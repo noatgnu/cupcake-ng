@@ -1,0 +1,117 @@
+<div class="container-fluid p-0">
+  <div class="d-flex flex-row w-100 p-0">
+    @if (showSection) {
+      <div class="d-flex border-end flex-column border-1 border-black">
+        <nav class="navbar navbar-expand-lg bg-body-tertiary">
+          <div class="container-fluid">
+            <a class="navbar-brand">Sections</a>
+          </div>
+        </nav>
+        <div class="list-group rounded-0 overflow-auto" style="height: 80vh; width: 300px">
+          @for (s of sections; track s.title) {
+            <div class="list-group-item list-group-item-action" [ngClass]="{'list-group-item-primary': currentSection === s}" (click)="handleSectionClick(s)">
+              <p>{{s.title}}</p>
+              Duration: {{timer.convertTime(s.duration)}}
+            </div>
+          }
+        </div>
+      </div>
+    }
+    <div class="d-flex flex-column w-100">
+      <nav class="navbar navbar-expand-lg bg-body-tertiary">
+        <div class="container-fluid d-flex flex-row justify-content-start">
+          <div>
+            <button class="btn btn-light" (click)="showSection=!showSection"><i class="bi bi-menu-app"></i></button>
+          </div>
+          <a class="navbar-brand">{{currentSection?.title}}</a>
+          @if (currentStep) {
+            @if(timer.timeKeeper[currentStep.step_id.toString()]){
+              <div class="d-flex flex-row justify-content-end gap-2 w-100">
+                @if (recording) {
+                  <button class="btn btn-outline-danger" (click)="stopRecording()"><i class="bi bi-stop"></i></button>
+                } @else {
+                  <button class="btn btn-outline-danger" (click)="startRecording()"><i class="bi bi-record"></i></button>
+                }
+                <button class="btn btn-outline-primary">{{timer.convertTime(timer.timeKeeper[currentStep.step_id.toString()].current)}}</button>
+                @if (timer.timeKeeper[currentStep.step_id.toString()].started) {
+                  <button class="btn btn-outline-primary" (click)="pauseTimer(currentStep.step_id)"><i class="bi bi-pause"></i></button>
+                } @else {
+                  <button class="btn btn-outline-primary" (click)="startTimer(currentStep.step_id)"><i class="bi bi-play"></i></button>
+                }
+                <button class="btn btn-outline-primary" (click)="resetTimer(currentStep.step_id)"><i class="bi bi-arrow-counterclockwise"></i></button>
+              </div>
+            }
+          }
+        </div>
+      </nav>
+
+      @if (currentStep) {
+        <div class="d-flex flex-row justify-content-between w-100" style="padding-left: 20px">
+          @if (getPreviousStep() !== '') {
+            <a class="btn border-0" (click)="goToPrevious()">Previous <i>{{getPreviousStep()}}...</i></a>
+          } @else {
+            <a class="btn border-0" disabled>No Previous Step</a>
+          }
+          @if (currentStep.next_step.length === 0) {
+            <a class="btn border-0" disabled>Finish Section</a>
+          } @else {
+            <a class="btn border-0" (click)="goToNext()"><i>{{getNextStep()}}...</i> Next</a>
+          }
+
+        </div>
+        <div class="d-flex flex-column p-5 g-2" style="height: 80vh">
+          <div class="card w-100 border-0">
+            <div class="card-body">
+              <div [innerHTML]="currentStep.step_description"></div>
+            </div>
+          </div>
+          <a class="btn" (click)="viewAnnotationMenu=!viewAnnotationMenu">+ Add Annotation</a>
+          @if (viewAnnotationMenu) {
+            <div class="card border-0">
+              <div class="card-body d-flex flex-row gap-2 flex-wrap">
+                @for (a of ['Audio', 'Text', 'Video', 'Image']; track a) {
+                  <div class="card" (click)="annotationMenuClick(a)" (mouseenter)="mouseOverElement=a" (mouseout)="mouseOverElement=''" [ngClass]="{'card bg-info': mouseOverElement==a}">
+                    <div class="card-body">
+                      {{a}}
+                    </div>
+                  </div>
+                }
+              </div>
+            </div>
+
+            @if (clickedElement==='Text') {
+              <div class="d-flex flex-row w-100 justify-content-center">
+                <div class="form-group" style="width: 600px">
+                  <label for="annotationText">Annotation Text</label>
+                  <textarea id="annotationText" class="form-control"></textarea>
+                </div>
+              </div>
+            }
+
+          }
+          @if (audioURL) {
+            <div class="card border-0">
+              <div class="card-body d-flex justify-content-center">
+                <div class="d-flex flex-column gap-1">
+                  Recording Preview
+                  <audio controls>
+                    <source [src]="audioURL" type="audio/webm">
+                    Your browser does not support the audio element.
+                  </audio>
+                  <div class="d-flex flex-row gap-2">
+                    <button class="btn btn-primary" (click)="saveRecording()">Save</button>
+                    <button class="btn btn-danger" (click)="deletePreviewRecording()">Delete</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+
+      }
+    </div>
+  </div>
+
+
+
+</div>
