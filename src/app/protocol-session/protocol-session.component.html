@@ -70,8 +70,8 @@
             <div class="card border-0">
               <div class="card-body d-flex flex-row gap-2 flex-wrap">
                 @for (a of ['Audio', 'Text', 'Video', 'Image']; track a) {
-                  <div class="card" (click)="annotationMenuClick(a)" (mouseenter)="mouseOverElement=a" (mouseout)="mouseOverElement=''" [ngClass]="{'card bg-info': mouseOverElement==a}">
-                    <div class="card-body">
+                  <div class="card" >
+                    <div class="card-body" (click)="annotationMenuClick(a)" (mouseenter)="mouseOverElement=a" (mouseout)="mouseOverElement=''" [ngClass]="{'bg-info': mouseOverElement==a}">
                       {{a}}
                     </div>
                   </div>
