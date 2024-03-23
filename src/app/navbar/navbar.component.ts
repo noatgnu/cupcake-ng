@@ -3,6 +3,7 @@ import {DataService} from "../data.service";
 import {NgbDropdown, NgbDropdownMenu, NgbDropdownToggle, NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import {LoginModalComponent} from "../login-modal/login-modal.component";
 import {AccountsService} from "../accounts.service";
+import {NgOptimizedImage} from "@angular/common";
 
 @Component({
   selector: 'app-navbar',
@@ -10,7 +11,8 @@ import {AccountsService} from "../accounts.service";
   imports: [
     NgbDropdown,
     NgbDropdownToggle,
-    NgbDropdownMenu
+    NgbDropdownMenu,
+    NgOptimizedImage
   ],
   templateUrl: './navbar.component.html',
   styleUrl: './navbar.component.scss'
@@ -21,18 +23,18 @@ export class NavbarComponent {
 
   openAccountLogin() {
     const ref = this.modal.open(LoginModalComponent)
-    ref.closed.subscribe((data) => {
-      if (data) {
-        this.accounts.login(data.username, data.password).subscribe((data: any) => {
+    ref.closed.subscribe((loginData) => {
+      if (loginData) {
+        this.accounts.login(loginData.username, loginData.password).subscribe((data: any) => {
           this.accounts.token = data.token
           this.accounts.loggedIn = true
-          if (data.username) {
-            this.accounts.username = data.username
+          if (loginData.username) {
+            this.accounts.username = loginData.username
           }
 
-          if (data.remember && data.remember === true && data.username) {
+          if (loginData.remember && loginData.remember === true && loginData.username) {
             localStorage.setItem("cupcakeToken", data.token)
-            localStorage.setItem("cupcakeUsername", data.username)
+            localStorage.setItem("cupcakeUsername", loginData.username)
           }
         })
       }

@@ -29,8 +29,8 @@ export class AccountsService {
   logout() {
     this.loggedIn = false
     this.token = ""
-    localStorage.removeItem("token")
-    localStorage.removeItem("username")
+    localStorage.removeItem("cupcakeToken")
+    localStorage.removeItem("cupcakeUsername")
   }
 
   loadLastVisited() {

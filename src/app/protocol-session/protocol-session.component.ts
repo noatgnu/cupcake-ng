@@ -5,12 +5,16 @@ import {WebService} from "../web.service";
 import {NgClass} from "@angular/common";
 import {ProtocolStep} from "../protocol";
 import {SpeechService} from "../speech.service";
+import {AnnotationTextFormComponent} from "./annotation-text-form/annotation-text-form.component";
+import {HandwrittenAnnotationComponent} from "./handwritten-annotation/handwritten-annotation.component";
 
 @Component({
   selector: 'app-protocol-session',
   standalone: true,
   imports: [
-    NgClass
+    NgClass,
+    AnnotationTextFormComponent,
+    HandwrittenAnnotationComponent
   ],
   templateUrl: './protocol-session.component.html',
   styleUrl: './protocol-session.component.scss'
@@ -24,6 +28,7 @@ export class ProtocolSessionComponent implements OnInit{
   mouseOverElement: string = "";
   clickedElement: string = "";
   @Input() set protocolSessionId(value: string) {
+    console.log(value)
     this._protocolSessionId = value;
   }
 
@@ -50,9 +55,23 @@ export class ProtocolSessionComponent implements OnInit{
       const protocolString = localStorage.getItem('protocol');
       if (protocolString) {
         this.dataService.protocol = JSON.parse(protocolString);
+        this.parseProtocol()
       }
+    } else {
+      this.web.getProtocol(this.protocolSessionId).subscribe((data: any) => {
+        this.dataService.protocol = data;
+        this.parseProtocol();
+        localStorage.setItem('protocol', JSON.stringify(data));
+      })
     }
+
+  }
+
+  parseProtocol() {
     if (this.dataService.protocol) {
+      this.web.getAssociatedSessions(this.dataService.protocol.id).subscribe((data: any) => {
+        console.log(data)
+      })
       this.sections = []
       this.dataService.protocol.steps.forEach((step) => {
         const section = this.sections.filter((section) => section.title === step.step_section)
@@ -225,5 +244,13 @@ export class ProtocolSessionComponent implements OnInit{
       return;
     }
     this.clickedElement = item;
+  }
+
+  handleTextAnnotation(text: string) {
+    console.log(text)
+  }
+
+  handleSketchAnnotation(sketch: any) {
+    console.log(sketch)
   }
 }

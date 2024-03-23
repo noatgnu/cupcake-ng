@@ -16,7 +16,7 @@ export class LoginModalComponent {
   form = this.fb.group({
     username: ['', Validators.required],
     password: ['', Validators.required],
-    remember: [false]
+    remember: [false,]
   })
 
   constructor(private fb: FormBuilder, private modal: NgbActiveModal) {

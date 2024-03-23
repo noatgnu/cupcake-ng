@@ -1,16 +1,32 @@
-<div class="container-fluid p-5">
-  <div class="card">
+<div class="container-fluid p-5 d-flex flex-row justify-content-center">
+  <div class="card border-0">
     <div class="card-body">
-      <form [formGroup]="form" (ngSubmit)="onSubmit()">
-        <div class="input-group mb-3">
-          <input formControlName="url" type="text" class="form-control" id="protocolUrl" placeholder="Protocols.io URL">
-          <button class="btn btn-primary" type="submit" id="protocolSubmit">Submit</button>
+      <div class="d-flex gap-2">
+        <div class="logo">
+          <img #logo class="logo_home" ngSrc="assets/cupcake_logo.png" alt="Cupcake Logo" [width]="128" [height]="128">
         </div>
-      </form>
-      <small>
-        *Please note that the URL must be a valid Protocols.io URL or valid Protocols.io DOI.<br>
-        *Example: <a target="_blank" href="https://www.protocols.io/view/expression-and-purification-of-rab10-1-181-stoichi-4r3l24p1xg1y/v1?step=1">https://www.protocols.io/view/expression-and-purification-of-rab10-1-181-stoichi-4r3l24p1xg1y/v1?step=1</a>
-      </small>
+        <div class="vr">
+        </div>
+        <div class="d-flex flex-column">
+          <form [formGroup]="form" (ngSubmit)="onSubmit()">
+            <div class="input-group mb-3">
+              <input formControlName="url" type="text" class="form-control" id="protocolUrl" placeholder="Protocols.io URL">
+              <button class="btn btn-primary" type="submit" id="protocolSubmit">Submit</button>
+            </div>
+          </form>
+          <small>
+            *Please note that the URL must be a valid Protocols.io URL or valid Protocols.io DOI.<br>
+            *Example: <a target="_blank" href="https://www.protocols.io/view/expression-and-purification-of-rab10-1-181-stoichi-4r3l24p1xg1y/v1?step=1">https://www.protocols.io/view/expression-and-purification-of-rab10-1-181-stoichi-4r3l24p1xg1y/v1?step=1</a>
+          </small>
+          <hr>
+          <div class="d-flex flex-row justify-content-center">
+            <div>
+              <button class="btn btn-primary">Or Create Your Protocols</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
 </div>

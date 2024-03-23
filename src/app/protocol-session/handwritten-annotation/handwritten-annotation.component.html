@@ -1,0 +1,16 @@
+<div class="d-flex flex-column justify-content-center gap-2">
+  <div>
+    <canvas class="border border-black border-1" #sketchpad></canvas>
+  </div>
+  <div class="d-flex justify-content-start gap-2">
+    <button class="btn btn-primary" (click)="save()">Save</button>
+    <button class="btn btn-primary" (click)="clear()">Clear</button>
+    <button class="btn btn-outline-primary" (click)="changeMode('draw')"><i class="bi bi-pen"></i></button>
+    <button class="btn btn-outline-primary" (click)="changeMode('erase')"><i class="bi bi-eraser"></i></button>
+    <button class="btn btn-outline-primary" (click)="undo()"><i class="bi bi-arrow-left"></i> Undo</button>
+    <button class="btn btn-outline-primary" (click)="downloadImage()">Download</button>
+  </div>
+
+</div>
+
+

@@ -8,10 +8,6 @@ const routes: Routes = [
     path: ':protocolSessionId',
     component: ProtocolSessionComponent
   },
-  {
-    path: '',
-    component: ProtocolSessionComponent
-  }
 ];
 
 @NgModule({

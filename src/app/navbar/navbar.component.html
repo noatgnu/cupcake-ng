@@ -1,6 +1,9 @@
 <nav class="navbar navbar-expand-lg bg-body-tertiary">
   <div class="container-fluid">
-    <a class="navbar-brand" href="#">Cupcake</a>
+
+    <a class="navbar-brand" href="#">
+      Cupcake
+    </a>
   </div>
   <div class="d-flex justify-content-end" style="padding-right: 20px">
     <div ngbDropdown display="dynamic" class="d-inline-black">
@@ -18,7 +21,7 @@
     </div>
   </div>
 </nav>
-@if (dataService.protocol && dataService.protocol !== null) {
+@if (dataService.protocol && true) {
   <nav class="navbar navbar-expand-lg bg-body-tertiary">
     <div class="container-fluid d-flex justify-content-center">
       <b><span [innerHTML]="dataService.protocol.protocol_title"></span></b>
