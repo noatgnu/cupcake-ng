@@ -1,0 +1,25 @@
+<div class="modal-header">
+  <h5 class="modal-title" id="session-selection">Session</h5>
+</div>
+<div class="modal-body">
+  <form [formGroup]="form">
+    <div class="form-group">
+      <label for="session">Select a session</label>
+      <select class="form-control" id="session" formControlName="selectedSession">
+        <option [ngValue]="null">Select a session</option>
+        @for (session of associatedSessions; track session.id) {
+          <option [ngValue]="session">
+            @if (session.name){
+              {{ session.name }}
+            } @else {{{ session.unique_id }}}, Date: {{ session.created_at | date: 'short'}}
+          </option>
+        }
+      </select>
+    </div>
+  </form>
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn btn-secondary" (click)="close()">Close</button>
+  <button type="button" class="btn btn-primary" (click)="submit()">Submit</button>
+  <button type="button" class="btn btn-primary" (click)="createSession()">Create New Session</button>
+</div>

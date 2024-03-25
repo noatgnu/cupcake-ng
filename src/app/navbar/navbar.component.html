@@ -1,11 +1,21 @@
 <nav class="navbar navbar-expand-lg bg-body-tertiary">
   <div class="container-fluid">
-
     <a class="navbar-brand" href="#">
       Cupcake
     </a>
   </div>
-  <div class="d-flex justify-content-end" style="padding-right: 20px">
+  <div class="d-flex justify-content-end gap-2" style="padding-right: 20px">
+    <div class="d-flex flex-row gap-2">
+      @if (dataService.currentSession) {
+        <a class="btn btn-outline-danger" style="white-space: nowrap" (click)="copyLink()">
+          @if (dataService.currentSession.name) {
+            {{dataService.currentSession.name}}
+          } @else {
+            {{dataService.currentSession.unique_id}}
+          }
+        </a>
+      }
+    </div>
     <div ngbDropdown display="dynamic" class="d-inline-black">
       <button type="button" class="btn btn-outline-primary" id="accountDropdown" ngbDropdownToggle>
         <i class="fas fa-user"></i> Account

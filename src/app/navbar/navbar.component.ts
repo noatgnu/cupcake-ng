@@ -44,4 +44,8 @@ export class NavbarComponent {
   logout() {
     this.accounts.logout()
   }
+
+  copyLink() {
+    navigator.clipboard.writeText(location.origin + "/#/" + this.dataService.protocol?.id + "&" + this.dataService.currentSession?.unique_id)
+  }
 }

@@ -1,9 +1,12 @@
 import { Injectable } from '@angular/core';
+import {TimeKeeper} from "./time-keeper";
 
 @Injectable({
   providedIn: 'root'
 })
 export class TimerService {
+  currentTrackingStep: number[] = [];
+  remoteTimeKeeper: {[key: string]: TimeKeeper} = {}
   timeKeeper: {[key: string]: {duration: number, current: number, started: boolean, startTime: number, spent: number}} = {}
   timer: number = 0;
   timeTick: number = 0;

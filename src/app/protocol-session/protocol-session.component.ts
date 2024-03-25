@@ -3,10 +3,15 @@ import {DataService} from "../data.service";
 import {TimerService} from "../timer.service";
 import {WebService} from "../web.service";
 import {NgClass} from "@angular/common";
-import {ProtocolStep} from "../protocol";
+import {Protocol, ProtocolStep} from "../protocol";
 import {SpeechService} from "../speech.service";
 import {AnnotationTextFormComponent} from "./annotation-text-form/annotation-text-form.component";
 import {HandwrittenAnnotationComponent} from "./handwritten-annotation/handwritten-annotation.component";
+import {ProtocolSession} from "../protocol-session";
+import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
+import {SessionSelectionModalComponent} from "./session-selection-modal/session-selection-modal.component";
+import {AccountsService} from "../accounts.service";
+import {TimeKeeper} from "../time-keeper";
 
 @Component({
   selector: 'app-protocol-session',
@@ -27,9 +32,16 @@ export class ProtocolSessionComponent implements OnInit{
   viewAnnotationMenu: boolean = false;
   mouseOverElement: string = "";
   clickedElement: string = "";
+  sessionID: string = '';
+
+
+
   @Input() set protocolSessionId(value: string) {
-    console.log(value)
-    this._protocolSessionId = value;
+    const data = value.split("&")
+    if (data.length > 1) {
+      this.sessionID = data[1];
+    }
+    this._protocolSessionId = data[0];
   }
 
   get protocolSessionId(): string {
@@ -44,7 +56,7 @@ export class ProtocolSessionComponent implements OnInit{
   mediaRecorder?: MediaRecorder
   audioURL?: string;
 
-  constructor(private speech: SpeechService , private dataService: DataService, public web: WebService, public timer: TimerService) {
+  constructor(private accounts: AccountsService, private speech: SpeechService , public dataService: DataService, public web: WebService, public timer: TimerService, private modal: NgbModal) {
 
   }
 
@@ -69,28 +81,66 @@ export class ProtocolSessionComponent implements OnInit{
 
   parseProtocol() {
     if (this.dataService.protocol) {
-      this.web.getAssociatedSessions(this.dataService.protocol.id).subscribe((data: any) => {
-        console.log(data)
-      })
       this.sections = []
       this.dataService.protocol.steps.forEach((step) => {
         const section = this.sections.filter((section) => section.title === step.step_section)
         if (section.length === 0) {
-          this.sections.push({title: step.step_section, duration: step.step_section_duration, steps: [step], currentStep: step.step_id})
+          this.sections.push({title: step.step_section, duration: step.step_section_duration, steps: [step], currentStep: step.id})
         } else {
           section[0].steps.push(step)
         }
-        if (!this.timer.timeKeeper[step.step_id.toString()]) {
-          this.timer.timeKeeper[step.step_id.toString()] = {duration: step.step_duration, current: step.step_duration, started: false, startTime: Date.now(), spent: 0}
+        if (!this.timer.timeKeeper[step.id.toString()]) {
+          this.timer.timeKeeper[step.id.toString()] = {duration: step.step_duration, current: step.step_duration, started: false, startTime: Date.now(), spent: 0}
         }
       })
+      this.web.getAssociatedSessions(this.dataService.protocol.id).subscribe((data: ProtocolSession[]) => {
+        if (this.sessionID !== "") {
+          this.web.getProtocolSession(this.sessionID).subscribe((session: ProtocolSession) => {
+            if (session) {
+              this.sessionID = session.unique_id;
+              this.dataService.currentSession = session;
+              for (const timeKeeper of session.time_keeper) {
+                this.timer.remoteTimeKeeper[timeKeeper.step.toString()] = timeKeeper;
+                this.timer.timeKeeper[timeKeeper.step.toString()].startTime = new Date(timeKeeper.start_time).getTime();
+                this.timer.timeKeeper[timeKeeper.step.toString()].started = timeKeeper.started;
+                this.timer.timeKeeper[timeKeeper.step.toString()].current = timeKeeper.current_duration;
+                if (this.timer.timeKeeper[timeKeeper.step.toString()].started && !this.timer.currentTrackingStep.includes(timeKeeper.step)) {
+                  this.timer.currentTrackingStep.push(timeKeeper.step);
+                }
+              }
+            }
+
+          })
+        } else {
+          const ref = this.modal.open(SessionSelectionModalComponent, {centered: true, backdrop: 'static', keyboard: false, windowClass: 'session-selection-modal'})
+          ref.componentInstance.associatedSessions = data;
+          if (this.dataService.protocol) {
+            ref.componentInstance.protocolId = this.dataService.protocol.id;
+          }
+          ref.result.then((session: ProtocolSession) => {
+            if (session) {
+              this.sessionID = session.unique_id;
+              this.dataService.currentSession = session;
+              for (const timeKeeper of session.time_keeper) {
+                this.timer.remoteTimeKeeper[timeKeeper.step.toString()] = timeKeeper;
+                this.timer.timeKeeper[timeKeeper.step.toString()].startTime = new Date(timeKeeper.start_time).getTime();
+                this.timer.timeKeeper[timeKeeper.step.toString()].started = timeKeeper.started;
+                this.timer.timeKeeper[timeKeeper.step.toString()].current = timeKeeper.current_duration;
+                if (this.timer.timeKeeper[timeKeeper.step.toString()].started && !this.timer.currentTrackingStep.includes(timeKeeper.step)) {
+                  this.timer.currentTrackingStep.push(timeKeeper.step);
+                }
+              }
+            }
+          })
+        }
+      })
+
     }
   }
 
   handleSectionClick(section: {title: string, duration: number, steps: ProtocolStep[], currentStep: number}) {
     this.currentSection = section;
-    const step = section.steps.find((step) => step.step_id === section.currentStep);
-    console.log(step)
+    const step = section.steps.find((step) => step.id === section.currentStep);
     if (step) {
       this.currentStep = step;
     }
@@ -98,10 +148,22 @@ export class ProtocolSessionComponent implements OnInit{
 
   goToNext() {
     if (this.currentSection) {
-      console.log(this.currentStep)
       const nextStep = this.currentSection.steps.find((step) => step.id === this.currentStep?.next_step[0]);
       if (nextStep) {
         this.currentStep = nextStep;
+        this.currentSection.currentStep = nextStep.id;
+      } else {
+        this.sections.find((section) => {
+          const step = section.steps.find((step) => this.currentStep?.next_step.includes(step.id));
+          if (step) {
+            this.currentStep = step;
+            this.currentSection = section;
+            this.currentSection.currentStep = step.id;
+            return true;
+          } else {
+            return false;
+          }
+        })
       }
     }
   }
@@ -111,6 +173,13 @@ export class ProtocolSessionComponent implements OnInit{
       const nextStep = this.currentSection.steps.find((step) => step.id === this.currentStep?.next_step[0]);
       if (nextStep) {
         return this.stripHtml(nextStep.step_description).slice(0, 30);
+      } else {
+        // @ts-ignore
+        for (const step of this.dataService.protocol?.steps) {
+          if (this.currentStep?.next_step.includes(step.id)) {
+            return this.stripHtml(step.step_description).slice(0, 30);
+          }
+        }
       }
     }
     return '';
@@ -123,6 +192,20 @@ export class ProtocolSessionComponent implements OnInit{
         const previousStep = this.currentSection.steps.find((step) => step.next_step.includes(this.currentStep?.id));
         if (previousStep) {
           this.currentStep = previousStep;
+          this.currentSection.currentStep = previousStep.id;
+        } else {
+          this.sections.find((section) => {
+            // @ts-ignore
+            const step = section.steps.find((step) => step.next_step.includes(this.currentStep?.id));
+            if (step) {
+              this.currentStep = step;
+              this.currentSection = section;
+              this.currentSection.currentStep = step.id;
+              return true;
+            } else {
+              return false;
+            }
+          })
         }
       }
     }
@@ -135,6 +218,13 @@ export class ProtocolSessionComponent implements OnInit{
         const previousStep = this.currentSection.steps.find((step) => step.next_step.includes(this.currentStep?.id));
         if (previousStep) {
           return this.stripHtml(previousStep.step_description).slice(0, 30);
+        } else {
+          // @ts-ignore
+          for (const step of this.dataService.protocol?.steps) {
+            if (step.next_step.includes(this.currentStep?.id)) {
+              return this.stripHtml(step.step_description).slice(0, 30);
+            }
+          }
         }
       }
     }
@@ -147,13 +237,46 @@ export class ProtocolSessionComponent implements OnInit{
   }
 
   startTimer(step_id: number) {
-    this.timer.timeKeeper[step_id.toString()].startTime = Date.now();
-    this.timer.timeKeeper[step_id.toString()].started = true;
+    if (this.accounts.loggedIn) {
+      if (!this.timer.remoteTimeKeeper[step_id.toString()]) {
+        console.log(step_id)
+        // @ts-ignore
+        this.web.postStepTimeKeeper(this.dataService.currentSession?.unique_id, step_id, true, new Date(), this.currentStep?.step_duration).subscribe((data: TimeKeeper) => {
+          this.timer.remoteTimeKeeper[step_id.toString()] = data;
+          const utcDate = new Date(data.start_time).getTime();
+          this.timer.timeKeeper[step_id.toString()].startTime = utcDate;
+          this.timer.timeKeeper[step_id.toString()].started = true;
+          if (this.timer.timeKeeper[step_id.toString()].started && !this.timer.currentTrackingStep.includes(step_id)) {
+            this.timer.currentTrackingStep.push(step_id);
+          }
+        })
+      } else {
+        this.web.updateTimeKeeper(this.timer.remoteTimeKeeper[step_id.toString()].id, true, new Date()).subscribe((data: TimeKeeper) => {
+          this.timer.remoteTimeKeeper[step_id.toString()] = data;
+          const utcDate = new Date(data.start_time).getTime();
+          this.timer.timeKeeper[step_id.toString()].startTime = utcDate;
+          this.timer.timeKeeper[step_id.toString()].started = true;
+          if (this.timer.timeKeeper[step_id.toString()].started && !this.timer.currentTrackingStep.includes(step_id)) {
+            this.timer.currentTrackingStep.push(step_id);
+          }
+        })
+      }
+
+    } else {
+      this.timer.timeKeeper[step_id.toString()].startTime = Date.now();
+      this.timer.timeKeeper[step_id.toString()].started = true;
+    }
+
   }
 
   pauseTimer(step_id: number) {
     this.timer.timeKeeper[step_id.toString()].started = false;
     this.timer.timeKeeper[step_id.toString()].duration = this.timer.timeKeeper[step_id.toString()].current;
+    if (this.accounts.loggedIn) {
+      this.web.updateTimeKeeper(this.timer.remoteTimeKeeper[step_id.toString()].id, false, null, this.timer.timeKeeper[step_id.toString()].current).subscribe((data: TimeKeeper) => {
+        this.timer.remoteTimeKeeper[step_id.toString()] = data;
+      })
+    }
   }
 
   resetTimer(step_id: number) {
