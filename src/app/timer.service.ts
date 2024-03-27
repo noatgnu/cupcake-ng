@@ -7,7 +7,7 @@ import {TimeKeeper} from "./time-keeper";
 export class TimerService {
   currentTrackingStep: number[] = [];
   remoteTimeKeeper: {[key: string]: TimeKeeper} = {}
-  timeKeeper: {[key: string]: {duration: number, current: number, started: boolean, startTime: number, spent: number}} = {}
+  timeKeeper: {[key: string]: {duration: number, current: number, started: boolean, startTime: number, spent: number, previousStop: number}} = {}
   timer: number = 0;
   timeTick: number = 0;
   calculatingTime: boolean = false;
@@ -16,12 +16,13 @@ export class TimerService {
       if (this.calculatingTime) {
         return;
       }
+      const timeNow = Date.now();
       this.calculatingTime = true;
       for (const i in this.timeKeeper) {
         if (this.timeKeeper[i].started) {
-          this.timeKeeper[i].spent = Math.floor((Date.now() - this.timeKeeper[i].startTime) / 1000);
+          this.timeKeeper[i].spent = Math.floor((timeNow - this.timeKeeper[i].startTime) / 1000);
 
-          this.timeKeeper[i].current = this.timeKeeper[i].duration - this.timeKeeper[i].spent;
+          this.timeKeeper[i].current = this.timeKeeper[i].previousStop - this.timeKeeper[i].spent;
           console.log(this.timeKeeper[i].spent, this.timeKeeper[i].current, this.timeKeeper[i].duration)
           if (this.timeKeeper[i].current <= 0) {
             this.timeKeeper[i].current = 0;

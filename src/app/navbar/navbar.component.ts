@@ -46,6 +46,6 @@ export class NavbarComponent {
   }
 
   copyLink() {
-    navigator.clipboard.writeText(location.origin + "/#/" + this.dataService.protocol?.id + "&" + this.dataService.currentSession?.unique_id)
+    navigator.clipboard.writeText(location.origin + "/#/protocol-session/" + this.dataService.protocol?.id + "&" + this.dataService.currentSession?.unique_id)
   }
 }

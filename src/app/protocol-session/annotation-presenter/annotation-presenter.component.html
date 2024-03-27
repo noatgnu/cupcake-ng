@@ -1,0 +1,35 @@
+<div class="list-group overflow-auto">
+  @for (a of annotations; track a.id) {
+    <div class="list-group-item border-0">
+      <div class="d-flex flex-row justify-content-between">
+        <p>Date: {{a.created_at|date: "short"}} | Annotation Type: {{a.annotation_type}}</p>
+        <div>
+          <button class="btn btn-outline-danger" (click)="delete(a.id)"><i class="bi bi-trash"></i></button>
+        </div>
+      </div>
+
+        @if (a.annotation_type === 'text') {
+          <div [innerHTML]="a.annotation"></div>
+        } @else if (a.annotation_type === 'image') {
+          <div class="d-flex flex-row justify-content-center">
+            <app-image-presenter [annotation]="a"></app-image-presenter>
+          </div>
+        } @else if (a.annotation_type === 'audio') {
+          <div class="d-flex flex-row justify-content-center">
+            <app-media-presenter [annotation]="a"></app-media-presenter>
+          </div>
+        } @else if (a.annotation_type === 'video') {
+          <div class="d-flex flex-row justify-content-center">
+            <div class="d-flex flex-row justify-content-center">
+              <app-media-presenter [annotation]="a"></app-media-presenter>
+            </div>
+          </div>
+        } @else if (a.annotation_type === 'sketch') {
+          <div class="d-flex flex-row justify-content-center">
+            <app-sketch-presenter [annotation]="a"></app-sketch-presenter>
+          </div>
+        }
+
+    </div>
+  }
+</div>

@@ -7,6 +7,7 @@ export interface Protocol {
   protocol_created_on: Date;
   protocol_version_uri: string;
   steps: ProtocolStep[];
+  sections: ProtocolSection[];
 }
 
 export interface ProtocolStep {
@@ -15,7 +16,16 @@ export interface ProtocolStep {
   step_id: number;
   step_description: string;
   step_duration: number;
-  step_section: string;
-  step_section_duration: number;
+  step_section: number;
   next_step: number[];
+  previous_step: number;
+}
+
+export interface ProtocolSection {
+  id: number;
+  protocol: number;
+  section_description: string;
+  section_duration: number;
+  created_at: Date;
+  updated_at: Date;
 }

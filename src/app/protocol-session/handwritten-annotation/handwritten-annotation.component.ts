@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, ElementRef, EventEmitter, Output, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, ElementRef, EventEmitter, Input, Output, ViewChild} from '@angular/core';
 // @ts-ignore
 import {MODE_DRAW, MODE_ERASE} from 'atrament';
 // @ts-ignore
@@ -13,11 +13,55 @@ import Atrament from 'atrament';
 export class HandwrittenAnnotationComponent implements AfterViewInit{
   @ViewChild('sketchpad') handwrittenSketchpad?: ElementRef;
   canvas: any;
+  _data: any[] = [];
+  @Input() set data(value: any[]) {
+    this._data = value;
+    this.strokes = value
+  }
+
+  get data() {
+    return this._data;
+  }
   strokes: any[] = [];
   currentMode: string = 'draw';
   @Output() sketch: EventEmitter<any> = new EventEmitter<any>();
   ngAfterViewInit() {
-    this.initialize();
+    if (this.data.length > 0) {
+      this.initialize();
+      this.canvas["#dirty"] = true;
+      const segs = this.strokes.slice(0, this.strokes.length);
+      this.strokes = [];
+      for (const seg of segs) {
+
+        const segments = seg.segments.slice()
+        this.canvas.adaptiveStroke = seg.adaptiveStroke;
+        this.canvas.color = seg.color;
+        this.canvas.weight = seg.weight;
+        this.canvas.smoothing = seg.smoothing;
+        if (!seg.mode) {
+          this.canvas.mode = MODE_DRAW;
+        } else {
+          if (seg.mode === MODE_DRAW) {
+            this.canvas.mode = MODE_DRAW;
+          } else {
+            this.canvas.mode = MODE_ERASE;
+          }
+        }
+        const firstPoint = segments.shift().point;
+        const prevPoint = firstPoint;
+        this.canvas.beginStroke(firstPoint.x, firstPoint.y);
+        while (segments.length > 0) {
+          const point = segments.shift().point;
+          const {x, y} = this.canvas.draw(point.x, point.y, prevPoint.x, prevPoint.y)
+          prevPoint.x = x;
+          prevPoint.y = y;
+        }
+        this.canvas.endStroke(prevPoint.x, prevPoint.y);
+      }
+      console.log(this.strokes)
+    } else {
+      this.initialize();
+    }
 
     console.log(this.canvas);
   }
@@ -73,10 +117,14 @@ export class HandwrittenAnnotationComponent implements AfterViewInit{
       this.canvas.color = seg.color;
       this.canvas.weight = seg.weight;
       this.canvas.smoothing = seg.smoothing;
-      if (seg.mode === MODE_DRAW) {
+      if (!seg.mode) {
         this.canvas.mode = MODE_DRAW;
       } else {
-        this.canvas.mode = MODE_ERASE;
+        if (seg.mode === MODE_DRAW) {
+          this.canvas.mode = MODE_DRAW;
+        } else {
+          this.canvas.mode = MODE_ERASE;
+        }
       }
       const firstPoint = segments.shift().point;
       const prevPoint = firstPoint;

@@ -10,6 +10,10 @@ export const routes: Routes = [
     loadChildren: () => import('./protocol-session/protocol-session.module').then(m => m.ProtocolSessionModule)
   },
   {
+    path: 'protocol-editor',
+    loadChildren: () => import('./protocol-editor/protocol-editor.module').then(m => m.ProtocolEditorModule)
+  },
+  {
     path: '**',
     redirectTo: 'home'
   },

@@ -2,8 +2,8 @@ import {Component, Input, OnInit} from '@angular/core';
 import {DataService} from "../data.service";
 import {TimerService} from "../timer.service";
 import {WebService} from "../web.service";
-import {NgClass} from "@angular/common";
-import {Protocol, ProtocolStep} from "../protocol";
+import {DatePipe, NgClass, NgOptimizedImage} from "@angular/common";
+import {Protocol, ProtocolSection, ProtocolStep} from "../protocol";
 import {SpeechService} from "../speech.service";
 import {AnnotationTextFormComponent} from "./annotation-text-form/annotation-text-form.component";
 import {HandwrittenAnnotationComponent} from "./handwritten-annotation/handwritten-annotation.component";
@@ -12,6 +12,8 @@ import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import {SessionSelectionModalComponent} from "./session-selection-modal/session-selection-modal.component";
 import {AccountsService} from "../accounts.service";
 import {TimeKeeper} from "../time-keeper";
+import {Annotation, AnnotationQuery} from "../annotation";
+import {AnnotationPresenterComponent} from "./annotation-presenter/annotation-presenter.component";
 
 @Component({
   selector: 'app-protocol-session',
@@ -19,7 +21,10 @@ import {TimeKeeper} from "../time-keeper";
   imports: [
     NgClass,
     AnnotationTextFormComponent,
-    HandwrittenAnnotationComponent
+    HandwrittenAnnotationComponent,
+    DatePipe,
+    NgOptimizedImage,
+    AnnotationPresenterComponent
   ],
   templateUrl: './protocol-session.component.html',
   styleUrl: './protocol-session.component.scss'
@@ -28,7 +33,7 @@ export class ProtocolSessionComponent implements OnInit{
 
   showSection: boolean = true;
   private _protocolSessionId: string = '';
-  sections: {title: string, duration: number, steps: ProtocolStep[], currentStep: number}[] = []
+  sections: {data: ProtocolSection, steps: ProtocolStep[], currentStep: number}[] = []
   viewAnnotationMenu: boolean = false;
   mouseOverElement: string = "";
   clickedElement: string = "";
@@ -47,14 +52,32 @@ export class ProtocolSessionComponent implements OnInit{
   get protocolSessionId(): string {
     return this._protocolSessionId;
   }
-  currentSection: {title: string, duration: number, steps: ProtocolStep[], currentStep: number}|null = null;
-  currentStep: ProtocolStep|null = null;
+  currentSection: {data: ProtocolSection, steps: ProtocolStep[], currentStep: number}|null = null;
+  _currentStep: ProtocolStep|null = null;
+  set currentStep(value: ProtocolStep|null) {
+    this._currentStep = value;
+    if (value) {
+      if (this.dataService.currentSession) {
+        this.web.getAnnotations(this.dataService.currentSession.unique_id, value.id).subscribe((data: AnnotationQuery) => {
+          this.annotations = data;
+        })
+      }
+    } else {
+      this.annotations = undefined;
+    }
+  }
+
+  get currentStep(): ProtocolStep|null {
+    return this._currentStep;
+  }
+
   speechRecognition: any;
   recording: boolean = false;
   recordingChunks: any[] = [];
   recordedBlob?: Blob;
   mediaRecorder?: MediaRecorder
   audioURL?: string;
+  annotations?: AnnotationQuery;
 
   constructor(private accounts: AccountsService, private speech: SpeechService , public dataService: DataService, public web: WebService, public timer: TimerService, private modal: NgbModal) {
 
@@ -81,16 +104,18 @@ export class ProtocolSessionComponent implements OnInit{
 
   parseProtocol() {
     if (this.dataService.protocol) {
-      this.sections = []
+      this.sections = this.dataService.protocol.sections.map((section) => {
+        return {data: section, steps: [], currentStep: 0}
+      })
+      console.log(this.sections)
+
       this.dataService.protocol.steps.forEach((step) => {
-        const section = this.sections.filter((section) => section.title === step.step_section)
-        if (section.length === 0) {
-          this.sections.push({title: step.step_section, duration: step.step_section_duration, steps: [step], currentStep: step.id})
-        } else {
+        const section = this.sections.filter((section) => section.data.id === step.step_section)
+        if (section.length > 0) {
           section[0].steps.push(step)
         }
         if (!this.timer.timeKeeper[step.id.toString()]) {
-          this.timer.timeKeeper[step.id.toString()] = {duration: step.step_duration, current: step.step_duration, started: false, startTime: Date.now(), spent: 0}
+          this.timer.timeKeeper[step.id.toString()] = {duration: step.step_duration, current: step.step_duration, started: false, startTime: Date.now(), spent: 0, previousStop: step.step_duration}
         }
       })
       this.web.getAssociatedSessions(this.dataService.protocol.id).subscribe((data: ProtocolSession[]) => {
@@ -104,6 +129,8 @@ export class ProtocolSessionComponent implements OnInit{
                 this.timer.timeKeeper[timeKeeper.step.toString()].startTime = new Date(timeKeeper.start_time).getTime();
                 this.timer.timeKeeper[timeKeeper.step.toString()].started = timeKeeper.started;
                 this.timer.timeKeeper[timeKeeper.step.toString()].current = timeKeeper.current_duration;
+                this.timer.timeKeeper[timeKeeper.step.toString()].previousStop = timeKeeper.current_duration;
+                console.log(this.timer.timeKeeper[timeKeeper.step.toString()])
                 if (this.timer.timeKeeper[timeKeeper.step.toString()].started && !this.timer.currentTrackingStep.includes(timeKeeper.step)) {
                   this.timer.currentTrackingStep.push(timeKeeper.step);
                 }
@@ -126,6 +153,8 @@ export class ProtocolSessionComponent implements OnInit{
                 this.timer.timeKeeper[timeKeeper.step.toString()].startTime = new Date(timeKeeper.start_time).getTime();
                 this.timer.timeKeeper[timeKeeper.step.toString()].started = timeKeeper.started;
                 this.timer.timeKeeper[timeKeeper.step.toString()].current = timeKeeper.current_duration;
+                this.timer.timeKeeper[timeKeeper.step.toString()].previousStop = timeKeeper.current_duration;
+                console.log(this.timer.timeKeeper[timeKeeper.step.toString()])
                 if (this.timer.timeKeeper[timeKeeper.step.toString()].started && !this.timer.currentTrackingStep.includes(timeKeeper.step)) {
                   this.timer.currentTrackingStep.push(timeKeeper.step);
                 }
@@ -138,11 +167,14 @@ export class ProtocolSessionComponent implements OnInit{
     }
   }
 
-  handleSectionClick(section: {title: string, duration: number, steps: ProtocolStep[], currentStep: number}) {
+  handleSectionClick(section: {data: ProtocolSection, steps: ProtocolStep[], currentStep: number}) {
     this.currentSection = section;
     const step = section.steps.find((step) => step.id === section.currentStep);
     if (step) {
       this.currentStep = step;
+    } else {
+      this.currentStep = section.steps[0];
+      section.currentStep = section.steps[0].id;
     }
   }
 
@@ -271,7 +303,7 @@ export class ProtocolSessionComponent implements OnInit{
 
   pauseTimer(step_id: number) {
     this.timer.timeKeeper[step_id.toString()].started = false;
-    this.timer.timeKeeper[step_id.toString()].duration = this.timer.timeKeeper[step_id.toString()].current;
+    this.timer.timeKeeper[step_id.toString()].previousStop = this.timer.timeKeeper[step_id.toString()].current;
     if (this.accounts.loggedIn) {
       this.web.updateTimeKeeper(this.timer.remoteTimeKeeper[step_id.toString()].id, false, null, this.timer.timeKeeper[step_id.toString()].current).subscribe((data: TimeKeeper) => {
         this.timer.remoteTimeKeeper[step_id.toString()] = data;
@@ -288,14 +320,12 @@ export class ProtocolSessionComponent implements OnInit{
     this.timer.timeKeeper[step_id.toString()].started = false;
   }
 
-  startRecording() {
+  startRecording(audio: boolean, video: boolean) {
     //this.speechRecognition.start();
     console.log('start recording')
-    console.log(navigator.mediaDevices)
-
     this.recording = true;
     this.recordingChunks = [];
-    navigator.mediaDevices.getUserMedia({audio: true}).then(
+    navigator.mediaDevices.getUserMedia({audio: audio, video: video}).then(
       (stream) => {
         this.mediaRecorder = new MediaRecorder(stream);
         this.mediaRecorder.onstart = () => {
@@ -358,7 +388,11 @@ export class ProtocolSessionComponent implements OnInit{
   }
 
   saveRecording() {
-
+    if (this.dataService.currentSession && this.currentStep && this.recordedBlob) {
+      this.web.saveMediaRecorderBlob(this.dataService.currentSession.unique_id, this.currentStep.id, this.recordedBlob, this.clickedElement.toLowerCase()).subscribe((data: any) => {
+        this.refreshAnnotations();
+      })
+    }
   }
 
   annotationMenuClick(item: string) {
@@ -370,10 +404,48 @@ export class ProtocolSessionComponent implements OnInit{
   }
 
   handleTextAnnotation(text: string) {
-    console.log(text)
+    if (this.dataService.currentSession && this.currentStep) {
+      this.web.saveAnnotationText(this.dataService.currentSession.unique_id, this.currentStep.id, text).subscribe((data: any) => {
+        // @ts-ignore
+        this.web.getAnnotations(this.dataService.currentSession.unique_id, this.currentStep.id).subscribe((data: AnnotationQuery) => {
+          this.annotations = data;
+        })
+      })
+    }
   }
 
   handleSketchAnnotation(sketch: any) {
-    console.log(sketch)
+    // @ts-ignore
+    this.web.saveSketch(this.dataService.currentSession.unique_id, this.currentStep.id, sketch).subscribe((data: any) => {
+      // @ts-ignore
+      this.web.getAnnotations(this.dataService.currentSession.unique_id, this.currentStep.id).subscribe((data: AnnotationQuery) => {
+        this.annotations = data;
+      })
+    })
+  }
+
+  handleFileInput(event: any) {
+    if (event.target.files.length > 0) {
+      const file = event.target.files[0];
+      if (this.dataService.currentSession && this.currentStep) {
+        this.web.saveAnnotationFile(this.dataService.currentSession.unique_id, this.currentStep.id, file, this.clickedElement.toLowerCase()).subscribe((data: any) => {
+          this.refreshAnnotations();
+        })
+      }
+    }
+  }
+
+  refreshAnnotations() {
+    // @ts-ignore
+    this.web.getAnnotations(this.dataService.currentSession.unique_id, this.currentStep.id).subscribe((data: AnnotationQuery) => {
+      this.annotations = data;
+    })
+  }
+
+  deleteAnnotation(annotation_id: number) {
+    // @ts-ignore
+    this.web.deleteAnnotation(annotation_id).subscribe((data: any) => {
+      this.refreshAnnotations();
+    })
   }
 }

@@ -5,6 +5,7 @@ import {error} from "@angular/compiler-cli/src/transformers/util";
 import {DataService} from "../data.service";
 import {Router} from "@angular/router";
 import {NgOptimizedImage} from "@angular/common";
+import {resolve} from "@angular/compiler-cli";
 
 @Component({
   selector: 'app-home',
@@ -45,10 +46,15 @@ export class HomeComponent implements OnInit, AfterViewInit {
           (error) => {
             console.log(error);
           }, () => {
-            this.router.navigate(['/protocol-session'])
+            if (this.dataService.protocol)
+            this.router.navigate([`/protocol-session/${this.dataService.protocol.id}`])
           }
         )
       }
     }
+  }
+
+  navigateToEditor() {
+    this.router.navigate(['/protocol-editor']);
   }
 }

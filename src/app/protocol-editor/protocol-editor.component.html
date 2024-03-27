@@ -1,0 +1,52 @@
+@if (!protocol) {
+  <div class="container-fluid d-flex flex-row justify-content-center" style="padding-top: 60px">
+    <form [formGroup]="form" (ngSubmit)="createProtocol()" class="d-flex flex-column gap-2 justify-content-center" style="width: 800px">
+      <h5>Initial project input</h5>
+      <div class="form-floating">
+        <input type="text" class="form-control" formControlName="protocol_title" id="protocol_title">
+        <label for="protocol_title">Protocol Title</label>
+      </div>
+      <div class="form-floating">
+        <textarea class="form-control" formControlName="protocol_description" id="protocol_description" style="height: 300px"></textarea>
+        <label for="protocol_description">Protocol Description</label>
+      </div>
+      <div>
+        <button type="submit" class="btn btn-primary">Create</button>
+      </div>
+
+    </form>
+  </div>
+} @else {
+  @if (sections[currentSectionIndex]) {
+    <div class="container d-flex flex-row justify-content-center overflow-auto">
+      <div class="d-flex flex-column gap-2 " style="width: 800px">
+        <form>
+          <div class="form-floating">
+            <input [ngModelOptions]="{standalone: true}" type="text" class="form-control" id="section-title" [(ngModel)]="sections[currentSectionIndex].data.section_description">
+            <label for="section-title">Section Title</label>
+          </div>
+        </form>
+        <app-time-picker [seconds]="sections[currentSectionIndex].data.section_duration" (output)="handleUpdateSectionDuration($event)"></app-time-picker>
+        <div class="d-flex flex-row gap-2">
+          <button class="btn btn-primary">Add Section</button>
+          <button class="btn btn-primary" (click)="addStepToSection(currentSectionIndex)">Add Step</button>
+          <button class="btn btn-danger">Delete Section</button>
+        </div>
+        <div class="list-group overflow-auto" style="height: 70vh">
+          @for (step of sections[currentSectionIndex].steps; track step.id; let i = $index) {
+            <div class="list-group-item border-0">
+              <hr>
+              <div>
+                <b>Step {{ i + 1 }}/{{sections[currentSectionIndex].steps.length}}</b>
+              </div>
+              Step Description
+              <ngx-wig [(ngModel)]="step.step_description"></ngx-wig>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  }
+
+}
+
