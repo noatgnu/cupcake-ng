@@ -1,5 +1,5 @@
 @if (!protocol) {
-  <div class="container-fluid d-flex flex-row justify-content-center" style="padding-top: 60px">
+  <div class="container-fluid d-flex flex-row justify-content-center" style="padding-top: 80px">
     <form [formGroup]="form" (ngSubmit)="createProtocol()" class="d-flex flex-column gap-2 justify-content-center" style="width: 800px">
       <h5>Initial project input</h5>
       <div class="form-floating">
@@ -52,7 +52,7 @@
         </form>
         <app-time-picker [seconds]="sections[formSectionSelect.controls['currentSection'].value].data.section_duration" (output)="handleUpdateSectionDuration($event)"></app-time-picker>
 
-        <div class="list-group overflow-auto" style="height: 65vh">
+        <div class="list-group overflow-auto" style="height: 60vh">
           @for (step of sections[formSectionSelect.controls['currentSection'].value].steps; track step.id; let i = $index) {
             <div class="list-group-item border-0">
               <hr>

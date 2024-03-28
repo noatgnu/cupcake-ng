@@ -32,9 +32,9 @@
   </div>
 </nav>
 @if (dataService.protocol && true) {
-  <nav class="navbar navbar-expand-lg bg-body-tertiary" style="padding-top: 50px;">
+  <nav class="navbar navbar-expand-lg bg-body-tertiary" style="padding-top: 80px;">
     <div class="container-fluid d-flex justify-content-center">
-      <b><span [innerHTML]="dataService.protocol.protocol_title"></span></b>
+      <b><span [innerHTML]="dataService.protocol.protocol_title"></span></b> <div><a class="btn btn-link" (click)="goToProtocolEditor(dataService.protocol.id)"><i class="bi bi-pen"></i></a></div>
     </div>
   </nav>
 }

@@ -4,6 +4,7 @@ import {NgbDropdown, NgbDropdownMenu, NgbDropdownToggle, NgbModal} from "@ng-boo
 import {LoginModalComponent} from "../login-modal/login-modal.component";
 import {AccountsService} from "../accounts.service";
 import {NgOptimizedImage} from "@angular/common";
+import {Router} from "@angular/router";
 
 @Component({
   selector: 'app-navbar',
@@ -18,7 +19,7 @@ import {NgOptimizedImage} from "@angular/common";
   styleUrl: './navbar.component.scss'
 })
 export class NavbarComponent {
-  constructor(public dataService: DataService, private modal: NgbModal, public accounts: AccountsService) {
+  constructor(public dataService: DataService, private modal: NgbModal, public accounts: AccountsService, private router: Router) {
   }
 
   openAccountLogin() {
@@ -47,5 +48,10 @@ export class NavbarComponent {
 
   copyLink() {
     navigator.clipboard.writeText(location.origin + "/#/protocol-session/" + this.dataService.protocol?.id + "&" + this.dataService.currentSession?.unique_id)
+  }
+
+  goToProtocolEditor(protocolID: number) {
+    const url = this.router.createUrlTree(["/protocol-editor", protocolID])
+    window.open(location.origin + "/#/protocol-editor/" + protocolID, '_blank')
   }
 }
