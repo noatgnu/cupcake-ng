@@ -178,6 +178,14 @@ export class WebService {
     ).pipe(map((blob: Blob) => URL.createObjectURL(blob)));
   }
 
+  getSignedURL(annotation_id: number) {
+    return this.http.post(
+      `${this.baseURL}/api/annotation/${annotation_id}/get_signed_url/`,
+      {},
+      {responseType: 'json', observe: 'body'}
+    )
+  }
+
   saveMediaRecorderBlob(session_id: string, step_id: number, blob: Blob, annotation_type: string) {
     const form = new FormData()
     form.append('annotation', "");

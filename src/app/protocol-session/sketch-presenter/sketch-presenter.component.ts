@@ -22,6 +22,7 @@ export class SketchPresenterComponent {
         this.data = data
         console.log(this.data);
       })
+
     }
   }
   get annotation(): Annotation|undefined {

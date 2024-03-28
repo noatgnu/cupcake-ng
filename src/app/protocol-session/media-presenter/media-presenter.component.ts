@@ -14,8 +14,11 @@ export class MediaPresenterComponent {
   mediaURL: string = ''
   @Input() set annotation(value: Annotation) {
     this._annotation = value
-    this.web.getAnnotationImageBlobUrl(value.id).subscribe((url) => {
-      this.mediaURL = url
+    //this.web.getAnnotationImageBlobUrl(value.id).subscribe((url) => {
+    //  this.mediaURL = url
+    //})
+    this.web.getSignedURL(value.id).subscribe((token: any) => {
+      this.mediaURL = `${this.web.baseURL}/api/annotation/download_signed/?token=${token["signed_token"]}`
     })
   }
 

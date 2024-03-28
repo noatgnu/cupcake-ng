@@ -18,8 +18,11 @@ export class ImagePresenterComponent {
   @Input() set annotation(value: Annotation) {
     this._annotation = value;
     if (value.file) {
-      this.web.getAnnotationImageBlobUrl(value.id).subscribe((url) => {
+      /*this.web.getAnnotationImageBlobUrl(value.id).subscribe((url) => {
         this.image = url;
+      })*/
+      this.web.getSignedURL(value.id).subscribe((token: any) => {
+        this.image = `${this.web.baseURL}/api/annotation/download_signed/?token=${token["signed_token"]}`
       })
     }
 

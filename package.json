@@ -20,11 +20,13 @@
     "@angular/router": "^17.3.0",
     "@ng-bootstrap/ng-bootstrap": "^16.0.0",
     "@popperjs/core": "^2.11.8",
+
     "atrament": "^4.0.0",
     "bootstrap": "^5.3.2",
     "bootstrap-icons": "^1.11.3",
     "ngx-wig": "^17.1.7",
     "rxjs": "~7.8.0",
+    "streamsaver": "^2.0.6",
     "tslib": "^2.3.0",
     "zone.js": "~0.14.3"
   },
@@ -40,6 +42,7 @@
     "karma-coverage": "~2.2.0",
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
-    "typescript": "~5.4.2"
+    "typescript": "~5.4.2",
+    "@types/streamsaver": "^2.0.4"
   }
 }
