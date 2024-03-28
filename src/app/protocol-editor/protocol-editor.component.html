@@ -30,7 +30,14 @@
             <label for="sectionSelect">Select Section</label>
           </div>
         </form>
+        <div class="d-flex flex-row gap-2">
+          <button class="btn btn-primary" (click)="createNewSection()">Create New Section</button>
+          <button class="btn btn-primary" (click)="saveSection()">Save Section Data</button>
+          <button class="btn btn-primary" (click)="addStepToSection(formSectionSelect.controls['currentSection'].value)">Add Step</button>
+          <button class="btn btn-danger" (click)="deleteSection()">Delete Section</button>
+        </div>
       </div>
+
     </div>
   }
 
@@ -44,11 +51,7 @@
           </div>
         </form>
         <app-time-picker [seconds]="sections[formSectionSelect.controls['currentSection'].value].data.section_duration" (output)="handleUpdateSectionDuration($event)"></app-time-picker>
-        <div class="d-flex flex-row gap-2">
-          <button class="btn btn-primary">Add Section</button>
-          <button class="btn btn-primary" (click)="addStepToSection(formSectionSelect.controls['currentSection'].value)">Add Step</button>
-          <button class="btn btn-danger">Delete Section</button>
-        </div>
+
         <div class="list-group overflow-auto" style="height: 65vh">
           @for (step of sections[formSectionSelect.controls['currentSection'].value].steps; track step.id; let i = $index) {
             <div class="list-group-item border-0">

@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import {HttpClient, HttpParams} from "@angular/common/http";
 import {environment} from "../environments/environment";
 import {map, Observable} from "rxjs";
-import {Protocol, ProtocolStep} from "./protocol";
+import {Protocol, ProtocolSection, ProtocolStep} from "./protocol";
 import {ProtocolSession} from "./protocol-session";
 import {TimeKeeper} from "./time-keeper";
 import {AnnotationQuery} from "./annotation";
@@ -217,7 +217,7 @@ export class WebService {
   }
 
   updateProtocolStep(step_id: number, step_description: string, step_duration: number) {
-    return this.http.put<Protocol>(
+    return this.http.patch<ProtocolStep>(
       `${this.baseURL}/api/step/${step_id}/`,
       {
         step_description: step_description,
@@ -241,4 +241,32 @@ export class WebService {
     }
     return this.http.patch<ProtocolStep>(url, {}, {responseType: 'json', observe: 'body'})
   }
+
+  createProtocolSection(protocol_id: number, section_description: string, section_duration: number) {
+    return this.http.post<ProtocolSection>(
+      `${this.baseURL}/api/section/`,
+      {section_description: section_description, section_duration: section_duration, protocol: protocol_id},
+      {responseType: 'json', observe: 'body'}
+    );
+  }
+
+  updateProtocolSection(section_id: number, section_description: string, section_duration: number) {
+    return this.http.put<ProtocolSection>(
+      `${this.baseURL}/api/section/${section_id}/`,
+      {
+        section_description: section_description,
+        section_duration: section_duration
+      },
+      {responseType: 'json', observe: 'body'}
+    );
+  }
+
+  deleteSection(section_id: number) {
+    return this.http.delete(
+      `${this.baseURL}/api/section/${section_id}/`,
+      {responseType: 'json', observe: 'body'}
+    );
+  }
+
+
 }

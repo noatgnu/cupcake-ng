@@ -157,4 +157,31 @@ export class ProtocolEditorComponent {
 
     })
   }
+
+  createNewSection() {
+    this.web.createProtocolSection(this.protocolID, "", 0).subscribe((response: ProtocolSection) => {
+      this.sections.push({data: response, steps: [], currentStep: 0})
+      this.formSectionSelect.patchValue({currentSection: this.sections.length - 1})
+      this.web.createProtocolStep(this.protocolID, "", 0, response.id).subscribe((responseStep: ProtocolStep) => {
+        this.sections[this.formSectionSelect.value.currentSection].steps.push(responseStep)
+      })
+    })
+  }
+
+  deleteSection() {
+    this.web.deleteSection(this.sections[this.formSectionSelect.value.currentSection].data.id).subscribe(() => {
+      this.sections.splice(this.formSectionSelect.value.currentSection, 1)
+    })
+  }
+
+  saveSection() {
+    this.web.updateProtocolSection(this.sections[this.formSectionSelect.value.currentSection].data.id, this.sections[this.formSectionSelect.value.currentSection].data.section_description, this.sections[this.formSectionSelect.value.currentSection].data.section_duration).subscribe(() => {
+      for (const step of this.sections[this.formSectionSelect.value.currentSection].steps) {
+        this.web.updateProtocolStep(step.id, step.step_description, step.step_duration).subscribe((data) => {
+          step.step_duration = data.step_duration
+          step.step_description = data.step_description
+        })
+      }
+    })
+  }
 }
