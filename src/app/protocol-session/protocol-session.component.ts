@@ -14,6 +14,7 @@ import {AccountsService} from "../accounts.service";
 import {TimeKeeper} from "../time-keeper";
 import {Annotation, AnnotationQuery} from "../annotation";
 import {AnnotationPresenterComponent} from "./annotation-presenter/annotation-presenter.component";
+import {ToastService} from "../toast.service";
 
 @Component({
   selector: 'app-protocol-session',
@@ -79,13 +80,14 @@ export class ProtocolSessionComponent implements OnInit{
   audioURL?: string;
   annotations?: AnnotationQuery;
 
-  constructor(private accounts: AccountsService, private speech: SpeechService , public dataService: DataService, public web: WebService, public timer: TimerService, private modal: NgbModal) {
+  constructor(private toastService: ToastService, private accounts: AccountsService, private speech: SpeechService , public dataService: DataService, public web: WebService, public timer: TimerService, private modal: NgbModal) {
 
   }
 
 
 
   ngOnInit() {
+    this.toastService.show('Protocol Session', 'Loading Protocol Session')
     if (this.protocolSessionId === '') {
       const protocolString = localStorage.getItem('protocol');
       if (protocolString) {
@@ -330,6 +332,7 @@ export class ProtocolSessionComponent implements OnInit{
       (stream) => {
         this.mediaRecorder = new MediaRecorder(stream);
         this.mediaRecorder.onstart = () => {
+          this.toastService.show('Recording', 'Recording Started')
           console.log('recording started')
         }
         this.mediaRecorder.ondataavailable = (event) => {
@@ -339,6 +342,7 @@ export class ProtocolSessionComponent implements OnInit{
         this.mediaRecorder.onstop = () => {
           stream.getTracks().forEach((track) => track.stop());
           console.log('recording stopped')
+          this.toastService.show('Recording', 'Recording Stopped')
           this.recordedBlob = new Blob(this.recordingChunks, {type: 'audio/webm'});
           this.audioURL = window.URL.createObjectURL(this.recordedBlob);
         }
@@ -391,6 +395,7 @@ export class ProtocolSessionComponent implements OnInit{
   saveRecording() {
     if (this.dataService.currentSession && this.currentStep && this.recordedBlob) {
       this.web.saveMediaRecorderBlob(this.dataService.currentSession.unique_id, this.currentStep.id, this.recordedBlob, this.clickedElement.toLowerCase()).subscribe((data: any) => {
+        this.toastService.show('Annotation', 'Recording Saved Successfully')
         this.refreshAnnotations();
       })
     }
@@ -407,6 +412,7 @@ export class ProtocolSessionComponent implements OnInit{
   handleTextAnnotation(text: string) {
     if (this.dataService.currentSession && this.currentStep) {
       this.web.saveAnnotationText(this.dataService.currentSession.unique_id, this.currentStep.id, text).subscribe((data: any) => {
+        this.toastService.show('Annotation', 'Text Saved Successfully')
         // @ts-ignore
         this.web.getAnnotations(this.dataService.currentSession.unique_id, this.currentStep.id).subscribe((data: AnnotationQuery) => {
           this.annotations = data;
@@ -418,6 +424,7 @@ export class ProtocolSessionComponent implements OnInit{
   handleSketchAnnotation(sketch: any) {
     // @ts-ignore
     this.web.saveSketch(this.dataService.currentSession.unique_id, this.currentStep.id, sketch).subscribe((data: any) => {
+      this.toastService.show('Annotation', 'Sketch Saved Successfully')
       // @ts-ignore
       this.web.getAnnotations(this.dataService.currentSession.unique_id, this.currentStep.id).subscribe((data: AnnotationQuery) => {
         this.annotations = data;
@@ -440,12 +447,14 @@ export class ProtocolSessionComponent implements OnInit{
     // @ts-ignore
     this.web.getAnnotations(this.dataService.currentSession.unique_id, this.currentStep.id).subscribe((data: AnnotationQuery) => {
       this.annotations = data;
+      this.toastService.show('Annotation', 'Annotation List Updated Successfully')
     })
   }
 
   deleteAnnotation(annotation_id: number) {
     // @ts-ignore
     this.web.deleteAnnotation(annotation_id).subscribe((data: any) => {
+      this.toastService.show('Annotation', 'Annotation Deleted Successfully')
       this.refreshAnnotations();
     })
   }

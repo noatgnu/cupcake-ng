@@ -125,14 +125,20 @@
                   </div>
                 } @else if (clickedElement==='Audio') {
                   <div class="d-flex flex-row gap-2">
-                    <button class="btn btn-primary" (click)="startRecording(true, false)">Start Recording</button>
-                    <button class="btn btn-danger" (click)="stopRecording()">Stop Recording</button>
+                    @if (recording) {
+                      <button class="btn btn-danger" (click)="stopRecording()">Stop Recording</button>
+                    } @else {
+                      <button class="btn btn-primary" (click)="startRecording(true, false)">Start Recording</button>
+                    }
                   </div>
 
                 } @else if (clickedElement==='Video') {
                   <div class="d-flex flex-row gap-2">
-                    <button class="btn btn-primary" (click)="startRecording(true, true)">Start Recording</button>
-                    <button class="btn btn-danger" (click)="stopRecording()">Stop Recording</button>
+                    @if (recording) {
+                      <button class="btn btn-danger" (click)="stopRecording()">Stop Recording</button>
+                    } @else {
+                      <button class="btn btn-primary" (click)="startRecording(true, true)">Start Recording</button>
+                    }
                   </div>
                 } @else if (clickedElement==='Image') {
                   <div class="form-group">

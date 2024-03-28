@@ -3,11 +3,12 @@ import { RouterOutlet } from '@angular/router';
 import {NavbarComponent} from "./navbar/navbar.component";
 import {AccountsService} from "./accounts.service";
 import {LoadingComponent} from "./loading/loading.component";
+import {ToastContainerComponent} from "./toast-container/toast-container.component";
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, NavbarComponent, LoadingComponent],
+  imports: [RouterOutlet, NavbarComponent, LoadingComponent, ToastContainerComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })

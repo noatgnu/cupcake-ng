@@ -6,6 +6,7 @@ import {Protocol, ProtocolSection, ProtocolStep} from "../protocol";
 import {DataService} from "../data.service";
 import {Router} from "@angular/router";
 import {TimePickerComponent} from "../time-picker/time-picker.component";
+import {ToastService} from "../toast.service";
 
 @Component({
   selector: 'app-protocol-editor',
@@ -36,6 +37,7 @@ export class ProtocolEditorComponent {
   _protocolID: number = 0
   @Input() set protocolID(value: number) {
     this._protocolID = value
+    this.toastService.show("Loading", "Protocol")
     this.web.getProtocol(value).subscribe((response: Protocol) => {
       this.protocol = response
       console.log(response)
@@ -61,13 +63,14 @@ export class ProtocolEditorComponent {
         if (section.length > 0) {
           section[0].steps.push(step)
         }})
+      this.toastService.show("Protocol", "Loaded")
     })
   }
   get protocolID(): number {
     return this._protocolID
   }
 
-  constructor(private fb: FormBuilder, private web: WebService, private dataService: DataService, private router: Router) {
+  constructor(private fb: FormBuilder, private web: WebService, private dataService: DataService, private router: Router, private toastService: ToastService) {
 
   }
 
@@ -105,6 +108,7 @@ export class ProtocolEditorComponent {
 
   addStepToSection(index: number) {
     this.web.createProtocolStep(this.protocolID, "", 0, this.sections[this.formSectionSelect.value.currentSection].data.id).subscribe((response: ProtocolStep) => {
+      this.toastService.show("Step", "Created")
       this.sections[this.formSectionSelect.value.currentSection].steps.push(response)
     })
   }
@@ -134,6 +138,7 @@ export class ProtocolEditorComponent {
 
   deleteStep(step: number) {
     this.web.deleteProtocolStep(step).subscribe(() => {
+      this.toastService.show("Step", "Deleted")
       this.sections[this.formSectionSelect.value.currentSection].steps = this.sections[this.formSectionSelect.value.currentSection].steps.filter(s => s.id !== step)
     })
   }
@@ -160,9 +165,11 @@ export class ProtocolEditorComponent {
 
   createNewSection() {
     this.web.createProtocolSection(this.protocolID, "", 0).subscribe((response: ProtocolSection) => {
+      this.toastService.show("Section", "Created")
       this.sections.push({data: response, steps: [], currentStep: 0})
       this.formSectionSelect.patchValue({currentSection: this.sections.length - 1})
       this.web.createProtocolStep(this.protocolID, "", 0, response.id).subscribe((responseStep: ProtocolStep) => {
+        this.toastService.show("Step", "Created")
         this.sections[this.formSectionSelect.value.currentSection].steps.push(responseStep)
       })
     })
@@ -170,12 +177,14 @@ export class ProtocolEditorComponent {
 
   deleteSection() {
     this.web.deleteSection(this.sections[this.formSectionSelect.value.currentSection].data.id).subscribe(() => {
+      this.toastService.show("Section", "Deleted")
       this.sections.splice(this.formSectionSelect.value.currentSection, 1)
     })
   }
 
   saveSection() {
     this.web.updateProtocolSection(this.sections[this.formSectionSelect.value.currentSection].data.id, this.sections[this.formSectionSelect.value.currentSection].data.section_description, this.sections[this.formSectionSelect.value.currentSection].data.section_duration).subscribe(() => {
+      this.toastService.show("Section", "Saved")
       for (const step of this.sections[this.formSectionSelect.value.currentSection].steps) {
         this.web.updateProtocolStep(step.id, step.step_description, step.step_duration).subscribe((data) => {
           step.step_duration = data.step_duration
