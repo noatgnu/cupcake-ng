@@ -1,13 +1,13 @@
-<div class="container-fluid p-5 d-flex flex-row justify-content-center">
+<div class="container-fluid p-5 d-flex flex-row justify-content-center" style="padding-top: 100px">
   <div class="card border-0">
-    <div class="card-body">
+    <div class="card-body d-flex flex-row justify-content-center">
       <div class="d-flex gap-2">
         <div class="logo">
           <img #logo class="logo_home" ngSrc="assets/cupcake_logo.png" alt="Cupcake Logo" [width]="128" [height]="128">
         </div>
         <div class="vr">
         </div>
-        <div class="d-flex flex-column">
+        <div class="d-flex flex-column gap-1">
           <form [formGroup]="form" (ngSubmit)="onSubmit()">
             <div class="input-group mb-3">
               <input formControlName="url" type="text" class="form-control" id="protocolUrl" placeholder="Protocols.io URL">
@@ -24,9 +24,37 @@
               <button class="btn btn-primary" (click)="navigateToEditor()">Or Create Your Protocols</button>
             </div>
           </div>
+          <hr>
+          @if (protocolQuery) {
+            @if (protocolQuery.results.length > 0) {
+              <h5>Protocols</h5>
+              <div class="list-group">
+                @for (protocol of protocolQuery.results; track protocol.id) {
+                  <div class="list-group-item list-group-item-action">
+                    <div>
+                      <a href="/#/protocol-session/{{protocol.id}}" target="_blank"><span [innerHTML]="protocol.protocol_title"></span></a>
+                    </div>
+                    <small>{{ protocol.protocol_created_on | date : "short" }}</small>
+                  </div>
+                }
+              </div>
+              <div class="d-flex flex-row gap-2">
+                @if (protocolQuery.previous) {
+                  <button class="btn btn-primary" (click)="getUserProtocols(protocolQuery.previous)">Previous</button>
+                } @else {
+                  <button class="btn btn-primary" disabled>Previous</button>
+                }
+                @if (protocolQuery.next) {
+                  <button class="btn btn-primary" (click)="getUserProtocols(protocolQuery.next)">Next</button>
+                } @else {
+                  <button class="btn btn-primary" disabled>Next</button>
+                }
+              </div>
+            }
+          }
+
         </div>
       </div>
-
     </div>
   </div>
 </div>

@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import {HttpClient, HttpParams} from "@angular/common/http";
 import {environment} from "../environments/environment";
 import {map, Observable} from "rxjs";
-import {Protocol, ProtocolSection, ProtocolStep} from "./protocol";
+import {Protocol, ProtocolQuery, ProtocolSection, ProtocolStep} from "./protocol";
 import {ProtocolSession} from "./protocol-session";
 import {TimeKeeper} from "./time-keeper";
 import {AnnotationQuery} from "./annotation";
@@ -276,5 +276,16 @@ export class WebService {
     );
   }
 
-
+  getUserProtocols(url?: string) {
+    if (url) {
+      return this.http.get<ProtocolQuery>(
+        url,
+        {responseType: 'json', observe: 'body'}
+      );
+    }
+    return this.http.get<ProtocolQuery>(
+      `${this.baseURL}/api/protocol/get_user_protocols/`,
+      {responseType: 'json', observe: 'body'}
+    );
+  }
 }

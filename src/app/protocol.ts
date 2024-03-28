@@ -29,3 +29,10 @@ export interface ProtocolSection {
   created_at: Date;
   updated_at: Date;
 }
+
+export interface ProtocolQuery {
+  count: number;
+  next: string|null;
+  previous: string|null;
+  results: Protocol[];
+}

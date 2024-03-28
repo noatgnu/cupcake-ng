@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import {DataService} from "../data.service";
-import {NgbDropdown, NgbDropdownMenu, NgbDropdownToggle, NgbModal} from "@ng-bootstrap/ng-bootstrap";
+import {NgbCollapse, NgbDropdown, NgbDropdownMenu, NgbDropdownToggle, NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import {LoginModalComponent} from "../login-modal/login-modal.component";
 import {AccountsService} from "../accounts.service";
 import {NgOptimizedImage} from "@angular/common";
@@ -13,12 +13,14 @@ import {Router} from "@angular/router";
     NgbDropdown,
     NgbDropdownToggle,
     NgbDropdownMenu,
-    NgOptimizedImage
+    NgOptimizedImage,
+    NgbCollapse
   ],
   templateUrl: './navbar.component.html',
   styleUrl: './navbar.component.scss'
 })
 export class NavbarComponent {
+  isMenuCollapsed = false;
   constructor(public dataService: DataService, private modal: NgbModal, public accounts: AccountsService, private router: Router) {
   }
 

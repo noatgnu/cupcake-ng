@@ -4,15 +4,17 @@ import {WebService} from "../web.service";
 import {error} from "@angular/compiler-cli/src/transformers/util";
 import {DataService} from "../data.service";
 import {Router} from "@angular/router";
-import {NgOptimizedImage} from "@angular/common";
+import {DatePipe, NgOptimizedImage} from "@angular/common";
 import {resolve} from "@angular/compiler-cli";
+import {ProtocolQuery} from "../protocol";
 
 @Component({
   selector: 'app-home',
   standalone: true,
   imports: [
     ReactiveFormsModule,
-    NgOptimizedImage
+    NgOptimizedImage,
+    DatePipe
   ],
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss'
@@ -23,6 +25,7 @@ export class HomeComponent implements OnInit, AfterViewInit {
   form = this.fb.group({
     url: new FormControl('', Validators.required),
   })
+  protocolQuery?: ProtocolQuery;
   constructor(private router: Router, private fb: FormBuilder, private web: WebService, private dataService: DataService) {
 
   }
@@ -32,7 +35,7 @@ export class HomeComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit() {
-
+    this.getUserProtocols()
   }
 
   onSubmit() {
@@ -56,5 +59,11 @@ export class HomeComponent implements OnInit, AfterViewInit {
 
   navigateToEditor() {
     this.router.navigate(['/protocol-editor']);
+  }
+
+  getUserProtocols(url?: string) {
+    this.web.getUserProtocols(url).subscribe((response) => {
+      this.protocolQuery = response;
+    })
   }
 }
