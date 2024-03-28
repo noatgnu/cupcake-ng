@@ -13,6 +13,6 @@ RUN npm run build
 
 FROM nginx:latest
 
-COPY --from=0 /app/cupcake-ng/dist /usr/share/nginx/html
+COPY --from=0 /app/cupcake-ng/dist/browser /usr/share/nginx/html
 
 EXPOSE 80
