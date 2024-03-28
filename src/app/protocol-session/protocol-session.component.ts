@@ -8,7 +8,7 @@ import {SpeechService} from "../speech.service";
 import {AnnotationTextFormComponent} from "./annotation-text-form/annotation-text-form.component";
 import {HandwrittenAnnotationComponent} from "./handwritten-annotation/handwritten-annotation.component";
 import {ProtocolSession} from "../protocol-session";
-import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
+import {NgbModal, NgbModalConfig} from "@ng-bootstrap/ng-bootstrap";
 import {SessionSelectionModalComponent} from "./session-selection-modal/session-selection-modal.component";
 import {AccountsService} from "../accounts.service";
 import {TimeKeeper} from "../time-keeper";
@@ -80,7 +80,9 @@ export class ProtocolSessionComponent implements OnInit{
   audioURL?: string;
   annotations?: AnnotationQuery;
 
-  constructor(private toastService: ToastService, private accounts: AccountsService, private speech: SpeechService , public dataService: DataService, public web: WebService, public timer: TimerService, private modal: NgbModal) {
+  constructor(private modalConfig: NgbModalConfig, private toastService: ToastService, private accounts: AccountsService, private speech: SpeechService , public dataService: DataService, public web: WebService, public timer: TimerService, private modal: NgbModal) {
+    this.modalConfig.backdrop = 'static';
+    this.modalConfig.keyboard = false;
 
   }
 

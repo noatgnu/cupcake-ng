@@ -7,6 +7,7 @@ import {DataService} from "../data.service";
 import {Router} from "@angular/router";
 import {TimePickerComponent} from "../time-picker/time-picker.component";
 import {ToastService} from "../toast.service";
+import {NgbModalConfig} from "@ng-bootstrap/ng-bootstrap";
 
 @Component({
   selector: 'app-protocol-editor',
@@ -70,8 +71,9 @@ export class ProtocolEditorComponent {
     return this._protocolID
   }
 
-  constructor(private fb: FormBuilder, private web: WebService, private dataService: DataService, private router: Router, private toastService: ToastService) {
-
+  constructor(private modalConfig: NgbModalConfig, private fb: FormBuilder, private web: WebService, private dataService: DataService, private router: Router, private toastService: ToastService) {
+    this.modalConfig.backdrop = 'static'
+    this.modalConfig.keyboard = false
   }
 
   addStepForm() {
