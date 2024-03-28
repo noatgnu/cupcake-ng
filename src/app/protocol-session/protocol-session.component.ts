@@ -104,6 +104,7 @@ export class ProtocolSessionComponent implements OnInit{
 
   parseProtocol() {
     if (this.dataService.protocol) {
+      console.log(this.dataService.protocol)
       this.sections = this.dataService.protocol.sections.map((section) => {
         return {data: section, steps: [], currentStep: 0}
       })

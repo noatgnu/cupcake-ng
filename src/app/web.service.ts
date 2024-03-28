@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import {HttpClient, HttpParams} from "@angular/common/http";
 import {environment} from "../environments/environment";
 import {map, Observable} from "rxjs";
-import {Protocol} from "./protocol";
+import {Protocol, ProtocolStep} from "./protocol";
 import {ProtocolSession} from "./protocol-session";
 import {TimeKeeper} from "./time-keeper";
 import {AnnotationQuery} from "./annotation";
@@ -208,11 +208,37 @@ export class WebService {
     );
   }
 
-  createProtocolStep(protocol_id: number, step_description: string, step_duration: number, step_section: string, step_section_duration: number) {
-    return this.http.post<Protocol>(
+  createProtocolStep(protocol_id: number, step_description: string, step_duration: number, step_section: number) {
+    return this.http.post<ProtocolStep>(
       `${this.baseURL}/api/step/`,
-      {step_description: step_description, step_duration: step_duration, step_section: step_section, step_section_duration: step_section_duration},
+      {step_description: step_description, step_duration: step_duration, step_section: step_section, protocol: protocol_id},
       {responseType: 'json', observe: 'body'}
     );
+  }
+
+  updateProtocolStep(step_id: number, step_description: string, step_duration: number) {
+    return this.http.put<Protocol>(
+      `${this.baseURL}/api/step/${step_id}/`,
+      {
+        step_description: step_description,
+        step_duration: step_duration
+      },
+      {responseType: 'json', observe: 'body'}
+    );
+  }
+
+  deleteProtocolStep(step_id: number) {
+    return this.http.delete(
+      `${this.baseURL}/api/step/${step_id}/`,
+      {responseType: 'json', observe: 'body'}
+    );
+  }
+
+  moveProtocolStep(step_id: number, up: boolean = true) {
+    let url = `${this.baseURL}/api/step/${step_id}/move_up/`
+    if (!up) {
+      url = `${this.baseURL}/api/step/${step_id}/move_down/`
+    }
+    return this.http.patch<ProtocolStep>(url, {}, {responseType: 'json', observe: 'body'})
   }
 }

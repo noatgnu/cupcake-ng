@@ -1,5 +1,5 @@
 import {Component, Input} from '@angular/core';
-import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule} from "@angular/forms";
+import {FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {NgxWigModule} from "ngx-wig";
 import {WebService} from "../web.service";
 import {Protocol, ProtocolSection, ProtocolStep} from "../protocol";
@@ -26,8 +26,11 @@ export class ProtocolEditorComponent {
     protocol_description: '',
   })
 
+  formSectionSelect: FormGroup = this.fb.group({
+    currentSection: new FormControl<number>(0)
+  })
+
   steps: FormGroup[] = []
-  currentSectionIndex: number = 0
   sections: {data: ProtocolSection, steps: ProtocolStep[], currentStep: number}[] = []
   protocol?: Protocol
   _protocolID: number = 0
@@ -35,6 +38,7 @@ export class ProtocolEditorComponent {
     this._protocolID = value
     this.web.getProtocol(value).subscribe((response: Protocol) => {
       this.protocol = response
+      console.log(response)
       this.dataService.protocol = response
       this.form.patchValue({
         protocol_title: this.protocol.protocol_title,
@@ -96,28 +100,13 @@ export class ProtocolEditorComponent {
   }
 
   handleUpdateSectionDuration(seconds: number) {
-    this.sections[this.currentSectionIndex].data.section_duration = seconds
+    this.sections[this.formSectionSelect.value.currentSection].data.section_duration = seconds
   }
 
   addStepToSection(index: number) {
-    const step = {
-      id: 0,
-      next_step: [],
-      protocol: this.protocolID,
-      step_description: "",
-      step_duration: 0,
-      step_id: 0,
-      step_section: this.sections[index].data.id,
-    }
-
-    if (index < this.sections.length - 1) {
-      const lastStep = this.getLastStepInSection(index)
-
-    }
-    if (this.sections[index].steps.length > 0) {
-
-    }
-
+    this.web.createProtocolStep(this.protocolID, "", 0, this.sections[this.formSectionSelect.value.currentSection].data.id).subscribe((response: ProtocolStep) => {
+      this.sections[this.formSectionSelect.value.currentSection].steps.push(response)
+    })
   }
 
   getLastStepInSection(index: number) {
@@ -137,5 +126,35 @@ export class ProtocolEditorComponent {
       }
     }
     return lastStep
+  }
+
+  handleUpdateStepDuration(seconds: number, index: number) {
+    this.sections[this.formSectionSelect.value.currentSection].steps[index].step_duration = seconds
+  }
+
+  deleteStep(step: number) {
+    this.web.deleteProtocolStep(step).subscribe(() => {
+      this.sections[this.formSectionSelect.value.currentSection].steps = this.sections[this.formSectionSelect.value.currentSection].steps.filter(s => s.id !== step)
+    })
+  }
+
+  moveStep(step: number, up: boolean = true) {
+    this.web.moveProtocolStep(step, up).subscribe((data) => {
+      const index = this.sections[this.formSectionSelect.value.currentSection].steps.findIndex(s => s.id === step)
+      if (up) {
+        if (index > 0) {
+          const temp = this.sections[this.formSectionSelect.value.currentSection].steps[index - 1]
+          this.sections[this.formSectionSelect.value.currentSection].steps[index - 1] = this.sections[this.formSectionSelect.value.currentSection].steps[index]
+          this.sections[this.formSectionSelect.value.currentSection].steps[index] = temp
+        }
+      } else {
+        if (index < this.sections[this.formSectionSelect.value.currentSection].steps.length - 1) {
+          const temp = this.sections[this.formSectionSelect.value.currentSection].steps[index + 1]
+          this.sections[this.formSectionSelect.value.currentSection].steps[index + 1] = this.sections[this.formSectionSelect.value.currentSection].steps[index]
+          this.sections[this.formSectionSelect.value.currentSection].steps[index] = temp
+        }
+      }
+
+    })
   }
 }
