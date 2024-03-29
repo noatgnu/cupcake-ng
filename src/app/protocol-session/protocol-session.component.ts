@@ -39,6 +39,7 @@ export class ProtocolSessionComponent implements OnInit{
   mouseOverElement: string = "";
   clickedElement: string = "";
   sessionID: string = '';
+  cameraDevices: MediaDeviceInfo[] = [];
 
 
 
@@ -330,6 +331,10 @@ export class ProtocolSessionComponent implements OnInit{
     console.log('start recording')
     this.recording = true;
     this.recordingChunks = [];
+    let constraints: MediaStreamConstraints = { audio: audio, video: video };
+    if (video) {
+      constraints.video = { width: { ideal: 1920 }, height: { ideal: 1080 }, facingMode: 'environment'};
+    }
     navigator.mediaDevices.getUserMedia({audio: audio, video: video}).then(
       (stream) => {
         this.mediaRecorder = new MediaRecorder(stream);
