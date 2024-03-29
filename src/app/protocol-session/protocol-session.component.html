@@ -130,6 +130,15 @@
                     } @else {
                       <button class="btn btn-primary" (click)="startRecording(true, false)">Start Recording</button>
                     }
+                    <div class="form-floating">
+                      <select class="form-select">
+                        <option selected>Default Selected</option>
+                        @for (a of audioDevices; track a) {
+                          <option value="{{a.deviceId}}">{{a.label}}</option>
+                        }
+                      </select>
+                      <label>Select Audio Device</label>
+                    </div>
                   </div>
 
                 } @else if (clickedElement==='Video') {
@@ -139,7 +148,21 @@
                     } @else {
                       <button class="btn btn-primary" (click)="startRecording(true, true)">Start Recording</button>
                     }
+                    <div class="form-floating">
+                      <select class="form-select">
+                        <option selected>Default Selected</option>
+                        @for (a of cameraDevices; track a) {
+                          <option value="{{a.deviceId}}">{{a.label}}</option>
+                        }
+                      </select>
+                      <label>Select Camera Device</label>
+                    </div>
                   </div>
+                  @if (recording) {
+                    <div class="d-flex flex-row justify-content-center">
+                      <video autoplay muted #previewVideo></video>
+                    </div>
+                  }
                 } @else if (clickedElement==='Image') {
                   <div class="form-group">
                     <label for="image">Upload Image</label>
@@ -167,18 +190,20 @@
             <div class="d-flex flex-column g-2">
               @if (audioURL) {
                 <div class="d-flex flex-column gap-1">
-                  Recording Preview
-                  @if (clickedElement==='Audio') {
-                    <audio controls>
-                      <source [src]="audioURL" type="audio/webm">
-                      Your browser does not support the audio element.
-                    </audio>
-                  } @else if (clickedElement==='Video') {
-                    <video controls>
-                      <source [src]="audioURL" type="video/webm">
-                      Your browser does not support the video element.
-                    </video>
-                  }
+                  <div class="d-flex flex-row justify-content-center">
+                    Recording Preview
+                    @if (clickedElement==='Audio') {
+                      <audio controls>
+                        <source [src]="audioURL" type="audio/webm">
+                        Your browser does not support the audio element.
+                      </audio>
+                    } @else if (clickedElement==='Video') {
+                      <video controls>
+                        <source [src]="audioURL" type="video/webm">
+                        Your browser does not support the video element.
+                      </video>
+                    }
+                  </div>
                   <div class="d-flex flex-row gap-2">
                     <button class="btn btn-primary" (click)="saveRecording()">Save</button>
                     <button class="btn btn-danger" (click)="deletePreviewRecording()">Delete</button>

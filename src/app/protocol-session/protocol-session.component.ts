@@ -1,4 +1,4 @@
-import {Component, Input, OnInit} from '@angular/core';
+import {Component, ElementRef, Input, OnInit, ViewChild} from '@angular/core';
 import {DataService} from "../data.service";
 import {TimerService} from "../timer.service";
 import {WebService} from "../web.service";
@@ -31,7 +31,7 @@ import {ToastService} from "../toast.service";
   styleUrl: './protocol-session.component.scss'
 })
 export class ProtocolSessionComponent implements OnInit{
-
+  @ViewChild('previewVideo') previewVideo?: ElementRef;
   showSection: boolean = true;
   private _protocolSessionId: string = '';
   sections: {data: ProtocolSection, steps: ProtocolStep[], currentStep: number}[] = []
@@ -40,7 +40,9 @@ export class ProtocolSessionComponent implements OnInit{
   clickedElement: string = "";
   sessionID: string = '';
   cameraDevices: MediaDeviceInfo[] = [];
-
+  currentCameraDevice: MediaDeviceInfo|null = null;
+  audioDevices: MediaDeviceInfo[] = [];
+  currentAudioDevice: MediaDeviceInfo|null = null;
 
 
   @Input() set protocolSessionId(value: string) {
@@ -84,7 +86,10 @@ export class ProtocolSessionComponent implements OnInit{
   constructor(private modalConfig: NgbModalConfig, private toastService: ToastService, private accounts: AccountsService, private speech: SpeechService , public dataService: DataService, public web: WebService, public timer: TimerService, private modal: NgbModal) {
     this.modalConfig.backdrop = 'static';
     this.modalConfig.keyboard = false;
-
+    navigator.mediaDevices.enumerateDevices().then((devices) => {
+      this.cameraDevices = devices.filter((device) => device.kind === 'videoinput');
+      this.audioDevices = devices.filter((device) => device.kind === 'audioinput');
+    })
   }
 
 
@@ -334,9 +339,21 @@ export class ProtocolSessionComponent implements OnInit{
     let constraints: MediaStreamConstraints = { audio: audio, video: video };
     if (video) {
       constraints.video = { width: { ideal: 1920 }, height: { ideal: 1080 }, facingMode: 'environment'};
+      if (this.currentCameraDevice) {
+        constraints.video = { deviceId: this.currentCameraDevice.deviceId, width: { ideal: 1920 }, height: { ideal: 1080 }, facingMode: 'environment'};
+      }
+    }
+    if (audio) {
+      if (this.currentAudioDevice) {
+        constraints.audio = { deviceId: this.currentAudioDevice.deviceId }
+      }
     }
     navigator.mediaDevices.getUserMedia({audio: audio, video: video}).then(
       (stream) => {
+        if (this.previewVideo) {
+          this.previewVideo.nativeElement.srcObject = stream;
+          this.previewVideo.nativeElement.play();
+        }
         this.mediaRecorder = new MediaRecorder(stream);
         this.mediaRecorder.onstart = () => {
           this.toastService.show('Recording', 'Recording Started')
@@ -352,6 +369,9 @@ export class ProtocolSessionComponent implements OnInit{
           this.toastService.show('Recording', 'Recording Stopped')
           this.recordedBlob = new Blob(this.recordingChunks, {type: 'audio/webm'});
           this.audioURL = window.URL.createObjectURL(this.recordedBlob);
+          if (this.previewVideo) {
+            this.previewVideo.nativeElement.stop()
+          }
         }
         this.mediaRecorder.start();
         console.log(this.mediaRecorder)
