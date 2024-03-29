@@ -163,7 +163,8 @@ export class HandwrittenAnnotationComponent implements AfterViewInit{
       width: this.width,
       height: this.height,
     });
-    this.canvas.devicePixelRatio = 1;
+    this.canvas.canvas.style.width = `${this.canvas.canvas.width}px`;
+    this.canvas.canvas.style.height = `${this.canvas.canvas.height}px`;
 
     this.canvas.recordStrokes = true;
     this.canvas.addEventListener('strokerecorded', (event: any) => {
