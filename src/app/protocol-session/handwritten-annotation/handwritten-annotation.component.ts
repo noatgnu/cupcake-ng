@@ -30,6 +30,7 @@ export class HandwrittenAnnotationComponent implements AfterViewInit{
     } else {
       this.strokes = value
     }
+    console.log(this.strokes)
   }
 
   get data() {
@@ -39,13 +40,13 @@ export class HandwrittenAnnotationComponent implements AfterViewInit{
   currentMode: string = 'draw';
   @Output() sketch: EventEmitter<any> = new EventEmitter<any>();
   ngAfterViewInit() {
-    if (this.data.length > 0) {
+    if (this.strokes.length > 0) {
       this.initialize();
       this.canvas["#dirty"] = true;
       const segs = this.strokes.slice(0, this.strokes.length);
       this.strokes = [];
       for (const seg of segs) {
-
+        console.log(seg)
         const segments = seg.segments.slice()
         this.canvas.adaptiveStroke = seg.adaptiveStroke;
         this.canvas.color = seg.color;
