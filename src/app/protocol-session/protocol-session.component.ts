@@ -389,7 +389,7 @@ export class ProtocolSessionComponent implements OnInit{
         constraints.audio = { deviceId: {exact: this.currentAudioDevice.deviceId} }
       }
     }
-    navigator.mediaDevices.getUserMedia({audio: audio, video: video}).then(
+    navigator.mediaDevices.getUserMedia(constraints).then(
       (stream) => {
         if (this.previewVideo) {
           this.previewVideo.nativeElement.srcObject = stream;
