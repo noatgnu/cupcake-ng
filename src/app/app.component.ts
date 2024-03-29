@@ -4,11 +4,14 @@ import {NavbarComponent} from "./navbar/navbar.component";
 import {AccountsService} from "./accounts.service";
 import {LoadingComponent} from "./loading/loading.component";
 import {ToastContainerComponent} from "./toast-container/toast-container.component";
+import {
+  HandwrittenAnnotationComponent
+} from "./protocol-session/handwritten-annotation/handwritten-annotation.component";
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, NavbarComponent, LoadingComponent, ToastContainerComponent],
+  imports: [RouterOutlet, NavbarComponent, LoadingComponent, ToastContainerComponent, HandwrittenAnnotationComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })

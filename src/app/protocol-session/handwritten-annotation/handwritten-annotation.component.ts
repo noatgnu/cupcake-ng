@@ -164,14 +164,14 @@ export class HandwrittenAnnotationComponent implements AfterViewInit{
       height: this.height,
     });
     const scale = window.devicePixelRatio
-    //this.canvas.width = Math.floor(this.width * scale);
-    //this.canvas.height = Math.floor(this.height * scale);
-    this.canvas.canvas.style.width = `${this.width * scale}px`;
-    this.canvas.canvas.style.height = `${this.height * scale}px`;
-
+    //this.canvas.width = Math.floor(this.width);
+    //this.canvas.height = Math.floor(this.height);
+    this.canvas.canvas.style.width = `${this.width}px`;
+    this.canvas.canvas.style.height = `${this.height}px`;
+    //this.canvas.canvas.style.width = `${this.width * scale}px`;
+    //this.canvas.canvas.style.height = `${this.height * scale}px`;
     const context = this.canvas.canvas.getContext('2d');
-    console.log(scale)
-    context.scale(scale, scale)
+    context.scale(1, 1)
     console.log(this.canvas.width, this.canvas.height)
     console.log(this.canvas.canvas.style.width, this.canvas.canvas.style.height)
 
