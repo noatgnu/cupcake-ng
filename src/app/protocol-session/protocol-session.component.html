@@ -160,7 +160,7 @@
                   </div>
                   @if (recording) {
                     <div class="d-flex flex-row justify-content-center">
-                      <video autoplay muted #previewVideo></video>
+                      <video autoplay muted #previewVideo [width]="400" [height]="300"></video>
                     </div>
                   }
                 } @else if (clickedElement==='Image') {
@@ -198,7 +198,7 @@
                         Your browser does not support the audio element.
                       </audio>
                     } @else if (clickedElement==='Video') {
-                      <video controls>
+                      <video controls [width]="400" [height]="300">
                         <source [src]="audioURL" type="video/webm">
                         Your browser does not support the video element.
                       </video>

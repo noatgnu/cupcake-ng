@@ -377,7 +377,13 @@ export class ProtocolSessionComponent implements OnInit{
     this.recordingChunks = [];
     let constraints: MediaStreamConstraints = { audio: audio, video: video };
     if (video) {
-      constraints.video = { width: { ideal: 1920 }, height: { ideal: 1080 }, facingMode: {exact: 'environment'}};
+      // check agent if mobile or desktop
+      if (navigator.userAgent.match(/Android/i) || navigator.userAgent.match(/iPhone/i) || navigator.userAgent.match(/iPad/i)) {
+        constraints.video = { width: { ideal: 1920 }, height: { ideal: 1080 }, facingMode: {exact: 'environment'}};
+      } else {
+        constraints.video = { width: { ideal: 1920 }, height: { ideal: 1080 }};
+      }
+      //constraints.video = { width: { ideal: 1920 }, height: { ideal: 1080 }, facingMode: {exact: 'environment'}};
       if (this.currentCameraDevice) {
         console.log(this.currentCameraDevice)
         constraints.video = { deviceId: {exact: this.currentCameraDevice.deviceId}, width: { ideal: 1920 }, height: { ideal: 1080 }};
@@ -389,6 +395,7 @@ export class ProtocolSessionComponent implements OnInit{
         constraints.audio = { deviceId: {exact: this.currentAudioDevice.deviceId} }
       }
     }
+    console.log(constraints)
     navigator.mediaDevices.getUserMedia(constraints).then(
       (stream) => {
         if (this.previewVideo) {
