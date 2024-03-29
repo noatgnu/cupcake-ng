@@ -377,10 +377,10 @@ export class ProtocolSessionComponent implements OnInit{
     this.recordingChunks = [];
     let constraints: MediaStreamConstraints = { audio: audio, video: video };
     if (video) {
-      constraints.video = { width: { ideal: 1920 }, height: { ideal: 1080 }, facingMode: 'environment'};
+      constraints.video = { width: { ideal: 1920 }, height: { ideal: 1080 }, facingMode: {exact: 'environment'}};
       if (this.currentCameraDevice) {
         console.log(this.currentCameraDevice)
-        constraints.video = { deviceId: {exact: this.currentCameraDevice.deviceId}, width: { ideal: 1920 }, height: { ideal: 1080 }, facingMode: 'environment'};
+        constraints.video = { deviceId: {exact: this.currentCameraDevice.deviceId}, width: { ideal: 1920 }, height: { ideal: 1080 }, facingMode: {exact: 'environment'}};
       }
     }
     if (audio) {
