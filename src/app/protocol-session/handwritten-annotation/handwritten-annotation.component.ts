@@ -160,11 +160,19 @@ export class HandwrittenAnnotationComponent implements AfterViewInit{
 
     this.canvas = new Atrament(this.handwrittenSketchpad?.nativeElement, {
       color: '#000',
-      width: this.width,
-      height: this.height,
     });
-    this.canvas.canvas.style.width = `${this.canvas.canvas.width}px`;
-    this.canvas.canvas.style.height = `${this.canvas.canvas.height}px`;
+    const scale = window.devicePixelRatio
+    this.canvas.width = Math.floor(this.width * scale);
+    this.canvas.height = Math.floor(this.height * scale);
+    this.canvas.canvas.style.width = `${this.width}px`;
+    this.canvas.canvas.style.height = `${this.height}px`;
+
+    const context = this.canvas.canvas.getContext('2d');
+    console.log(scale)
+    context.scale(scale, scale)
+
+
+
 
     this.canvas.recordStrokes = true;
     this.canvas.addEventListener('strokerecorded', (event: any) => {
