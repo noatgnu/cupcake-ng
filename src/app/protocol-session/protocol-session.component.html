@@ -131,10 +131,10 @@
                       <button class="btn btn-primary" (click)="startRecording(true, false)">Start Recording</button>
                     }
                     <div class="form-floating">
-                      <select class="form-select">
-                        <option selected>Default Selected</option>
+                      <select class="form-select" [(ngModel)]="currentAudioDevice" >
+                        <option selected [value]="null">Default Selected</option>
                         @for (a of audioDevices; track a) {
-                          <option value="{{a.deviceId}}">{{a.label}}</option>
+                          <option [ngValue]="a">{{a.label}}</option>
                         }
                       </select>
                       <label>Select Audio Device</label>
@@ -149,10 +149,10 @@
                       <button class="btn btn-primary" (click)="startRecording(true, true)">Start Recording</button>
                     }
                     <div class="form-floating">
-                      <select class="form-select">
+                      <select class="form-select" [(ngModel)]="currentCameraDevice">
                         <option selected>Default Selected</option>
                         @for (a of cameraDevices; track a) {
-                          <option value="{{a.deviceId}}">{{a.label}}</option>
+                          <option [ngValue]="a">{{a.label}}</option>
                         }
                       </select>
                       <label>Select Camera Device</label>

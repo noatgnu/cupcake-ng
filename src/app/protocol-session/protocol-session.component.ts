@@ -17,6 +17,7 @@ import {AnnotationPresenterComponent} from "./annotation-presenter/annotation-pr
 import {ToastService} from "../toast.service";
 import {WebSocketSubject} from "rxjs/internal/observable/dom/WebSocketSubject";
 import {WebsocketService} from "../websocket.service";
+import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 
 @Component({
   selector: 'app-protocol-session',
@@ -27,7 +28,9 @@ import {WebsocketService} from "../websocket.service";
     HandwrittenAnnotationComponent,
     DatePipe,
     NgOptimizedImage,
-    AnnotationPresenterComponent
+    AnnotationPresenterComponent,
+    ReactiveFormsModule,
+    FormsModule
   ],
   templateUrl: './protocol-session.component.html',
   styleUrl: './protocol-session.component.scss'
@@ -376,11 +379,13 @@ export class ProtocolSessionComponent implements OnInit{
     if (video) {
       constraints.video = { width: { ideal: 1920 }, height: { ideal: 1080 }, facingMode: 'environment'};
       if (this.currentCameraDevice) {
-        constraints.video = { deviceId: this.currentCameraDevice.deviceId, width: { ideal: 1920 }, height: { ideal: 1080 }, facingMode: 'environment'};
+        console.log(this.currentCameraDevice)
+        constraints.video = { deviceId: {exact: this.currentCameraDevice.deviceId}, width: { ideal: 1920 }, height: { ideal: 1080 }, facingMode: 'environment'};
       }
     }
     if (audio) {
       if (this.currentAudioDevice) {
+        console.log(this.currentAudioDevice)
         constraints.audio = { deviceId: this.currentAudioDevice.deviceId }
       }
     }
