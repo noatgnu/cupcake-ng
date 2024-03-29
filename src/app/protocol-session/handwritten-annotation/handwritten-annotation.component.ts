@@ -13,9 +13,9 @@ import Atrament from 'atrament';
 export class HandwrittenAnnotationComponent implements AfterViewInit{
   @ViewChild('sketchpad') handwrittenSketchpad?: ElementRef;
   canvas: any;
-  _data: any = {width: 400, height: 800, strokes: []};
-  @Input() width: number = 400;
-  @Input() height: number = 800;
+  _data: any = {width: 300, height: 400, strokes: []};
+  @Input() width: number = 300;
+  @Input() height: number = 400;
   @Input() disabled: boolean = false;
   @Input() set data(value: any) {
     this._data = value;
