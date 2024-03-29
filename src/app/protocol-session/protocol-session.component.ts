@@ -15,6 +15,8 @@ import {TimeKeeper} from "../time-keeper";
 import {Annotation, AnnotationQuery} from "../annotation";
 import {AnnotationPresenterComponent} from "./annotation-presenter/annotation-presenter.component";
 import {ToastService} from "../toast.service";
+import {WebSocketSubject} from "rxjs/internal/observable/dom/WebSocketSubject";
+import {WebsocketService} from "../websocket.service";
 
 @Component({
   selector: 'app-protocol-session',
@@ -38,7 +40,40 @@ export class ProtocolSessionComponent implements OnInit{
   viewAnnotationMenu: boolean = false;
   mouseOverElement: string = "";
   clickedElement: string = "";
-  sessionID: string = '';
+  private _sessionID: string = '';
+  set sessionID(value: string) {
+    if (this._sessionID !== value) {
+      if (this.ws.timerWSConnection) {
+        this.ws.closeTimerWS();
+      }
+      this.ws.connectTimerWS(value);
+      this.ws.timerWSConnection?.subscribe((data: TimeKeeper) => {
+        if (data.step){
+          const getRemoteTimeKeeper = this.timer.remoteTimeKeeper[data.step.toString()];
+          if (getRemoteTimeKeeper) {
+            this.timer.remoteTimeKeeper[data.step.toString()] = data;
+            if (data.started) {
+              const utcDate = new Date(data.start_time).getTime();
+              this.timer.timeKeeper[data.step.toString()].startTime = utcDate;
+              this.timer.timeKeeper[data.step.toString()].started = true;
+              if (this.timer.timeKeeper[data.step.toString()].started && !this.timer.currentTrackingStep.includes(data.step)) {
+                this.timer.currentTrackingStep.push(data.step);
+              }
+            } else {
+              this.timer.timeKeeper[data.step.toString()].started = false;
+              this.timer.timeKeeper[data.step.toString()].previousStop = data.current_duration;
+            }
+          }
+        }
+      })
+    }
+    this._sessionID = value;
+  }
+
+  get sessionID(): string {
+    return this._sessionID;
+  }
+
   cameraDevices: MediaDeviceInfo[] = [];
   currentCameraDevice: MediaDeviceInfo|null = null;
   audioDevices: MediaDeviceInfo[] = [];
@@ -83,13 +118,14 @@ export class ProtocolSessionComponent implements OnInit{
   audioURL?: string;
   annotations?: AnnotationQuery;
 
-  constructor(private modalConfig: NgbModalConfig, private toastService: ToastService, private accounts: AccountsService, private speech: SpeechService , public dataService: DataService, public web: WebService, public timer: TimerService, private modal: NgbModal) {
+  constructor(private ws: WebsocketService, private modalConfig: NgbModalConfig, private toastService: ToastService, private accounts: AccountsService, private speech: SpeechService , public dataService: DataService, public web: WebService, public timer: TimerService, private modal: NgbModal) {
     this.modalConfig.backdrop = 'static';
     this.modalConfig.keyboard = false;
     navigator.mediaDevices.enumerateDevices().then((devices) => {
       this.cameraDevices = devices.filter((device) => device.kind === 'videoinput');
       this.audioDevices = devices.filter((device) => device.kind === 'audioinput');
     })
+
   }
 
 
