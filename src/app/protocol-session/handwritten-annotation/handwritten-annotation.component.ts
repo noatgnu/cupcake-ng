@@ -19,9 +19,17 @@ export class HandwrittenAnnotationComponent implements AfterViewInit{
   @Input() disabled: boolean = false;
   @Input() set data(value: any) {
     this._data = value;
-    this.width = value.width;
-    this.height = value.height;
-    this.strokes = value.strokes;
+    if (value.width) {
+      this.width = value.width;
+    }
+    if (value.height) {
+      this.height = value.height;
+    }
+    if (value.strokes) {
+      this.strokes = value.strokes;
+    } else {
+      this.strokes = value
+    }
   }
 
   get data() {
