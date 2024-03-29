@@ -24,38 +24,41 @@
               <button class="btn btn-primary" (click)="navigateToEditor()">Or Create Your Protocols</button>
             </div>
           </div>
-          <hr>
-          @if (protocolQuery) {
-            @if (protocolQuery.results.length > 0) {
-              <h5>Protocols</h5>
-              <div class="list-group">
-                @for (protocol of protocolQuery.results; track protocol.id) {
-                  <div class="list-group-item list-group-item-action">
-                    <div>
-                      <a href="/#/protocol-session/{{protocol.id}}" target="_blank"><span [innerHTML]="protocol.protocol_title"></span></a>
-                    </div>
-                    <small>{{ protocol.protocol_created_on | date : "short" }}</small>
-                  </div>
-                }
-              </div>
-              <div class="d-flex flex-row gap-2">
-                @if (protocolQuery.previous) {
-                  <button class="btn btn-primary" (click)="getUserProtocols(protocolQuery.previous)">Previous</button>
-                } @else {
-                  <button class="btn btn-primary" disabled>Previous</button>
-                }
-                @if (protocolQuery.next) {
-                  <button class="btn btn-primary" (click)="getUserProtocols(protocolQuery.next)">Next</button>
-                } @else {
-                  <button class="btn btn-primary" disabled>Next</button>
-                }
-              </div>
-            }
-          }
-
         </div>
       </div>
     </div>
   </div>
 </div>
 
+
+@if (protocolQuery) {
+  @if (protocolQuery.results.length > 0) {
+    <div class="d-flex flex-column p-5 gap-2">
+      <hr>
+      <h5>User's Protocols</h5>
+      <div class="list-group">
+        @for (protocol of protocolQuery.results; track protocol.id) {
+          <div class="list-group-item list-group-item-action">
+            <div>
+              <a href="/#/protocol-session/{{protocol.id}}" target="_blank"><span [innerHTML]="protocol.protocol_title"></span></a>
+            </div>
+            <small>{{ protocol.protocol_created_on | date : "short" }}</small>
+          </div>
+        }
+      </div>
+      <div class="d-flex flex-row gap-2">
+        @if (protocolQuery.previous) {
+          <button class="btn btn-primary" (click)="getUserProtocols(protocolQuery.previous)">Previous</button>
+        } @else {
+          <button class="btn btn-primary" disabled>Previous</button>
+        }
+        @if (protocolQuery.next) {
+          <button class="btn btn-primary" (click)="getUserProtocols(protocolQuery.next)">Next</button>
+        } @else {
+          <button class="btn btn-primary" disabled>Next</button>
+        }
+      </div>
+    </div>
+
+  }
+}
