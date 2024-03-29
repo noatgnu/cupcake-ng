@@ -1,6 +1,6 @@
 import {AfterViewInit, Component, ElementRef, EventEmitter, Input, Output, ViewChild} from '@angular/core';
 // @ts-ignore
-import {MODE_DRAW, MODE_ERASE} from 'atrament';
+import {MODE_DRAW, MODE_ERASE, MODE_DISABLED} from 'atrament';
 // @ts-ignore
 import Atrament from 'atrament';
 @Component({
@@ -14,6 +14,11 @@ export class HandwrittenAnnotationComponent implements AfterViewInit{
   @ViewChild('sketchpad') handwrittenSketchpad?: ElementRef;
   canvas: any;
   _data: any[] = [];
+  @Input() width: number = 400;
+  @Input() height: number = 800;
+
+
+  @Input() disabled: boolean = false;
   @Input() set data(value: any[]) {
     this._data = value;
     this.strokes = value
@@ -59,8 +64,12 @@ export class HandwrittenAnnotationComponent implements AfterViewInit{
         this.canvas.endStroke(prevPoint.x, prevPoint.y);
       }
       console.log(this.strokes)
+
     } else {
       this.initialize();
+    }
+    if (this.disabled) {
+      this.canvas.mode = MODE_DISABLED;
     }
 
     console.log(this.canvas);
@@ -143,8 +152,8 @@ export class HandwrittenAnnotationComponent implements AfterViewInit{
 
     this.canvas = new Atrament(this.handwrittenSketchpad?.nativeElement, {
       color: '#000',
-      width: 400*window.devicePixelRatio,
-      height: 800*window.devicePixelRatio,
+      width: this.width,
+      height: this.height,
     });
 
     this.canvas.recordStrokes = true;
