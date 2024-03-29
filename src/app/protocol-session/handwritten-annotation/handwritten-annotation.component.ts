@@ -13,15 +13,15 @@ import Atrament from 'atrament';
 export class HandwrittenAnnotationComponent implements AfterViewInit{
   @ViewChild('sketchpad') handwrittenSketchpad?: ElementRef;
   canvas: any;
-  _data: any[] = [];
+  _data: any = {width: 400, height: 800, strokes: []};
   @Input() width: number = 400;
   @Input() height: number = 800;
-
-
   @Input() disabled: boolean = false;
-  @Input() set data(value: any[]) {
+  @Input() set data(value: any) {
     this._data = value;
-    this.strokes = value
+    this.width = value.width;
+    this.height = value.height;
+    this.strokes = value.strokes;
   }
 
   get data() {
@@ -168,6 +168,12 @@ export class HandwrittenAnnotationComponent implements AfterViewInit{
     if (this.strokes.length === 0) {
       return;
     }
-    this.sketch.emit(this.strokes);
+    this.sketch.emit(
+      {
+        width: this.width,
+        height: this.height,
+        strokes: this.strokes
+      }
+    );
   }
 }
