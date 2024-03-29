@@ -380,13 +380,13 @@ export class ProtocolSessionComponent implements OnInit{
       constraints.video = { width: { ideal: 1920 }, height: { ideal: 1080 }, facingMode: {exact: 'environment'}};
       if (this.currentCameraDevice) {
         console.log(this.currentCameraDevice)
-        constraints.video = { deviceId: {exact: this.currentCameraDevice.deviceId}, width: { ideal: 1920 }, height: { ideal: 1080 }, facingMode: {exact: 'environment'}};
+        constraints.video = { deviceId: {exact: this.currentCameraDevice.deviceId}, width: { ideal: 1920 }, height: { ideal: 1080 }};
       }
     }
     if (audio) {
       if (this.currentAudioDevice) {
         console.log(this.currentAudioDevice)
-        constraints.audio = { deviceId: this.currentAudioDevice.deviceId }
+        constraints.audio = { deviceId: {exact: this.currentAudioDevice.deviceId} }
       }
     }
     navigator.mediaDevices.getUserMedia({audio: audio, video: video}).then(
