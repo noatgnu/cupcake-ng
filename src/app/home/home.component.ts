@@ -7,6 +7,7 @@ import {Router} from "@angular/router";
 import {DatePipe, NgOptimizedImage} from "@angular/common";
 import {resolve} from "@angular/compiler-cli";
 import {ProtocolQuery} from "../protocol";
+import {ToastService} from "../toast.service";
 
 @Component({
   selector: 'app-home',
@@ -26,7 +27,9 @@ export class HomeComponent implements OnInit, AfterViewInit {
     url: new FormControl('', Validators.required),
   })
   protocolQuery?: ProtocolQuery;
-  constructor(private router: Router, private fb: FormBuilder, private web: WebService, private dataService: DataService) {
+  loading = false;
+
+  constructor(private router: Router, private fb: FormBuilder, private web: WebService, private dataService: DataService, private toastService: ToastService) {
 
   }
 
@@ -41,12 +44,15 @@ export class HomeComponent implements OnInit, AfterViewInit {
   onSubmit() {
     if (this.form.valid) {
       if (this.form.value.url) {
+        this.toastService.show("Protocol", "Creating protocol...")
         this.web.postProtocol(this.form.value.url).subscribe(
           (response) => {
+            this.toastService.show("Protocol", "Protocol created successfully")
             this.dataService.protocol = response;
             localStorage.setItem('protocol', JSON.stringify(response));
           },
           (error) => {
+            this.toastService.show("Protocol", "Error creating protocol")
             console.log(error);
           }, () => {
             if (this.dataService.protocol)
@@ -58,12 +64,20 @@ export class HomeComponent implements OnInit, AfterViewInit {
   }
 
   navigateToEditor() {
-    this.router.navigate(['/protocol-editor']);
+    window.open(location.origin + "/#/protocol-editor", '_blank')
   }
 
   getUserProtocols(url?: string) {
+    this.loading = true;
+    this.toastService.show("Protocol", "Fetching user's protocols...")
     this.web.getUserProtocols(url).subscribe((response) => {
       this.protocolQuery = response;
-    })
+      this.loading = false;
+      this.toastService.show("Protocol", "Protocols fetched successfully")
+    }, (error) => {
+      console.log(error);
+      this.loading = false;
+      this.toastService.show("Protocol", "Error fetching protocols")
+    });
   }
 }
