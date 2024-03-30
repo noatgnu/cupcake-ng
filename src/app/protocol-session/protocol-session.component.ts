@@ -169,6 +169,10 @@ export class ProtocolSessionComponent implements OnInit{
   parseProtocol() {
     if (this.dataService.protocol) {
       console.log(this.dataService.protocol)
+      const title = new DOMParser().parseFromString(this.dataService.protocol.protocol_title, 'text/html').textContent
+      if (title) {
+        this.dataService.protocol.protocol_title = title;
+      }
       this.sections = this.dataService.protocol.sections.map((section) => {
         return {data: section, steps: [], currentStep: 0}
       })

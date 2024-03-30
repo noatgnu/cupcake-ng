@@ -18,7 +18,7 @@
   }
 }
 @if (transcription) {
-  <div>
+  <div class="overflow-auto" style="max-height: 300px">
     <b>Transcription:</b>
     <p>
       @for (line of annotation.transcription.split('\n'); track line) {
