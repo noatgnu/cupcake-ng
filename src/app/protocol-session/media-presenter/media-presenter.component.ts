@@ -12,11 +12,18 @@ import {WebService} from "../../web.service";
 export class MediaPresenterComponent {
   _annotation?: Annotation;
   mediaURL: string = ''
+  transcription: string = ''
   @Input() set annotation(value: Annotation) {
     this._annotation = value
     //this.web.getAnnotationImageBlobUrl(value.id).subscribe((url) => {
     //  this.mediaURL = url
     //})
+    console.log(value)
+    if (value.transcribed) {
+      // convert value.transcription text to ObjectURL
+      const blob = new Blob([value.transcription], {type: 'text/plain'})
+      this.transcription = URL.createObjectURL(blob)
+    }
     this.web.getSignedURL(value.id).subscribe((token: any) => {
       this.mediaURL = `${this.web.baseURL}/api/annotation/download_signed/?token=${token["signed_token"]}`
     })

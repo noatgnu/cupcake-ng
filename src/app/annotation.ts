@@ -7,6 +7,8 @@ export interface Annotation {
   created_at: Date;
   updated_at: Date;
   annotation_type: string;
+  transcribed: boolean;
+  transcription: string;
 }
 
 export interface AnnotationQuery {

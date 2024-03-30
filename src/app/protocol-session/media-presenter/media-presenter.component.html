@@ -2,12 +2,30 @@
   @if (annotation.annotation_type === 'video' ) {
     <video controls>
       <source [attr.src]="mediaURL" type="video/webm">
+      @if (transcription) {
+        <track [attr.src]="transcription" kind="captions" srclang="en" label="english_captions">
+      }
       Your browser does not support the audio element.
     </video>
   } @else {
     <audio controls>
       <source [attr.src]="mediaURL" type="audio/webm">
+      @if (transcription) {
+        <track [attr.src]="transcription" kind="captions" srclang="en" label="english_captions">
+      }
       Your browser does not support the audio element.
     </audio>
   }
 }
+@if (transcription) {
+  <div>
+    <b>Transcription:</b>
+    <p>
+      @for (line of annotation.transcription.split('\n'); track line) {
+        {{ line }}
+        <br>
+      }
+    </p>
+  </div>
+}
+

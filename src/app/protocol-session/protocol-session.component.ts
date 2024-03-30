@@ -69,6 +69,21 @@ export class ProtocolSessionComponent implements OnInit{
           }
         }
       })
+      if (this.ws.annotationWSConnection) {
+        this.ws.closeAnnotationWS();
+      }
+      this.ws.connectAnnotationWS(value);
+      this.ws.annotationWSConnection?.subscribe((data: Annotation) => {
+        if (data) {
+          if (this.annotations) {
+            const annotation = this.annotations.results.findIndex((annotation) => annotation.id === data.id);
+            if (annotation !== -1) {
+              this.annotations.results[annotation] = data;
+              this.annotations.results = [...this.annotations.results]
+            }
+          }
+        }
+      })
     }
     this._sessionID = value;
   }
@@ -389,13 +404,10 @@ export class ProtocolSessionComponent implements OnInit{
         constraints.video = { deviceId: {exact: this.currentCameraDevice.deviceId}, width: { ideal: 1920 }, height: { ideal: 1080 }};
       }
     }
-    if (audio) {
-      if (this.currentAudioDevice) {
-        console.log(this.currentAudioDevice)
-        constraints.audio = { deviceId: {exact: this.currentAudioDevice.deviceId} }
-      }
+    if (this.currentAudioDevice) {
+      console.log(this.currentAudioDevice)
+      constraints.audio = { deviceId: {exact: this.currentAudioDevice.deviceId} }
     }
-    console.log(constraints)
     navigator.mediaDevices.getUserMedia(constraints).then(
       (stream) => {
         if (this.previewVideo) {
