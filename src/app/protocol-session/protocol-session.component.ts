@@ -10,7 +10,7 @@ import {HandwrittenAnnotationComponent} from "./handwritten-annotation/handwritt
 import {ProtocolSession} from "../protocol-session";
 import {NgbModal, NgbModalConfig} from "@ng-bootstrap/ng-bootstrap";
 import {SessionSelectionModalComponent} from "./session-selection-modal/session-selection-modal.component";
-import {AccountsService} from "../accounts.service";
+import {AccountsService} from "../accounts/accounts.service";
 import {TimeKeeper} from "../time-keeper";
 import {Annotation, AnnotationQuery} from "../annotation";
 import {AnnotationPresenterComponent} from "./annotation-presenter/annotation-presenter.component";

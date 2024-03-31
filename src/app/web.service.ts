@@ -288,4 +288,12 @@ export class WebService {
       {responseType: 'json', observe: 'body'}
     );
   }
+
+  changeUserPassword(old_password: string, new_password: string) {
+    return this.http.post(
+      `${this.baseURL}/api/user/change_password/`,
+      {old_password: old_password, password: new_password},
+      {responseType: 'json', observe: 'body'}
+    );
+  }
 }

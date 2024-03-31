@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import {NavbarComponent} from "./navbar/navbar.component";
-import {AccountsService} from "./accounts.service";
+import {AccountsService} from "./accounts/accounts.service";
 import {LoadingComponent} from "./loading/loading.component";
 import {ToastContainerComponent} from "./toast-container/toast-container.component";
 import {

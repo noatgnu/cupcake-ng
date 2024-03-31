@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import {DataService} from "../data.service";
 import {NgbCollapse, NgbDropdown, NgbDropdownMenu, NgbDropdownToggle, NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import {LoginModalComponent} from "../login-modal/login-modal.component";
-import {AccountsService} from "../accounts.service";
+import {AccountsService} from "../accounts/accounts.service";
 import {NgOptimizedImage} from "@angular/common";
 import {Router} from "@angular/router";
 import {QrcodeModalComponent} from "../qrcode-modal/qrcode-modal.component";
@@ -60,5 +60,9 @@ export class NavbarComponent {
   openQRCodeModal() {
     const ref = this.modal.open(QrcodeModalComponent)
     ref.componentInstance.url = location.origin + "/#/protocol-session/" + this.dataService.protocol?.id + "&" + this.dataService.currentSession?.unique_id
+  }
+
+  navigateToAccount() {
+    this.router.navigate(["/accounts"])
   }
 }

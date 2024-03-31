@@ -14,8 +14,13 @@ export const routes: Routes = [
     loadChildren: () => import('./protocol-editor/protocol-editor.module').then(m => m.ProtocolEditorModule)
   },
   {
+    path: 'accounts',
+    loadChildren: () => import('./accounts/accounts.module').then(m => m.AccountsModule)
+  },
+  {
     path: '**',
     redirectTo: 'home'
   },
+
 
 ];
