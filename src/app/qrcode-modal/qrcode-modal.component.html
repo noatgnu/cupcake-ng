@@ -1,0 +1,11 @@
+<div class="modal-header">
+  QR Code
+</div>
+<div class="modal-body">
+  <div class="d-flex justify-content-center">
+    <ngx-qrcode-styling [config]="config" *ngIf="config.data !== ''"></ngx-qrcode-styling>
+  </div>
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn btn-secondary" (click)="close()">Close</button>
+</div>

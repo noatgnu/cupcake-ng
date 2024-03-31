@@ -5,6 +5,7 @@ import {LoginModalComponent} from "../login-modal/login-modal.component";
 import {AccountsService} from "../accounts.service";
 import {NgOptimizedImage} from "@angular/common";
 import {Router} from "@angular/router";
+import {QrcodeModalComponent} from "../qrcode-modal/qrcode-modal.component";
 
 @Component({
   selector: 'app-navbar',
@@ -55,5 +56,9 @@ export class NavbarComponent {
   goToProtocolEditor(protocolID: number) {
     const url = this.router.createUrlTree(["/protocol-editor", protocolID])
     window.open(location.origin + "/#/protocol-editor/" + protocolID, '_blank')
+  }
+  openQRCodeModal() {
+    const ref = this.modal.open(QrcodeModalComponent)
+    ref.componentInstance.url = location.origin + "/#/protocol-session/" + this.dataService.protocol?.id + "&" + this.dataService.currentSession?.unique_id
   }
 }
