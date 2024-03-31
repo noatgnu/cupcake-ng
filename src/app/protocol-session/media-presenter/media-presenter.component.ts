@@ -1,4 +1,4 @@
-import {Component, Input} from '@angular/core';
+import {Component, ElementRef, Input, ViewChild} from '@angular/core';
 import {Annotation} from "../../annotation";
 import {WebService} from "../../web.service";
 import {parse} from "@plussub/srt-vtt-parser";
@@ -14,6 +14,9 @@ import {NgClass} from "@angular/common";
   styleUrl: './media-presenter.component.scss'
 })
 export class MediaPresenterComponent {
+  @ViewChild('audioControlElement') audioControlElement?: ElementRef;
+  @ViewChild('videoControlElement') videoControlElement?: ElementRef;
+
   _annotation?: Annotation;
   mediaURL: string = ''
   transcription: string = ''
@@ -78,5 +81,17 @@ export class MediaPresenterComponent {
       this.currentSubtitleID = currentSubtitle
     }
 
+  }
+
+  seekToTimePosition(time: number) {
+    if (this.annotation?.annotation_type === "audio") {
+      if (this.audioControlElement) {
+        this.audioControlElement.nativeElement.currentTime = time / 1000
+      }
+    } else {
+      if (this.videoControlElement) {
+        this.videoControlElement.nativeElement.currentTime = time / 1000
+      }
+    }
   }
 }
