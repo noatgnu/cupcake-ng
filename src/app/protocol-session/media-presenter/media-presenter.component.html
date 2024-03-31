@@ -1,6 +1,6 @@
 @if (annotation && mediaURL) {
   @if (annotation.annotation_type === 'video' ) {
-    <video controls>
+    <video controls (progress)="highLightSubtitle($event)">
       <source [attr.src]="mediaURL" type="video/webm">
       @if (transcription) {
         <track [attr.src]="transcription" kind="captions" srclang="en" label="english_captions">
@@ -8,7 +8,7 @@
       Your browser does not support the audio element.
     </video>
   } @else {
-    <audio controls>
+    <audio controls (progress)="highLightSubtitle($event)">
       <source [attr.src]="mediaURL" type="audio/webm">
       @if (transcription) {
         <track [attr.src]="transcription" kind="captions" srclang="en" label="english_captions">
@@ -20,12 +20,17 @@
 @if (transcription) {
   <div class="overflow-auto" style="max-height: 300px">
     <b>Transcription:</b>
-    <p>
-      @for (line of annotation.transcription.split('\n'); track line) {
-        {{ line }}
-        <br>
+    <div class="list-group">
+      @for (e of subtitles.entries; track e; let i = $index) {
+
+        <div class="list-group-item list-group-item-action border-0 rounded-1"
+             [ngClass]="{'list-group-item-success': i === currentSubtitleID, 'list-group-item-light': i !== currentSubtitleID}"
+        >
+          {{i}} {{msToTime(e.from)}} --> {{msToTime(e.to)}}<br> <span>{{e.text}}</span>
+        </div>
       }
-    </p>
+    </div>
+
   </div>
 }
 
