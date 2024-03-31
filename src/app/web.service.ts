@@ -107,6 +107,7 @@ export class WebService {
     let params = new HttpParams()
     params = params.set('session', session_id);
     params = params.set('step', step_id.toString());
+    params = params.set('ordering', '-created_at');
     return this.http.get<AnnotationQuery>(
       `${this.baseURL}/api/annotation/`,
       {responseType: 'json', observe: 'body', params: params}

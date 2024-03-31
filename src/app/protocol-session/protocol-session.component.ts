@@ -8,7 +8,14 @@ import {SpeechService} from "../speech.service";
 import {AnnotationTextFormComponent} from "./annotation-text-form/annotation-text-form.component";
 import {HandwrittenAnnotationComponent} from "./handwritten-annotation/handwritten-annotation.component";
 import {ProtocolSession} from "../protocol-session";
-import {NgbModal, NgbModalConfig} from "@ng-bootstrap/ng-bootstrap";
+import {
+  NgbDropdown,
+  NgbDropdownItem,
+  NgbDropdownMenu,
+  NgbDropdownToggle,
+  NgbModal,
+  NgbModalConfig
+} from "@ng-bootstrap/ng-bootstrap";
 import {SessionSelectionModalComponent} from "./session-selection-modal/session-selection-modal.component";
 import {AccountsService} from "../accounts/accounts.service";
 import {TimeKeeper} from "../time-keeper";
@@ -30,7 +37,11 @@ import {FormsModule, ReactiveFormsModule} from "@angular/forms";
     NgOptimizedImage,
     AnnotationPresenterComponent,
     ReactiveFormsModule,
-    FormsModule
+    FormsModule,
+    NgbDropdown,
+    NgbDropdownToggle,
+    NgbDropdownMenu,
+    NgbDropdownItem
   ],
   templateUrl: './protocol-session.component.html',
   styleUrl: './protocol-session.component.scss'
@@ -548,5 +559,22 @@ export class ProtocolSessionComponent implements OnInit{
       this.toastService.show('Annotation', 'Annotation Deleted Successfully')
       this.refreshAnnotations();
     })
+  }
+
+  previousAnnotationPage() {
+    if (this.annotations?.previous) {
+      // @ts-ignore
+      this.web.getAnnotationsURL(this.annotations.previous).subscribe((data: AnnotationQuery) => {
+        this.annotations = data;
+      })
+    }
+  }
+  nextAnnotationPage() {
+    if (this.annotations?.next) {
+      // @ts-ignore
+      this.web.getAnnotationsURL(this.annotations.next).subscribe((data: AnnotationQuery) => {
+        this.annotations = data;
+      })
+    }
   }
 }

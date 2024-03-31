@@ -102,9 +102,9 @@
           </div>
           <div class="container-fluid d-flex flex-column justify-content-center">
             <div [innerHTML]="currentStep.step_description"></div>
-            <a class="btn" (click)="viewAnnotationMenu=!viewAnnotationMenu">+ Add Annotation</a>
+            <!--<a class="btn" (click)="viewAnnotationMenu=!viewAnnotationMenu">+ Add Annotation</a>-->
             @if (viewAnnotationMenu) {
-              <div class="d-flex flex-wrap gap-2">
+<!--              <div class="d-flex flex-wrap gap-2">
                 @for (a of ['Audio', 'Text', 'Video', 'Image', 'Sketchpad', 'File']; track a) {
                   <div class="card" >
                     <div class="card-body" (click)="annotationMenuClick(a)" (mouseenter)="mouseOverElement=a" (mouseout)="mouseOverElement=''" [ngClass]="{'bg-info': mouseOverElement==a}">
@@ -112,66 +112,67 @@
                     </div>
                   </div>
                 }
-              </div>
-              <div class="p-2">
-                @if (clickedElement==='Text') {
-                  <app-annotation-text-form (text)="handleTextAnnotation($event)"></app-annotation-text-form>
-                } @else if (clickedElement==='Sketchpad') {
-                  <app-handwritten-annotation (sketch)="handleSketchAnnotation($event)"></app-handwritten-annotation>
-                } @else if (clickedElement==='File') {
-                  <div class="form-group">
-                    <label for="file">Upload File</label>
-                    <input type="file" class="form-control" id="file" (change)="handleFileInput($event)">
-                  </div>
-                } @else if (clickedElement==='Audio') {
-                  <div class="d-flex flex-row gap-2">
-                    @if (recording) {
-                      <button class="btn btn-danger" (click)="stopRecording()">Stop Recording</button>
-                    } @else {
-                      <button class="btn btn-primary" (click)="startRecording(true, false)">Start Recording</button>
-                    }
-                    <div class="form-floating">
-                      <select class="form-select" [(ngModel)]="currentAudioDevice" >
-                        <option selected [value]="null">Default Selected</option>
-                        @for (a of audioDevices; track a) {
-                          <option [ngValue]="a">{{a.label}}</option>
-                        }
-                      </select>
-                      <label>Select Audio Device</label>
-                    </div>
-                  </div>
+              </div>-->
 
-                } @else if (clickedElement==='Video') {
-                  <div class="d-flex flex-row gap-2">
-                    @if (recording) {
-                      <button class="btn btn-danger" (click)="stopRecording()">Stop Recording</button>
-                    } @else {
-                      <button class="btn btn-primary" (click)="startRecording(true, true)">Start Recording</button>
-                    }
-                    <div class="form-floating">
-                      <select class="form-select" [(ngModel)]="currentCameraDevice">
-                        <option selected>Default Selected</option>
-                        @for (a of cameraDevices; track a) {
-                          <option [ngValue]="a">{{a.label}}</option>
-                        }
-                      </select>
-                      <label>Select Camera Device</label>
-                    </div>
-                  </div>
-                  @if (recording) {
-                    <div class="d-flex flex-row justify-content-center">
-                      <video autoplay muted #previewVideo [width]="400" [height]="300"></video>
-                    </div>
-                  }
-                } @else if (clickedElement==='Image') {
-                  <div class="form-group">
-                    <label for="image">Upload Image</label>
-                    <input type="file" class="form-control" id="image" (change)="handleFileInput($event)">
-                  </div>
-                }
-              </div>
 
             }
+            <div class="p-2">
+              @if (clickedElement==='Text') {
+                <app-annotation-text-form (text)="handleTextAnnotation($event)"></app-annotation-text-form>
+              } @else if (clickedElement==='Sketchpad') {
+                <app-handwritten-annotation (sketch)="handleSketchAnnotation($event)"></app-handwritten-annotation>
+              } @else if (clickedElement==='File') {
+                <div class="form-group">
+                  <label for="file">Upload File</label>
+                  <input type="file" class="form-control" id="file" (change)="handleFileInput($event)">
+                </div>
+              } @else if (clickedElement==='Audio') {
+                <div class="d-flex flex-row gap-2">
+                  @if (recording) {
+                    <button class="btn btn-danger" (click)="stopRecording()">Stop Recording</button>
+                  } @else {
+                    <button class="btn btn-primary" (click)="startRecording(true, false)">Start Recording</button>
+                  }
+                  <div class="form-floating">
+                    <select class="form-select" [(ngModel)]="currentAudioDevice" >
+                      <option selected [value]="null">Default Selected</option>
+                      @for (a of audioDevices; track a) {
+                        <option [ngValue]="a">{{a.label}}</option>
+                      }
+                    </select>
+                    <label>Select Audio Device</label>
+                  </div>
+                </div>
+
+              } @else if (clickedElement==='Video') {
+                <div class="d-flex flex-row gap-2">
+                  @if (recording) {
+                    <button class="btn btn-danger" (click)="stopRecording()">Stop Recording</button>
+                  } @else {
+                    <button class="btn btn-primary" (click)="startRecording(true, true)">Start Recording</button>
+                  }
+                  <div class="form-floating">
+                    <select class="form-select" [(ngModel)]="currentCameraDevice">
+                      <option selected>Default Selected</option>
+                      @for (a of cameraDevices; track a) {
+                        <option [ngValue]="a">{{a.label}}</option>
+                      }
+                    </select>
+                    <label>Select Camera Device</label>
+                  </div>
+                </div>
+                @if (recording) {
+                  <div class="d-flex flex-row justify-content-center">
+                    <video autoplay muted #previewVideo [width]="400" [height]="300"></video>
+                  </div>
+                }
+              } @else if (clickedElement==='Image') {
+                <div class="form-group">
+                  <label for="image">Upload Image</label>
+                  <input type="file" class="form-control" id="image" (change)="handleFileInput($event)">
+                </div>
+              }
+            </div>
           </div>
         } @else {
           <div class="container-fluid p-2 d-flex flex-column" style="height: 100%">
@@ -223,3 +224,29 @@
     </div>
   </div>
 </div>
+
+<div style="position: fixed; z-index: 1030; bottom: 50px; right: 50px">
+  <div class="d-flex flex-row gap-2 align-items-center">
+    @if (annotations) {
+      @if (annotations.previous || annotations.next) {
+        <span>Annotation Page</span>
+        @if (annotations.previous) {
+          <button class="btn btn-outline-primary" (click)="previousAnnotationPage()"><i class="bi bi-arrow-left"></i></button>
+        }
+        @if (annotations.next) {
+          <button class="btn btn-outline-primary" (click)="nextAnnotationPage()"><i class="bi bi-arrow-right"></i></button>
+        }
+      }
+    }
+    <div ngbDropdown placement="top-end" class="d-inline-block">
+      <button class="btn btn-outline-success" ngbDropdownToggle><i class="bi bi-plus"></i></button>
+      <div ngbDropdownMenu>
+        @for (a of ['Audio', 'Text', 'Video', 'Image', 'Sketchpad', 'File']; track a) {
+          <button ngbDropdownItem (click)="annotationMenuClick(a)">{{a}}</button>
+        }
+      </div>
+    </div>
+
+  </div>
+</div>
+

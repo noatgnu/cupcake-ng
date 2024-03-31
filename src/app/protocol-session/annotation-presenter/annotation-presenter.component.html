@@ -4,7 +4,7 @@
       <div class="d-flex flex-row justify-content-between">
         <p>Date: {{a.created_at|date: "short"}} | Annotation Type: {{a.annotation_type}}</p>
         <div class="d-flex flex-row gap-1">
-          @if (['image', 'audio', 'video'].includes(a.annotation_type)) {
+          @if (['image', 'audio', 'video', 'sketch'].includes(a.annotation_type)) {
             <button class="btn btn-outline-primary" (click)="download(a.id)"><i class="bi bi-download"></i></button>
           }
           <button class="btn btn-outline-danger" (click)="delete(a.id)"><i class="bi bi-trash"></i></button>
