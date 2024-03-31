@@ -1,6 +1,6 @@
 @if (annotation && mediaURL) {
   @if (annotation.annotation_type === 'video' ) {
-    <video controls (progress)="highLightSubtitle($event)">
+    <video controls (timeupdate)="highLightSubtitle($event)">
       <source [attr.src]="mediaURL" type="video/webm">
       @if (transcription) {
         <track [attr.src]="transcription" kind="captions" srclang="en" label="english_captions">
@@ -8,7 +8,7 @@
       Your browser does not support the audio element.
     </video>
   } @else {
-    <audio controls (progress)="highLightSubtitle($event)">
+    <audio controls (timeupdate)="highLightSubtitle($event)">
       <source [attr.src]="mediaURL" type="audio/webm">
       @if (transcription) {
         <track [attr.src]="transcription" kind="captions" srclang="en" label="english_captions">

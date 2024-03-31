@@ -69,6 +69,7 @@ export class MediaPresenterComponent {
 
   highLightSubtitle(event: any) {
     const currentTime = event.target.currentTime * 1000
+    console.log(currentTime)
     const currentSubtitle = this.subtitles.entries.findIndex((entry) => {
       return currentTime >= entry.from && currentTime <= entry.to
     })

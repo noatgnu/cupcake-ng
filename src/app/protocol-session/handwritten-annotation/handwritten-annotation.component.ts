@@ -192,7 +192,8 @@ export class HandwrittenAnnotationComponent implements AfterViewInit{
       {
         width: this.width,
         height: this.height,
-        strokes: this.strokes
+        strokes: this.strokes,
+        png: this.handwrittenSketchpad?.nativeElement.toDataURL('image/png')
       }
     );
   }
