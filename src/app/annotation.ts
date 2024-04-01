@@ -9,8 +9,8 @@ export interface Annotation {
   annotation_type: string;
   transcribed: boolean;
   transcription: string;
-  language: string;
-  translation: string;
+  language: string|null;
+  translation: string|null;
 }
 
 export interface AnnotationQuery {

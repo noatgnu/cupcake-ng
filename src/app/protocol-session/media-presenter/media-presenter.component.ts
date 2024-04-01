@@ -44,7 +44,7 @@ export class MediaPresenterComponent {
       this.subtitles = parse(value.transcription)
       console.log(this.subtitles)
     }
-    if (value.translation !== "") {
+    if (value.translation) {
       const blob = new Blob([value.translation], {type: 'text/plain'})
       this.translation = URL.createObjectURL(blob)
       this.translationSubtitles = parse(value.translation)
