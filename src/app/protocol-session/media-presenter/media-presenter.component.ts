@@ -3,7 +3,7 @@ import {Annotation} from "../../annotation";
 import {WebService} from "../../web.service";
 import {parse} from "@plussub/srt-vtt-parser";
 import {NgClass} from "@angular/common";
-import {NgbNav, NgbNavItem} from "@ng-bootstrap/ng-bootstrap";
+import {NgbNav, NgbNavContent, NgbNavItem, NgbNavLinkButton, NgbNavOutlet} from "@ng-bootstrap/ng-bootstrap";
 
 @Component({
   selector: 'app-media-presenter',
@@ -11,7 +11,10 @@ import {NgbNav, NgbNavItem} from "@ng-bootstrap/ng-bootstrap";
   imports: [
     NgClass,
     NgbNav,
-    NgbNavItem
+    NgbNavItem,
+    NgbNavOutlet,
+    NgbNavLinkButton,
+    NgbNavContent
   ],
   templateUrl: './media-presenter.component.html',
   styleUrl: './media-presenter.component.scss'
