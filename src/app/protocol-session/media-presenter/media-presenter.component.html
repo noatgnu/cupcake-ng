@@ -16,7 +16,7 @@
       @if (transcription) {
         <track [attr.src]="transcription" kind="captions" srclang="en" label="captions">
       }
-      @if (translation) {
+      @if (annotation.translation!=="") {
         <track [attr.src]="translation" kind="captions" srclang="en" label="translated english captions">
       }
       Your browser doe
@@ -41,7 +41,7 @@
           </div>
         </ng-template>
       </li>
-      @if (translation !== "") {
+      @if (annotation.translation!=="") {
         <li [ngbNavItem]="'translation'" [destroyOnHide]="false">
           <button ngbNavLink>Translation</button>
           <ng-template ngbNavContent>
