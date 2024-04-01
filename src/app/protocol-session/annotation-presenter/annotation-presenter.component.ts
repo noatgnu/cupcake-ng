@@ -5,6 +5,8 @@ import {SketchPresenterComponent} from "../sketch-presenter/sketch-presenter.com
 import {ImagePresenterComponent} from "../image-presenter/image-presenter.component";
 import {MediaPresenterComponent} from "../media-presenter/media-presenter.component";
 import {WebService} from "../../web.service";
+import {NgbModal, NgbModalConfig} from "@ng-bootstrap/ng-bootstrap";
+import {TranscribeModalComponent} from "../transcribe-modal/transcribe-modal.component";
 
 @Component({
   selector: 'app-annotation-presenter',
@@ -24,7 +26,10 @@ export class AnnotationPresenterComponent {
   @Input() annotations: Annotation[] = [];
   @Output() deleteAnnotation: EventEmitter<number> = new EventEmitter<number>();
 
-  constructor(private web: WebService) { }
+  constructor(private web: WebService, private modal: NgbModal, private modalConfig: NgbModalConfig) {
+    this.modalConfig.backdrop = 'static';
+    this.modalConfig.keyboard = false;
+  }
 
   delete(annotationID: number) {
     this.deleteAnnotation.emit(annotationID);
@@ -42,4 +47,15 @@ export class AnnotationPresenterComponent {
     })
   }
 
+  openTranscribeModal(annotation: Annotation) {
+    const ref = this.modal.open(TranscribeModalComponent)
+    ref.componentInstance.annotation = annotation
+    ref.closed.subscribe((result: any) => {
+      if (result["language"]) {
+        this.web.postTranscribeRequest(annotation.id, result["language"], result["model"]).subscribe((response: any) => {
+
+        })
+      }
+    })
+  }
 }

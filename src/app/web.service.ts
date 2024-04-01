@@ -5,7 +5,7 @@ import {map, Observable} from "rxjs";
 import {Protocol, ProtocolQuery, ProtocolSection, ProtocolStep} from "./protocol";
 import {ProtocolSession} from "./protocol-session";
 import {TimeKeeper} from "./time-keeper";
-import {AnnotationQuery} from "./annotation";
+import {Annotation, AnnotationQuery} from "./annotation";
 
 @Injectable({
   providedIn: 'root'
@@ -294,6 +294,14 @@ export class WebService {
     return this.http.post(
       `${this.baseURL}/api/user/change_password/`,
       {old_password: old_password, password: new_password},
+      {responseType: 'json', observe: 'body'}
+    );
+  }
+
+  postTranscribeRequest(annotation_id: number, language: string, model: string) {
+    return this.http.post(
+      `${this.baseURL}/api/annotation/${annotation_id}/retranscribe/`,
+      {language: language, model: model},
       {responseType: 'json', observe: 'body'}
     );
   }
