@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import {environment} from "../environments/environment";
 import {WebSocketSubject} from "rxjs/internal/observable/dom/WebSocketSubject";
 import {AccountsService} from "./accounts/accounts.service";
+import {Subject} from "rxjs";
 
 @Injectable({
   providedIn: 'root'
@@ -10,6 +11,8 @@ export class WebsocketService {
   baseURL = environment.baseURL.replace("http", "ws")
   timerWSConnection?: WebSocketSubject<any>
   annotationWSConnection?: WebSocketSubject<any>
+  userWSConnection?: WebSocketSubject<any>
+  userSubject: Subject<boolean> = new Subject<boolean>()
 
   constructor(private accounts: AccountsService) { }
 
@@ -59,6 +62,30 @@ export class WebsocketService {
   closeAnnotationWS() {
     if (this.annotationWSConnection) {
       this.annotationWSConnection.unsubscribe()
+    }
+  }
+
+  connectUserWS() {
+    console.log("Connecting to user websocket")
+    console.log(`${this.baseURL}/ws/user/?token=${this.accounts.token}`)
+    this.userWSConnection = new WebSocketSubject({
+      url: `${this.baseURL}/ws/user/?token=${this.accounts.token}`,
+      openObserver: {
+        next: () => {
+          console.log("Connected to user websocket")
+        }
+      },
+      closeObserver: {
+        next: () => {
+          console.log("Closed connection to user websocket")
+        }
+      },
+    })
+  }
+
+  closeUserWS() {
+    if (this.userWSConnection) {
+      this.userWSConnection.unsubscribe()
     }
   }
 }

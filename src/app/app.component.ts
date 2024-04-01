@@ -7,6 +7,8 @@ import {ToastContainerComponent} from "./toast-container/toast-container.compone
 import {
   HandwrittenAnnotationComponent
 } from "./protocol-session/handwritten-annotation/handwritten-annotation.component";
+import {WebsocketService} from "./websocket.service";
+import {environment} from "../environments/environment";
 
 @Component({
   selector: 'app-root',
@@ -18,7 +20,7 @@ import {
 export class AppComponent {
   title = 'cupcake-ng';
   ready = false;
-  constructor(private accounts: AccountsService) {
+  constructor(private accounts: AccountsService, private ws: WebsocketService) {
 
     if (this.accounts.token === "") {
       const token = localStorage.getItem("cupcakeToken")
@@ -28,9 +30,18 @@ export class AppComponent {
         this.accounts.loggedIn = true
         this.accounts.username = localStorage.getItem("cupcakeUsername") || ""
         this.accounts.loadLastVisited()
+        this.ws.connectUserWS()
       }
     }
     console.log(this.accounts.token)
     this.ready = true
+    this.ws.userWSConnection?.subscribe((data) => {
+      if (data) {
+        console.log(data)
+        if(data.signed_value && data.user_download) {
+          window.open(environment.baseURL + "/api/protocol/download_temp_file/?token=" + data.signed_value, "_blank")
+        }
+      }
+    })
   }
 }

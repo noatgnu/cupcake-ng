@@ -6,6 +6,8 @@ import {AccountsService} from "../accounts/accounts.service";
 import {NgOptimizedImage} from "@angular/common";
 import {Router} from "@angular/router";
 import {QrcodeModalComponent} from "../qrcode-modal/qrcode-modal.component";
+import {WebsocketService} from "../websocket.service";
+import {WebService} from "../web.service";
 
 @Component({
   selector: 'app-navbar',
@@ -22,7 +24,7 @@ import {QrcodeModalComponent} from "../qrcode-modal/qrcode-modal.component";
 })
 export class NavbarComponent {
   isMenuCollapsed = false;
-  constructor(public dataService: DataService, private modal: NgbModal, public accounts: AccountsService, private router: Router) {
+  constructor(public dataService: DataService, private modal: NgbModal, public accounts: AccountsService, private router: Router, private ws: WebsocketService, private web: WebService) {
   }
 
   openAccountLogin() {
@@ -40,6 +42,7 @@ export class NavbarComponent {
             localStorage.setItem("cupcakeToken", data.token)
             localStorage.setItem("cupcakeUsername", loginData.username)
           }
+          this.ws.connectUserWS()
         })
       }
     })
@@ -47,6 +50,7 @@ export class NavbarComponent {
 
   logout() {
     this.accounts.logout()
+    this.ws.closeUserWS()
   }
 
   copyLink() {
@@ -64,5 +68,18 @@ export class NavbarComponent {
 
   navigateToAccount() {
     this.router.navigate(["/accounts"])
+  }
+
+  exportToDocx() {
+    let currentSession = ""
+    if (this.dataService.currentSession) {
+      currentSession = this.dataService.currentSession.unique_id
+    }
+    console.log(this.dataService.protocol)
+    if (this.dataService.protocol) {
+      this.web.exportToDocx(this.dataService.protocol.id, currentSession).subscribe((data: any) => {
+
+      })
+    }
   }
 }
