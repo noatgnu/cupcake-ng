@@ -19,18 +19,30 @@
 }
 @if (transcription) {
   <div class="overflow-auto" style="max-height: 300px">
-    <b>Transcription:</b>
-    <div class="list-group">
-      @for (e of subtitles.entries; track e; let i = $index) {
-
-        <div class="list-group-item list-group-item-action border-0 rounded-1" (click)="seekToTimePosition(e.from)"
-             [ngClass]="{'list-group-item-success': i === currentSubtitleID, 'list-group-item-light': i !== currentSubtitleID}"
-        >
-          {{i}} {{msToTime(e.from)}} --> {{msToTime(e.to)}}<br> <span>{{e.text}}</span>
+    <ul ngbNav #nav="ngbNav" [(activeId)]="active" class="nav-tabs" [destroyOnHide]="false">
+      <li [ngbNavItem]="'transcription'" [destroyOnHide]="false">
+        <div class="list-group">
+          @for (e of subtitles.entries; track e; let i = $index) {
+            <div class="list-group-item list-group-item-action border-0 rounded-1" (click)="seekToTimePosition(e.from)"
+                 [ngClass]="{'list-group-item-success': i === currentSubtitleID, 'list-group-item-light': i !== currentSubtitleID}"
+            >
+              {{i}} {{msToTime(e.from)}} --> {{msToTime(e.to)}}<br> <span>{{e.text}}</span>
+            </div>
+          }
         </div>
-      }
-    </div>
-
+      </li>
+      <li [ngbNavItem]="'translation'" [destroyOnHide]="false">
+        <div class="list-group">
+          @for (e of translationSubtitles.entries; track e; let i = $index) {
+            <div class="list-group-item list-group-item-action border-0 rounded-1" (click)="seekToTimePosition(e.from)"
+                 [ngClass]="{'list-group-item-success': i === currentSubtitleID, 'list-group-item-light': i !== currentSubtitleID}"
+            >
+              {{i}} {{msToTime(e.from)}} --> {{msToTime(e.to)}}<br> <span>{{e.text}}</span>
+            </div>
+          }
+        </div>
+      </li>
+    </ul>
   </div>
 }
 

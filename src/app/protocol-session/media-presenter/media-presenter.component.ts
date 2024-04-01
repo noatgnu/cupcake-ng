@@ -3,12 +3,15 @@ import {Annotation} from "../../annotation";
 import {WebService} from "../../web.service";
 import {parse} from "@plussub/srt-vtt-parser";
 import {NgClass} from "@angular/common";
+import {NgbNav, NgbNavItem} from "@ng-bootstrap/ng-bootstrap";
 
 @Component({
   selector: 'app-media-presenter',
   standalone: true,
   imports: [
-    NgClass
+    NgClass,
+    NgbNav,
+    NgbNavItem
   ],
   templateUrl: './media-presenter.component.html',
   styleUrl: './media-presenter.component.scss'
@@ -16,11 +19,14 @@ import {NgClass} from "@angular/common";
 export class MediaPresenterComponent {
   @ViewChild('audioControlElement') audioControlElement?: ElementRef;
   @ViewChild('videoControlElement') videoControlElement?: ElementRef;
-
+  active = 'transcription'
   _annotation?: Annotation;
   mediaURL: string = ''
+
   transcription: string = ''
+  translation: string = ''
   subtitles: {entries: {from: number, id: string, text: string, to: number}[]} = {entries: []}
+  translationSubtitles: {entries: {from: number, id: string, text: string, to: number}[]} = {entries: []}
   currentSubtitleID: number = -1
   @Input() set annotation(value: Annotation) {
     this._annotation = value
@@ -34,6 +40,11 @@ export class MediaPresenterComponent {
       this.transcription = URL.createObjectURL(blob)
       this.subtitles = parse(value.transcription)
       console.log(this.subtitles)
+    }
+    if (value.translation !== "") {
+      const blob = new Blob([value.translation], {type: 'text/plain'})
+      this.translation = URL.createObjectURL(blob)
+      this.translationSubtitles = parse(value.translation)
     }
     this.web.getSignedURL(value.id).subscribe((token: any) => {
       this.mediaURL = `${this.web.baseURL}/api/annotation/download_signed/?token=${token["signed_token"]}`
@@ -72,14 +83,23 @@ export class MediaPresenterComponent {
 
   highLightSubtitle(event: any) {
     const currentTime = event.target.currentTime * 1000
-    console.log(currentTime)
-    const currentSubtitle = this.subtitles.entries.findIndex((entry) => {
-      return currentTime >= entry.from && currentTime <= entry.to
-    })
-    console.log(currentSubtitle)
-    if (currentSubtitle > -1) {
-      this.currentSubtitleID = currentSubtitle
+    if (this.active === 'transcription') {
+      const currentSubtitle = this.subtitles.entries.findIndex((entry) => {
+        return currentTime >= entry.from && currentTime <= entry.to
+      })
+      console.log(currentSubtitle)
+      if (currentSubtitle > -1) {
+        this.currentSubtitleID = currentSubtitle
+      }
+    } else {
+      const currentSubtitle = this.translationSubtitles.entries.findIndex((entry) => {
+        return currentTime >= entry.from && currentTime <= entry.to
+      })
+      if (currentSubtitle > -1) {
+        this.currentSubtitleID = currentSubtitle
+      }
     }
+
 
   }
 
