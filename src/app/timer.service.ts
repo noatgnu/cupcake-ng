@@ -21,6 +21,9 @@ export class TimerService {
       for (const i in this.timeKeeper) {
         if (this.timeKeeper[i].started) {
           console.log(timeNow, this.timeKeeper[i].startTime)
+          if (timeNow < this.timeKeeper[i].startTime) {
+            this.timeKeeper[i].startTime = timeNow;
+          }
           this.timeKeeper[i].spent = Math.floor((timeNow - this.timeKeeper[i].startTime) / 1000);
 
           this.timeKeeper[i].current = this.timeKeeper[i].previousStop - this.timeKeeper[i].spent;
