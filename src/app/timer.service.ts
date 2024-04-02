@@ -18,24 +18,22 @@ export class TimerService {
       }
       const timeNow = Date.now();
       this.calculatingTime = true;
-      for (const i in this.timeKeeper) {
-        if (this.timeKeeper[i].started) {
-          console.log(timeNow, this.timeKeeper[i].startTime)
+      Object.keys(this.timeKeeper).forEach(i => {
+        if (this.timeKeeper[i].started && this.timeKeeper[i].current > 0) {
           if (timeNow < this.timeKeeper[i].startTime) {
             this.timeKeeper[i].startTime = timeNow;
           }
-          this.timeKeeper[i].spent = Math.floor((timeNow - this.timeKeeper[i].startTime) / 1000);
-
+          this.timeKeeper[i].spent = timeNow - this.timeKeeper[i].startTime; // Calculate spent time in milliseconds
           this.timeKeeper[i].current = this.timeKeeper[i].previousStop - this.timeKeeper[i].spent;
-          console.log(this.timeKeeper[i].spent, this.timeKeeper[i].current, this.timeKeeper[i].duration)
+
           if (this.timeKeeper[i].current <= 0) {
             this.timeKeeper[i].current = 0;
             this.timeKeeper[i].started = false;
           }
         }
-      }
+      });
       this.calculatingTime = false;
-    }, 1000);
+    }, 10);
   }
 
   startTimer() {
@@ -50,6 +48,7 @@ export class TimerService {
     if (time === null) {
       time = this.timer;
     }
+    time = time / 1000;
     let minutes = Math.floor(time / 60);
     let seconds = time - minutes * 60;
     let hours = Math.floor(minutes / 60);
