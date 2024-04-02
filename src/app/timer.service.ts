@@ -23,7 +23,7 @@ export class TimerService {
           if (timeNow < this.timeKeeper[i].startTime) {
             this.timeKeeper[i].startTime = timeNow;
           }
-          this.timeKeeper[i].spent = timeNow - this.timeKeeper[i].startTime; // Calculate spent time in milliseconds
+          this.timeKeeper[i].spent = Math.floor((timeNow - this.timeKeeper[i].startTime) / 1000);
           this.timeKeeper[i].current = this.timeKeeper[i].previousStop - this.timeKeeper[i].spent;
 
           if (this.timeKeeper[i].current <= 0) {
@@ -33,7 +33,7 @@ export class TimerService {
         }
       });
       this.calculatingTime = false;
-    }, 10);
+    }, 1000);
   }
 
   startTimer() {
@@ -48,7 +48,6 @@ export class TimerService {
     if (time === null) {
       time = this.timer;
     }
-    time = time / 1000;
     let minutes = Math.floor(time / 60);
     let seconds = time - minutes * 60;
     let hours = Math.floor(minutes / 60);
