@@ -23,17 +23,19 @@ export class TimerService {
           if (timeNow < this.timeKeeper[i].startTime) {
             this.timeKeeper[i].startTime = timeNow;
           }
-          this.timeKeeper[i].spent = Math.floor((timeNow - this.timeKeeper[i].startTime) / 1000);
+          this.timeKeeper[i].spent = (timeNow - this.timeKeeper[i].startTime) / 1000;
           this.timeKeeper[i].current = this.timeKeeper[i].previousStop - this.timeKeeper[i].spent;
 
           if (this.timeKeeper[i].current <= 0) {
             this.timeKeeper[i].current = 0;
             this.timeKeeper[i].started = false;
+          } else {
+            this.timeKeeper[i].current = parseFloat(this.timeKeeper[i].current.toFixed(2)); // Round to 2 decimal places
           }
         }
       });
       this.calculatingTime = false;
-    }, 1000);
+    }, 100);
   }
 
   startTimer() {
