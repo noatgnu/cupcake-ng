@@ -197,6 +197,9 @@ export class ProtocolSessionComponent implements OnInit{
         if (!this.timer.timeKeeper[step.id.toString()]) {
           this.timer.timeKeeper[step.id.toString()] = {duration: step.step_duration, current: step.step_duration, started: false, startTime: Date.now(), spent: 0, previousStop: step.step_duration}
         }
+        if (!this.dataService.stepCompletionSummary[step.id]) {
+          this.dataService.stepCompletionSummary[step.id] = {started: false, completed: false, content: ""}
+        }
       })
       this.web.getAssociatedSessions(this.dataService.protocol.id).subscribe((data: ProtocolSession[]) => {
         if (this.sessionID !== "") {
