@@ -116,8 +116,10 @@
 
 
             }
-            <div>
-              <button class="btn btn-primary" (click)="getStepSummarySoFar(currentStep)">Summarize previous steps</button>
+            <div class="d-flex flex-column gap-2">
+              @if (!dataService.stepCompletionSummary[currentStep.id].started) {
+                <button class="btn btn-primary" (click)="getStepSummarySoFar(currentStep)">Summarize previous steps</button>
+              }
               @if (dataService.stepCompletionSummary[currentStep.id]){
                 @if (!dataService.stepCompletionSummary[currentStep.id].completed) {
                   <div class="loading">
@@ -126,9 +128,12 @@
                     </div>
                   </div>
                 }
-                <div class="alert alert-info">
-                  <p>{{dataService.stepCompletionSummary[currentStep.id].content}}</p>
-                </div>
+                @if (dataService.stepCompletionSummary[currentStep.id].content.length > 0) {
+                  <div class="alert alert-info">
+                    <p>{{dataService.stepCompletionSummary[currentStep.id].content}}</p>
+                  </div>
+                }
+
               }
 
             </div>

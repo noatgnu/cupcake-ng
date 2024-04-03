@@ -58,6 +58,9 @@ export class AppComponent {
               if (this.dataService.stepCompletionSummary[data.target.step].started) {
                 this.dataService.stepCompletionSummary[data.target.step].content += data.data
                 this.dataService.stepCompletionSummary[data.target.step].completed = data.finished
+                if (data.finished) {
+                  this.dataService.stepCompletionSummary[data.target.step].started = false
+                }
               }
             }
           }
