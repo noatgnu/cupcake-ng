@@ -588,6 +588,7 @@ export class ProtocolSessionComponent implements OnInit{
         prompt += `${i+1}. ${this.stripHtml(step.step_description)}\n`
       }
     }
+    prompt += 'Answer:'
     this.web.postSummaryRequest(prompt, {section: this.currentSection?.data.id}).subscribe((data: any) => {})
   }
 }
