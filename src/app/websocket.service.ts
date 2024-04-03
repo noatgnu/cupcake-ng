@@ -12,6 +12,7 @@ export class WebsocketService {
   timerWSConnection?: WebSocketSubject<any>
   annotationWSConnection?: WebSocketSubject<any>
   userWSConnection?: WebSocketSubject<any>
+  summaryWSConnection?: WebSocketSubject<any>
   userSubject: Subject<boolean> = new Subject<boolean>()
 
   constructor(private accounts: AccountsService) { }
@@ -86,6 +87,30 @@ export class WebsocketService {
   closeUserWS() {
     if (this.userWSConnection) {
       this.userWSConnection.unsubscribe()
+    }
+  }
+
+  connectSummaryWS() {
+    console.log("Connecting to summary websocket")
+    console.log(`${this.baseURL}/ws/summary/?token=${this.accounts.token}`)
+    this.summaryWSConnection = new WebSocketSubject({
+      url: `${this.baseURL}/ws/summary/?token=${this.accounts.token}`,
+      openObserver: {
+        next: () => {
+          console.log("Connected to summary websocket")
+        }
+      },
+      closeObserver: {
+        next: () => {
+          console.log("Closed connection to summary websocket")
+        }
+      },
+    })
+  }
+
+  closeSummaryWS() {
+    if (this.summaryWSConnection) {
+      this.summaryWSConnection.unsubscribe()
     }
   }
 }

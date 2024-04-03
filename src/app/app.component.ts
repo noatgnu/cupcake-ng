@@ -31,6 +31,7 @@ export class AppComponent {
         this.accounts.username = localStorage.getItem("cupcakeUsername") || ""
         this.accounts.loadLastVisited()
         this.ws.connectUserWS()
+        this.ws.connectSummaryWS()
       }
     }
     console.log(this.accounts.token)
@@ -41,6 +42,11 @@ export class AppComponent {
         if(data.signed_value && data.user_download) {
           window.open(environment.baseURL + "/api/protocol/download_temp_file/?token=" + data.signed_value, "_blank")
         }
+      }
+    })
+    this.ws.summaryWSConnection?.subscribe((data) => {
+      if (data) {
+        console.log(data)
       }
     })
   }
