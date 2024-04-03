@@ -50,16 +50,17 @@ export class AppComponent {
         if (data.target) {
           if (data.target.step) {
             if (!this.dataService.stepCompletionSummary[data.target.step]) {
-              this.dataService.stepCompletionSummary[data.target.step] = {started: false, completed: false, content: ""}
+              this.dataService.stepCompletionSummary[data.target.step] = {started: false, completed: false, content: "", promptStarted: false}
             }
             if (data.data.startsWith("llm-Answer:")) {
-              this.dataService.stepCompletionSummary[data.target.step] = {started: true, completed: false, content: ""}
+              this.dataService.stepCompletionSummary[data.target.step] = {started: true, completed: false, content: "", promptStarted: true}
             } else {
-              if (this.dataService.stepCompletionSummary[data.target.step].started) {
+              if (this.dataService.stepCompletionSummary[data.target.step].promptStarted) {
                 this.dataService.stepCompletionSummary[data.target.step].content += data.data
                 this.dataService.stepCompletionSummary[data.target.step].completed = data.finished
                 if (data.finished) {
                   this.dataService.stepCompletionSummary[data.target.step].started = false
+                  this.dataService.stepCompletionSummary[data.target.step].promptStarted = false
                 }
               }
             }

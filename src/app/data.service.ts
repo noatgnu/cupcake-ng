@@ -8,6 +8,6 @@ import {ProtocolSession} from "./protocol-session";
 export class DataService {
   protocol: Protocol|null = null;
   currentSession: ProtocolSession|null = null;
-  stepCompletionSummary: {[key: string]: {started: boolean, completed: boolean, content: string}} = {};
+  stepCompletionSummary: {[key: string]: {started: boolean, completed: boolean, content: string, promptStarted: boolean}} = {};
   constructor() { }
 }

@@ -198,7 +198,7 @@ export class ProtocolSessionComponent implements OnInit{
           this.timer.timeKeeper[step.id.toString()] = {duration: step.step_duration, current: step.step_duration, started: false, startTime: Date.now(), spent: 0, previousStop: step.step_duration}
         }
         if (!this.dataService.stepCompletionSummary[step.id]) {
-          this.dataService.stepCompletionSummary[step.id] = {started: false, completed: false, content: ""}
+          this.dataService.stepCompletionSummary[step.id] = {started: false, completed: false, content: "", promptStarted: false}
         }
       })
       this.web.getAssociatedSessions(this.dataService.protocol.id).subscribe((data: ProtocolSession[]) => {
@@ -610,10 +610,12 @@ export class ProtocolSessionComponent implements OnInit{
       }
     }
     if (positionInSection === 0) {
-      this.dataService.stepCompletionSummary[step.id] = {started: false, completed: true, content: "No prior steps."}
+      this.dataService.stepCompletionSummary[step.id] = {started: false, completed: true, content: "No prior steps.", promptStarted: false}
     } else {
-      prompt += 'Please provide a summary to what have been completed in 1 paragraph.\nllm-Answer:\n'
-      this.web.postSummaryRequest(prompt, {section: this.currentSection?.data.id, step: step.id}).subscribe((data: any) => {})
+      prompt += 'Please provide a summary to what have been completed in 1 paragraph within 3 sentences or less.\nllm-Answer:\n'
+      this.web.postSummaryRequest(prompt, {section: this.currentSection?.data.id, step: step.id}).subscribe((data: any) => {
+        this.dataService.stepCompletionSummary[step.id] = {started: true, completed: false, content: "", promptStarted: false}
+      })
     }
   }
 }
