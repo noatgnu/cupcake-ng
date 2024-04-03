@@ -118,10 +118,12 @@
             }
             <div class="d-flex flex-column gap-2">
               @if (!dataService.stepCompletionSummary[currentStep.id].started) {
-                <button class="btn btn-primary" (click)="getStepSummarySoFar(currentStep)">Summarize previous steps</button>
+                <div>
+                  <button class="btn btn-primary" (click)="getStepSummarySoFar(currentStep)">Summarize previous steps</button>
+                </div>
               }
               @if (dataService.stepCompletionSummary[currentStep.id]){
-                @if (!dataService.stepCompletionSummary[currentStep.id].completed) {
+                @if (dataService.stepCompletionSummary[currentStep.id].started && !dataService.stepCompletionSummary[currentStep.id].completed) {
                   <div class="loading">
                     <div class="spinner-border text-primary" role="status">
                       <span class="visually-hidden">Loading...</span>
