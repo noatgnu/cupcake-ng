@@ -317,4 +317,12 @@ export class WebService {
       {responseType: 'json', observe: 'body'}
     );
   }
+
+  postSummaryRequest(prompt: string, target: any = {}) {
+    return this.http.post(
+      `${this.baseURL}/api/user/summarize_prompt/`,
+      {prompt: prompt, target: target},
+      {responseType: 'json', observe: 'body'}
+    );
+  }
 }

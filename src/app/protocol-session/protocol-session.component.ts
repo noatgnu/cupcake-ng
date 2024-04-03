@@ -250,12 +250,14 @@ export class ProtocolSessionComponent implements OnInit{
   handleSectionClick(section: {data: ProtocolSection, steps: ProtocolStep[], currentStep: number}) {
     this.currentSection = section;
     const step = section.steps.find((step) => step.id === section.currentStep);
+
     if (step) {
       this.currentStep = step;
     } else {
       this.currentStep = section.steps[0];
       section.currentStep = section.steps[0].id;
     }
+    this.summarySectionPrompt()
   }
 
   goToNext() {
@@ -576,5 +578,16 @@ export class ProtocolSessionComponent implements OnInit{
         this.annotations = data;
       })
     }
+  }
+
+  summarySectionPrompt() {
+    let prompt = '';
+    if (this.currentSection) {
+      for (let i = 0; i < this.currentSection.steps.length; i++) {
+        const step = this.currentSection.steps[i];
+        prompt += `${i+1}. ${this.stripHtml(step.step_description)}\n`
+      }
+    }
+    this.web.postSummaryRequest(prompt, {section: this.currentSection?.data.id}).subscribe((data: any) => {})
   }
 }
