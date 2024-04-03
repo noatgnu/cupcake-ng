@@ -581,14 +581,14 @@ export class ProtocolSessionComponent implements OnInit{
   }
 
   summarySectionPrompt() {
-    let prompt = '';
+    let prompt = 'The following are the steps of experiment that were completed:\n';
     if (this.currentSection) {
       for (let i = 0; i < this.currentSection.steps.length; i++) {
         const step = this.currentSection.steps[i];
         prompt += `${i+1}. ${this.stripHtml(step.step_description)}\n`
       }
     }
-    prompt += 'Answer:'
+    prompt += 'Please provide a summary to what have been completed in 1 paragraph.\nllm-Answer:\n'
     this.web.postSummaryRequest(prompt, {section: this.currentSection?.data.id}).subscribe((data: any) => {})
   }
 }
