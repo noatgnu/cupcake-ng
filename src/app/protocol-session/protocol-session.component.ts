@@ -257,7 +257,7 @@ export class ProtocolSessionComponent implements OnInit{
       this.currentStep = section.steps[0];
       section.currentStep = section.steps[0].id;
     }
-    this.summarySectionPrompt()
+    //this.summarySectionPrompt()
   }
 
   goToNext() {
@@ -590,5 +590,27 @@ export class ProtocolSessionComponent implements OnInit{
     }
     prompt += 'Please provide a summary to what have been completed in 1 paragraph.\nllm-Answer:\n'
     this.web.postSummaryRequest(prompt, {section: this.currentSection?.data.id}).subscribe((data: any) => {})
+  }
+
+  getStepSummarySoFar(step: ProtocolStep) {
+    let prompt = 'The following are the steps of experiment section that were completed:\n';
+    let positionInSection = 0;
+    if (this.currentSection) {
+      for (let i = 0; i < this.currentSection.steps.length; i++) {
+        const step = this.currentSection.steps[i];
+        if (step.id === this.currentStep?.id) {
+          positionInSection = i;
+          break;
+        }
+
+        prompt += `${i+1}. ${this.stripHtml(step.step_description)}\n`
+      }
+    }
+    if (positionInSection === 0) {
+      this.dataService.stepCompletionSummary[step.id] = {started: false, completed: true, content: "No prior steps."}
+    } else {
+      prompt += 'Please provide a summary to what have been completed in 1 paragraph.\nllm-Answer:\n'
+      this.web.postSummaryRequest(prompt, {section: this.currentSection?.data.id, step: step.id}).subscribe((data: any) => {})
+    }
   }
 }

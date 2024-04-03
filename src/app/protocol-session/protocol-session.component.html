@@ -116,6 +116,22 @@
 
 
             }
+            <div>
+              <button class="btn btn-primary" (click)="getStepSummarySoFar(currentStep)">Summarize previous steps</button>
+              @if (dataService.stepCompletionSummary[currentStep.id]){
+                @if (!dataService.stepCompletionSummary[currentStep.id].completed) {
+                  <div class="loading">
+                    <div class="spinner-border text-primary" role="status">
+                      <span class="visually-hidden">Loading...</span>
+                    </div>
+                  </div>
+                }
+                <div class="alert alert-info">
+                  <p>{{dataService.stepCompletionSummary[currentStep.id].content}}</p>
+                </div>
+              }
+
+            </div>
             <div class="p-2">
               @if (clickedElement==='Text') {
                 <app-annotation-text-form (text)="handleTextAnnotation($event)"></app-annotation-text-form>

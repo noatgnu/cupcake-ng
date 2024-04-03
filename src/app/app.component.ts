@@ -9,6 +9,7 @@ import {
 } from "./protocol-session/handwritten-annotation/handwritten-annotation.component";
 import {WebsocketService} from "./websocket.service";
 import {environment} from "../environments/environment";
+import {DataService} from "./data.service";
 
 @Component({
   selector: 'app-root',
@@ -20,7 +21,7 @@ import {environment} from "../environments/environment";
 export class AppComponent {
   title = 'cupcake-ng';
   ready = false;
-  constructor(private accounts: AccountsService, private ws: WebsocketService) {
+  constructor(private accounts: AccountsService, private ws: WebsocketService, private dataService: DataService) {
 
     if (this.accounts.token === "") {
       const token = localStorage.getItem("cupcakeToken")
@@ -46,6 +47,21 @@ export class AppComponent {
     })
     this.ws.summaryWSConnection?.subscribe((data) => {
       if (data) {
+        if (data.target) {
+          if (data.target.step) {
+            if (!this.dataService.stepCompletionSummary[data.target.step]) {
+              this.dataService.stepCompletionSummary[data.target.step] = {started: false, completed: false, content: ""}
+            }
+            if (data.data.startsWith("llm-Answer:")) {
+              this.dataService.stepCompletionSummary[data.target.step] = {started: true, completed: false, content: ""}
+            } else {
+              if (this.dataService.stepCompletionSummary[data.target.step].started) {
+                this.dataService.stepCompletionSummary[data.target.step].content += data.data
+                this.dataService.stepCompletionSummary[data.target.step].completed = data.finished
+              }
+            }
+          }
+        }
         console.log(data)
       }
     })
