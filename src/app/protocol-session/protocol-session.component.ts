@@ -612,7 +612,7 @@ export class ProtocolSessionComponent implements OnInit{
     if (positionInSection === 0) {
       this.dataService.stepCompletionSummary[step.id] = {started: false, completed: true, content: "No prior steps.", promptStarted: false}
     } else {
-      prompt += 'Please provide a summary to what have been completed in 1 paragraph within 3 sentences or less.\nllm-Answer:\n'
+      prompt += 'Please provide a summary without adding any further information to what have been completed in 1 paragraph within 3 sentences or less.\nllm-Answer:\n'
       this.web.postSummaryRequest(prompt, {section: this.currentSection?.data.id, step: step.id}).subscribe((data: any) => {
         this.dataService.stepCompletionSummary[step.id] = {started: true, completed: false, content: "", promptStarted: false}
       })
