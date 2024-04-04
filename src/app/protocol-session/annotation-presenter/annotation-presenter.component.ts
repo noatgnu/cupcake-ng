@@ -7,6 +7,8 @@ import {MediaPresenterComponent} from "../media-presenter/media-presenter.compon
 import {WebService} from "../../web.service";
 import {NgbModal, NgbModalConfig} from "@ng-bootstrap/ng-bootstrap";
 import {TranscribeModalComponent} from "../transcribe-modal/transcribe-modal.component";
+import {ChecklistPresenterComponent} from "../checklist-presenter/checklist-presenter.component";
+import {CounterPresenterComponent} from "../counter-presenter/counter-presenter.component";
 
 @Component({
   selector: 'app-annotation-presenter',
@@ -17,7 +19,9 @@ import {TranscribeModalComponent} from "../transcribe-modal/transcribe-modal.com
     SketchPresenterComponent,
     AsyncPipe,
     ImagePresenterComponent,
-    MediaPresenterComponent
+    MediaPresenterComponent,
+    ChecklistPresenterComponent,
+    CounterPresenterComponent
   ],
   templateUrl: './annotation-presenter.component.html',
   styleUrl: './annotation-presenter.component.scss'

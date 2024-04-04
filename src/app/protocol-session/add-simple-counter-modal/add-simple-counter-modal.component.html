@@ -1,0 +1,20 @@
+<div class="model-header">
+  <h5 class="modal-title">Add Simple Counter</h5>
+</div>
+<div class="modal-body">
+  <form [formGroup]="form">
+    This will add a simple counter annotation to your step to help you manually keep track of how many times certain thing within the step has been done.
+    <div class="form-floating">
+      <input type="text" id="counterName" formControlName="name" class="form-control">
+      <label for="counterName">Counter Name</label>
+    </div>
+    <div class="form-floating">
+      <input type="number" id="counterTotal" formControlName="total" class="form-control">
+      <label for="counterTotal">Total</label>
+    </div>
+  </form>
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn btn-secondary" (click)="close()">Cancel</button>
+  <button type="button" class="btn btn-primary" (click)="submit()">Submit</button>
+</div>

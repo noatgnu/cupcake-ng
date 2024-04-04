@@ -264,7 +264,7 @@
     <div ngbDropdown placement="top-end" class="d-inline-block">
       <button class="btn btn-outline-success" ngbDropdownToggle><i class="bi bi-plus"></i></button>
       <div ngbDropdownMenu>
-        @for (a of ['Audio', 'Text', 'Video', 'Image', 'Sketchpad', 'File']; track a) {
+        @for (a of ['Audio', 'Text', 'Video', 'Image', 'Sketchpad', 'Counter','File', 'Checklist']; track a) {
           <button ngbDropdownItem (click)="annotationMenuClick(a)">{{a}}</button>
         }
       </div>

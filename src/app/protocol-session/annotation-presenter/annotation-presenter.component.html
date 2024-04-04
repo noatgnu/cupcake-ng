@@ -34,6 +34,14 @@
           <div class="d-flex flex-row justify-content-center">
             <app-sketch-presenter [annotation]="a"></app-sketch-presenter>
           </div>
+        } @else if (a.annotation_type === 'checklist') {
+          <div class="d-flex flex-row justify-content-center">
+            <app-checklist-presenter [annotation]="a"></app-checklist-presenter>
+          </div>
+        } @else if (a.annotation_type === 'counter') {
+          <div class="d-flex flex-row justify-content-center">
+            <app-counter-presenter [annotation]="a"></app-counter-presenter>
+          </div>
         }
 
     </div>

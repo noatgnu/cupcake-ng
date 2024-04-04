@@ -25,6 +25,8 @@ import {ToastService} from "../toast.service";
 import {WebSocketSubject} from "rxjs/internal/observable/dom/WebSocketSubject";
 import {WebsocketService} from "../websocket.service";
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
+import {AddSimpleCounterModalComponent} from "./add-simple-counter-modal/add-simple-counter-modal.component";
+import {AddChecklistModalComponent} from "./add-checklist-modal/add-checklist-modal.component";
 
 @Component({
   selector: 'app-protocol-session',
@@ -509,11 +511,54 @@ export class ProtocolSessionComponent implements OnInit{
   }
 
   annotationMenuClick(item: string) {
-    if (this.clickedElement === item) {
-      this.clickedElement = "";
-      return;
+    if (item === 'Counter') {
+      if (this.dataService.currentSession && this.currentStep) {
+        const ref = this.modal.open(AddSimpleCounterModalComponent)
+        ref.closed.subscribe((data: any) => {
+          if (data) {
+            const payload: any = {
+              total: data.total,
+              current: 0,
+              name: data.name,
+            }
+
+            // @ts-ignore
+            this.web.saveAnnotationText(this.dataService.currentSession.unique_id, this.currentStep.id, JSON.stringify(payload)).subscribe((data: any) => {
+              this.toastService.show('Annotation', 'Counter Saved Successfully')
+              this.refreshAnnotations();
+            })
+          }
+        })
+      }
+
+    } else if (item === 'Checklist') {
+      if (this.dataService.currentSession && this.currentStep) {
+        const ref = this.modal.open(AddChecklistModalComponent)
+        ref.closed.subscribe((data: any) => {
+          if (data) {
+            const payload: any = {
+              checkList: [],
+              name: data.name
+            }
+            for (const line of data.checkList.split('\n')) {
+              payload.checkList.push({checked: false, content: line.replace('\r', '')})
+            }
+            // @ts-ignore
+            this.web.saveAnnotationText(this.dataService.currentSession.unique_id, this.currentStep.id, JSON.stringify(payload)).subscribe((data: any) => {
+              this.toastService.show('Annotation', 'Checklist Saved Successfully')
+              this.refreshAnnotations();
+            })
+          }
+        })
+      }
+    } else {
+      if (this.clickedElement === item) {
+        this.clickedElement = "";
+        return;
+      }
+      this.clickedElement = item;
     }
-    this.clickedElement = item;
+
   }
 
   handleTextAnnotation(text: string) {
