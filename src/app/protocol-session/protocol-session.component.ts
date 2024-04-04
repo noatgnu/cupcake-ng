@@ -673,7 +673,8 @@ export class ProtocolSessionComponent implements OnInit{
         step_ids.push(step.id)
       }
     }
-    this.web.postSummarizeStep(step_ids, {section: this.currentSection?.data.id, step: step.id}).subscribe((data: any) => {
+    // @ts-ignore
+    this.web.postSummarizeStep(step_ids, {section: this.currentSection?.data.id, step: step.id}, this.currentStep?.id).subscribe((data: any) => {
       this.dataService.stepCompletionSummary[step.id] = {started: true, completed: false, content: "", promptStarted: false}
     })
   }

@@ -340,10 +340,10 @@ export class WebService {
     );
   }
 
-  postSummarizeStep(step_ids: number[], target: any) {
+  postSummarizeStep(step_ids: number[], target: any, current_step: number) {
     return this.http.post(
       `${this.baseURL}/api/user/summarize_steps/`,
-      {steps: step_ids, target: target},
+      {steps: step_ids, target: target, current_step: current_step},
       {responseType: 'json', observe: 'body'}
     );
   }
