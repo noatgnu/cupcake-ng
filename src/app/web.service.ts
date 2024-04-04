@@ -342,7 +342,7 @@ export class WebService {
 
   updateAnnotation(content: string, annotation_type: string, annotation_id: number) {
     const form = new FormData()
-    if (annotation_type === 'text') {
+    if (['text', 'checklist', 'counter'].includes(annotation_type)) {
       form.append('annotation', content);
     } else {
       form.append('annotation', "");
