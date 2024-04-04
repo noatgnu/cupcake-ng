@@ -1,22 +1,16 @@
-<h5>{{data.name}}</h5>
-<div class="d-flex flex-row justify-content-start align-items-center gap-2">
-  @if (data.current >= data.total){
-
-  } @else {
+<div class="card">
+  <div class="card-header">
+    <h5 class="card-title">{{data.name}}</h5>
+  </div>
+  <div class="card-body">
+    <h3><span class="text-success">{{data.current}}</span>|<span class="text-primary">{{data.total}}</span></h3>
+  </div>
+  <div class="d-flex flex-row">
     <div>
       <button class="btn btn-primary" (click)="data.current=data.current+1">Up</button>
     </div>
-  }
-
-  <div>
-    <button class="btn btn-link" disabled>{{data.current}}/{{data.total}}</button>
-  </div>
-
-  @if (data.current <= 0){
-
-  } @else {
     <div>
       <button class="btn btn-primary" (click)="data.current=data.current-1">Down</button>
     </div>
-  }
+  </div>
 </div>
