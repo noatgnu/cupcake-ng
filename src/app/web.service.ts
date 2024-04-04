@@ -153,12 +153,10 @@ export class WebService {
 
   saveAnnotationJSON(session_id: string, step_id: number, json: any, annotation_type: string ) {
     const form = new FormData()
-    form.append('annotation', "");
+    form.append('annotation', JSON.stringify(json));
     form.append('annotation_type', annotation_type);
     form.append('step', step_id.toString());
     form.append('session', session_id);
-    const file = new File([JSON.stringify(json)], `${annotation_type}.json`, {type: 'application/json'});
-    form.append('file', file);
     return this.http.post(
       `${this.baseURL}/api/annotation/`,
       form,

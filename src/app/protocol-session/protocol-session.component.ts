@@ -523,7 +523,7 @@ export class ProtocolSessionComponent implements OnInit{
             }
 
             // @ts-ignore
-            this.web.saveAnnotationText(this.dataService.currentSession.unique_id, this.currentStep.id, JSON.stringify(payload)).subscribe((data: any) => {
+            this.web.saveAnnotationJSON(this.dataService.currentSession.unique_id, this.currentStep.id, payload, 'counter').subscribe((data: any) => {
               this.toastService.show('Annotation', 'Counter Saved Successfully')
               this.refreshAnnotations();
             })
@@ -544,7 +544,7 @@ export class ProtocolSessionComponent implements OnInit{
               payload.checkList.push({checked: false, content: line.replace('\r', '')})
             }
             // @ts-ignore
-            this.web.saveAnnotationText(this.dataService.currentSession.unique_id, this.currentStep.id, JSON.stringify(payload)).subscribe((data: any) => {
+            this.web.saveAnnotationJSON(this.dataService.currentSession.unique_id, this.currentStep.id, payload, 'checklist').subscribe((data: any) => {
               this.toastService.show('Annotation', 'Checklist Saved Successfully')
               this.refreshAnnotations();
             })
