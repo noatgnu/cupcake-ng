@@ -1,5 +1,5 @@
 <h5>{{data.name}}</h5>
-<div class="d-flex flex-row justify-content-start align-items-center">
+<div class="d-flex flex-row justify-content-start align-items-center gap-2">
   @if (data.current >= data.total){
 
   } @else {
@@ -8,10 +8,9 @@
     </div>
   }
 
-  <p>
-    <span>{{data.current}}</span>/
-    <span>{{data.total}}</span>
-  </p>
+  <div>
+    <button class="btn btn-link" disabled>{{data.current}}/{{data.total}}</button>
+  </div>
 
   @if (data.current <= 0){
 
