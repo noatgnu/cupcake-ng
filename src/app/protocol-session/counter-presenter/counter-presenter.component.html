@@ -1,13 +1,23 @@
 <h5>{{data.name}}</h5>
 <div class="d-flex flex-row justify-content-start align-items-center">
-  <div>
-    <button class="btn btn-primary" (click)="data.current=data.current+1">Up</button>
-  </div>
+  @if (data.current >= data.total){
+
+  } @else {
+    <div>
+      <button class="btn btn-primary" (click)="data.current=data.current+1">Up</button>
+    </div>
+  }
+
   <p>
     <span class="badge badge-primary">{{data.current}}</span>/
     <span class="badge badge-secondary">{{data.total}}</span>
   </p>
-  <div>
-    <button class="btn btn-primary" (click)="data.current=data.current-1">Down</button>
-  </div>
+
+  @if (data.current <= 0){
+
+  } @else {
+    <div>
+      <button class="btn btn-primary" (click)="data.current=data.current-1">Down</button>
+    </div>
+  }
 </div>
