@@ -15,7 +15,7 @@ export class CounterPresenterComponent {
 
   @Input() set annotation(value: Annotation) {
     this._annotation = value
-
+    this.data = JSON.parse(value.annotation)
   }
 
   get annotation(): Annotation {
