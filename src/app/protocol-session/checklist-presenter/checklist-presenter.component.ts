@@ -29,4 +29,8 @@ export class ChecklistPresenterComponent {
   constructor(private web: WebService, private fb: FormBuilder) {
   }
 
+  onChange(event: any) {
+    this.web.updateAnnotation(JSON.stringify(this.data), "checklist", this.annotation.id).subscribe(() => {
+    })
+  }
 }

@@ -25,16 +25,13 @@ export class CounterPresenterComponent {
 
   data: {name: string, total: number, current: number} = {name: "", total: 0, current: 0}
 
-  form = this.fb.group({
-
-  })
-
   constructor(private web: WebService, private fb: FormBuilder) {
 
   }
 
   updateAnnotation() {
-
+    this.web.updateAnnotation(JSON.stringify(this.data), "counter", this.annotation.id).subscribe(() => {
+    })
   }
 
 }
