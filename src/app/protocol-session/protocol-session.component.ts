@@ -641,7 +641,7 @@ export class ProtocolSessionComponent implements OnInit{
   }
 
   getStepSummarySoFar(step: ProtocolStep) {
-    let prompt = 'The following are the steps of experiment section that were completed:\n';
+    /*let prompt = 'The following are the steps of experiment section that were completed:\n';
     let positionInSection = 0;
     if (this.currentSection) {
       for (let i = 0; i < this.currentSection.steps.length; i++) {
@@ -661,6 +661,21 @@ export class ProtocolSessionComponent implements OnInit{
       this.web.postSummaryRequest(prompt, {section: this.currentSection?.data.id, step: step.id}).subscribe((data: any) => {
         this.dataService.stepCompletionSummary[step.id] = {started: true, completed: false, content: "", promptStarted: false}
       })
+    }*/
+    const step_ids:number[] = [];
+    if (this.currentSection) {
+      for (let i = 0; i < this.currentSection.steps.length; i++) {
+        const step = this.currentSection.steps[i];
+        if (step.id === this.currentStep?.id) {
+          break;
+        }
+
+        step_ids.push(step.id)
+      }
     }
+    this.web.postSummarizeStep(step_ids).subscribe((data: any) => {
+      this.dataService.stepCompletionSummary[step.id] = {started: true, completed: false, content: "", promptStarted: false}
+    })
   }
+
 }

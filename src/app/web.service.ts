@@ -340,6 +340,14 @@ export class WebService {
     );
   }
 
+  postSummarizeStep(step_ids: number[]) {
+    return this.http.post(
+      `${this.baseURL}/api/user/summarize_steps/`,
+      {steps: step_ids},
+      {responseType: 'json', observe: 'body'}
+    );
+  }
+
   updateAnnotation(content: string, annotation_type: string, annotation_id: number) {
     const form = new FormData()
     if (['text', 'checklist', 'counter'].includes(annotation_type)) {
