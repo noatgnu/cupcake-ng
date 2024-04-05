@@ -41,7 +41,7 @@ export class WebrtcService {
   }
 
   private createSignallingConnection(): WebSocketSubject<any> {
-    const url = `${this.baseURL}/ws/webrtc_webrtc/?token=${this.accounts.token}`.replace("http", "ws");
+    const url = `${this.baseURL}/ws/webrtc_signal/?token=${this.accounts.token}`.replace("http", "ws");
     const ws = new WebSocketSubject({
       url: url,
       openObserver: {
