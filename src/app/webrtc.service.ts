@@ -37,6 +37,17 @@ export class WebrtcService {
         });
       }
     }
+    pc.onnegotiationneeded = () => {
+      pc.createOffer().then((offer) => {
+        pc.setLocalDescription(offer);
+        this.signallingConnection?.next({
+          type: 'offer',
+          sdp: offer
+        });
+      });
+    }
+    console.log(pc)
+
     return pc;
   }
 
@@ -57,6 +68,7 @@ export class WebrtcService {
     });
     ws.subscribe((data: any) => {
       const {type, sdp, candidate} = data;
+      console.log(data)
       this.handleSignallingData(type, sdp, candidate);
     })
     return ws;
