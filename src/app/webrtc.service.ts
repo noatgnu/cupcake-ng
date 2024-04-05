@@ -10,6 +10,7 @@ export class WebrtcService {
   private peerConnection?: RTCPeerConnection;
   private signallingConnection?: WebSocketSubject<any>;
   baseURL = environment.baseURL
+
   constructor(private accounts: AccountsService) {
 
   }
@@ -29,6 +30,7 @@ export class WebrtcService {
       ]
     };
     const pc = new RTCPeerConnection(configuration);
+
     pc.onicecandidate = (event) => {
       if (event.candidate) {
         this.signallingConnection?.next({
@@ -46,7 +48,7 @@ export class WebrtcService {
         });
       });
     }
-    console.log(pc)
+    console.log(pc.localDescription)
 
     return pc;
   }
