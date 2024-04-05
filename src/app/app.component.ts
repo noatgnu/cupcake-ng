@@ -10,6 +10,7 @@ import {
 import {WebsocketService} from "./websocket.service";
 import {environment} from "../environments/environment";
 import {DataService} from "./data.service";
+import {WebrtcService} from "./webrtc.service";
 
 @Component({
   selector: 'app-root',
@@ -21,7 +22,7 @@ import {DataService} from "./data.service";
 export class AppComponent {
   title = 'cupcake-ng';
   ready = false;
-  constructor(private accounts: AccountsService, private ws: WebsocketService, private dataService: DataService) {
+  constructor(private accounts: AccountsService, private webrtc: WebrtcService, private ws: WebsocketService, private dataService: DataService) {
 
     if (this.accounts.token === "") {
       const token = localStorage.getItem("cupcakeToken")
@@ -33,6 +34,7 @@ export class AppComponent {
         this.accounts.loadLastVisited()
         this.ws.connectUserWS()
         this.ws.connectSummaryWS()
+        this.webrtc.connect()
       }
     }
     console.log(this.accounts.token)
