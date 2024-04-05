@@ -96,4 +96,27 @@ export class WebrtcService {
         break;
     }
   }
+
+  async start() {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({video: true, audio: true});
+      stream.getTracks().forEach((track) => {
+        this.peerConnection?.addTrack(track, stream);
+        console.log(this.peerConnection)
+      });
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  async call() {
+    await this.start();
+    await this.peerConnection?.createOffer().then((offer) => {
+      this.peerConnection?.setLocalDescription(offer);
+      this.signallingConnection?.next({
+        type: 'offer',
+        sdp: offer
+      });
+    });
+  }
 }

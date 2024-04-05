@@ -89,6 +89,7 @@ export class ProtocolSessionComponent implements OnInit{
       this.ws.annotationWSConnection?.subscribe((data: Annotation) => {
         if (data) {
           if (this.annotations) {
+            this.toastService.show('Annotation', 'Annotation Updated')
             const annotation = this.annotations.results.findIndex((annotation) => annotation.id === data.id);
             if (annotation !== -1) {
               this.annotations.results[annotation] = data;

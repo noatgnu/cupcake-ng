@@ -8,6 +8,7 @@ import {Router} from "@angular/router";
 import {QrcodeModalComponent} from "../qrcode-modal/qrcode-modal.component";
 import {WebsocketService} from "../websocket.service";
 import {WebService} from "../web.service";
+import {WebrtcService} from "../webrtc.service";
 
 @Component({
   selector: 'app-navbar',
@@ -24,7 +25,7 @@ import {WebService} from "../web.service";
 })
 export class NavbarComponent {
   isMenuCollapsed = false;
-  constructor(public dataService: DataService, private modal: NgbModal, public accounts: AccountsService, private router: Router, private ws: WebsocketService, private web: WebService) {
+  constructor(private webrtc: WebrtcService, public dataService: DataService, private modal: NgbModal, public accounts: AccountsService, private router: Router, private ws: WebsocketService, private web: WebService) {
   }
 
   openAccountLogin() {
@@ -81,5 +82,10 @@ export class NavbarComponent {
 
       })
     }
+  }
+
+  async testWebRTC() {
+    await this.webrtc.start()
+    await this.webrtc.call()
   }
 }

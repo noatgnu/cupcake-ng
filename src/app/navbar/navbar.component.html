@@ -27,6 +27,11 @@
             </li>
           }
           <li class="nav-item">
+            <button class="btn btn-primary" (click)="testWebRTC()">
+              WebRTC
+            </button>
+          </li>
+          <li class="nav-item">
             <div ngbDropdown display="dynamic" class="d-inline-black">
 
               <button type="button" class="btn btn-outline-primary" id="accountDropdown" ngbDropdownToggle>
@@ -51,7 +56,7 @@
 @if (dataService.protocol && true) {
   <nav class="navbar navbar-expand-lg bg-body-tertiary" style="padding-top: 80px;">
     <div class="container-fluid d-flex justify-content-center">
-      <a href="/protocol-session/{{dataService.protocol.id}}" target="_blank" class="link-primary"><b>{{dataService.protocol.protocol_title}}</b></a>
+      <a href="/#/protocol-session/{{dataService.protocol.id}}" target="_blank" class="link-primary"><b>{{dataService.protocol.protocol_title}}</b></a>
       <div><a class="btn btn-link" (click)="goToProtocolEditor(dataService.protocol.id)"><i class="bi bi-pen"></i></a></div>
       <div><a class="btn btn-link" (click)="exportToDocx()"><i class="bi bi-download"></i></a></div>
     </div>
