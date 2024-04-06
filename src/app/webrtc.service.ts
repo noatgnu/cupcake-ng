@@ -121,8 +121,10 @@ export class WebrtcService {
           if (!this.peerConnectionMap[from!]) {
             this.peerConnectionMap[from!] = this.createPeerConnection();
           }
-
+          console.log(this.peerConnectionMap[from!])
+          console.log(this.polite)
           const offerCollision = (this.makingOffer || this.peerConnection?.signalingState !== 'stable');
+          console.log(offerCollision)
           ignoreOffer = !this.polite && offerCollision;
           if (ignoreOffer) {
             return;
