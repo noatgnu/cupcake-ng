@@ -126,6 +126,7 @@ export class WebrtcService {
           }
           console.log(this.peerConnectionMap[from!])
           console.log(this.polite)
+          console.log(this.makingOffer)
           const offerCollision = (this.makingOffer || this.peerConnection?.signalingState !== 'stable');
           console.log(offerCollision)
           ignoreOffer = !this.polite && offerCollision;
