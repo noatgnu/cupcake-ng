@@ -127,7 +127,7 @@ export class WebrtcService {
     if (!this.peerConnectionMap[from!]) {
       this.peerConnectionMap[from!] = this.createPeerConnection();
     }
-    if (this.peerList.includes(from!)) {
+    if (!this.peerList.includes(from!)) {
       this.peerList.push(from!);
     }
     try {
