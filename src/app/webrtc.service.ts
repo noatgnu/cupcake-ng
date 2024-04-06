@@ -59,11 +59,7 @@ export class WebrtcService {
         console.log(this.makingOffer)
         await pc.setLocalDescription();
         console.log(connectionID)
-        this.signallingConnection?.next({
-          type: 'offer',
-          description: pc.localDescription,
-          to: connectionID
-        });
+        this.signallingConnection?.next( pc.localDescription);
       } catch (e) {
         console.error(e);
       } finally {
