@@ -137,7 +137,8 @@ export class WebrtcService {
           await this.peerConnectionMap[from!].setRemoteDescription(sdp!);
           const answer = await this.peerConnectionMap[from!].createAnswer()
           await this.peerConnectionMap[from!].setLocalDescription(answer!);
-          const data = {...answer, to:from}
+
+          const data = {sdp:answer.sdp, type: answer.type, to:from}
           this.signallingConnection?.next(data);
           console.log(this.peerConnectionMap[from!])
           break;
