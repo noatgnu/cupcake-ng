@@ -9,6 +9,7 @@ import {QrcodeModalComponent} from "../qrcode-modal/qrcode-modal.component";
 import {WebsocketService} from "../websocket.service";
 import {WebService} from "../web.service";
 import {WebrtcService} from "../webrtc.service";
+import {WebrtcModalComponent} from "../webrtc-modal/webrtc-modal.component";
 
 @Component({
   selector: 'app-navbar',
@@ -85,6 +86,6 @@ export class NavbarComponent {
   }
 
   async testWebRTC() {
-    await this.webrtc.call()
+    const ref = this.modal.open(WebrtcModalComponent)
   }
 }

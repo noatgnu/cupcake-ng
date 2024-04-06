@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import {ElementRef, Injectable} from '@angular/core';
 import {WebSocketSubject} from "rxjs/internal/observable/dom/WebSocketSubject";
 import {environment} from "../environments/environment";
 import {AccountsService} from "./accounts/accounts.service";
@@ -16,7 +16,9 @@ export class WebrtcService {
   stream?: MediaStream;
   unique_id?: string;
   peerConnectionMap: {[key: string]: RTCPeerConnection} = {};
+  peerList: string[] = [];
   acceptCall = false;
+  connected = false;
 
   constructor(private accounts: AccountsService) {
 
@@ -70,6 +72,10 @@ export class WebrtcService {
 
     }
     pc.ontrack = ({track, streams}) => {
+      const videoElement = document.querySelector(`video[data-peer="${connectionID}"]`) as HTMLVideoElement;
+      if (videoElement) {
+        videoElement.srcObject = streams[0];
+      }
       track.onmute = () => {
         console.log('track muted')
       }
@@ -120,6 +126,9 @@ export class WebrtcService {
     let ignoreOffer = false;
     if (!this.peerConnectionMap[from!]) {
       this.peerConnectionMap[from!] = this.createPeerConnection();
+    }
+    if (this.peerList.includes(from!)) {
+      this.peerList.push(from!);
     }
     try {
       switch (type) {
@@ -191,5 +200,11 @@ export class WebrtcService {
     this.stream = undefined;
     this.peerConnection?.close();
     this.signallingConnection?.unsubscribe();
+  }
+
+  getStreamFromPeer(peerID: string) {
+    // retrieve video stream from peer to be displayed
+
+
   }
 }
