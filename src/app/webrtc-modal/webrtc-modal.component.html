@@ -2,6 +2,9 @@
   <h5 class="modal-title">WebRTC</h5>
 </div>
 <div class="modal-body">
+  <div class="d-flex flex-row gap-2">
+    <button class="btn btn-primary" (click)="connect()">Connect</button>
+  </div>
   @for (peer of webrtc.peerList; track peer) {
     <div class="d-flex flex-row gap-2">
       <video id="webrtc-{{peer}}" autoplay muted [attr.src]="webrtc.peerConnectionMap[peer].getSenders()" [width]="400" [height]="300"></video>
