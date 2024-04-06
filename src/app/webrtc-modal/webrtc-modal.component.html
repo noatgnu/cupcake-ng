@@ -7,7 +7,7 @@
   </div>
   @for (peer of webrtc.peerList; track peer) {
     <div class="d-flex flex-row gap-2">
-      <video id="webrtc-{{peer}}" autoplay muted [attr.src]="webrtc.peerConnectionMap[peer].getSenders()" [width]="400" [height]="300"></video>
+      <video id="webrtc-{{peer}}" autoplay muted [width]="400" [height]="300"></video>
     </div>
   }
 
