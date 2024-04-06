@@ -16,6 +16,7 @@ export class WebrtcService {
   stream?: MediaStream;
   unique_id?: string;
   peerConnectionMap: {[key: string]: RTCPeerConnection} = {};
+  acceptCall = false;
 
   constructor(private accounts: AccountsService) {
 
@@ -101,7 +102,10 @@ export class WebrtcService {
         }
       } else {
         const {type, sdp, candidate, from} = data;
-        await this.handleSignallingData(type, sdp, candidate, from);
+        if (this.acceptCall) {
+          await this.handleSignallingData(type, sdp, candidate, from);
+        }
+
       }
 
     })
@@ -158,6 +162,7 @@ export class WebrtcService {
   }
 
   async call() {
+    this.acceptCall = true;
     await this.start();
     await this.peerConnection?.createOffer().then((offer) => {
       this.peerConnection?.setLocalDescription(offer);
@@ -166,6 +171,7 @@ export class WebrtcService {
   }
 
   async end() {
+    this.acceptCall = false;
     this.stream?.getTracks().forEach((track) => {
       track.stop();
     });
