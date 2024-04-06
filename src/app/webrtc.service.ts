@@ -94,6 +94,7 @@ export class WebrtcService {
       }
     });
     ws.subscribe(async (data: any) => {
+      console.log(data)
       if (data.message) {
         if (data.unique_id) {
           this.unique_id = data.unique_id;
