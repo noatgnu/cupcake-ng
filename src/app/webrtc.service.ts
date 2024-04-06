@@ -118,12 +118,13 @@ export class WebrtcService {
 
   async handleSignallingData(type: string, sdp: RTCSessionDescriptionInit | undefined, candidate: RTCIceCandidate | undefined, from: string | undefined) {
     let ignoreOffer = false;
+    if (!this.peerConnectionMap[from!]) {
+      this.peerConnectionMap[from!] = this.createPeerConnection();
+    }
     try {
       switch (type) {
         case 'offer':
-          if (!this.peerConnectionMap[from!]) {
-            this.peerConnectionMap[from!] = this.createPeerConnection();
-          }
+
           console.log(this.peerConnectionMap[from!])
           console.log(this.polite)
           console.log(this.makingOffer)
