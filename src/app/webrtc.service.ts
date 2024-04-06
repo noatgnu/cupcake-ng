@@ -102,7 +102,7 @@ export class WebrtcService {
         }
       } else {
         const {type, sdp, candidate, from} = data;
-        if (this.acceptCall) {
+        if (this.acceptCall && from) {
           console.log(data)
           await this.handleSignallingData(type, sdp, candidate, from);
         }
