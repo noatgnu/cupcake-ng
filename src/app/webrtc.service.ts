@@ -52,8 +52,11 @@ export class WebrtcService {
     }
     pc.onnegotiationneeded = async () => {
       try {
+        console.log('negotiation needed')
         this.makingOffer = true;
+        console.log(this.makingOffer)
         await pc.setLocalDescription();
+        console.log(connectionID)
         this.signallingConnection?.next({
           type: 'offer',
           description: pc.localDescription,
