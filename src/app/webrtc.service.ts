@@ -25,7 +25,7 @@ export class WebrtcService {
   }
 
   connect(currentSessionID: string) {
-    this.peerConnection = this.createPeerConnection();
+
     this.signallingConnection = this.createSignallingConnection(currentSessionID);
   }
   private createPeerConnection(connectionID: string|undefined = ""): RTCPeerConnection {
@@ -42,7 +42,7 @@ export class WebrtcService {
 
 
     const pc = new RTCPeerConnection(configuration);
-
+    pc.addTrack(this.stream?.getTracks()[0] as MediaStreamTrack, this.stream!);
     pc.onicecandidate = (event) => {
       if (event.candidate) {
         this.signallingConnection?.next({
@@ -188,6 +188,7 @@ export class WebrtcService {
   async call() {
     this.acceptCall = true;
     await this.start();
+    this.peerConnection = this.createPeerConnection();
     await this.peerConnection?.createOffer().then((offer) => {
       this.peerConnection?.setLocalDescription(offer);
       this.signallingConnection?.next(offer);
