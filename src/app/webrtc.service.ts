@@ -145,7 +145,8 @@ export class WebrtcService {
           break;
         case 'answer':
           console.log(this.peerConnectionMap[from!])
-          this.peerConnectionMap[from!].setRemoteDescription(sdp!);
+          await this.peerConnectionMap[from!].setLocalDescription()
+          await this.peerConnectionMap[from!].setRemoteDescription(sdp!);
           break;
         case 'candidate':
           try {
