@@ -133,6 +133,7 @@ export class WebrtcService {
           if (ignoreOffer) {
             return;
           }
+          console.log(sdp)
           await this.peerConnectionMap[from!].setRemoteDescription(sdp!);
           const answer = await this.peerConnectionMap[from!].createAnswer()
           await this.peerConnectionMap[from!].setLocalDescription(answer!);
