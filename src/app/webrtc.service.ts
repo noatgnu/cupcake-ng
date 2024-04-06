@@ -72,7 +72,7 @@ export class WebrtcService {
 
     }
     pc.ontrack = ({track, streams}) => {
-      const videoElement = document.querySelector(`video[data-peer="${connectionID}"]`) as HTMLVideoElement;
+      const videoElement = document.getElementById(`webrtc-${connectionID}`) as HTMLVideoElement;
       if (videoElement) {
         videoElement.srcObject = streams[0];
       }
