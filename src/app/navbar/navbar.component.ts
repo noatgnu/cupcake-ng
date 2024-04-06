@@ -85,7 +85,6 @@ export class NavbarComponent {
   }
 
   async testWebRTC() {
-    await this.webrtc.start()
     await this.webrtc.call()
   }
 }

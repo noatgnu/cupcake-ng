@@ -10,6 +10,12 @@ export class WebrtcService {
   private peerConnection?: RTCPeerConnection;
   private signallingConnection?: WebSocketSubject<any>;
   baseURL = environment.baseURL
+  makingOffer = false;
+  polite = false;
+  ignoreOffer = false;
+  stream?: MediaStream;
+  unique_id?: string;
+  peerConnectionMap: {[key: string]: RTCPeerConnection} = {};
 
   constructor(private accounts: AccountsService) {
 
@@ -19,7 +25,7 @@ export class WebrtcService {
     this.peerConnection = this.createPeerConnection();
     this.signallingConnection = this.createSignallingConnection();
   }
-  private createPeerConnection(): RTCPeerConnection {
+  private createPeerConnection(connectionID: string|undefined = ""): RTCPeerConnection {
     const configuration: RTCConfiguration = {
       iceServers: [
         {
@@ -29,24 +35,43 @@ export class WebrtcService {
         }
       ]
     };
+
+
+
     const pc = new RTCPeerConnection(configuration);
 
     pc.onicecandidate = (event) => {
       if (event.candidate) {
         this.signallingConnection?.next({
           type: 'candidate',
-          candidate: event.candidate
+          candidate: event.candidate,
+          to: connectionID
         });
       }
     }
-    pc.onnegotiationneeded = () => {
-      pc.createOffer().then((offer) => {
-        pc.setLocalDescription(offer);
+    pc.onnegotiationneeded = async () => {
+      try {
+        this.makingOffer = true;
+        await pc.setLocalDescription();
         this.signallingConnection?.next({
           type: 'offer',
-          sdp: offer
+          description: pc.localDescription,
+          to: connectionID
         });
-      });
+      } catch (e) {
+        console.error(e);
+      } finally {
+        this.makingOffer = false;
+      }
+
+    }
+    pc.ontrack = ({track, streams}) => {
+      track.onmute = () => {
+        console.log('track muted')
+      }
+      track.onunmute = () => {
+        console.log('track unmuted')
+      }
     }
     console.log(pc.localDescription)
 
@@ -68,44 +93,66 @@ export class WebrtcService {
         }
       }
     });
-    ws.subscribe((data: any) => {
-      const {type, sdp, candidate} = data;
-      console.log(data)
-      this.handleSignallingData(type, sdp, candidate);
+    ws.subscribe(async (data: any) => {
+      if (data.message) {
+        if (data.unique_id) {
+          this.unique_id = data.unique_id;
+        }
+      } else {
+        const {type, sdp, candidate, from} = data;
+        await this.handleSignallingData(type, sdp, candidate, from);
+      }
+
     })
     return ws;
   }
 
-  handleSignallingData(type: string, sdp: RTCSessionDescriptionInit | undefined, candidate: RTCIceCandidate | undefined) {
-    switch (type) {
-      case 'offer':
-        this.peerConnection?.setRemoteDescription(sdp!);
-        this.peerConnection?.createAnswer().then((answer) => {
-          this.peerConnection?.setLocalDescription(answer);
-          this.signallingConnection?.next({
-            type: 'answer',
-            sdp: answer
-          });
-        });
-        break;
-      case 'answer':
-        this.peerConnection?.setRemoteDescription(sdp!);
-        break;
-      case 'candidate':
-        this.peerConnection?.addIceCandidate(candidate!);
-        break;
+  async handleSignallingData(type: string, sdp: RTCSessionDescriptionInit | undefined, candidate: RTCIceCandidate | undefined, from: string | undefined) {
+    let ignoreOffer = false;
+    try {
+      switch (type) {
+        case 'offer':
+          if (!this.peerConnectionMap[from!]) {
+            this.peerConnectionMap[from!] = this.createPeerConnection();
+          }
+
+          const offerCollision = (this.makingOffer || this.peerConnection?.signalingState !== 'stable');
+          ignoreOffer = !this.polite && offerCollision;
+          if (ignoreOffer) {
+            return;
+          }
+          await this.peerConnectionMap[from!].setRemoteDescription(sdp!);
+          const answer = await this.peerConnectionMap[from!].createAnswer()
+          await this.peerConnectionMap[from!].setLocalDescription(answer!);
+          const data = {...answer, to:from}
+          this.signallingConnection?.next(data);
+          break;
+        case 'answer':
+          this.peerConnectionMap[from!].setRemoteDescription(sdp!);
+          break;
+        case 'candidate':
+          try {
+            await this.peerConnectionMap[from!].addIceCandidate(candidate!);
+          } catch (e) {
+            if (!ignoreOffer) {
+              throw e;
+            }
+          }
+          break;
+      }
+    } catch (e) {
+      console.error(e);
     }
+
   }
 
   async start() {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({video: true, audio: true});
-      stream.getTracks().forEach((track) => {
-        this.peerConnection?.addTrack(track, stream);
-        console.log(this.peerConnection)
-      });
-    } catch (e) {
-      console.error(e);
+    if (!this.stream) {
+      try {
+        this.stream = await navigator.mediaDevices.getUserMedia({video: true, audio: true});
+      } catch (e) {
+        console.error(e);
+      }
     }
   }
 
@@ -113,10 +160,16 @@ export class WebrtcService {
     await this.start();
     await this.peerConnection?.createOffer().then((offer) => {
       this.peerConnection?.setLocalDescription(offer);
-      this.signallingConnection?.next({
-        type: 'offer',
-        sdp: offer
-      });
+      this.signallingConnection?.next(offer);
     });
+  }
+
+  async end() {
+    this.stream?.getTracks().forEach((track) => {
+      track.stop();
+    });
+    this.stream = undefined;
+    this.peerConnection?.close();
+    this.signallingConnection?.unsubscribe();
   }
 }
