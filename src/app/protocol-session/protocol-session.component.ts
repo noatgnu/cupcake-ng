@@ -27,6 +27,7 @@ import {WebsocketService} from "../websocket.service";
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {AddSimpleCounterModalComponent} from "./add-simple-counter-modal/add-simple-counter-modal.component";
 import {AddChecklistModalComponent} from "./add-checklist-modal/add-checklist-modal.component";
+import {WebrtcService} from "../webrtc.service";
 
 @Component({
   selector: 'app-protocol-session',
@@ -116,6 +117,7 @@ export class ProtocolSessionComponent implements OnInit{
     const data = value.split("&")
     if (data.length > 1) {
       this.sessionID = data[1];
+      this.webrtc.connect(data[1])
     }
     this._protocolSessionId = data[0];
   }
@@ -150,7 +152,7 @@ export class ProtocolSessionComponent implements OnInit{
   audioURL?: string;
   annotations?: AnnotationQuery;
 
-  constructor(private ws: WebsocketService, private modalConfig: NgbModalConfig, private toastService: ToastService, private accounts: AccountsService, private speech: SpeechService , public dataService: DataService, public web: WebService, public timer: TimerService, private modal: NgbModal) {
+  constructor(private webrtc: WebrtcService, private ws: WebsocketService, private modalConfig: NgbModalConfig, private toastService: ToastService, private accounts: AccountsService, private speech: SpeechService , public dataService: DataService, public web: WebService, public timer: TimerService, private modal: NgbModal) {
     this.modalConfig.backdrop = 'static';
     this.modalConfig.keyboard = false;
     navigator.mediaDevices.enumerateDevices().then((devices) => {

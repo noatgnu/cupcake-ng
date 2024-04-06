@@ -21,9 +21,9 @@ export class WebrtcService {
 
   }
 
-  connect() {
+  connect(currentSessionID: string) {
     this.peerConnection = this.createPeerConnection();
-    this.signallingConnection = this.createSignallingConnection();
+    this.signallingConnection = this.createSignallingConnection(currentSessionID);
   }
   private createPeerConnection(connectionID: string|undefined = ""): RTCPeerConnection {
     const configuration: RTCConfiguration = {
@@ -78,8 +78,8 @@ export class WebrtcService {
     return pc;
   }
 
-  private createSignallingConnection(): WebSocketSubject<any> {
-    const url = `${this.baseURL}/ws/webrtc_signal/?token=${this.accounts.token}`.replace("http", "ws");
+  private createSignallingConnection(currentSessionID: string): WebSocketSubject<any> {
+    const url = `${this.baseURL}/ws/webrtc_signal/${currentSessionID}/?token=${this.accounts.token}`.replace("http", "ws");
     const ws = new WebSocketSubject({
       url: url,
       openObserver: {

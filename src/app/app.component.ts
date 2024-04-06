@@ -34,7 +34,7 @@ export class AppComponent {
         this.accounts.loadLastVisited()
         this.ws.connectUserWS()
         this.ws.connectSummaryWS()
-        this.webrtc.connect()
+
       }
     }
     console.log(this.accounts.token)
