@@ -74,6 +74,8 @@ export class WebrtcService {
     pc.ontrack = ({track, streams}) => {
       const videoElement = document.getElementById(`webrtc-${connectionID}`) as HTMLVideoElement;
       if (videoElement) {
+        console.log(track)
+        console.log(streams)
         videoElement.srcObject = streams[0];
       }
       track.onmute = () => {
