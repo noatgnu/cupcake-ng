@@ -84,6 +84,18 @@ export class WebrtcService {
     pc.onicecandidateerror = (event) => {
       console.log(event)
     }
+    pc.oniceconnectionstatechange = (event) => {
+      console.log(event)
+    }
+    pc.onicegatheringstatechange = (event) => {
+      console.log(event)
+    }
+    pc.onconnectionstatechange = (event) => {
+      console.log(event)
+    }
+    pc.ondatachannel = (event) => {
+      console.log(event)
+    }
     pc.ontrack = ({track, streams}) => {
       console.log(track)
       console.log(streams)
@@ -263,8 +275,8 @@ export class WebrtcService {
           delete this.peerConnectionMap[peer];
         } else {
           // print out all stats
-          console.log(this.peerConnectionMap[peer].iceGatheringState)
-          console.log(this.peerConnectionMap[peer].iceConnectionState)
+          //console.log(this.peerConnectionMap[peer].iceGatheringState)
+          //console.log(this.peerConnectionMap[peer].iceConnectionState)
           //this.peerConnectionMap[peer].getStats().then((stats) => {
           //  stats.forEach((report) => {
           //   console.log(report);
