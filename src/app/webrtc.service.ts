@@ -189,6 +189,7 @@ export class WebrtcService {
         const currentVideoElement = document.getElementById('webrtc-local') as HTMLVideoElement;
         if (currentVideoElement) {
           currentVideoElement.srcObject = this.stream;
+          currentVideoElement.muted = true;
         }
       } catch (e) {
         console.error(e);
