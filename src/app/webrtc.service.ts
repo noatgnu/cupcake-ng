@@ -170,7 +170,7 @@ export class WebrtcService {
     console.log(from)
     if (!this.peerConnectionMap[from!]) {
       console.log(from)
-      this.peerConnectionMap[from!] = this.createPeerConnection();
+      this.peerConnectionMap[from!] = this.createPeerConnection(from!);
     }
     if (!this.peerList.includes(from!)) {
       this.peerList.push(from!);
