@@ -72,7 +72,7 @@ export class WebrtcService {
       console.log('negotiation needed')
       this.makingOffer = true;
       console.log(this.makingOffer)
-      //await pc.setLocalDescription();
+      await pc.setLocalDescription();
       console.log(pc.localDescription)
       console.log(connectionID)
       this.signallingConnection?.next( pc.localDescription);
