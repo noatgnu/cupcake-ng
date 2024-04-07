@@ -42,7 +42,10 @@ export class WebrtcService {
 
 
     const pc = new RTCPeerConnection(configuration);
-    pc.addTrack(this.stream?.getTracks()[0] as MediaStreamTrack, this.stream!);
+    const videoTrack = this.stream?.getVideoTracks()[0];
+    const audioTrack = this.stream?.getAudioTracks()[0];
+    pc.addTrack(videoTrack!, this.stream!);
+    pc.addTrack(audioTrack!, this.stream!);
     pc.onicecandidate = (event) => {
       if (event.candidate) {
         this.signallingConnection?.next({
@@ -76,7 +79,7 @@ export class WebrtcService {
         if (videoElement) {
           videoElement.srcObject = null;
         }
-        
+
       }
       track.onunmute = () => {
         const videoElement = document.getElementById(`webrtc-${connectionID}`) as HTMLVideoElement;
