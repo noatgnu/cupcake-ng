@@ -37,13 +37,13 @@ export class WebrtcService {
   }
   private createPeerConnection(connectionID: string|undefined = ""): RTCPeerConnection {
     const configuration: RTCConfiguration = {
-      iceServers: [
+/*      iceServers: [
         {
           urls:[ 'turn:51.89.194.112:3478', 'stun:51.89.194.112:3478'],
           username: 'testuser',
           credential: 'testuser21021992'
         }
-      ]
+      ]*/
     };
 
     console.log(connectionID)
