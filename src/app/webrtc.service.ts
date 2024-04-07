@@ -36,6 +36,7 @@ export class WebrtcService {
     this.signallingConnection = this.createSignallingConnection(currentSessionID);
   }
   private createPeerConnection(connectionID: string|undefined = ""): RTCPeerConnection {
+    console.log("Creating peer connection for", connectionID)
     const configuration: RTCConfiguration = {
       iceServers: [
         {
