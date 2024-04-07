@@ -75,10 +75,10 @@ export class WebrtcService {
       console.log(streams)
       track.onmute = () => {
         console.log('track muted')
-        const videoElement = document.getElementById(`webrtc-${connectionID}`) as HTMLVideoElement;
-        if (videoElement) {
-          videoElement.srcObject = null;
-        }
+        //const videoElement = document.getElementById(`webrtc-${connectionID}`) as HTMLVideoElement;
+        //if (videoElement) {
+        //  videoElement.srcObject = null;
+        //}
 
       }
       track.onunmute = () => {
@@ -88,6 +88,7 @@ export class WebrtcService {
             return;
           }
           videoElement.srcObject = streams[0];
+          console.log(videoElement)
         }
         console.log('track unmuted')
       }
