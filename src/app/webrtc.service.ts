@@ -212,7 +212,7 @@ export class WebrtcService {
         console.log(sdp)
         await this.peerConnectionMap[from!].setRemoteDescription(sdp!);
         const answer = await this.peerConnectionMap[from!].createAnswer()
-        await this.peerConnectionMap[from!].setLocalDescription();
+        await this.peerConnectionMap[from!].setLocalDescription(answer);
         console.log(answer)
         const data = {sdp:answer.sdp, type: answer.type, to:from}
         this.signallingConnection?.next(data);
@@ -221,16 +221,18 @@ export class WebrtcService {
       case 'answer':
         console.log(this.peerConnectionMap[from!])
         console.log(sdp)
-        await this.peerConnectionMap[from!].setLocalDescription()
+        // check if local description is set
+        if (!this.peerConnectionMap[from!].localDescription) {
+          await this.peerConnectionMap[from!].setLocalDescription()
+        }
         await this.peerConnectionMap[from!].setRemoteDescription(sdp!);
         break;
       case 'candidate':
         console.log(candidate)
         try {
-
           await this.peerConnectionMap[from!].addIceCandidate(new RTCIceCandidate(candidate!));
-          console.log(this.peerConnectionMap[from!].iceConnectionState)
-          console.log(this.peerConnectionMap[from!].iceGatheringState)
+          //console.log(this.peerConnectionMap[from!].iceConnectionState)
+          //console.log(this.peerConnectionMap[from!].iceGatheringState)
         } catch (e) {
           if (!ignoreOffer) {
             throw e;
