@@ -167,7 +167,9 @@ export class WebrtcService {
 
   async handleSignallingData(type: string, sdp: RTCSessionDescriptionInit | undefined, candidate: RTCIceCandidate | undefined, from: string | undefined) {
     let ignoreOffer = false;
+    console.log(from)
     if (!this.peerConnectionMap[from!]) {
+      console.log(from)
       this.peerConnectionMap[from!] = this.createPeerConnection();
     }
     if (!this.peerList.includes(from!)) {
