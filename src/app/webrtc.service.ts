@@ -217,6 +217,7 @@ export class WebrtcService {
     await this.start();
     this.peerConnection = this.createPeerConnection();
     await this.peerConnection?.createOffer().then((offer) => {
+      console.log(offer)
       this.peerConnection?.setLocalDescription(offer);
       this.signallingConnection?.next(offer);
     });
