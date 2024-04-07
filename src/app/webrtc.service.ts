@@ -49,10 +49,9 @@ export class WebrtcService {
 
 
     const pc = new RTCPeerConnection(configuration);
-    const videoTrack = this.stream?.getVideoTracks()[0];
-    const audioTrack = this.stream?.getAudioTracks()[0];
-    pc.addTrack(videoTrack!, this.stream!);
-    pc.addTrack(audioTrack!, this.stream!);
+    if (this.stream) {
+      this.stream.getTracks().forEach(track => pc.addTrack(track, this.stream!));
+    }
     pc.onicecandidate = (event) => {
       if (event.candidate) {
         this.signallingConnection?.next({
