@@ -220,6 +220,7 @@ export class WebrtcService {
         break;
       case 'answer':
         console.log(this.peerConnectionMap[from!])
+        console.log(sdp)
         await this.peerConnectionMap[from!].setLocalDescription()
         await this.peerConnectionMap[from!].setRemoteDescription(sdp!);
         break;
