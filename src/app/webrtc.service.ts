@@ -39,12 +39,9 @@ export class WebrtcService {
     const configuration: RTCConfiguration = {
       iceServers: [
         {
-          urls:[ 'turn:51.89.194.112:3478', 'stun:51.89.194.112:3478'],
+          urls:[ 'turn:188.68.54.37:3478', 'stun:188.68.54.37:3478'],
           username: 'testuser',
-          credential: 'testuser21021992'
-        },
-        {
-          urls: ['stun:stun.l.google.com:19302']
+          credential: 'testuser'
         }
       ]
     };
