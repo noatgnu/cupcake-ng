@@ -258,6 +258,22 @@ export class WebrtcService {
     //  this.peerConnection?.setLocalDescription(offer);
     //  this.signallingConnection?.next(offer);
    //});
+    // check webrtc connection from peerConnectionMap every 5 seconds
+    setInterval(() => {
+      for (const peer in this.peerConnectionMap) {
+        if (this.peerConnectionMap[peer].iceConnectionState === 'disconnected') {
+          this.peerConnectionMap[peer].close();
+          delete this.peerConnectionMap[peer];
+        } else {
+          // print out all stats
+          this.peerConnectionMap[peer].getStats().then((stats) => {
+            stats.forEach((report) => {
+              console.log(report);
+            })
+          })
+        }
+      }
+    }, 5000)
   }
 
   async end() {
