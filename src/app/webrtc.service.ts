@@ -52,6 +52,8 @@ export class WebrtcService {
     if (this.stream) {
       this.stream.getTracks().forEach(track => pc.addTrack(track, this.stream!));
     }
+    console.log(pc.localDescription)
+
     pc.onicecandidate = (event) => {
       if (event.candidate) {
         this.signallingConnection?.next({
