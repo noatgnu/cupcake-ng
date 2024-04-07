@@ -37,13 +37,13 @@ export class WebrtcService {
   }
   private createPeerConnection(connectionID: string|undefined = ""): RTCPeerConnection {
     const configuration: RTCConfiguration = {
-/*      iceServers: [
+      iceServers: [
         {
           urls:[ 'turn:51.89.194.112:3478', 'stun:51.89.194.112:3478'],
           username: 'testuser',
           credential: 'testuser21021992'
         }
-      ]*/
+      ]
     };
 
     console.log(connectionID)
@@ -214,7 +214,8 @@ export class WebrtcService {
       case 'candidate':
         console.log(candidate)
         try {
-          await this.peerConnectionMap[from!].addIceCandidate(candidate!);
+
+          await this.peerConnectionMap[from!].addIceCandidate(new RTCIceCandidate(candidate!));
           console.log(this.peerConnectionMap[from!].iceConnectionState)
           console.log(this.peerConnectionMap[from!].iceGatheringState)
         } catch (e) {
