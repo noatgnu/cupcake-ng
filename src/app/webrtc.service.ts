@@ -64,18 +64,20 @@ export class WebrtcService {
     }
     pc.onnegotiationneeded = async () => {
       try {
-        console.log('negotiation needed')
-        this.makingOffer = true;
-        console.log(this.makingOffer)
-        await pc.setLocalDescription();
-        console.log(pc.localDescription)
-        console.log(connectionID)
-        this.signallingConnection?.next( pc.localDescription);
+
       } catch (e) {
         console.log(e);
       } finally {
-        this.makingOffer = false;
+
       }
+      console.log('negotiation needed')
+      this.makingOffer = true;
+      console.log(this.makingOffer)
+      await pc.setLocalDescription();
+      console.log(pc.localDescription)
+      console.log(connectionID)
+      this.signallingConnection?.next( pc.localDescription);
+      this.makingOffer = false;
 
     }
     pc.ontrack = ({track, streams}) => {
