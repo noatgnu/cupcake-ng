@@ -1,4 +1,4 @@
-import {Component, Input} from '@angular/core';
+import {Component, ElementRef, Input, ViewChild} from '@angular/core';
 
 @Component({
   selector: 'app-webrtc-video',
@@ -8,8 +8,7 @@ import {Component, Input} from '@angular/core';
   styleUrl: './webrtc-video.component.scss'
 })
 export class WebrtcVideoComponent {
-  _peerConnection?: RTCPeerConnection
-
+  @ViewChild('webRTCVideoViewer') webRTCVideoViewer?: ElementRef;
 
   @Input() set peerConnection(value: RTCPeerConnection) {
 
