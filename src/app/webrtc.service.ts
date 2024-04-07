@@ -99,9 +99,12 @@ export class WebrtcService {
         let v = document.getElementById(`webrtc-${connectionID}`) as HTMLVideoElement;
         console.log(v)
         if (v) {
+          console.log(streams)
           v.srcObject = streams[0];
           v.oncanplaythrough = () => {
+            v.muted = true
             v.play();
+
           }
         } else {
           let observer = new MutationObserver(mutations => {
