@@ -11,7 +11,7 @@ export class WebrtcService {
   private signallingConnection?: WebSocketSubject<any>;
   baseURL = environment.baseURL
   makingOffer = false;
-  polite = false;
+  polite = true;
   ignoreOffer = false;
   stream?: MediaStream;
   unique_id?: string;
@@ -143,7 +143,6 @@ export class WebrtcService {
     try {
       switch (type) {
         case 'offer':
-
           console.log(this.peerConnectionMap[from!])
           console.log(this.polite)
           console.log(this.makingOffer)
@@ -187,6 +186,10 @@ export class WebrtcService {
     if (!this.stream) {
       try {
         this.stream = await navigator.mediaDevices.getUserMedia({video: true, audio: true});
+        const currentVideoElement = document.getElementById('webrtc-local') as HTMLVideoElement;
+        if (currentVideoElement) {
+          currentVideoElement.srcObject = this.stream;
+        }
       } catch (e) {
         console.error(e);
       }
