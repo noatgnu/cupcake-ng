@@ -46,7 +46,7 @@ export class WebrtcService {
       ]
     };
 
-
+    console.log(connectionID)
 
     const pc = new RTCPeerConnection(configuration);
     if (this.stream) {
@@ -92,7 +92,9 @@ export class WebrtcService {
         //}
 
       }
+      console.log(connectionID)
       track.onunmute = () => {
+        console.log(connectionID)
         console.log(`webrtc-${connectionID}`)
         let v = document.getElementById(`webrtc-${connectionID}`) as HTMLVideoElement;
         console.log(v)
