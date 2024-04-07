@@ -94,6 +94,7 @@ export class WebrtcService {
       }
       track.onunmute = () => {
         let v = document.getElementById(`webrtc-${connectionID}`) as HTMLVideoElement;
+        console.log(v)
         if (v) {
           v.srcObject = streams[0];
           v.oncanplaythrough = () => {
