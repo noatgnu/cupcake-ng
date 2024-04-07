@@ -19,7 +19,14 @@ export class WebrtcService {
   peerList: string[] = [];
   acceptCall = false;
   connected = false;
-
+  constraints = {
+    video: {
+      width: { ideal: 1280 },
+      height: { ideal: 720 },
+      frameRate: { ideal: 30 },
+    },
+    audio: true,
+  };
   constructor(private accounts: AccountsService) {
 
   }
@@ -45,7 +52,7 @@ export class WebrtcService {
     const videoTrack = this.stream?.getVideoTracks()[0];
     const audioTrack = this.stream?.getAudioTracks()[0];
     pc.addTrack(videoTrack!, this.stream!);
-    //pc.addTrack(audioTrack!, this.stream!);
+    pc.addTrack(audioTrack!, this.stream!);
     pc.onicecandidate = (event) => {
       if (event.candidate) {
         this.signallingConnection?.next({
@@ -61,6 +68,7 @@ export class WebrtcService {
         this.makingOffer = true;
         console.log(this.makingOffer)
         await pc.setLocalDescription();
+        console.log(pc.localDescription)
         console.log(connectionID)
         this.signallingConnection?.next( pc.localDescription);
       } catch (e) {
@@ -185,7 +193,7 @@ export class WebrtcService {
   async start() {
     if (!this.stream) {
       try {
-        this.stream = await navigator.mediaDevices.getUserMedia({video: true, audio: true});
+        this.stream = await navigator.mediaDevices.getUserMedia(this.constraints);
         const currentVideoElement = document.getElementById('webrtc-local') as HTMLVideoElement;
         if (currentVideoElement) {
           currentVideoElement.srcObject = this.stream;
