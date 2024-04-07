@@ -93,13 +93,31 @@ export class WebrtcService {
 
       }
       track.onunmute = () => {
-        const videoElement = document.getElementById(`webrtc-${connectionID}`) as HTMLVideoElement;
-        if (videoElement) {
-          if (videoElement.srcObject) {
-            return;
+        let v = document.getElementById(`webrtc-${connectionID}`) as HTMLVideoElement;
+        if (v) {
+          v.srcObject = streams[0];
+          v.oncanplaythrough = () => {
+            v.play();
           }
-          videoElement.srcObject = streams[0];
-          console.log(videoElement)
+        } else {
+          let observer = new MutationObserver(mutations => {
+            mutations.forEach(function (mutation) {
+              let nodes = Array.from(mutation.addedNodes)
+              for (const node of nodes) {
+                if (node.contains(document.getElementById(`webrtc-${connectionID}`))) {
+                  v = document.getElementById(`webrtc-${connectionID}`) as HTMLVideoElement;
+                  if (v) {
+                    v.srcObject = streams[0];
+                    v.oncanplaythrough = () => {
+                      v.play();
+                    }
+                  }
+                  observer.disconnect()
+                  break
+                }
+              }
+            })
+          })
         }
         console.log('track unmuted')
       }
