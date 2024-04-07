@@ -266,11 +266,13 @@ export class WebrtcService {
           delete this.peerConnectionMap[peer];
         } else {
           // print out all stats
-          this.peerConnectionMap[peer].getStats().then((stats) => {
-            stats.forEach((report) => {
-              console.log(report);
-            })
-          })
+          console.log(this.peerConnectionMap[peer].iceGatheringState)
+          console.log(this.peerConnectionMap[peer].iceConnectionState)
+          //this.peerConnectionMap[peer].getStats().then((stats) => {
+          //  stats.forEach((report) => {
+          //   console.log(report);
+          //  })
+          //})
         }
       }
     }, 5000)
