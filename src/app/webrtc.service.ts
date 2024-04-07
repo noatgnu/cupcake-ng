@@ -181,11 +181,6 @@ export class WebrtcService {
     if (!this.peerList.includes(from!)) {
       this.peerList.push(from!);
     }
-    try {
-
-    } catch (e) {
-      console.error(e);
-    }
     switch (type) {
       case 'offer':
         console.log(this.peerConnectionMap[from!])
@@ -214,6 +209,7 @@ export class WebrtcService {
         await this.peerConnectionMap[from!].setRemoteDescription(sdp!);
         break;
       case 'candidate':
+        console.log(candidate)
         try {
           await this.peerConnectionMap[from!].addIceCandidate(candidate!);
           console.log(this.peerConnectionMap[from!].iceConnectionState)
