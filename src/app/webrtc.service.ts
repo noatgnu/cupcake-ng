@@ -64,7 +64,7 @@ export class WebrtcService {
         console.log(connectionID)
         this.signallingConnection?.next( pc.localDescription);
       } catch (e) {
-        console.error(e);
+        console.log(e);
       } finally {
         this.makingOffer = false;
       }
