@@ -216,6 +216,8 @@ export class WebrtcService {
       case 'candidate':
         try {
           await this.peerConnectionMap[from!].addIceCandidate(candidate!);
+          console.log(this.peerConnectionMap[from!].iceConnectionState)
+          console.log(this.peerConnectionMap[from!].iceGatheringState)
         } catch (e) {
           if (!ignoreOffer) {
             throw e;
