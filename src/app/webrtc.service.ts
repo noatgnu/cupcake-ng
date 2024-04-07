@@ -93,6 +93,7 @@ export class WebrtcService {
 
       }
       track.onunmute = () => {
+        console.log(`webrtc-${connectionID}`)
         let v = document.getElementById(`webrtc-${connectionID}`) as HTMLVideoElement;
         console.log(v)
         if (v) {
