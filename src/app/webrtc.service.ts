@@ -124,7 +124,7 @@ export class WebrtcService {
       }
     });
     ws.subscribe(async (data: any) => {
-      console.log(data)
+      //console.log(data)
       if (data.message) {
         if (data.unique_id) {
           this.unique_id = data.unique_id;
@@ -166,11 +166,13 @@ export class WebrtcService {
         if (ignoreOffer) {
           return;
         }
+        console.log(this.peerConnectionMap[from!].localDescription)
+        console.log(this.peerConnectionMap[from!].remoteDescription)
         console.log(sdp)
         await this.peerConnectionMap[from!].setRemoteDescription(sdp!);
         const answer = await this.peerConnectionMap[from!].createAnswer()
         await this.peerConnectionMap[from!].setLocalDescription();
-
+        console.log(answer)
         const data = {sdp:answer.sdp, type: answer.type, to:from}
         this.signallingConnection?.next(data);
         console.log(this.peerConnectionMap[from!])
