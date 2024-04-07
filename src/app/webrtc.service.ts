@@ -189,7 +189,11 @@ export class WebrtcService {
         const currentVideoElement = document.getElementById('webrtc-local') as HTMLVideoElement;
         if (currentVideoElement) {
           currentVideoElement.srcObject = this.stream;
-          currentVideoElement.muted = true;
+          currentVideoElement.oncanplaythrough = () => {
+            currentVideoElement.muted = true;
+            currentVideoElement.play();
+          }
+
         }
       } catch (e) {
         console.error(e);
