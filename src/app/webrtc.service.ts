@@ -81,6 +81,9 @@ export class WebrtcService {
       this.makingOffer = false;
 
     }
+    pc.onicecandidateerror = (event) => {
+      console.log(event)
+    }
     pc.ontrack = ({track, streams}) => {
       console.log(track)
       console.log(streams)
