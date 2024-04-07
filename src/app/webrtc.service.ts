@@ -141,45 +141,45 @@ export class WebrtcService {
       this.peerList.push(from!);
     }
     try {
-      switch (type) {
-        case 'offer':
-          console.log(this.peerConnectionMap[from!])
-          console.log(this.polite)
-          console.log(this.makingOffer)
-          const offerCollision = (this.makingOffer || this.peerConnectionMap[from!].signalingState !== 'stable');
-          console.log(offerCollision)
-          ignoreOffer = !this.polite && offerCollision;
-          if (ignoreOffer) {
-            return;
-          }
-          console.log(sdp)
-          await this.peerConnectionMap[from!].setRemoteDescription(sdp!);
-          const answer = await this.peerConnectionMap[from!].createAnswer()
-          await this.peerConnectionMap[from!].setLocalDescription();
 
-          const data = {sdp:answer.sdp, type: answer.type, to:from}
-          this.signallingConnection?.next(data);
-          console.log(this.peerConnectionMap[from!])
-          break;
-        case 'answer':
-          console.log(this.peerConnectionMap[from!])
-          await this.peerConnectionMap[from!].setLocalDescription()
-          await this.peerConnectionMap[from!].setRemoteDescription(sdp!);
-          break;
-        case 'candidate':
-          try {
-            await this.peerConnectionMap[from!].addIceCandidate(candidate!);
-          } catch (e) {
-            if (!ignoreOffer) {
-              throw e;
-            }
-          }
-          break;
-      }
     } catch (e) {
       console.error(e);
     }
+    switch (type) {
+      case 'offer':
+        console.log(this.peerConnectionMap[from!])
+        console.log(this.polite)
+        console.log(this.makingOffer)
+        const offerCollision = (this.makingOffer || this.peerConnectionMap[from!].signalingState !== 'stable');
+        console.log(offerCollision)
+        ignoreOffer = !this.polite && offerCollision;
+        if (ignoreOffer) {
+          return;
+        }
+        console.log(sdp)
+        await this.peerConnectionMap[from!].setRemoteDescription(sdp!);
+        const answer = await this.peerConnectionMap[from!].createAnswer()
+        await this.peerConnectionMap[from!].setLocalDescription();
 
+        const data = {sdp:answer.sdp, type: answer.type, to:from}
+        this.signallingConnection?.next(data);
+        console.log(this.peerConnectionMap[from!])
+        break;
+      case 'answer':
+        console.log(this.peerConnectionMap[from!])
+        await this.peerConnectionMap[from!].setLocalDescription()
+        await this.peerConnectionMap[from!].setRemoteDescription(sdp!);
+        break;
+      case 'candidate':
+        try {
+          await this.peerConnectionMap[from!].addIceCandidate(candidate!);
+        } catch (e) {
+          if (!ignoreOffer) {
+            throw e;
+          }
+        }
+        break;
+    }
   }
 
   async start() {
