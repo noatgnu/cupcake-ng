@@ -91,12 +91,14 @@ export class WebrtcService {
       console.log(event)
     }
     pc.oniceconnectionstatechange = (event) => {
-      console.log(event)
+      console.log(Date.now(), pc.iceGatheringState, "ice connection state")
     }
     pc.onicegatheringstatechange = (event) => {
-      console.log(event)
+      console.log(Date.now(), pc.iceGatheringState, "ice gathering")
+
     }
     pc.onconnectionstatechange = (event) => {
+      console.log(Date.now(), pc.connectionState, "connection state")
       console.log(event)
     }
     pc.ondatachannel = (event) => {
