@@ -8,6 +8,7 @@ export interface Protocol {
   protocol_version_uri: string;
   steps: ProtocolStep[];
   sections: ProtocolSection[];
+  enabled: boolean;
 }
 
 export interface ProtocolStep {

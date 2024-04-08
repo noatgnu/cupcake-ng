@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import {Observable} from "rxjs";
+import {Observable, Subject} from "rxjs";
 import {environment} from "../../environments/environment";
 import {HttpClient, HttpHeaders} from "@angular/common/http";
 
@@ -12,6 +12,7 @@ export class AccountsService {
   baseURL: string = environment.baseURL;
   username: string = ""
   lastVisited: Date = new Date()
+  triggerLoginSubject: Subject<boolean> = new Subject<boolean>()
   constructor(private http: HttpClient) { }
 
   login(username: string, password: string): Observable<any> {

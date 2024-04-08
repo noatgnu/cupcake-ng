@@ -1,87 +1,105 @@
-@if (!protocol) {
-  <div class="container-fluid d-flex flex-row justify-content-center" style="padding-top: 80px">
-    <form [formGroup]="form" (ngSubmit)="createProtocol()" class="d-flex flex-column gap-2 justify-content-center" style="width: 800px">
-      <h5>Initial project input</h5>
-      <div class="form-floating">
-        <input type="text" class="form-control" formControlName="protocol_title" id="protocol_title">
-        <label for="protocol_title">Protocol Title</label>
-      </div>
-      <div class="form-floating">
-        <textarea class="form-control" formControlName="protocol_description" id="protocol_description" style="height: 300px"></textarea>
-        <label for="protocol_description">Protocol Description</label>
-      </div>
-      <div>
-        <button type="submit" class="btn btn-primary">Create</button>
-      </div>
+@if (dataService.protocolPermissions['edit']) {
+  @if (!protocol) {
+    <div class="container-fluid d-flex flex-row justify-content-center" style="padding-top: 80px">
+      <form  [formGroup]="form" (ngSubmit)="createProtocol()" class="d-flex flex-column gap-2 justify-content-center" style="width: 800px">
+        <h5>Initial project input</h5>
+        <div class="form-floating">
+          <input type="text" class="form-control" formControlName="protocol_title" id="protocol_title">
+          <label for="protocol_title">Protocol Title</label>
+        </div>
+        <div class="form-floating">
+          <textarea class="form-control" formControlName="protocol_description" id="protocol_description" style="height: 300px"></textarea>
+          <label for="protocol_description">Protocol Description</label>
+        </div>
+        <div>
+          <button type="submit" class="btn btn-primary">Create</button>
+        </div>
 
-    </form>
-  </div>
-} @else {
-  <div class="d-flex justify-content-center align-items-center flex-row flex-wrap gap-2 overflow-x-hidden">
-    <div class="d-flex flex-column mb-4 mt-4">
-      @if (sections.length > 0) {
-        <div class="d-flex flex-row overflow-auto">
-          <div class="d-flex flex-column gap-2 " style="width: 500px">
-            <form [formGroup]="formSectionSelect">
+      </form>
+    </div>
+  } @else {
+    <div class="d-flex justify-content-center align-items-center flex-row flex-wrap gap-2 overflow-x-hidden">
+      <div class="d-flex flex-column mb-4 mt-4">
+        <form [formGroup]="form" class="p-2">
+          <div class="form-check">
+            <label class="form-check-label" for="protocol_enabled">Enabled For Public View</label>
+            <input class="form-check-input" type="checkbox" formControlName="enabled" id="protocol_enabled">
+          </div>
+          <div>
+            <button class="btn btn-primary" (click)="saveProtocol()">Update Protocol Settings</button>
+          </div>
+        </form>
+        @if (sections.length > 0) {
+          <div class="d-flex flex-row overflow-auto">
+            <div class="d-flex flex-column gap-2 " style="width: 500px">
+              <form [formGroup]="formSectionSelect">
+                <div class="form-floating">
+                  <select class="form-select" formControlName="currentSection" id="sectionSelect">
+                    @for (section of sections; track section.data.id; let i = $index) {
+                      <option [value]="i">{{section.data.section_description}}</option>
+                    }
+                  </select>
+                  <label for="sectionSelect">Select Section</label>
+                </div>
+              </form>
+              <div class="d-flex flex-row gap-2">
+                <button class="btn btn-primary" (click)="createNewSection()">Create New Section</button>
+                <button class="btn btn-primary" (click)="saveSection()">Save Section Data</button>
+                <button class="btn btn-primary" (click)="addStepToSection(formSectionSelect.controls['currentSection'].value)">Add Step</button>
+                <button class="btn btn-danger" (click)="deleteSection()">Delete Section</button>
+              </div>
+            </div>
+
+          </div>
+        }
+
+        @if (sections[formSectionSelect.controls['currentSection'].value]) {
+          <div class="d-flex flex-column gap-2" style="width: 500px">
+            <form class="mt-2" >
               <div class="form-floating">
-                <select class="form-select" formControlName="currentSection" id="sectionSelect">
-                  @for (section of sections; track section.data.id; let i = $index) {
-                    <option [value]="i">{{section.data.section_description}}</option>
-                  }
-                </select>
-                <label for="sectionSelect">Select Section</label>
+                <input [ngModelOptions]="{standalone: true}" type="text" class="form-control" id="section-title" [(ngModel)]="sections[formSectionSelect.controls['currentSection'].value].data.section_description">
+                <label for="section-title">Section Title</label>
               </div>
             </form>
-            <div class="d-flex flex-row gap-2">
-              <button class="btn btn-primary" (click)="createNewSection()">Create New Section</button>
-              <button class="btn btn-primary" (click)="saveSection()">Save Section Data</button>
-              <button class="btn btn-primary" (click)="addStepToSection(formSectionSelect.controls['currentSection'].value)">Add Step</button>
-              <button class="btn btn-danger" (click)="deleteSection()">Delete Section</button>
-            </div>
-          </div>
+            <app-time-picker [seconds]="sections[formSectionSelect.controls['currentSection'].value].data.section_duration" (output)="handleUpdateSectionDuration($event)"></app-time-picker>
 
-        </div>
-      }
-
-      @if (sections[formSectionSelect.controls['currentSection'].value]) {
-        <div class="d-flex flex-column gap-2" style="width: 500px">
-          <form class="mt-2" >
-            <div class="form-floating">
-              <input [ngModelOptions]="{standalone: true}" type="text" class="form-control" id="section-title" [(ngModel)]="sections[formSectionSelect.controls['currentSection'].value].data.section_description">
-              <label for="section-title">Section Title</label>
-            </div>
-          </form>
-          <app-time-picker [seconds]="sections[formSectionSelect.controls['currentSection'].value].data.section_duration" (output)="handleUpdateSectionDuration($event)"></app-time-picker>
-
-        </div>
-      }
-    </div>
-    <div class="d-flex flex-row justify-content-center">
-      <div class="list-group overflow-auto" style="max-height: 80vh; width: 600px">
-        @for (step of sections[formSectionSelect.controls['currentSection'].value].steps; track step.id; let i = $index) {
-          <div class="list-group-item border-0">
-            <div class="d-flex flex-row justify-content-around gap-2">
-              <b>Step {{ i + 1 }}/{{sections[formSectionSelect.controls['currentSection'].value].steps.length}}</b>
-              <div class="d-flex flex-row justify-content-end gap-2">
-                <button class="btn btn-outline-primary" (click)="moveStep(step.id)"><i class="bi bi-arrow-up"></i></button>
-                <button class="btn btn-outline-primary" (click)="moveStep(step.id, false)"><i class="bi bi-arrow-down"></i></button>
-                <button class="btn btn-outline-danger" (click)="deleteStep(step.id)"><i class="bi bi-trash"></i></button>
-              </div>
-            </div>
-            Step Description
-            <ngx-wig [(ngModel)]="step.step_description"></ngx-wig>
-            <div>
-              Step Duration
-            </div>
-            <app-time-picker [seconds]="step.step_duration" (output)="handleUpdateStepDuration($event, i)"></app-time-picker>
-            <hr>
           </div>
         }
       </div>
+      <div class="d-flex flex-row justify-content-center">
+        <div class="list-group overflow-auto" style="max-height: 80vh; width: 600px">
+          @for (step of sections[formSectionSelect.controls['currentSection'].value].steps; track step.id; let i = $index) {
+            <div class="list-group-item border-0">
+              <div class="d-flex flex-row justify-content-around gap-2">
+                <b>Step {{ i + 1 }}/{{sections[formSectionSelect.controls['currentSection'].value].steps.length}}</b>
+                <div class="d-flex flex-row justify-content-end gap-2">
+                  <button class="btn btn-outline-primary" (click)="moveStep(step.id)"><i class="bi bi-arrow-up"></i></button>
+                  <button class="btn btn-outline-primary" (click)="moveStep(step.id, false)"><i class="bi bi-arrow-down"></i></button>
+                  <button class="btn btn-outline-danger" (click)="deleteStep(step.id)"><i class="bi bi-trash"></i></button>
+                </div>
+              </div>
+              Step Description
+              <ngx-wig [(ngModel)]="step.step_description"></ngx-wig>
+              <div>
+                Step Duration
+              </div>
+              <app-time-picker [seconds]="step.step_duration" (output)="handleUpdateStepDuration($event, i)"></app-time-picker>
+              <hr>
+            </div>
+          }
+        </div>
+      </div>
+
     </div>
 
+
+  }
+} @else {
+  <div class="container d-flex flex-row justify-content-between align-items-center">
+    <p>
+      No protocol edit permission
+    </p>
   </div>
-
-
 }
+
 

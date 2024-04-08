@@ -8,6 +8,7 @@ import {DatePipe, NgOptimizedImage} from "@angular/common";
 import {resolve} from "@angular/compiler-cli";
 import {ProtocolQuery} from "../protocol";
 import {ToastService} from "../toast.service";
+import {AccountsService} from "../accounts/accounts.service";
 
 @Component({
   selector: 'app-home',
@@ -29,7 +30,7 @@ export class HomeComponent implements OnInit, AfterViewInit {
   protocolQuery?: ProtocolQuery;
   loading = false;
 
-  constructor(private router: Router, private fb: FormBuilder, private web: WebService, private dataService: DataService, private toastService: ToastService) {
+  constructor(private accounts: AccountsService, private router: Router, private fb: FormBuilder, private web: WebService, private dataService: DataService, private toastService: ToastService) {
 
   }
 
@@ -38,7 +39,13 @@ export class HomeComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit() {
-    this.getUserProtocols()
+    if (this.accounts.loggedIn) {
+      this.getUserProtocols()
+    } else {
+      this.toastService.show("Login", "Please login to access your protocols")
+      this.accounts.triggerLoginSubject.next(true)
+    }
+
   }
 
   onSubmit() {

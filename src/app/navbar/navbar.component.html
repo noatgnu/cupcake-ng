@@ -12,13 +12,20 @@
         <ul class="navbar-nav gap-2">
           @if (dataService.currentSession) {
             <li class="nav-item">
-              <a class="btn btn-outline-danger" style="white-space: nowrap" (click)="copyLink()">
-                @if (dataService.currentSession.name) {
-                  {{dataService.currentSession.name}}
-                } @else {
-                  {{dataService.currentSession.unique_id}}
-                }
-              </a>
+              <div ngbDropdown display="dynamic" class="d-inline-black">
+
+                <button type="button" class="btn btn-outline-primary" id="sessionDropdown" ngbDropdownToggle>
+                  {{dataService.currentSession.unique_id}} @if (dataService.currentSession.enabled) {<i class="bi bi-unlock"></i>} @else {<i class="bi bi-lock"></i>}
+                </button>
+                <div ngbDropdownMenu aria-labelledby="accountDropdown">
+                  <button class="dropdown-item" (click)="openSessionEditor()">Session Settings</button>
+                </div>
+              </div>
+            </li>
+            <li class="nav-item">
+              <button class="btn btn-primary" (click)="copyLink()">
+                <i class="bi bi-clipboard"></i>
+              </button>
             </li>
             <li class="nav-item">
               <a class="btn btn-outline-primary" (click)="openQRCodeModal()">
@@ -26,11 +33,14 @@
               </a>
             </li>
           }
-          <li class="nav-item">
-            <button class="btn btn-primary" (click)="testWebRTC()">
-              WebRTC
-            </button>
-          </li>
+          @if (dataService.currentSessionPermissions['view']) {
+            <li class="nav-item">
+              <button class="btn btn-primary" (click)="testWebRTC()">
+                WebRTC
+              </button>
+            </li>
+          }
+
           <li class="nav-item">
             <div ngbDropdown display="dynamic" class="d-inline-black">
 

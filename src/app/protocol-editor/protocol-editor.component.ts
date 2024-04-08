@@ -26,6 +26,7 @@ export class ProtocolEditorComponent {
   form = this.fb.group({
     protocol_title: '',
     protocol_description: '',
+    enabled: false
   })
 
   formSectionSelect: FormGroup = this.fb.group({
@@ -45,7 +46,8 @@ export class ProtocolEditorComponent {
       this.dataService.protocol = response
       this.form.patchValue({
         protocol_title: this.protocol.protocol_title,
-        protocol_description: this.protocol.protocol_description
+        protocol_description: this.protocol.protocol_description,
+        enabled: this.protocol.enabled
       })
       this.steps = this.protocol.steps.map(step => {
         return this.fb.group({
@@ -71,7 +73,7 @@ export class ProtocolEditorComponent {
     return this._protocolID
   }
 
-  constructor(private modalConfig: NgbModalConfig, private fb: FormBuilder, private web: WebService, private dataService: DataService, private router: Router, private toastService: ToastService) {
+  constructor( private modalConfig: NgbModalConfig, private fb: FormBuilder, private web: WebService, public dataService: DataService, private router: Router, private toastService: ToastService) {
     this.modalConfig.backdrop = 'static'
     this.modalConfig.keyboard = false
   }
@@ -193,6 +195,13 @@ export class ProtocolEditorComponent {
           step.step_description = data.step_description
         })
       }
+    })
+  }
+
+  saveProtocol() {
+    // @ts-ignore
+    this.web.updateProtocol(this.protocolID, this.form.value.protocol_title, this.form.value.protocol_description, this.form.value.enabled).subscribe(() => {
+      this.toastService.show("Protocol", "Saved")
     })
   }
 }

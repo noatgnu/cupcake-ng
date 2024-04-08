@@ -10,6 +10,7 @@ import {WebsocketService} from "../websocket.service";
 import {WebService} from "../web.service";
 import {WebrtcService} from "../webrtc.service";
 import {WebrtcModalComponent} from "../webrtc-modal/webrtc-modal.component";
+import {SessionEditorModalComponent} from "../protocol-session/session-editor-modal/session-editor-modal.component";
 
 @Component({
   selector: 'app-navbar',
@@ -27,6 +28,8 @@ import {WebrtcModalComponent} from "../webrtc-modal/webrtc-modal.component";
 export class NavbarComponent {
   isMenuCollapsed = false;
   constructor(private webrtc: WebrtcService, public dataService: DataService, private modal: NgbModal, public accounts: AccountsService, private router: Router, private ws: WebsocketService, private web: WebService) {
+    this.accounts.triggerLoginSubject.subscribe(() => {
+      this.openAccountLogin()})
   }
 
   openAccountLogin() {
@@ -87,5 +90,18 @@ export class NavbarComponent {
 
   async testWebRTC() {
     const ref = this.modal.open(WebrtcModalComponent)
+  }
+
+  openSessionEditor() {
+    const ref = this.modal.open(SessionEditorModalComponent)
+    ref.componentInstance.session = this.dataService.currentSession
+    ref.closed.subscribe((data) => {
+      if (data) {
+        // @ts-ignore
+        this.web.updateProtocolSession(this.dataService.currentSession!.unique_id, data.name, data.enabled).subscribe((response) => {
+          this.dataService.currentSession = response
+        })
+      }
+    })
   }
 }

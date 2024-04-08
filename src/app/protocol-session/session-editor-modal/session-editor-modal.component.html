@@ -1,0 +1,19 @@
+<div class="modal-header">
+  <h5 class="modal-title">Session Settings</h5>
+</div>
+<div class="modal-body">
+  <form [formGroup]="form">
+    <div class="form-floating">
+      <input type="text" class="form-control" id="sessionName" formControlName="name" placeholder="Session Name">
+      <label for="sessionName">Session Name</label>
+    </div>
+    <div class="form-check">
+      <input class="form-check-input" type="checkbox" id="sessionEnabled" formControlName="enabled">
+      <label class="form-check-label" for="sessionEnabled">Enabled For Public View</label>
+    </div>
+  </form>
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn btn-secondary" (click)="close()">Close</button>
+  <button type="button" class="btn btn-primary" (click)="save()">Save</button>
+</div>

@@ -364,4 +364,44 @@ export class WebService {
       {responseType: 'json', observe: 'body'}
     );
   }
+
+  updateProtocol(protocol_id: number, protocol_title: string, protocol_description: string, enabled: boolean) {
+    return this.http.put<Protocol>(
+      `${this.baseURL}/api/protocol/${protocol_id}/`,
+      {protocol_title: protocol_title, protocol_description: protocol_description, enabled: enabled},
+      {responseType: 'json', observe: 'body'}
+    );
+  }
+
+  checkProtocolPermissions(protocol_id: number) {
+    return this.http.post(
+      `${this.baseURL}/api/user/check_protocol_permission/`,
+      {'protocol': protocol_id},
+      {responseType: 'json', observe: 'body'}
+    )
+  }
+
+  checkSessionPermissions(session_id: string) {
+    return this.http.post(
+      `${this.baseURL}/api/user/check_session_permission/`,
+      {'session': session_id},
+      {responseType: 'json', observe: 'body'}
+    )
+  }
+
+  checkAnnotationPermissions(annotation_id: number[]) {
+    return this.http.post(
+      `${this.baseURL}/api/user/check_annotation_permission/`,
+      {'annotations': annotation_id},
+      {responseType: 'json', observe: 'body'}
+    )
+  }
+
+  updateProtocolSession(session_id: string, name: string, enabled: boolean) {
+    return this.http.put<ProtocolSession>(
+      `${this.baseURL}/api/session/${session_id}/`,
+      {enabled: enabled, name: name},
+      {responseType: 'json', observe: 'body'}
+    );
+  }
 }
