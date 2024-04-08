@@ -44,7 +44,12 @@ export class WebrtcService {
           username: 'testuser',
           credential: 'testuser'
         }
-      ]
+      ],
+      iceCandidatePoolSize: 10,
+      iceTransportPolicy: 'relay',
+      bundlePolicy: 'max-bundle',
+      rtcpMuxPolicy: 'require',
+
     };
 
     console.log(connectionID)
@@ -303,6 +308,12 @@ export class WebrtcService {
 
   getStreamFromPeer(peerID: string) {
     // retrieve video stream from peer to be displayed
+
+
+  }
+
+  precacheIceCandidates(peerConnection: RTCPeerConnection) {
+
 
 
   }
