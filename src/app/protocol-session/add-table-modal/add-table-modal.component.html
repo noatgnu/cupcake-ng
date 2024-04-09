@@ -1,0 +1,23 @@
+<div class="modal-header">
+  <h5 class="modal-title">Add Table</h5>
+</div>
+<div class="modal-body">
+  <form [formGroup]="form">
+    <div class="form-floating">
+      <input type="text" class="form-control" id="name" formControlName="name" placeholder="Name">
+      <label for="name">Table Name</label>
+    </div>
+    <div class="form-floating">
+      <input type="number" class="form-control" id="nRow" formControlName="nRow" placeholder="Number of Rows">
+      <label for="nRow">Number of Rows</label>
+    </div>
+    <div class="form-floating">
+      <input type="number" class="form-control" id="nCol" formControlName="nCol" placeholder="Number of Columns">
+      <label for="nCol">Number of Columns</label>
+    </div>
+  </form>
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn btn-secondary" (click)="close()">Close</button>
+  <button type="button" class="btn btn-primary" (click)="save()">Save</button>
+</div>

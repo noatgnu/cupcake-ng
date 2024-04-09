@@ -28,6 +28,7 @@ import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {AddSimpleCounterModalComponent} from "./add-simple-counter-modal/add-simple-counter-modal.component";
 import {AddChecklistModalComponent} from "./add-checklist-modal/add-checklist-modal.component";
 import {WebrtcService} from "../webrtc.service";
+import {AddTableModalComponent} from "./add-table-modal/add-table-modal.component";
 
 @Component({
   selector: 'app-protocol-session',
@@ -553,6 +554,33 @@ export class ProtocolSessionComponent implements OnInit{
             })
           }
         })
+      }
+    } else if (item === 'Table') {
+      if (this.dataService.currentSession && this.currentStep) {
+        const ref = this.modal.open(AddTableModalComponent)
+        ref.closed.subscribe((data: any) => {
+          if (data) {
+            const payload: any = {
+              nRow: data.nRow,
+              nCol: data.nCol,
+              name: data.name,
+              content: []
+            }
+            for (let i = 0; i < data.nRow; i++) {
+              const modelRow: string[] = []
+              for (let j = 0; j < data.nCol; j++) {
+                modelRow.push("")
+              }
+              payload.content.push(modelRow)
+            }
+            // @ts-ignore
+            this.web.saveAnnotationJSON(this.dataService.currentSession.unique_id, this.currentStep.id, payload, 'table').subscribe((data: any) => {
+              this.toastService.show('Annotation', 'Table Saved Successfully')
+              this.refreshAnnotations();
+            })
+          }
+        })
+
       }
     } else {
       if (this.clickedElement === item) {

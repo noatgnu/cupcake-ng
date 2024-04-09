@@ -42,6 +42,10 @@
           <div class="d-flex flex-row justify-content-center">
             <app-counter-presenter [annotation]="a"></app-counter-presenter>
           </div>
+        } @else if (a.annotation_type === 'table') {
+          <div class="d-flex flex-row justify-content-center">
+            <app-table-presenter [annotation]="a"></app-table-presenter>
+          </div>
         }
 
     </div>

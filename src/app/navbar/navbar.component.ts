@@ -27,6 +27,8 @@ import {SessionEditorModalComponent} from "../protocol-session/session-editor-mo
 })
 export class NavbarComponent {
   isMenuCollapsed = false;
+  switched = false
+
   constructor(private webrtc: WebrtcService, public dataService: DataService, private modal: NgbModal, public accounts: AccountsService, private router: Router, private ws: WebsocketService, private web: WebService) {
     this.accounts.triggerLoginSubject.subscribe(() => {
       this.openAccountLogin()})
@@ -103,5 +105,9 @@ export class NavbarComponent {
         })
       }
     })
+  }
+
+  switchTitle() {
+    this.switched = !this.switched
   }
 }

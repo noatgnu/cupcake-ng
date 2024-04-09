@@ -9,6 +9,7 @@ import {NgbModal, NgbModalConfig} from "@ng-bootstrap/ng-bootstrap";
 import {TranscribeModalComponent} from "../transcribe-modal/transcribe-modal.component";
 import {ChecklistPresenterComponent} from "../checklist-presenter/checklist-presenter.component";
 import {CounterPresenterComponent} from "../counter-presenter/counter-presenter.component";
+import {TablePresenterComponent} from "../table-presenter/table-presenter.component";
 
 @Component({
   selector: 'app-annotation-presenter',
@@ -21,7 +22,8 @@ import {CounterPresenterComponent} from "../counter-presenter/counter-presenter.
     ImagePresenterComponent,
     MediaPresenterComponent,
     ChecklistPresenterComponent,
-    CounterPresenterComponent
+    CounterPresenterComponent,
+    TablePresenterComponent
   ],
   templateUrl: './annotation-presenter.component.html',
   styleUrl: './annotation-presenter.component.scss'
