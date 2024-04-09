@@ -440,9 +440,9 @@ export class ProtocolSessionComponent implements OnInit{
           this.previewVideo.nativeElement.srcObject = stream;
           this.previewVideo.nativeElement.oncanplaythrough = () => {
             // @ts-ignore
-            this.previewVideo?.nativeElement.muted = true;
-            this.previewVideo?.nativeElement.play();
+            this.previewVideo.nativeElement.muted = true;
           }
+          this.previewVideo.nativeElement.play();
 
         }
         this.mediaRecorder = new MediaRecorder(stream);
