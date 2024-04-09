@@ -1,6 +1,6 @@
 @if (annotation && mediaURL) {
   @if (annotation.annotation_type === 'video' ) {
-    <video controls (timeupdate)="highLightSubtitle($event)" #videoControlElement>
+    <video controls (timeupdate)="highLightSubtitle($event)" #videoControlElement [width]="400" [height]="300">
       <source [attr.src]="mediaURL" type="video/webm">
       @if (transcription) {
         <track [attr.src]="transcription" kind="captions" srclang="en" label="captions">
