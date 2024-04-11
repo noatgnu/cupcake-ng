@@ -222,27 +222,44 @@ export class WebrtcService {
           console.log(data)
           await this.handleSignallingData(type, sdp, candidate, from, id_type);
         }
-
       }
-
     })
     return ws;
   }
 
   async handleSignallingData(type: string, sdp: RTCSessionDescriptionInit | undefined, candidate: RTCIceCandidate | undefined, from: string | undefined, id_type: string | undefined) {
     if (!this.peerConnectionMap[from!]) {
+      if (type === 'check') {
+        if (this.peerConnectionMap[from!]) {
+          // reset the connection
+          this.peerConnectionMap[from!].pc.close();
+          delete this.peerConnectionMap[from!];
+          this.peerConnectionMap[from!] = {
+            pc: this.createPeerConnection(from),
+            offered: false,
+            answered: false,
+            connectionType: id_type === 'host' ? 'viewer' : 'host',
+            connected: false
+          }
 
-      this.peerConnectionMap[from!] = {
-        pc: this.createPeerConnection(from),
-        offered: false,
-        answered: false,
-        connectionType: id_type === 'host' ? 'viewer' : 'host',
-        connected: false
+          if (!this.peerList.includes(from!)) {
+            this.peerList.push(from!);
+          }
+        }
+      } else {
+        this.peerConnectionMap[from!] = {
+          pc: this.createPeerConnection(from),
+          offered: false,
+          answered: false,
+          connectionType: id_type === 'host' ? 'viewer' : 'host',
+          connected: false
+        }
+
+        if (!this.peerList.includes(from!)) {
+          this.peerList.push(from!);
+        }
       }
 
-      if (!this.peerList.includes(from!)) {
-        this.peerList.push(from!);
-      }
     }
     if (id_type) {
       // @ts-ignore
