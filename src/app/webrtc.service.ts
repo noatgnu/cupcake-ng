@@ -46,7 +46,7 @@ export class WebrtcService {
 
     this.signallingConnection = this.createSignallingConnection(currentSessionID);
   }
-  private createPeerConnection(connectionID: string|undefined = ""): RTCPeerConnection {
+  private createPeerConnection(connectionID: string|undefined = "", autonegotiate: boolean = true): RTCPeerConnection {
     console.log("Creating peer connection for", connectionID)
     const configuration: RTCConfiguration = {
 /*      iceServers: [
@@ -112,10 +112,13 @@ export class WebrtcService {
     }
     pc.onnegotiationneeded = async () => {
       console.log('negotiation needed')
+      if (!autonegotiate) {
+        return
+      }
       this.makingOffer = true;
       await pc.setLocalDescription(await pc.createOffer());
 
-      this.signallingConnection?.next({type: pc.localDescription?.type, sdp: pc.localDescription?.sdp, to: "", id_type: this.connectionType});
+      this.signallingConnection?.next({type: pc.localDescription?.type, sdp: pc.localDescription?.sdp, to: connectionID, id_type: this.connectionType});
       this.makingOffer = false;
 
     }
@@ -227,8 +230,6 @@ export class WebrtcService {
   }
 
   async handleSignallingData(type: string, sdp: RTCSessionDescriptionInit | undefined, candidate: RTCIceCandidate | undefined, from: string | undefined, id_type: string | undefined) {
-    let ignoreOffer = false;
-
     if (!this.peerConnectionMap[from!]) {
 
       this.peerConnectionMap[from!] = {
@@ -238,18 +239,21 @@ export class WebrtcService {
         connectionType: id_type === 'host' ? 'viewer' : 'host',
         connected: false
       }
-    }
 
-    if (!this.peerList.includes(from!)) {
-      this.peerList.push(from!);
+      if (!this.peerList.includes(from!)) {
+        this.peerList.push(from!);
+      }
     }
     if (id_type) {
       // @ts-ignore
       this.peerConnectionMap[from!].connectionType = id_type
     }
     console.log(this.peerConnectionMap)
-
+    console.log(this.peerConnectionMap[from!].pc.signalingState)
     switch (type) {
+      //case 'check':
+      //  this.signallingConnection?.next({type: 'available', to: from, id_type: this.connectionType});
+      //  break;
       case 'offer':
         if (sdp) {
           if (this.peerConnectionMap[from!].pc.signalingState !== 'stable') {
@@ -281,6 +285,8 @@ export class WebrtcService {
         await this.peerConnectionMap[from!].pc.addIceCandidate(candidate!);
         break;
     }
+
+
   }
 
   async start() {
@@ -322,7 +328,12 @@ export class WebrtcService {
     if (this.connectionType === 'host') {
       await this.start();
     }
-    this.peerConnection = this.createPeerConnection();
+    this.signallingConnection?.next({type: 'check', to: "", id_type: this.connectionType});
+    //this.peerConnection = this.createPeerConnection("", false);
+
+    //await this.peerConnection.setLocalDescription(await this.peerConnection.createOffer());
+
+    //this.signallingConnection?.next({type: this.peerConnection.localDescription?.type, sdp: this.peerConnection.localDescription?.sdp, to: "", id_type: this.connectionType});
 
     //await this.peerConnection?.createOffer().then((offer) => {
     //  console.log(offer)
