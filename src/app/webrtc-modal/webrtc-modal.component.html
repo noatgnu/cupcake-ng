@@ -4,12 +4,36 @@
 <div class="modal-body">
   <div class="d-flex flex-row gap-2">
     <button class="btn btn-primary" (click)="connect()">Connect</button>
-  </div>
-  <video id="webrtc-local" muted autoplay [width]="400" [height]="300"></video>
-  @for (peer of webrtc.peerList; track peer) {
-    <div class="d-flex flex-row gap-2">
-      <video id="webrtc-{{peer}}" autoplay [width]="400" [height]="300"></video>
+    <div class="form-floating" style="width:200px">
+      <select class="form-select" [(ngModel)]="connectionType">
+        <option [value]="'viewer'">Viewer</option>
+        <option [value]="'host'">Host</option>
+      </select>
+      <label>Connection Type</label>
     </div>
+    <button class="btn btn-primary" (click)="webrtc.reNegotiateAllPeers()">Refresh</button>
+  </div>
+  <div class="d-flex flex-row gap-2">
+    <div class="form-check">
+      <input class="form-check-input" [(ngModel)]="webrtc.enableVideo" type="checkbox">
+      <label>Enable Video</label>
+    </div>
+    <div class="form-check">
+      <input type="checkbox" class="form-check-input" [(ngModel)]="webrtc.enableAudio">
+      <label>Enable Audio</label>
+    </div>
+  </div>
+  @if (webrtc.connectionType==='host') {
+    <video id="webrtc-local" muted autoplay [width]="400" [height]="300"></video>
+  }
+  @for (peer of webrtc.peerList; track peer) {
+    @if (webrtc.peerConnectionMap[peer]) {
+      @if (webrtc.peerConnectionMap[peer].connectionType==='host') {
+        <div class="d-flex flex-row gap-2">
+          <video id="webrtc-{{peer}}" autoplay [width]="400" [height]="300"></video>
+        </div>
+      }
+    }
   }
 
 </div>

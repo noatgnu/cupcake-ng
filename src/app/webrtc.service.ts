@@ -15,11 +15,19 @@ export class WebrtcService {
   ignoreOffer = false;
   stream?: MediaStream;
   unique_id?: string;
-  peerConnectionMap: {[key: string]: RTCPeerConnection} = {};
+  peerConnectionMap: {[key: string]: {
+    pc: RTCPeerConnection,
+    offered: boolean,
+    answered: boolean,
+    connectionType: 'viewer'|'host',
+    connected: boolean,
+      dataChannel?: RTCDataChannel
+  }
+  } = {};
   peerList: string[] = [];
   acceptCall = false;
   connected = false;
-  constraints = {
+  constraints: any = {
     video: {
       width: { ideal: 1280 },
       height: { ideal: 720 },
@@ -27,6 +35,9 @@ export class WebrtcService {
     },
     audio: true,
   };
+  enableVideo = false;
+  enableAudio = false;
+  connectionType: 'viewer'|'host' = 'viewer';
   constructor(private accounts: AccountsService) {
 
   }
@@ -38,7 +49,7 @@ export class WebrtcService {
   private createPeerConnection(connectionID: string|undefined = ""): RTCPeerConnection {
     console.log("Creating peer connection for", connectionID)
     const configuration: RTCConfiguration = {
-      iceServers: [
+/*      iceServers: [
         {
           urls:[
             'turn:188.68.54.37:3478',
@@ -50,7 +61,7 @@ export class WebrtcService {
         {
           urls: ['stun:stun.l.google.com:19302']
         }
-      ],
+      ],*/
       iceCandidatePoolSize: 10,
       iceTransportPolicy: 'all',
       bundlePolicy: 'max-bundle',
@@ -58,58 +69,77 @@ export class WebrtcService {
 
     };
 
+
     console.log(connectionID)
 
     const pc = new RTCPeerConnection(configuration);
-    if (this.stream) {
-      this.stream.getTracks().forEach(track => pc.addTrack(track, this.stream!));
+    const dataChannel = pc.createDataChannel('dataChannel');
+    dataChannel.onopen = () => {
+      console.log('data channel opened')
+      this.peerConnectionMap[connectionID!].dataChannel?.send('Connection established.');
     }
-    console.log(pc.localDescription)
+    dataChannel.onmessage = (event) => {
+      console.log('data channel message')
+      console.log(event)
+    }
+    dataChannel.onclose = () => {
+      console.log('data channel closed')
+    }
+    if (this.connectionType==='viewer') {
+      //this.stream.getTracks().forEach(track => pc.addTrack(track, this.stream!));
+    //} else {
+      console.log("Viewer only. Activate receive only mode.")
+      pc.addTransceiver('video', {direction: 'recvonly'});
+      pc.addTransceiver('audio', {direction: 'recvonly'});
+    } else {
+      if (this.connectionType === 'host') {
+        this.stream?.getTracks().forEach((track) => {
+          pc.addTrack(track, this.stream!);
+        })
+      }
+    }
+
 
     pc.onicecandidate = (event) => {
       if (event.candidate && connectionID !== "" && connectionID !== undefined) {
-        console.log(event.candidate)
         this.signallingConnection?.next({
           type: 'candidate',
           candidate: event.candidate,
-          to: connectionID
+          to: connectionID,
+          id_type: this.connectionType
         });
       }
     }
     pc.onnegotiationneeded = async () => {
-      try {
-
-      } catch (e) {
-        console.log(e);
-      } finally {
-
-      }
       console.log('negotiation needed')
       this.makingOffer = true;
-      console.log(this.makingOffer)
-      await pc.setLocalDescription();
-      console.log(pc.localDescription)
-      console.log(connectionID)
-      this.signallingConnection?.next( pc.localDescription);
+      await pc.setLocalDescription(await pc.createOffer());
+
+      this.signallingConnection?.next({type: pc.localDescription?.type, sdp: pc.localDescription?.sdp, to: "", id_type: this.connectionType});
       this.makingOffer = false;
 
     }
     pc.onicecandidateerror = (event) => {
-      console.log(event)
+
     }
     pc.oniceconnectionstatechange = (event) => {
-      console.log(Date.now(), pc.iceGatheringState, "ice connection state")
+
     }
     pc.onicegatheringstatechange = (event) => {
-      console.log(Date.now(), pc.iceGatheringState, "ice gathering")
 
     }
     pc.onconnectionstatechange = (event) => {
       console.log(Date.now(), pc.connectionState, "connection state")
-      console.log(event)
+      if (pc.connectionState === 'connected') {
+        this.peerConnectionMap[connectionID!].connected = true;
+        this.peerConnectionMap[connectionID!].dataChannel = dataChannel;
+
+      } else {
+        this.peerConnectionMap[connectionID!].connected = false;
+      }
     }
     pc.ondatachannel = (event) => {
-      console.log(event)
+      event.channel.send('Hello World!')
     }
     pc.ontrack = ({track, streams}) => {
       console.log(track)
@@ -125,10 +155,6 @@ export class WebrtcService {
       }
       console.log(connectionID)
       track.onunmute = () => {
-        console.log(pc.iceConnectionState)
-        console.log(pc.iceGatheringState)
-        console.log(connectionID)
-        console.log(`webrtc-${connectionID}`)
         let v = document.getElementById(`webrtc-${connectionID}`) as HTMLVideoElement;
         console.log(v)
         if (v) {
@@ -163,7 +189,6 @@ export class WebrtcService {
       }
     }
     console.log(pc.localDescription)
-
     return pc;
   }
 
@@ -189,10 +214,10 @@ export class WebrtcService {
           this.unique_id = data.unique_id;
         }
       } else {
-        const {type, sdp, candidate, from} = data;
+        const {type, sdp, candidate, from, id_type} = data;
         if (this.acceptCall && from) {
           console.log(data)
-          await this.handleSignallingData(type, sdp, candidate, from);
+          await this.handleSignallingData(type, sdp, candidate, from, id_type);
         }
 
       }
@@ -201,65 +226,81 @@ export class WebrtcService {
     return ws;
   }
 
-  async handleSignallingData(type: string, sdp: RTCSessionDescriptionInit | undefined, candidate: RTCIceCandidate | undefined, from: string | undefined) {
+  async handleSignallingData(type: string, sdp: RTCSessionDescriptionInit | undefined, candidate: RTCIceCandidate | undefined, from: string | undefined, id_type: string | undefined) {
     let ignoreOffer = false;
-    console.log(from)
+
     if (!this.peerConnectionMap[from!]) {
-      console.log(from)
-      this.peerConnectionMap[from!] = this.createPeerConnection(from!);
+
+      this.peerConnectionMap[from!] = {
+        pc: this.createPeerConnection(from),
+        offered: false,
+        answered: false,
+        connectionType: id_type === 'host' ? 'viewer' : 'host',
+        connected: false
+      }
     }
+
     if (!this.peerList.includes(from!)) {
       this.peerList.push(from!);
     }
+    if (id_type) {
+      // @ts-ignore
+      this.peerConnectionMap[from!].connectionType = id_type
+    }
+    console.log(this.peerConnectionMap)
+
     switch (type) {
       case 'offer':
-        console.log(this.peerConnectionMap[from!])
-        console.log(this.polite)
-        console.log(this.makingOffer)
-        const offerCollision = (this.makingOffer || this.peerConnectionMap[from!].signalingState !== 'stable');
-        console.log(offerCollision)
-        ignoreOffer = !this.polite && offerCollision;
-        if (ignoreOffer) {
-          return;
-        }
-        console.log(this.peerConnectionMap[from!].localDescription)
-        console.log(this.peerConnectionMap[from!].remoteDescription)
-        console.log(sdp)
-        await this.peerConnectionMap[from!].setRemoteDescription(sdp!);
-        const answer = await this.peerConnectionMap[from!].createAnswer()
-        await this.peerConnectionMap[from!].setLocalDescription(answer);
-        console.log(answer)
-        const data = {sdp:answer.sdp, type: answer.type, to:from}
-        this.signallingConnection?.next(data);
-        console.log(this.peerConnectionMap[from!])
-        break;
-      case 'answer':
-        console.log(this.peerConnectionMap[from!])
-        console.log(sdp)
-        // check if local description is set
-        if (!this.peerConnectionMap[from!].localDescription) {
-          await this.peerConnectionMap[from!].setLocalDescription()
-        }
-        await this.peerConnectionMap[from!].setRemoteDescription(sdp!);
-        break;
-      case 'candidate':
-        console.log(candidate)
-        try {
-          await this.peerConnectionMap[from!].addIceCandidate(new RTCIceCandidate(candidate!));
-          //console.log(this.peerConnectionMap[from!].iceConnectionState)
-          //console.log(this.peerConnectionMap[from!].iceGatheringState)
-        } catch (e) {
-          if (!ignoreOffer) {
-            throw e;
+        if (sdp) {
+          if (this.peerConnectionMap[from!].pc.signalingState !== 'stable') {
+            if (!this.polite) {
+              return
+            }
+            await Promise.all([
+              this.peerConnectionMap[from!].pc.setLocalDescription({type: 'rollback'}),
+              this.peerConnectionMap[from!].pc.setRemoteDescription(sdp!)
+            ])
           }
         }
+        const answer = await this.peerConnectionMap[from!].pc.createAnswer();
+        await this.peerConnectionMap[from!].pc.setLocalDescription(answer);
+
+        // Send the answer to the remote peer
+        this.signallingConnection?.next({
+          type: answer.type,
+          sdp: answer.sdp,
+          to: from,
+          id_type: this.connectionType
+        });
+        break;
+      case 'answer':
+        // Set the remote description
+        await this.peerConnectionMap[from!].pc.setRemoteDescription(sdp!);
+        break;
+      case 'candidate':
+        await this.peerConnectionMap[from!].pc.addIceCandidate(candidate!);
         break;
     }
   }
 
   async start() {
-    if (!this.stream) {
-      try {
+    try {
+      if (this.enableAudio || this.enableVideo) {
+        this.constraints = {
+          video: this.enableVideo ? {
+            width: { ideal: 1280 },
+            height: { ideal: 720 },
+            frameRate: { ideal: 30 },
+          } : false,
+          audio: this.enableAudio ? true : false,
+        }
+      } else {
+        this.constraints = {
+          video: false,
+          audio: false
+        }
+      }
+      if (this.constraints.video || this.constraints.audio) {
         this.stream = await navigator.mediaDevices.getUserMedia(this.constraints);
         const currentVideoElement = document.getElementById('webrtc-local') as HTMLVideoElement;
         if (currentVideoElement) {
@@ -268,18 +309,21 @@ export class WebrtcService {
             currentVideoElement.muted = true;
             currentVideoElement.play();
           }
-
         }
-      } catch (e) {
-        console.error(e);
       }
+    } catch (e) {
+      console.error(e);
     }
   }
 
-  async call() {
+  async call(connectionType: 'viewer'|'host') {
     this.acceptCall = true;
-    await this.start();
+    this.connectionType = connectionType;
+    if (this.connectionType === 'host') {
+      await this.start();
+    }
     this.peerConnection = this.createPeerConnection();
+
     //await this.peerConnection?.createOffer().then((offer) => {
     //  console.log(offer)
     //  this.peerConnection?.setLocalDescription(offer);
@@ -288,9 +332,10 @@ export class WebrtcService {
     // check webrtc connection from peerConnectionMap every 5 seconds
     setInterval(() => {
       for (const peer in this.peerConnectionMap) {
-        if (this.peerConnectionMap[peer].iceConnectionState === 'disconnected') {
-          this.peerConnectionMap[peer].close();
+        if (this.peerConnectionMap[peer].pc.iceConnectionState === 'disconnected') {
+          this.peerConnectionMap[peer].pc.close();
           delete this.peerConnectionMap[peer];
+          this.peerList = this.peerList.filter((p) => p !== peer);
         } else {
           // print out all stats
           //console.log(this.peerConnectionMap[peer].iceGatheringState)
@@ -315,15 +360,32 @@ export class WebrtcService {
     this.signallingConnection?.unsubscribe();
   }
 
-  getStreamFromPeer(peerID: string) {
-    // retrieve video stream from peer to be displayed
-
-
+  removeAllTracksFromAllPeers() {
+    for (const peer in this.peerConnectionMap) {
+      this.peerConnectionMap[peer].pc.getSenders().forEach((sender) => {
+        this.peerConnectionMap[peer].pc.removeTrack(sender);
+      })
+    }
   }
 
-  precacheIceCandidates(peerConnection: RTCPeerConnection) {
-
-
-
+  addAllTracksToAllPeers() {
+    for (const peer in this.peerConnectionMap) {
+      this.stream?.getTracks().forEach((track) => {
+        this.peerConnectionMap[peer].pc.addTrack(track, this.stream!);
+      })
+    }
   }
+
+  reNegotiateAllPeers() {
+    //this.removeAllTracksFromAllPeers();
+    this.removeAllTracksFromAllPeers();
+/*    for (const peer in this.peerConnectionMap) {
+      this.peerConnectionMap[peer].pc.createOffer().then((offer) => {
+        const data = {sdp:offer.sdp, type: offer.type, to:peer, id_type: this.connectionType}
+        this.peerConnectionMap[peer].pc.setLocalDescription(offer);
+        this.signallingConnection?.next(data);
+      })
+    }*/
+  }
+
 }
