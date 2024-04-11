@@ -49,7 +49,7 @@ export class WebrtcService {
   private createPeerConnection(connectionID: string|undefined = "", autonegotiate: boolean = true): RTCPeerConnection {
     console.log("Creating peer connection for", connectionID)
     const configuration: RTCConfiguration = {
-/*      iceServers: [
+      iceServers: [
         {
           urls:[
             'turn:188.68.54.37:3478',
@@ -61,7 +61,7 @@ export class WebrtcService {
         {
           urls: ['stun:stun.l.google.com:19302']
         }
-      ],*/
+      ],
       iceCandidatePoolSize: 10,
       iceTransportPolicy: 'all',
       bundlePolicy: 'max-bundle',
