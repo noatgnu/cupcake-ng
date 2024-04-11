@@ -234,19 +234,7 @@ export class WebrtcService {
           // reset the connection
           this.peerConnectionMap[from!].pc.close();
           delete this.peerConnectionMap[from!];
-          this.peerConnectionMap[from!] = {
-            pc: this.createPeerConnection(from),
-            offered: false,
-            answered: false,
-            connectionType: id_type === 'host' ? 'viewer' : 'host',
-            connected: false
-          }
-
-          if (!this.peerList.includes(from!)) {
-            this.peerList.push(from!);
-          }
         }
-      } else {
         this.peerConnectionMap[from!] = {
           pc: this.createPeerConnection(from),
           offered: false,
@@ -255,11 +243,19 @@ export class WebrtcService {
           connected: false
         }
 
-        if (!this.peerList.includes(from!)) {
-          this.peerList.push(from!);
+
+      } else {
+        this.peerConnectionMap[from!] = {
+          pc: this.createPeerConnection(from),
+          offered: false,
+          answered: false,
+          connectionType: id_type === 'host' ? 'viewer' : 'host',
+          connected: false
         }
       }
-
+    }
+    if (!this.peerList.includes(from!)) {
+      this.peerList.push(from!);
     }
     if (id_type) {
       // @ts-ignore
