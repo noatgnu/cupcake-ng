@@ -16,6 +16,8 @@ export class WebrtcModalComponent {
   connectionType: 'host'|'viewer' = 'viewer'
 
   constructor(public webrtc: WebrtcService, private activeModal: NgbActiveModal) {
+    this.connectionType = this.webrtc.connectionType
+    console.log(this.connectionType)
 
   }
 
