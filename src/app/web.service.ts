@@ -365,6 +365,22 @@ export class WebService {
     );
   }
 
+  updateTranscription(annotation_id: number, transcription: string) {
+    return this.http.put(
+      `${this.baseURL}/api/annotation/${annotation_id}/`,
+      {transcription: transcription},
+      {responseType: 'json', observe: 'body'}
+    );
+  }
+
+  updateTranslation(annotation_id: number, translation: string) {
+    return this.http.put(
+      `${this.baseURL}/api/annotation/${annotation_id}/`,
+      {translation: translation},
+      {responseType: 'json', observe: 'body'}
+    );
+  }
+
   updateProtocol(protocol_id: number, protocol_title: string, protocol_description: string, enabled: boolean) {
     return this.http.put<Protocol>(
       `${this.baseURL}/api/protocol/${protocol_id}/`,

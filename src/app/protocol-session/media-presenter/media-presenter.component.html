@@ -29,6 +29,7 @@
       <li [ngbNavItem]="'transcription'" [destroyOnHide]="false">
         <button ngbNavLink>Transcription</button>
         <ng-template ngbNavContent>
+          <button class="btn btn-sm btn-primary" (click)="editText('transcription')">Edit</button>
           <div class="list-group">
             @for (e of subtitles.entries; track e; let i = $index) {
               <div class="list-group-item list-group-item-action border-0 rounded-1" (click)="seekToTimePosition(e.from)"
@@ -44,6 +45,7 @@
         <li [ngbNavItem]="'translation'" [destroyOnHide]="false">
           <button ngbNavLink>Translation</button>
           <ng-template ngbNavContent>
+            <button class="btn btn-sm btn-primary" (click)="editText('translation')">Edit</button>
             <div class="list-group">
               @for (e of translationSubtitles.entries; track e; let i = $index) {
                 <div class="list-group-item list-group-item-action border-0 rounded-1" (click)="seekToTimePosition(e.from)"

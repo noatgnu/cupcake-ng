@@ -3,7 +3,8 @@ import {Annotation} from "../../annotation";
 import {WebService} from "../../web.service";
 import {parse} from "@plussub/srt-vtt-parser";
 import {NgClass} from "@angular/common";
-import {NgbNav, NgbNavContent, NgbNavItem, NgbNavLinkButton, NgbNavOutlet} from "@ng-bootstrap/ng-bootstrap";
+import {NgbModal, NgbNav, NgbNavContent, NgbNavItem, NgbNavLinkButton, NgbNavOutlet} from "@ng-bootstrap/ng-bootstrap";
+import {TextScriptEditorModalComponent} from "../text-scsript-editor-modal/text-script-editor-modal.component";
 
 @Component({
   selector: 'app-media-presenter',
@@ -57,7 +58,7 @@ export class MediaPresenterComponent {
   get annotation(): Annotation {
     return this._annotation!
   }
-  constructor(private web: WebService) { }
+  constructor(private web: WebService, private modal: NgbModal) { }
 
   msToTime(duration: number) {
     const milliseconds = Math.floor((duration % 1000) / 100)
@@ -116,5 +117,36 @@ export class MediaPresenterComponent {
         this.videoControlElement.nativeElement.currentTime = time / 1000
       }
     }
+  }
+  editText(type: 'transcription'|'translation') {
+    const ref  = this.modal.open(TextScriptEditorModalComponent)
+    if (type === 'transcription') {
+      ref.componentInstance.text = this.annotation.transcription
+    } else {
+      ref.componentInstance.text = this.annotation.translation
+    }
+    ref.closed.subscribe((result) => {
+      if (type === 'transcription') {
+        this.annotation.transcription = result
+        const blob = new Blob([result], {type: 'text/plain'})
+        this.transcription = URL.createObjectURL(blob)
+        this.subtitles = parse(result)
+        this.web.updateTranscription(this.annotation.id, result).subscribe(
+          (result) => {
+            console.log(result)
+          }
+        )
+      } else {
+        this.annotation.translation = result
+        const blob = new Blob([result], {type: 'text/plain'})
+        this.translation = URL.createObjectURL(blob)
+        this.translationSubtitles = parse(result)
+        this.web.updateTranslation(this.annotation.id, result).subscribe(
+          (result) => {
+            console.log(result)
+          }
+        )
+      }
+    })
   }
 }

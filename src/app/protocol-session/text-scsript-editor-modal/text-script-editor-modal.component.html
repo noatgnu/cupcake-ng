@@ -1,0 +1,12 @@
+<div class="modal-header">
+  <h5 class="modal-title">Text Editor</h5>
+</div>
+<div class="modal-body">
+  <div class="form-group">
+    <textarea class="form-control" [(ngModel)]="text" rows="10"></textarea>
+  </div>
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn btn-primary" (click)="save()">Save</button>
+  <button type="button" class="btn btn-secondary" (click)="cancel()">Close</button>
+</div>
