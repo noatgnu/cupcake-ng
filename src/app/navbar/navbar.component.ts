@@ -91,7 +91,7 @@ export class NavbarComponent {
   }
 
   async testWebRTC() {
-    const ref = this.modal.open(WebrtcModalComponent)
+    const ref = this.modal.open(WebrtcModalComponent, {scrollable: true, size: 'lg'})
   }
 
   openSessionEditor() {

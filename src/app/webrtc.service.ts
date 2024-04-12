@@ -1,4 +1,4 @@
-import {ElementRef, Injectable} from '@angular/core';
+import {Injectable} from '@angular/core';
 import {WebSocketSubject} from "rxjs/internal/observable/dom/WebSocketSubject";
 import {environment} from "../environments/environment";
 import {AccountsService} from "./accounts/accounts.service";
@@ -15,6 +15,7 @@ export class WebrtcService {
   ignoreOffer = false;
   stream?: MediaStream;
   unique_id?: string;
+  searchingForPeers = false;
   peerConnectionMap: {[key: string]: {
     pc: RTCPeerConnection,
     offered: boolean,
@@ -134,6 +135,7 @@ export class WebrtcService {
     pc.onconnectionstatechange = (event) => {
       console.log(Date.now(), pc.connectionState, "connection state")
       if (pc.connectionState === 'connected') {
+        this.connected = true;
         this.peerConnectionMap[connectionID!].connected = true;
         this.peerConnectionMap[connectionID!].dataChannel = dataChannel;
 
@@ -228,6 +230,9 @@ export class WebrtcService {
   }
 
   async handleSignallingData(type: string, sdp: RTCSessionDescriptionInit | undefined, candidate: RTCIceCandidate | undefined, from: string | undefined, id_type: string | undefined) {
+    if (!this.acceptCall) {
+      return
+    }
     if (!this.peerConnectionMap[from!]) {
       if (type === 'check') {
         if (this.peerConnectionMap[from!]) {
@@ -242,8 +247,6 @@ export class WebrtcService {
           connectionType: id_type === 'host' ? 'viewer' : 'host',
           connected: false
         }
-
-
       } else {
         this.peerConnectionMap[from!] = {
           pc: this.createPeerConnection(from),
@@ -263,6 +266,7 @@ export class WebrtcService {
     }
     console.log(this.peerConnectionMap)
     console.log(this.peerConnectionMap[from!].pc.signalingState)
+
     switch (type) {
       //case 'check':
       //  this.signallingConnection?.next({type: 'available', to: from, id_type: this.connectionType});
@@ -337,10 +341,12 @@ export class WebrtcService {
 
   async call(connectionType: 'viewer'|'host') {
     this.acceptCall = true;
+    this.connected = false;
     this.connectionType = connectionType;
     if (this.connectionType === 'host') {
       await this.start();
     }
+    this.searchingForPeers = true;
     this.signallingConnection?.next({type: 'check', to: "", id_type: this.connectionType});
     //this.peerConnection = this.createPeerConnection("", false);
 
@@ -376,6 +382,8 @@ export class WebrtcService {
 
   async end() {
     this.acceptCall = false;
+    this.connected = false;
+    this.searchingForPeers = false;
     this.stream?.getTracks().forEach((track) => {
       track.stop();
     });

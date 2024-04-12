@@ -3,7 +3,11 @@
 </div>
 <div class="modal-body">
   <div class="d-flex flex-row gap-2">
-    <button class="btn btn-primary" (click)="connect()">Connect</button>
+    @if (!webrtc.searchingForPeers) {
+      <button class="btn btn-primary" (click)="connect()">Connect</button>
+    } @else {
+      <button class="btn btn-danger" (click)="webrtc.end()">Disconnect</button>
+    }
     <div class="form-floating" style="width:200px">
       <select class="form-select" [(ngModel)]="connectionType">
         <option [value]="'viewer'">Viewer</option>
@@ -11,7 +15,7 @@
       </select>
       <label>Connection Type</label>
     </div>
-    <button class="btn btn-primary" (click)="webrtc.reNegotiateAllPeers()">Refresh</button>
+<!--    <button class="btn btn-primary" (click)="webrtc.reNegotiateAllPeers()">Refresh</button>-->
   </div>
   <div class="d-flex flex-row gap-2">
     <div class="form-check">
@@ -26,14 +30,24 @@
   @if (webrtc.connectionType==='host') {
     <video id="webrtc-local" muted autoplay [width]="400" [height]="300"></video>
   }
-  @for (peer of webrtc.peerList; track peer) {
-    @if (webrtc.peerConnectionMap[peer]) {
-      @if (webrtc.peerConnectionMap[peer].connectionType==='host') {
-        <div class="d-flex flex-row gap-2">
-          <video id="webrtc-{{peer}}" autoplay [width]="400" [height]="300"></video>
-        </div>
+  @if (webrtc.connected && webrtc.searchingForPeers) {
+    @for (peer of webrtc.peerList; track peer) {
+      @if (webrtc.peerConnectionMap[peer]) {
+        @if (webrtc.peerConnectionMap[peer].connectionType==='host') {
+          <div class="d-flex flex-row gap-2">
+            <video id="webrtc-{{peer}}" autoplay [width]="400" [height]="300"></video>
+          </div>
+        }
       }
     }
+  } @else if (!webrtc.connected && webrtc.searchingForPeers) {
+    <div class="d-flex flex-row justify-content-center align-items-center">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Connecting to peers...</span>
+      </div>
+    </div>
   }
-
+</div>
+<div class="modal-footer">
+  <button class="btn btn-secondary" (click)="close()">Close</button>
 </div>

@@ -64,4 +64,10 @@ export class AnnotationPresenterComponent {
       }
     })
   }
+
+  ocrAnnotation(annotation: Annotation) {
+    this.web.sketchOCR(annotation.id).subscribe((response: any) => {
+      console.log(response)
+    })
+  }
 }

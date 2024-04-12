@@ -1,3 +1,20 @@
 @if (data) {
   <app-handwritten-annotation [disabled]="true" [data]="data"></app-handwritten-annotation>
+  @if (transcription) {
+    <div class="overflow-auto" style="max-height: 300px">
+      <ul ngbNav #nav="ngbNav" [(activeId)]="active" class="nav-tabs" [destroyOnHide]="false">
+        <li [ngbNavItem]="'OCR'" [destroyOnHide]="false">
+          <button ngbNavLink>OCR</button>
+          <ng-template ngbNavContent>
+            @for (a of transcription.trim().split('\n'); track a) {
+              <p>
+                {{a}}
+              </p>
+            }
+          </ng-template>
+        </li>
+      </ul>
+      <div [ngbNavOutlet]="nav" class="mt-2"></div>
+    </div>
+  }
 }

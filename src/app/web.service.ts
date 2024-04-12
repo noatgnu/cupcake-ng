@@ -404,4 +404,12 @@ export class WebService {
       {responseType: 'json', observe: 'body'}
     );
   }
+
+  sketchOCR(annotation_id: number) {
+    return this.http.post(
+      `${this.baseURL}/api/annotation/${annotation_id}/ocr/`,
+      {},
+      {responseType: 'json', observe: 'body'}
+    )
+  }
 }
