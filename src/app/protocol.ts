@@ -9,6 +9,8 @@ export interface Protocol {
   steps: ProtocolStep[];
   sections: ProtocolSection[];
   enabled: boolean;
+  complexity_rating: number;
+  duration_rating: number;
 }
 
 export interface ProtocolStep {

@@ -30,35 +30,82 @@
   </div>
 </div>
 
-
-@if (protocolQuery) {
-  @if (protocolQuery.results.length > 0) {
-    <div class="d-flex flex-column p-5 gap-2">
-      <hr>
-      <h5>User's Protocols</h5>
-      <div class="list-group">
-        @for (protocol of protocolQuery.results; track protocol.id) {
-          <div class="list-group-item list-group-item-action">
-            <div>
-              <a href="/#/protocol-session/{{protocol.id}}" target="_blank"><span [innerHTML]="protocol.protocol_title"></span></a>
+@if (protocolQuery || protocolSessionQuery) {
+  <div class="container">
+    <ul ngbNav #nav="ngbNav" [(activeId)]="active" class="nav-tabs" [destroyOnHide]="false">
+      @if (protocolQuery) {
+        <li [ngbNavItem]="'protocols'" [destroyOnHide]="false">
+          <button ngbNavLink>Protocols <span class="badge bg-primary">{{protocolQuery.count}}</span></button>
+          <ng-template ngbNavContent>
+            <div class="list-group">
+              @for (protocol of protocolQuery.results; track protocol.id) {
+                <div class="list-group-item list-group-item-action">
+                  <div>
+                    <a href="/#/protocol-session/{{protocol.id}}" target="_blank"><span [innerHTML]="protocol.protocol_title"></span></a>
+                  </div>
+                  <small>{{ protocol.protocol_created_on | date : "short" }}</small>
+                </div>
+              }
             </div>
-            <small>{{ protocol.protocol_created_on | date : "short" }}</small>
-          </div>
-        }
-      </div>
-      <div class="d-flex flex-row gap-2">
-        @if (protocolQuery.previous) {
-          <button class="btn btn-primary" (click)="getUserProtocols(protocolQuery.previous)">Previous</button>
-        } @else {
-          <button class="btn btn-primary" disabled>Previous</button>
-        }
-        @if (protocolQuery.next) {
-          <button class="btn btn-primary" (click)="getUserProtocols(protocolQuery.next)">Next</button>
-        } @else {
-          <button class="btn btn-primary" disabled>Next</button>
-        }
-      </div>
-    </div>
+            <div class="d-flex flex-row gap-2 mt-2">
+              @if (protocolQuery.previous) {
+                <button class="btn btn-primary" (click)="getUserProtocols(protocolQuery.previous)">Previous</button>
+              } @else {
+                <button class="btn btn-primary" disabled>Previous</button>
+              }
+              @if (protocolQuery.next) {
+                <button class="btn btn-primary" (click)="getUserProtocols(protocolQuery.next)">Next</button>
+              } @else {
+                <button class="btn btn-primary" disabled>Next</button>
+              }
+            </div>
+          </ng-template>
+        </li>
+      }
 
-  }
+      @if (protocolSessionQuery) {
+        <li [ngbNavItem]="'sessions'" [destroyOnHide]="false">
+          <button ngbNavLink>Protocol Sessions <span class="badge bg-primary">{{protocolSessionQuery.count}}</span></button>
+          <ng-template ngbNavContent>
+            <div class="list-group">
+              @for (session of protocolSessionQuery.results; track session.id) {
+                <div class="list-group-item list-group-item-action" (click)="getAssociatedProtocolTitle(session.unique_id)">
+                  <div>
+                    @if (session.name) {
+                      {{session.name}}
+                    } @else {
+                      {{session.unique_id}}
+                    }
+                  </div>
+                  <small>{{ session.created_at | date : "short" }}</small>
+                  @if (session.unique_id === currentSessionID) {
+                    @for (protocol of associatedSessionProtocols; track protocol.id) {
+                      <div>
+                        <small>Associated Protocol: <a href="/#/protocol-session/{{protocol.id}}&{{session.unique_id}}" target="_blank">{{protocol.protocol_title}}</a></small>
+                      </div>
+                    }
+                  }
+                </div>
+              }
+            </div>
+            <div class="d-flex flex-row gap-2 mt-2">
+              @if (protocolSessionQuery.previous) {
+                <button class="btn btn-primary" (click)="getUserSessions(protocolSessionQuery.previous)">Previous</button>
+              } @else {
+                <button class="btn btn-primary" disabled>Previous</button>
+              }
+              @if (protocolSessionQuery.next) {
+                <button class="btn btn-primary" (click)="getUserSessions(protocolSessionQuery.next)">Next</button>
+              } @else {
+                <button class="btn btn-primary" disabled>Next</button>
+              }
+            </div>
+          </ng-template>
+        </li>
+      }
+    </ul>
+    <div [ngbNavOutlet]="nav" class="mt-2"></div>
+  </div>
 }
+
+

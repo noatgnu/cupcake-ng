@@ -3,7 +3,7 @@ import {HttpClient, HttpParams} from "@angular/common/http";
 import {environment} from "../environments/environment";
 import {map, Observable} from "rxjs";
 import {Protocol, ProtocolQuery, ProtocolSection, ProtocolStep} from "./protocol";
-import {ProtocolSession} from "./protocol-session";
+import {ProtocolSession, ProtocolSessionQuery} from "./protocol-session";
 import {TimeKeeper} from "./time-keeper";
 import {Annotation, AnnotationQuery} from "./annotation";
 
@@ -427,5 +427,24 @@ export class WebService {
       {},
       {responseType: 'json', observe: 'body'}
     )
+  }
+
+  getUserSessions(url?: string) {
+    if (url) {
+      return this.http.get<ProtocolSessionQuery>(
+        url,
+        {responseType: 'json', observe: 'body'}
+      );
+    }
+    return this.http.get<ProtocolSessionQuery>(
+      `${this.baseURL}/api/session/get_user_sessions/`,
+      {responseType: 'json', observe: 'body'}
+    );
+  }
+  getAssociatedProtocolTitles(session_id: string) {
+    return this.http.get<Protocol[]>(
+      `${this.baseURL}/api/session/${session_id}/get_associated_protocol_titles/`,
+      {responseType: 'json', observe: 'body'}
+    );
   }
 }

@@ -6,9 +6,12 @@ import {DataService} from "../data.service";
 import {Router} from "@angular/router";
 import {DatePipe, NgOptimizedImage} from "@angular/common";
 import {resolve} from "@angular/compiler-cli";
-import {ProtocolQuery} from "../protocol";
+import {Protocol, ProtocolQuery} from "../protocol";
 import {ToastService} from "../toast.service";
 import {AccountsService} from "../accounts/accounts.service";
+import {ProtocolSession, ProtocolSessionQuery} from "../protocol-session";
+import {NgbNav, NgbNavContent, NgbNavItem, NgbNavLinkButton, NgbNavOutlet, NgbRating} from "@ng-bootstrap/ng-bootstrap";
+import {SessionAnnotationComponent} from "../protocol-session/session-annotation/session-annotation.component";
 
 @Component({
   selector: 'app-home',
@@ -16,7 +19,13 @@ import {AccountsService} from "../accounts/accounts.service";
   imports: [
     ReactiveFormsModule,
     NgOptimizedImage,
-    DatePipe
+    DatePipe,
+    NgbNav,
+    NgbNavContent,
+    NgbNavLinkButton,
+    NgbNavItem,
+    NgbRating,
+    NgbNavOutlet
   ],
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss'
@@ -28,8 +37,13 @@ export class HomeComponent implements OnInit, AfterViewInit {
     url: new FormControl('', Validators.required),
   })
   protocolQuery?: ProtocolQuery;
-  loading = false;
-
+  loadingProtocol = false;
+  loadingSession = false;
+  protocolSessionQuery?: ProtocolSessionQuery;
+  associatedSessionProtocols: Protocol[] = [];
+  currentSessionID: string = '';
+  active = 'protocols'
+  rating = 0;
   constructor(private accounts: AccountsService, private router: Router, private fb: FormBuilder, private web: WebService, private dataService: DataService, private toastService: ToastService) {
 
   }
@@ -41,6 +55,7 @@ export class HomeComponent implements OnInit, AfterViewInit {
   ngAfterViewInit() {
     if (this.accounts.loggedIn) {
       this.getUserProtocols()
+      this.getUserSessions()
     } else {
       this.toastService.show("Login", "Please login to access your protocols")
       this.accounts.triggerLoginSubject.next(true)
@@ -75,16 +90,37 @@ export class HomeComponent implements OnInit, AfterViewInit {
   }
 
   getUserProtocols(url?: string) {
-    this.loading = true;
+    this.loadingProtocol = true;
     this.toastService.show("Protocol", "Fetching user's protocols...")
     this.web.getUserProtocols(url).subscribe((response) => {
       this.protocolQuery = response;
-      this.loading = false;
+      this.loadingProtocol = false;
       this.toastService.show("Protocol", "Protocols fetched successfully")
     }, (error) => {
       console.log(error);
-      this.loading = false;
+      this.loadingProtocol = false;
       this.toastService.show("Protocol", "Error fetching protocols")
     });
+  }
+
+  getUserSessions(url?: string) {
+    this.loadingSession = true;
+    this.toastService.show("Protocol", "Fetching user's sessions...")
+    this.web.getUserSessions(url).subscribe((response) => {
+      this.protocolSessionQuery = response;
+      this.loadingSession = false;
+      this.toastService.show("Protocol", "Sessions fetched successfully")
+    }, (error) => {
+      console.log(error);
+      this.loadingSession = false;
+      this.toastService.show("Protocol", "Error fetching sessions")
+    });
+  }
+
+  getAssociatedProtocolTitle(sessionID: string) {
+    this.currentSessionID = sessionID;
+    this.web.getAssociatedProtocolTitles(sessionID).subscribe((response) => {
+      this.associatedSessionProtocols = response;
+    })
   }
 }

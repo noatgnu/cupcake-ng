@@ -1,0 +1,9 @@
+<ngb-rating [(rate)]="rating">
+  <ng-template let-fill="fill" let-index="index">
+    @if (fill === 100) {
+      <img ngSrc="assets/cupcake_24x24.png" alt="fill-rate" height="24" width="24">
+    } @else {
+      <img ngSrc="assets/cupcake_24x24_tinted.png" alt="blank-rate" height="24" width="24">
+    }
+  </ng-template>
+</ngb-rating>

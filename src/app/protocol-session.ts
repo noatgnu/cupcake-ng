@@ -11,3 +11,10 @@ export interface ProtocolSession {
   name: string;
   time_keeper: TimeKeeper[];
 }
+
+export interface ProtocolSessionQuery {
+  count: number;
+  next: string;
+  previous: string;
+  results: ProtocolSession[];
+}
