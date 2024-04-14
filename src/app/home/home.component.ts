@@ -12,6 +12,7 @@ import {AccountsService} from "../accounts/accounts.service";
 import {ProtocolSession, ProtocolSessionQuery} from "../protocol-session";
 import {NgbNav, NgbNavContent, NgbNavItem, NgbNavLinkButton, NgbNavOutlet, NgbRating} from "@ng-bootstrap/ng-bootstrap";
 import {SessionAnnotationComponent} from "../protocol-session/session-annotation/session-annotation.component";
+import {ProtocolListComponent} from "../protocol-list/protocol-list.component";
 
 @Component({
   selector: 'app-home',
@@ -25,7 +26,8 @@ import {SessionAnnotationComponent} from "../protocol-session/session-annotation
     NgbNavLinkButton,
     NgbNavItem,
     NgbRating,
-    NgbNavOutlet
+    NgbNavOutlet,
+    ProtocolListComponent
   ],
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss'

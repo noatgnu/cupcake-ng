@@ -18,6 +18,11 @@ export const routes: Routes = [
     loadChildren: () => import('./accounts/accounts.module').then(m => m.AccountsModule)
   },
   {
+    path: 'session-editor',
+    loadChildren: () => import('./session-editor/session-editor.module').then(m => m.SessionEditorModule)
+  }
+  ,
+  {
     path: '**',
     redirectTo: 'home'
   },

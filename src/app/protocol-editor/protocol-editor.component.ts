@@ -7,7 +7,7 @@ import {DataService} from "../data.service";
 import {Router} from "@angular/router";
 import {TimePickerComponent} from "../time-picker/time-picker.component";
 import {ToastService} from "../toast.service";
-import {NgbModalConfig} from "@ng-bootstrap/ng-bootstrap";
+import {NgbDate, NgbModalConfig} from "@ng-bootstrap/ng-bootstrap";
 
 @Component({
   selector: 'app-protocol-editor',
@@ -203,5 +203,9 @@ export class ProtocolEditorComponent {
     this.web.updateProtocol(this.protocolID, this.form.value.protocol_title, this.form.value.protocol_description, this.form.value.enabled).subscribe(() => {
       this.toastService.show("Protocol", "Saved")
     })
+  }
+
+  handleDateSelect(date: NgbDate) {
+
   }
 }

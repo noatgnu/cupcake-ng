@@ -10,6 +10,8 @@ export interface ProtocolSession {
   protocol: number[];
   name: string;
   time_keeper: TimeKeeper[];
+  started_at?: Date;
+  ended_at?: Date;
 }
 
 export interface ProtocolSessionQuery {

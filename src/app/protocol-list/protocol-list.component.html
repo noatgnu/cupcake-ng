@@ -1,0 +1,15 @@
+<div class="list-group">
+  @for (protocol of protocols; track protocol.id) {
+    <div class="list-group-item list-group-item-action">
+      <div>
+        <a href="/#/protocol-session/{{protocol.id}}" target="_blank"><span [innerHTML]="protocol.protocol_title"></span></a>
+      </div>
+      @if (protocol.protocol_created_on) {
+        <small>{{ protocol.protocol_created_on | date : "short" }}</small><br>
+      }
+      @if (durationMap[protocol.id] !== 0) {
+        <small>Total duration: {{timeKeeper.convertTime(durationMap[protocol.id])}}</small><br>
+      }
+    </div>
+  }
+</div>

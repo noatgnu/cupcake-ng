@@ -447,4 +447,16 @@ export class WebService {
       {responseType: 'json', observe: 'body'}
     );
   }
+  searchProtocols(url: string = "", search: string) {
+    if (url !== "") {
+      return this.http.get<ProtocolQuery>(
+        url,
+        {responseType: 'json', observe: 'body'}
+      );
+    }
+    return this.http.get<ProtocolQuery>(
+      `${this.baseURL}/api/protocol/?search=${search}`,
+      {responseType: 'json', observe: 'body'}
+    );
+  }
 }

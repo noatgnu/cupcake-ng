@@ -1,11 +1,13 @@
 import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {FormBuilder, FormControl, ReactiveFormsModule} from "@angular/forms";
+import {NgbTimepicker, NgbTimeStruct} from "@ng-bootstrap/ng-bootstrap";
 
 @Component({
   selector: 'app-time-picker',
   standalone: true,
   imports: [
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    NgbTimepicker
   ],
   templateUrl: './time-picker.component.html',
   styleUrl: './time-picker.component.scss'
@@ -16,6 +18,7 @@ export class TimePickerComponent {
     minutes: new FormControl<number>(0),
     hours: new FormControl<number>(0),
   })
+
   @Output() output: EventEmitter<number> = new EventEmitter<number>()
   _seconds = 0
   @Input() set seconds(value: number) {
