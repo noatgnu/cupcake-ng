@@ -20,7 +20,7 @@ export class WebrtcVideoComponent implements AfterViewInit{
   }
 
   ngAfterViewInit() {
-    if (this.webrtc.stream) {
+    /*if (this.webrtc.stream) {
       const currentVideoElement = document.getElementById('webrtc-local') as HTMLVideoElement;
       if (currentVideoElement) {
         currentVideoElement.srcObject = this.webrtc.stream;
@@ -30,7 +30,7 @@ export class WebrtcVideoComponent implements AfterViewInit{
         }
         console.log(this.webrtc.stream)
       }
-    }
+    }*/
   }
 
 }

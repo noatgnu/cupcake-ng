@@ -166,6 +166,8 @@ export class WebrtcService {
       track.onunmute = () => {
         let v = document.getElementById(`webrtc-${connectionID}`) as HTMLVideoElement;
         console.log(v)
+        console.log(`webrtc-${connectionID}`)
+        console.log(this.peerConnectionMap)
         if (v) {
           console.log(streams)
           v.srcObject = streams[0];
@@ -181,9 +183,11 @@ export class WebrtcService {
               for (const node of nodes) {
                 if (node.contains(document.getElementById(`webrtc-${connectionID}`))) {
                   v = document.getElementById(`webrtc-${connectionID}`) as HTMLVideoElement;
+                  console.log(v)
                   if (v) {
                     v.srcObject = streams[0];
                     v.oncanplaythrough = () => {
+                      v.muted = true
                       v.play();
                     }
                   }
@@ -192,6 +196,10 @@ export class WebrtcService {
                 }
               }
             })
+          })
+          observer.observe(document.documentElement, {
+            childList: true,
+            subtree: true
           })
         }
         console.log('track unmuted')
