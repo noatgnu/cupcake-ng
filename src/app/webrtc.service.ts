@@ -50,6 +50,7 @@ export class WebrtcService {
   private async createPeerConnection(connectionID: string|undefined = "", autonegotiate: boolean = true): Promise<RTCPeerConnection> {
     console.log("Creating peer connection for", connectionID)
     const credential = await this.web.getCoturnCredentials().toPromise();
+    console.log(credential)
     const configuration: RTCConfiguration = {
       iceServers: [
         {
