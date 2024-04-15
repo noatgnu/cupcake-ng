@@ -13,7 +13,7 @@
     <b>Associated Protocols</b>
     @if (associatedProtocols.length > 0) {
       <div>
-        <app-protocol-list [protocols]="associatedProtocols"></app-protocol-list>
+        <app-protocol-list [enableRemove]="true" [protocols]="associatedProtocols" (removeProtocol)="handleProtocolRemove($event)"></app-protocol-list>
       </div>
     }
     <div class="form-floating mt-2">
@@ -23,7 +23,7 @@
     @if (protocolSearchResults) {
       <div class="d-flex flex-column gap-2">
         Search results:
-        <app-protocol-list [protocols]="protocolSearchResults.results"></app-protocol-list>
+        <app-protocol-list [enableAdd]="true" [protocols]="protocolSearchResults.results" (addProtocol)="handleProtocolAdd($event)"></app-protocol-list>
         <div class="d-flex flex-row gap-2">
           @if (protocolSearchResults.previous) {
             <button class="btn btn-primary" (click)="getProtocols(protocolSearchResults.previous)">Previous</button>
@@ -40,22 +40,39 @@
       </div>
     }
   </form>
-  <div class="mt-2">
-    <ngb-datepicker #dp [displayMonths]="2" (dateSelect)="onDateSelection($event)" [dayTemplate]="t"></ngb-datepicker>
+  <div class="d-flex flex-row justify-content-center mt-2">
+    <div>
+      <div>
+        <b>Session Schedule</b>
+      </div>
+      <ngb-datepicker #dp [displayMonths]="2" (dateSelect)="onDateSelection($event)" [dayTemplate]="t"></ngb-datepicker>
 
-    <ng-template #t let-date let-focused="focused">
+      <ng-template #t let-date let-focused="focused">
 	    <span
-    class="custom-day"
-    [class.focused]="focused"
-    [class.range]="isRange(date)"
-    [class.faded]="isHovered(date) || isInside(date)"
-    [class.durationPreview]="isInPreviewRange(date)&&!isHovered(date)"
-    (mouseenter)="hoveredDate = date"
-    (mouseleave)="hoveredDate = null"
-  >
+        class="custom-day"
+        [class.focused]="focused"
+        [class.range]="isRange(date)"
+        [class.faded]="isHovered(date) || isInside(date)"
+        [class.durationPreview]="isInPreviewRange(date)&&!isHovered(date)"
+        (mouseenter)="hoveredDate = date"
+        (mouseleave)="hoveredDate = null"
+      >
 		{{ date.day }}
 	    </span>
-    </ng-template>
+      </ng-template>
+      <div class="mt-1 d-flex flex-row justify-content-center align-items-center">
+        <ul>
+          <b>Calendar Legend:</b>
+          <li>Selected Range <span class="custom-day range" style="height: 1rem"></span><span class="custom-day faded" style="height: 1rem"></span></li>
+          <li>Protocol Estimated Preview <span class="custom-day durationPreview" style="height: 1rem"></span></li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+  <div class="d-flex flex-row gap-2 mt-2">
+    <button class="btn btn-primary" (click)="save()">Save</button>
+    <button class="btn btn-danger" (click)="removeSession()">Delete</button>
   </div>
 
 </div>

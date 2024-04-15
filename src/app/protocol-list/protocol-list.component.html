@@ -10,6 +10,14 @@
       @if (durationMap[protocol.id] !== 0) {
         <small>Total duration: {{timeKeeper.convertTime(durationMap[protocol.id])}}</small><br>
       }
+      <div class="d-flex flex-row gap-2">
+        @if (enableAdd) {
+          <button class="btn btn-sm btn-outline-success" (click)="addProtocol.emit(protocol.id)"><i class="bi bi-plus"></i></button>
+        }
+        @if (enableRemove) {
+          <button class="btn btn-sm btn-outline-danger" (click)="removeProtocol.emit(protocol.id)"><i class="bi bi-trash"></i></button>
+        }
+      </div>
     </div>
   }
 </div>

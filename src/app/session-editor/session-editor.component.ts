@@ -6,6 +6,9 @@ import {FormBuilder, ReactiveFormsModule} from "@angular/forms";
 import {Protocol, ProtocolQuery} from "../protocol";
 import {ProtocolListComponent} from "../protocol-list/protocol-list.component";
 import {NgbCalendar, NgbDate, NgbDatepicker} from "@ng-bootstrap/ng-bootstrap";
+import {ToastService} from "../toast.service";
+import {Router} from "@angular/router";
+import {routes} from "../app.routes";
 
 @Component({
   selector: 'app-session-editor',
@@ -49,15 +52,27 @@ export class SessionEditorComponent {
     this.web.getProtocolSession(value).subscribe((response) => {
       this.dataService.currentSession = response;
       this.session = response;
-      if (this.session.started_at) {
-        this.fromDate = new NgbDate(this.session.started_at.getFullYear(), this.session.started_at.getMonth(), this.session.started_at.getDate());
-      }
-      if (this.session.ended_at) {
-        this.toDate = new NgbDate(this.session.ended_at.getFullYear(), this.session.ended_at.getMonth(), this.session.ended_at.getDate());
-      }
-      this.web.getAssociatedProtocolTitles(value).subscribe((response) => {
-        this.associatedProtocols = response;
-      })
+      console.log(response)
+      this.refreshSessionAssociatedData(value);
+
+    })
+  }
+
+  private refreshSessionAssociatedData(value: string) {
+    if (!this.session) {
+      return
+    }
+    if (this.session.started_at) {
+      this.session.started_at = new Date(this.session.started_at)
+      this.fromDate = new NgbDate(this.session.started_at.getFullYear(), this.session.started_at.getMonth(), this.session.started_at.getDate());
+      console.log(this.fromDate)
+    }
+    if (this.session.ended_at) {
+      this.session.ended_at = new Date(this.session.ended_at)
+      this.toDate = new NgbDate(this.session.ended_at.getFullYear(), this.session.ended_at.getMonth(), this.session.ended_at.getDate());
+    }
+    this.web.getAssociatedProtocolTitles(value).subscribe((response) => {
+      this.associatedProtocols = response;
       if (this.fromDate) {
         this.calculateDatePreview()
       }
@@ -68,7 +83,7 @@ export class SessionEditorComponent {
     return this._sessionID;
   }
 
-  constructor(private calendar: NgbCalendar, private web: WebService, private dataService: DataService, private fb: FormBuilder) {
+  constructor(private router: Router, private calendar: NgbCalendar, private web: WebService, private dataService: DataService, private fb: FormBuilder, private toast: ToastService) {
     this.formSearch.controls.protocolSearch.valueChanges.subscribe((value) => {
       if (value) {
         if (value.length < 3) {
@@ -141,5 +156,50 @@ export class SessionEditorComponent {
       this.toDatePreview = this.calendar.getNext(this.fromDate, 'd', totalDuration);
     }
   }
+
+  save() {
+    let startDate: Date|null = null;
+    if (this.fromDate) {
+      startDate = new Date(this.fromDate.year, this.fromDate.month, this.fromDate.day);
+    }
+    let endDate: Date|null = null;
+    if (this.toDate) {
+      endDate = new Date(this.toDate.year, this.toDate.month, this.toDate.day);
+    }
+
+    // @ts-ignore
+    this.web.updateProtocolSession(this.sessionID, this.form.value.name, this.form.value.enabled, startDate, endDate).subscribe(() => {
+
+    })
+  }
+
+  handleProtocolRemove(protocolID: number) {
+    if (this.session?.protocol.includes(protocolID)) {
+      this.web.sessionRemoveProtocol(this.sessionID, protocolID).subscribe((response) => {
+        this.session = response;
+      })
+    }
+    this.refreshSessionAssociatedData(this.sessionID)
+  }
+
+  handleProtocolAdd(protocolID: number) {
+    if (this.session?.protocol.includes(protocolID)) {
+      this.toast.show("Protocol", "Already Existed in Session")
+      return
+    }
+    this.web.sessionAddProtocol(this.sessionID, protocolID).subscribe((response) => {
+      this.session = response;
+      this.refreshSessionAssociatedData(this.sessionID)
+    })
+  }
+
+  removeSession() {
+    this.web.deleteProtocolSession(this.sessionID).subscribe(() => {
+      this.session = undefined;
+      this.dataService.currentSession = null;
+      this.router.navigate(["/"])
+    })
+  }
+
 
 }

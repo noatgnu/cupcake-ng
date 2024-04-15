@@ -18,7 +18,8 @@
                   {{dataService.currentSession.unique_id}} @if (dataService.currentSession.enabled) {<i class="bi bi-unlock"></i>} @else {<i class="bi bi-lock"></i>}
                 </button>
                 <div ngbDropdownMenu aria-labelledby="accountDropdown">
-                  <button class="dropdown-item" (click)="openSessionEditor()">Session Settings</button>
+<!--                  <button class="dropdown-item" (click)="openSessionEditor()">Session Settings</button>-->
+                  <a class="dropdown-item" href="/#/session-editor/{{dataService.currentSession.id}}" target="_blank">Session Editor</a>
                 </div>
               </div>
             </li>

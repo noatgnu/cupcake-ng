@@ -1,4 +1,4 @@
-import {Component, Input} from '@angular/core';
+import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {DatePipe} from "@angular/common";
 import {Protocol} from "../protocol";
 import {TimerService} from "../timer.service";
@@ -29,6 +29,14 @@ export class ProtocolListComponent {
     return this._protocols
   }
   durationMap: {[key: number]: number} = {}
+
+  @Input() enableAdd: boolean = false
+  @Input() enableRemove: boolean = false
+
+  @Output() removeProtocol: EventEmitter<number> = new EventEmitter<number>()
+  @Output() addProtocol: EventEmitter<number> = new EventEmitter<number>()
   constructor(public timeKeeper: TimerService) { }
+
+
 
 }

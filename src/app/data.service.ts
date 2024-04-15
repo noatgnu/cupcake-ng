@@ -31,15 +31,18 @@ export class DataService {
 
   _currentSession: ProtocolSession|null = null;
 
-  set currentSession(value: ProtocolSession) {
+  set currentSession(value: ProtocolSession|null) {
     this._currentSession = value;
-    if (this.accounts.loggedIn) {
-      this.web.checkSessionPermissions(value.unique_id).subscribe((response: any) => {
-        if (response) {
-          this.currentSessionPermissions = response;
-        }
-      })
+    if (value) {
+      if (this.accounts.loggedIn) {
+        this.web.checkSessionPermissions(value.unique_id).subscribe((response: any) => {
+          if (response) {
+            this.currentSessionPermissions = response;
+          }
+        })
+      }
     }
+
   }
 
   get currentSession(): ProtocolSession {

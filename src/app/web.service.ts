@@ -413,10 +413,12 @@ export class WebService {
     )
   }
 
-  updateProtocolSession(session_id: string, name: string, enabled: boolean) {
+  updateProtocolSession(session_id: string, name: string, enabled: boolean, started_at: Date|null = null, ended_at: Date|null = null) {
+
+
     return this.http.put<ProtocolSession>(
       `${this.baseURL}/api/session/${session_id}/`,
-      {enabled: enabled, name: name},
+      {enabled: enabled, name: name, started_at: started_at, ended_at: ended_at},
       {responseType: 'json', observe: 'body'}
     );
   }
@@ -456,6 +458,29 @@ export class WebService {
     }
     return this.http.get<ProtocolQuery>(
       `${this.baseURL}/api/protocol/?search=${search}`,
+      {responseType: 'json', observe: 'body'}
+    );
+  }
+
+  sessionAddProtocol(session_id: string, protocol_id: number) {
+    return this.http.post<ProtocolSession>(
+      `${this.baseURL}/api/session/${session_id}/add_protocol/`,
+      {protocol: protocol_id},
+      {responseType: 'json', observe: 'body'}
+    );
+  }
+
+  sessionRemoveProtocol(session_id: string, protocol_id: number) {
+    return this.http.post<ProtocolSession>(
+      `${this.baseURL}/api/session/${session_id}/remove_protocol/`,
+      {protocol: protocol_id},
+      {responseType: 'json', observe: 'body'}
+    );
+  }
+
+  deleteProtocolSession(session_id: string) {
+    return this.http.delete(
+      `${this.baseURL}/api/session/${session_id}/`,
       {responseType: 'json', observe: 'body'}
     );
   }
