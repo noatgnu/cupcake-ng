@@ -2,6 +2,7 @@ import {Injectable} from '@angular/core';
 import {WebSocketSubject} from "rxjs/internal/observable/dom/WebSocketSubject";
 import {environment} from "../environments/environment";
 import {AccountsService} from "./accounts/accounts.service";
+import {WebService} from "./web.service";
 
 @Injectable({
   providedIn: 'root'
@@ -39,25 +40,25 @@ export class WebrtcService {
   enableVideo = false;
   enableAudio = false;
   connectionType: 'viewer'|'host' = 'viewer';
-  constructor(private accounts: AccountsService) {
+  constructor(private accounts: AccountsService, private web: WebService) {
 
   }
 
   connect(currentSessionID: string) {
-
     this.signallingConnection = this.createSignallingConnection(currentSessionID);
   }
-  private createPeerConnection(connectionID: string|undefined = "", autonegotiate: boolean = true): RTCPeerConnection {
+  private async createPeerConnection(connectionID: string|undefined = "", autonegotiate: boolean = true): Promise<RTCPeerConnection> {
     console.log("Creating peer connection for", connectionID)
+    const credential = await this.web.getCoturnCredentials().toPromise();
     const configuration: RTCConfiguration = {
       iceServers: [
         {
           urls:[
-            'turn:188.68.54.37:3478',
+            `turn:${credential?.turn_server}:${credential?.turn_port}`,
             //'stun:188.68.54.37:3478'
           ],
-          username: 'testuser',
-          credential: 'testuser'
+          username: credential?.username,
+          credential: credential?.password
         },
         {
           urls: ['stun:stun.l.google.com:19302']
@@ -241,7 +242,7 @@ export class WebrtcService {
           delete this.peerConnectionMap[from!];
         }
         this.peerConnectionMap[from!] = {
-          pc: this.createPeerConnection(from),
+          pc: await this.createPeerConnection(from),
           offered: false,
           answered: false,
           connectionType: id_type === 'host' ? 'viewer' : 'host',
@@ -249,7 +250,7 @@ export class WebrtcService {
         }
       } else {
         this.peerConnectionMap[from!] = {
-          pc: this.createPeerConnection(from),
+          pc: await this.createPeerConnection(from),
           offered: false,
           answered: false,
           connectionType: id_type === 'host' ? 'viewer' : 'host',

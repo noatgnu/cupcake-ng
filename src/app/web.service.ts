@@ -484,4 +484,11 @@ export class WebService {
       {responseType: 'json', observe: 'body'}
     );
   }
+
+  getCoturnCredentials() {
+    return this.http.get<{username: string, password: string, turn_server: string, turn_port: string}>(
+      `${this.baseURL}/api/user/generate_turn_credential/`,
+      {responseType: 'json', observe: 'body'}
+    );
+  }
 }

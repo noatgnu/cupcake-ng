@@ -2,6 +2,8 @@ import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {DatePipe} from "@angular/common";
 import {Protocol} from "../protocol";
 import {TimerService} from "../timer.service";
+import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
+import {RemovalAreYouSureComponent} from "./removal-are-you-sure/removal-are-you-sure.component";
 
 @Component({
   selector: 'app-protocol-list',
@@ -35,8 +37,14 @@ export class ProtocolListComponent {
 
   @Output() removeProtocol: EventEmitter<number> = new EventEmitter<number>()
   @Output() addProtocol: EventEmitter<number> = new EventEmitter<number>()
-  constructor(public timeKeeper: TimerService) { }
+  constructor(public timeKeeper: TimerService, private modal: NgbModal) { }
 
-
+  remove(id: number) {
+    this.modal.open(RemovalAreYouSureComponent).result.then((result) => {
+      if (result) {
+        this.removeProtocol.emit(id)
+      }
+    })
+  }
 
 }
