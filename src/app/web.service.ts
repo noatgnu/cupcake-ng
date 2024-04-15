@@ -491,4 +491,11 @@ export class WebService {
       {responseType: 'json', observe: 'body'}
     );
   }
+  getCalendarSessions(start: string, end: string) {
+    console.log(start, end)
+    return this.http.get<ProtocolSession[]>(
+      `${this.baseURL}/api/session/calendar_get_sessions/?start=${start}&end=${end}`,
+      {responseType: 'json', observe: 'body'}
+    );
+  }
 }

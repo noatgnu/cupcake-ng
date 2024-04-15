@@ -64,12 +64,12 @@ export class SessionEditorComponent {
     }
     if (this.session.started_at) {
       this.session.started_at = new Date(this.session.started_at)
-      this.fromDate = new NgbDate(this.session.started_at.getFullYear(), this.session.started_at.getMonth(), this.session.started_at.getDate());
+      this.fromDate = new NgbDate(this.session.started_at.getFullYear(), this.session.started_at.getMonth()+1, this.session.started_at.getDate());
       console.log(this.fromDate)
     }
     if (this.session.ended_at) {
       this.session.ended_at = new Date(this.session.ended_at)
-      this.toDate = new NgbDate(this.session.ended_at.getFullYear(), this.session.ended_at.getMonth(), this.session.ended_at.getDate());
+      this.toDate = new NgbDate(this.session.ended_at.getFullYear(), this.session.ended_at.getMonth()+1, this.session.ended_at.getDate());
     }
     this.web.getAssociatedProtocolTitles(value).subscribe((response) => {
       this.associatedProtocols = response;
@@ -159,14 +159,17 @@ export class SessionEditorComponent {
 
   save() {
     let startDate: Date|null = null;
+    console.log(this.fromDate)
     if (this.fromDate) {
-      startDate = new Date(this.fromDate.year, this.fromDate.month, this.fromDate.day);
+      startDate = new Date(this.fromDate.year, this.fromDate.month-1, this.fromDate.day);
     }
     let endDate: Date|null = null;
+    console.log(this.toDate)
     if (this.toDate) {
-      endDate = new Date(this.toDate.year, this.toDate.month, this.toDate.day);
+      endDate = new Date(this.toDate.year, this.toDate.month-1, this.toDate.day);
     }
-
+    console.log(startDate)
+    console.log(endDate)
     // @ts-ignore
     this.web.updateProtocolSession(this.sessionID, this.form.value.name, this.form.value.enabled, startDate, endDate).subscribe(() => {
 

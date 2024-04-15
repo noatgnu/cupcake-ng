@@ -1,1 +1,12 @@
-<p>calendar works!</p>
+<div class="container" style="padding-top: 100px">
+  <ngb-datepicker #dp [dayTemplate]="t"></ngb-datepicker>
+
+  <ng-template #t let-date let-focused="focused">
+	    <span
+        class="custom-day"
+      >
+		{{ date.day }}
+	    </span>
+  </ng-template>
+</div>
+

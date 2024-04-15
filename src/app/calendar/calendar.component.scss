@@ -1,0 +1,38 @@
+:host ::ng-deep .ngb-dp-day, :host ::ng-deep .ngb-dp-weekday {
+  width: 8rem !important;
+  height: 8rem !important;
+}
+
+:host ::ng-deep .ngb-dp-day > div {
+  width: 8rem !important;
+  height: 8rem !important;
+  line-height: 8rem !important;
+}
+
+/* For devices with width less than 600px */
+@media (max-width: 600px) {
+  :host ::ng-deep .ngb-dp-day, :host ::ng-deep .ngb-dp-weekday {
+    width: 4rem !important;
+    height: 4rem !important;
+  }
+
+  :host ::ng-deep .ngb-dp-day > div {
+    width: 4rem !important;
+    height: 4rem !important;
+    line-height: 4rem !important;
+  }
+}
+
+/* For devices with width between 600px and 900px */
+@media (min-width: 601px) and (max-width: 900px) {
+  :host ::ng-deep .ngb-dp-day, :host ::ng-deep .ngb-dp-weekday {
+    width: 6rem !important;
+    height: 6rem !important;
+  }
+
+  :host ::ng-deep .ngb-dp-day > div {
+    width: 6rem !important;
+    height: 6rem !important;
+    line-height: 6rem !important;
+  }
+}

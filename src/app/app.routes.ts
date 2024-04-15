@@ -20,7 +20,12 @@ export const routes: Routes = [
   {
     path: 'session-editor',
     loadChildren: () => import('./session-editor/session-editor.module').then(m => m.SessionEditorModule)
+  },
+  {
+    path: 'calendar',
+    loadChildren: () => import('./calendar/calendar.module').then(m => m.CalendarModule)
   }
+
   ,
   {
     path: '**',
