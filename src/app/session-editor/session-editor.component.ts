@@ -177,7 +177,7 @@ export class SessionEditorComponent {
   }
 
   handleProtocolRemove(protocolID: number) {
-    if (this.session?.protocol.includes(protocolID)) {
+    if (this.session?.protocols.includes(protocolID)) {
       this.web.sessionRemoveProtocol(this.sessionID, protocolID).subscribe((response) => {
         this.session = response;
       })
@@ -186,7 +186,7 @@ export class SessionEditorComponent {
   }
 
   handleProtocolAdd(protocolID: number) {
-    if (this.session?.protocol.includes(protocolID)) {
+    if (this.session?.protocols.includes(protocolID)) {
       this.toast.show("Protocol", "Already Existed in Session")
       return
     }

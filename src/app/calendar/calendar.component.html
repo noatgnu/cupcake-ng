@@ -1,11 +1,32 @@
 <div class="container" style="padding-top: 100px">
+  <h5>Scheduled Session Calendar</h5>
   <ngb-datepicker #dp [dayTemplate]="t"></ngb-datepicker>
 
   <ng-template #t let-date let-focused="focused">
 	    <span
         class="custom-day"
       >
-		{{ date.day }}
+        {{ date.day }}
+        @for (d of Object.keys(dateToSession); track d) {
+          @if (checkDateMatch(date, d)) {
+            @if (dateToSession[d]) {
+              <div class="p-1 view-button">
+                  <button class="btn btn-sm btn-danger" (click)="openSessionListModal(dateToSession[d])">View</button>
+              </div>
+              @if (dateToSession[d].length > 0) {
+                @for (session of dateToSession[d]; track session.id) {
+                  <div class="p-1 session-list">
+                    <span (click)="handleClick(session)" class="badge bg-danger text-truncate">
+                      {{ session.name !== '' ? session.name : session.unique_id }}
+                    </span>
+                  </div>
+                }
+              }
+
+            }
+          }
+        }
+
 	    </span>
   </ng-template>
 </div>

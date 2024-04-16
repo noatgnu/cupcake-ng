@@ -51,6 +51,7 @@
               <div ngbDropdownMenu aria-labelledby="accountDropdown">
                 @if (accounts.loggedIn) {
                   <button class="dropdown-item" (click)="navigateToAccount()">Account</button>
+                  <a class="dropdown-item" href="/#/calendar" target="_blank">Calendar</a>
                   <button class="dropdown-item" (click)="logout()">Logout</button>
                 } @else {
                   <button class="dropdown-item" (click)="openAccountLogin()">Login</button>

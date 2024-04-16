@@ -7,7 +7,7 @@ export interface ProtocolSession {
   enabled: boolean;
   created_at: Date;
   updated_at: Date;
-  protocol: number[];
+  protocols: number[];
   name: string;
   time_keeper: TimeKeeper[];
   started_at?: Date;

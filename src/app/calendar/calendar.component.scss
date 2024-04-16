@@ -9,6 +9,14 @@
   line-height: 8rem !important;
 }
 
+.session-list {
+  display: block;
+}
+
+.view-button {
+  display: none;
+}
+
 /* For devices with width less than 600px */
 @media (max-width: 600px) {
   :host ::ng-deep .ngb-dp-day, :host ::ng-deep .ngb-dp-weekday {
@@ -20,6 +28,14 @@
     width: 4rem !important;
     height: 4rem !important;
     line-height: 4rem !important;
+  }
+
+  .session-list {
+    display: none;
+  }
+
+  .view-button {
+    display: block;
   }
 }
 
@@ -35,4 +51,12 @@
     height: 6rem !important;
     line-height: 6rem !important;
   }
+}
+
+.text-truncate {
+  display: inline-block;
+  width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
