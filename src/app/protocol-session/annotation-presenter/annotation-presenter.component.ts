@@ -10,6 +10,7 @@ import {TranscribeModalComponent} from "../transcribe-modal/transcribe-modal.com
 import {ChecklistPresenterComponent} from "../checklist-presenter/checklist-presenter.component";
 import {CounterPresenterComponent} from "../counter-presenter/counter-presenter.component";
 import {TablePresenterComponent} from "../table-presenter/table-presenter.component";
+import {AlignmentAnnotationComponent} from "../alignment-annotation/alignment-annotation.component";
 
 @Component({
   selector: 'app-annotation-presenter',
@@ -23,7 +24,8 @@ import {TablePresenterComponent} from "../table-presenter/table-presenter.compon
     MediaPresenterComponent,
     ChecklistPresenterComponent,
     CounterPresenterComponent,
-    TablePresenterComponent
+    TablePresenterComponent,
+    AlignmentAnnotationComponent
   ],
   templateUrl: './annotation-presenter.component.html',
   styleUrl: './annotation-presenter.component.scss'

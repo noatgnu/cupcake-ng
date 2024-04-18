@@ -29,6 +29,7 @@ import {AddSimpleCounterModalComponent} from "./add-simple-counter-modal/add-sim
 import {AddChecklistModalComponent} from "./add-checklist-modal/add-checklist-modal.component";
 import {WebrtcService} from "../webrtc.service";
 import {AddTableModalComponent} from "./add-table-modal/add-table-modal.component";
+import {AlignmentAnnotationComponent} from "./alignment-annotation/alignment-annotation.component";
 
 @Component({
   selector: 'app-protocol-session',
@@ -45,7 +46,8 @@ import {AddTableModalComponent} from "./add-table-modal/add-table-modal.componen
     NgbDropdown,
     NgbDropdownToggle,
     NgbDropdownMenu,
-    NgbDropdownItem
+    NgbDropdownItem,
+    AlignmentAnnotationComponent
   ],
   templateUrl: './protocol-session.component.html',
   styleUrl: './protocol-session.component.scss'

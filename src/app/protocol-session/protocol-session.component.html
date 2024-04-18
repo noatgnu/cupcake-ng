@@ -199,6 +199,11 @@
                   <label for="image">Upload Image</label>
                   <input type="file" class="form-control" id="image" (change)="handleFileInput($event)">
                 </div>
+              } @else if (clickedElement === 'Alignment') {
+                <div class="form-group">
+                  <label for="file">Upload Alignment</label>
+                  <input type="file" class="form-control" id="alignment-file" (change)="handleFileInput($event)">
+                </div>
               }
             </div>
           </div>
@@ -269,7 +274,7 @@
       <div ngbDropdown placement="top-end" class="d-inline-block">
         <button class="btn btn-outline-success" ngbDropdownToggle><i class="bi bi-plus"></i></button>
         <div ngbDropdownMenu>
-          @for (a of ['Audio', 'Text', 'Video', 'Image', 'Sketchpad', 'Counter','File', 'Checklist', 'Table']; track a) {
+          @for (a of ['Audio', 'Text', 'Video', 'Image', 'Sketchpad', 'Counter','File', 'Checklist', 'Table', 'Alignment']; track a) {
             <button ngbDropdownItem (click)="annotationMenuClick(a)">{{a}}</button>
           }
         </div>

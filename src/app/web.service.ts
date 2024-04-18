@@ -172,10 +172,16 @@ export class WebService {
     );
   }
 
-  getAnnotationFile(id: number|string) {
-    return this.http.get<string>(
+  getAnnotationFile(id: number|string, responseText: boolean = false): Observable<any> {
+    if (responseText) {
+      return this.http.get<any>(
+        `${this.baseURL}/api/annotation/${id}/download_file/`,
+        {responseType: 'text' as 'json', observe: 'body'}
+      );
+    }
+    return this.http.get<any>(
       `${this.baseURL}/api/annotation/${id}/download_file/`,
-      {responseType: 'json', observe: 'body'}
+      {observe: 'body'}
     );
   }
 
