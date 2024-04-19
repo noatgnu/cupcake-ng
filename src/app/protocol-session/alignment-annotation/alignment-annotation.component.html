@@ -30,6 +30,10 @@
         </select>
         <label for="sequenceType">Sequence Type</label>
       </div>
+      <div class="form-check">
+        <input type="checkbox" class="form-check-input" id="enableThreeFrame" [(ngModel)]="data.enableThreeFrame">
+        <label class="form-check-label" for="enableThreeFrame">Enable Three Frame Translation</label>
+      </div>
     </div>
     <div>
       <button class="btn btn-sm btn-outline-primary" (click)="update()">Update</button>
@@ -70,9 +74,9 @@
   }
 
   @if (sequenceAlignment){
-    <app-alignment-segment [highlightSectionsMap]="data.highlightSectionsMap" [cellHeight]="data.cellHeight" [cellWidth]="data.cellWidth" [cellOffset]="data.cellOffset" [sequenceAlignment]="sequenceAlignment" (dataURL)="data.dataURL=$event"></app-alignment-segment>
+    <app-alignment-segment [threeFrameHighlight]="data.threeFrameHighlight" [enableThreeFrame]="data.enableThreeFrame" [highlightSectionsMap]="data.highlightSectionsMap" [cellHeight]="data.cellHeight" [cellWidth]="data.cellWidth" [cellOffset]="data.cellOffset" [sequenceAlignment]="sequenceAlignment" (dataURL)="data.dataURL=$event"></app-alignment-segment>
     @for (segment of data.extractedSegments; track segment) {
-      <app-alignment-segment [highlightSectionsMap]="data.highlightSectionsMap" [cellHeight]="data.cellHeight" [cellWidth]="data.cellWidth" [cellOffset]="data.cellOffset" [sequenceAlignment]="sequenceAlignment" [start]="segment.start" [end]="segment.end" (dataURL)="segment.dataURL=$event"></app-alignment-segment>
+      <app-alignment-segment [threeFrameHighlight]="data.threeFrameHighlight" [enableThreeFrame]="data.enableThreeFrame" [highlightSectionsMap]="data.highlightSectionsMap" [cellHeight]="data.cellHeight" [cellWidth]="data.cellWidth" [cellOffset]="data.cellOffset" [sequenceAlignment]="sequenceAlignment" [start]="segment.start" [end]="segment.end" (dataURL)="segment.dataURL=$event"></app-alignment-segment>
     }
   }
 </div>

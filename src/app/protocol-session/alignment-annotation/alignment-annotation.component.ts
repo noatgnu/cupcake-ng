@@ -34,7 +34,8 @@ export class AlignmentAnnotationComponent implements AfterViewInit{
     alignmentFormat: string,
     sequenceType: string,
     dataURL?: string,
-    threeFrameHighlight?: {[key: string]: {[key: string]: {start: number, end: number}[]}},
+    threeFrameHighlight: {[key: string]: {[key: string]: {start: number, end: number}[]}},
+    enableThreeFrame: boolean
   } = {
     extractedSegments: [],
     highlightSectionsMap: {},
@@ -43,7 +44,8 @@ export class AlignmentAnnotationComponent implements AfterViewInit{
     cellOffset: 5,
     alignmentFormat: 'fasta',
     sequenceType: 'amino-acid',
-    threeFrameHighlight: {}
+    threeFrameHighlight: {},
+    enableThreeFrame: false
   }
 
   @Input() set annotation(value: Annotation) {
@@ -128,25 +130,25 @@ export class AlignmentAnnotationComponent implements AfterViewInit{
         if (!this.data.threeFrameHighlight) {
           this.data.threeFrameHighlight = {}
         }
-        for (const frame of Object.keys(this.sequenceAlignment.threeFrame)) {
-          if (!this.data.threeFrameHighlight[frame]) {
-            this.data.threeFrameHighlight[frame] = {}
+        for (let i = 0; i < this.sequenceAlignment.alignmentIDs.length; i++) {
+          if (!this.data.threeFrameHighlight[this.sequenceAlignment.alignmentIDs[i]]) {
+            this.data.threeFrameHighlight[this.sequenceAlignment.alignmentIDs[i]] = {}
           }
-          for (let i = 0; i < this.sequenceAlignment.alignmentIDs.length; i++) {
-            const seq = this.sequenceAlignment.threeFrame[frame][this.sequenceAlignment.alignmentIDs[i]]
+          for (const frame of Object.keys(this.sequenceAlignment.threeFrame[this.sequenceAlignment.alignmentIDs[i]])) {
+            const seq = this.sequenceAlignment.threeFrame[this.sequenceAlignment.alignmentIDs[i]][frame]
             if (seq) {
               const matches = [...seq.map((x) => {return x.residue}).join('').matchAll(regex)];
-              if (!this.data.threeFrameHighlight[frame][this.sequenceAlignment!.alignmentIDs[i]]) {
-                this.data.threeFrameHighlight[frame][this.sequenceAlignment!.alignmentIDs[i]] = []
+              if (!this.data.threeFrameHighlight[this.sequenceAlignment!.alignmentIDs[i]][frame]) {
+                this.data.threeFrameHighlight[this.sequenceAlignment!.alignmentIDs[i]][frame] = []
               }
               for (const m of matches) {
-                this.data.threeFrameHighlight[frame][this.sequenceAlignment!.alignmentIDs[i]].push({start: m.index!, end: m.index! + m[0].length})
+                this.data.threeFrameHighlight[this.sequenceAlignment!.alignmentIDs[i]][frame].push({start: m.index!, end: m.index! + m[0].length-1})
               }
             }
           }
         }
       }
-
+      console.log(this.data.threeFrameHighlight)
       this.dataService.redrawSubject.next(true)
     }
   }

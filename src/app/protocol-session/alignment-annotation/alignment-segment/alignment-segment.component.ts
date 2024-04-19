@@ -17,8 +17,12 @@ export class AlignmentSegmentComponent implements AfterViewInit {
   @Input() start: number = 0
   @Input() end: number = 0
   @Input() sequenceAlignment: SequenceAlignment = new SequenceAlignment('', 'fasta')
+  @Input() enableThreeFrame: boolean = false
   @ViewChild('canvasElem') canvasElem?: ElementRef;
   @Output() dataURL: EventEmitter<string> = new EventEmitter<string>()
+  @Input() cellOffsetTop: number = 1
+  @Input() threeFrameHighlight: {[key: string]: {[key: string]: {start: number, end: number}[]}} = {}
+
   constructor(private dataService: DataService) {
     this.dataService.redrawSubject.subscribe(() => {
       this.drawCanvas()
@@ -35,15 +39,17 @@ export class AlignmentSegmentComponent implements AfterViewInit {
       const ctx = canvas.getContext('2d');
 
       if (ctx && this.sequenceAlignment) {
-        const cellWidth: number = 20;
-        const cellHeight = canvas.height / (this.sequenceAlignment.alignmentIDs.length + 1);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        // clear the canvas
+        const cellWidth: number = this.cellWidth;
+        const cellHeight = this.cellHeight;
         let width = (this.sequenceAlignment.alignmentMap.get(this.sequenceAlignment.alignmentIDs[0])!.length + this.cellOffset + 1) * cellWidth;
         if (this.start > 0 && this.end > 0) {
           width = (this.end - this.start + this.cellOffset + 1) * cellWidth;
         }
-        let height = (this.sequenceAlignment.alignmentIDs.length+1) * cellHeight;
-        if (this.sequenceAlignment.sequenceType === 'nucleotide' && this.sequenceAlignment.threeFrame) {
-          height = (1 + (this.sequenceAlignment.alignmentIDs.length+1) * Object.keys(this.sequenceAlignment.threeFrame).length) * cellHeight;
+        let height = (this.sequenceAlignment.alignmentIDs.length+1+this.cellOffsetTop) * cellHeight;
+        if (this.sequenceAlignment.sequenceType === 'nucleotide' && this.sequenceAlignment.threeFrame && this.enableThreeFrame) {
+          height = (1 + (this.sequenceAlignment.alignmentIDs.length+1+this.cellOffsetTop) * Object.keys(this.sequenceAlignment.threeFrame).length) * cellHeight;
         }
         canvas.width = width;
         canvas.height = height;
@@ -82,7 +88,7 @@ export class AlignmentSegmentComponent implements AfterViewInit {
   }
 
   canvasDrawSequence(ctx: CanvasRenderingContext2D, cellWidth: number, cellHeight: number, seqAlignment: SequenceAlignment) {
-    let sequenceCount = 0
+    let sequenceCount = 0 + this.cellOffsetTop
     for (let i = 0; i < seqAlignment.alignmentIDs.length; i++) {
       const seq = seqAlignment.alignmentMap.get(seqAlignment.alignmentIDs[i]);
       if (seq) {
@@ -99,11 +105,11 @@ export class AlignmentSegmentComponent implements AfterViewInit {
           ctx.fillText(seqAlignment.alignmentIDs[i], 0, (sequenceCount + 0.5) * cellHeight); // draw the ID text at the beginning of the sequence
 
         } else {
-          ctx.rect(0, i * cellHeight, (this.cellOffset+1) * cellWidth, cellHeight);
+          ctx.rect(0, sequenceCount * cellHeight, (this.cellOffset+1) * cellWidth, cellHeight);
           ctx.clip();
           // Draw the ID of the sequence
           ctx.textBaseline = 'middle'; // align text with the middle of the cell
-          ctx.fillText(seqAlignment.alignmentIDs[i], 0, (i + 0.5) * cellHeight); // draw the ID text at the beginning of the sequence
+          ctx.fillText(seqAlignment.alignmentIDs[i], 0, (sequenceCount + 0.5) * cellHeight); // draw the ID text at the beginning of the sequence
 
         }
 
@@ -115,12 +121,12 @@ export class AlignmentSegmentComponent implements AfterViewInit {
             if (j >= this.start-1 && j < this.end) {
               const residue = seq[j];
               // if the residue is in the highlightSectionsMap, draw the residue with a different color
-              this.canvasDrawSequenceCell(ctx, cellWidth, cellHeight, residue, this.cellOffset + j + 2 - this.start, i)
+              this.canvasDrawSequenceCell(ctx, cellWidth, cellHeight, residue, this.cellOffset + j + 2 - this.start, sequenceCount)
               if (this.highlightSectionsMap[seqAlignment.alignmentIDs[i]]) {
                 const highlightSections = this.highlightSectionsMap[seqAlignment.alignmentIDs[i]];
                 const isHighlighted = highlightSections.some((section) => j >= section.start && j < section.end);
                 if (isHighlighted) {
-                  this.canvasDrawSequenceCell(ctx, cellWidth, cellHeight, residue, this.cellOffset + j + 2 - this.start, i, 'rgba(255, 0, 0, 0.5)')
+                  this.canvasDrawSequenceCell(ctx, cellWidth, cellHeight, residue, this.cellOffset + j + 2 - this.start, sequenceCount, 'rgba(255, 0, 0, 0.5)')
                 }
               }
             }
@@ -140,24 +146,50 @@ export class AlignmentSegmentComponent implements AfterViewInit {
 
               }
             }
-            sequenceCount ++
-            for (const frame in this.sequenceAlignment.threeFrame[seqAlignment.alignmentIDs[i]]) {
-              const frameTranslation = this.sequenceAlignment.threeFrame[seqAlignment.alignmentIDs[i]][frame];
-              for (const translation of frameTranslation) {
-                this.canvasDrawSequenceCell(ctx, cellWidth, cellHeight, translation.residue, this.cellOffset + (translation.start + translation.end)/2 + 1, sequenceCount)
+
+            if (this.enableThreeFrame) {
+              for (const frame in this.sequenceAlignment.threeFrame[seqAlignment.alignmentIDs[i]]) {
+                sequenceCount ++
+                const frameTranslation = this.sequenceAlignment.threeFrame[seqAlignment.alignmentIDs[i]][frame];
+                for (const translation of frameTranslation) {
+                  this.canvasDrawSequenceCell(ctx, cellWidth, cellHeight, translation.residue, this.cellOffset + (translation.start + translation.end)/2 + 1, sequenceCount)
+                }
+                console.log(this.threeFrameHighlight)
+                if (this.threeFrameHighlight) {
+                  if (this.threeFrameHighlight[seqAlignment.alignmentIDs[i]]) {
+                    if (this.threeFrameHighlight[seqAlignment.alignmentIDs[i]][frame]) {
+                      const highlightFrameSections = this.threeFrameHighlight[seqAlignment.alignmentIDs[i]][frame];
+
+                      for (const section of highlightFrameSections) {
+                        const startPosition = frameTranslation[section.start].start;
+                        console.log(startPosition)
+                        const endPosition = frameTranslation[section.end].end;
+                        console.log(endPosition)
+                        if (this.start > 0 && this.end > 0) {
+                          if (startPosition >= this.start-1 && endPosition < this.end) {
+                            ctx.fillStyle = 'rgba(255, 0, 0, 0.5)';
+                            ctx.fillRect((this.cellOffset + startPosition + 1 - this.start) * cellWidth, sequenceCount * cellHeight, cellWidth * (endPosition - startPosition + 1), cellHeight)
+                          }
+                        } else {
+                          ctx.fillStyle = 'rgba(255, 0, 0, 0.5)';
+                          ctx.fillRect((this.cellOffset + startPosition + 1) * cellWidth, sequenceCount * cellHeight, cellWidth * (endPosition - startPosition + 1), cellHeight)
+                        }
+                      }
+                    }
+                  }
+                }
               }
-              sequenceCount ++
             }
           } else {
             for (let j = 0; j < seq.length; j++) {
               const residue = seq[j];
 
-              this.canvasDrawSequenceCell(ctx, cellWidth, cellHeight, residue, this.cellOffset + j + 1, i)
+              this.canvasDrawSequenceCell(ctx, cellWidth, cellHeight, residue, this.cellOffset + j + 1, sequenceCount)
               if (this.highlightSectionsMap[seqAlignment.alignmentIDs[i]]) {
                 const highlightSections = this.highlightSectionsMap[seqAlignment.alignmentIDs[i]];
                 const isHighlighted = highlightSections.some((section) => j >= section.start && j < section.end);
                 if (isHighlighted) {
-                  this.canvasDrawSequenceCell(ctx, cellWidth, cellHeight, residue, this.cellOffset + j + 1, i, 'rgba(255, 0, 0, 0.5)')
+                  this.canvasDrawSequenceCell(ctx, cellWidth, cellHeight, residue, this.cellOffset + j + 1, sequenceCount, 'rgba(255, 0, 0, 0.5)')
                 }
 
               }
@@ -165,7 +197,9 @@ export class AlignmentSegmentComponent implements AfterViewInit {
           }
           //this.canvasDrawSequenceCell(ctx, cellWidth, cellHeight, residue, this.cellOffset + j + 1, i) // start drawing the sequence from the second cell
         }
+        sequenceCount ++
       }
+
     }
   }
 
