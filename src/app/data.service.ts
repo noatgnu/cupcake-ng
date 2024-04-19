@@ -3,6 +3,7 @@ import {Protocol} from "./protocol";
 import {ProtocolSession} from "./protocol-session";
 import {AccountsService} from "./accounts/accounts.service";
 import {WebService} from "./web.service";
+import {Subject} from "rxjs";
 
 @Injectable({
   providedIn: 'root'
@@ -55,7 +56,7 @@ export class DataService {
     delete: false,
   };
 
-
+  redrawSubject: Subject<boolean> = new Subject<boolean>();
 
   stepCompletionSummary: {[key: string]: {started: boolean, completed: boolean, content: string, promptStarted: boolean}} = {};
   constructor(private accounts: AccountsService, private web: WebService) { }

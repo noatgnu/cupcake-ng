@@ -1,53 +1,78 @@
 <div class="d-flex flex-column gap-2">
-  <div class="d-flex flex-row flex-warp gap-2">
-    <div class="form-floating">
-      <input type="number" class="form-control" id="cellWidth" placeholder="Cell Width" [(ngModel)]="cellWidth">
-      <label for="cellWidth">Cell Width</label>
-    </div>
-    <div class="form-floating">
-      <input type="number" class="form-control" id="cellHeight" placeholder="Cell Height" [(ngModel)]="cellHeight">
-      <label for="cellHeight">Cell Height</label>
-    </div>
-    <div class="form-floating">
-      <input type="number" class="form-control" id="cellOffset" placeholder="Cell Offset" [(ngModel)]="cellOffset">
-      <label for="cellOffset">Starting Offset</label>
-    </div>
+  <div class="d-flex flex-row gap-2">
+    @if (!editMode) {
+      <button class="btn btn-sm btn-outline-danger" (click)="editMode=true"><i class="bi bi-pen"></i> Edit</button>
+    } @else {
+      <button class="btn btn-sm btn-outline-secondary" (click)="save()"><i class="bi bi-save"></i> Save</button>
+      <button class="btn btn-sm btn-outline-success" (click)="editMode=false"><i class="bi bi-check"></i> Done</button>
+    }
+
   </div>
 
-  <form [formGroup]="form" (ngSubmit)="searchAndHighlight()" class="mt-2">
-    <div class="d-flex flex-column flex-wrap gap-2">
+  @if (editMode) {
+    <div class="d-flex flex-row flex-warp gap-2">
       <div class="form-floating">
-        <input type="search" class="form-control" id="searchTerm" placeholder="Search Term" formControlName="searchTerm">
-        <label for="searchTerm">Search Term</label>
+        <input type="number" class="form-control" id="cellWidth" placeholder="Cell Width" [(ngModel)]="data.cellWidth">
+        <label for="cellWidth">Cell Width</label>
       </div>
-      <div class="form-check">
-        <input type="checkbox" class="form-check-input" id="gap" formControlName="gap">
-        <label class="form-check-label" for="gap">Taking Account of Gap</label>
+      <div class="form-floating">
+        <input type="number" class="form-control" id="cellHeight" placeholder="Cell Height" [(ngModel)]="data.cellHeight">
+        <label for="cellHeight">Cell Height</label>
       </div>
-      <div>
-        <button type="submit" class="btn btn-primary">Search</button>
+      <div class="form-floating">
+        <input type="number" class="form-control" id="cellOffset" placeholder="Cell Offset" [(ngModel)]="data.cellOffset">
+        <label for="cellOffset">Starting Offset</label>
+      </div>
+      <div class="form-floating">
+        <select class="form-select" id="sequenceType" [(ngModel)]="data.sequenceType">
+          <option value="nucleotide">Nucleotide</option>
+          <option value="amino-acid">Amino Acid</option>
+        </select>
+        <label for="sequenceType">Sequence Type</label>
       </div>
     </div>
-  </form>
-  <form [formGroup]="formExtract" (ngSubmit)="extractSegment()">
-    <div class="d-flex flex-column flex-wrap gap-2">
-      <div class="form-floating">
-        <input type="number" class="form-control" id="start" placeholder="Start" formControlName="start">
-        <label for="start">Start</label>
-      </div>
-      <div class="form-floating">
-        <input type="number" class="form-control" id="end" placeholder="End" formControlName="end">
-        <label for="end">End</label>
-      </div>
-      <div>
-        <button type="submit" class="btn btn-primary">Extract</button>
-      </div>
+    <div>
+      <button class="btn btn-sm btn-outline-primary" (click)="update()">Update</button>
     </div>
-  </form>
+
+    <form [formGroup]="form" (ngSubmit)="searchAndHighlight()" class="mt-2">
+      <div class="d-flex flex-column flex-wrap gap-2">
+        <div class="form-floating">
+          <input type="search" class="form-control" id="searchTerm" placeholder="Search Term" formControlName="searchTerm">
+          <label for="searchTerm">Search Term</label>
+        </div>
+        <div class="form-check">
+          <input type="checkbox" class="form-check-input" id="gap" formControlName="gap">
+          <label class="form-check-label" for="gap">Taking Account of Gap</label>
+        </div>
+        <div>
+          <button type="submit" class="btn btn-primary">Search</button>
+        </div>
+      </div>
+    </form>
+    <form [formGroup]="formExtract" (ngSubmit)="extractSegment()">
+      <div class="d-flex flex-column flex-wrap gap-2">
+        <div class="d-flex flex-row flex-wrap gap-2">
+          <div class="form-floating">
+            <input type="number" class="form-control" id="start" placeholder="Start" formControlName="start">
+            <label for="start">Start</label>
+          </div>
+          <div class="form-floating">
+            <input type="number" class="form-control" id="end" placeholder="End" formControlName="end">
+            <label for="end">End</label>
+          </div>
+        </div>
+        <div>
+          <button type="submit" class="btn btn-primary">Extract</button>
+        </div>
+      </div>
+    </form>
+  }
+
   @if (sequenceAlignment){
-    <app-alignment-segment [cellHeight]="cellHeight" [cellWidth]="cellWidth" [cellOffset]="cellOffset" [sequenceAlignment]="sequenceAlignment"></app-alignment-segment>
-    @for (segment of extractedSegments; track segment) {
-      <app-alignment-segment [cellHeight]="cellHeight" [cellWidth]="cellWidth" [cellOffset]="cellOffset" [sequenceAlignment]="sequenceAlignment" [start]="segment.start" [end]="segment.end"></app-alignment-segment>
+    <app-alignment-segment [highlightSectionsMap]="data.highlightSectionsMap" [cellHeight]="data.cellHeight" [cellWidth]="data.cellWidth" [cellOffset]="data.cellOffset" [sequenceAlignment]="sequenceAlignment" (dataURL)="data.dataURL=$event"></app-alignment-segment>
+    @for (segment of data.extractedSegments; track segment) {
+      <app-alignment-segment [highlightSectionsMap]="data.highlightSectionsMap" [cellHeight]="data.cellHeight" [cellWidth]="data.cellWidth" [cellOffset]="data.cellOffset" [sequenceAlignment]="sequenceAlignment" [start]="segment.start" [end]="segment.end" (dataURL)="segment.dataURL=$event"></app-alignment-segment>
     }
   }
 </div>

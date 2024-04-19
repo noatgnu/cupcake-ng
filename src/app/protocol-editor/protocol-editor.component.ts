@@ -38,6 +38,10 @@ export class ProtocolEditorComponent {
   protocol?: Protocol
   _protocolID: number = 0
   @Input() set protocolID(value: number) {
+    if (!value) {
+      return
+    }
+    console.log(this.protocol)
     this._protocolID = value
     this.toastService.show("Loading", "Protocol")
     this.web.getProtocol(value).subscribe((response: Protocol) => {
