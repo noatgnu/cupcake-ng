@@ -151,7 +151,9 @@ export class CalculatorAnnotationComponent {
         this.executionMode = 'initial'
         this.operation = null
       } else{
-        // @ts-ignore
+        if (operation === 'log2' || operation === 'log10' || operation === 'sqrt' || operation === 'abs') {
+          return;
+        }
         this.operation = operation
       }
       this.dataLog.push(data)
