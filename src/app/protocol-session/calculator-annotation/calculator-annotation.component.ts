@@ -196,8 +196,11 @@ export class CalculatorAnnotationComponent {
     this.form.controls.inputPromptSecondValue.setValue(data.inputPromptSecondValue.toString())
     if (data.operation === 'log2' || data.operation === 'log10' || data.operation === 'sqrt' || data.operation === 'abs') {
       this.executionMode = 'initial'
+      return
     } else {
       this.executionMode = 'second'
+      // @ts-ignore
+      this.operation = data.operation
     }
   }
 }

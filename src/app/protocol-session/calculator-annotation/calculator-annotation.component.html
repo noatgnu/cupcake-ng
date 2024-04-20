@@ -11,7 +11,7 @@
       </div>
     }
     @if (operation) {
-      <small>Operation: <span class="badge bg-primary">
+      <small>Operation: <span class="badge bg-primary" (click)="operation=null;form.controls.inputPromptSecondValue.setValue('');executionMode='initial'">
         @switch (operation) {
           @case('+') {
             Addition
