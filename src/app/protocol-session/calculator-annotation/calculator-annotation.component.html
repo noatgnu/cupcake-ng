@@ -1,4 +1,4 @@
-<div class="d-flex flex-column gap-2">
+<div class="d-flex flex-column gap-2" style="max-width: 600px">
   <form [formGroup]="form">
     @if (executionMode === 'initial') {
       <div class="form-floating">
@@ -12,7 +12,7 @@
 
   </form>
 
-  <table class="table table-borderless" style="max-width: 600px">
+  <table class="table table-borderless">
     <tbody>
     <tr>
       <td>
@@ -25,7 +25,7 @@
         <button class="btn btn-outline-primary" (click)="formNumber(3)">3</button>
       </td>
       <td>
-        <button class="btn btn-outline-primary"><i class="bi bi-plus"></i></button>
+        <button class="btn btn-outline-primary" (click)="formOperation('+')"><i class="bi bi-plus"></i></button>
       </td>
     </tr>
     <tr>
@@ -39,7 +39,7 @@
         <button class="btn btn-outline-primary" (click)="formNumber(6)">6</button>
       </td>
       <td>
-        <button class="btn btn-outline-primary">-</button>
+        <button class="btn btn-outline-primary" (click)="formOperation('-')">-</button>
       </td>
     </tr>
     <tr>
@@ -53,7 +53,7 @@
         <button class="btn btn-outline-primary" (click)="formNumber(9)">9</button>
       </td>
       <td>
-        <button class="btn btn-outline-primary"><i class="bi bi-slash"></i></button>
+        <button class="btn btn-outline-primary" (click)="formOperation('/')"><i class="bi bi-slash"></i></button>
       </td>
     <tr>
       <td>
@@ -63,10 +63,10 @@
         <button class="btn btn-outline-primary" (click)="formDecimal()">.</button>
       </td>
       <td>
-        <button class="btn btn-outline-primary"><i class="bi bi-x"></i></button>
+        <button class="btn btn-outline-primary" (click)="formOperation('*')"><i class="bi bi-x"></i></button>
       </td>
       <td>
-        <button class="btn btn-outline-primary">=</button>
+        <button class="btn btn-outline-primary" (click)="formOperation('=')">=</button>
       </td>
     </tr>
     </tbody>

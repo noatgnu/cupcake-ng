@@ -23,13 +23,14 @@ export class CalculatorAnnotationComponent {
   }
 
   executionMode: 'initial' | 'second' | 'operation' = 'initial'
+  operation: '+' | '-' | '*' | '/' | '^' | null = null
 
   form = this.fb.group({
     inputPromptFirstValue: new FormControl<string>("", Validators.required),
     inputPromptSecondValue: new FormControl<string>("", Validators.required),
-    outputResult: new FormControl<number>(0),
-    operation: new FormControl<string|null>(null, Validators.required),
   })
+
+  dataLog: {inputPromptFirstValue: number, inputPromptSecondValue: number, operation: string, result: number}[] = []
 
   constructor(private fb: FormBuilder) {
 
@@ -67,4 +68,78 @@ export class CalculatorAnnotationComponent {
     }
   }
 
+  formOperation(operation: '+'|'-'|'*'|'/'| '='| 'log2' | 'log10' | 'sqrt' | 'abs' | '^') {
+    if (this.executionMode === 'initial') {
+      if (operation === '=' || this.form.controls.inputPromptFirstValue.value === "") {
+        return
+      }
+      if (operation === 'log2' || operation === 'log10' || operation === 'sqrt' || operation === 'abs') {
+        // @ts-ignore
+        let data = {inputPromptFirstValue: parseFloat(this.form.controls.inputPromptFirstValue.value), inputPromptSecondValue: 0, operation: operation, result: 0}
+        switch (operation) {
+          case 'log2':
+            // @ts-ignore
+            data.result = Math.log2(parseFloat(this.form.controls.inputPromptFirstValue.value))
+            this.form.controls.inputPromptFirstValue.setValue(data.result.toString())
+
+            break
+          case 'log10':
+            // @ts-ignore
+            data.result = Math.log10(parseFloat(this.form.controls.inputPromptFirstValue.value))
+            this.form.controls.inputPromptFirstValue.setValue(data.result.toString())
+            break
+          case 'sqrt':
+            // @ts-ignore
+            data.result = Math.sqrt(parseFloat(this.form.controls.inputPromptFirstValue.value))
+            this.form.controls.inputPromptFirstValue.setValue(data.result.toString())
+            break
+          case 'abs':
+            // @ts-ignore
+            data.result = Math.abs(parseFloat(this.form.controls.inputPromptFirstValue.value))
+            this.form.controls.inputPromptFirstValue.setValue(data.result.toString())
+            break
+        }
+        this.dataLog.push(data)
+        return;
+      }
+      this.executionMode = 'second'
+      this.operation = operation
+    } else {
+      if (operation === '=' || this.form.controls.inputPromptSecondValue.value === "") {
+        return
+      }
+      // @ts-ignore
+      let data = {inputPromptFirstValue: parseFloat(this.form.controls.inputPromptFirstValue.value), inputPromptSecondValue: parseFloat(this.form.controls.inputPromptSecondValue.value), operation: this.operation!, result: 0}
+      switch (this.operation) {
+        case '+':
+          // @ts-ignore
+          data.result = parseFloat(this.form.controls.inputPromptFirstValue.value) + parseFloat(this.form.controls.inputPromptSecondValue.value)
+          this.form.controls.inputPromptFirstValue.setValue(data.result.toString())
+          break
+        case '-':
+          // @ts-ignore
+          data.result = parseFloat(this.form.controls.inputPromptFirstValue.value) - parseFloat(this.form.controls.inputPromptSecondValue.value)
+          this.form.controls.inputPromptFirstValue.setValue(data.result.toString())
+          break
+        case '*':
+          // @ts-ignore
+          data.result = parseFloat(this.form.controls.inputPromptFirstValue.value) * parseFloat(this.form.controls.inputPromptSecondValue.value)
+          this.form.controls.inputPromptFirstValue.setValue(data.result.toString())
+          break
+        case '/':
+          // @ts-ignore
+          data.result = parseFloat(this.form.controls.inputPromptFirstValue.value) / parseFloat(this.form.controls.inputPromptSecondValue.value)
+          this.form.controls.inputPromptFirstValue.setValue(data.result.toString())
+          break
+        case '^':
+          // @ts-ignore
+          data.result = Math.pow(parseFloat(this.form.controls.inputPromptFirstValue.value), parseFloat(this.form.controls.inputPromptSecondValue.value))
+          this.form.controls.inputPromptFirstValue.setValue(data.result.toString())
+          break
+      }
+      this.operation = null
+      this.executionMode = 'initial'
+      this.dataLog.push(data)
+    }
+  }
 }
