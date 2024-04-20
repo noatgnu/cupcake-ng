@@ -105,11 +105,11 @@ export class CalculatorAnnotationComponent {
       this.executionMode = 'second'
       this.operation = operation
     } else {
-      if (operation === '=' || this.form.controls.inputPromptSecondValue.value === "") {
+      if (this.form.controls.inputPromptSecondValue.value === "") {
         return
       }
       // @ts-ignore
-      let data = {inputPromptFirstValue: parseFloat(this.form.controls.inputPromptFirstValue.value), inputPromptSecondValue: parseFloat(this.form.controls.inputPromptSecondValue.value), operation: this.operation!, result: 0}
+      let data = {inputPromptFirstValue: parseFloat(this.form.controls.inputPromptFirstValue.value), inputPromptSecondValue: parseFloat(this.form.controls.inputPromptSecondValue.value), operation: this.operation!.slice(), result: 0}
       switch (this.operation) {
         case '+':
           // @ts-ignore
@@ -137,6 +137,7 @@ export class CalculatorAnnotationComponent {
           this.form.controls.inputPromptFirstValue.setValue(data.result.toString())
           break
       }
+      this.form.controls.inputPromptSecondValue.setValue('')
       this.operation = null
       this.executionMode = 'initial'
       this.dataLog.push(data)

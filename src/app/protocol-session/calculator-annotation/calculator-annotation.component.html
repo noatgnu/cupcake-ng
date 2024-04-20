@@ -9,7 +9,27 @@
         <input type="text" class="form-control" formControlName="inputPromptSecondValue">
       </div>
     }
-
+    @if (operation) {
+      <small>Operation: <span class="badge bg-primary">
+        @switch (operation) {
+          @case('+') {
+            Addition
+          }
+          @case('-') {
+            Subtraction
+          }
+          @case('*') {
+            Multiplication
+          }
+          @case('/') {
+            Division
+          }
+          @default {
+            No Operation
+          }
+        }
+      </span></small>
+    }
   </form>
 
   <table class="table table-borderless">
@@ -71,5 +91,19 @@
     </tr>
     </tbody>
   </table>
+  @if (dataLog.length > 0) {
+    <div class="list-group">
+      @for (l of dataLog; track l) {
+        <div class="list-group-item list-group-item-action">
+          @if (l.inputPromptSecondValue !== 0) {
+            {{ l.inputPromptFirstValue }} {{ l.operation }} {{ l.inputPromptSecondValue }} = {{ l.result }}
+          } @else {
+            {{l.operation}} {{ l.inputPromptFirstValue }} = {{ l.result }}
+          }
+        </div>
+      }
+    </div>
+  }
+
 </div>
 
