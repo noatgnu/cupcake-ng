@@ -30,6 +30,7 @@ import {AddChecklistModalComponent} from "./add-checklist-modal/add-checklist-mo
 import {WebrtcService} from "../webrtc.service";
 import {AddTableModalComponent} from "./add-table-modal/add-table-modal.component";
 import {AlignmentAnnotationComponent} from "./alignment-annotation/alignment-annotation.component";
+import {CalculatorAnnotationComponent} from "./calculator-annotation/calculator-annotation.component";
 
 @Component({
   selector: 'app-protocol-session',
@@ -47,7 +48,8 @@ import {AlignmentAnnotationComponent} from "./alignment-annotation/alignment-ann
     NgbDropdownToggle,
     NgbDropdownMenu,
     NgbDropdownItem,
-    AlignmentAnnotationComponent
+    AlignmentAnnotationComponent,
+    CalculatorAnnotationComponent
   ],
   templateUrl: './protocol-session.component.html',
   styleUrl: './protocol-session.component.scss'

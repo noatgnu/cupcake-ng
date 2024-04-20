@@ -53,6 +53,10 @@
           <div class="d-flex flex-row justify-content-center">
             <app-alignment-annotation [annotation]="a"></app-alignment-annotation>
           </div>
+        } @else if (a.annotation_type === 'calculator') {
+          <div class="d-flex flex-row justify-content-center">
+            <app-calculator-annotation [annotation]="a"></app-calculator-annotation>
+          </div>
         }
 
     </div>

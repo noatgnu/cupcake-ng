@@ -11,6 +11,7 @@ import {ChecklistPresenterComponent} from "../checklist-presenter/checklist-pres
 import {CounterPresenterComponent} from "../counter-presenter/counter-presenter.component";
 import {TablePresenterComponent} from "../table-presenter/table-presenter.component";
 import {AlignmentAnnotationComponent} from "../alignment-annotation/alignment-annotation.component";
+import {CalculatorAnnotationComponent} from "../calculator-annotation/calculator-annotation.component";
 
 @Component({
   selector: 'app-annotation-presenter',
@@ -25,7 +26,8 @@ import {AlignmentAnnotationComponent} from "../alignment-annotation/alignment-an
     ChecklistPresenterComponent,
     CounterPresenterComponent,
     TablePresenterComponent,
-    AlignmentAnnotationComponent
+    AlignmentAnnotationComponent,
+    CalculatorAnnotationComponent
   ],
   templateUrl: './annotation-presenter.component.html',
   styleUrl: './annotation-presenter.component.scss'
