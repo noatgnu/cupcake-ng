@@ -68,7 +68,14 @@ export class CalculatorAnnotationComponent {
     }
   }
 
-  formOperation(operation: '+'|'-'|'*'|'/'| '='| 'log2' | 'log10' | 'sqrt' | 'abs' | '^') {
+  formOperation(operation: '+'|'-'|'*'|'/'| '='| 'log2' | 'log10' | 'sqrt' | 'abs' | '^' | 'clr') {
+    if (operation === 'clr') {
+      this.form.controls.inputPromptFirstValue.setValue('')
+      this.form.controls.inputPromptSecondValue.setValue('')
+      this.executionMode = 'initial'
+      this.operation = null
+      return
+    }
     if (this.executionMode === 'initial') {
       if (operation === '=' || this.form.controls.inputPromptFirstValue.value === "") {
         return

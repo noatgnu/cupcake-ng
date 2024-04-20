@@ -47,6 +47,13 @@
       <td>
         <button class="btn btn-outline-primary" (click)="formOperation('+')" style="width: 50px"><i class="bi bi-plus"></i></button>
       </td>
+      <td>
+        <button class="btn btn-outline-primary" (click)="formOperation('^')" style="width: 50px">^</button>
+      </td>
+      <td>
+        <button class="btn btn-outline-primary" (click)="formOperation('clr')" style="width: 50px">CLR</button>
+      </td>
+
     </tr>
     <tr>
       <td>
@@ -60,6 +67,12 @@
       </td>
       <td>
         <button class="btn btn-outline-primary" (click)="formOperation('-')" style="width: 50px">-</button>
+      </td>
+      <td>
+        <button class="btn btn-outline-primary" [disabled]="executionMode==='initial'" (click)="formOperation('log10')" style="width: 50px">log10</button>
+      </td>
+      <td>
+        <button class="btn btn-outline-primary" [disabled]="executionMode==='initial'" (click)="formOperation('log2')" style="width: 50px">log2</button>
       </td>
     </tr>
     <tr>
@@ -75,6 +88,10 @@
       <td>
         <button class="btn btn-outline-primary" (click)="formOperation('/')" style="width: 50px"><i class="bi bi-slash"></i></button>
       </td>
+      <td>
+        <button class="btn btn-outline-primary" [disabled]="executionMode==='initial'" (click)="formOperation('sqrt')" style="width: 50px">sqrt</button>
+      </td>
+      <td></td>
     <tr>
       <td>
         <button class="btn btn-outline-primary" (click)="formNumber(0)" style="width: 50px">0</button>
@@ -88,6 +105,10 @@
       <td>
         <button class="btn btn-outline-primary" (click)="formOperation('=')" style="width: 50px">=</button>
       </td>
+      <td>
+        <button class="btn btn-outline-primary" [disabled]="executionMode==='initial'" (click)="formOperation('abs')" style="width: 50px">abs</button>
+      </td>
+      <td></td>
     </tr>
     </tbody>
   </table>
