@@ -117,9 +117,9 @@
       @for (l of dataLog; track l) {
         <div class="list-group-item list-group-item-action">
           @if (l.inputPromptSecondValue !== 0) {
-            {{ l.inputPromptFirstValue }} {{ l.operation }} {{ l.inputPromptSecondValue }} = {{ l.result }}
+            {{ l.inputPromptFirstValue.toFixed(2) }} {{ l.operation }} {{ l.inputPromptSecondValue.toFixed(2) }} = {{ l.result }}
           } @else {
-            {{l.operation}} {{ l.inputPromptFirstValue }} = {{ l.result }}
+            {{l.operation}} {{ l.inputPromptFirstValue.toFixed(2) }} = {{ l.result }}
           }
         </div>
       }
