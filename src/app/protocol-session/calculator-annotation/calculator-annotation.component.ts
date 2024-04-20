@@ -147,8 +147,13 @@ export class CalculatorAnnotationComponent {
           break
       }
       this.form.controls.inputPromptSecondValue.setValue('')
-      this.operation = null
-      this.executionMode = 'initial'
+      if (operation === '=') {
+        this.executionMode = 'initial'
+        this.operation = null
+      } else{
+        // @ts-ignore
+        this.operation = operation
+      }
       this.dataLog.push(data)
     }
   }
