@@ -17,6 +17,11 @@ export class CalculatorAnnotationComponent {
   private _annotation?: Annotation
   @Input() set annotation(value: Annotation) {
     this._annotation = value
+    const data = JSON.parse(this.annotation.annotation)
+    if (Object.keys(data).length === 0) {
+      this.dataLog = []
+      return
+    }
     this.dataLog = JSON.parse(this.annotation.annotation)
   }
 
