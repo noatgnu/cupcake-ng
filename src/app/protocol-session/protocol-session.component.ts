@@ -591,6 +591,12 @@ export class ProtocolSessionComponent implements OnInit{
         })
 
       }
+    } else if (item === 'Calculator') {
+      // @ts-ignore
+      this.web.saveAnnotationJSON(this.dataService.currentSession.unique_id, this.currentStep.id, {}, 'calculator').subscribe((data: any) => {
+        this.toastService.show('Annotation', 'Calculator Saved Successfully');
+        this.refreshAnnotations();
+      })
     } else {
       if (this.clickedElement === item) {
         this.clickedElement = "";

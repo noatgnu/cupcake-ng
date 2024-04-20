@@ -2,6 +2,7 @@ import {Component, Input} from '@angular/core';
 import {FormBuilder, FormControl, ReactiveFormsModule, Validators} from "@angular/forms";
 import {Annotation} from "../../annotation";
 import {parse} from "@plussub/srt-vtt-parser";
+import {WebService} from "../../web.service";
 
 @Component({
   selector: 'app-calculator-annotation',
@@ -16,6 +17,7 @@ export class CalculatorAnnotationComponent {
   private _annotation?: Annotation
   @Input() set annotation(value: Annotation) {
     this._annotation = value
+    this.dataLog = JSON.parse(this.annotation.annotation)
   }
 
   get annotation(): Annotation {
@@ -32,7 +34,7 @@ export class CalculatorAnnotationComponent {
 
   dataLog: {inputPromptFirstValue: number, inputPromptSecondValue: number, operation: string, result: number}[] = []
 
-  constructor(private fb: FormBuilder) {
+  constructor(private fb: FormBuilder, private web: WebService) {
 
   }
 
@@ -148,6 +150,41 @@ export class CalculatorAnnotationComponent {
       this.operation = null
       this.executionMode = 'initial'
       this.dataLog.push(data)
+    }
+  }
+
+  formDelete() {
+    if (this.executionMode === 'initial') {
+      if (this.form.controls.inputPromptFirstValue.value === "") {
+        return
+      }
+      // @ts-ignore
+      this.form.controls.inputPromptFirstValue.setValue(this.form.controls.inputPromptFirstValue.value.slice(0, -1))
+    } else if (this.executionMode === 'second') {
+      if (this.form.controls.inputPromptSecondValue.value === "") {
+        return
+      }
+      // @ts-ignore
+      this.form.controls.inputPromptSecondValue.setValue(this.form.controls.inputPromptSecondValue.value.slice(0, -1))
+    }
+  }
+
+  formSave() {
+    this.web.updateAnnotation(JSON.stringify(this.dataLog), 'calculator', this.annotation.id).subscribe(
+      (response: any) => {
+        console.log(response)
+
+      }
+    )
+  }
+
+  revertValueTo(data: {inputPromptFirstValue: number, inputPromptSecondValue: number, operation: string, result: number}) {
+    this.form.controls.inputPromptFirstValue.setValue(data.inputPromptFirstValue.toString())
+    this.form.controls.inputPromptSecondValue.setValue(data.inputPromptSecondValue.toString())
+    if (data.operation === 'log2' || data.operation === 'log10' || data.operation === 'sqrt' || data.operation === 'abs') {
+      this.executionMode = 'initial'
+    } else {
+      this.executionMode = 'second'
     }
   }
 }

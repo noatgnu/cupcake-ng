@@ -5,6 +5,7 @@
         <input type="text" class="form-control" formControlName="inputPromptFirstValue">
       </div>
     } @else if (executionMode === 'second') {
+      <small>Initial: <span class="badge bg-danger">{{form.value.inputPromptFirstValue}}</span></small>
       <div class="form-floating">
         <input type="text" class="form-control" formControlName="inputPromptSecondValue">
       </div>
@@ -23,6 +24,9 @@
           }
           @case('/') {
             Division
+          }
+          @case('^') {
+            Power
           }
           @default {
             No Operation
@@ -47,8 +51,9 @@
       <td>
         <button class="btn btn-outline-primary" (click)="formOperation('+')" style="width: 65px"><i class="bi bi-plus"></i></button>
       </td>
+
       <td>
-        <button class="btn btn-outline-primary" (click)="formOperation('^')" style="width: 65px">^</button>
+        <button class="btn btn-outline-primary" [disabled]="executionMode==='second'" (click)="formOperation('log2')" style="width: 65px">log2</button>
       </td>
     </tr>
     <tr>
@@ -95,7 +100,7 @@
         <button class="btn btn-outline-primary" (click)="formOperation('*')" style="width: 65px"><i class="bi bi-x"></i></button>
       </td>
       <td>
-        <button class="btn btn-outline-primary" (click)="formOperation('=')" style="width: 65px">=</button>
+        <button class="btn btn-outline-primary" (click)="formOperation('^')" style="width: 65px">^</button>
       </td>
       <td>
         <button class="btn btn-outline-primary" [disabled]="executionMode==='second'" (click)="formOperation('abs')" style="width: 65px">abs</button>
@@ -103,21 +108,26 @@
     </tr>
     <tr>
       <td>
-        <button class="btn btn-outline-primary" [disabled]="executionMode==='second'" (click)="formOperation('log2')" style="width: 65px">log2</button>
+        <button class="btn btn-outline-primary" (click)="formOperation('=')" style="width: 65px">=</button>
       </td>
       <td>
         <button class="btn btn-outline-primary" (click)="formOperation('clr')" style="width: 65px">CLR</button>
       </td>
-      <td></td>
+      <td>
+        <button class="btn btn-outline-primary" (click)="formDelete()" style="width: 65px">DEL</button>
+      </td>
+      <td>
+        <button class="btn btn-outline-primary" (click)="formSave()" style="width: 65px"><i class="bi bi-save"></i></button>
+      </td>
       <td></td>
       <td></td>
     </tr>
     </tbody>
   </table>
   @if (dataLog.length > 0) {
-    <div class="list-group">
+    <div class="list-group" style="max-height: 300px">
       @for (l of dataLog; track l) {
-        <div class="list-group-item list-group-item-action">
+        <div class="list-group-item list-group-item-action" (click)="revertValueTo(l)">
           @if (l.inputPromptSecondValue !== 0) {
             {{ l.inputPromptFirstValue.toFixed(2) }} {{ l.operation }} {{ l.inputPromptSecondValue.toFixed(2) }} = {{ l.result }}
           } @else {
