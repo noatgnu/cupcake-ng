@@ -157,6 +157,7 @@ export class CalculatorAnnotationComponent {
         this.operation = operation
       }
       this.dataLog.push(data)
+      console.log(this.dataLog)
     }
   }
 
