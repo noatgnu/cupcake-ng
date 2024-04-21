@@ -10,6 +10,12 @@
       <div [ngbCollapse]="isMenuCollapsed" class="collapse navbar-collapse">
 
         <ul class="navbar-nav gap-2">
+          <li class="nav-item">
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" id="darkModeSwitch" (change)="toggleDarkMode($event)">
+              <label class="form-check-label" for="darkModeSwitch">Dark Mode</label>
+            </div>
+          </li>
           @if (dataService.currentSession) {
             <li class="nav-item">
               <div ngbDropdown display="dynamic" class="d-inline-black">

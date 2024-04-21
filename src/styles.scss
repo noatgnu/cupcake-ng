@@ -26,8 +26,39 @@ $theme-colors: (
   background-color: #9acad5 !important;
 }
 
+
+
 @import '../node_modules/bootstrap/scss/bootstrap.scss';
 
+$dark-theme-colors: (
+  "primary":    #24b4c6,
+  "success":    #7ad800,
+);
+
+@mixin generate-dark-theme($colors) {
+  .dark-theme {
+    @each $color, $value in $dark-theme-colors {
+      .bg-#{$color} {
+        background-color: $value !important;
+      }
+      .text-#{$color} {
+        color: $value !important;
+      }
+      .border-#{$color} {
+        border-color: $value !important;
+      }
+      .btn-#{$color} {
+        background-color: $value !important;
+        border-color: $value !important;
+      }
+      .btn-outline-#{$color} {
+        color: $value !important;
+        border-color: $value !important;
+      }
+    }
+  }
+}
+@include generate-dark-theme($dark-theme-colors);
 html, body { height: 100vh; width: 100vw; margin: 0 }
 
 
