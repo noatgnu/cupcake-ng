@@ -109,6 +109,7 @@ export class WebrtcService {
 
 
     pc.onicecandidate = (event) => {
+      console.log(event)
       if (event.candidate && connectionID !== "" && connectionID !== undefined) {
         this.signallingConnection?.next({
           type: 'candidate',
