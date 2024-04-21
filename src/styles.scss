@@ -55,6 +55,12 @@ $dark-theme-colors: (
         color: $value !important;
         border-color: $value !important;
       }
+      .link-#{$color} {
+        color: $value !important;
+      }
+      .table-#{$color} {
+        color: $value !important;
+      }
     }
   }
 }
