@@ -133,7 +133,13 @@ export class WebrtcService {
 
     }
     pc.oniceconnectionstatechange = (event) => {
-
+      if (pc.iceConnectionState === 'disconnected' || pc.iceConnectionState === 'failed') {
+        pc.getStats(null).then(stats => {
+          stats.forEach(report => {
+            console.log(report);
+          });
+        });
+      }
     }
     pc.onicegatheringstatechange = (event) => {
 
