@@ -70,7 +70,7 @@ export class WebrtcService {
         }
       ],
       iceCandidatePoolSize: 10,
-      iceTransportPolicy: 'relay',
+      iceTransportPolicy: 'all',
       bundlePolicy: 'max-bundle',
       rtcpMuxPolicy: 'require',
 
