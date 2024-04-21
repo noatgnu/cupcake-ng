@@ -304,6 +304,7 @@ export class WebrtcService {
             if (!this.polite) {
               return
             }
+            console.log(this.peerConnectionMap[from!].pc.signalingState)
             await Promise.all([
               this.peerConnectionMap[from!].pc.setLocalDescription({type: 'rollback'}),
               this.peerConnectionMap[from!].pc.setRemoteDescription(sdp!)
