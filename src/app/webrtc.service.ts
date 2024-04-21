@@ -120,6 +120,7 @@ export class WebrtcService {
     }
     pc.onnegotiationneeded = async () => {
       console.log('negotiation needed')
+      console.log(pc.signalingState)
       if (!autonegotiate) {
         return
       }
