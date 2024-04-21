@@ -427,9 +427,9 @@ export class WebrtcService {
     });
     this.stream = undefined;
     this.peerConnection?.close();
-    this.signallingConnection?.unsubscribe();
-    this.signallingConnection?.complete();
-    this.signallingConnection = undefined;
+    //this.signallingConnection?.unsubscribe();
+    //this.signallingConnection?.complete();
+    //this.signallingConnection = undefined;
   }
 
   removeAllTracksFromAllPeers() {
