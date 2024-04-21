@@ -323,21 +323,22 @@ export class WebrtcService {
         await this.peerConnectionMap[from!].pc.setRemoteDescription(sdp!);
 
         // Add any queued candidates
-        if (this.peerConnectionMap[from!].queuedCandidates.length > 0) {
+        /*if (this.peerConnectionMap[from!].queuedCandidates.length > 0) {
           for (const candidate of this.peerConnectionMap[from!].queuedCandidates) {
             await this.peerConnectionMap[from!].pc.addIceCandidate(candidate);
           }
           this.peerConnectionMap[from!].queuedCandidates = [];
-        }
+        }*/
         break;
       case 'candidate':
-        if (this.peerConnectionMap[from!].pc.remoteDescription) {
+        await this.peerConnectionMap[from!].pc.addIceCandidate(candidate!)
+/*        if (this.peerConnectionMap[from!].pc.remoteDescription) {
           await this.peerConnectionMap[from!].pc.addIceCandidate(candidate!);
         } else {
           // If remote description is not set, queue the candidate
           this.peerConnectionMap[from!].queuedCandidates = this.peerConnectionMap[from!].queuedCandidates || [];
           this.peerConnectionMap[from!].queuedCandidates.push(candidate!);
-        }
+        }*/
         break;
     }
 
