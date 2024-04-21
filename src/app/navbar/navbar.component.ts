@@ -4,7 +4,7 @@ import {NgbCollapse, NgbDropdown, NgbDropdownMenu, NgbDropdownToggle, NgbModal} 
 import {LoginModalComponent} from "../login-modal/login-modal.component";
 import {AccountsService} from "../accounts/accounts.service";
 import {NgOptimizedImage} from "@angular/common";
-import {Event, Router} from "@angular/router";
+import {Router} from "@angular/router";
 import {QrcodeModalComponent} from "../qrcode-modal/qrcode-modal.component";
 import {WebsocketService} from "../websocket.service";
 import {WebService} from "../web.service";
@@ -109,16 +109,5 @@ export class NavbarComponent {
 
   switchTitle() {
     this.switched = !this.switched
-  }
-
-  toggleDarkMode(event: any) {
-    const body = document.getElementsByTagName('body')[0]
-    if (event.target?.checked) {
-      body.setAttribute('data-bs-theme', 'dark')
-      body.classList.add('dark-theme')
-    } else {
-      body.setAttribute('data-bs-theme', 'light')
-      body.classList.remove('dark-theme')
-    }
   }
 }

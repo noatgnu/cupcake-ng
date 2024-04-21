@@ -23,6 +23,20 @@ export class AppComponent {
   title = 'cupcake-ng';
   ready = false;
   constructor(private accounts: AccountsService, private webrtc: WebrtcService, private ws: WebsocketService, private dataService: DataService) {
+    const followSystemTheme = localStorage.getItem("cupcake-follow-system-theme")
+    if (followSystemTheme) {
+      if (followSystemTheme === "true") {
+        const prefersDarkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        if (prefersDarkMode) {
+          this.dataService.setDarkMode(true)
+        }
+      }
+    } else {
+      const darkMode = localStorage.getItem("cupcake-dark-mode")
+      if (darkMode && darkMode === "true") {
+        this.dataService.setDarkMode(true)
+      }
+    }
 
     if (this.accounts.token === "") {
       const token = localStorage.getItem("cupcakeToken")
@@ -71,5 +85,10 @@ export class AppComponent {
         console.log(data)
       }
     })
+  }
+
+  checkForPreferredTheme() {
+    const prefersDarkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+
   }
 }

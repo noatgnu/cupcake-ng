@@ -1,24 +1,27 @@
 import { Component } from '@angular/core';
-import {FormBuilder, ReactiveFormsModule} from "@angular/forms";
+import {FormBuilder, FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {ToastService} from "../toast.service";
 import {WebService} from "../web.service";
+import {DataService} from "../data.service";
 
 @Component({
   selector: 'app-accounts',
   standalone: true,
   imports: [
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    FormsModule
   ],
   templateUrl: './accounts.component.html',
   styleUrl: './accounts.component.scss'
 })
 export class AccountsComponent {
+  selectedSection = 'security'
 
   passwordForm = this.fb.group({
     currentPassword: [''],
     newPassword: [''],
   })
-  constructor(private fb: FormBuilder, private toastService: ToastService, private web: WebService) {
+  constructor(private fb: FormBuilder, private toastService: ToastService, private web: WebService, public dataService: DataService) {
 
   }
 
@@ -41,5 +44,30 @@ export class AccountsComponent {
       this.toastService.show("Password change", "Password change failed")
     })
 
+  }
+
+  toggleDarkMode(event: any) {
+    const body = document.getElementsByTagName('body')[0]
+    if (event.target?.checked) {
+      body.setAttribute('data-bs-theme', 'dark')
+      body.classList.add('dark-theme')
+      localStorage.setItem('cupcake-dark-mode', 'true')
+      this.dataService.darkMode = true
+    } else {
+      body.setAttribute('data-bs-theme', 'light')
+      body.classList.remove('dark-theme')
+      localStorage.setItem('cupcake-dark-mode', 'false')
+      this.dataService.darkMode = false
+    }
+  }
+
+  followSystemTheme(event: any) {
+    localStorage.setItem('cupcake-follow-system-theme', event.target.checked.toString())
+    const prefersDarkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (prefersDarkMode) {
+      document.getElementsByTagName('body')[0].setAttribute('data-bs-theme', 'dark')
+      document.getElementsByTagName('body')[0].classList.add('dark-theme')
+      this.dataService.darkMode = true
+    }
   }
 }

@@ -10,6 +10,8 @@ import {Subject} from "rxjs";
 })
 export class DataService {
   _protocol: Protocol|null = null;
+  darkMode: boolean = false;
+  systemTheme: boolean = false;
   protocolPermissions: {[key: string]: boolean} = {
     edit: false,
     view: false,
@@ -60,4 +62,16 @@ export class DataService {
 
   stepCompletionSummary: {[key: string]: {started: boolean, completed: boolean, content: string, promptStarted: boolean}} = {};
   constructor(private accounts: AccountsService, private web: WebService) { }
+
+  setDarkMode(value: boolean) {
+    this.darkMode = value;
+    const body = document.getElementsByTagName('body')[0];
+    if (value) {
+      body.setAttribute('data-bs-theme', 'dark');
+      body.classList.add('dark-theme');
+    } else {
+      body.setAttribute('data-bs-theme', 'light');
+      body.classList.remove('dark-theme');
+    }
+  }
 }
