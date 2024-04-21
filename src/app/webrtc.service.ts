@@ -310,6 +310,8 @@ export class WebrtcService {
               this.peerConnectionMap[from!].pc.setLocalDescription({type: 'rollback'}),
               this.peerConnectionMap[from!].pc.setRemoteDescription(sdp!)
             ])
+          } else {
+            await this.peerConnectionMap[from!].pc.setRemoteDescription(sdp!);
           }
         }
         console.log(this.peerConnectionMap[from!].pc.signalingState)
