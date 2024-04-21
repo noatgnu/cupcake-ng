@@ -299,6 +299,7 @@ export class WebrtcService {
       //  break;
       case 'offer':
         if (sdp) {
+          console.log(this.peerConnectionMap[from!].pc.signalingState)
           if (this.peerConnectionMap[from!].pc.signalingState !== 'stable') {
             if (!this.polite) {
               return
@@ -309,18 +310,16 @@ export class WebrtcService {
             ])
           }
         }
-        if (this.peerConnectionMap[from!].pc.signalingState === 'have-remote-offer') {
-          const answer = await this.peerConnectionMap[from!].pc.createAnswer();
-          await this.peerConnectionMap[from!].pc.setLocalDescription(answer);
+        const answer = await this.peerConnectionMap[from!].pc.createAnswer();
+        await this.peerConnectionMap[from!].pc.setLocalDescription(answer);
 
-          // Send the answer to the remote peer
-          this.signallingConnection?.next({
-            type: answer.type,
-            sdp: answer.sdp,
-            to: from,
-            id_type: this.connectionType
-          });
-        }
+        // Send the answer to the remote peer
+        this.signallingConnection?.next({
+          type: answer.type,
+          sdp: answer.sdp,
+          to: from,
+          id_type: this.connectionType
+        });
         break;
       case 'answer':
         // Set the remote description
