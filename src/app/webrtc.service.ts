@@ -23,7 +23,8 @@ export class WebrtcService {
     answered: boolean,
     connectionType: 'viewer'|'host',
     connected: boolean,
-      dataChannel?: RTCDataChannel
+      dataChannel?: RTCDataChannel,
+      queuedCandidates: RTCIceCandidate[]
   }
   } = {};
   peerList: string[] = [];
@@ -258,7 +259,8 @@ export class WebrtcService {
           offered: false,
           answered: false,
           connectionType: id_type === 'host' ? 'viewer' : 'host',
-          connected: false
+          connected: false,
+          queuedCandidates: []
         }
       } else {
         this.peerConnectionMap[from!] = {
@@ -266,7 +268,8 @@ export class WebrtcService {
           offered: false,
           answered: false,
           connectionType: id_type === 'host' ? 'viewer' : 'host',
-          connected: false
+          connected: false,
+          queuedCandidates: []
         }
       }
     }
@@ -310,9 +313,23 @@ export class WebrtcService {
       case 'answer':
         // Set the remote description
         await this.peerConnectionMap[from!].pc.setRemoteDescription(sdp!);
+
+        // Add any queued candidates
+        if (this.peerConnectionMap[from!].queuedCandidates.length > 0) {
+          for (const candidate of this.peerConnectionMap[from!].queuedCandidates) {
+            await this.peerConnectionMap[from!].pc.addIceCandidate(candidate);
+          }
+          this.peerConnectionMap[from!].queuedCandidates = [];
+        }
         break;
       case 'candidate':
-        await this.peerConnectionMap[from!].pc.addIceCandidate(candidate!);
+        if (this.peerConnectionMap[from!].pc.remoteDescription) {
+          await this.peerConnectionMap[from!].pc.addIceCandidate(candidate!);
+        } else {
+          // If remote description is not set, queue the candidate
+          this.peerConnectionMap[from!].queuedCandidates = this.peerConnectionMap[from!].queuedCandidates || [];
+          this.peerConnectionMap[from!].queuedCandidates.push(candidate!);
+        }
         break;
     }
 
