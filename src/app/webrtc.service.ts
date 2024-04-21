@@ -41,6 +41,7 @@ export class WebrtcService {
   enableVideo = false;
   enableAudio = false;
   connectionType: 'viewer'|'host' = 'viewer';
+  isCallerMap: {[key: string]: boolean} = {};
   constructor(private accounts: AccountsService, private web: WebService) {
 
   }
@@ -122,11 +123,13 @@ export class WebrtcService {
       if (!autonegotiate) {
         return
       }
-      this.makingOffer = true;
-      await pc.setLocalDescription(await pc.createOffer());
+      if (this.isCallerMap[connectionID!]) {
+        this.makingOffer = true;
+        await pc.setLocalDescription(await pc.createOffer());
 
-      this.signallingConnection?.next({type: pc.localDescription?.type, sdp: pc.localDescription?.sdp, to: connectionID, id_type: this.connectionType});
-      this.makingOffer = false;
+        this.signallingConnection?.next({type: pc.localDescription?.type, sdp: pc.localDescription?.sdp, to: connectionID, id_type: this.connectionType});
+        this.makingOffer = false;
+      }
 
     }
     pc.onicecandidateerror = (event) => {
@@ -255,6 +258,7 @@ export class WebrtcService {
     }
     if (!this.peerConnectionMap[from!]) {
       if (type === 'check') {
+        this.isCallerMap[from!] = true;
         if (this.peerConnectionMap[from!]) {
           // reset the connection
           this.peerConnectionMap[from!].pc.close();
@@ -428,6 +432,7 @@ export class WebrtcService {
     });
     this.stream = undefined;
     this.peerConnection?.close();
+    this.isCallerMap = {};
     //this.signallingConnection?.unsubscribe();
     //this.signallingConnection?.complete();
     //this.signallingConnection = undefined;
