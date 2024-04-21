@@ -56,7 +56,7 @@ export class WebrtcService {
       iceServers: [
         {
           urls:[
-            `turn:${credential?.turn_server}:${credential?.turn_port}?transport=tcp`,
+            `turn:${credential?.turn_server}:${credential?.turn_port}`,
             //'stun:188.68.54.37:3478'
             //`turn:188.68.54.37:3478`
           ],
