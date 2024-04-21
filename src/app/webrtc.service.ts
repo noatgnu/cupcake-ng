@@ -233,7 +233,7 @@ export class WebrtcService {
       }
     });
     ws.subscribe(async (data: any) => {
-      //console.log(data)
+      console.log(data)
       if (data.message) {
         if (data.unique_id) {
           this.unique_id = data.unique_id;
@@ -428,6 +428,8 @@ export class WebrtcService {
     this.stream = undefined;
     this.peerConnection?.close();
     this.signallingConnection?.unsubscribe();
+    this.signallingConnection?.complete();
+    this.signallingConnection = undefined;
   }
 
   removeAllTracksFromAllPeers() {
