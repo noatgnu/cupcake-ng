@@ -1,4 +1,4 @@
-<div class="d-flex flex-column gap-2" style="width: 600px">
+<div class="d-flex flex-column gap-2" style="width: 500px">
   <div class="form-floating">
     <select class="form-select" [(ngModel)]="selectedForm">
       <option value="massFromVolumeAndConcentration">
@@ -24,7 +24,7 @@
             <label for="volume1">Volume</label>
           </div>
           <div class="form-floating">
-            <select class="form-select" formControlName="volumeUnit" id="volumeUnit1">
+            <select class="form-select" formControlName="volumeUnit" id="volumeUnit1" style="width: 100px">
               @for (unit of dataService.volumeUnits; track unit) {
                 <option [value]="unit">{{ unit }}</option>
               }
@@ -39,7 +39,7 @@
             <label for="concentration1">Concentration</label>
           </div>
           <div class="form-floating">
-            <select class="form-select" formControlName="concentrationUnit" id="concentrationUnit1">
+            <select class="form-select" formControlName="concentrationUnit" id="concentrationUnit1" style="width: 100px">
               @for (unit of dataService.molarityUnits; track unit) {
                 <option [value]="unit">{{ unit }}</option>
               }
@@ -50,11 +50,11 @@
 
         <div class="d-flex flex-row gap-1">
           <div class="form-floating">
-            <input type="number" class="form-control" id="weight1" formControlName="weight" />
+            <input type="number" class="form-control" id="weight1" formControlName="molecularWeight" />
             <label for="weight1">Molecular Weight</label>
           </div>
           <div class="form-floating">
-            <select class="form-select" formControlName="weightUnit" id="weightUnit1">
+            <select class="form-select" formControlName="weightUnit" id="weightUnit1" style="width: 100px">
               @for (unit of dataService.massUnits; track unit) {
                 <option [value]="unit">{{ unit }}</option>
               }
@@ -73,16 +73,16 @@
       <form [formGroup]="formVolumeFromMassAndConcentration" (ngSubmit)="calculateVolumeFromMassAndConcentration()">
         <div class="d-flex flex-row gap-1">
           <div class="form-floating">
-            <input type="number" class="form-control" id="mass2" formControlName="mass" />
+            <input type="number" class="form-control" id="mass2" formControlName="weight" />
             <label for="mass2">Mass</label>
           </div>
           <div class="form-floating">
-            <select class="form-select" formControlName="massUnit" id="massUnit2">
+            <select class="form-select" formControlName="weightUnit" id="massUnit2" style="width: 100px">
               @for (unit of dataService.massUnits; track unit) {
                 <option [value]="unit">{{ unit }}</option>
               }
             </select>
-            <label for="massUnit2">Mass Unit</label>
+            <label for="massUnit2">Weight Unit</label>
           </div>
         </div>
 
@@ -92,7 +92,7 @@
             <label for="concentration2">Concentration</label>
           </div>
           <div class="form-floating">
-            <select class="form-select" formControlName="concentrationUnit" id="concentrationUnit2">
+            <select class="form-select" formControlName="concentrationUnit" id="concentrationUnit2" style="width: 100px">
               @for (unit of dataService.molarityUnits; track unit) {
                 <option [value]="unit">{{ unit }}</option>
               }
@@ -103,11 +103,11 @@
 
         <div class="d-flex flex-row gap-1">
           <div class="form-floating">
-            <input type="number" class="form-control" id="weight2" formControlName="weight" />
+            <input type="number" class="form-control" id="weight2" formControlName="molecularWeight" />
             <label for="weight2">Molecular Weight</label>
           </div>
           <div class="form-floating">
-            <select class="form-select" formControlName="weightUnit" id="weightUnit2">
+            <select class="form-select" formControlName="weightUnit" id="weightUnit2" style="width: 100px">
               @for (unit of dataService.massUnits; track unit) {
                 <option [value]="unit">{{ unit }}</option>
               }
@@ -127,11 +127,11 @@
       <form [formGroup]="formConcentrationFromMassAndVolume" (ngSubmit)="calculateConcentrationFromMassAndVolume()">
         <div class="d-flex flex-row gap-1">
           <div class="form-floating">
-            <input type="number" class="form-control" id="mass3" formControlName="mass" />
+            <input type="number" class="form-control" id="mass3" formControlName="weight" />
             <label for="mass3">Mass</label>
           </div>
           <div class="form-floating">
-            <select class="form-select" formControlName="massUnit" id="massUnit3">
+            <select class="form-select" formControlName="weightUnit" id="massUnit3" style="width: 100px">
               @for (unit of dataService.massUnits; track unit) {
                 <option [value]="unit">{{ unit }}</option>
               }
@@ -146,7 +146,7 @@
             <label for="volume3">Volume</label>
           </div>
           <div class="form-floating">
-            <select class="form-select" formControlName="volumeUnit" id="volumeUnit3">
+            <select class="form-select" formControlName="volumeUnit" id="volumeUnit3" style="width: 100px">
               @for (unit of dataService.volumeUnits; track unit) {
                 <option [value]="unit">{{ unit }}</option>
               }
@@ -157,11 +157,11 @@
 
         <div class="d-flex flex-row gap-1">
           <div class="form-floating">
-            <input type="number" class="form-control" id="weight3" formControlName="weight" />
+            <input type="number" class="form-control" id="weight3" formControlName="molecularWeight" />
             <label for="weight3">Molecular Weight</label>
           </div>
           <div class="form-floating">
-            <select class="form-select" formControlName="weightUnit" id="weightUnit3">
+            <select class="form-select" formControlName="weightUnit" id="weightUnit3" style="width: 100px">
               @for (unit of dataService.massUnits; track unit) {
                 <option [value]="unit">{{ unit }}</option>
               }
@@ -185,7 +185,7 @@
             <label for="stockVolume4">Stock Volume</label>
           </div>
           <div class="form-floating">
-            <select class="form-select" formControlName="stockVolumeUnit" id="stockVolumeUnit4">
+            <select class="form-select" formControlName="stockVolumeUnit" id="stockVolumeUnit4" style="width: 100px">
               @for (unit of dataService.volumeUnits; track unit) {
                 <option [value]="unit">{{ unit }}</option>
               }
@@ -200,7 +200,7 @@
             <label for="stockConcentration4">Stock Concentration</label>
           </div>
           <div class="form-floating">
-            <select class="form-select" formControlName="stockConcentrationUnit" id="stockConcentrationUnit4">
+            <select class="form-select" formControlName="stockConcentrationUnit" id="stockConcentrationUnit4" style="width: 100px">
               @for (unit of dataService.molarityUnits; track unit) {
                 <option [value]="unit">{{ unit }}</option>
               }
@@ -215,7 +215,7 @@
             <label for="targetConcentration4">Target Concentration</label>
           </div>
           <div class="form-floating">
-            <select class="form-select" formControlName="targetConcentrationUnit" id="targetConcentrationUnit4">
+            <select class="form-select" formControlName="targetConcentrationUnit" id="targetConcentrationUnit4" style="width: 100px">
               @for (unit of dataService.molarityUnits; track unit) {
                 <option [value]="unit">{{ unit }}</option>
               }
