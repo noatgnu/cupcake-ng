@@ -30,7 +30,7 @@
 
   @switch (selectedForm) {
     @case ("dynamic") {
-      <form [formGroup]="formDynamicsFormula" class="d-flex flex-column gap-2">
+      <form [formGroup]="formDynamicsFormula" class="d-flex flex-column gap-2" (ngSubmit)="calculateDynamic()">
         <ngb-alert>
           At least 3 numeric values are required to calculate the fourth value.
         </ngb-alert>
