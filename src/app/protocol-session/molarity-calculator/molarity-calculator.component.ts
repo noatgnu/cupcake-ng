@@ -24,6 +24,10 @@ export class MolarityCalculatorComponent {
     if (value.annotation) {
       const annotation = JSON.parse(value.annotation)
       if (annotation) {
+        if (Object.keys(annotation).length === 0) {
+          this.dataLog = []
+          return
+        }
         this.dataLog = annotation
       } else {
         this.dataLog = []
