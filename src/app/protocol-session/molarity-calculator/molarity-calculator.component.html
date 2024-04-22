@@ -26,6 +26,68 @@
 
 
   @switch (selectedForm) {
+    @case ("dynamic") {
+      <form [formGroup]="formDynamicsFormula" class="d-flex flex-column gap-2">
+        <div class="d-flex flex-row gap-1">
+          <div class="form-floating">
+            <input type="number" class="form-control" id="volume" formControlName="volume" style="width: 150px" />
+            <label for="volume">Volume</label>
+          </div>
+          <div class="form-floating">
+            <select class="form-select" formControlName="volumeUnit" id="volumeUnit" style="width: 150px">
+              @for (unit of dataService.volumeUnits; track unit) {
+                <option [value]="unit">{{ unit }}</option>
+              }
+            </select>
+            <label for="volumeUnit">Volume Unit</label>
+          </div>
+        </div>
+        <div class="d-flex flex-row gap-1">
+          <div class="form-floating">
+            <input type="number" class="form-control" id="concentration" formControlName="concentration" style="width: 150px" />
+            <label for="concentration">Concentration</label>
+          </div>
+          <div class="form-floating">
+            <select class="form-select" formControlName="concentrationUnit" id="concentrationUnit" style="width: 150px">
+              @for (unit of dataService.molarityUnits; track unit) {
+                <option [value]="unit">{{ unit }}</option>
+              }
+            </select>
+            <label for="concentrationUnit">Concentration Unit</label>
+          </div>
+        </div>
+        <div class="d-flex flex-row gap-1">
+          <div class="form-floating">
+            <input type="number" class="form-control" id="molecularWeight" formControlName="molecularWeight" style="width: 150px" />
+            <label for="molecularWeight">Molecular Weight</label>
+          </div>
+          <div class="form-floating">
+            <input type="text" disabled value="g/mol" class="form-control">
+            <label>Unit</label>
+          </div>
+        </div>
+        <div class="d-flex flex-row gap-1">
+          <div class="form-floating">
+            <input type="number" class="form-control" id="weightDynamics" formControlName="weight" style="width: 150px" />
+            <label for="concentration">Concentration</label>
+          </div>
+          <div class="form-floating">
+            <select class="form-select" formControlName="weightUnit" id="weightDynamicsUnit" style="width: 150px">
+              @for (unit of dataService.massUnits; track unit) {
+                <option [value]="unit">{{ unit }}</option>
+              }
+            </select>
+            <label for="concentrationUnit">Weight Unit</label>
+          </div>
+        </div>
+        <div>
+          <button class="btn btn-primary" type="submit">
+            Calculate
+          </button>
+        </div>
+      </form>
+    }
+
     @case ("massFromVolumeAndConcentration") {
       <form [formGroup]="formMassFromVolumeAndConcentration" (ngSubmit)="calculateMassFromVolumeAndConcentration()" class="d-flex flex-column gap-2">
         <div class="d-flex flex-row gap-1">

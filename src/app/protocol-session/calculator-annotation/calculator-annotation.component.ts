@@ -45,18 +45,29 @@ export class CalculatorAnnotationComponent {
 
   formNumber(inputNumber: number) {
     if (this.executionMode === 'initial') {
-      if (this.form.controls.inputPromptFirstValue.value === "") {
-        this.form.controls.inputPromptFirstValue.setValue(inputNumber.toString())
-      } else {
-        // @ts-ignore
-        this.form.controls.inputPromptFirstValue.setValue((parseFloat(this.form.controls.inputPromptFirstValue.value)  * 10 + inputNumber).toString())
+      const firstValue = this.form.controls.inputPromptFirstValue.value
+      if (firstValue) {
+        if (firstValue === "") {
+          this.form.controls.inputPromptFirstValue.setValue(inputNumber.toString())
+        } else if (firstValue.endsWith(".")) {
+          this.form.controls.inputPromptFirstValue.setValue(firstValue + inputNumber.toString())
+        } else {
+          // @ts-ignore
+          this.form.controls.inputPromptFirstValue.setValue((parseFloat(this.form.controls.inputPromptFirstValue.value)  * 10 + inputNumber).toString())
+        }
       }
+
     } else if (this.executionMode === 'second') {
-      if (this.form.controls.inputPromptSecondValue.value === "") {
-        this.form.controls.inputPromptSecondValue.setValue(inputNumber.toString())
-      } else {
-        // @ts-ignore
-        this.form.controls.inputPromptSecondValue.setValue((parseFloat(this.form.controls.inputPromptSecondValue.value)  * 10 + inputNumber).toString())
+      const secondValue = this.form.controls.inputPromptSecondValue.value
+      if (secondValue) {
+        if (secondValue === "") {
+          this.form.controls.inputPromptSecondValue.setValue(inputNumber.toString())
+        } else if (secondValue.endsWith(".")) {
+          this.form.controls.inputPromptSecondValue.setValue(secondValue + inputNumber.toString())
+        } else {
+          // @ts-ignore
+          this.form.controls.inputPromptSecondValue.setValue((parseFloat(this.form.controls.inputPromptSecondValue.value)  * 10 + inputNumber).toString())
+        }
       }
     }
   }

@@ -16,7 +16,7 @@ import {Annotation} from "../../annotation";
   styleUrl: './molarity-calculator.component.scss'
 })
 export class MolarityCalculatorComponent {
-  selectedForm: 'massFromVolumeAndConcentration'| 'volumeFromMassAndConcentration'| 'concentrationFromMassAndVolume'| 'volumeFromStockVolumeAndConcentration' = 'massFromVolumeAndConcentration'
+  selectedForm: 'dynamic'|'massFromVolumeAndConcentration'| 'volumeFromMassAndConcentration'| 'concentrationFromMassAndVolume'| 'volumeFromStockVolumeAndConcentration' = 'massFromVolumeAndConcentration'
   private _annotation?: Annotation
 
   @Input() set annotation(value: Annotation) {
@@ -41,6 +41,15 @@ export class MolarityCalculatorComponent {
     return this._annotation!
   }
 
+  formDynamicsFormula = this.fb.group({
+    concentration: [],
+    concentrationUnit: ["uM"],
+    volume: [],
+    volumeUnit: ["mL"],
+    molecularWeight: [],
+    weight: [],
+    weightUnit: ["g"]
+  })
 
   formMassFromVolumeAndConcentration = this.fb.group({
     concentration: [],
@@ -184,6 +193,51 @@ export class MolarityCalculatorComponent {
         operationType: 'volumeFromStockVolumeAndConcentration',
         result: finalVolume
       })
+    }
+  }
+
+  calculateDynamic() {
+    const concentration = this.formDynamicsFormula.value.concentration
+    const volume = this.formDynamicsFormula.value.volume
+    const molecularWeight = this.formDynamicsFormula.value.molecularWeight
+    const weight = this.formDynamicsFormula.value.weight
+    const concentrationUnit = this.formDynamicsFormula.value.concentrationUnit
+    const volumeUnit = this.formDynamicsFormula.value.volumeUnit
+    const weightUnit = this.formDynamicsFormula.value.weightUnit
+    if (concentrationUnit && volumeUnit && weightUnit) {
+      if (concentration && volume && molecularWeight) {
+        const concentrationInMolar = this.dataService.convertMolarity(concentration, concentrationUnit, "M")
+        const volumeInLiters = this.dataService.convertVolume(volume, volumeUnit, "L")
+        const mass = concentrationInMolar * volumeInLiters * molecularWeight
+        // convert to target weight unit
+        const finalWeight = this.dataService.convertMass(mass, "g", weightUnit)
+        this.dataLog.push({
+          data: {concentration, volume, molecularWeight, concentrationUnit, volumeUnit, weightUnit},
+          operationType: 'dynamic',
+          result: finalWeight
+        })
+      } else if (weight && volume && molecularWeight) {
+        const weightInGrams = this.dataService.convertMass(weight, weightUnit, "g")
+        const concentration = weightInGrams / (volume * molecularWeight)
+        // convert to target concentration unit
+        const finalConcentration = this.dataService.convertMolarity(concentration, "M", concentrationUnit)
+        this.dataLog.push({
+          data: {weight, volume, molecularWeight, weightUnit, volumeUnit, concentrationUnit},
+          operationType: 'dynamic',
+          result: finalConcentration
+        })
+      } else if (weight && concentration && molecularWeight) {
+        const weightInGrams = this.dataService.convertMass(weight, weightUnit, "g")
+        const concentrationInMolar = this.dataService.convertMolarity(concentration, concentrationUnit, "M")
+        const volume = weightInGrams / (concentrationInMolar * molecularWeight)
+        // convert to target volume unit
+        const finalVolume = this.dataService.convertVolume(volume, "L", volumeUnit)
+        this.dataLog.push({
+          data: {weight, concentration, molecularWeight, weightUnit, concentrationUnit, volumeUnit},
+          operationType: 'dynamic',
+          result: finalVolume
+        })
+      }
     }
   }
 
