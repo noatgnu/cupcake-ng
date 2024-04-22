@@ -1,4 +1,4 @@
-<div class="d-flex flex-column gap-2" style="width: 350px">
+<div class="d-flex flex-column gap-2" style="width: 290px">
   <div class="d-flex flex-row gap-2">
     <div class="form-floating">
       <select class="form-select" [(ngModel)]="selectedForm">
@@ -30,7 +30,7 @@
       <form [formGroup]="formDynamicsFormula" class="d-flex flex-column gap-2">
         <div class="d-flex flex-row gap-1">
           <div class="form-floating">
-            <input type="number" class="form-control" id="volume" formControlName="volume" style="width: 150px" />
+            <input type="number" class="form-control" id="volume" formControlName="volume" style="width: 100px" />
             <label for="volume">Volume</label>
           </div>
           <div class="form-floating">
@@ -44,7 +44,7 @@
         </div>
         <div class="d-flex flex-row gap-1">
           <div class="form-floating">
-            <input type="number" class="form-control" id="concentration" formControlName="concentration" style="width: 150px" />
+            <input type="number" class="form-control" id="concentration" formControlName="concentration" style="width: 100px" />
             <label for="concentration">Concentration</label>
           </div>
           <div class="form-floating">
@@ -58,7 +58,7 @@
         </div>
         <div class="d-flex flex-row gap-1">
           <div class="form-floating">
-            <input type="number" class="form-control" id="molecularWeight" formControlName="molecularWeight" style="width: 150px" />
+            <input type="number" class="form-control" id="molecularWeight" formControlName="molecularWeight" style="width: 100px" />
             <label for="molecularWeight">Molecular Weight</label>
           </div>
           <div class="form-floating">
@@ -68,7 +68,7 @@
         </div>
         <div class="d-flex flex-row gap-1">
           <div class="form-floating">
-            <input type="number" class="form-control" id="weightDynamics" formControlName="weight" style="width: 150px" />
+            <input type="number" class="form-control" id="weightDynamics" formControlName="weight" style="width: 100px" />
             <label for="concentration">Concentration</label>
           </div>
           <div class="form-floating">
@@ -92,7 +92,7 @@
       <form [formGroup]="formMassFromVolumeAndConcentration" (ngSubmit)="calculateMassFromVolumeAndConcentration()" class="d-flex flex-column gap-2">
         <div class="d-flex flex-row gap-1">
           <div class="form-floating">
-            <input type="number" class="form-control" id="volume1" formControlName="volume" style="width: 150px" />
+            <input type="number" class="form-control" id="volume1" formControlName="volume" style="width: 100px" />
             <label for="volume1">Volume</label>
           </div>
           <div class="form-floating">
@@ -107,7 +107,7 @@
 
         <div class="d-flex flex-row gap-1">
           <div class="form-floating">
-            <input type="number" class="form-control" id="concentration1" formControlName="concentration" style="width: 150px" />
+            <input type="number" class="form-control" id="concentration1" formControlName="concentration" style="width: 100px" />
             <label for="concentration1">Concentration</label>
           </div>
           <div class="form-floating">
@@ -122,7 +122,7 @@
 
         <div class="d-flex flex-row gap-1">
           <div class="form-floating">
-            <input type="number" class="form-control" id="weight1" formControlName="molecularWeight" style="width: 150px" />
+            <input type="number" class="form-control" id="weight1" formControlName="molecularWeight" style="width: 100px" />
             <label for="weight1">M.Weight</label>
           </div>
           <div class="form-floating">
@@ -149,7 +149,7 @@
       <form [formGroup]="formVolumeFromMassAndConcentration" (ngSubmit)="calculateVolumeFromMassAndConcentration()">
         <div class="d-flex flex-row gap-1">
           <div class="form-floating">
-            <input type="number" class="form-control" id="mass2" formControlName="weight" style="width: 150px"/>
+            <input type="number" class="form-control" id="mass2" formControlName="weight" style="width: 100px"/>
             <label for="mass2">Mass</label>
           </div>
           <div class="form-floating">
@@ -164,7 +164,7 @@
 
         <div class="d-flex flex-row gap-1">
           <div class="form-floating">
-            <input type="number" class="form-control" id="concentration2" formControlName="concentration" style="width: 150px" />
+            <input type="number" class="form-control" id="concentration2" formControlName="concentration" style="width: 100px" />
             <label for="concentration2">Concentration</label>
           </div>
           <div class="form-floating">
@@ -179,7 +179,7 @@
 
         <div class="d-flex flex-row gap-1">
           <div class="form-floating">
-            <input type="number" class="form-control" id="weight2" formControlName="molecularWeight" style="width: 150px" />
+            <input type="number" class="form-control" id="weight2" formControlName="molecularWeight" style="width: 100px" />
             <label for="weight2">M.Weight</label>
           </div>
           <div class="form-floating">
@@ -203,7 +203,7 @@
       <form [formGroup]="formConcentrationFromMassAndVolume" (ngSubmit)="calculateConcentrationFromMassAndVolume()">
         <div class="d-flex flex-row gap-1">
           <div class="form-floating">
-            <input type="number" class="form-control" id="mass3" formControlName="weight" style="width: 150px" />
+            <input type="number" class="form-control" id="mass3" formControlName="weight" style="width: 100px" />
             <label for="mass3">Mass</label>
           </div>
           <div class="form-floating">
@@ -218,7 +218,7 @@
 
         <div class="d-flex flex-row gap-1">
           <div class="form-floating">
-            <input type="number" class="form-control" id="volume3" formControlName="volume" style="width: 150px" />
+            <input type="number" class="form-control" id="volume3" formControlName="volume" style="width: 100px" />
             <label for="volume3">Volume</label>
           </div>
           <div class="form-floating">
@@ -233,7 +233,7 @@
 
         <div class="d-flex flex-row gap-1">
           <div class="form-floating">
-            <input type="number" class="form-control" id="weight3" formControlName="molecularWeight" style="width: 150px" />
+            <input type="number" class="form-control" id="weight3" formControlName="molecularWeight" style="width: 100px" />
             <label for="weight3">M.Weight</label>
           </div>
           <div class="form-floating">
@@ -257,7 +257,7 @@
       <form [formGroup]="formVolumeFromStockVolumeAndConcentration" (ngSubmit)="calculateVolumeFromStockVolumeAndConcentration()">
         <div class="d-flex flex-row gap-1">
           <div class="form-floating">
-            <input type="number" class="form-control" id="stockVolume4" formControlName="stockVolume" style="width: 150px" />
+            <input type="number" class="form-control" id="stockVolume4" formControlName="stockVolume" style="width: 100px" />
             <label for="stockVolume4">Stock Volume</label>
           </div>
           <div class="form-floating">
@@ -272,7 +272,7 @@
 
         <div class="d-flex flex-row gap-1">
           <div class="form-floating">
-            <input type="number" class="form-control" id="stockConcentration4" formControlName="stockConcentration" style="width: 150px"/>
+            <input type="number" class="form-control" id="stockConcentration4" formControlName="stockConcentration" style="width: 100px"/>
             <label for="stockConcentration4">Stock Concentration</label>
           </div>
           <div class="form-floating">
@@ -287,7 +287,7 @@
 
         <div class="d-flex flex-row gap-1">
           <div class="form-floating">
-            <input type="number" class="form-control" id="targetConcentration4" formControlName="targetConcentration" style="width: 150px"/>
+            <input type="number" class="form-control" id="targetConcentration4" formControlName="targetConcentration" style="width: 100px"/>
             <label for="targetConcentration4">Target Concentration</label>
           </div>
           <div class="form-floating">
