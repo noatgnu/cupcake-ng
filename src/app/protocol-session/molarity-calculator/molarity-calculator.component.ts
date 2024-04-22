@@ -1,8 +1,9 @@
-import { Component } from '@angular/core';
+import {Component, Input} from '@angular/core';
 import {DataService} from "../../data.service";
 import {WebService} from "../../web.service";
 import {ToastService} from "../../toast.service";
 import {FormBuilder, FormsModule, ReactiveFormsModule} from "@angular/forms";
+import {Annotation} from "../../annotation";
 
 @Component({
   selector: 'app-molarity-calculator',
@@ -16,6 +17,15 @@ import {FormBuilder, FormsModule, ReactiveFormsModule} from "@angular/forms";
 })
 export class MolarityCalculatorComponent {
   selectedForm: 'massFromVolumeAndConcentration'| 'volumeFromMassAndConcentration'| 'concentrationFromMassAndVolume'| 'volumeFromStockVolumeAndConcentration' = 'massFromVolumeAndConcentration'
+  private _annotation?: Annotation
+
+  @Input() set annotation(value: Annotation) {
+    this._annotation = value
+  }
+
+  get annotation(): Annotation {
+    return this._annotation!
+  }
 
 
   formMassFromVolumeAndConcentration = this.fb.group({

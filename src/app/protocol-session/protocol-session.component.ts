@@ -597,6 +597,12 @@ export class ProtocolSessionComponent implements OnInit{
         this.toastService.show('Annotation', 'Calculator Saved Successfully');
         this.refreshAnnotations();
       })
+    } else if (item === 'Molarity Calculator'){
+      // @ts-ignore
+      this.web.saveAnnotationJSON(this.dataService.currentSession.unique_id, this.currentStep.id, {}, 'mcalculator').subscribe((data: any) => {
+        this.toastService.show('Annotation', 'Calculator Saved Successfully');
+        this.refreshAnnotations();
+      })
     } else {
       if (this.clickedElement === item) {
         this.clickedElement = "";

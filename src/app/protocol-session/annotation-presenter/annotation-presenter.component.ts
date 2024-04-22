@@ -12,6 +12,7 @@ import {CounterPresenterComponent} from "../counter-presenter/counter-presenter.
 import {TablePresenterComponent} from "../table-presenter/table-presenter.component";
 import {AlignmentAnnotationComponent} from "../alignment-annotation/alignment-annotation.component";
 import {CalculatorAnnotationComponent} from "../calculator-annotation/calculator-annotation.component";
+import {MolarityCalculatorComponent} from "../molarity-calculator/molarity-calculator.component";
 
 @Component({
   selector: 'app-annotation-presenter',
@@ -27,7 +28,8 @@ import {CalculatorAnnotationComponent} from "../calculator-annotation/calculator
     CounterPresenterComponent,
     TablePresenterComponent,
     AlignmentAnnotationComponent,
-    CalculatorAnnotationComponent
+    CalculatorAnnotationComponent,
+    MolarityCalculatorComponent
   ],
   templateUrl: './annotation-presenter.component.html',
   styleUrl: './annotation-presenter.component.scss'
