@@ -61,6 +61,38 @@ export class DataService {
   redrawSubject: Subject<boolean> = new Subject<boolean>();
 
   stepCompletionSummary: {[key: string]: {started: boolean, completed: boolean, content: string, promptStarted: boolean}} = {};
+
+  massUnitMap: {[key: string]: {name: string, unit: string, baseConversion: number}} = {
+    "ng": {name: "Nanogram", unit: "ng", baseConversion: 1},
+    "ug": {name: "Microgram", unit: "ug", baseConversion: 1000},
+    "mg": {name: "Milligram", unit: "mg", baseConversion: 1000000},
+    "g": {name: "Gram", unit: "g", baseConversion: 1000000000},
+    "kg": {name: "Kilogram", unit: "kg", baseConversion: 1000000000000}
+  };
+  baseMassUnit: string = "ng";
+  massUnits: string[] = ["ng", "ug", "mg", "g", "kg"];
+
+  volumeUnitMap: {[key: string]: {name: string, unit: string, baseConversion: number}} = {
+    "nL": {name: "Nanoliter", unit: "nL", baseConversion: 1},
+    "uL": {name: "Microliter", unit: "uL", baseConversion: 1000},
+    "mL": {name: "Milliliter", unit: "mL", baseConversion: 1000000},
+    "L": {name: "Liter", unit: "L", baseConversion: 1000000000}
+  };
+  baseVolumeUnit: string = "nL";
+  volumeUnits: string[] = ["nL", "uL", "mL", "L"];
+
+  molarityUnitMap: {[key: string]: {name: string, unit: string, baseConversion: number}} = {
+    "nM": {name: "Nanomolar", unit: "nM", baseConversion: 1},
+    "uM": {name: "Micromolar", unit: "uM", baseConversion: 1000},
+    "mM": {name: "Millimolar", unit: "mM", baseConversion: 1000000},
+    "M": {name: "Molar", unit: "M", baseConversion: 1000000000}
+  };
+
+  baseMolarityUnit: string = "nM";
+  molarityUnits: string[] = ["nM", "uM", "mM", "M"];
+
+
+
   constructor(private accounts: AccountsService, private web: WebService) { }
 
   setDarkMode(value: boolean) {
@@ -73,5 +105,17 @@ export class DataService {
       body.setAttribute('data-bs-theme', 'light');
       body.classList.remove('dark-theme');
     }
+  }
+
+  convertMass(value: number, unit: string, targetUnit: string): number {
+    return value * this.massUnitMap[unit].baseConversion / this.massUnitMap[targetUnit].baseConversion;
+  }
+
+  convertVolume(value: number, unit: string, targetUnit: string): number {
+    return value * this.volumeUnitMap[unit].baseConversion / this.volumeUnitMap[targetUnit].baseConversion;
+  }
+
+  convertMolarity(value: number, unit: string, targetUnit: string): number {
+    return value * this.molarityUnitMap[unit].baseConversion / this.molarityUnitMap[targetUnit].baseConversion;
   }
 }
