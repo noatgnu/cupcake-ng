@@ -1,30 +1,40 @@
-<div class="d-flex flex-column gap-2" style="width: 500px">
-  <div class="form-floating">
-    <select class="form-select" [(ngModel)]="selectedForm">
-      <option value="massFromVolumeAndConcentration">
-        Mass From Volume And Concentration
-      </option>
-      <option value="volumeFromMassAndConcentration">
-        Volume From Mass And Concentration
-      </option>
-      <option value="concentrationFromMassAndVolume">
-        Concentration From Mass And Volume
-      </option>
-      <option value="volumeFromStockVolumeAndConcentration">
-        Volume From Stock Volume And Concentration
-      </option>
-    </select>
+<div class="d-flex flex-column gap-2" style="width: 450px">
+  <div>
+    <div class="form-floating">
+      <select class="form-select" [(ngModel)]="selectedForm">
+        <option value="massFromVolumeAndConcentration">
+          Mass From Volume And Concentration
+        </option>
+        <option value="volumeFromMassAndConcentration">
+          Volume From Mass And Concentration
+        </option>
+        <option value="concentrationFromMassAndVolume">
+          Concentration From Mass And Volume
+        </option>
+        <option value="volumeFromStockVolumeAndConcentration">
+          Volume From Stock Volume And Concentration
+        </option>
+      </select>
+      <label>Selected Formula</label>
+    </div>
+    <div>
+      <button class="btn btn-success" (click)="updateAnnotation()">
+        <i class="bi bi-save"></i>
+      </button>
+    </div>
   </div>
+
+
   @switch (selectedForm) {
     @case ("massFromVolumeAndConcentration") {
-      <form [formGroup]="formMassFromVolumeAndConcentration" (ngSubmit)="calculateMassFromVolumeAndConcentration()">
+      <form [formGroup]="formMassFromVolumeAndConcentration" (ngSubmit)="calculateMassFromVolumeAndConcentration()" class="d-flex flex-column gap-2">
         <div class="d-flex flex-row gap-1">
           <div class="form-floating">
             <input type="number" class="form-control" id="volume1" formControlName="volume" />
             <label for="volume1">Volume</label>
           </div>
           <div class="form-floating">
-            <select class="form-select" formControlName="volumeUnit" id="volumeUnit1" style="width: 100px">
+            <select class="form-select" formControlName="volumeUnit" id="volumeUnit1" style="width: 200px">
               @for (unit of dataService.volumeUnits; track unit) {
                 <option [value]="unit">{{ unit }}</option>
               }
@@ -39,7 +49,7 @@
             <label for="concentration1">Concentration</label>
           </div>
           <div class="form-floating">
-            <select class="form-select" formControlName="concentrationUnit" id="concentrationUnit1" style="width: 100px">
+            <select class="form-select" formControlName="concentrationUnit" id="concentrationUnit1" style="width: 200px">
               @for (unit of dataService.molarityUnits; track unit) {
                 <option [value]="unit">{{ unit }}</option>
               }
@@ -54,7 +64,7 @@
             <label for="weight1">Molecular Weight</label>
           </div>
           <div class="form-floating">
-            <select class="form-select" formControlName="weightUnit" id="weightUnit1" style="width: 100px">
+            <select class="form-select" formControlName="weightUnit" id="weightUnit1" style="width: 200px">
               @for (unit of dataService.massUnits; track unit) {
                 <option [value]="unit">{{ unit }}</option>
               }
@@ -77,7 +87,7 @@
             <label for="mass2">Mass</label>
           </div>
           <div class="form-floating">
-            <select class="form-select" formControlName="weightUnit" id="massUnit2" style="width: 100px">
+            <select class="form-select" formControlName="weightUnit" id="massUnit2" style="width: 200px">
               @for (unit of dataService.massUnits; track unit) {
                 <option [value]="unit">{{ unit }}</option>
               }
@@ -92,7 +102,7 @@
             <label for="concentration2">Concentration</label>
           </div>
           <div class="form-floating">
-            <select class="form-select" formControlName="concentrationUnit" id="concentrationUnit2" style="width: 100px">
+            <select class="form-select" formControlName="concentrationUnit" id="concentrationUnit2" style="width: 200px">
               @for (unit of dataService.molarityUnits; track unit) {
                 <option [value]="unit">{{ unit }}</option>
               }
@@ -107,7 +117,7 @@
             <label for="weight2">Molecular Weight</label>
           </div>
           <div class="form-floating">
-            <select class="form-select" formControlName="weightUnit" id="weightUnit2" style="width: 100px">
+            <select class="form-select" formControlName="weightUnit" id="weightUnit2" style="width: 200px">
               @for (unit of dataService.massUnits; track unit) {
                 <option [value]="unit">{{ unit }}</option>
               }
@@ -131,7 +141,7 @@
             <label for="mass3">Mass</label>
           </div>
           <div class="form-floating">
-            <select class="form-select" formControlName="weightUnit" id="massUnit3" style="width: 100px">
+            <select class="form-select" formControlName="weightUnit" id="massUnit3" style="width: 200px">
               @for (unit of dataService.massUnits; track unit) {
                 <option [value]="unit">{{ unit }}</option>
               }
@@ -146,7 +156,7 @@
             <label for="volume3">Volume</label>
           </div>
           <div class="form-floating">
-            <select class="form-select" formControlName="volumeUnit" id="volumeUnit3" style="width: 100px">
+            <select class="form-select" formControlName="volumeUnit" id="volumeUnit3" style="width: 200px">
               @for (unit of dataService.volumeUnits; track unit) {
                 <option [value]="unit">{{ unit }}</option>
               }
@@ -161,7 +171,7 @@
             <label for="weight3">Molecular Weight</label>
           </div>
           <div class="form-floating">
-            <select class="form-select" formControlName="weightUnit" id="weightUnit3" style="width: 100px">
+            <select class="form-select" formControlName="weightUnit" id="weightUnit3" style="width: 200px">
               @for (unit of dataService.massUnits; track unit) {
                 <option [value]="unit">{{ unit }}</option>
               }
@@ -185,7 +195,7 @@
             <label for="stockVolume4">Stock Volume</label>
           </div>
           <div class="form-floating">
-            <select class="form-select" formControlName="stockVolumeUnit" id="stockVolumeUnit4" style="width: 100px">
+            <select class="form-select" formControlName="stockVolumeUnit" id="stockVolumeUnit4" style="width: 200px">
               @for (unit of dataService.volumeUnits; track unit) {
                 <option [value]="unit">{{ unit }}</option>
               }
@@ -200,7 +210,7 @@
             <label for="stockConcentration4">Stock Concentration</label>
           </div>
           <div class="form-floating">
-            <select class="form-select" formControlName="stockConcentrationUnit" id="stockConcentrationUnit4" style="width: 100px">
+            <select class="form-select" formControlName="stockConcentrationUnit" id="stockConcentrationUnit4" style="width: 200px">
               @for (unit of dataService.molarityUnits; track unit) {
                 <option [value]="unit">{{ unit }}</option>
               }
@@ -215,7 +225,7 @@
             <label for="targetConcentration4">Target Concentration</label>
           </div>
           <div class="form-floating">
-            <select class="form-select" formControlName="targetConcentrationUnit" id="targetConcentrationUnit4" style="width: 100px">
+            <select class="form-select" formControlName="targetConcentrationUnit" id="targetConcentrationUnit4" style="width: 200px">
               @for (unit of dataService.molarityUnits; track unit) {
                 <option [value]="unit">{{ unit }}</option>
               }

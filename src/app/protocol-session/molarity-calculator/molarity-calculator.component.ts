@@ -21,6 +21,16 @@ export class MolarityCalculatorComponent {
 
   @Input() set annotation(value: Annotation) {
     this._annotation = value
+    if (value.annotation) {
+      const annotation = JSON.parse(value.annotation)
+      if (annotation) {
+        this.dataLog = annotation
+      } else {
+        this.dataLog = []
+      }
+    } else {
+      this.dataLog = []
+    }
   }
 
   get annotation(): Annotation {
@@ -169,6 +179,14 @@ export class MolarityCalculatorComponent {
         data: {volumeUnit, stockConcentration, stockConcentrationUnit, targetConcentration, targetConcentrationUnit, stockVolume, stockVolumeUnit},
         operationType: 'volumeFromStockVolumeAndConcentration',
         result: finalVolume
+      })
+    }
+  }
+
+  updateAnnotation() {
+    if (this.dataLog.length > 0) {
+      this.web.updateAnnotation(JSON.stringify(this.dataLog), 'mcalculator', this.annotation.id).subscribe((response) => {
+        console.log(response)
       })
     }
   }
