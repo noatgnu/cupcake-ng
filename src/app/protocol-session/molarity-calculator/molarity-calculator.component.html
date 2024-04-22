@@ -241,7 +241,7 @@
           @switch (d.operationType) {
             @case ('massFromVolumeAndConcentration') {
               <div class="list-group-item list-group-item-action">
-                {{ d.data.concentration }} {{ d.data.concentrationUnit }} x {{ d.data.volume }} {{ d.data.volumeUnit }} x {{ d.data.weight }} = {{ d.result }} {{ d.data.weightUnit }}
+                {{ d.data.concentration }} {{ d.data.concentrationUnit }} x {{ d.data.volume }} {{ d.data.volumeUnit }} x {{ d.data.molecularWeight }} = {{ d.result }} {{ d.data.weightUnit }}
               </div>
             }
             @case ('volumeFromMassAndConcentration') {
