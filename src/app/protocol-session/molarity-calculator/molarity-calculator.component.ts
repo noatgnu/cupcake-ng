@@ -4,13 +4,15 @@ import {WebService} from "../../web.service";
 import {ToastService} from "../../toast.service";
 import {FormBuilder, FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {Annotation} from "../../annotation";
+import {NgbAlert} from "@ng-bootstrap/ng-bootstrap";
 
 @Component({
   selector: 'app-molarity-calculator',
   standalone: true,
   imports: [
     ReactiveFormsModule,
-    FormsModule
+    FormsModule,
+    NgbAlert
   ],
   templateUrl: './molarity-calculator.component.html',
   styleUrl: './molarity-calculator.component.scss'
@@ -237,6 +239,17 @@ export class MolarityCalculatorComponent {
           operationType: 'dynamic',
           result: finalVolume
         })
+      }else if (weight && volume && concentration) {
+        const weightInGrams = this.dataService.convertMass(weight, weightUnit, "g")
+        const volumeInLiters = this.dataService.convertVolume(volume, volumeUnit, "L")
+        const concentrationInMolar = this.dataService.convertMolarity(concentration, concentrationUnit, "M")
+        const molecularWeight = weightInGrams / (volumeInLiters * concentrationInMolar)
+        this.dataLog.push({
+          data: {weight, volume, concentration, weightUnit, volumeUnit, concentrationUnit},
+          operationType: 'dynamic',
+          result: molecularWeight
+        })
+
       }
     }
   }

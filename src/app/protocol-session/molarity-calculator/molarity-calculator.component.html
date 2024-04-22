@@ -2,6 +2,9 @@
   <div class="d-flex flex-row gap-2">
     <div class="form-floating">
       <select class="form-select" [(ngModel)]="selectedForm">
+        <option value="dynamic">
+          Dynamic Molarity Formula
+        </option>
         <option value="massFromVolumeAndConcentration">
           Mass From Volume And Concentration
         </option>
@@ -28,6 +31,9 @@
   @switch (selectedForm) {
     @case ("dynamic") {
       <form [formGroup]="formDynamicsFormula" class="d-flex flex-column gap-2">
+        <ngb-alert>
+          At least 3 numeric values are required to calculate the fourth value.
+        </ngb-alert>
         <div class="d-flex flex-row gap-1">
           <div class="form-floating">
             <input type="number" class="form-control" id="volume" formControlName="volume" style="width: 100px" />
@@ -126,7 +132,7 @@
             <label for="weight1">M.Weight</label>
           </div>
           <div class="form-floating">
-            <input type="text" disabled value="g/mol" class="form-control">
+            <input type="text" disabled value="g/mol" class="form-control" style="width: 100px">
             <label>Unit</label>
           </div>
         </div>
@@ -183,13 +189,18 @@
             <label for="weight2">M.Weight</label>
           </div>
           <div class="form-floating">
-            <select class="form-select" formControlName="weightUnit" id="weightUnit2" style="width: 150px">
-              @for (unit of dataService.massUnits; track unit) {
-                <option [value]="unit">{{ unit }}</option>
-              }
-            </select>
-            <label for="weightUnit2">Target Volume Unit</label>
+            <input type="text" disabled value="g/mol" class="form-control" style="width: 100px">
+            <label>Unit</label>
           </div>
+
+        </div>
+        <div class="form-floating">
+          <select class="form-select" formControlName="weightUnit" id="weightUnit2" style="width: 150px">
+            @for (unit of dataService.massUnits; track unit) {
+              <option [value]="unit">{{ unit }}</option>
+            }
+          </select>
+          <label for="weightUnit2">Target Volume Unit</label>
         </div>
 
         <div>
@@ -237,13 +248,18 @@
             <label for="weight3">M.Weight</label>
           </div>
           <div class="form-floating">
-            <select class="form-select" formControlName="weightUnit" id="weightUnit3" style="width: 150px">
-              @for (unit of dataService.massUnits; track unit) {
-                <option [value]="unit">{{ unit }}</option>
-              }
-            </select>
-            <label for="weightUnit3">Target Concentration Unit</label>
+            <input type="text" disabled value="g/mol" class="form-control" style="width: 100px">
+            <label>Unit</label>
           </div>
+        </div>
+
+        <div class="form-floating">
+          <select class="form-select" formControlName="weightUnit" id="weightUnit3" style="width: 150px">
+            @for (unit of dataService.massUnits; track unit) {
+              <option [value]="unit">{{ unit }}</option>
+            }
+          </select>
+          <label for="weightUnit3">Target Concentration Unit</label>
         </div>
 
         <div>
@@ -321,18 +337,31 @@
               </div>
             }
             @case ('volumeFromMassAndConcentration') {
-              <div class="list-group list-group-item-action">
+              <div class="list-group-item list-group-item-action">
                 {{ d.data.weight}} {{ d.data.weightUnit}} / ({{ d.data.concentration}} {{d.data.concentrationUnit}} x {{ d.data.molecularWeight}}) = {{ d.result}} {{ d.data.volumeUnit}}
               </div>
             }
             @case ('concentrationFromMassAndVolume') {
-              <div class="list-group list-group-item-action">
+              <div class="list-group-item list-group-item-action">
                 {{ d.data.weight}} {{ d.data.weightUnit}} / ({{ d.data.volume}} {{d.data.volumeUnit}} x {{ d.data.molecularWeight}}) = {{ d.result}} {{ d.data.concentrationUnit}}
               </div>
             }
             @case ('volumeFromStockVolumeAndConcentration') {
-              <div class="list-group list-group-item-action">
+              <div class="list-group-item list-group-item-action">
                 {{ d.data.stockVolumne}} {{ d.data.stockVolumeUnit}} x {{ d.data.targetConcentration }} {{ d.data.targetConcentrationUnit}} / {{ d.data.stockConcentration}} {{ d.data.stockConcentrationUnit}} = {{ d.result}} {{ d.data.volumeUnit}}
+              </div>
+            }
+            @case ('dynamic') {
+              <div class="list-group-item list-group-item-action">
+                @if (d.data.volume && d.data.concentration && d.data.molecularWeight) {
+                  {{ d.data.volume }} {{ d.data.volumeUnit }} x {{ d.data.concentration }} {{ d.data.concentrationUnit }} x {{ d.data.molecularWeight }} g/mol = {{ d.result }} {{ d.data.weightUnit }}
+                } @else if (d.data.volume && d.data.concentration && d.data.weight) {
+                  {{ d.data.weight }} {{ d.data.weightUnit }} / ({{ d.data.volume }} {{ d.data.volumeUnit }} x {{ d.data.concentration }} {{ d.data.concentrationUnit }}) = {{ d.result }} g/mol
+                } @else if (d.data.volume && d.data.molecularWeight && d.data.weight) {
+                  {{ d.data.weight }} {{ d.data.weightUnit }} / ({{ d.data.volume }} {{ d.data.volumeUnit }} x {{ d.data.molecularWeight }} g/mol)  = {{ d.result }} {{ d.data.concentrationUnit }}
+                } @else if (d.data.concentration && d.data.molecularWeight && d.data.weight) {
+                  {{ d.data.weight }} {{ d.data.weightUnit }} / ({{ d.data.concentration }} {{ d.data.concentrationUnit }} x {{ d.data.molecularWeight }} g/mol) = {{ d.result }} {{ d.data.volumeUnit }}
+                }
               </div>
             }
           }
