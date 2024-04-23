@@ -18,7 +18,7 @@ import {NgbAlert} from "@ng-bootstrap/ng-bootstrap";
   styleUrl: './molarity-calculator.component.scss'
 })
 export class MolarityCalculatorComponent {
-  selectedForm: 'dynamic'|'massFromVolumeAndConcentration'| 'volumeFromMassAndConcentration'| 'concentrationFromMassAndVolume'| 'volumeFromStockVolumeAndConcentration' = 'massFromVolumeAndConcentration'
+  selectedForm: 'dynamic'|'massFromVolumeAndConcentration'| 'volumeFromMassAndConcentration'| 'concentrationFromMassAndVolume'| 'volumeFromStockVolumeAndConcentration' = 'dynamic'
   private _annotation?: Annotation
 
   @Input() set annotation(value: Annotation) {
