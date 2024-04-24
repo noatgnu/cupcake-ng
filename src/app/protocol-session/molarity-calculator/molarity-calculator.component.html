@@ -333,34 +333,35 @@
           @switch (d.operationType) {
             @case ('massFromVolumeAndConcentration') {
               <div class="list-group-item list-group-item-action">
-                {{ d.data.concentration }} {{ d.data.concentrationUnit }} x {{ d.data.volume }} {{ d.data.volumeUnit }} x {{ d.data.molecularWeight }} = {{ d.result }} {{ d.data.weightUnit }}
+
+                {{ d.data.concentration.toFixed(2) }} {{ d.data.concentrationUnit }} x {{ d.data.volume.toFixed(2) }} {{ d.data.volumeUnit }} x {{ d.data.molecularWeight.toFixed(2) }} = {{ d.result.toFixed(2) }} {{ d.data.weightUnit }}
               </div>
             }
             @case ('volumeFromMassAndConcentration') {
               <div class="list-group-item list-group-item-action">
-                {{ d.data.weight}} {{ d.data.weightUnit}} / ({{ d.data.concentration}} {{d.data.concentrationUnit}} x {{ d.data.molecularWeight}}) = {{ d.result}} {{ d.data.volumeUnit}}
+                {{ d.data.weight.toFixed(2)}} {{ d.data.weightUnit}} / ({{ d.data.concentration.toFixed(2)}} {{d.data.concentrationUnit}} x {{ d.data.molecularWeight.toFixed(2)}}) = {{ d.result.toFixed(2)}} {{ d.data.volumeUnit}}
               </div>
             }
             @case ('concentrationFromMassAndVolume') {
               <div class="list-group-item list-group-item-action">
-                {{ d.data.weight}} {{ d.data.weightUnit}} / ({{ d.data.volume}} {{d.data.volumeUnit}} x {{ d.data.molecularWeight}}) = {{ d.result}} {{ d.data.concentrationUnit}}
+                {{ d.data.weight.toFixed(2)}} {{ d.data.weightUnit}} / ({{ d.data.volume.toFixed(2)}} {{d.data.volumeUnit}} x {{ d.data.molecularWeight.toFixed(2)}}) = {{ d.result.toFixed(2)}} {{ d.data.concentrationUnit}}
               </div>
             }
             @case ('volumeFromStockVolumeAndConcentration') {
               <div class="list-group-item list-group-item-action">
-                {{ d.data.stockVolumne}} {{ d.data.stockVolumeUnit}} x {{ d.data.targetConcentration }} {{ d.data.targetConcentrationUnit}} / {{ d.data.stockConcentration}} {{ d.data.stockConcentrationUnit}} = {{ d.result}} {{ d.data.volumeUnit}}
+                {{ d.data.stockVolumne.toFixed(2)}} {{ d.data.stockVolumeUnit}} x {{ d.data.targetConcentration.toFixed(2) }} {{ d.data.targetConcentrationUnit}} / {{ d.data.stockConcentration.toFixed(2)}} {{ d.data.stockConcentrationUnit}} = {{ d.result.toFixed(2)}} {{ d.data.volumeUnit}}
               </div>
             }
             @case ('dynamic') {
               <div class="list-group-item list-group-item-action">
                 @if (d.data.volume && d.data.concentration && d.data.molecularWeight) {
-                  {{ d.data.volume }} {{ d.data.volumeUnit }} x {{ d.data.concentration }} {{ d.data.concentrationUnit }} x {{ d.data.molecularWeight }} g/mol = {{ d.result }} {{ d.data.weightUnit }}
+                  {{ d.data.volume.toFixed(2) }} {{ d.data.volumeUnit }} x {{ d.data.concentration.toFixed(2) }} {{ d.data.concentrationUnit }} x {{ d.data.molecularWeight.toFixed(2) }} g/mol = {{ d.result.toFixed(2) }} {{ d.data.weightUnit }}
                 } @else if (d.data.volume && d.data.concentration && d.data.weight) {
-                  {{ d.data.weight }} {{ d.data.weightUnit }} / ({{ d.data.volume }} {{ d.data.volumeUnit }} x {{ d.data.concentration }} {{ d.data.concentrationUnit }}) = {{ d.result }} g/mol
+                  {{ d.data.weight.toFixed(2) }} {{ d.data.weightUnit }} / ({{ d.data.volume.toFixed(2) }} {{ d.data.volumeUnit }} x {{ d.data.concentration.toFixed(2) }} {{ d.data.concentrationUnit }}) = {{ d.result.toFixed(2) }} g/mol
                 } @else if (d.data.volume && d.data.molecularWeight && d.data.weight) {
-                  {{ d.data.weight }} {{ d.data.weightUnit }} / ({{ d.data.volume }} {{ d.data.volumeUnit }} x {{ d.data.molecularWeight }} g/mol)  = {{ d.result }} {{ d.data.concentrationUnit }}
+                  {{ d.data.weight.toFixed(2) }} {{ d.data.weightUnit }} / ({{ d.data.volume.toFixed(2) }} {{ d.data.volumeUnit }} x {{ d.data.molecularWeight.toFixed(2) }} g/mol)  = {{ d.result.toFixed(2) }} {{ d.data.concentrationUnit }}
                 } @else if (d.data.concentration && d.data.molecularWeight && d.data.weight) {
-                  {{ d.data.weight }} {{ d.data.weightUnit }} / ({{ d.data.concentration }} {{ d.data.concentrationUnit }} x {{ d.data.molecularWeight }} g/mol) = {{ d.result }} {{ d.data.volumeUnit }}
+                  {{ d.data.weight.toFixed(2) }} {{ d.data.weightUnit }} / ({{ d.data.concentration.toFixed(2) }} {{ d.data.concentrationUnit }} x {{ d.data.molecularWeight.toFixed(2) }} g/mol) = {{ d.result.toFixed(2) }} {{ d.data.volumeUnit }}
                 }
               </div>
             }

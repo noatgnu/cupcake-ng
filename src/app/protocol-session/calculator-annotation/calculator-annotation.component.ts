@@ -1,7 +1,6 @@
 import {Component, Input} from '@angular/core';
 import {FormBuilder, FormControl, ReactiveFormsModule, Validators} from "@angular/forms";
 import {Annotation} from "../../annotation";
-import {parse} from "@plussub/srt-vtt-parser";
 import {WebService} from "../../web.service";
 
 @Component({

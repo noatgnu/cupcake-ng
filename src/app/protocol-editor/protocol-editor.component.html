@@ -83,7 +83,11 @@
                 </div>
               </div>
               Step Description
-              <ngx-wig [(ngModel)]="step.step_description"></ngx-wig>
+              <quill-editor [(ngModel)]="step.step_description">
+
+              </quill-editor>
+
+<!--              <ngx-wig [(ngModel)]="step.step_description"></ngx-wig>-->
               <div>
                 Step Duration
               </div>

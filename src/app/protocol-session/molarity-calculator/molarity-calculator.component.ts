@@ -12,7 +12,7 @@ import {NgbAlert} from "@ng-bootstrap/ng-bootstrap";
   imports: [
     ReactiveFormsModule,
     FormsModule,
-    NgbAlert
+    NgbAlert,
   ],
   templateUrl: './molarity-calculator.component.html',
   styleUrl: './molarity-calculator.component.scss'

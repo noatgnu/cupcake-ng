@@ -8,6 +8,7 @@ import {Router} from "@angular/router";
 import {TimePickerComponent} from "../time-picker/time-picker.component";
 import {ToastService} from "../toast.service";
 import {NgbDate, NgbModalConfig} from "@ng-bootstrap/ng-bootstrap";
+import {QuillEditorComponent} from "ngx-quill";
 
 @Component({
   selector: 'app-protocol-editor',
@@ -16,7 +17,8 @@ import {NgbDate, NgbModalConfig} from "@ng-bootstrap/ng-bootstrap";
     ReactiveFormsModule,
     NgxWigModule,
     FormsModule,
-    TimePickerComponent
+    TimePickerComponent,
+    QuillEditorComponent
   ],
   templateUrl: './protocol-editor.component.html',
   styleUrl: './protocol-editor.component.scss'
