@@ -129,7 +129,7 @@
         <div class="list-group-item list-group-item-action">
           <div class="d-flex flex-row gap-1 align-items-center">
             <div>
-              <button class="btn btn-outline-primary" (click)="l.scratch=!l.scratch"><i class="bi bi-type-strikethrough"></i></button>
+              <span (click)="l.scratch=!l.scratch"><i class="bi bi-type-strikethrough"></i></span>
             </div>
             <div (click)="revertValueTo(l)">
               @if (l.scratch) {
