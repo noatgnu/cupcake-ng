@@ -16,6 +16,8 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(
       withInterceptors([authInterceptor])
     ),
-    importProvidersFrom(QuillModule.forRoot())
+    importProvidersFrom(QuillModule.forRoot(
+
+    ))
   ],
 };
