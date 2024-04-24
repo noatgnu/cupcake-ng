@@ -126,12 +126,30 @@
   @if (dataLog.length > 0) {
     <div class="list-group" style="max-height: 300px; overflow: auto">
       @for (l of dataLog; track l) {
-        <div class="list-group-item list-group-item-action" (click)="revertValueTo(l)">
-          @if (l.inputPromptSecondValue !== 0) {
-            {{ l.inputPromptFirstValue.toFixed(2) }} {{ l.operation }} {{ l.inputPromptSecondValue.toFixed(2) }} = {{ l.result }}
-          } @else {
-            {{l.operation}} {{ l.inputPromptFirstValue.toFixed(2) }} = {{ l.result }}
-          }
+        <div class="list-group-item list-group-item-action">
+          <div class="d-flex flex-row gap-1 align-items-center">
+            <div>
+              <button class="btn btn-outline-primary" (click)="l.scratch=!l.scratch"><i class="bi bi-type-strikethrough"></i></button>
+            </div>
+            <div (click)="revertValueTo(l)">
+              @if (l.scratch) {
+                <s>
+                  @if (l.inputPromptSecondValue !== 0) {
+                    {{ l.inputPromptFirstValue.toFixed(2) }} {{ l.operation }} {{ l.inputPromptSecondValue.toFixed(2) }} = {{ l.result }}
+                  } @else {
+                    {{l.operation}} {{ l.inputPromptFirstValue.toFixed(2) }} = {{ l.result }}
+                  }
+                </s>
+              } @else {
+                @if (l.inputPromptSecondValue !== 0) {
+                  {{ l.inputPromptFirstValue.toFixed(2) }} {{ l.operation }} {{ l.inputPromptSecondValue.toFixed(2) }} = {{ l.result }}
+                } @else {
+                  {{l.operation}} {{ l.inputPromptFirstValue.toFixed(2) }} = {{ l.result }}
+                }
+              }
+            </div>
+          </div>
+
         </div>
       }
     </div>

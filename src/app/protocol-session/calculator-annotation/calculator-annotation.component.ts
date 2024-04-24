@@ -36,7 +36,7 @@ export class CalculatorAnnotationComponent {
     inputPromptSecondValue: new FormControl<string>("", Validators.required),
   })
 
-  dataLog: {inputPromptFirstValue: number, inputPromptSecondValue: number, operation: string, result: number}[] = []
+  dataLog: {inputPromptFirstValue: number, inputPromptSecondValue: number, operation: string, result: number, scratch: boolean}[] = []
 
   constructor(private fb: FormBuilder, private web: WebService) {
 
@@ -99,7 +99,7 @@ export class CalculatorAnnotationComponent {
       }
       if (operation === 'log2' || operation === 'log10' || operation === 'sqrt' || operation === 'abs') {
         // @ts-ignore
-        let data = {inputPromptFirstValue: parseFloat(this.form.controls.inputPromptFirstValue.value), inputPromptSecondValue: 0, operation: operation, result: 0}
+        let data = {inputPromptFirstValue: parseFloat(this.form.controls.inputPromptFirstValue.value), inputPromptSecondValue: 0, operation: operation, result: 0, scratch: false}
         switch (operation) {
           case 'log2':
             // @ts-ignore
@@ -133,7 +133,7 @@ export class CalculatorAnnotationComponent {
         return
       }
       // @ts-ignore
-      let data = {inputPromptFirstValue: parseFloat(this.form.controls.inputPromptFirstValue.value), inputPromptSecondValue: parseFloat(this.form.controls.inputPromptSecondValue.value), operation: this.operation!.slice(), result: 0}
+      let data = {inputPromptFirstValue: parseFloat(this.form.controls.inputPromptFirstValue.value), inputPromptSecondValue: parseFloat(this.form.controls.inputPromptSecondValue.value), operation: this.operation!.slice(), result: 0, scratch: false}
       switch (this.operation) {
         case '+':
           // @ts-ignore
