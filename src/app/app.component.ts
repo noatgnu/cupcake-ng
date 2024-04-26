@@ -11,6 +11,7 @@ import {WebsocketService} from "./websocket.service";
 import {environment} from "../environments/environment";
 import {DataService} from "./data.service";
 import {WebrtcService} from "./webrtc.service";
+import {ToastService} from "./toast.service";
 
 @Component({
   selector: 'app-root',
@@ -22,7 +23,7 @@ import {WebrtcService} from "./webrtc.service";
 export class AppComponent {
   title = 'cupcake-ng';
   ready = false;
-  constructor(private accounts: AccountsService, private webrtc: WebrtcService, private ws: WebsocketService, private dataService: DataService) {
+  constructor(private accounts: AccountsService, private webrtc: WebrtcService, private ws: WebsocketService, private dataService: DataService, private toastService: ToastService) {
     const followSystemTheme = localStorage.getItem("cupcake-follow-system-theme")
     if (followSystemTheme) {
       if (followSystemTheme === "true") {
@@ -57,6 +58,7 @@ export class AppComponent {
       if (data) {
         console.log(data)
         if(data.signed_value && data.user_download) {
+          this.toastService.show("Export File", "Downloading file...")
           window.open(environment.baseURL + "/api/protocol/download_temp_file/?token=" + data.signed_value, "_blank")
         }
       }

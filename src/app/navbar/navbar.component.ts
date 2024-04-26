@@ -11,6 +11,7 @@ import {WebService} from "../web.service";
 import {WebrtcService} from "../webrtc.service";
 import {WebrtcModalComponent} from "../webrtc-modal/webrtc-modal.component";
 import {SessionEditorModalComponent} from "../protocol-session/session-editor-modal/session-editor-modal.component";
+import {ToastService} from "../toast.service";
 
 @Component({
   selector: 'app-navbar',
@@ -29,7 +30,7 @@ export class NavbarComponent {
   isMenuCollapsed = false;
   switched = false
 
-  constructor(private webrtc: WebrtcService, public dataService: DataService, private modal: NgbModal, public accounts: AccountsService, private router: Router, private ws: WebsocketService, private web: WebService) {
+  constructor(private toastService: ToastService, private webrtc: WebrtcService, public dataService: DataService, private modal: NgbModal, public accounts: AccountsService, private router: Router, private ws: WebsocketService, private web: WebService) {
     this.accounts.triggerLoginSubject.subscribe(() => {
       this.openAccountLogin()})
   }
@@ -86,11 +87,11 @@ export class NavbarComponent {
     if (this.dataService.protocol) {
       if (exportType === "protocol") {
         this.web.exportToDocx(this.dataService.protocol.id, "", format).subscribe((data: any) => {
-
+          this.toastService.show("Exporting Protocol", "Processing Request")
         })
       } else if (exportType === "session") {
         this.web.exportToDocx(this.dataService.protocol.id, currentSession, format).subscribe((data: any) => {
-
+          this.toastService.show("Exporting Session", "Processing Request")
         })
       }
 

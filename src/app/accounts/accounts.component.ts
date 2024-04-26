@@ -3,13 +3,17 @@ import {FormBuilder, FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {ToastService} from "../toast.service";
 import {WebService} from "../web.service";
 import {DataService} from "../data.service";
+import {NgbDropdown, NgbDropdownMenu, NgbDropdownToggle} from "@ng-bootstrap/ng-bootstrap";
 
 @Component({
   selector: 'app-accounts',
   standalone: true,
   imports: [
     ReactiveFormsModule,
-    FormsModule
+    FormsModule,
+    NgbDropdown,
+    NgbDropdownToggle,
+    NgbDropdownMenu
   ],
   templateUrl: './accounts.component.html',
   styleUrl: './accounts.component.scss'
@@ -69,5 +73,11 @@ export class AccountsComponent {
       document.getElementsByTagName('body')[0].classList.add('dark-theme')
       this.dataService.darkMode = true
     }
+  }
+
+  exportUserData() {
+    this.web.exportUserData().subscribe((data: any) => {
+      this.toastService.show("User Data", "Processing export user data request...")
+    })
   }
 }

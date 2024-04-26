@@ -340,6 +340,14 @@ export class WebService {
     );
   }
 
+  exportUserData() {
+    return this.http.post(
+      `${this.baseURL}/api/user/export_data/`,
+      {},
+      {responseType: 'json', observe: 'body'}
+    );
+  }
+
   postSummaryRequest(prompt: string, target: any = {}) {
     return this.http.post(
       `${this.baseURL}/api/user/summarize_prompt/`,
