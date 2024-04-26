@@ -326,13 +326,15 @@ export class WebService {
     );
   }
 
-  exportToDocx(protocol_id: number, session_id: string = "") {
-    const body: any = {};
+  exportToDocx(protocol_id: number, session_id: string = "", format: string = "docx") {
+    const body: any = {export_type: "session", format: format};
     if (session_id !== "") {
       body["session"] = session_id;
+    } else {
+      body["export_type"] = "protocol";
     }
     return this.http.post(
-      `${this.baseURL}/api/protocol/${protocol_id}/create_docx/`,
+      `${this.baseURL}/api/protocol/${protocol_id}/create_export/`,
       body,
       {responseType: 'json', observe: 'body'}
     );

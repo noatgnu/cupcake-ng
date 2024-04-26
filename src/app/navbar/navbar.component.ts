@@ -77,16 +77,23 @@ export class NavbarComponent {
     this.router.navigate(["/accounts"])
   }
 
-  exportToDocx() {
+  exportToDocx(exportType: string, format: string) {
     let currentSession = ""
     if (this.dataService.currentSession) {
       currentSession = this.dataService.currentSession.unique_id
     }
     console.log(this.dataService.protocol)
     if (this.dataService.protocol) {
-      this.web.exportToDocx(this.dataService.protocol.id, currentSession).subscribe((data: any) => {
+      if (exportType === "protocol") {
+        this.web.exportToDocx(this.dataService.protocol.id, "", format).subscribe((data: any) => {
 
-      })
+        })
+      } else if (exportType === "session") {
+        this.web.exportToDocx(this.dataService.protocol.id, currentSession, format).subscribe((data: any) => {
+
+        })
+      }
+
     }
   }
 
