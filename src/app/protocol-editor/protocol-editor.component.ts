@@ -7,8 +7,10 @@ import {DataService} from "../data.service";
 import {Router} from "@angular/router";
 import {TimePickerComponent} from "../time-picker/time-picker.component";
 import {ToastService} from "../toast.service";
-import {NgbDate, NgbModalConfig} from "@ng-bootstrap/ng-bootstrap";
+import {NgbDate, NgbModal, NgbModalConfig} from "@ng-bootstrap/ng-bootstrap";
 import {QuillEditorComponent} from "ngx-quill";
+import {UserEditorModalComponent} from "./user-editor-modal/user-editor-modal.component";
+import {UserViewerModalComponent} from "./user-viewer-modal/user-viewer-modal.component";
 
 @Component({
   selector: 'app-protocol-editor',
@@ -100,7 +102,7 @@ export class ProtocolEditorComponent {
     return this._protocolID
   }
 
-  constructor( private modalConfig: NgbModalConfig, private fb: FormBuilder, private web: WebService, public dataService: DataService, private router: Router, private toastService: ToastService) {
+  constructor(private modal: NgbModal, private modalConfig: NgbModalConfig, private fb: FormBuilder, private web: WebService, public dataService: DataService, private router: Router, private toastService: ToastService) {
     this.modalConfig.backdrop = 'static'
     this.modalConfig.keyboard = false
   }
@@ -235,4 +237,17 @@ export class ProtocolEditorComponent {
   handleDateSelect(date: NgbDate) {
 
   }
+
+  viewEditorModal() {
+    const ref = this.modal.open(UserEditorModalComponent, {scrollable: true})
+    ref.componentInstance.protocolId = this.protocolID
+
+  }
+
+  viewViewerModal() {
+    const ref = this.modal.open(UserViewerModalComponent, {scrollable: true})
+    ref.componentInstance.protocolId = this.protocolID
+  }
+
+
 }

@@ -1,0 +1,36 @@
+<div class="modal-header">
+  <h5 class="modal-title">Protocol Editors</h5>
+</div>
+<div class="modal-body">
+  <form [formGroup]="form" (ngSubmit)="submit()">
+    <div class="form-group">
+      <label for="username">Username</label>
+      <input type="text" class="form-control" id="username" formControlName="username" >
+    </div>
+    <div class="mt-1">
+      <button type="submit" class="btn btn-primary">Add</button>
+    </div>
+
+  </form>
+
+  @if (editors.length > 0) {
+    <div class="list-group">
+      List of editors
+      @for (user of editors; track user.id) {
+        <div class="list-group-item list-group-item-action">
+          <div class="d-flex w-100 justify-content-between">
+            <b class="mb-1">{{ user.username }}</b>
+            <small>
+              <button class="btn btn-sm btn-danger" (click)="removeUserFromProtocol(user.username)">
+                <i class="bi bi-trash"></i>
+              </button>
+            </small>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn btn-secondary" (click)="close()">Close</button>
+</div>

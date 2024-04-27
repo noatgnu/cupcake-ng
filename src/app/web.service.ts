@@ -514,4 +514,64 @@ export class WebService {
       {responseType: 'json', observe: 'body'}
     );
   }
+
+  getProtocolEditors(protocol_id: number) {
+    return this.http.get<{id: number, username: string}[]>(
+      `${this.baseURL}/api/protocol/${protocol_id}/get_editors/`,
+      {responseType: 'json', observe: 'body'}
+    );
+  }
+
+  getProtocolViewers(protocol_id: number) {
+    return this.http.get<{id: number, username: string}[]>(
+      `${this.baseURL}/api/protocol/${protocol_id}/get_viewers/`,
+      {responseType: 'json', observe: 'body'}
+    );
+  }
+
+  protocolAddUserRole(protocol_id: number, username: string, role: string) {
+    return this.http.post(
+      `${this.baseURL}/api/protocol/${protocol_id}/add_user_role/`,
+      {user: username, role: role},
+      {responseType: 'json', observe: 'body'}
+    );
+  }
+
+  protocolRemoveUserRole(protocol_id: number, username: string, role: string) {
+    return this.http.post(
+      `${this.baseURL}/api/protocol/${protocol_id}/remove_user_role/`,
+      {user: username, role: role},
+      {responseType: 'json', observe: 'body'}
+    );
+  }
+
+  getSessionEditors(session_id: string) {
+    return this.http.get<{id: number, username: string}[]>(
+      `${this.baseURL}/api/session/${session_id}/get_editors/`,
+      {responseType: 'json', observe: 'body'}
+    );
+  }
+
+  getSessionViewers(session_id: string) {
+    return this.http.get<{id: number, username: string}[]>(
+      `${this.baseURL}/api/session/${session_id}/get_viewers/`,
+      {responseType: 'json', observe: 'body'}
+    );
+  }
+
+  sessionAddUserRole(session_id: string, username: string, role: string) {
+    return this.http.post(
+      `${this.baseURL}/api/session/${session_id}/add_user_role/`,
+      {user: username, role: role},
+      {responseType: 'json', observe: 'body'}
+    );
+  }
+
+  sessionRemoveUserRole(session_id: string, username: string, role: string) {
+    return this.http.post(
+      `${this.baseURL}/api/session/${session_id}/remove_user_role/`,
+      {user: username, role: role},
+      {responseType: 'json', observe: 'body'}
+    );
+  }
 }
