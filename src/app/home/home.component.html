@@ -30,6 +30,16 @@
   </div>
 </div>
 
+<div class="container">
+  <form (ngSubmit)="search()">
+    <div class="input-group mb-3">
+      <button class="btn btn-outline-secondary" type="button" (click)="search()" id="homeSearchButton" >Search</button>
+      <input type="search" [(ngModel)]="searchTerm" [ngModelOptions]="{standalone:true}" class="form-control" placeholder="Session or Protocol search term" aria-label="Search Term" aria-describedby="homeSearchButton">
+    </div>
+  </form>
+
+</div>
+
 @if (protocolQuery || protocolSessionQuery) {
   <div class="container">
     <ul ngbNav #nav="ngbNav" [(activeId)]="active" class="nav-tabs" [destroyOnHide]="false">
@@ -37,8 +47,11 @@
         <li [ngbNavItem]="'protocols'" [destroyOnHide]="false">
           <button ngbNavLink>Protocols <span class="badge bg-primary">{{protocolQuery.count}}</span></button>
           <ng-template ngbNavContent>
-            <app-protocol-list [protocols]="protocolQuery.results"></app-protocol-list>
-            <div class="d-flex flex-row gap-2 mt-2">
+            <app-protocol-list [protocols]="protocolQuery.results" [enableRemove]="true" [enableEdit]="true" (editProtocol)="navigateToEditProtocol($event)" (removeProtocol)="deleteProtocol($event)"></app-protocol-list>
+            <div class="mt-2">
+              <ngb-pagination (pageChange)="handlePageChange($event)" [collectionSize]="protocolQuery.count" [(page)]="currentProtocolPage" [pageSize]="pageSize" [rotate]="true" [boundaryLinks]="true" />
+            </div>
+            <!--<div class="d-flex flex-row gap-2 mt-2">
               @if (protocolQuery.previous) {
                 <button class="btn btn-primary" (click)="getUserProtocols(protocolQuery.previous)">Previous</button>
               } @else {
@@ -49,7 +62,7 @@
               } @else {
                 <button class="btn btn-primary" disabled>Next</button>
               }
-            </div>
+            </div>-->
           </ng-template>
         </li>
       }
@@ -85,7 +98,10 @@
                 </div>
               }
             </div>
-            <div class="d-flex flex-row gap-2 mt-2">
+            <div class="mt-2">
+              <ngb-pagination (pageChange)="handlePageChange($event)" [collectionSize]="protocolSessionQuery.count" [(page)]="currentSessionPage" [pageSize]="pageSize" [rotate]="true" [boundaryLinks]="true" />
+            </div>
+<!--            <div class="d-flex flex-row gap-2 mt-2">
               @if (protocolSessionQuery.previous) {
                 <button class="btn btn-primary" (click)="getUserSessions(protocolSessionQuery.previous)">Previous</button>
               } @else {
@@ -96,7 +112,7 @@
               } @else {
                 <button class="btn btn-primary" disabled>Next</button>
               }
-            </div>
+            </div>-->
           </ng-template>
         </li>
       }

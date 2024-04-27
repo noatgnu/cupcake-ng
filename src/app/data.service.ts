@@ -90,7 +90,7 @@ export class DataService {
 
   baseMolarityUnit: string = "nM";
   molarityUnits: string[] = ["nM", "uM", "mM", "M"];
-
+  triggerReload: Subject<boolean> = new Subject<boolean>();
 
 
   constructor(private accounts: AccountsService, private web: WebService) { }

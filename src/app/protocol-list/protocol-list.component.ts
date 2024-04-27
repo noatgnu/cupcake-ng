@@ -34,9 +34,10 @@ export class ProtocolListComponent {
 
   @Input() enableAdd: boolean = false
   @Input() enableRemove: boolean = false
-
+  @Input() enableEdit: boolean = false
   @Output() removeProtocol: EventEmitter<number> = new EventEmitter<number>()
   @Output() addProtocol: EventEmitter<number> = new EventEmitter<number>()
+  @Output() editProtocol: EventEmitter<number> = new EventEmitter<number>()
   constructor(public timeKeeper: TimerService, private modal: NgbModal) { }
 
   remove(id: number) {

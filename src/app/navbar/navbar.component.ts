@@ -52,6 +52,7 @@ export class NavbarComponent {
           }
           this.ws.connectUserWS()
         })
+        this.dataService.triggerReload.next(true)
       }
     })
   }

@@ -14,6 +14,9 @@
         @if (enableAdd) {
           <button class="btn btn-sm btn-outline-success" (click)="addProtocol.emit(protocol.id)"><i class="bi bi-plus"></i></button>
         }
+        @if (enableEdit) {
+          <button class="btn btn-sm btn-outline-primary" (click)="editProtocol.emit(protocol.id)"><i class="bi bi-pencil"></i></button>
+        }
         @if (enableRemove) {
           <button class="btn btn-sm btn-outline-danger" (click)="remove(protocol.id)"><i class="bi bi-trash"></i></button>
         }

@@ -297,16 +297,24 @@ export class WebService {
     );
   }
 
-  getUserProtocols(url?: string) {
+  getUserProtocols(url?: string, limit: number = 5, offset: number = 0, searchTerm: string = "") {
     if (url) {
       return this.http.get<ProtocolQuery>(
         url,
         {responseType: 'json', observe: 'body'}
       );
     }
+
+    let params = new HttpParams()
+      .set('limit', limit.toString())
+      .set('offset', offset.toString())
+    if (searchTerm !== "") {
+      params =params.append('search', searchTerm);
+    }
+    console.log(params)
     return this.http.get<ProtocolQuery>(
       `${this.baseURL}/api/protocol/get_user_protocols/`,
-      {responseType: 'json', observe: 'body'}
+      {responseType: 'json', observe: 'body', params: params},
     );
   }
 
@@ -447,16 +455,22 @@ export class WebService {
     )
   }
 
-  getUserSessions(url?: string) {
+  getUserSessions(url?: string, limit: number = 5, offset: number = 0, searchTerm: string = "") {
     if (url) {
       return this.http.get<ProtocolSessionQuery>(
         url,
         {responseType: 'json', observe: 'body'}
       );
     }
+    let params = new HttpParams()
+      .set('limit', limit.toString())
+      .set('offset', offset.toString())
+    if (searchTerm !== "") {
+      params = params.append('search', searchTerm);
+    }
     return this.http.get<ProtocolSessionQuery>(
       `${this.baseURL}/api/session/get_user_sessions/`,
-      {responseType: 'json', observe: 'body'}
+      {responseType: 'json', observe: 'body', params: params}
     );
   }
   getAssociatedProtocolTitles(session_id: string) {
@@ -571,6 +585,13 @@ export class WebService {
     return this.http.post(
       `${this.baseURL}/api/session/${session_id}/remove_user_role/`,
       {user: username, role: role},
+      {responseType: 'json', observe: 'body'}
+    );
+  }
+
+  deleteProtocol(protocol_id: number) {
+    return this.http.delete(
+      `${this.baseURL}/api/protocol/${protocol_id}/`,
       {responseType: 'json', observe: 'body'}
     );
   }
