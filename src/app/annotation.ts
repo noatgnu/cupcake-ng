@@ -11,6 +11,7 @@ export interface Annotation {
   transcription: string;
   language: string|null;
   translation: string|null;
+  scratched: boolean;
 }
 
 export interface AnnotationQuery {
