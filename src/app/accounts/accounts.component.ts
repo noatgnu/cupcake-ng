@@ -4,6 +4,7 @@ import {ToastService} from "../toast.service";
 import {WebService} from "../web.service";
 import {DataService} from "../data.service";
 import {NgbDropdown, NgbDropdownMenu, NgbDropdownToggle} from "@ng-bootstrap/ng-bootstrap";
+import {UserDataComponent} from "./user-data/user-data.component";
 
 @Component({
   selector: 'app-accounts',
@@ -13,7 +14,8 @@ import {NgbDropdown, NgbDropdownMenu, NgbDropdownToggle} from "@ng-bootstrap/ng-
     FormsModule,
     NgbDropdown,
     NgbDropdownToggle,
-    NgbDropdownMenu
+    NgbDropdownMenu,
+    UserDataComponent
   ],
   templateUrl: './accounts.component.html',
   styleUrl: './accounts.component.scss'
@@ -75,9 +77,5 @@ export class AccountsComponent {
     }
   }
 
-  exportUserData() {
-    this.web.exportUserData().subscribe((data: any) => {
-      this.toastService.show("User Data", "Processing export user data request...")
-    })
-  }
+
 }

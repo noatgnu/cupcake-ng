@@ -1,0 +1,17 @@
+<div class="d-flex flex-row">
+  <div class="d-flex flex-column p-5 gap-2">
+    <b>Export User Data</b>
+    <button class="btn btn-primary" (click)="exportUserData()">Export User Data</button>
+
+    <b>Import User Data</b>
+    <button class="btn btn-primary" (click)="importFile.click()">Import User Data</button>
+    <input hidden type="file" #importFile id="importUserData" (change)="importUserData($event)">
+
+    @if(chunkUploadProgress > 0 && chunkUploadProgress < chunkUploadTotal) {
+      <ngb-progressbar [value]="chunkUploadProgress" [max]="chunkUploadTotal" [type]="'danger'"></ngb-progressbar>
+    } @else if(chunkUploadProgress == chunkUploadTotal && chunkUploadTotal > 0) {
+      <ngb-progressbar [value]="chunkUploadProgress" [max]="chunkUploadTotal" [type]="'success'"></ngb-progressbar>
+      <div class="alert alert-success">Upload Completed</div>
+    }
+  </div>
+</div>

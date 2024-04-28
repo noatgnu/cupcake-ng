@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import {HttpClient, HttpParams} from "@angular/common/http";
+import {HttpClient, HttpHeaders, HttpParams} from "@angular/common/http";
 import {environment} from "../environments/environment";
 import {map, Observable} from "rxjs";
 import {Protocol, ProtocolQuery, ProtocolSection, ProtocolStep} from "./protocol";
@@ -595,4 +595,70 @@ export class WebService {
       {responseType: 'json', observe: 'body'}
     );
   }
+
+  uploadDataChunk(url: string = "", chunk: File, filename: string, contentRange: string) {
+    const form = new FormData()
+    form.append('file', chunk)
+    form.append('filename', filename)
+    let headers = new HttpHeaders()
+    headers = headers.append('Content-Range', contentRange)
+    //headers.append('Content-Disposition', `attachment; filename=${filename}`)
+    console.log(headers)
+    if (url !== "") {
+      return this.http.put<ChunkUploadResponse>(
+        url,
+        form,
+        {responseType: 'json', observe: 'body', headers: headers}
+      )
+
+    } else {
+      return this.http.put<ChunkUploadResponse>(
+        `${this.baseURL}/api/chunked_upload/`,
+        form,
+        {responseType: 'json', observe: 'body', headers: headers}
+      )
+
+    }
+  }
+
+  uploadDataChunkComplete(url: string = "", md5: string, file?: File, filename?: string) {
+    const form = new FormData()
+    form.append('sha256', md5)
+    if (file && filename) {
+      form.append('file', file)
+      form.append('filename', filename)
+      return this.http.post<ChunkUploadResponse>(
+        `${this.baseURL}/api/chunked_upload/`,
+        form,
+        {responseType: 'json', observe: 'body'}
+      )
+    } else {
+      return this.http.post<ChunkUploadResponse>(
+        url,
+        form,
+        {responseType: 'json', observe: 'body'}
+      )
+    }
+  }
+
+  importUserData(uploadID: string) {
+    return this.http.post(
+      `${this.baseURL}/api/user/import_user_data/`,
+      {upload_id: uploadID},
+      {responseType: 'json', observe: 'body'}
+    )
+
+  }
+}
+
+interface ChunkUploadResponse {
+  id: string,
+  url: string,
+  file: string,
+  filename: string,
+  offset: number,
+  created_at: Date,
+  status: number,
+  completed_at: Date|null,
+  user: number,
 }
