@@ -8,6 +8,8 @@ import {WebService} from "./web.service";
   providedIn: 'root'
 })
 export class WebrtcService {
+  selectedVideoDevice?: MediaDeviceInfo
+  selectedAudioDevice?: MediaDeviceInfo
   private peerConnection?: RTCPeerConnection;
   private signallingConnection?: WebSocketSubject<any>;
   baseURL = environment.baseURL
@@ -42,6 +44,8 @@ export class WebrtcService {
   enableAudio = false;
   connectionType: 'viewer'|'host' = 'viewer';
   isCallerMap: {[key: string]: boolean} = {};
+  cameraDevices: MediaDeviceInfo[] = [];
+  audioDevices: MediaDeviceInfo[] = [];
   constructor(private accounts: AccountsService, private web: WebService) {
 
   }
@@ -314,12 +318,14 @@ export class WebrtcService {
           } else {
             await this.peerConnectionMap[from!].pc.setRemoteDescription(sdp!);
           }
+          console.log("Accepted offer")
         }
+
         console.log(this.peerConnectionMap[from!].pc.signalingState)
         if (this.peerConnectionMap[from!].pc.signalingState === 'have-remote-offer') {
           const answer = await this.peerConnectionMap[from!].pc.createAnswer();
           await this.peerConnectionMap[from!].pc.setLocalDescription(answer);
-
+          console.log("Sent answer")
           // Send the answer to the remote peer
           this.signallingConnection?.next({
             type: answer.type,
@@ -340,6 +346,7 @@ export class WebrtcService {
           }
           this.peerConnectionMap[from!].queuedCandidates = [];
         }
+        console.log("Accepted answer")
         break;
       case 'candidate':
         await this.peerConnectionMap[from!].pc.addIceCandidate(candidate!)
@@ -350,6 +357,7 @@ export class WebrtcService {
           this.peerConnectionMap[from!].queuedCandidates = this.peerConnectionMap[from!].queuedCandidates || [];
           this.peerConnectionMap[from!].queuedCandidates.push(candidate!);
         }
+        console.log("Added candidate")
         break;
     }
 
@@ -359,14 +367,24 @@ export class WebrtcService {
   async start() {
     try {
       if (this.enableAudio || this.enableVideo) {
+
         this.constraints = {
-          video: this.enableVideo ? {
-            width: { ideal: 1280 },
-            height: { ideal: 720 },
-            frameRate: { ideal: 30 },
-          } : false,
+          video: this.enableVideo ? true : false,
           audio: this.enableAudio ? true : false,
         }
+        {
+
+        }
+        if (this.selectedVideoDevice) {
+          this.constraints.video = {deviceId: this.selectedVideoDevice.deviceId,
+            width: { ideal: 1280 },
+          height: { ideal: 720 },
+          frameRate: { ideal: 30 },}
+        }
+        if (this.selectedAudioDevice) {
+          this.constraints.audio = {deviceId: this.selectedAudioDevice.deviceId}
+        }
+
       } else {
         this.constraints = {
           video: false,
@@ -374,6 +392,7 @@ export class WebrtcService {
         }
       }
       if (this.constraints.video || this.constraints.audio) {
+
         this.stream = await navigator.mediaDevices.getUserMedia(this.constraints);
         const currentVideoElement = document.getElementById('webrtc-local') as HTMLVideoElement;
         if (currentVideoElement) {
@@ -471,6 +490,50 @@ export class WebrtcService {
         this.signallingConnection?.next(data);
       })
     }*/
+  }
+
+  async changeMediaInput(videoInput?: MediaDeviceInfo, audioInput?: MediaDeviceInfo) {
+    // Stop the current tracks
+    this.stream?.getTracks().forEach((track) => {
+      track.stop();
+    });
+    console.log(this.stream)
+    // Define new constraints
+    if (videoInput) {
+      this.constraints.video = {deviceId: videoInput.deviceId,
+        width: { ideal: 1280 },
+        height: { ideal: 720 },
+        frameRate: { ideal: 30 },};
+    }
+    if (audioInput) {
+      this.constraints.audio = {deviceId: audioInput.deviceId};
+    }
+    console.log(this.constraints)
+    // Get the new MediaStream
+    this.stream = await navigator.mediaDevices.getUserMedia(this.constraints);
+    console.log(this.stream)
+    const videoPreviewElement = document.getElementById('webrtc-local') as HTMLVideoElement;
+    if (videoPreviewElement) {
+      videoPreviewElement.srcObject = this.stream;
+      videoPreviewElement.oncanplaythrough = () => {
+        videoPreviewElement.muted = true;
+        videoPreviewElement.play();
+      }
+      videoPreviewElement.load();
+    }
+    // Replace the tracks in the RTCPeerConnection
+    for (const peer in this.peerConnectionMap) {
+      const senders = this.peerConnectionMap[peer].pc.getSenders();
+
+      this.stream.getTracks().forEach((track) => {
+        const sender = senders.find(sender =>
+          sender.track?.kind === track.kind
+        );
+        if (sender) {
+          sender.replaceTrack(track);
+        }
+      });
+    }
   }
 
 }

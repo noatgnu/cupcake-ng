@@ -15,14 +15,31 @@ import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
 export class WebrtcModalComponent {
   connectionType: 'host'|'viewer' = 'viewer'
 
+
+
   constructor(public webrtc: WebrtcService, private activeModal: NgbActiveModal) {
     this.connectionType = this.webrtc.connectionType
-    console.log(this.connectionType)
+    this.getAllInputDevices().then()
+
 
   }
 
   async connect() {
     await this.webrtc.call(this.connectionType)
+  }
+
+  async getAllInputDevices() {
+    this.webrtc.cameraDevices = await navigator.mediaDevices.enumerateDevices().then((devices) => {
+      return devices.filter((device) => device.kind === 'videoinput');
+    })
+    this.webrtc.audioDevices = await navigator.mediaDevices.enumerateDevices().then((devices) => {
+      return devices.filter((device) => device.kind === 'audioinput');
+    })
+
+  }
+
+  async changeInputDevice() {
+
   }
 
   close() {
