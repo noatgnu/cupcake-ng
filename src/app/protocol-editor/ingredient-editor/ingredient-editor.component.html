@@ -1,0 +1,32 @@
+
+<form [formGroup]="ingredientSearchForm">
+  <div class="form-floating">
+    <input (selectItem)="onSearchIngredients($event)" id="ingredientNameSearch" type="search" class="form-control" formControlName="name" [ngbTypeahead]="search" [inputFormatter]="formatIngredient" />
+    <label for="ingredientNameSearch">Ingredient</label>
+  </div>
+  <div class="form-floating">
+    <select id="ingredientUnit" class="form-select" formControlName="unit">
+      <optgroup label="Volume">
+        <option value="nL">nL</option>
+        <option value="uL">uL</option>
+        <option value="mL">mL</option>
+        <option value="L">L</option>
+      </optgroup>
+      <optgroup label="Mass">
+        <option value="ng">ng</option>
+        <option value="mg">mg</option>
+        <option value="g">g</option>
+        <option value="kg">kg</option>
+      </optgroup>
+      <optgroup label="Mole">
+        <option value="nM">nM</option>
+        <option value="uM">uM</option>
+        <option value="mM">mM</option>
+        <option value="M">M</option>
+      </optgroup>
+      <optgroup label="Count">
+        <option value="ea">ea</option>
+      </optgroup>
+    </select>
+  </div>
+</form>

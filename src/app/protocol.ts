@@ -1,3 +1,5 @@
+import {ProtocolIngredient, ProtocolStepIngredient} from "./ingredient";
+
 export interface Protocol {
   id: number;
   protocol_id: number;
@@ -11,6 +13,7 @@ export interface Protocol {
   enabled: boolean;
   complexity_rating: number;
   duration_rating: number;
+  ingredients: ProtocolIngredient[];
 }
 
 export interface ProtocolStep {
@@ -22,6 +25,7 @@ export interface ProtocolStep {
   step_section: number;
   next_step: number[];
   previous_step: number;
+  ingredients: ProtocolStepIngredient[];
 }
 
 export interface ProtocolSection {
