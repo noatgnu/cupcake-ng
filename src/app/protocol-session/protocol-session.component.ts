@@ -415,6 +415,36 @@ export class ProtocolSessionComponent implements OnInit{
     this.timer.timeKeeper[step_id.toString()].started = false;
   }
 
+  startScreenRecording(audio: boolean) {
+    this.recording = true;
+    this.recordingChunks = [];
+    let constraints: any = { audio: audio, video: {cursor: "always"} };
+    if (this.currentAudioDevice && audio) {
+      constraints.audio = { deviceId: {exact: this.currentAudioDevice.deviceId} }
+    }
+    navigator.mediaDevices.getDisplayMedia(constraints).then((stream) => {
+      this.mediaRecorder = new MediaRecorder(stream);
+      this.mediaRecorder.onstart = () => {
+        this.toastService.show('Recording', 'Recording Started')
+        console.log('recording started')
+      }
+      this.mediaRecorder.ondataavailable = (event) => {
+        console.log(event);
+        this.recordingChunks.push(event.data);
+      }
+      this.mediaRecorder.onstop = () => {
+        stream.getTracks().forEach((track) => track.stop());
+        console.log('recording stopped')
+        this.toastService.show('Recording', 'Recording Stopped')
+        this.recordedBlob = new Blob(this.recordingChunks, {type: 'video/webm'});
+        this.audioURL = window.URL.createObjectURL(this.recordedBlob);
+      }
+      this.mediaRecorder.start();
+    })
+
+
+  }
+
   startRecording(audio: boolean, video: boolean) {
     //this.speechRecognition.start();
     console.log('start recording')
@@ -434,6 +464,7 @@ export class ProtocolSessionComponent implements OnInit{
         constraints.video = { deviceId: {exact: this.currentCameraDevice.deviceId}, width: { ideal: 1920 }, height: { ideal: 1080 }};
       }
     }
+
     if (this.currentAudioDevice) {
       console.log(this.currentAudioDevice)
       constraints.audio = { deviceId: {exact: this.currentAudioDevice.deviceId} }

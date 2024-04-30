@@ -173,22 +173,53 @@
                 </div>
 
               } @else if (clickedElement==='Video') {
-                <div class="d-flex flex-row gap-2">
-                  @if (recording) {
-                    <button class="btn btn-danger" (click)="stopRecording()">Stop Recording</button>
-                  } @else {
-                    <button class="btn btn-primary" (click)="startRecording(true, true)">Start Recording</button>
-                  }
-                  <div class="form-floating">
-                    <select class="form-select" [(ngModel)]="currentCameraDevice">
-                      <option selected>Default Selected</option>
-                      @for (a of cameraDevices; track a) {
-                        <option [ngValue]="a">{{a.label}}</option>
-                      }
-                    </select>
-                    <label>Select Camera Device</label>
+                <div class="d-flex flex-column gap-2">
+                  <div class="d-flex flex-row gap-2">
+                    @if (recording) {
+                      <button class="btn btn-danger" (click)="stopRecording()">Stop Recording</button>
+                    } @else {
+                      <button class="btn btn-primary" (click)="startRecording(enableAudio.checked, enableVideo.checked)">Record Video</button>
+                      <button class="btn btn-primary" (click)="startScreenRecording(enableAudio.checked)">Record Screen</button>
+                    }
                   </div>
+                  <div class="d-flex flex-row gap-2">
+                    <div class="form-check">
+                      <input class="form-check-input" type="checkbox" #enableVideo>
+                      <label class="form-check-label">Enable Video</label>
+                    </div>
+                    @if (enableVideo.checked) {
+                      <div class="form-floating">
+                        <select class="form-select" [(ngModel)]="currentCameraDevice">
+                          <option selected>Default Selected</option>
+                          @for (a of cameraDevices; track a) {
+                            <option [ngValue]="a">{{a.label}}</option>
+                          }
+                        </select>
+                        <label>Select Camera Device</label>
+                      </div>
+                    }
+                  </div>
+                  <div class="d-flex flex-row gap-2">
+                    <div class="form-check">
+                      <input class="form-check-input" type="checkbox" #enableAudio>
+                      <label class="form-check-label">Enable Audio</label>
+                    </div>
+                    @if (enableAudio.checked) {
+                      <div class="form-floating">
+                        <select class="form-select" [(ngModel)]="currentAudioDevice">
+                          <option selected>Default Selected</option>
+                          @for (a of audioDevices; track a) {
+                            <option [ngValue]="a">{{a.label}}</option>
+                          }
+                        </select>
+                        <label>Select Audio Device</label>
+                      </div>
+                    }
+                  </div>
+
+
                 </div>
+
                 @if (recording) {
                   <div class="d-flex flex-row justify-content-center">
                     <video autoplay muted #previewVideo [width]="400" [height]="300"></video>
