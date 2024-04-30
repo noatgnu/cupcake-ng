@@ -63,6 +63,7 @@ export class ProtocolSessionComponent implements OnInit{
   mouseOverElement: string = "";
   clickedElement: string = "";
   private _sessionID: string = '';
+  screenRecording: boolean = false;
   set sessionID(value: string) {
     if (this._sessionID !== value) {
       if (this.ws.timerWSConnection) {
@@ -427,6 +428,8 @@ export class ProtocolSessionComponent implements OnInit{
       this.mediaRecorder.onstart = () => {
         this.toastService.show('Recording', 'Recording Started')
         console.log('recording started')
+        this.recording = true;
+        this.screenRecording = true;
       }
       this.mediaRecorder.ondataavailable = (event) => {
         console.log(event);
@@ -438,6 +441,8 @@ export class ProtocolSessionComponent implements OnInit{
         this.toastService.show('Recording', 'Recording Stopped')
         this.recordedBlob = new Blob(this.recordingChunks, {type: 'video/webm'});
         this.audioURL = window.URL.createObjectURL(this.recordedBlob);
+        this.recording = false;
+        this.screenRecording = false;
       }
       this.mediaRecorder.start();
     })
