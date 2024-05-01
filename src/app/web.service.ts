@@ -6,7 +6,7 @@ import {Protocol, ProtocolQuery, ProtocolSection, ProtocolStep} from "./protocol
 import {ProtocolSession, ProtocolSessionQuery} from "./protocol-session";
 import {TimeKeeper} from "./time-keeper";
 import {Annotation, AnnotationQuery} from "./annotation";
-import {IngredientQuery} from "./ingredient";
+import {IngredientQuery, ProtocolIngredient, ProtocolStepIngredient} from "./ingredient";
 
 @Injectable({
   providedIn: 'root'
@@ -655,16 +655,16 @@ export class WebService {
   }
 
   stepAddIngredient(step_id: number, name: string, quantity: number, unit: string) {
-    return this.http.post(
+    return this.http.post<ProtocolStepIngredient>(
       `${this.baseURL}/api/step/${step_id}/add_protocol_ingredient/`,
       {name: name, quantity: quantity, unit: unit},
       {responseType: 'json', observe: 'body'}
     )
   }
 
-  stepUpdateIngredient(ingredient_id: number, quantity: number) {
-    return this.http.put(
-      `${this.baseURL}/api/step/update_protocol_ingredient/`,
+  stepUpdateIngredient(step_id: number, ingredient_id: number, quantity: number) {
+    return this.http.post<ProtocolStepIngredient>(
+      `${this.baseURL}/api/step/${step_id}/update_protocol_ingredient/`,
       {ingredient: ingredient_id, quantity: quantity},
       {responseType: 'json', observe: 'body'}
     )
@@ -676,7 +676,13 @@ export class WebService {
       {ingredient: ingredient_id},
       {responseType: 'json', observe: 'body'}
     )
+  }
 
+  getProtocolIngredients(protocol_id: number) {
+    return this.http.get<ProtocolIngredient[]>(
+      `${this.baseURL}/api/protocol/${protocol_id}/get_ingredients/`,
+      {responseType: 'json', observe: 'body'}
+    )
   }
 }
 

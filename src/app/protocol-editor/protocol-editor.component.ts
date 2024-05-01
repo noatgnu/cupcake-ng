@@ -7,10 +7,19 @@ import {DataService} from "../data.service";
 import {Router} from "@angular/router";
 import {TimePickerComponent} from "../time-picker/time-picker.component";
 import {ToastService} from "../toast.service";
-import {NgbDate, NgbModal, NgbModalConfig} from "@ng-bootstrap/ng-bootstrap";
+import {
+  NgbDate,
+  NgbDropdown,
+  NgbDropdownItem,
+  NgbDropdownMenu, NgbDropdownToggle,
+  NgbModal,
+  NgbModalConfig
+} from "@ng-bootstrap/ng-bootstrap";
 import {QuillEditorComponent} from "ngx-quill";
 import {UserEditorModalComponent} from "./user-editor-modal/user-editor-modal.component";
 import {UserViewerModalComponent} from "./user-viewer-modal/user-viewer-modal.component";
+import {IngredientEditorComponent} from "./ingredient-editor/ingredient-editor.component";
+import {ProtocolIngredient, ProtocolStepIngredient} from "../ingredient";
 
 @Component({
   selector: 'app-protocol-editor',
@@ -20,7 +29,11 @@ import {UserViewerModalComponent} from "./user-viewer-modal/user-viewer-modal.co
     NgxWigModule,
     FormsModule,
     TimePickerComponent,
-    QuillEditorComponent
+    QuillEditorComponent,
+    NgbDropdown,
+    NgbDropdownItem,
+    NgbDropdownMenu,
+    NgbDropdownToggle
   ],
   templateUrl: './protocol-editor.component.html',
   styleUrl: './protocol-editor.component.scss'
@@ -62,6 +75,7 @@ export class ProtocolEditorComponent {
   sections: {data: ProtocolSection, steps: ProtocolStep[], currentStep: number}[] = []
   protocol?: Protocol
   _protocolID: number = 0
+  floatedClick?: string
   @Input() set protocolID(value: number) {
     if (!value) {
       return
@@ -249,5 +263,22 @@ export class ProtocolEditorComponent {
     ref.componentInstance.protocolId = this.protocolID
   }
 
+  openIngredientEditorModal(step: ProtocolStep) {
+    const ref = this.modal.open(IngredientEditorComponent, {scrollable: true})
+    ref.componentInstance.ingredients = step.ingredients
+    ref.componentInstance.stepId = step.id
+    ref.closed.subscribe((data: ProtocolStepIngredient[]) => {
+      step.ingredients = data
+      this.web.getProtocolIngredients(this.protocolID).subscribe((data: ProtocolIngredient[]) => {
+        if (this.protocol) {
+          this.protocol.ingredients = data
+        }
+      })
+    })
+  }
+
+  editorFloatClick(clickType: string) {
+    this.floatedClick = clickType
+  }
 
 }

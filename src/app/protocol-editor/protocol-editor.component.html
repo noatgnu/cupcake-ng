@@ -89,12 +89,27 @@
               <quill-editor [(ngModel)]="step.step_description" [modules]="editorConfig">
 
               </quill-editor>
-
 <!--              <ngx-wig [(ngModel)]="step.step_description"></ngx-wig>-->
               <div>
                 Step Duration
               </div>
               <app-time-picker [seconds]="step.step_duration" (output)="handleUpdateStepDuration($event, i)"></app-time-picker>
+              @if (step.ingredients.length > 0) {
+                <div class="d-flex flex-row justify-content-between">
+                  <b>Ingredients</b>
+                </div>
+                <div class="d-flex flex-column gap-2">
+                  @for (ingredient of step.ingredients; track ingredient.id; let j = $index) {
+                    <div class="d-flex flex-row justify-content-between">
+                      <p>
+                        {{ingredient.quantity}} {{ingredient.ingredient.unit}} {{ingredient.ingredient.name}}
+                      </p>
+
+                    </div>
+                  }
+                </div>
+              }
+              <button class="btn btn-sm btn-primary" (click)="openIngredientEditorModal(step)">Ingredient Editor</button>
               <hr>
             </div>
           }
@@ -110,4 +125,41 @@
   </div>
 }
 
+@if (floatedClick) {
+  <div style="position: fixed; z-index: 1030; bottom: 150px; right: 50px; max-width: 200px; max-height: 400px">
+    <div class="d-flex flex-row gap-2 align-items-center">
+      <div class="card">
+        <div class="card-body">
+          @switch (floatedClick) {
+            @case ('Ingredient Summary') {
+              <b>Ingredient Summary</b>
+              <ul>
+                @for (ingredient of protocol?.ingredients; track ingredient.id) {
+                  <li>
+                    {{ingredient.quantity}} {{ingredient.ingredient.unit}} {{ingredient.ingredient.name}}
+                  </li>
+                }
+              </ul>
+            }
+          }
+        </div>
+      </div>
+
+    </div>
+  </div>
+}
+
+<div style="position: fixed; z-index: 1030; bottom: 50px; right: 50px">
+  <div class="d-flex flex-row gap-2 align-items-center">
+    <div ngbDropdown placement="top-end" class="d-inline-block">
+      <button class="btn btn-outline-success" ngbDropdownToggle><i class="bi bi-info"></i></button>
+      <div ngbDropdownMenu>
+        @for (a of ['Ingredient Summary']; track a) {
+          <button ngbDropdownItem (click)="editorFloatClick(a)">{{a}}</button>
+        }
+      </div>
+    </div>
+
+  </div>
+</div>
 
