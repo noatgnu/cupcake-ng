@@ -104,12 +104,13 @@
                       <p>
                         {{ingredient.quantity}} {{ingredient.ingredient.unit}} {{ingredient.ingredient.name}}
                       </p>
-
                     </div>
                   }
                 </div>
               }
-              <button class="btn btn-sm btn-primary" (click)="openIngredientEditorModal(step)">Ingredient Editor</button>
+              <div class="mt-2">
+                <button class="btn btn-sm btn-primary" (click)="openIngredientEditorModal(step)">Ingredient Editor</button>
+              </div>
               <hr>
             </div>
           }
@@ -126,20 +127,29 @@
 }
 
 @if (floatedClick) {
-  <div style="position: fixed; z-index: 1030; bottom: 150px; right: 50px; max-width: 200px; max-height: 400px">
+  <div style="position: fixed; z-index: 1030; bottom: 150px; right: 50px">
     <div class="d-flex flex-row gap-2 align-items-center">
       <div class="card">
         <div class="card-body">
           @switch (floatedClick) {
             @case ('Ingredient Summary') {
-              <b>Ingredient Summary</b>
-              <ul>
-                @for (ingredient of protocol?.ingredients; track ingredient.id) {
-                  <li>
-                    {{ingredient.quantity}} {{ingredient.ingredient.unit}} {{ingredient.ingredient.name}}
-                  </li>
-                }
-              </ul>
+              <div style="max-height:300px; max-width:300px; overflow: auto">
+                <b>Ingredient Summary</b>
+                <ul>
+                  @for (ingredient of protocol?.ingredients; track ingredient.id) {
+                    <li>
+                      {{ingredient.quantity}} {{ingredient.ingredient.unit}} {{ingredient.ingredient.name}}
+                    </li>
+                  }
+                </ul>
+              </div>
+
+            }
+            @case ('Calculator') {
+              <div style="width: 320px; max-height: 600px;  overflow: auto">
+                <app-calculator-annotation></app-calculator-annotation>
+              </div>
+
             }
           }
         </div>
@@ -154,7 +164,7 @@
     <div ngbDropdown placement="top-end" class="d-inline-block">
       <button class="btn btn-outline-success" ngbDropdownToggle><i class="bi bi-info"></i></button>
       <div ngbDropdownMenu>
-        @for (a of ['Ingredient Summary']; track a) {
+        @for (a of ['Ingredient Summary', 'Calculator']; track a) {
           <button ngbDropdownItem (click)="editorFloatClick(a)">{{a}}</button>
         }
       </div>

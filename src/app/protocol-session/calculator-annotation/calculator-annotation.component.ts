@@ -13,6 +13,7 @@ import {WebService} from "../../web.service";
   styleUrl: './calculator-annotation.component.scss'
 })
 export class CalculatorAnnotationComponent {
+  @Input() enableSave: boolean = false
   private _annotation?: Annotation
   @Input() set annotation(value: Annotation) {
     this._annotation = value
@@ -43,6 +44,7 @@ export class CalculatorAnnotationComponent {
   }
 
   formNumber(inputNumber: number) {
+    console.log(inputNumber, this.executionMode)
     if (this.executionMode === 'initial') {
       const firstValue = this.form.controls.inputPromptFirstValue.value
       if (firstValue) {
@@ -54,6 +56,8 @@ export class CalculatorAnnotationComponent {
           // @ts-ignore
           this.form.controls.inputPromptFirstValue.setValue((parseFloat(this.form.controls.inputPromptFirstValue.value)  * 10 + inputNumber).toString())
         }
+      } else {
+        this.form.controls.inputPromptFirstValue.setValue(inputNumber.toString())
       }
 
     } else if (this.executionMode === 'second') {
@@ -67,6 +71,8 @@ export class CalculatorAnnotationComponent {
           // @ts-ignore
           this.form.controls.inputPromptSecondValue.setValue((parseFloat(this.form.controls.inputPromptSecondValue.value)  * 10 + inputNumber).toString())
         }
+      } else {
+        this.form.controls.inputPromptSecondValue.setValue(inputNumber.toString())
       }
     }
   }

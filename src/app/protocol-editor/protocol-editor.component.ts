@@ -20,6 +20,7 @@ import {UserEditorModalComponent} from "./user-editor-modal/user-editor-modal.co
 import {UserViewerModalComponent} from "./user-viewer-modal/user-viewer-modal.component";
 import {IngredientEditorComponent} from "./ingredient-editor/ingredient-editor.component";
 import {ProtocolIngredient, ProtocolStepIngredient} from "../ingredient";
+import {CalculatorAnnotationComponent} from "../protocol-session/calculator-annotation/calculator-annotation.component";
 
 @Component({
   selector: 'app-protocol-editor',
@@ -33,7 +34,8 @@ import {ProtocolIngredient, ProtocolStepIngredient} from "../ingredient";
     NgbDropdown,
     NgbDropdownItem,
     NgbDropdownMenu,
-    NgbDropdownToggle
+    NgbDropdownToggle,
+    CalculatorAnnotationComponent
   ],
   templateUrl: './protocol-editor.component.html',
   styleUrl: './protocol-editor.component.scss'

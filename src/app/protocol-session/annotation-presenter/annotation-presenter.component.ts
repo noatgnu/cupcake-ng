@@ -76,4 +76,10 @@ export class AnnotationPresenterComponent {
       console.log(response)
     })
   }
+
+  scratch(annotation: Annotation) {
+    this.web.scratchAnnotation(annotation.id).subscribe((response: Annotation) => {
+      annotation.scratched = response.scratched
+    })
+  }
 }

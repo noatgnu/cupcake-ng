@@ -116,7 +116,9 @@
         <button class="btn btn-sm btn-outline-primary" (click)="formDelete()" style="width: 40px">DEL</button>
       </td>
       <td>
-        <button class="btn btn-sm btn-outline-primary" (click)="formSave()" style="width: 50px"><i class="bi bi-save"></i></button>
+        @if (enableSave) {
+          <button class="btn btn-sm btn-outline-primary" (click)="formSave()" style="width: 50px"><i class="bi bi-save"></i></button>
+        }
       </td>
       <td></td>
       <td></td>

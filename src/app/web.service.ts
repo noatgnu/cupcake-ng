@@ -684,6 +684,15 @@ export class WebService {
       {responseType: 'json', observe: 'body'}
     )
   }
+
+  scratchAnnotation(annotation_id: number) {
+    return this.http.post<Annotation>(
+      `${this.baseURL}/api/annotation/${annotation_id}/scratch/`,
+      {},
+      {responseType: 'json', observe: 'body'}
+    )
+
+  }
 }
 
 interface ChunkUploadResponse {

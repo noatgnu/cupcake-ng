@@ -4,6 +4,7 @@
       <div class="d-flex flex-row justify-content-between">
         <p>Date: {{a.created_at|date: "short"}} | Annotation Type: {{a.annotation_type}}</p>
         <div class="d-flex flex-row gap-1">
+          <button class="btn btn-outline-danger" (click)="scratch(a)"><i class="bi bi-type-strikethrough"></i></button>
           @if (['audio', 'video'].includes(a.annotation_type)) {
             <button class="btn btn-outline-primary" (click)="openTranscribeModal(a)">Re-transcribe</button>
           }
@@ -16,7 +17,11 @@
           <button class="btn btn-outline-danger" (click)="delete(a.id)"><i class="bi bi-trash"></i></button>
         </div>
       </div>
-
+      @if (a.scratched) {
+        <div class="alert alert-secondary" role="alert">
+          Annotation has been disabled
+        </div>
+      } @else {
         @if (a.annotation_type === 'text') {
           <div [innerHTML]="a.annotation"></div>
         } @else if (a.annotation_type === 'image') {
@@ -55,13 +60,15 @@
           </div>
         } @else if (a.annotation_type === 'calculator') {
           <div class="d-flex flex-row justify-content-center">
-            <app-calculator-annotation [annotation]="a"></app-calculator-annotation>
+            <app-calculator-annotation [annotation]="a" [enableSave]="true"></app-calculator-annotation>
           </div>
         } @else if (a.annotation_type === 'mcalculator') {
           <div class="d-flex flex-row justify-content-center">
             <app-molarity-calculator [annotation]="a"></app-molarity-calculator>
           </div>
         }
+      }
+
 
     </div>
   }
