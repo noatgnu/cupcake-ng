@@ -11,12 +11,14 @@
   </form>
   <hr>
   <div class="d-flex flex-row gap-2 flex-wrap">
+    <b>Assigned Tags:</b>
     @for (tag of tags; track tag.id) {
-      <span class="badge bg-primary">
+      <span class="badge bg-primary" (click)="removeProtocolTag(tag)">
         {{ tag.tag.tag }}
       </span>
     }
   </div>
+  <small>Click on assigned tags to remove</small>
 </div>
 <div class="modal-footer">
   <button type="button" class="btn btn-primary" (click)="save()">Save</button>

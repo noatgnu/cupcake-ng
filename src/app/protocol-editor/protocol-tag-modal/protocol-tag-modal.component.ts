@@ -57,6 +57,12 @@ export class ProtocolTagModalComponent {
     }
   }
 
+  removeProtocolTag(tag: ProtocolTag) {
+    this.web.removeProtocolTag(this.protocolId, tag.id).subscribe(() => {
+      this.tags = this.tags.filter((t) => t.id !== tag.id)
+    })
+  }
+
   close() {
     this.activeModal.dismiss()
   }
