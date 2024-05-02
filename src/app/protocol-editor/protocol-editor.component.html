@@ -30,13 +30,28 @@
             <input class="form-check-input" type="checkbox" formControlName="enabled" id="protocol_enabled">
           </div>
           <div>
-            <button class="btn btn-primary" (click)="saveProtocol()">Update Protocol Settings</button>
+            <button class="btn btn-sm btn-primary" (click)="saveProtocol()">Update Protocol Settings</button>
           </div>
         </form>
+        @if (protocol.tags.length > 0) {
+          <div class="d-flex flex-row gap-2 flex-wrap p-2">
+            <b>Tags: </b>
+            @for (tag of protocol.tags; track tag.id) {
+              <span class="badge bg-primary">{{tag.tag.tag}}</span>
+            }
+          </div>
+        }
         <div class="d-flex flex-row gap-2 p-2">
-          <button class="btn btn-primary" (click)="viewEditorModal()">Protocol Editors</button>
-          <button class="btn btn-primary" (click)="viewViewerModal()">Protocol Viewers</button>
+          <div ngbDropdown placement="top-end" class="d-inline-block">
+            <button class="btn btn-sm btn-primary" ngbDropdownToggle>Protocol Actions</button>
+            <div ngbDropdownMenu>
+              <button ngbDropdownItem (click)="viewEditorModal()">Protocol Editors</button>
+              <button ngbDropdownItem (click)="viewViewerModal()">Protocol Viewers</button>
+              <button ngbDropdownItem (click)="viewProtocolTagModal()">Protocol Tag Editors</button>
+            </div>
+          </div>
         </div>
+
         @if (sections.length > 0) {
           <div class="d-flex flex-row overflow-auto">
             <div class="d-flex flex-column gap-2 " style="width: 500px">
@@ -51,10 +66,10 @@
                 </div>
               </form>
               <div class="d-flex flex-row gap-2">
-                <button class="btn btn-primary" (click)="createNewSection()">Create New Section</button>
-                <button class="btn btn-primary" (click)="saveSection()">Save Section Data</button>
-                <button class="btn btn-primary" (click)="addStepToSection(formSectionSelect.controls['currentSection'].value)">Add Step</button>
-                <button class="btn btn-danger" (click)="deleteSection()">Delete Section</button>
+                <button class="btn btn-sm btn-primary" (click)="createNewSection()">Create New Section</button>
+                <button class="btn btn-sm btn-primary" (click)="saveSection()">Save Section Data</button>
+                <button class="btn btn-sm btn-primary" (click)="addStepToSection(formSectionSelect.controls['currentSection'].value)">Add Step</button>
+                <button class="btn btn-sm btn-danger" (click)="deleteSection()">Delete Section</button>
               </div>
             </div>
 

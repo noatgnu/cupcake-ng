@@ -82,4 +82,13 @@ export class AnnotationPresenterComponent {
       annotation.scratched = response.scratched
     })
   }
+
+  updateAnnotation(annotation: Annotation) {
+    this.annotations = this.annotations.map((a) => {
+      if (a.id === annotation.id) {
+        return annotation
+      }
+      return a
+    })
+  }
 }

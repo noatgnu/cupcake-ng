@@ -1,4 +1,4 @@
-import {Component, Input} from '@angular/core';
+import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {Annotation} from "../../annotation";
 import {FormBuilder, FormsModule} from "@angular/forms";
 import {WebService} from "../../web.service";
@@ -19,6 +19,7 @@ export class ChecklistPresenterComponent {
     this._annotation = value
     this.data = JSON.parse(value.annotation)
   }
+  @Output() change: EventEmitter<Annotation> = new EventEmitter<Annotation>()
 
   get annotation(): Annotation {
     return this._annotation!
@@ -30,7 +31,9 @@ export class ChecklistPresenterComponent {
   }
 
   onChange(event: any) {
-    this.web.updateAnnotation(JSON.stringify(this.data), "checklist", this.annotation.id).subscribe(() => {
+    this.web.updateAnnotation(JSON.stringify(this.data), "checklist", this.annotation.id).subscribe((data) => {
+      this._annotation = data
+      this.change.emit(data)
     })
   }
 }

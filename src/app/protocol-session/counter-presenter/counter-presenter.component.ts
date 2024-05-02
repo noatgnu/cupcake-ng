@@ -1,4 +1,4 @@
-import {Component, Input} from '@angular/core';
+import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {Annotation} from "../../annotation";
 import {WebService} from "../../web.service";
 import {FormBuilder} from "@angular/forms";
@@ -22,7 +22,7 @@ export class CounterPresenterComponent {
   get annotation(): Annotation {
     return this._annotation!
   }
-
+  @Output() change: EventEmitter<Annotation> = new EventEmitter<Annotation>()
   data: {name: string, total: number, current: number} = {name: "", total: 0, current: 0}
 
   constructor(private web: WebService, private fb: FormBuilder) {
@@ -30,7 +30,9 @@ export class CounterPresenterComponent {
   }
 
   updateAnnotation() {
-    this.web.updateAnnotation(JSON.stringify(this.data), "counter", this.annotation.id).subscribe(() => {
+    this.web.updateAnnotation(JSON.stringify(this.data), "counter", this.annotation.id).subscribe((data) => {
+      this._annotation = data;
+      this.change.emit(data)
     })
   }
 

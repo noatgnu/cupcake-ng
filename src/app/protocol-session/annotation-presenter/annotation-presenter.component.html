@@ -17,9 +17,12 @@
           <button class="btn btn-outline-danger" (click)="delete(a.id)"><i class="bi bi-trash"></i></button>
         </div>
       </div>
+      <div class="d-flex flex-row">
+        <p>Last save: {{a.updated_at|date: "short"}}</p>
+      </div>
       @if (a.scratched) {
-        <div class="alert alert-secondary" role="alert">
-          Annotation has been disabled
+        <div class="alert alert-secondary mt-2" role="alert">
+          This annotation has been disabled
         </div>
       } @else {
         @if (a.annotation_type === 'text') {
@@ -44,27 +47,27 @@
           </div>
         } @else if (a.annotation_type === 'checklist') {
           <div class="d-flex flex-row justify-content-center">
-            <app-checklist-presenter [annotation]="a"></app-checklist-presenter>
+            <app-checklist-presenter [annotation]="a" (change)="updateAnnotation($event)"></app-checklist-presenter>
           </div>
         } @else if (a.annotation_type === 'counter') {
           <div class="d-flex flex-row justify-content-center">
-            <app-counter-presenter [annotation]="a"></app-counter-presenter>
+            <app-counter-presenter [annotation]="a" (change)="updateAnnotation($event)"></app-counter-presenter>
           </div>
         } @else if (a.annotation_type === 'table') {
           <div class="d-flex flex-row justify-content-center">
-            <app-table-presenter [annotation]="a"></app-table-presenter>
+            <app-table-presenter [annotation]="a" (change)="updateAnnotation($event)"></app-table-presenter>
           </div>
         } @else if (a.annotation_type === 'alignment') {
           <div class="d-flex flex-row justify-content-center">
-            <app-alignment-annotation [annotation]="a"></app-alignment-annotation>
+            <app-alignment-annotation [annotation]="a" (change)="updateAnnotation($event)"></app-alignment-annotation>
           </div>
         } @else if (a.annotation_type === 'calculator') {
           <div class="d-flex flex-row justify-content-center">
-            <app-calculator-annotation [annotation]="a" [enableSave]="true"></app-calculator-annotation>
+            <app-calculator-annotation [annotation]="a" [enableSave]="true" (change)="updateAnnotation($event)"></app-calculator-annotation>
           </div>
         } @else if (a.annotation_type === 'mcalculator') {
           <div class="d-flex flex-row justify-content-center">
-            <app-molarity-calculator [annotation]="a"></app-molarity-calculator>
+            <app-molarity-calculator [annotation]="a" (change)="updateAnnotation($event)"></app-molarity-calculator>
           </div>
         }
       }

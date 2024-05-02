@@ -1,4 +1,4 @@
-import {Component, Input} from '@angular/core';
+import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {DataService} from "../../data.service";
 import {WebService} from "../../web.service";
 import {ToastService} from "../../toast.service";
@@ -42,6 +42,8 @@ export class MolarityCalculatorComponent {
   get annotation(): Annotation {
     return this._annotation!
   }
+
+  @Output() change: EventEmitter<Annotation> = new EventEmitter<Annotation>();
 
   formDynamicsFormula = this.fb.group({
     concentration: [],
@@ -257,7 +259,8 @@ export class MolarityCalculatorComponent {
   updateAnnotation() {
     if (this.dataLog.length > 0) {
       this.web.updateAnnotation(JSON.stringify(this.dataLog), 'mcalculator', this.annotation.id).subscribe((response) => {
-        console.log(response)
+        this._annotation = response
+        this.change.emit(response)
       })
     }
   }

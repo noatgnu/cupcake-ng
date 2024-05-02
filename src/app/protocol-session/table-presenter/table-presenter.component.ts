@@ -1,4 +1,4 @@
-import {Component, Input} from '@angular/core';
+import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {Annotation} from "../../annotation";
 import {FormBuilder, FormsModule} from "@angular/forms";
 import {WebService} from "../../web.service";
@@ -22,6 +22,7 @@ export class TablePresenterComponent {
     this.data = JSON.parse(value.annotation)
     this.segments = JSON.parse(JSON.stringify(this.data.content))
   }
+  @Output() change: EventEmitter<Annotation> = new EventEmitter<Annotation>();
 
   get annotation() {
     return this._annotation!;
@@ -33,7 +34,9 @@ export class TablePresenterComponent {
   save() {
     this.data.content = JSON.parse(JSON.stringify(this.segments))
     this.annotation.annotation = JSON.stringify(this.data)
-    this.web.updateAnnotation(this.annotation.annotation, "table", this.annotation.id).subscribe(() => {
+    this.web.updateAnnotation(this.annotation.annotation, "table", this.annotation.id).subscribe((data) => {
+      this._annotation = data
+      this.change.emit(data)
       this.toast.show("Table", "Table updated successfully")
     })
   }

@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, ElementRef, Input, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, ElementRef, EventEmitter, Input, Output, ViewChild} from '@angular/core';
 import {SequenceAlignment} from "../../sequence-alignment";
 import {Annotation} from "../../annotation";
 import {WebService} from "../../web.service";
@@ -59,7 +59,7 @@ export class AlignmentAnnotationComponent implements AfterViewInit{
   get annotation(): Annotation {
     return this._annotation!
   }
-
+  @Output() change: EventEmitter<Annotation> = new EventEmitter<Annotation>()
   form = this.fb.group({
     searchTerm: [""],
     gap: [false]
@@ -166,7 +166,8 @@ export class AlignmentAnnotationComponent implements AfterViewInit{
   save() {
     this.toast.show('Annotation', 'Saving annotation')
     this.web.updateAnnotation(JSON.stringify(this.data), this.annotation.annotation_type, this.annotation.id).subscribe((response) => {
-      console.log(response)
+      this._annotation = response
+      this.change.emit(response)
       this.toast.show('Annotation', 'Annotation saved')
     })
   }

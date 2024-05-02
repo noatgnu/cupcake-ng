@@ -2,11 +2,17 @@ import { Injectable } from '@angular/core';
 import {HttpClient, HttpHeaders, HttpParams} from "@angular/common/http";
 import {environment} from "../environments/environment";
 import {map, Observable} from "rxjs";
-import {Protocol, ProtocolQuery, ProtocolSection, ProtocolStep} from "./protocol";
+import {
+  Protocol,
+  ProtocolQuery,
+  ProtocolSection,
+  ProtocolStep
+} from "./protocol";
 import {ProtocolSession, ProtocolSessionQuery} from "./protocol-session";
 import {TimeKeeper} from "./time-keeper";
 import {Annotation, AnnotationQuery} from "./annotation";
 import {IngredientQuery, ProtocolIngredient, ProtocolStepIngredient} from "./ingredient";
+import {ProtocolTag, ProtocolTagQuery, StepTag, StepTagQuery, TagQuery} from "./tag";
 
 @Injectable({
   providedIn: 'root'
@@ -383,7 +389,7 @@ export class WebService {
       form.append('file', file);
     }
     form.append('annotation_type', annotation_type);
-    return this.http.put(
+    return this.http.put<Annotation>(
       `${this.baseURL}/api/annotation/${annotation_id}/`,
       form,
       {responseType: 'json', observe: 'body'}
@@ -691,8 +697,44 @@ export class WebService {
       {},
       {responseType: 'json', observe: 'body'}
     )
-
   }
+
+  addProtocolTag(protocol_id: number, tag: string) {
+    return this.http.post<ProtocolTag>(
+      `${this.baseURL}/api/protocol/${protocol_id}/add_tag/`,
+      {tag: tag},
+      {responseType: 'json', observe: 'body'}
+    )
+  }
+
+  removeProtocolTag(protocol_id: number, tag_id: number) {
+    return this.http.post(
+      `${this.baseURL}/api/protocol/${protocol_id}/remove_tag/`,
+      {tag: tag_id},
+      {responseType: 'json', observe: 'body'}
+    )
+  }
+
+  addStepTag(step_id: number, tag: string) {
+    return this.http.post<StepTag>(
+      `${this.baseURL}/api/step/${step_id}/add_tag/`,
+      {tag: tag},
+      {responseType: 'json', observe: 'body'}
+    )
+  }
+
+  removeStepTag(step_id: number, tag_id: number) {
+    return this.http.post(
+      `${this.baseURL}/api/step/${step_id}/remove_tag/`,
+      {tag: tag_id},
+      {responseType: 'json', observe: 'body'}
+    )
+  }
+
+  searchTags(search: string) {
+    return this.http.get<TagQuery>(`${this.baseURL}/api/tag/?search=${search}`, {responseType: 'json', observe: 'body'})
+  }
+
 }
 
 interface ChunkUploadResponse {

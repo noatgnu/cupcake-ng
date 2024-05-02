@@ -1,0 +1,28 @@
+<div class="modal-header">
+  <h5 class="modal-title">Protocol Tag Editor</h5>
+</div>
+<div class="modal-body">
+  <form [formGroup]="searchForm" class="d-flex flex-row gap-2">
+    <div class="form-floating">
+      <input type="text" class="form-control" id="search" formControlName="tag" placeholder="Search" [ngbTypeahead]="search" [inputFormatter]="tagFormatter" [resultTemplate]="rt">
+      <label for="search">Search</label>
+    </div>
+    <button type="submit" class="btn" (click)="addProtocolTag()"><i class="bi bi-plus"></i></button>
+  </form>
+  <hr>
+  <div class="d-flex flex-row gap-2 flex-wrap">
+    @for (tag of tags; track tag.id) {
+      <span class="badge bg-primary">
+        {{ tag.tag.tag }}
+      </span>
+    }
+  </div>
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn btn-primary" (click)="save()">Save</button>
+  <button type="button" class="btn btn-secondary" (click)="close()">Close</button>
+</div>
+
+<ng-template #rt let-r="result" let-t="term">
+  <ngb-highlight [result]="r.tag" [term]="t"></ngb-highlight>
+</ng-template>

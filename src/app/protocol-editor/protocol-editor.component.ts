@@ -21,6 +21,8 @@ import {UserViewerModalComponent} from "./user-viewer-modal/user-viewer-modal.co
 import {IngredientEditorComponent} from "./ingredient-editor/ingredient-editor.component";
 import {ProtocolIngredient, ProtocolStepIngredient} from "../ingredient";
 import {CalculatorAnnotationComponent} from "../protocol-session/calculator-annotation/calculator-annotation.component";
+import {ProtocolTagModalComponent} from "./protocol-tag-modal/protocol-tag-modal.component";
+import {ProtocolTag} from "../tag";
 
 @Component({
   selector: 'app-protocol-editor',
@@ -283,4 +285,14 @@ export class ProtocolEditorComponent {
     this.floatedClick = clickType
   }
 
+  viewProtocolTagModal() {
+    const ref = this.modal.open(ProtocolTagModalComponent, {scrollable: true})
+    ref.componentInstance.protocolId = this.protocolID
+    ref.componentInstance.tags = this.protocol?.tags
+    ref.closed.subscribe((data: ProtocolTag[]) => {
+      if (this.protocol) {
+        this.protocol.tags = data
+      }
+    })
+  }
 }

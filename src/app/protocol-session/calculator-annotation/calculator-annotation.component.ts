@@ -1,4 +1,4 @@
-import {Component, Input} from '@angular/core';
+import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {FormBuilder, FormControl, ReactiveFormsModule, Validators} from "@angular/forms";
 import {Annotation} from "../../annotation";
 import {WebService} from "../../web.service";
@@ -28,7 +28,7 @@ export class CalculatorAnnotationComponent {
   get annotation(): Annotation {
     return this._annotation!
   }
-
+  @Output() change: EventEmitter<Annotation> = new EventEmitter<Annotation>()
   executionMode: 'initial' | 'second' | 'operation' = 'initial'
   operation: '+' | '-' | '*' | '/' | '^' | null = null
 
@@ -200,8 +200,9 @@ export class CalculatorAnnotationComponent {
 
   formSave() {
     this.web.updateAnnotation(JSON.stringify(this.dataLog), 'calculator', this.annotation.id).subscribe(
-      (response: any) => {
-        console.log(response)
+      (response) => {
+        this._annotation = response
+        this.change.emit(response)
 
       }
     )
