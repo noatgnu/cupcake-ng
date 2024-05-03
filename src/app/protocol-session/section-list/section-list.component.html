@@ -1,0 +1,43 @@
+<div class="list-group d-flex flex-column rounded-0 overflow-auto" style="height: 80vh">
+  @for (s of sections; track s.data.id) {
+    @if (currentSection) {
+      @if (currentSection.data.id === s.data.id) {
+        <div class="list-group-item list-group-item-primary list-group-item-action" (click)="handleSectionClick(s)">
+          <p>{{s.data.section_description}}</p>
+          Duration: {{timer.convertTime(s.data.section_duration)}}
+          <ul>
+            @for (step of s.steps; track step.id; let i=$index) {
+              @if (timer.currentTrackingStep.includes(step.id)) {
+                <li>{{i+1}}/{{s.steps.length}}: {{timer.convertTime(timer.timeKeeper[step.id.toString()].current)}}/{{timer.convertTime(step.step_duration)}}</li>
+              }
+            }
+          </ul>
+        </div>
+      } @else {
+        <div class="list-group-item list-group-item-action" (click)="handleSectionClick(s)">
+          <p>{{s.data.section_description}}</p>
+          Duration: {{timer.convertTime(s.data.section_duration)}}
+          <ul>
+            @for (step of s.steps; track step.id; let i=$index) {
+              @if (timer.currentTrackingStep.includes(step.id)) {
+                <li>{{i+1}}/{{s.steps.length}}: {{timer.convertTime(timer.timeKeeper[step.id.toString()].current)}}/{{timer.convertTime(step.step_duration)}}</li>
+              }
+            }
+          </ul>
+        </div>
+      }
+    } @else {
+      <div class="list-group-item list-group-item-action" (click)="handleSectionClick(s)">
+        <p>{{s.data.section_description}}</p>
+        Duration: {{timer.convertTime(s.data.section_duration)}}
+        <ul>
+          @for (step of s.steps; track step.id; let i=$index) {
+            @if (timer.currentTrackingStep.includes(step.id)) {
+              <li>{{i+1}}/{{s.steps.length}}: {{timer.convertTime(timer.timeKeeper[step.id.toString()].current)}}/{{timer.convertTime(step.step_duration)}}</li>
+            }
+          }
+        </ul>
+      </div>
+    }
+  }
+</div>

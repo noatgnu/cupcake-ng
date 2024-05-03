@@ -1,5 +1,8 @@
 <div class="d-flex flex-column w-100 justify-content-center">
-  <ngx-wig [formControl]="form.controls.text" class="w-100"></ngx-wig>
+  <quill-editor [formControl]="form.controls.text" [modules]="editorConfig">
+
+  </quill-editor>
+
   <div class="d-flex flex-row gap-2 p-2">
     <button class="btn btn-primary" (click)="submit()">Submit</button>
     <button class="btn btn-primary" (click)="form.controls.text.reset()">Clear</button>

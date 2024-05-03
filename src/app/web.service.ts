@@ -10,7 +10,7 @@ import {
 } from "./protocol";
 import {ProtocolSession, ProtocolSessionQuery} from "./protocol-session";
 import {TimeKeeper} from "./time-keeper";
-import {Annotation, AnnotationQuery} from "./annotation";
+import {Annotation, AnnotationFolder, AnnotationQuery} from "./annotation";
 import {IngredientQuery, ProtocolIngredient, ProtocolStepIngredient} from "./ingredient";
 import {ProtocolTag, ProtocolTagQuery, StepTag, StepTagQuery, TagQuery} from "./tag";
 
@@ -97,11 +97,13 @@ export class WebService {
     );
   }
 
-  saveAnnotationText(session_id: string, step_id: number, text: string) {
+  saveAnnotationText(session_id: string, step_id: number = 0, text: string) {
     const form = new FormData();
     form.append('annotation', text);
     form.append('annotation_type', 'text');
-    form.append('step', step_id.toString());
+    if (step_id !== 0) {
+      form.append('step', step_id.toString());
+    }
     form.append('session', session_id);
     return this.http.post(
       `${this.baseURL}/api/annotation/`,
@@ -128,11 +130,13 @@ export class WebService {
     );
   }
 
-  saveAnnotationFile(session_id: string, step_id: number, file: File, annotation_type: string = 'file') {
+  saveAnnotationFile(session_id: string, step_id: number = 0, file: File, annotation_type: string = 'file') {
     const form = new FormData()
     form.append('annotation', "");
     form.append('annotation_type', annotation_type);
-    form.append('step', step_id.toString());
+    if (step_id !== 0) {
+      form.append('step', step_id.toString());
+    }
     form.append('session', session_id);
     form.append('file', file);
     console.log(session_id, step_id, file)
@@ -143,11 +147,13 @@ export class WebService {
     );
   }
 
-  saveSketch(session_id: string, step_id: number, strokes: any[]) {
+  saveSketch(session_id: string, step_id: number = 0, strokes: any[]) {
     const form = new FormData()
     form.append('annotation', "");
     form.append('annotation_type', 'sketch');
-    form.append('step', step_id.toString());
+    if (step_id !== 0) {
+      form.append('step', step_id.toString());
+    }
     form.append('session', session_id);
     const file = new File([JSON.stringify(strokes)], 'sketch.json', {type: 'application/json'});
     form.append('file', file);
@@ -158,11 +164,13 @@ export class WebService {
     );
   }
 
-  saveAnnotationJSON(session_id: string, step_id: number, json: any, annotation_type: string ) {
+  saveAnnotationJSON(session_id: string, step_id: number = 0, json: any, annotation_type: string ) {
     const form = new FormData()
     form.append('annotation', JSON.stringify(json));
     form.append('annotation_type', annotation_type);
-    form.append('step', step_id.toString());
+    if (step_id !== 0) {
+      form.append('step', step_id.toString());
+    }
     form.append('session', session_id);
     return this.http.post(
       `${this.baseURL}/api/annotation/`,
@@ -743,6 +751,56 @@ export class WebService {
     )
   }
 
+  sessionGetBaseFolders(session_id: string) {
+    return this.http.get<AnnotationFolder[]>(
+      `${this.baseURL}/api/session/${session_id}/get_base_folders/`,
+      {responseType: 'json', observe: 'body'}
+    )
+  }
+
+  sessionAddFolder(session_id: string, folder_name: string) {
+    return this.http.post<AnnotationFolder>(
+      `${this.baseURL}/api/session/${session_id}/add_folder/`,
+      {folder_name: folder_name},
+      {responseType: 'json', observe: 'body'}
+    )
+  }
+
+  sessionRemoveFolder(session_id: string, folder_id: number, remove_content: boolean = false) {
+    if (remove_content) {
+      return this.http.post(
+        `${this.baseURL}/api/session/${session_id}/remove_folder/`, {folder: folder_id, remove_content: remove_content},
+        {responseType: 'json', observe: 'body'}
+      )
+    }
+    return this.http.post(
+      `${this.baseURL}/api/session/${session_id}/remove_folder/`, {folder: folder_id},
+      {responseType: 'json', observe: 'body'}
+    )
+  }
+
+  getAnnotationInFolder(folder_id: number) {
+    let params = new HttpParams().set('folder', folder_id.toString())
+    return this.http.get<AnnotationQuery>(
+      `${this.baseURL}/api/annotation/get_annotation_in_folder/`,
+      {responseType: 'json', observe: 'body', params: params}
+    )
+  }
+
+  annotationMoveToFolder(annotation_id: number, folder_id: number) {
+    return this.http.post(
+      `${this.baseURL}/api/annotation/${annotation_id}/move_to_folder/`,
+      {folder: folder_id},
+      {responseType: 'json', observe: 'body'}
+    )
+  }
+
+  getFolderChildren(folder_id: number) {
+    return this.http.get<AnnotationFolder[]>(
+      `${this.baseURL}/api/folder/${folder_id}/get_children/`,
+      {responseType: 'json', observe: 'body'}
+    )
+  }
 }
 
 interface ChunkUploadResponse {
