@@ -735,6 +735,14 @@ export class WebService {
     return this.http.get<TagQuery>(`${this.baseURL}/api/tag/?search=${search}`, {responseType: 'json', observe: 'body'})
   }
 
+  annotationRename(annotation_id: number, name: string) {
+    return this.http.post<Annotation>(
+      `${this.baseURL}/api/annotation/${annotation_id}/rename/`,
+      {annotation_name: name},
+      {responseType: 'json', observe: 'body'}
+    )
+  }
+
 }
 
 interface ChunkUploadResponse {

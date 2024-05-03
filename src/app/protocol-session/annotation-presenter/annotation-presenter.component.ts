@@ -5,7 +5,7 @@ import {SketchPresenterComponent} from "../sketch-presenter/sketch-presenter.com
 import {ImagePresenterComponent} from "../image-presenter/image-presenter.component";
 import {MediaPresenterComponent} from "../media-presenter/media-presenter.component";
 import {WebService} from "../../web.service";
-import {NgbModal, NgbModalConfig} from "@ng-bootstrap/ng-bootstrap";
+import {NgbDropdown, NgbDropdownMenu, NgbDropdownToggle, NgbModal, NgbModalConfig} from "@ng-bootstrap/ng-bootstrap";
 import {TranscribeModalComponent} from "../transcribe-modal/transcribe-modal.component";
 import {ChecklistPresenterComponent} from "../checklist-presenter/checklist-presenter.component";
 import {CounterPresenterComponent} from "../counter-presenter/counter-presenter.component";
@@ -13,6 +13,7 @@ import {TablePresenterComponent} from "../table-presenter/table-presenter.compon
 import {AlignmentAnnotationComponent} from "../alignment-annotation/alignment-annotation.component";
 import {CalculatorAnnotationComponent} from "../calculator-annotation/calculator-annotation.component";
 import {MolarityCalculatorComponent} from "../molarity-calculator/molarity-calculator.component";
+import {AnnotationRenameModalComponent} from "./annotation-rename-modal/annotation-rename-modal.component";
 
 @Component({
   selector: 'app-annotation-presenter',
@@ -29,7 +30,10 @@ import {MolarityCalculatorComponent} from "../molarity-calculator/molarity-calcu
     TablePresenterComponent,
     AlignmentAnnotationComponent,
     CalculatorAnnotationComponent,
-    MolarityCalculatorComponent
+    MolarityCalculatorComponent,
+    NgbDropdown,
+    NgbDropdownToggle,
+    NgbDropdownMenu
   ],
   templateUrl: './annotation-presenter.component.html',
   styleUrl: './annotation-presenter.component.scss'
@@ -89,6 +93,18 @@ export class AnnotationPresenterComponent {
         return annotation
       }
       return a
+    })
+  }
+
+  annotationRename(annotation: Annotation) {
+    const ref = this.modal.open(AnnotationRenameModalComponent)
+    ref.componentInstance.annotation = annotation
+    ref.closed.subscribe((result: string) => {
+      if (result) {
+        this.web.annotationRename(annotation.id, result).subscribe((response: Annotation) => {
+          annotation.annotation_name = response.annotation_name
+        })
+      }
     })
   }
 }

@@ -1,0 +1,15 @@
+<div class="modal-header">
+  <h5 class="modal-title"></h5>
+</div>
+<div class="modal-body">
+  <form [formGroup]="form">
+    <div class="form-floating">
+      <input type="text" id="renameText" class="form-control" formControlName="name">
+      <label for="renameText">Name</label>
+    </div>
+  </form>
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn btn-primary" (click)="submit()">Save changes</button>
+  <button type="button" class="btn btn-secondary" (click)="cancel()">Close</button>
+</div>

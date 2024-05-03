@@ -12,6 +12,8 @@ export interface Annotation {
   language: string|null;
   translation: string|null;
   scratched: boolean;
+  folder: {id: number, folder_name: string}[];
+  annotation_name: string;
 }
 
 export interface AnnotationQuery {
@@ -19,4 +21,11 @@ export interface AnnotationQuery {
   next: string|null;
   previous: string|null;
   results: Annotation[];
+}
+
+export interface AnnotationFolder {
+  id: number;
+  folder_name: string;
+  created_at: Date;
+  updated_at: Date;
 }

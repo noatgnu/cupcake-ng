@@ -1,0 +1,17 @@
+@media (min-width: 601px) {
+  #annotationControlPanel {
+    display: flex !important;
+  }
+  #annotationControlPanelDropdown {
+    display: none !important;
+  }
+}
+
+@media (max-width: 600px) {
+  #annotationControlPanel {
+    display: none !important;
+  }
+  #annotationControlPanelDropdown {
+    display: flex !important;
+  }
+}
