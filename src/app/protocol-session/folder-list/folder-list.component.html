@@ -20,14 +20,25 @@
           <p>
             Created: {{ folder.created_at| date: "short" }}
           </p>
+          @if (editMode) {
+            <div class="d-flex flex-row gap-2">
+              <div class="form-check">
+                <input type="checkbox" class="form-check-input">
+              </div>
+              <button class="btn btn-sm btn-outline-primary"><i class="bi bi-input-cursor-text"></i></button>
+              <button class="btn btn-sm btn-outline-danger" (click)="deleteFolder(folder)"><i class="bi bi-trash"></i></button>
+            </div>
+          }
+
         </div>
 
       </div>
     }
   </div>
   <hr>
-  <div id="folderControlPanel" class="p-2">
+  <div id="folderControlPanel" class="d-flex flex-row gap-2 p-2">
     <button class="btn btn-sm btn-outline-primary" (click)="createFolder()"><i class="bi bi-folder-plus"></i></button>
+    <button class="btn btn-sm btn-outline-primary" (click)="editMode=!editMode"><i class="bi bi-pen"></i></button>
   </div>
 </div>
 

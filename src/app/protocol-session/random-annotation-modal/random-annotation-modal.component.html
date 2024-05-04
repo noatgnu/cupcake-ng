@@ -1,0 +1,94 @@
+<div class="modal-header">
+  <h5 class="modal-title">Randomize Annotation</h5>
+</div>
+<div class="modal-body">
+  <form [formGroup]="form" class="d-flex flex-column gap-2">
+    <div class="form-group">
+      <label for="samples">List of sample to randomize</label>
+      <textarea class="form-control" id="samples" rows="3" formControlName="samples"></textarea>
+    </div>
+    <div class="form-check">
+      <input class="form-check-input" type="checkbox" id="generateNumber" formControlName="generateNumber">
+      <label class="form-check-label" for="generateNumber">Random Number Generation</label>
+    </div>
+    @if (form.value.generateNumber) {
+      <div class="d-flex flex-row gap-2">
+        <div class="form-floating">
+          <input class="form-control" id="numberMin" type="number" formControlName="numberMin">
+          <label for="numberMin">Min</label>
+        </div>
+        <div class="form-floating">
+          <input class="form-control" id="numberMax" type="number" formControlName="numberMax">
+          <label for="numberMax">Max</label>
+        </div>
+      </div>
+    }
+    <div class="d-flex flex-row gap-2">
+      <div class="form-floating">
+        <input class="form-control" id="numberOfColumn" type="number" formControlName="nCol">
+        <label for="numberOfColumn">Number of column</label>
+      </div>
+      <div class="form-floating">
+        <input class="form-control" id="numberOfRow" type="number" formControlName="nRow">
+        <label for="numberOfRow">Number of row</label>
+      </div>
+    </div>
+
+    <div>
+      <button type="button" class="btn btn-primary" (click)="randomize()">Randomize</button>
+    </div>
+  </form>
+  @if (sampleArray.length > 0) {
+    <div class="mt-2">
+      <table class="table table-bordered">
+        <thead>
+          <tr>
+            <th></th>
+            @for (column of sampleArray[0]; track column; let i = $index) {
+              <th scope="col">Col {{ i }}</th>
+            }
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of sampleArray; track row; let i = $index) {
+            <tr>
+              <th>Row {{i}}</th>
+              @for (column of row; track column) {
+                <td>{{ column }}</td>
+              }
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+  @if (numberArray.length > 0) {
+    <div class="mt-2">
+      <table class="table table-bordered">
+        <thead>
+          <tr>
+            <th></th>
+            @for (column of numberArray[0]; track column; let i = $index) {
+              <th scope="col">Col {{ i }}</th>
+            }
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of numberArray; track row; let i = $index) {
+            <tr>
+              <th>Row {{i}}</th>
+              @for (column of row; track column) {
+                <td>{{ column }}</td>
+              }
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn btn-primary" (click)="save()">Save</button>
+  <button type="button" class="btn btn-secondary" (click)="close()">Close</button>
+
+</div>

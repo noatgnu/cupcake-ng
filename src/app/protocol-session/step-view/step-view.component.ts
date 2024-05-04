@@ -23,6 +23,7 @@ import {AddChecklistModalComponent} from "../add-checklist-modal/add-checklist-m
 import {AddTableModalComponent} from "../add-table-modal/add-table-modal.component";
 import {AccountsService} from "../../accounts/accounts.service";
 import {SpeechService} from "../../speech.service";
+import {RandomAnnotationModalComponent} from "../random-annotation-modal/random-annotation-modal.component";
 
 @Component({
   selector: 'app-step-view',
@@ -469,7 +470,16 @@ export class StepViewComponent {
         this.toastService.show('Annotation', 'Calculator Saved Successfully');
         this.refreshAnnotations();
       })
-    } else {
+    } else if (item === 'Randomization'){
+      const ref = this.modal.open(RandomAnnotationModalComponent, {scrollable: true})
+      ref.closed.subscribe((data: any) => {
+        this.web.saveAnnotationJSON(this.dataService.currentSession.unique_id, this.currentStep.id, data, 'randomization').subscribe((data: any) => {
+          this.toastService.show('Randomization', 'Randomization Saved Successfully')
+          this.refreshAnnotations();
+        })
+      })
+
+    }else {
       if (this.clickedElement === item) {
         this.clickedElement = "";
         return;

@@ -97,6 +97,10 @@
           <div class="d-flex flex-row justify-content-center">
             <app-molarity-calculator [annotation]="a" (change)="updateAnnotation($event)"></app-molarity-calculator>
           </div>
+        } @else if (a.annotation_type === 'randomization') {
+          <div class="d-flex flex-row justify-content-center">
+            <app-randomization-presenter [annotation]="a"></app-randomization-presenter>
+          </div>
         }
       }
 

@@ -1,0 +1,50 @@
+@if (annotation) {
+  @if (data.sampleArray.length > 0) {
+    <b>Randomized Sample Table</b>
+    <table class="table table-bordered">
+      <thead>
+      <tr>
+        <th></th>
+        @for (column of data.sampleArray[0]; track column; let i = $index) {
+          <th scope="col">Col {{ i }}</th>
+        }
+      </tr>
+      </thead>
+      <tbody>
+        @for (row of data.sampleArray; track row; let i = $index) {
+          <tr>
+            <th>Row {{i}}</th>
+            @for (column of row; track column) {
+              <td>{{ column }}</td>
+            }
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+  @if (data.numberArray.length > 0) {
+    <b>Randomized Number Table</b>
+    <table class="table table-bordered">
+      <thead>
+      <tr>
+        <th></th>
+        @for (column of data.numberArray[0]; track column; let i = $index) {
+          <th scope="col">Col {{ i }}</th>
+        }
+      </tr>
+      </thead>
+      <tbody>
+        @for (row of data.numberArray; track row; let i = $index) {
+          <tr>
+            <th>Row {{i}}</th>
+            @for (column of row; track column) {
+              <td>{{ column }}</td>
+            }
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+}
+<div>
+</div>

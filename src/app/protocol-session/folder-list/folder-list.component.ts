@@ -4,6 +4,7 @@ import {AnnotationFolder} from "../../annotation";
 import {DatePipe} from "@angular/common";
 import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import {FolderNameModalComponent} from "./folder-name-modal/folder-name-modal.component";
+import {DeleteFolderModalComponent} from "./delete-folder-modal/delete-folder-modal.component";
 
 @Component({
   selector: 'app-folder-list',
@@ -16,6 +17,7 @@ import {FolderNameModalComponent} from "./folder-name-modal/folder-name-modal.co
 })
 export class FolderListComponent {
   private _sessionID?: string
+  editMode: boolean = false
   @Input() set sessionID(value: string) {
     this._sessionID = value
     if (!value) {
@@ -50,8 +52,12 @@ export class FolderListComponent {
     })
   }
 
-  handleFolderSelect(folder?: AnnotationFolder) {
-    if (folder) {
+  handleFolderSelect(folder: AnnotationFolder) {
+    if (this.editMode) {
+      return
+    }
+
+    if (Object.keys(folder).length > 0 ) {
       this.parentFolder = Object.assign({}, this.selectedFolder)
       this.selectedFolder = folder
       this.web.getFolderChildren(folder.id).subscribe((data) => {
@@ -64,10 +70,17 @@ export class FolderListComponent {
       this.web.sessionGetBaseFolders(this.sessionID).subscribe((data) => {
         this.folderList = data
       })
-      this.selectedFolderChange.emit(this.selectedFolder)
     }
   }
 
+  deleteFolder(folder: AnnotationFolder) {
+    const ref = this.modal.open(DeleteFolderModalComponent)
+    ref.closed.subscribe((removeContent) => {
+      this.web.sessionRemoveFolder(this.sessionID, folder.id, removeContent).subscribe(() => {
+        this.folderList = this.folderList.filter((f) => f.id !== folder.id)
+      })
+    })
+  }
 
 
 }

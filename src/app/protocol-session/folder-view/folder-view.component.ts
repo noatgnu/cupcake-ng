@@ -11,6 +11,7 @@ import {AnnotationTextFormComponent} from "../annotation-text-form/annotation-te
 import {FormsModule} from "@angular/forms";
 import {HandwrittenAnnotationComponent} from "../handwritten-annotation/handwritten-annotation.component";
 import {AnnotationPresenterComponent} from "../annotation-presenter/annotation-presenter.component";
+import {RandomAnnotationModalComponent} from "../random-annotation-modal/random-annotation-modal.component";
 
 @Component({
   selector: 'app-folder-view',
@@ -166,8 +167,22 @@ export class FolderViewComponent {
     } else if (item === 'Molarity Calculator'){
       // @ts-ignore
       this.web.saveAnnotationJSON(this.dataService.currentSession.unique_id, 0, {}, 'mcalculator').subscribe((data: any) => {
-        this.toastService.show('Annotation', 'Calculator Saved Successfully');
-        this.refreshAnnotations();
+        this.web.annotationMoveToFolder(data.id, this.currentFolder.id).subscribe(
+          (data: any) => {
+            this.toastService.show('Annotation', 'Molarity Calculator Saved Successfully');
+            this.refreshAnnotations();
+          }
+        )
+      })
+    } else if (item === 'Randomization'){
+      const ref = this.modal.open(RandomAnnotationModalComponent, {scrollable: true})
+      ref.closed.subscribe((data: any) => {
+        this.web.saveAnnotationJSON(this.dataService.currentSession.unique_id, 0, data, 'randomization').subscribe((data: any) => {
+          this.web.annotationMoveToFolder(data.id, this.currentFolder.id).subscribe((data: any) => {
+            this.toastService.show('Annotation', 'Randomization Saved Successfully')
+            this.refreshAnnotations();
+          })
+        })
       })
     } else {
       if (this.clickedElement === item) {

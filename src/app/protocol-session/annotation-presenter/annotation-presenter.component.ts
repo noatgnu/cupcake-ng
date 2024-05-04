@@ -14,6 +14,7 @@ import {AlignmentAnnotationComponent} from "../alignment-annotation/alignment-an
 import {CalculatorAnnotationComponent} from "../calculator-annotation/calculator-annotation.component";
 import {MolarityCalculatorComponent} from "../molarity-calculator/molarity-calculator.component";
 import {AnnotationRenameModalComponent} from "./annotation-rename-modal/annotation-rename-modal.component";
+import {RandomizationPresenterComponent} from "../randomization-presenter/randomization-presenter.component";
 
 @Component({
   selector: 'app-annotation-presenter',
@@ -33,7 +34,8 @@ import {AnnotationRenameModalComponent} from "./annotation-rename-modal/annotati
     MolarityCalculatorComponent,
     NgbDropdown,
     NgbDropdownToggle,
-    NgbDropdownMenu
+    NgbDropdownMenu,
+    RandomizationPresenterComponent
   ],
   templateUrl: './annotation-presenter.component.html',
   styleUrl: './annotation-presenter.component.scss'
