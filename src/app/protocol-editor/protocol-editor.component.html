@@ -109,22 +109,27 @@
                 Step Duration
               </div>
               <app-time-picker [seconds]="step.step_duration" (output)="handleUpdateStepDuration($event, i)"></app-time-picker>
-              @if (step.ingredients.length > 0) {
+              @if (step.reagents.length > 0) {
                 <div class="d-flex flex-row justify-content-between">
-                  <b>Ingredients</b>
+                  <b>Reagents</b>
                 </div>
                 <div class="d-flex flex-column gap-2">
-                  @for (ingredient of step.ingredients; track ingredient.id; let j = $index) {
+                  @for (reagent of step.reagents; track reagent.id; let j = $index) {
                     <div class="d-flex flex-row justify-content-between">
                       <p>
-                        {{ingredient.quantity}} {{ingredient.ingredient.unit}} {{ingredient.ingredient.name}}
+                        @if (reagent.scalable) {
+                          {{reagent.quantity}} x {{reagent.scalable}} = {{reagent.quantity * reagent.scalable_factor}} {{reagent.reagent.unit}} {{reagent.reagent.name}}
+                        } @else {
+                          {{reagent.quantity}} {{reagent.reagent.unit}} {{reagent.reagent.name}}
+                        }
+
                       </p>
                     </div>
                   }
                 </div>
               }
               <div class="mt-2">
-                <button class="btn btn-sm btn-primary" (click)="openIngredientEditorModal(step)">Ingredient Editor</button>
+                <button class="btn btn-sm btn-primary" (click)="openReagentEditorModal(step)">Reagent Editor</button>
               </div>
               <hr>
             </div>
@@ -149,11 +154,11 @@
           @switch (floatedClick) {
             @case ('Ingredient Summary') {
               <div style="max-height:300px; max-width:300px; overflow: auto">
-                <b>Ingredient Summary</b>
+                <b>Reagent Summary</b>
                 <ul>
-                  @for (ingredient of protocol?.ingredients; track ingredient.id) {
+                  @for (reagent of protocol?.reagents; track reagent.id) {
                     <li>
-                      {{ingredient.quantity}} {{ingredient.ingredient.unit}} {{ingredient.ingredient.name}}
+                      {{reagent.quantity}} {{reagent.reagent.unit}} {{reagent.reagent.name}}
                     </li>
                   }
                 </ul>
@@ -179,7 +184,7 @@
     <div ngbDropdown placement="top-end" class="d-inline-block">
       <button class="btn btn-outline-success" ngbDropdownToggle><i class="bi bi-info"></i></button>
       <div ngbDropdownMenu>
-        @for (a of ['Ingredient Summary', 'Calculator']; track a) {
+        @for (a of ['Reagent Summary', 'Calculator']; track a) {
           <button ngbDropdownItem (click)="editorFloatClick(a)">{{a}}</button>
         }
       </div>

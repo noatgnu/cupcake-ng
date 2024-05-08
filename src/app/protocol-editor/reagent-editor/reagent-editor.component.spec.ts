@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { IngredientEditorComponent } from './ingredient-editor.component';
+import { ReagentEditorComponent } from './reagent-editor.component';
 
 describe('IngredientEditorComponent', () => {
-  let component: IngredientEditorComponent;
-  let fixture: ComponentFixture<IngredientEditorComponent>;
+  let component: ReagentEditorComponent;
+  let fixture: ComponentFixture<ReagentEditorComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [IngredientEditorComponent]
+      imports: [ReagentEditorComponent]
     })
     .compileComponents();
-    
-    fixture = TestBed.createComponent(IngredientEditorComponent);
+
+    fixture = TestBed.createComponent(ReagentEditorComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

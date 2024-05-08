@@ -1,4 +1,4 @@
-export interface Ingredient {
+export interface Reagent {
   id: number;
   name: string;
   unit: string;
@@ -6,25 +6,27 @@ export interface Ingredient {
   updated_at: Date;
 }
 
-export interface ProtocolIngredient {
+export interface ProtocolReagent {
   id: number;
-  ingredient: Ingredient;
+  reagent: Reagent;
   quantity: number;
   created_at: Date;
   updated_at: Date;
 }
 
-export interface ProtocolStepIngredient {
+export interface ProtocolStepReagent {
   id: number;
-  ingredient: Ingredient;
+  reagent: Reagent;
   quantity: number;
   created_at: Date;
   updated_at: Date;
+  scalable: boolean;
+  scalable_factor: number;
 }
 
-export interface IngredientQuery {
+export interface ReagentQuery {
   count: number;
   next: string|null;
   previous: string|null;
-  results: Ingredient[];
+  results: Reagent[];
 }

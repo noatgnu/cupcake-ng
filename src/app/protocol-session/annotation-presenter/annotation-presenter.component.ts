@@ -41,8 +41,19 @@ import {RandomizationPresenterComponent} from "../randomization-presenter/random
   styleUrl: './annotation-presenter.component.scss'
 })
 export class AnnotationPresenterComponent {
-  @Input() annotations: Annotation[] = [];
+  private _annotations?: Annotation[]
+  @Input() set annotations(value: Annotation[]) {
+    this._annotations = value
+    this.web.checkAnnotationPermissions(value.map((a) => a.id)).subscribe((response) => {
+      console.log(response)
+    })
+  }
+  get annotations(): Annotation[] {
+    return this._annotations!
+  }
   @Output() deleteAnnotation: EventEmitter<number> = new EventEmitter<number>();
+
+
 
   constructor(private web: WebService, private modal: NgbModal, private modalConfig: NgbModalConfig) {
     this.modalConfig.backdrop = 'static';

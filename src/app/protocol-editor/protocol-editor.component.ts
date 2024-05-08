@@ -18,8 +18,8 @@ import {
 import {QuillEditorComponent} from "ngx-quill";
 import {UserEditorModalComponent} from "./user-editor-modal/user-editor-modal.component";
 import {UserViewerModalComponent} from "./user-viewer-modal/user-viewer-modal.component";
-import {IngredientEditorComponent} from "./ingredient-editor/ingredient-editor.component";
-import {ProtocolIngredient, ProtocolStepIngredient} from "../ingredient";
+import {ReagentEditorComponent} from "./reagent-editor/reagent-editor.component";
+import {ProtocolReagent, ProtocolStepReagent} from "../reagent";
 import {CalculatorAnnotationComponent} from "../protocol-session/calculator-annotation/calculator-annotation.component";
 import {ProtocolTagModalComponent} from "./protocol-tag-modal/protocol-tag-modal.component";
 import {ProtocolTag} from "../tag";
@@ -267,15 +267,15 @@ export class ProtocolEditorComponent {
     ref.componentInstance.protocolId = this.protocolID
   }
 
-  openIngredientEditorModal(step: ProtocolStep) {
-    const ref = this.modal.open(IngredientEditorComponent, {scrollable: true})
-    ref.componentInstance.ingredients = step.ingredients
+  openReagentEditorModal(step: ProtocolStep) {
+    const ref = this.modal.open(ReagentEditorComponent, {scrollable: true})
+    ref.componentInstance.reagents = step.reagents
     ref.componentInstance.stepId = step.id
-    ref.closed.subscribe((data: ProtocolStepIngredient[]) => {
-      step.ingredients = data
-      this.web.getProtocolIngredients(this.protocolID).subscribe((data: ProtocolIngredient[]) => {
+    ref.closed.subscribe((data: ProtocolStepReagent[]) => {
+      step.reagents = data
+      this.web.getProtocolReagents(this.protocolID).subscribe((data: ProtocolReagent[]) => {
         if (this.protocol) {
-          this.protocol.ingredients = data
+          this.protocol.reagents = data
         }
       })
     })

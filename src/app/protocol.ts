@@ -1,4 +1,4 @@
-import {ProtocolIngredient, ProtocolStepIngredient} from "./ingredient";
+import {ProtocolReagent, ProtocolStepReagent} from "./reagent";
 import {ProtocolTag, StepTag} from "./tag";
 
 export interface Protocol {
@@ -14,7 +14,7 @@ export interface Protocol {
   enabled: boolean;
   complexity_rating: number;
   duration_rating: number;
-  ingredients: ProtocolIngredient[];
+  reagents: ProtocolReagent[];
   tags: ProtocolTag[];
 }
 
@@ -27,7 +27,7 @@ export interface ProtocolStep {
   step_section: number;
   next_step: number[];
   previous_step: number;
-  ingredients: ProtocolStepIngredient[];
+  reagents: ProtocolStepReagent[];
   tags: StepTag[];
 }
 

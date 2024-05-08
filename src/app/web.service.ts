@@ -11,7 +11,7 @@ import {
 import {ProtocolSession, ProtocolSessionQuery} from "./protocol-session";
 import {TimeKeeper} from "./time-keeper";
 import {Annotation, AnnotationFolder, AnnotationQuery} from "./annotation";
-import {IngredientQuery, ProtocolIngredient, ProtocolStepIngredient} from "./ingredient";
+import {ReagentQuery, ProtocolReagent, ProtocolStepReagent} from "./reagent";
 import {ProtocolTag, ProtocolTagQuery, StepTag, StepTagQuery, TagQuery} from "./tag";
 
 @Injectable({
@@ -664,37 +664,37 @@ export class WebService {
     )
   }
 
-  searchIngredients(search: string) {
-    return this.http.get<IngredientQuery>(`${this.baseURL}/api/ingredient/?search=${search}`, {responseType: 'json', observe: 'body'})
+  searchReagents(search: string) {
+    return this.http.get<ReagentQuery>(`${this.baseURL}/api/reagent/?search=${search}`, {responseType: 'json', observe: 'body'})
   }
 
-  stepAddIngredient(step_id: number, name: string, quantity: number, unit: string) {
-    return this.http.post<ProtocolStepIngredient>(
-      `${this.baseURL}/api/step/${step_id}/add_protocol_ingredient/`,
-      {name: name, quantity: quantity, unit: unit},
+  stepAddReagent(step_id: number, name: string, quantity: number, unit: string, scalable: boolean = false, scalable_factor: number = 1.0) {
+    return this.http.post<ProtocolStepReagent>(
+      `${this.baseURL}/api/step/${step_id}/add_protocol_reagent/`,
+      {name: name, quantity: quantity, unit: unit, scalable, scalable_factor},
       {responseType: 'json', observe: 'body'}
     )
   }
 
-  stepUpdateIngredient(step_id: number, ingredient_id: number, quantity: number) {
-    return this.http.post<ProtocolStepIngredient>(
-      `${this.baseURL}/api/step/${step_id}/update_protocol_ingredient/`,
-      {ingredient: ingredient_id, quantity: quantity},
+  stepUpdateReagent(step_id: number, reagent_id: number, quantity: number, scalable: boolean = false, scalable_factor: number = 1.0) {
+    return this.http.post<ProtocolStepReagent>(
+      `${this.baseURL}/api/step/${step_id}/update_protocol_reagent/`,
+      {reagent: reagent_id, quantity: quantity, scalable, scalable_factor},
       {responseType: 'json', observe: 'body'}
     )
   }
 
-  removeIngredient(ingredient_id: number) {
+  removeReagent(reagent_id: number) {
     return this.http.post(
-      `${this.baseURL}/api/step/remove_protocol_ingredient/`,
-      {ingredient: ingredient_id},
+      `${this.baseURL}/api/step/remove_protocol_reagent/`,
+      {reagent: reagent_id},
       {responseType: 'json', observe: 'body'}
     )
   }
 
-  getProtocolIngredients(protocol_id: number) {
-    return this.http.get<ProtocolIngredient[]>(
-      `${this.baseURL}/api/protocol/${protocol_id}/get_ingredients/`,
+  getProtocolReagents(protocol_id: number) {
+    return this.http.get<ProtocolReagent[]>(
+      `${this.baseURL}/api/protocol/${protocol_id}/get_reagents/`,
       {responseType: 'json', observe: 'body'}
     )
   }
