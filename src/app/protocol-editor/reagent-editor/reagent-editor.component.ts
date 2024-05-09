@@ -54,7 +54,7 @@ export class ReagentEditorComponent {
     name: ['', Validators.required],
     quantity: [0, Validators.required],
     unit: ['', Validators.required],
-    scalable: [false],
+    scalable: [false, Validators.required],
     scalable_factor: [1.0, Validators.required]
   })
 

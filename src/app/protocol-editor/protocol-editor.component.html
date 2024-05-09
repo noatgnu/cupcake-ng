@@ -118,9 +118,10 @@
                     <div class="d-flex flex-row justify-content-between">
                       <p>
                         @if (reagent.scalable) {
-                          {{reagent.quantity}} x {{reagent.scalable}} = {{reagent.quantity * reagent.scalable_factor}} {{reagent.reagent.unit}} {{reagent.reagent.name}}
+                          {{reagent.quantity}} x {{reagent.scalable_factor}} = {{reagent.quantity * reagent.scalable_factor}} {{reagent.reagent.unit}} {{reagent.reagent.name}} <br>
+
                         } @else {
-                          {{reagent.quantity}} {{reagent.reagent.unit}} {{reagent.reagent.name}}
+                          {{reagent.quantity}} {{reagent.reagent.unit}} {{reagent.reagent.name}}<br>
                         }
 
                       </p>

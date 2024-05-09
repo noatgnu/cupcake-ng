@@ -86,14 +86,20 @@
                 {{ i.controls["unit"].value }}
               </td>
               <td>
-                <div class="form-check">
-                  <input class="form-check-input" type="checkbox" formControlName="scalable">
-                </div>
+                <form [formGroup]="i">
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" formControlName="scalable">
+                  </div>
+                </form>
+
               </td>
               <td>
-                <div class="form-group">
-                  <input class="form-control" type="number" formControlName="scalable_factor">
-                </div>
+                <form [formGroup]="i">
+                  <div class="form-group">
+                    <input class="form-control" type="number" formControlName="scalable_factor">
+                  </div>
+                </form>
+
               </td>
               <td>
                 <button class="btn btn-outline-danger" (click)="removeIngredient(i.controls['id'].value)"><i class="bi bi-trash"></i></button>
