@@ -1,71 +1,65 @@
 <nav class="navbar navbar-expand-lg fixed-top bg-body-tertiary">
-  <div class="container-fluid d-flex flex-row justify-content-between">
+  <div class="container-fluid">
     <a class="navbar-brand" href="#">
       Cupcake
     </a>
-    <div class="d-flex gap-2 flex-wrap">
+    <div class="d-flex flex-row justify-content-end">
       <button class="navbar-toggler" type="button" (click)="isMenuCollapsed = !isMenuCollapsed">
-        <i class="bi bi-three-dots-vertical"></i>
+        <span class="navbar-toggler-icon"></span>
       </button>
-      <div [ngbCollapse]="isMenuCollapsed" class="collapse navbar-collapse">
+    </div>
 
-        <ul class="navbar-nav gap-2">
-          @if (dataService.currentSession) {
-            <li class="nav-item">
-              <div ngbDropdown display="dynamic" class="d-inline-black">
-
-                <button type="button" class="btn btn-outline-primary" id="sessionDropdown" ngbDropdownToggle>
-                  @if (dataService.currentSession.enabled) {<i class="bi bi-unlock"></i>} @else {<i class="bi bi-lock"></i>}
-                </button>
-                <div ngbDropdownMenu aria-labelledby="sessionDropdown">
-<!--                  <button class="dropdown-item" (click)="openSessionEditor()">Session Settings</button>-->
-                  <div class="dropdown-item">
-                    Session: {{dataService.currentSession.unique_id}}
-                  </div>
-                  <a class="dropdown-item" href="/#/session-editor/{{dataService.currentSession.unique_id}}" target="_blank">Session Editor</a>
-                </div>
-              </div>
-            </li>
-            <li class="nav-item">
-              <button class="btn btn-primary" (click)="copyLink()">
-                <i class="bi bi-clipboard"></i>
-              </button>
-            </li>
-            <li class="nav-item">
-              <a class="btn btn-outline-primary" (click)="openQRCodeModal()">
-                <i class="bi bi-qr-code"></i>
-              </a>
-            </li>
-          }
-          @if (dataService.currentSessionPermissions['view']) {
-            <li class="nav-item">
-              <button class="btn btn-primary" (click)="testWebRTC()">
-                <i class="bi bi-intersect"></i>
-              </button>
-            </li>
-          }
-
+    <div [ngbCollapse]="isMenuCollapsed" class="collapse navbar-collapse">
+      <ul class="navbar-nav gap-2">
+        @if (dataService.currentSession) {
           <li class="nav-item">
             <div ngbDropdown display="dynamic" class="d-inline-black">
-
-              <button type="button" class="btn btn-outline-primary" id="accountDropdown" ngbDropdownToggle>
-                <i class="bi bi-people"></i>
-              </button>
-              <div ngbDropdownMenu aria-labelledby="accountDropdown">
-                @if (accounts.loggedIn) {
-                  <button class="dropdown-item" (click)="navigateToAccount()">Account</button>
-                  <a class="dropdown-item" href="/#/calendar" target="_blank">Calendar</a>
-                  <button class="dropdown-item" (click)="logout()">Logout</button>
-                } @else {
-                  <button class="dropdown-item" (click)="openAccountLogin()">Login</button>
+              <a class="nav-link" id="sessionDropdown" ngbDropdownToggle>
+                @if (dataService.currentSession.enabled) {<i class="bi bi-unlock"></i>} @else {<i class="bi bi-lock"></i>}Session
+              </a>
+              <div ngbDropdownMenu aria-labelledby="sessionDropdown">
+                <!--                  <button class="dropdown-item" (click)="openSessionEditor()">Session Settings</button>-->
+                <div class="dropdown-item">
+                  Session: {{dataService.currentSession.unique_id}}
+                </div>
+                <a class="dropdown-item" href="/#/session-editor/{{dataService.currentSession.unique_id}}" target="_blank">Session Editor</a>
+                <a class="dropdown-item" (click)="copyLink()">
+                  <i class="bi bi-clipboard"></i> Copy Session Link
+                </a>
+                <a class="dropdown-item" (click)="openQRCodeModal()">
+                  <i class="bi bi-qr-code"></i> QR Code
+                </a>
+                @if (dataService.currentSessionPermissions['view']) {
+                  <a class="dropdown-item" (click)="testWebRTC()">
+                    <i class="bi bi-intersect"></i> WebRTC
+                  </a>
                 }
               </div>
             </div>
           </li>
-        </ul>
-      </div>
-    </div>
 
+        }
+
+
+        <li class="nav-item">
+          <div ngbDropdown display="dynamic" class="d-inline-black">
+
+            <a class="nav-link" id="accountDropdown" ngbDropdownToggle>
+              <i class="bi bi-people"></i>Accounts
+            </a>
+            <div ngbDropdownMenu aria-labelledby="accountDropdown">
+              @if (accounts.loggedIn) {
+                <button class="dropdown-item" (click)="navigateToAccount()">Account</button>
+                <a class="dropdown-item" href="/#/calendar" target="_blank">Calendar</a>
+                <button class="dropdown-item" (click)="logout()">Logout</button>
+              } @else {
+                <button class="dropdown-item" (click)="openAccountLogin()">Login</button>
+              }
+            </div>
+          </div>
+        </li>
+      </ul>
+    </div>
   </div>
 </nav>
 @if (dataService.protocol && true) {

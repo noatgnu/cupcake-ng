@@ -607,4 +607,17 @@ export class StepViewComponent {
     })
   }
 
+  getStepDescription(step: ProtocolStep) {
+    const reagents = step.reagents
+    let description = step.step_description.slice()
+    for (const reagent of reagents) {
+      description = description.replaceAll(`%${reagent.id}.name%`, reagent.reagent.name)
+      description = description.replaceAll(`%${reagent.id}.quantity%`, reagent.quantity.toString())
+      description = description.replaceAll(`%${reagent.id}.unit%`, reagent.reagent.unit)
+      description = description.replaceAll(`%${reagent.id}.scaled_quantity%`, (reagent.quantity * reagent.scalable_factor).toFixed(2))
+    }
+    return description
+
+  }
+
 }

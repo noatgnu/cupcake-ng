@@ -27,7 +27,7 @@ import {ToastService} from "../toast.service";
   styleUrl: './navbar.component.scss'
 })
 export class NavbarComponent {
-  isMenuCollapsed = false;
+  isMenuCollapsed = true;
   switched = false
 
   constructor(private toastService: ToastService, private webrtc: WebrtcService, public dataService: DataService, private modal: NgbModal, public accounts: AccountsService, private router: Router, private ws: WebsocketService, private web: WebService) {

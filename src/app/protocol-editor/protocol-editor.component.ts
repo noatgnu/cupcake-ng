@@ -43,7 +43,7 @@ import {ProtocolTag} from "../tag";
   styleUrl: './protocol-editor.component.scss'
 })
 export class ProtocolEditorComponent {
-
+  viewTemplateTagMap: any = {}
   form = this.fb.group({
     protocol_title: '',
     protocol_description: '',
@@ -294,5 +294,13 @@ export class ProtocolEditorComponent {
         this.protocol.tags = data
       }
     })
+  }
+
+  clickViewTag(stepReagent: ProtocolStepReagent) {
+    if (!(stepReagent.id in this.viewTemplateTagMap)) {
+      this.viewTemplateTagMap[stepReagent.id] = true
+    } else {
+      this.viewTemplateTagMap[stepReagent.id] = !this.viewTemplateTagMap[stepReagent.id]
+    }
   }
 }
