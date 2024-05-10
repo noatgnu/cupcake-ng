@@ -70,7 +70,7 @@ export class AppComponent {
             if (!this.dataService.stepCompletionSummary[data.target.step]) {
               this.dataService.stepCompletionSummary[data.target.step] = {started: false, completed: false, content: "", promptStarted: false}
             }
-            if (data.data.startsWith("llm-Answer:")) {
+            if (data.data.startsWith("<|im_start|>assistant")) {
               this.dataService.stepCompletionSummary[data.target.step] = {started: true, completed: false, content: "", promptStarted: true}
             } else {
               if (this.dataService.stepCompletionSummary[data.target.step].promptStarted) {
