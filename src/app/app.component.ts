@@ -87,6 +87,7 @@ export class AppComponent {
           } else if (data.type === "annotation") {
             if (data.target.annotation) {
               if (!this.dataService.annotationCompletionSummary[data.target.annotation]) {
+                this.toastService.show("Annotation", "Annotation summarization started")
                 this.dataService.annotationCompletionSummary[data.target.annotation] = {started: false, completed: false, content: "", promptStarted: false}
               }
 
