@@ -12,6 +12,7 @@ import {FormsModule} from "@angular/forms";
 import {HandwrittenAnnotationComponent} from "../handwritten-annotation/handwritten-annotation.component";
 import {AnnotationPresenterComponent} from "../annotation-presenter/annotation-presenter.component";
 import {RandomAnnotationModalComponent} from "../random-annotation-modal/random-annotation-modal.component";
+import {WebsocketService} from "../../websocket.service";
 
 @Component({
   selector: 'app-folder-view',
@@ -56,10 +57,38 @@ export class FolderViewComponent {
     return this._currentFolder!
   }
 
-  constructor(public dataService: DataService, private modal: NgbModal, private web: WebService, private toastService: ToastService) {
+  constructor(private ws: WebsocketService, public dataService: DataService, private modal: NgbModal, private web: WebService, private toastService: ToastService) {
     navigator.mediaDevices.enumerateDevices().then((devices) => {
       this.cameraDevices = devices.filter((device) => device.kind === 'videoinput');
       this.audioDevices = devices.filter((device) => device.kind === 'audioinput');
+    })
+    this.ws.annotationWSConnection?.subscribe((data: Annotation) => {
+      if (data) {
+        if (this.annotations) {
+          this.toastService.show('Annotation', 'Annotation Updated')
+          const annotation = this.annotations.results.findIndex((annotation) => annotation.id === data.id);
+          if (annotation !== -1) {
+            this.annotations.results[annotation] = data;
+            this.annotations.results = [...this.annotations.results]
+          }
+        }
+      }
+    })
+    this.dataService.updateAnnotationSummary.subscribe((data) => {
+      if (data && this.annotations) {
+        const annotation = this.annotations.results.findIndex((annotation) => annotation.id === data.annotationID);
+        console.log(annotation)
+        if (annotation) {
+          this.web.getAnnotation(data.annotationID).subscribe((data: Annotation) => {
+            console.log(data)
+            if (this.annotations) {
+              this.annotations.results[annotation] = data;
+              this.annotations.results = [...this.annotations.results]
+              this.toastService.show('Annotation', 'Annotation Summary Updated')
+            }
+          })
+        }
+      }
     })
   }
 

@@ -120,4 +120,9 @@ export class AnnotationPresenterComponent {
       }
     })
   }
+  transcriptSummarize(annotation_id: number) {
+    this.web.transcriptSummarize(annotation_id).subscribe((response: any) => {
+      console.log(response)
+    })
+  }
 }

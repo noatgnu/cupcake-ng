@@ -58,6 +58,14 @@
           </ng-template>
         </li>
       }
+      @if (annotation.summary) {
+        <li [ngbNavItem]="'summary'" [destroyOnHide]="false">
+          <button ngbNavLink>Summary</button>
+          <ng-template ngbNavContent>
+            <p>{{annotation.summary}}</p>
+          </ng-template>
+        </li>
+      }
     </ul>
     <div [ngbNavOutlet]="nav" class="mt-2"></div>
   </div>

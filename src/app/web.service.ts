@@ -801,6 +801,21 @@ export class WebService {
       {responseType: 'json', observe: 'body'}
     )
   }
+
+  transcriptSummarize(annotation_id: number) {
+    return this.http.post(
+      `${this.baseURL}/api/user/summarize_audio_transcript/`,
+      {target: {annotation: annotation_id}},
+      {responseType: 'json', observe: 'body'}
+    )
+  }
+
+  getAnnotation(annotation_id: number) {
+    return this.http.get<Annotation>(
+      `${this.baseURL}/api/annotation/${annotation_id}/`,
+      {responseType: 'json', observe: 'body'}
+    )
+  }
 }
 
 interface ChunkUploadResponse {

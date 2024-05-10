@@ -97,6 +97,23 @@ export class StepViewComponent {
         }
       }
     })
+    this.dataService.updateAnnotationSummary.subscribe((data) => {
+      if (data && this.annotations) {
+        const annotation = this.annotations.results.findIndex((annotation) => annotation.id === data.annotationID);
+        console.log(annotation)
+        if (annotation) {
+          this.web.getAnnotation(data.annotationID).subscribe((data: Annotation) => {
+            console.log(data)
+            if (this.annotations) {
+              this.annotations.results[annotation] = data;
+              this.annotations.results = [...this.annotations.results]
+              this.toastService.show('Annotation', 'Annotation Summary Updated')
+            }
+          })
+        }
+      }
+    })
+
     navigator.mediaDevices.enumerateDevices().then((devices) => {
       this.cameraDevices = devices.filter((device) => device.kind === 'videoinput');
       this.audioDevices = devices.filter((device) => device.kind === 'audioinput');

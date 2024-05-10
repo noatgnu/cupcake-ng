@@ -14,6 +14,7 @@ export interface Annotation {
   scratched: boolean;
   folder: {id: number, folder_name: string}[];
   annotation_name: string;
+  summary: string;
 }
 
 export interface AnnotationQuery {

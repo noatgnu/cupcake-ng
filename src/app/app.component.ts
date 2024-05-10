@@ -66,25 +66,46 @@ export class AppComponent {
     this.ws.summaryWSConnection?.subscribe((data) => {
       if (data) {
         if (data.target) {
-          if (data.target.step) {
-            if (!this.dataService.stepCompletionSummary[data.target.step]) {
-              this.dataService.stepCompletionSummary[data.target.step] = {started: false, completed: false, content: "", promptStarted: false}
+          if (data.type === "step") {
+            if (data.target.step) {
+              if (!this.dataService.stepCompletionSummary[data.target.step]) {
+                this.dataService.stepCompletionSummary[data.target.step] = {started: false, completed: false, content: "", promptStarted: false}
+              }
+              if (data.data.startsWith("<|im_start|>assistant")) {
+                this.dataService.stepCompletionSummary[data.target.step] = {started: true, completed: false, content: "", promptStarted: true}
+              } else {
+                if (this.dataService.stepCompletionSummary[data.target.step].promptStarted) {
+                  this.dataService.stepCompletionSummary[data.target.step].content += data.data
+                  this.dataService.stepCompletionSummary[data.target.step].completed = data.finished
+                  if (data.finished) {
+                    this.dataService.stepCompletionSummary[data.target.step].started = false
+                    this.dataService.stepCompletionSummary[data.target.step].promptStarted = false
+                  }
+                }
+              }
             }
-            if (data.data.startsWith("<|im_start|>assistant")) {
-              this.dataService.stepCompletionSummary[data.target.step] = {started: true, completed: false, content: "", promptStarted: true}
-            } else {
-              if (this.dataService.stepCompletionSummary[data.target.step].promptStarted) {
-                this.dataService.stepCompletionSummary[data.target.step].content += data.data
-                this.dataService.stepCompletionSummary[data.target.step].completed = data.finished
-                if (data.finished) {
-                  this.dataService.stepCompletionSummary[data.target.step].started = false
-                  this.dataService.stepCompletionSummary[data.target.step].promptStarted = false
+          } else if (data.type === "annotation") {
+            if (data.target.annotation) {
+              if (!this.dataService.annotationCompletionSummary[data.target.annotation]) {
+                this.dataService.annotationCompletionSummary[data.target.annotation] = {started: false, completed: false, content: "", promptStarted: false}
+              }
+
+              if (data.data.startsWith("<|im_start|>assistant")) {
+                this.dataService.annotationCompletionSummary[data.target.annotation] = {started: true, completed: false, content: "", promptStarted: true}
+              } else {
+                if (this.dataService.annotationCompletionSummary[data.target.annotation].promptStarted) {
+                  this.dataService.annotationCompletionSummary[data.target.annotation].content += data.data
+                  this.dataService.annotationCompletionSummary[data.target.annotation].completed = data.finished
+                  if (data.finished) {
+                    this.dataService.updateAnnotationSummary.next({annotationID: data.target.annotation, summary: this.dataService.annotationCompletionSummary[data.target.annotation].content})
+                    this.dataService.annotationCompletionSummary[data.target.annotation].started = false
+                    this.dataService.annotationCompletionSummary[data.target.annotation].promptStarted = false
+                  }
                 }
               }
             }
           }
         }
-        console.log(data)
       }
     })
   }

@@ -51,6 +51,8 @@ export class DataService {
   get currentSession(): ProtocolSession {
     return this._currentSession!;
   }
+  annotationCompletionSummary: {[key: string]: {started: boolean, completed: boolean, content: string, promptStarted: boolean}} = {};
+  updateAnnotationSummary: Subject<{annotationID: number, summary: string}> = new Subject<{annotationID: number, summary: string}>();
 
   currentSessionPermissions: {[key: string]: boolean} = {
     edit: false,

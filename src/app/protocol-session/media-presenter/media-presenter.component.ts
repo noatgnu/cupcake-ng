@@ -29,6 +29,7 @@ export class MediaPresenterComponent {
 
   transcription: string = ''
   translation: string = ''
+  summary: string = ''
   subtitles: {entries: {from: number, id: string, text: string, to: number}[]} = {entries: []}
   translationSubtitles: {entries: {from: number, id: string, text: string, to: number}[]} = {entries: []}
   currentSubtitleID: number = -1
@@ -49,6 +50,9 @@ export class MediaPresenterComponent {
       const blob = new Blob([value.translation], {type: 'text/plain'})
       this.translation = URL.createObjectURL(blob)
       this.translationSubtitles = parse(value.translation)
+    }
+    if (value.summary) {
+      this.summary = value.summary
     }
     this.web.getSignedURL(value.id).subscribe((token: any) => {
       this.mediaURL = `${this.web.baseURL}/api/annotation/download_signed/?token=${token["signed_token"]}`
