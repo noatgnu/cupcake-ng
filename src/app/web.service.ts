@@ -445,7 +445,7 @@ export class WebService {
   }
 
   checkAnnotationPermissions(annotation_id: number[]) {
-    return this.http.post(
+    return this.http.post<{annotation: number, permission: {view: boolean, delete: boolean, edit: boolean}}[]>(
       `${this.baseURL}/api/user/check_annotation_permission/`,
       {'annotations': annotation_id},
       {responseType: 'json', observe: 'body'}

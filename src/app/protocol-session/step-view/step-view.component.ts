@@ -544,6 +544,7 @@ export class StepViewComponent {
     // @ts-ignore
     this.web.getAnnotations(this.dataService.currentSession.unique_id, this.currentStep.id).subscribe((data: AnnotationQuery) => {
       this.annotations = data;
+
       this.toastService.show('Annotation', 'Annotation List Updated Successfully')
     })
   }

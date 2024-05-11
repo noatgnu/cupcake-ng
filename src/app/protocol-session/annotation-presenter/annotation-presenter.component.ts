@@ -15,6 +15,7 @@ import {CalculatorAnnotationComponent} from "../calculator-annotation/calculator
 import {MolarityCalculatorComponent} from "../molarity-calculator/molarity-calculator.component";
 import {AnnotationRenameModalComponent} from "./annotation-rename-modal/annotation-rename-modal.component";
 import {RandomizationPresenterComponent} from "../randomization-presenter/randomization-presenter.component";
+import {DataService} from "../../data.service";
 
 @Component({
   selector: 'app-annotation-presenter',
@@ -45,7 +46,9 @@ export class AnnotationPresenterComponent {
   @Input() set annotations(value: Annotation[]) {
     this._annotations = value
     this.web.checkAnnotationPermissions(value.map((a) => a.id)).subscribe((response) => {
-      console.log(response)
+      for (const annotation of response) {
+        this.dataService.annotationPermissions[annotation.annotation] = annotation.permission
+      }
     })
   }
   get annotations(): Annotation[] {
@@ -55,7 +58,7 @@ export class AnnotationPresenterComponent {
 
 
 
-  constructor(private web: WebService, private modal: NgbModal, private modalConfig: NgbModalConfig) {
+  constructor(private web: WebService, private modal: NgbModal, private modalConfig: NgbModalConfig, public dataService: DataService) {
     this.modalConfig.backdrop = 'static';
     this.modalConfig.keyboard = false;
   }
@@ -101,12 +104,14 @@ export class AnnotationPresenterComponent {
   }
 
   updateAnnotation(annotation: Annotation) {
-    this.annotations = this.annotations.map((a) => {
-      if (a.id === annotation.id) {
-        return annotation
-      }
-      return a
-    })
+    if (this.dataService.annotationPermissions[annotation.id].edit) {
+      this.annotations = this.annotations.map((a) => {
+        if (a.id === annotation.id) {
+          return annotation
+        }
+        return a
+      })
+    }
   }
 
   annotationRename(annotation: Annotation) {

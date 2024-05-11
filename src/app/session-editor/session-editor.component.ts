@@ -83,7 +83,7 @@ export class SessionEditorComponent {
     return this._sessionID;
   }
 
-  constructor(private router: Router, private calendar: NgbCalendar, private web: WebService, private dataService: DataService, private fb: FormBuilder, private toast: ToastService) {
+  constructor(private router: Router, private calendar: NgbCalendar, private web: WebService, public dataService: DataService, private fb: FormBuilder, private toast: ToastService) {
     this.formSearch.controls.protocolSearch.valueChanges.subscribe((value) => {
       if (value) {
         if (value.length < 3) {

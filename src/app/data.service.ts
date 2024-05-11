@@ -17,6 +17,9 @@ export class DataService {
     view: false,
     delete: false,
   };
+
+  annotationPermissions: {[key: string]: {edit: boolean, view: boolean, delete: boolean}} = {};
+
   set protocol(value: Protocol) {
     this._protocol = value;
     if (this.accounts.loggedIn) {

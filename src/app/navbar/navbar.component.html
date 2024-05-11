@@ -22,7 +22,9 @@
                 <div class="dropdown-item">
                   Session: {{dataService.currentSession.unique_id}}
                 </div>
-                <a class="dropdown-item" href="/#/session-editor/{{dataService.currentSession.unique_id}}" target="_blank">Session Editor</a>
+                @if (dataService.currentSessionPermissions['edit']) {
+                  <a class="dropdown-item" href="/#/session-editor/{{dataService.currentSession.unique_id}}" target="_blank">Session Editor</a>
+                }
                 <a class="dropdown-item" (click)="copyLink()">
                   <i class="bi bi-clipboard"></i> Copy Session Link
                 </a>
