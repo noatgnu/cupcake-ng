@@ -37,7 +37,6 @@ export class AlignmentSegmentComponent implements AfterViewInit {
     if (this.canvasElem){
       const canvas: HTMLCanvasElement = this.canvasElem.nativeElement;
       const ctx = canvas.getContext('2d');
-
       if (ctx && this.sequenceAlignment) {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         // clear the canvas
@@ -58,7 +57,6 @@ export class AlignmentSegmentComponent implements AfterViewInit {
         if (seq) {
           this.canvasDrawResiduePosition(seq, ctx, cellWidth)
         }
-        console.log(canvas.width)
 
         this.canvasDrawConservationScores(ctx, cellWidth, cellHeight, this.sequenceAlignment.conservationScores, height)
         //this.canvasAddHover(ctx, cellWidth, cellHeight, this.sequenceAlignment, canvas)
@@ -117,6 +115,7 @@ export class AlignmentSegmentComponent implements AfterViewInit {
         // Restore the context state
         ctx.restore();
         if (this.start > 0 && this.end > 0) {
+          console.log(this.sequenceAlignment.sequenceType)
           for (let j = 0; j < seq.length; j++) {
             if (j >= this.start-1 && j < this.end) {
               const residue = seq[j];
@@ -127,6 +126,46 @@ export class AlignmentSegmentComponent implements AfterViewInit {
                 const isHighlighted = highlightSections.some((section) => j >= section.start && j < section.end);
                 if (isHighlighted) {
                   this.canvasDrawSequenceCell(ctx, cellWidth, cellHeight, residue, this.cellOffset + j + 2 - this.start, sequenceCount, 'rgba(255, 0, 0, 0.5)')
+                }
+              }
+            }
+          }
+          if (this.sequenceAlignment.sequenceType === 'nucleotide' && this.sequenceAlignment.threeFrame) {
+            // draw the three frame with offset and start with start and stop range of the nucleotide sequence
+            if (this.enableThreeFrame) {
+              for (const frame in this.sequenceAlignment.threeFrame[seqAlignment.alignmentIDs[i]]) {
+                sequenceCount ++
+                const frameTranslation = this.sequenceAlignment.threeFrame[seqAlignment.alignmentIDs[i]][frame];
+                // calculate start and end position of the translation for the frame
+                const frameNumber = parseInt(frame);
+                for (const translation of frameTranslation) {
+                  console.log(translation, this.start, this.end, frameNumber)
+                  if (translation.start+frameNumber+1 >= this.start-1 && translation.end+frameNumber+1 < this.end) {
+                    this.canvasDrawSequenceCell(ctx, cellWidth, cellHeight, translation.residue, this.cellOffset + (translation.start + translation.end)/2 + 1 - this.start+frameNumber+1, sequenceCount)
+                  }
+                }
+                if (this.threeFrameHighlight) {
+                  if (this.threeFrameHighlight[seqAlignment.alignmentIDs[i]]) {
+                    if (this.threeFrameHighlight[seqAlignment.alignmentIDs[i]][frame]) {
+                      const highlightFrameSections = this.threeFrameHighlight[seqAlignment.alignmentIDs[i]][frame];
+
+                      for (const section of highlightFrameSections) {
+                        console.log(section)
+
+                        for (const translation of frameTranslation.slice(section.start, section.end+1)) {
+                          if (translation.start >= this.start-1 && translation.end < this.end) {
+                            for (let j = translation.start; j <= translation.end; j++) {
+                              if (j+frameNumber+1 >= this.start-1 && j+frameNumber+1 < this.end) {
+                                ctx.fillStyle = 'rgba(255, 0, 0, 0.5)';
+                                ctx.fillRect((this.cellOffset + j + 1 - this.start+frameNumber+1) * cellWidth, sequenceCount * cellHeight, cellWidth, cellHeight)
+                              }
+                            }
+                          }
+                        }
+
+                      }
+                    }
+                  }
                 }
               }
             }
@@ -151,6 +190,7 @@ export class AlignmentSegmentComponent implements AfterViewInit {
               for (const frame in this.sequenceAlignment.threeFrame[seqAlignment.alignmentIDs[i]]) {
                 sequenceCount ++
                 const frameTranslation = this.sequenceAlignment.threeFrame[seqAlignment.alignmentIDs[i]][frame];
+                console.log(frameTranslation)
                 for (const translation of frameTranslation) {
                   this.canvasDrawSequenceCell(ctx, cellWidth, cellHeight, translation.residue, this.cellOffset + (translation.start + translation.end)/2 + 1, sequenceCount)
                 }
@@ -162,9 +202,7 @@ export class AlignmentSegmentComponent implements AfterViewInit {
 
                       for (const section of highlightFrameSections) {
                         const startPosition = frameTranslation[section.start].start;
-                        console.log(startPosition)
                         const endPosition = frameTranslation[section.end].end;
-                        console.log(endPosition)
                         if (this.start > 0 && this.end > 0) {
                           if (startPosition >= this.start-1 && endPosition < this.end) {
                             ctx.fillStyle = 'rgba(255, 0, 0, 0.5)';

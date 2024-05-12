@@ -49,7 +49,6 @@ export class HandwrittenAnnotationComponent implements AfterViewInit{
       const segs = this.strokes.slice(0, this.strokes.length);
       this.strokes = [];
       for (const seg of segs) {
-        console.log(seg)
         const segments = seg.segments.slice()
         this.canvas.adaptiveStroke = seg.adaptiveStroke;
         this.canvas.color = seg.color;
@@ -75,7 +74,6 @@ export class HandwrittenAnnotationComponent implements AfterViewInit{
         }
         this.canvas.endStroke(prevPoint.x, prevPoint.y);
       }
-      console.log(this.strokes)
 
     } else {
       this.initialize();
@@ -84,7 +82,6 @@ export class HandwrittenAnnotationComponent implements AfterViewInit{
       this.canvas.mode = MODE_DISABLED;
     }
 
-    console.log(this.canvas);
   }
 
   clear() {
@@ -176,13 +173,10 @@ export class HandwrittenAnnotationComponent implements AfterViewInit{
     //this.canvas.canvas.style.height = `${this.height * scale}px`;
     const context = this.canvas.canvas.getContext('2d');
     context.scale(1, 1)
-    console.log(this.canvas.width, this.canvas.height)
-    console.log(this.canvas.canvas.style.width, this.canvas.canvas.style.height)
 
     this.canvas.recordStrokes = true;
     this.canvas.addEventListener('strokerecorded', (event: any) => {
       this.strokes.push(event.stroke)
-      console.log(event.stroke)
     })
     this.changeMode(this.currentMode);
   }
