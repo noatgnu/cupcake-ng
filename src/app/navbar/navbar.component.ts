@@ -12,6 +12,7 @@ import {WebrtcService} from "../webrtc.service";
 import {WebrtcModalComponent} from "../webrtc-modal/webrtc-modal.component";
 import {SessionEditorModalComponent} from "../protocol-session/session-editor-modal/session-editor-modal.component";
 import {ToastService} from "../toast.service";
+import {ProtocolCloneModalComponent} from "../protocol-clone-modal/protocol-clone-modal.component";
 
 @Component({
   selector: 'app-navbar',
@@ -118,5 +119,10 @@ export class NavbarComponent {
 
   switchTitle() {
     this.switched = !this.switched
+  }
+
+  openCloneModal() {
+    const ref = this.modal.open(ProtocolCloneModalComponent)
+    ref.componentInstance.protocol = this.dataService.protocol
   }
 }

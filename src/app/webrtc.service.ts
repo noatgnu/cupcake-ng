@@ -227,6 +227,7 @@ export class WebrtcService {
   }
 
   private createSignallingConnection(currentSessionID: string): WebSocketSubject<any> {
+    console.log("Creating signalling connection")
     const url = `${this.baseURL}/ws/webrtc_signal/${currentSessionID}/?token=${this.accounts.token}`.replace("http", "ws");
     const ws = new WebSocketSubject({
       url: url,

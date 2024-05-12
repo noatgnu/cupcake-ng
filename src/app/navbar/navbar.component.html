@@ -66,17 +66,20 @@
 </nav>
 @if (dataService.protocol && true) {
   <nav class="navbar navbar-expand-lg bg-body-tertiary" style="padding-top: 80px;">
-    <div class="container-fluid d-flex justify-content-center">
+    <div class="container-fluid d-flex justify-content-center gap-2">
       @if (dataService.currentSession && dataService.currentSession.unique_id) {
         <a href="/#/protocol-session/{{dataService.protocol.id}}&{{dataService.currentSession.unique_id}}" target="_blank" class="link-primary"><b>@if(!switched){Protocol: {{dataService.protocol.protocol_title}}}@else{Session: {{dataService.currentSession.name}}}</b></a>
       }@else {
         <a href="/#/protocol-session/{{dataService.protocol.id}}" target="_blank" class="link-primary"><b>@if(!switched){Protocol: {{dataService.protocol.protocol_title}}}@else{Session: {{dataService.currentSession.name}}}</b></a>
       }
 
-      <div><a class="btn btn-link" (click)="switchTitle()"><i class="bi bi-arrow-return-left"></i></a></div>
-      <div><a class="btn btn-link" (click)="goToProtocolEditor(dataService.protocol.id)"><i class="bi bi-pen"></i></a></div>
+      <div><a class="nav-link" (click)="switchTitle()"><i class="bi bi-arrow-return-left"></i></a></div>
+      <div><a class="nav-link" (click)="openCloneModal()"><i class="bi bi-copy"></i></a></div>
+      @if (dataService.protocolPermissions['edit']) {
+        <div><a class="nav-link" (click)="goToProtocolEditor(dataService.protocol.id)"><i class="bi bi-pen"></i></a></div>
+      }
       <div ngbDropdown class="d-inline-block">
-        <button class="btn btn-link" id="exportDropdown" ngbDropdownToggle>
+        <button class="nav-link" id="exportDropdown" ngbDropdownToggle>
           <i class="bi bi-download"></i>
         </button>
         <div ngbDropdownMenu aria-labelledby="exportDropdown">

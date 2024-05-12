@@ -42,6 +42,10 @@ export class UserDataComponent {
         this.chunkUploadProgress = fileSize;
         if (result?.completed_at) {
           this.toastService.show("User Data", "Upload complete")
+          this.toastService.show("User Data", "Importing user data...")
+          this.web.importUserData(result.id).subscribe((data) => {
+            this.toastService.show("User Data", "Import complete")
+          })
         }
       } else {
         console.log("Uploading multiple chunks")
@@ -70,6 +74,10 @@ export class UserDataComponent {
           const result = await this.web.uploadDataChunkComplete(currentURL, hashDigest).toPromise()
           if (result?.completed_at) {
             this.toastService.show("User Data", "Upload complete")
+            this.toastService.show("User Data", "Importing user data...")
+            this.web.importUserData(result.id).subscribe((data) => {
+              this.toastService.show("User Data", "Import complete")
+            })
           }
         }
       }

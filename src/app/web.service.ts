@@ -816,6 +816,14 @@ export class WebService {
       {responseType: 'json', observe: 'body'}
     )
   }
+
+  cloneProtocol(protocol_id: number, protocol_title: string, protocol_description: string) {
+    return this.http.post<Protocol>(
+      `${this.baseURL}/api/protocol/${protocol_id}/clone/`,
+      {protocol_title: protocol_title, protocol_description: protocol_description},
+      {responseType: 'json', observe: 'body'}
+    )
+  }
 }
 
 interface ChunkUploadResponse {

@@ -74,6 +74,7 @@ export class ProtocolSessionComponent implements OnInit{
   viewMode: "section" | "folder" = "section"
   set sessionID(value: string) {
     if (this._sessionID !== value) {
+      this.webrtc.connect(value);
       if (this.ws.timerWSConnection) {
         this.ws.closeTimerWS();
       }
@@ -116,7 +117,7 @@ export class ProtocolSessionComponent implements OnInit{
     const data = value.split("&")
     if (data.length > 1) {
       this.sessionID = data[1];
-      this.webrtc.connect(data[1])
+
     }
     this._protocolSessionId = data[0];
   }

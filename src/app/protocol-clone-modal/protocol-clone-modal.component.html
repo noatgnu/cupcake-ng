@@ -1,0 +1,21 @@
+<div class="modal-header">
+  <h5 class="modal-title">Clone Protocol</h5>
+</div>
+<div class="modal-body">
+  <form [formGroup]="form">
+    <div class="form-group">
+      <label for="protocol_title">New Protocol Title</label>
+      <input type="text" class="form-control" id="protocol_title" formControlName="protocol_title">
+    </div>
+    <div class="form-group">
+      <label>New Protocol Description</label>
+      <quill-editor formControlName="protocol_description" [modules]="editorConfig">
+
+      </quill-editor>
+    </div>
+  </form>
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn btn-primary" (click)="clone()">Clone</button>
+  <button type="button" class="btn btn-secondary" (click)="cancel()">Cancel</button>
+</div>
