@@ -57,6 +57,11 @@ export class FolderViewComponent {
     return this._currentFolder!
   }
 
+  audioContext: AudioContext = new AudioContext();
+  analyser: AnalyserNode = this.audioContext.createAnalyser();
+  dataArray: Uint8Array = new Uint8Array(this.analyser.frequencyBinCount);
+  animationFrame: any;
+
   constructor(private ws: WebsocketService, public dataService: DataService, private modal: NgbModal, private web: WebService, private toastService: ToastService) {
     navigator.mediaDevices.enumerateDevices().then((devices) => {
       this.cameraDevices = devices.filter((device) => device.kind === 'videoinput');
@@ -303,6 +308,10 @@ export class FolderViewComponent {
 
         }
         this.mediaRecorder = new MediaRecorder(stream);
+        if (audio) {
+          let source = this.audioContext.createMediaStreamSource(stream);
+          source.connect(this.analyser);
+        }
         this.mediaRecorder.onstart = () => {
           this.toastService.show('Recording', 'Recording Started')
           console.log('recording started')
@@ -322,16 +331,39 @@ export class FolderViewComponent {
           }
         }
         this.mediaRecorder.start();
+        this.drawVisualizer();
         console.log(this.mediaRecorder)
       }
     )
 
   }
 
+  drawVisualizer() {
+    this.animationFrame = requestAnimationFrame(() => this.drawVisualizer());
+    this.analyser.getByteFrequencyData(this.dataArray);
+    let canvas = document.getElementById('visualizer') as HTMLCanvasElement;
+    let ctx = canvas.getContext('2d');
+    if (ctx) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      let barWidth = (canvas.width / this.analyser.frequencyBinCount) * 2.5;
+      let barHeight;
+      let x = 0;
+      for (let i = 0; i < this.analyser.frequencyBinCount; i++) {
+        barHeight = this.dataArray[i];
+        ctx.fillStyle = 'rgb(' + (barHeight + 100) + ',50,50)';
+        ctx.fillRect(x, canvas.height - barHeight / 2, barWidth, barHeight / 2);
+        x += barWidth + 1;
+      }
+    }
+  }
+
   stopRecording() {
     console.log(this.mediaRecorder)
     this.mediaRecorder?.stop();
     this.recording = false;
+    if (this.animationFrame) {
+      cancelAnimationFrame(this.animationFrame);
+    }
   }
 
   deletePreviewRecording() {

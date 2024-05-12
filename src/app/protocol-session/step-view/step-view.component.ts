@@ -24,6 +24,7 @@ import {AddTableModalComponent} from "../add-table-modal/add-table-modal.compone
 import {AccountsService} from "../../accounts/accounts.service";
 import {SpeechService} from "../../speech.service";
 import {RandomAnnotationModalComponent} from "../random-annotation-modal/random-annotation-modal.component";
+import {animationFrame} from "rxjs";
 
 @Component({
   selector: 'app-step-view',
@@ -81,7 +82,10 @@ export class StepViewComponent {
   currentCameraDevice: MediaDeviceInfo|null = null;
   audioDevices: MediaDeviceInfo[] = [];
   currentAudioDevice: MediaDeviceInfo|null = null;
-
+  audioContext: AudioContext = new AudioContext();
+  analyser: AnalyserNode = this.audioContext.createAnalyser();
+  dataArray: Uint8Array = new Uint8Array(this.analyser.frequencyBinCount);
+  animationFrame: any
   constructor(private modalConfig: NgbModalConfig, private modal: NgbModal, public timer: TimerService, public dataService: DataService, private ws: WebsocketService, private toastService: ToastService, private web: WebService, private accounts: AccountsService, private speech: SpeechService ) {
     this.modalConfig.backdrop = 'static';
     this.modalConfig.keyboard = false;
@@ -333,6 +337,10 @@ export class StepViewComponent {
           this.previewVideo.nativeElement.play();
 
         }
+        if (audio) {
+          let source = this.audioContext.createMediaStreamSource(stream);
+          source.connect(this.analyser);
+        }
         this.mediaRecorder = new MediaRecorder(stream);
         this.mediaRecorder.onstart = () => {
           this.toastService.show('Recording', 'Recording Started')
@@ -353,16 +361,38 @@ export class StepViewComponent {
           }
         }
         this.mediaRecorder.start();
+        this.drawVisualizer();
         console.log(this.mediaRecorder)
       }
     )
+  }
 
+  drawVisualizer() {
+    this.animationFrame = requestAnimationFrame(() => this.drawVisualizer());
+    this.analyser.getByteFrequencyData(this.dataArray);
+    let canvas = document.getElementById('visualizer') as HTMLCanvasElement;
+    let ctx = canvas.getContext('2d');
+    if (ctx) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      let barWidth = (canvas.width / this.analyser.frequencyBinCount) * 2.5;
+      let barHeight;
+      let x = 0;
+      for (let i = 0; i < this.analyser.frequencyBinCount; i++) {
+        barHeight = this.dataArray[i];
+        ctx.fillStyle = 'rgb(' + (barHeight + 100) + ',50,50)';
+        ctx.fillRect(x, canvas.height - barHeight / 2, barWidth, barHeight / 2);
+        x += barWidth + 1;
+      }
+    }
   }
 
   stopRecording() {
     console.log(this.mediaRecorder)
     this.mediaRecorder?.stop();
     this.recording = false;
+    if (this.animationFrame) {
+      cancelAnimationFrame(this.animationFrame);
+    }
   }
 
   recordingHandler(event: any) {

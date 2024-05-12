@@ -47,7 +47,21 @@
         <li [ngbNavItem]="'protocols'" [destroyOnHide]="false">
           <button ngbNavLink>Protocols <span class="badge bg-primary">{{protocolQuery.count}}</span></button>
           <ng-template ngbNavContent>
-            <app-protocol-list [protocols]="protocolQuery.results" [enableRemove]="true" [enableEdit]="true" (editProtocol)="navigateToEditProtocol($event)" (removeProtocol)="deleteProtocol($event)"></app-protocol-list>
+            @if (loadingProtocol) {
+              <div class="list-group">
+                <div class="list-group-item">
+                  <div class="d-flex flex-row justify-content-between gap-2">
+                    <div>
+                      <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            } @else {
+              <app-protocol-list [protocols]="protocolQuery.results" [enableRemove]="true" [enableEdit]="true" (editProtocol)="navigateToEditProtocol($event)" (removeProtocol)="deleteProtocol($event)"></app-protocol-list>
+            }
             <div class="mt-2">
               <ngb-pagination (pageChange)="handlePageChange($event)" [collectionSize]="protocolQuery.count" [(page)]="currentProtocolPage" [pageSize]="pageSize" [rotate]="true" [boundaryLinks]="true" />
             </div>
@@ -71,33 +85,49 @@
         <li [ngbNavItem]="'sessions'" [destroyOnHide]="false">
           <button ngbNavLink>Protocol Sessions <span class="badge bg-primary">{{protocolSessionQuery.count}}</span></button>
           <ng-template ngbNavContent>
-            <div class="list-group">
-              @for (session of protocolSessionQuery.results; track session.id) {
-                <div class="list-group-item list-group-item-action" (click)="getAssociatedProtocolTitle(session.unique_id)">
+            @if (loadingSession) {
+              <div class="list-group">
+                <div class="list-group-item">
                   <div class="d-flex flex-row justify-content-between gap-2">
                     <div>
-                      @if (session.name) {
-                        {{session.name}}
-                      } @else {
-                        {{session.unique_id}}
-                      }
-                    </div>
-                    <div class="d-flex flex-row gap-2">
-                      <a class="btn btn-sm btn-outline-primary" href="#/session-editor/{{session.unique_id}}" target="_blank"><i class="bi bi-pen"></i></a>
+                      <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                      </div>
                     </div>
                   </div>
-
-                  <small>{{ session.created_at | date : "short" }}</small>
-                  @if (session.unique_id === currentSessionID) {
-                    @for (protocol of associatedSessionProtocols; track protocol.id) {
-                      <div>
-                        <small>Associated Protocol: <a href="/#/protocol-session/{{protocol.id}}&{{session.unique_id}}" target="_blank">{{protocol.protocol_title}}</a></small>
-                      </div>
-                    }
-                  }
                 </div>
-              }
-            </div>
+              </div>
+            } @else {
+              <div class="list-group">
+                @for (session of protocolSessionQuery.results; track session.id) {
+                  <div class="list-group-item list-group-item-action" (click)="getAssociatedProtocolTitle(session.unique_id)">
+                    <div class="d-flex flex-row justify-content-between gap-2">
+                      <div>
+                        @if (session.name) {
+                          {{session.name}}
+                        } @else {
+                          {{session.unique_id}}
+                        }
+                      </div>
+                      <div class="d-flex flex-row gap-2">
+                        <a class="btn btn-sm btn-outline-primary" href="#/session-editor/{{session.unique_id}}" target="_blank"><i class="bi bi-pen"></i></a>
+                      </div>
+                    </div>
+
+                    <small>{{ session.created_at | date : "short" }}</small>
+                    @if (session.unique_id === currentSessionID) {
+                      @for (protocol of associatedSessionProtocols; track protocol.id) {
+                        <div>
+                          <small>Associated Protocol: <a href="/#/protocol-session/{{protocol.id}}&{{session.unique_id}}" target="_blank">{{protocol.protocol_title}}</a></small>
+                        </div>
+                      }
+                    }
+                  </div>
+                }
+              </div>
+            }
+
+
             <div class="mt-2">
               <ngb-pagination (pageChange)="handlePageChange($event)" [collectionSize]="protocolSessionQuery.count" [(page)]="currentSessionPage" [pageSize]="pageSize" [rotate]="true" [boundaryLinks]="true" />
             </div>
