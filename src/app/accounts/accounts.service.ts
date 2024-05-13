@@ -13,6 +13,7 @@ export class AccountsService {
   username: string = ""
   lastVisited: Date = new Date()
   triggerLoginSubject: Subject<boolean> = new Subject<boolean>()
+
   constructor(private http: HttpClient) { }
 
   login(username: string, password: string): Observable<any> {

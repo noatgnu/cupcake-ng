@@ -55,30 +55,37 @@ export class WebrtcService {
   }
   private async createPeerConnection(connectionID: string|undefined = "", autonegotiate: boolean = true): Promise<RTCPeerConnection> {
     console.log("Creating peer connection for", connectionID)
-    const credential = await this.web.getCoturnCredentials().toPromise();
-    console.log(credential)
+    let credential: { username: string, password: string, turn_server: string, turn_port: string}|undefined = undefined;
+    try {
+      credential = await this.web.getCoturnCredentials().toPromise();
+    } catch (e) {
+      console.error(e)
+    }
+    const urls = []
+    if (!credential) {
+      console.error("No credentials")
+      return new RTCPeerConnection();
+    } else {
+      urls.push(`turn:${credential.turn_server}:${credential.turn_port}`)
+    }
+    const servers: any[] = [
+      {
+        urls: ['stun:stun.l.google.com:19302']
+      }
+    ]
+    if (credential) {
+      servers.push({
+        urls: urls,
+        username: credential?.username,
+        credential: credential?.password
+      })
+    }
     const configuration: RTCConfiguration = {
-      iceServers: [
-        {
-          urls:[
-            `turn:${credential?.turn_server}:${credential?.turn_port}`,
-            //'stun:188.68.54.37:3478'
-            //`turn:188.68.54.37:3478`
-          ],
-          //username: credential?.username,
-          //credential: credential?.password
-          username: 'testuser',
-          credential: 'testuser'
-        },
-        {
-          urls: ['stun:stun.l.google.com:19302']
-        }
-      ],
+      iceServers: servers,
       iceCandidatePoolSize: 10,
       iceTransportPolicy: 'all',
       bundlePolicy: 'max-bundle',
       rtcpMuxPolicy: 'require',
-
     };
 
 

@@ -12,6 +12,7 @@ import {environment} from "../environments/environment";
 import {DataService} from "./data.service";
 import {WebrtcService} from "./webrtc.service";
 import {ToastService} from "./toast.service";
+import {WebService} from "./web.service";
 
 @Component({
   selector: 'app-root',
@@ -23,7 +24,7 @@ import {ToastService} from "./toast.service";
 export class AppComponent {
   title = 'cupcake-ng';
   ready = false;
-  constructor(private accounts: AccountsService, private webrtc: WebrtcService, private ws: WebsocketService, private dataService: DataService, private toastService: ToastService) {
+  constructor(private web: WebService, private accounts: AccountsService, private webrtc: WebrtcService, private ws: WebsocketService, private dataService: DataService, private toastService: ToastService) {
     const followSystemTheme = localStorage.getItem("cupcake-follow-system-theme")
     if (followSystemTheme) {
       if (followSystemTheme === "true") {
@@ -49,7 +50,11 @@ export class AppComponent {
         this.accounts.loadLastVisited()
         this.ws.connectUserWS()
         this.ws.connectSummaryWS()
-
+        this.web.getServerSettings().subscribe((data) => {
+          if (data) {
+            this.dataService.serverSettings = data
+          }
+        })
       }
     }
     console.log(this.accounts.token)

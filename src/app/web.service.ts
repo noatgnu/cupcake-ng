@@ -824,6 +824,13 @@ export class WebService {
       {responseType: 'json', observe: 'body'}
     )
   }
+
+  getServerSettings() {
+    return this.http.get<{use_ocr: boolean, use_llm: boolean, use_whisper: boolean, use_coturn: boolean}>(
+      `${this.baseURL}/api/user/get_server_settings/`,
+      {responseType: 'json', observe: 'body'}
+    )
+  }
 }
 
 interface ChunkUploadResponse {

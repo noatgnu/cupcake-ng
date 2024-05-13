@@ -17,7 +17,17 @@ export class DataService {
     view: false,
     delete: false,
   };
-
+  serverSettings: {
+    use_llm: boolean,
+    use_ocr: boolean,
+    use_coturn: boolean,
+    use_whisper: boolean,
+  } = {
+    use_llm: false,
+    use_ocr: false,
+    use_coturn: false,
+    use_whisper: false
+  }
   annotationPermissions: {[key: string]: {edit: boolean, view: boolean, delete: boolean}} = {};
 
   set protocol(value: Protocol) {

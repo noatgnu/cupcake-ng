@@ -36,10 +36,10 @@
             <button class="dropdown-item" (click)="scratch(a)"><i class="bi bi-type-strikethrough"></i> Disable</button>
             @if (dataService.annotationPermissions[a.id].edit){
               <button class="dropdown-item" (click)="annotationRename(a)"><i class="bi bi-input-cursor-text"></i> Rename</button>
-              @if (['audio', 'video'].includes(a.annotation_type)) {
+              @if (['audio', 'video'].includes(a.annotation_type) && dataService.serverSettings.use_whisper) {
                 <button class="dropdown-item" (click)="openTranscribeModal(a)"><i class="bi bi-pencil"></i> Re-transcribe</button>
               }
-              @if (['sketch'].includes(a.annotation_type)) {
+              @if (['sketch'].includes(a.annotation_type) && dataService.serverSettings.use_ocr) {
                 <button class="dropdown-item" (click)="ocrAnnotation(a)"><i class="bi bi-pencil"></i> OCR</button>
               }
             }

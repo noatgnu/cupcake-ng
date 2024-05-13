@@ -52,6 +52,11 @@ export class NavbarComponent {
             localStorage.setItem("cupcakeUsername", loginData.username)
           }
           this.ws.connectUserWS()
+          this.web.getServerSettings().subscribe((data) => {
+            if (data) {
+              this.dataService.serverSettings = data
+            }
+          })
         })
         this.dataService.triggerReload.next(true)
       }
