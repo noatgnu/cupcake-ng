@@ -83,7 +83,7 @@ export class WebrtcService {
     const configuration: RTCConfiguration = {
       iceServers: servers,
       iceCandidatePoolSize: 10,
-      iceTransportPolicy: 'all',
+      iceTransportPolicy: 'relay',
       bundlePolicy: 'max-bundle',
       rtcpMuxPolicy: 'require',
     };
