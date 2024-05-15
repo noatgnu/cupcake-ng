@@ -37,7 +37,7 @@
   </div>
 </nav>
 @if (timer.timeKeeper[currentStep.id.toString()].spent > 0) {
-  <ngb-progressbar [height]="'5px'" [value]="timer.timeKeeper[currentStep.id.toString()].spent" [max]="timer.timeKeeper[currentStep.id.toString()].duration" [type]="'danger'"></ngb-progressbar>
+  <ngb-progressbar [height]="'5px'" [value]="timer.timeKeeper[currentStep.id.toString()].duration-timer.timeKeeper[currentStep.id.toString()].current" [max]="timer.timeKeeper[currentStep.id.toString()].duration" [type]="'danger'"></ngb-progressbar>
 }
 
 @if (currentStep) {
