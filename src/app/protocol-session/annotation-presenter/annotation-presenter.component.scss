@@ -15,3 +15,46 @@
     display: flex !important;
   }
 }
+
+@keyframes fadein {
+  0% {
+    opacity: 0;
+  }
+  25% {
+    opacity: 0.25;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  75% {
+    opacity: 0.75;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes glitch {
+  0% {
+    color: #333;
+    background-color: #fff;
+  }
+  25% {
+    color: #fff;
+    background-color: #333;
+  }
+  50% {
+    color: #333;
+    background-color: #fff;
+  }
+  75% {
+    color: #fff;
+    background-color: #333;
+  }
+  100% {
+    color: #333;
+    background-color: #fff;
+  }
+}
+.list-group-item {
+  animation: fadein 0.5s linear;
+}

@@ -76,14 +76,16 @@ export class WebrtcService {
     if (credential) {
       servers.push({
         urls: urls,
-        username: credential?.username,
-        credential: credential?.password
+        //username: credential?.username,
+        //credential: credential?.password
+        username: "testuser",
+        credential: "testuser"
       })
     }
     const configuration: RTCConfiguration = {
       iceServers: servers,
       iceCandidatePoolSize: 10,
-      iceTransportPolicy: 'relay',
+      iceTransportPolicy: 'all',
       bundlePolicy: 'max-bundle',
       rtcpMuxPolicy: 'require',
     };
@@ -138,6 +140,7 @@ export class WebrtcService {
       }
       if (this.isCallerMap[connectionID!]) {
         this.makingOffer = true;
+        console.log("Sending initial negotiation")
         await pc.setLocalDescription(await pc.createOffer());
 
         this.signallingConnection?.next({type: pc.localDescription?.type, sdp: pc.localDescription?.sdp, to: connectionID, id_type: this.connectionType});
@@ -267,6 +270,7 @@ export class WebrtcService {
   }
 
   async handleSignallingData(type: string, sdp: RTCSessionDescriptionInit | undefined, candidate: RTCIceCandidate | undefined, from: string | undefined, id_type: string | undefined) {
+    console.log(type)
     if (!this.acceptCall) {
       return
     }
@@ -288,7 +292,7 @@ export class WebrtcService {
         }
       } else {
         this.peerConnectionMap[from!] = {
-          pc: await this.createPeerConnection(from),
+          pc: await this.createPeerConnection(from, true),
           offered: false,
           answered: false,
           connectionType: id_type === 'host' ? 'viewer' : 'host',
@@ -304,8 +308,6 @@ export class WebrtcService {
       // @ts-ignore
       this.peerConnectionMap[from!].connectionType = id_type
     }
-    console.log(this.peerConnectionMap)
-    console.log(this.peerConnectionMap[from!].pc.signalingState)
 
     switch (type) {
       //case 'check':
@@ -318,16 +320,21 @@ export class WebrtcService {
             if (!this.polite) {
               return
             }
-            console.log(this.peerConnectionMap[from!].pc.signalingState)
+            console.log("signaling state not stable")
+            console.log("rollback")
             await Promise.all([
               this.peerConnectionMap[from!].pc.setLocalDescription({type: 'rollback'}),
               this.peerConnectionMap[from!].pc.setRemoteDescription(sdp!)
             ])
           } else {
             await this.peerConnectionMap[from!].pc.setRemoteDescription(sdp!);
+            console.log("forward without rollback")
           }
           console.log("Accepted offer")
         }
+        // wait until have-remote-offer
+        console.log(this.peerConnectionMap[from!].pc.localDescription)
+
 
         console.log(this.peerConnectionMap[from!].pc.signalingState)
         if (this.peerConnectionMap[from!].pc.signalingState === 'have-remote-offer') {
@@ -357,7 +364,7 @@ export class WebrtcService {
         console.log("Accepted answer")
         break;
       case 'candidate':
-        await this.peerConnectionMap[from!].pc.addIceCandidate(candidate!)
+        //await this.peerConnectionMap[from!].pc.addIceCandidate(candidate!)
         if (this.peerConnectionMap[from!].pc.remoteDescription) {
           await this.peerConnectionMap[from!].pc.addIceCandidate(candidate!);
         } else {

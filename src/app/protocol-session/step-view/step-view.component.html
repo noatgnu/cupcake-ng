@@ -12,6 +12,7 @@
 
     @if (currentStep) {
       @if(timer.timeKeeper[currentStep.id.toString()]){
+
         <div class="d-flex flex-row justify-content-end gap-2">
           @if (dataService.currentSessionPermissions["edit"]) {
             @if (recording) {
@@ -35,6 +36,10 @@
     }
   </div>
 </nav>
+@if (timer.timeKeeper[currentStep.id.toString()].spent > 0) {
+  <ngb-progressbar [height]="'5px'" [value]="timer.timeKeeper[currentStep.id.toString()].spent" [max]="timer.timeKeeper[currentStep.id.toString()].duration" [type]="'danger'"></ngb-progressbar>
+}
+
 @if (currentStep) {
   <div class="d-flex flex-row justify-content-between">
     @if (getPreviousStep() !== '') {

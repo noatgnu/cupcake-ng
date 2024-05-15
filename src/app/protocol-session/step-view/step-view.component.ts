@@ -8,7 +8,7 @@ import {
   NgbDropdownItem,
   NgbDropdownMenu,
   NgbDropdownToggle, NgbModal,
-  NgbModalConfig
+  NgbModalConfig, NgbProgressbar
 } from "@ng-bootstrap/ng-bootstrap";
 import {ProtocolSection, ProtocolStep} from "../../protocol";
 import {TimerService} from "../../timer.service";
@@ -37,7 +37,8 @@ import {animationFrame} from "rxjs";
     NgbDropdown,
     NgbDropdownItem,
     NgbDropdownMenu,
-    NgbDropdownToggle
+    NgbDropdownToggle,
+    NgbProgressbar
   ],
   templateUrl: './step-view.component.html',
   styleUrl: './step-view.component.scss'
