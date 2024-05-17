@@ -100,7 +100,7 @@ export class FolderViewComponent {
   previousAnnotationPage() {
     if (this.annotations?.previous) {
       // @ts-ignore
-      this.web.getAnnotationsURL(this.annotations.previous).subscribe((data: AnnotationQuery) => {
+      this.web.getAnnotationsURL(this.annotations.previous.replace("http://", "https://")).subscribe((data: AnnotationQuery) => {
         this.annotations = data;
       })
     }
@@ -108,7 +108,7 @@ export class FolderViewComponent {
   nextAnnotationPage() {
     if (this.annotations?.next) {
       // @ts-ignore
-      this.web.getAnnotationsURL(this.annotations.next).subscribe((data: AnnotationQuery) => {
+      this.web.getAnnotationsURL(this.annotations.next.replace("http://", "https://")).subscribe((data: AnnotationQuery) => {
         this.annotations = data;
       })
     }
