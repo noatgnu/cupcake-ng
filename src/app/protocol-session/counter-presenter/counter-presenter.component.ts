@@ -49,8 +49,10 @@ export class CounterPresenterComponent {
 
   constructor(private web: WebService, private fb: FormBuilder, public speech: SpeechService, private toastService: ToastService) {
     this.speech.transcriptSubject.subscribe((transcript) => {
-      this.toastService.show("Voice Command", transcript, 1000)
-      this.commandTranscript = transcript
+      if (this.annotation.id === this.speech.currentAnnotation) {
+        this.toastService.show("Voice Command", transcript, 1000)
+        this.commandTranscript = transcript
+      }
     })
   }
 
