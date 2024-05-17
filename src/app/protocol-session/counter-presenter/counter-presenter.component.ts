@@ -45,7 +45,7 @@ export class CounterPresenterComponent {
 
 
 
-  constructor(private web: WebService, private fb: FormBuilder, private speech: SpeechService) {
+  constructor(private web: WebService, private fb: FormBuilder, public speech: SpeechService) {
     this.speech.transcriptSubject.subscribe((transcript) => {
       this.commandTranscript = transcript
     })

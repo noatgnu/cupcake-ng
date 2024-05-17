@@ -22,7 +22,7 @@
               <button class="btn btn-outline-primary" (click)="ocrAnnotation(a)">OCR</button>
             }
           }
-          @if (['counter'].includes(a.annotation_type)) {
+          @if (['counter'].includes(a.annotation_type) && speech.speechRecognition) {
             @if (speech.currentAnnotation === a.id) {
               <button class="btn btn-outline-primary" (click)="forceStop = true;speechRecognition.stop();speech.currentAnnotation=-1"><i class="bi bi-stop"></i></button>
             } @else {

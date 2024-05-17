@@ -1,3 +1,10 @@
+@if (speech.currentAnnotation === annotation.id) {
+  <div class="alert alert-warning">
+    <p>
+      <b>Speech Recognition</b> is active for this component. Speak any multi-word command that includes the word "increase" or "decrease" to change the current count value.
+    </p>
+  </div>
+}
 <div class="card border-0">
   <div class="card-header">
     <h5 class="card-title">{{data.name}}</h5>
