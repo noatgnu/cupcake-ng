@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import {Subject} from "rxjs";
 
 declare var webkitSpeechRecognition: any;
 declare var SpeechRecognition: any;
@@ -13,6 +14,8 @@ export class SpeechService {
   speechRecognition: any
   speechGrammarList: any
   speechRecognitionEvent: any
+  currentAnnotation: number = -1
+  transcriptSubject: Subject<string> = new Subject<string>()
   constructor() {
     if ('webkitSpeechRecognition' in window) {
       this.speechRecognition = webkitSpeechRecognition;

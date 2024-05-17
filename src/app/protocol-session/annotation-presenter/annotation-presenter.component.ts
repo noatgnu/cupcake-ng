@@ -16,6 +16,7 @@ import {MolarityCalculatorComponent} from "../molarity-calculator/molarity-calcu
 import {AnnotationRenameModalComponent} from "./annotation-rename-modal/annotation-rename-modal.component";
 import {RandomizationPresenterComponent} from "../randomization-presenter/randomization-presenter.component";
 import {DataService} from "../../data.service";
+import {SpeechService} from "../../speech.service";
 
 @Component({
   selector: 'app-annotation-presenter',
@@ -55,10 +56,11 @@ export class AnnotationPresenterComponent {
     return this._annotations!
   }
   @Output() deleteAnnotation: EventEmitter<number> = new EventEmitter<number>();
-
-
-
-  constructor(private web: WebService, private modal: NgbModal, private modalConfig: NgbModalConfig, public dataService: DataService) {
+  commandingAnnotationID: number = -1;
+  speechRecognition: any;
+  speechTranscript: string = "";
+  forceStop: boolean = false;
+  constructor(private web: WebService, private modal: NgbModal, private modalConfig: NgbModalConfig, public dataService: DataService, public speech: SpeechService) {
     this.modalConfig.backdrop = 'static';
     this.modalConfig.keyboard = false;
   }
@@ -129,5 +131,53 @@ export class AnnotationPresenterComponent {
     this.web.transcriptSummarize(annotation_id).subscribe((response: any) => {
       console.log(response)
     })
+  }
+
+  startSpeechRecognition(annotationID: number) {
+    if (this.speech.currentAnnotation === annotationID) {
+      this.forceStop = true
+      this.speechRecognition.stop()
+      this.speech.currentAnnotation = -1
+
+      return
+    }
+    this.speech.currentAnnotation = annotationID;
+    this.speechRecognition = this.speech.createSpeechRecognition()
+    this.speechRecognition.continuous = true;
+    //this.speechRecognition.interimResults = true;
+    this.speechRecognition.onresult = (event:any) => {
+      let transcript = '';
+      /*for (let i = event.resultIndex; i < event.results.length; i++) {
+        if (event.results[i].isFinal) {
+          if (event.results[i][0].transcript.trim().length > 0) {
+            transcript += event.results[i][0].transcript;
+
+          }
+        }
+      }*/
+      if (event.results[event.results.length - 1].isFinal) {
+        transcript = event.results[event.results.length - 1][0].transcript
+      }
+      console.log(transcript)
+      console.log(event)
+      this.speech.transcriptSubject.next(transcript)
+    }
+    this.speechRecognition.onend = (event:any) => {
+      console.log(event, "end")
+      if (this.forceStop) {
+        this.speechRecognition.stop()
+        setTimeout(() => {
+          this.forceStop = false
+        }, 200)
+      } else {
+        this.speechRecognition.start()
+      }
+      //this.speechRecognition.stop()
+      //this.speech.currentAnnotation = -1
+    }
+    this.speechRecognition.onstart = (event:any) => {
+      console.log(event)
+    }
+    this.speechRecognition.start();
   }
 }
