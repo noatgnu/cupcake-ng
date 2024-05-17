@@ -64,7 +64,15 @@ export class AppComponent {
         console.log(data)
         if(data.signed_value && data.user_download) {
           this.toastService.show("Export File", "Downloading file...")
-          window.open(environment.baseURL + "/api/protocol/download_temp_file/?token=" + data.signed_value, "_blank")
+          const downloadURL = environment.baseURL + "/api/protocol/download_temp_file/?token=" + data.signed_value
+          const link = document.createElement('a');
+          link.href = downloadURL;
+          link.download = data.signed_value.split(":")[0]
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+
+          //window.open(environment.baseURL + "/api/protocol/download_temp_file/?token=" + data.signed_value, "_blank")
         }
       }
     })
