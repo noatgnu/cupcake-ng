@@ -32,7 +32,7 @@ export class CounterPresenterComponent {
   @Input() set commandTranscript(value: string) {
     this._commandTranscript = value.toLowerCase()
     console.log(this._commandTranscript.slice())
-    this.toastService.show("Voice Command", this._commandTranscript, 1000)
+
     if (this._commandTranscript.indexOf("increas")!= -1) {
       console.log(this._commandTranscript.indexOf("increas"))
       this.data.current += 1
@@ -49,6 +49,7 @@ export class CounterPresenterComponent {
 
   constructor(private web: WebService, private fb: FormBuilder, public speech: SpeechService, private toastService: ToastService) {
     this.speech.transcriptSubject.subscribe((transcript) => {
+      this.toastService.show("Voice Command", transcript, 1000)
       this.commandTranscript = transcript
     })
   }
