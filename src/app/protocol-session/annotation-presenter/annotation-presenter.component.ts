@@ -158,9 +158,10 @@ export class AnnotationPresenterComponent {
       if (event.results[event.results.length - 1].isFinal) {
         transcript = event.results[event.results.length - 1][0].transcript
       }
-      console.log(transcript)
-      console.log(event)
-      this.speech.transcriptSubject.next(transcript)
+      if (transcript.trim().length > 0) {
+        this.speech.transcriptSubject.next(transcript)
+      }
+
     }
     this.speechRecognition.onend = (event:any) => {
       console.log(event, "end")
