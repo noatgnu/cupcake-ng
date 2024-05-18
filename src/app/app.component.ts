@@ -13,6 +13,8 @@ import {DataService} from "./data.service";
 import {WebrtcService} from "./webrtc.service";
 import {ToastService} from "./toast.service";
 import {WebService} from "./web.service";
+import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
+import {DownloadModalComponent} from "./download-modal/download-modal.component";
 
 @Component({
   selector: 'app-root',
@@ -24,7 +26,7 @@ import {WebService} from "./web.service";
 export class AppComponent {
   title = 'cupcake-ng';
   ready = false;
-  constructor(private web: WebService, private accounts: AccountsService, private webrtc: WebrtcService, private ws: WebsocketService, private dataService: DataService, private toastService: ToastService) {
+  constructor(private modal: NgbModal, private web: WebService, private accounts: AccountsService, private webrtc: WebrtcService, private ws: WebsocketService, private dataService: DataService, private toastService: ToastService) {
     const followSystemTheme = localStorage.getItem("cupcake-follow-system-theme")
     if (followSystemTheme) {
       if (followSystemTheme === "true") {
@@ -62,7 +64,8 @@ export class AppComponent {
     this.ws.userWSConnection?.subscribe((data) => {
       if (data) {
         console.log(data)
-        if(data.signed_value && data.user_download) {
+
+        /*if(data.signed_value && data.user_download) {
           this.toastService.show("Export File", "Downloading file...")
           const downloadURL = environment.baseURL + "/api/protocol/download_temp_file/?token=" + data.signed_value
           const link = document.createElement('a');
@@ -73,7 +76,7 @@ export class AppComponent {
           document.body.removeChild(link);
 
           //window.open(environment.baseURL + "/api/protocol/download_temp_file/?token=" + data.signed_value, "_blank")
-        }
+        }*/
       }
     })
     this.ws.summaryWSConnection?.subscribe((data) => {

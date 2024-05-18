@@ -13,6 +13,7 @@ import {WebrtcModalComponent} from "../webrtc-modal/webrtc-modal.component";
 import {SessionEditorModalComponent} from "../protocol-session/session-editor-modal/session-editor-modal.component";
 import {ToastService} from "../toast.service";
 import {ProtocolCloneModalComponent} from "../protocol-clone-modal/protocol-clone-modal.component";
+import {DownloadModalComponent} from "../download-modal/download-modal.component";
 
 @Component({
   selector: 'app-navbar',
@@ -92,6 +93,7 @@ export class NavbarComponent {
     }
     console.log(this.dataService.protocol)
     if (this.dataService.protocol) {
+      this.modal.open(DownloadModalComponent)
       if (exportType === "protocol") {
         this.web.exportToDocx(this.dataService.protocol.id, "", format).subscribe((data: any) => {
           this.toastService.show("Exporting Protocol", "Processing Request")

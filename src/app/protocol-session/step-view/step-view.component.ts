@@ -25,6 +25,7 @@ import {AccountsService} from "../../accounts/accounts.service";
 import {SpeechService} from "../../speech.service";
 import {RandomAnnotationModalComponent} from "../random-annotation-modal/random-annotation-modal.component";
 import {animationFrame} from "rxjs";
+import {UploadLargeFileModalComponent} from "../../upload-large-file-modal/upload-large-file-modal.component";
 
 @Component({
   selector: 'app-step-view',
@@ -527,6 +528,15 @@ export class StepViewComponent {
         })
       })
 
+    }else if (item === "Large/Multiple Files"){
+      const ref = this.modal.open(UploadLargeFileModalComponent)
+      ref.componentInstance.session_id = this.dataService.currentSession?.unique_id;
+      ref.componentInstance.step_id = this.currentStep?.id;
+      ref.componentInstance.folder_id = 0;
+      ref.dismissed.subscribe((data: any) => {
+        this.refreshAnnotations()
+      })
+
     }else {
       if (this.clickedElement === item) {
         this.clickedElement = "";
@@ -667,6 +677,26 @@ export class StepViewComponent {
     }
     return description
 
+  }
+
+  cauldronConnect(step: ProtocolStep) {
+    const a = document.createElement('a');
+    const stepPosition = this.currentSection?.steps.findIndex((s) => s.id === step.id);
+    const payload: any = {
+      step: step.id,
+      token: this.accounts.token,
+      folder: 0,
+      baseURL: this.web.baseURL,
+      name: ""
+    }
+    if (stepPosition !== undefined && stepPosition !== -1) {
+      payload.name = `${stepPosition+1}/${this.currentSection?.steps.length}`;
+    }
+    a.href = "cauldron:" + btoa(JSON.stringify(payload));
+    a.target = "_blank";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
   }
 
 }

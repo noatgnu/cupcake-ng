@@ -1,0 +1,30 @@
+<div class="modal-header">
+  <h5 class="modal-title">
+    Upload Large File
+  </h5>
+</div>
+<div class="modal-body">
+  <div class="form-group">
+    <label for="file">Select Files</label>
+    <input type="file" class="form-control" id="file" multiple (change)="uploadData($event)">
+  </div>
+  <div class="d-flex flex-column">
+    @for (file of fileList; track file) {
+      <div class="gap-2">
+        <div>{{file.name}}</div>
+        @if (fileProgressMap[file.name].progress === fileProgressMap[file.name].total) {
+          <ngb-progressbar [value]="fileProgressMap[file.name].progress" [max]="fileProgressMap[file.name].total" [type]="'success'"></ngb-progressbar>
+        } @else if (fileProgressMap[file.name].progress > 0) {
+          <ngb-progressbar [value]="fileProgressMap[file.name].progress" [max]="fileProgressMap[file.name].total" [type]="'primary'"></ngb-progressbar>
+        } @else {
+          File queued for upload
+        }
+      </div>
+    }
+
+  </div>
+
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn btn-secondary" (click)="close()">Close</button>
+</div>

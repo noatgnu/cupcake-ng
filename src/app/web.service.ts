@@ -831,6 +831,13 @@ export class WebService {
       {responseType: 'json', observe: 'body'}
     )
   }
+  bindUploadedFile(session_id: string, upload_id: string, file_name: string, annotation_name: string, step: number = 0, folder: number = 0) {
+    return this.http.post(
+      `${this.baseURL}/api/annotation/bind_uploaded_file/`,
+      {session: session_id, upload_id: upload_id, file_name: file_name, annotation_name: annotation_name, step: step, folder: folder},
+      {responseType: 'json', observe: 'body'}
+    )
+  }
 }
 
 interface ChunkUploadResponse {

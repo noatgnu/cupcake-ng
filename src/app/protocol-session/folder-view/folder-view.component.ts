@@ -13,6 +13,7 @@ import {HandwrittenAnnotationComponent} from "../handwritten-annotation/handwrit
 import {AnnotationPresenterComponent} from "../annotation-presenter/annotation-presenter.component";
 import {RandomAnnotationModalComponent} from "../random-annotation-modal/random-annotation-modal.component";
 import {WebsocketService} from "../../websocket.service";
+import {AccountsService} from "../../accounts/accounts.service";
 
 @Component({
   selector: 'app-folder-view',
@@ -62,7 +63,7 @@ export class FolderViewComponent {
   dataArray: Uint8Array = new Uint8Array(this.analyser.frequencyBinCount);
   animationFrame: any;
 
-  constructor(private ws: WebsocketService, public dataService: DataService, private modal: NgbModal, private web: WebService, private toastService: ToastService) {
+  constructor(private accounts: AccountsService, private ws: WebsocketService, public dataService: DataService, private modal: NgbModal, private web: WebService, private toastService: ToastService) {
     navigator.mediaDevices.enumerateDevices().then((devices) => {
       this.cameraDevices = devices.filter((device) => device.kind === 'videoinput');
       this.audioDevices = devices.filter((device) => device.kind === 'audioinput');
@@ -425,5 +426,21 @@ export class FolderViewComponent {
     })
   }
 
+  cauldronConnect(folder: AnnotationFolder) {
+    const a = document.createElement('a');
+     const payload: any = {
+      step: 0,
+      token: this.accounts.token,
+      folder: folder.id,
+      baseURL: this.web.baseURL,
+      name: folder.folder_name
+    }
+
+    a.href = "cauldron:" + btoa(JSON.stringify(payload));
+    a.target = "_blank";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  }
 
 }

@@ -6,6 +6,7 @@
 
     @if (currentFolder) {
       <a class="navbar-brand">{{currentFolder.folder_name}}</a>
+      <button class="btn btn-outline-primary" (click)="cauldronConnect(currentFolder)"><i class="bi bi-intersect"></i> Cauldron</button>
     } @else {
       <a class="navbar-brand">Select a folder</a>
     }

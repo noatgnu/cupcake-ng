@@ -15,6 +15,7 @@
 
         <div class="d-flex flex-row justify-content-end gap-2">
           @if (dataService.currentSessionPermissions["edit"]) {
+            <button class="btn btn-outline-primary" (click)="cauldronConnect(currentStep)"><i class="bi bi-intersect"></i> Cauldron</button>
             @if (recording) {
               <button class="btn btn-outline-danger" (click)="stopRecording()"><i class="bi bi-stop"></i></button>
             } @else {
@@ -61,6 +62,7 @@
         <div>
           <button class="btn btn-primary" (click)="getStepSummarySoFar(currentStep)">Summarize previous steps</button>
         </div>
+
       }
       @if (dataService.stepCompletionSummary[currentStep.id]){
         @if (dataService.stepCompletionSummary[currentStep.id].started && !dataService.stepCompletionSummary[currentStep.id].completed) {
@@ -243,7 +245,7 @@
       <div ngbDropdown placement="top-end" class="d-inline-block">
         <button class="btn btn-outline-success" ngbDropdownToggle><i class="bi bi-plus"></i></button>
         <div ngbDropdownMenu>
-          @for (a of ['Audio', 'Text', 'Video', 'Image', 'Sketchpad', 'Counter','File', 'Checklist', 'Table', 'Alignment', 'Calculator', 'Molarity Calculator', 'Randomization']; track a) {
+          @for (a of ['Audio', 'Text', 'Video', 'Image', 'Sketchpad', 'Counter','File', 'Checklist', 'Table', 'Alignment', 'Calculator', 'Molarity Calculator', 'Randomization', 'Large/Multiple Files']; track a) {
             <button ngbDropdownItem (click)="annotationMenuClick(a)">{{a}}</button>
           }
         </div>
