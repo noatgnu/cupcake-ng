@@ -687,7 +687,8 @@ export class StepViewComponent {
       token: this.accounts.token,
       folder: 0,
       baseURL: this.web.baseURL,
-      name: ""
+      name: "",
+      session: this.dataService.currentSession?.unique_id,
     }
     if (stepPosition !== undefined && stepPosition !== -1) {
       payload.name = `${stepPosition+1}/${this.currentSection?.steps.length}`;

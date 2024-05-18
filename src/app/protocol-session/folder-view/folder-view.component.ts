@@ -14,6 +14,7 @@ import {AnnotationPresenterComponent} from "../annotation-presenter/annotation-p
 import {RandomAnnotationModalComponent} from "../random-annotation-modal/random-annotation-modal.component";
 import {WebsocketService} from "../../websocket.service";
 import {AccountsService} from "../../accounts/accounts.service";
+import {UploadLargeFileModalComponent} from "../../upload-large-file-modal/upload-large-file-modal.component";
 
 @Component({
   selector: 'app-folder-view',
@@ -219,7 +220,16 @@ export class FolderViewComponent {
           })
         })
       })
-    } else {
+    } else if (item === "Large/Multiple Files"){
+      const ref = this.modal.open(UploadLargeFileModalComponent)
+      ref.componentInstance.session_id = this.dataService.currentSession?.unique_id;
+      ref.componentInstance.step_id = 0;
+      ref.componentInstance.folder_id = this.currentFolder.id;
+      ref.dismissed.subscribe((data: any) => {
+        this.refreshAnnotations()
+      })
+
+    }else {
       if (this.clickedElement === item) {
         this.clickedElement = "";
         return;
@@ -433,7 +443,8 @@ export class FolderViewComponent {
       token: this.accounts.token,
       folder: folder.id,
       baseURL: this.web.baseURL,
-      name: folder.folder_name
+      name: folder.folder_name,
+       session: this.dataService.currentSession?.unique_id
     }
 
     a.href = "cauldron:" + btoa(JSON.stringify(payload));
