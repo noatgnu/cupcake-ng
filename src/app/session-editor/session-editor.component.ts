@@ -5,10 +5,12 @@ import {DataService} from "../data.service";
 import {FormBuilder, ReactiveFormsModule} from "@angular/forms";
 import {Protocol, ProtocolQuery} from "../protocol";
 import {ProtocolListComponent} from "../protocol-list/protocol-list.component";
-import {NgbCalendar, NgbDate, NgbDatepicker} from "@ng-bootstrap/ng-bootstrap";
+import {NgbCalendar, NgbDate, NgbDatepicker, NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import {ToastService} from "../toast.service";
 import {Router} from "@angular/router";
 import {routes} from "../app.routes";
+import {SessionUserViewerModalComponent} from "./session-user-viewer-modal/session-user-viewer-modal.component";
+import {SessionUserEditorModalComponent} from "./session-user-editor-modal/session-user-editor-modal.component";
 
 @Component({
   selector: 'app-session-editor',
@@ -54,6 +56,10 @@ export class SessionEditorComponent {
       this.session = response;
       console.log(response)
       this.refreshSessionAssociatedData(value);
+      this.form.patchValue({
+        enabled: response.enabled,
+        name: response.name
+      })
 
     })
   }
@@ -83,7 +89,7 @@ export class SessionEditorComponent {
     return this._sessionID;
   }
 
-  constructor(private router: Router, private calendar: NgbCalendar, private web: WebService, public dataService: DataService, private fb: FormBuilder, private toast: ToastService) {
+  constructor(private modal: NgbModal, private router: Router, private calendar: NgbCalendar, private web: WebService, public dataService: DataService, private fb: FormBuilder, private toast: ToastService) {
     this.formSearch.controls.protocolSearch.valueChanges.subscribe((value) => {
       if (value) {
         if (value.length < 3) {
@@ -204,5 +210,14 @@ export class SessionEditorComponent {
     })
   }
 
+  openViewerModal() {
+    const ref = this.modal.open(SessionUserViewerModalComponent, {scrollable: true})
+    ref.componentInstance.sessionId = this.sessionID
+  }
+
+  openEditorModal() {
+    const ref = this.modal.open(SessionUserEditorModalComponent, {scrollable: true})
+    ref.componentInstance.sessionId = this.sessionID
+  }
 
 }
