@@ -27,6 +27,7 @@ import {StepDescriptionEditorComponent} from "./step-description-editor/step-des
 import {
   StepDescriptionPreviewModalComponent
 } from "./step-description-preview-modal/step-description-preview-modal.component";
+import {DatePipe} from "@angular/common";
 
 @Component({
   selector: 'app-protocol-editor',
@@ -42,7 +43,8 @@ import {
     NgbDropdownMenu,
     NgbDropdownToggle,
     CalculatorAnnotationComponent,
-    StepDescriptionEditorComponent
+    StepDescriptionEditorComponent,
+    DatePipe
   ],
   templateUrl: './protocol-editor.component.html',
   styleUrl: './protocol-editor.component.scss'

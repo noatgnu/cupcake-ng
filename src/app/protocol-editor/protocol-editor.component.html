@@ -148,6 +148,7 @@
                   }
                 </div>
               }
+              Last updated: {{step.updated_at | date: "medium"}}
               <div class="mt-2 d-flex flex-row gap-1">
                 <button class="btn btn-sm btn-primary" (click)="openReagentEditorModal(step)">Reagent Editor</button>
                 <button class="btn btn-sm btn-primary" (click)="previewDescription(step)">Preview</button>

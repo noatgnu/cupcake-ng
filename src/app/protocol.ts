@@ -29,6 +29,8 @@ export interface ProtocolStep {
   previous_step: number;
   reagents: ProtocolStepReagent[];
   tags: StepTag[];
+  created_at: Date;
+  updated_at: Date;
 }
 
 export interface ProtocolSection {
