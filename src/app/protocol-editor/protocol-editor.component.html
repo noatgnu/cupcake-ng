@@ -100,11 +100,7 @@
                   <button class="btn btn-outline-danger" (click)="deleteStep(step.id)"><i class="bi bi-trash"></i></button>
                 </div>
               </div>
-              Step Description
-              <quill-editor [(ngModel)]="step.step_description" [modules]="editorConfig">
-
-              </quill-editor>
-<!--              <ngx-wig [(ngModel)]="step.step_description"></ngx-wig>-->
+              <app-step-description-editor [step]="step"></app-step-description-editor>
               <div>
                 Step Duration
               </div>
@@ -152,8 +148,9 @@
                   }
                 </div>
               }
-              <div class="mt-2">
+              <div class="mt-2 d-flex flex-row gap-1">
                 <button class="btn btn-sm btn-primary" (click)="openReagentEditorModal(step)">Reagent Editor</button>
+                <button class="btn btn-sm btn-primary" (click)="previewDescription(step)">Preview</button>
               </div>
               <hr>
             </div>

@@ -15,7 +15,7 @@ import {
   NgbModal,
   NgbModalConfig
 } from "@ng-bootstrap/ng-bootstrap";
-import {QuillEditorComponent} from "ngx-quill";
+import {ContentChange, QuillEditorComponent, SelectionChange} from "ngx-quill";
 import {UserEditorModalComponent} from "./user-editor-modal/user-editor-modal.component";
 import {UserViewerModalComponent} from "./user-viewer-modal/user-viewer-modal.component";
 import {ReagentEditorComponent} from "./reagent-editor/reagent-editor.component";
@@ -23,6 +23,10 @@ import {ProtocolReagent, ProtocolStepReagent} from "../reagent";
 import {CalculatorAnnotationComponent} from "../protocol-session/calculator-annotation/calculator-annotation.component";
 import {ProtocolTagModalComponent} from "./protocol-tag-modal/protocol-tag-modal.component";
 import {ProtocolTag} from "../tag";
+import {StepDescriptionEditorComponent} from "./step-description-editor/step-description-editor.component";
+import {
+  StepDescriptionPreviewModalComponent
+} from "./step-description-preview-modal/step-description-preview-modal.component";
 
 @Component({
   selector: 'app-protocol-editor',
@@ -37,7 +41,8 @@ import {ProtocolTag} from "../tag";
     NgbDropdownItem,
     NgbDropdownMenu,
     NgbDropdownToggle,
-    CalculatorAnnotationComponent
+    CalculatorAnnotationComponent,
+    StepDescriptionEditorComponent
   ],
   templateUrl: './protocol-editor.component.html',
   styleUrl: './protocol-editor.component.scss'
@@ -302,5 +307,10 @@ export class ProtocolEditorComponent {
     } else {
       this.viewTemplateTagMap[stepReagent.id] = !this.viewTemplateTagMap[stepReagent.id]
     }
+  }
+
+  previewDescription(step: ProtocolStep) {
+    const ref = this.modal.open(StepDescriptionPreviewModalComponent, {scrollable: true})
+    ref.componentInstance.step = step
   }
 }
