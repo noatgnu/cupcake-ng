@@ -67,8 +67,6 @@ export class StepViewComponent {
     return this._currentStep!
   }
 
-
-
   mouseOverElement: string = "";
   clickedElement: string = "";
   screenRecording: boolean = false;
