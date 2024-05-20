@@ -20,7 +20,7 @@ export class SessionUserEditorModalComponent {
     if (value === "") {
       return
     }
-    this.web.getSessionViewers(this.sessionId).subscribe((data: any) => {
+    this.web.getSessionEditors(this.sessionId).subscribe((data: any) => {
       this.viewers = data
     })
   }

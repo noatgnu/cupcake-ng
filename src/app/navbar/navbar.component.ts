@@ -59,8 +59,9 @@ export class NavbarComponent {
               this.dataService.serverSettings = data
             }
           })
+          this.dataService.triggerReload.next(true)
         })
-        this.dataService.triggerReload.next(true)
+
       }
     })
   }
