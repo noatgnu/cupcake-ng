@@ -14,7 +14,39 @@
           <textarea type="text" class="form-control" formControlName="description" id="description" placeholder="Project Description"></textarea>
           <label for="description">Project Description</label>
         </div>
-        <button type="submit" class="btn btn-primary">Save</button>
+
+        @if (project.sessions) {
+          @if (project.sessions.length > 0) {
+            <div class="list-group">
+              @for (s of project.sessions; track s.unique_id) {
+                <div class="list-group-item list-group-item-action">
+                  <div>
+                    <b>@if (s.name) {
+                      {{s.name}}
+                    } @else {
+                      {{s.unique_id}}
+                    }</b>
+                  </div>
+                  <div class="d-flex flex-row gap-2">
+                    <a class="btn btn-sm btn-primary" href="/#/protocol-session/{{s.protocol}}&{{s.unique_id}}"><i class="bi bi-magnet"></i></a>
+                    <a class="btn btn-sm btn-primary" href="/#/session-editor/{{s.unique_id}}"><i class="bi bi-pen"></i></a>
+                    <button class="btn btn-sm btn-danger" (click)="removeSessionFromProject(s)"><i class="bi bi-trash"></i></button>
+                  </div>
+                </div>
+              }
+            </div>
+          } @else {
+            <div class="alert alert-warning" role="alert">
+              No sessions have been bound to this project
+            </div>
+          }
+        }
+
+        <div class="d-flex flex-row gap-2">
+          <button type="submit" class="btn btn-primary">Save</button>
+          <button type="button" class="btn btn-danger" (click)="deleteProject()">Delete</button>
+        </div>
+
       </form>
     </div>
   }

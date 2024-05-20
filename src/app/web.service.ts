@@ -849,7 +849,7 @@ export class WebService {
   }
 
   updateProject(project_id: number, project_name: string, project_description: string) {
-    return this.http.post<Project>(
+    return this.http.put<Project>(
       `${this.baseURL}/api/project/${project_id}/`,
       {name: project_name, description: project_description},
       {responseType: 'json', observe: 'body'}
