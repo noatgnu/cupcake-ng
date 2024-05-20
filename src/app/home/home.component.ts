@@ -63,16 +63,21 @@ export class HomeComponent implements OnInit, AfterViewInit {
   searchTerm = '';
 
   constructor(private accounts: AccountsService, private router: Router, private fb: FormBuilder, private web: WebService, private dataService: DataService, private toastService: ToastService) {
-    this.dataService.triggerReload.subscribe(() => {
+    this.dataService.triggerReload.subscribe((data) => {
       this.currentSessionPage = 1;
       this.currentProtocolPage = 1;
       this.currentProtocolQueryOffset = 0;
       this.currentProtocolSessionQueryOffset = 0;
       if (this.accounts.loggedIn) {
-        if (this.active === 'protocols') {
-          this.getUserProtocols(undefined, this.pageSize, this.currentProtocolQueryOffset)
+        if (!data) {
+          if (this.active === 'protocols') {
+            this.getUserProtocols(undefined, this.pageSize, this.currentProtocolQueryOffset)
+          } else {
+            this.getUserSessions(undefined, this.pageSize, this.currentProtocolSessionQueryOffset)
+          }
         } else {
-          this.getUserSessions(undefined, this.pageSize, this.currentProtocolSessionQueryOffset)
+          this.getUserProtocols()
+          this.getUserSessions()
         }
       }
     })
