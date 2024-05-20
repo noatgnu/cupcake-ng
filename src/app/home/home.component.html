@@ -40,7 +40,7 @@
 
 </div>
 
-@if (protocolQuery || protocolSessionQuery) {
+@if (protocolQuery || protocolSessionQuery || projectQuery) {
   <div class="container">
     <ul ngbNav #nav="ngbNav" [(activeId)]="active" class="nav-tabs" [destroyOnHide]="false">
       @if (protocolQuery) {
@@ -143,6 +143,51 @@
                 <button class="btn btn-primary" disabled>Next</button>
               }
             </div>-->
+          </ng-template>
+        </li>
+      }
+      @if (projectQuery) {
+        <li [ngbNavItem]="'projects'" [destroyOnHide]="false">
+          <button ngbNavLink>Projects <span class="badge bg-primary">{{projectQuery.count}}</span></button>
+          <ng-template ngbNavContent>
+            @if (!loadingProject) {
+              <div class="list-group">
+                @for (project of projectQuery.results; track project.id) {
+                  <div class="list-group-item list-group-item-action">
+                    <div>
+                      <b>{{project.project_name}}</b>
+                    </div>
+                    <small>{{project.created_at | date : "short"}}</small>
+                    @for (session of project.sessions; track session.unique_id) {
+                      <div>
+                        <small>Session: <a href="/#/protocol-session/{{session.protocol}}&{{session.unique_id}}" target="_blank">
+                          @if (session.name) {
+                            {{session.name}}
+                          } @else {
+                            {{session.unique_id}}
+                          }
+                        </a></small>
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
+            } @else {
+              <div class="list-group">
+                <div class="list-group-item">
+                  <div class="d-flex flex-row justify-content-between gap-2">
+                    <div>
+                      <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            }
+            <div class="mt-2">
+              <ngb-pagination (pageChange)="handlePageChange($event)" [collectionSize]="projectQuery.count" [(page)]="currentProjectPage" [pageSize]="pageSize" [rotate]="true" [boundaryLinks]="true" />
+            </div>
           </ng-template>
         </li>
       }

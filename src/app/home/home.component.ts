@@ -21,6 +21,7 @@ import {
 } from "@ng-bootstrap/ng-bootstrap";
 import {SessionAnnotationComponent} from "../protocol-session/session-annotation/session-annotation.component";
 import {ProtocolListComponent} from "../protocol-list/protocol-list.component";
+import {ProjectQuery} from "../project";
 
 @Component({
   selector: 'app-home',
@@ -49,13 +50,17 @@ export class HomeComponent implements OnInit, AfterViewInit {
     url: new FormControl('', Validators.required),
   })
   currentSessionPage = 1;
+  currentProjectPage = 1;
   protocolQuery?: ProtocolQuery;
   currentProtocolQueryOffset = 0;
   pageSize = 5;
   loadingProtocol = false;
   loadingSession = false;
+  loadingProject = false;
   protocolSessionQuery?: ProtocolSessionQuery;
+  projectQuery?: ProjectQuery;
   currentProtocolSessionQueryOffset = 0;
+  currentProjectQueryOffset = 0;
   associatedSessionProtocols: Protocol[] = [];
   currentSessionID: string = '';
   active = 'protocols'
@@ -68,16 +73,20 @@ export class HomeComponent implements OnInit, AfterViewInit {
       this.currentProtocolPage = 1;
       this.currentProtocolQueryOffset = 0;
       this.currentProtocolSessionQueryOffset = 0;
+      this.currentProjectQueryOffset = 0;
       if (this.accounts.loggedIn) {
         if (!data) {
           if (this.active === 'protocols') {
             this.getUserProtocols(undefined, this.pageSize, this.currentProtocolQueryOffset)
-          } else {
+          } else if (this.active === 'sessions') {
             this.getUserSessions(undefined, this.pageSize, this.currentProtocolSessionQueryOffset)
+          } else {
+            this.getProjects(undefined, this.pageSize, this.currentProjectQueryOffset)
           }
         } else {
           this.getUserProtocols()
           this.getUserSessions()
+          this.getProjects()
         }
       }
     })
@@ -92,6 +101,7 @@ export class HomeComponent implements OnInit, AfterViewInit {
     if (this.accounts.loggedIn) {
       this.getUserProtocols()
       this.getUserSessions()
+      this.getProjects()
     } else {
       this.toastService.show("Login", "Please login to access your protocols")
       this.accounts.triggerLoginSubject.next(true)
@@ -171,10 +181,14 @@ export class HomeComponent implements OnInit, AfterViewInit {
       const offset = (event - 1) * this.pageSize;
       this.currentProtocolQueryOffset = offset;
       this.getUserProtocols(undefined, this.pageSize, offset);
-    } else {
+    } else if (this.active === 'sessions') {
       const offset = (event - 1) * this.pageSize;
       this.currentProtocolSessionQueryOffset = offset;
       this.getUserSessions(undefined, this.pageSize, offset);
+    } else {
+      const offset = (event - 1) * this.pageSize;
+      this.currentProjectQueryOffset = offset;
+      this.getProjects(undefined, this.pageSize, offset);
     }
   }
 
@@ -185,5 +199,33 @@ export class HomeComponent implements OnInit, AfterViewInit {
   search() {
     this.getUserProtocols()
     this.getUserSessions()
+    this.getProjects()
   }
+
+  getProjects(url?: string, limit: number = 5, offset: number = 0) {
+    this.loadingProject = true;
+    this.toastService.show("Project", "Fetching user's projects...")
+    this.web.getProjects(url, limit, offset, this.searchTerm).subscribe((response) => {
+      this.projectQuery = response;
+      this.loadingProject = false;
+      this.toastService.show("Project", "Projects fetched successfully")
+    }, (error) => {
+      console.log(error);
+      this.loadingProject = false;
+      this.toastService.show("Project", "Error fetching projects")
+    })
+  }
+
+  nextProjectPage() {
+    if (this.projectQuery?.next) {
+      this.getProjects(this.projectQuery.next)
+    }
+  }
+
+  previousProjectPage() {
+    if (this.projectQuery?.previous) {
+      this.getProjects(this.projectQuery.previous)
+    }
+  }
+
 }

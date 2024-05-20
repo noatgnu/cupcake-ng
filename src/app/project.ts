@@ -5,7 +5,7 @@ export interface Project {
   created_at: Date
   updated_at: Date
   owner: string
-  sessions: string[]
+  sessions: {unique_id: string, protocol: number[], name: string}[]
 }
 
 export interface ProjectQuery {
