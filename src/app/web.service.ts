@@ -13,6 +13,7 @@ import {TimeKeeper} from "./time-keeper";
 import {Annotation, AnnotationFolder, AnnotationQuery} from "./annotation";
 import {ReagentQuery, ProtocolReagent, ProtocolStepReagent} from "./reagent";
 import {ProtocolTag, ProtocolTagQuery, StepTag, StepTagQuery, TagQuery} from "./tag";
+import {ProjectQuery} from "./project";
 
 @Injectable({
   providedIn: 'root'
@@ -837,6 +838,66 @@ export class WebService {
       {session: session_id, upload_id: upload_id, file_name: file_name, annotation_name: annotation_name, step: step, folder: folder},
       {responseType: 'json', observe: 'body'}
     )
+  }
+
+  createProject(project_name: string, project_description: string) {
+    return this.http.post(
+      `${this.baseURL}/api/project/`,
+      {name: project_name, description: project_description},
+      {responseType: 'json', observe: 'body'}
+    )
+  }
+
+  updateProject(project_id: number, project_name: string, project_description: string) {
+    return this.http.put(
+      `${this.baseURL}/api/project/${project_id}/`,
+      {name: project_name, description: project_description},
+      {responseType: 'json', observe: 'body'}
+    )
+  }
+
+  deleteProject(project_id: number) {
+    return this.http.delete(
+      `${this.baseURL}/api/project/${project_id}/`,
+      {responseType: 'json', observe: 'body'}
+    )
+  }
+
+  addSessionToProject(project_id: number, session_id: string) {
+    return this.http.post(
+      `${this.baseURL}/api/project/${project_id}/add_session/`,
+      {session: session_id},
+      {responseType: 'json', observe: 'body'}
+    )
+  }
+
+  removeSessionFromProject(project_id: number, session_id: string) {
+    return this.http.post(
+      `${this.baseURL}/api/project/${project_id}/remove_session/`,
+      {session: session_id},
+      {responseType: 'json', observe: 'body'}
+    )
+  }
+
+  getProjects(url?: string, limit: number = 5, offset: number = 0, searchTerm: string = "") {
+    if (url) {
+      return this.http.get<ProjectQuery>(
+        url,
+        {responseType: 'json', observe: 'body'}
+      );
+    }
+    let params = new HttpParams()
+      .set('limit', limit.toString())
+      .set('offset', offset.toString())
+
+    if (searchTerm !== "") {
+      params = params.append('search', searchTerm);
+    }
+
+    return this.http.get<ProjectQuery>(
+      `${this.baseURL}/api/project/`,
+      {responseType: 'json', observe: 'body', params: params}
+    );
   }
 }
 

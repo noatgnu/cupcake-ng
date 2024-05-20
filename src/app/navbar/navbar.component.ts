@@ -34,7 +34,8 @@ export class NavbarComponent {
 
   constructor(private toastService: ToastService, private webrtc: WebrtcService, public dataService: DataService, private modal: NgbModal, public accounts: AccountsService, private router: Router, private ws: WebsocketService, private web: WebService) {
     this.accounts.triggerLoginSubject.subscribe(() => {
-      this.openAccountLogin()})
+      this.openAccountLogin()
+    })
   }
 
   openAccountLogin() {

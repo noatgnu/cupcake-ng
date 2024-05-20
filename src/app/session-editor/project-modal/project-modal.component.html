@@ -1,0 +1,41 @@
+<div class="modal-header">
+  <h5 class="modal-title">
+    Project Binder
+  </h5>
+</div>
+<div class="modal-body">
+  Create a new project or select an existing project to bind this session to.
+  <hr>
+  Search for a project:
+  <form [formGroup]="searchForm">
+    <div class="form-floating">
+      <input type="search" class="form-control" formControlName="searchTerm" id="search" placeholder="Search Projects">
+      <label for="search">Search Project</label>
+    </div>
+  </form>
+  @if (projectQuery) {
+    @if (projectQuery.results.length > 0) {
+      <div class="list-group">
+        @for (project of projectQuery.results; track project) {
+          <div class="list-group-item list-group-item-action">
+            <p>{{ project.project_name }}</p>
+          </div>
+        }
+      </div>
+    }
+  }
+
+
+  <hr>
+  Create a new project:
+  <form [formGroup]="form">
+    <div class="form-floating">
+      <input type="text" class="form-control" formControlName="name" id="name" placeholder="Project Name">
+      <label for="name">Project Name</label>
+    </div>
+    <div class="form-floating">
+      <textarea type="text" class="form-control" formControlName="description" id="description" placeholder="Project Description"></textarea>
+      <label for="description">Project Description</label>
+    </div>
+  </form>
+</div>

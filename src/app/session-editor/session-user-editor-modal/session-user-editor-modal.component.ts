@@ -50,7 +50,7 @@ export class SessionUserEditorModalComponent {
     // @ts-ignore
     this.web.sessionAddUserRole(this.sessionId, this.form.value.username, 'editor').subscribe((data: any) => {
       this.toastService.show("User", "Added")
-      this.web.getSessionViewers(this.sessionId).subscribe((data: any) => {
+      this.web.getSessionEditors(this.sessionId).subscribe((data: any) => {
         this.viewers = data
         this.form.reset()
       })
@@ -60,7 +60,7 @@ export class SessionUserEditorModalComponent {
   removeUserFromSession(username: string) {
     this.web.sessionRemoveUserRole(this.sessionId, username, 'editor').subscribe((data: any) => {
       this.toastService.show("User", "Removed")
-      this.web.getSessionViewers(this.sessionId).subscribe((data: any) => {
+      this.web.getSessionEditors(this.sessionId).subscribe((data: any) => {
         this.viewers = data
       })
     })
