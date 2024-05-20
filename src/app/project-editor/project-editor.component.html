@@ -16,6 +16,7 @@
         </div>
 
         @if (project.sessions) {
+          <b>Project Bound Sessions</b>
           @if (project.sessions.length > 0) {
             <div class="list-group">
               @for (s of project.sessions; track s.unique_id) {
