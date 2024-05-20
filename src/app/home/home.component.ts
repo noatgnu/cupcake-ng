@@ -21,7 +21,7 @@ import {
 } from "@ng-bootstrap/ng-bootstrap";
 import {SessionAnnotationComponent} from "../protocol-session/session-annotation/session-annotation.component";
 import {ProtocolListComponent} from "../protocol-list/protocol-list.component";
-import {ProjectQuery} from "../project";
+import {Project, ProjectQuery} from "../project";
 
 @Component({
   selector: 'app-home',
@@ -51,6 +51,7 @@ export class HomeComponent implements OnInit, AfterViewInit {
   })
   currentSessionPage = 1;
   currentProjectPage = 1;
+  currentProjectID = 0;
   protocolQuery?: ProtocolQuery;
   currentProtocolQueryOffset = 0;
   pageSize = 5;
@@ -228,4 +229,11 @@ export class HomeComponent implements OnInit, AfterViewInit {
     }
   }
 
+  clickProject(project: Project) {
+    if (this.currentProjectID === project.id) {
+      this.currentProjectID = 0;
+      return;
+    }
+    this.currentProjectID = project.id;
+  }
 }

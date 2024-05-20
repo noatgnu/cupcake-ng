@@ -158,6 +158,15 @@
                       <b>{{project.project_name}}</b>
                     </div>
                     <small>{{project.created_at | date : "short"}}</small>
+                    <div class="d-flex flex-row gap-2">
+                      <a class="btn btn-sm btn-outline-primary" href="/#/project-editor/{{project.id}}"><i class="bi bi-pen"></i></a>
+                      <button class="btn btn-sm btn-outline-primary" (click)="clickProject(project)">Description</button>
+                    </div>
+                    @if (currentProjectID === project.id) {
+                      <div>
+                        <small><b>Description:</b> {{project.project_description}}</small>
+                      </div>
+                    }
                     @for (session of project.sessions; track session.unique_id) {
                       <div>
                         <small>Session: <a href="/#/protocol-session/{{session.protocol}}&{{session.unique_id}}" target="_blank">
@@ -166,7 +175,8 @@
                           } @else {
                             {{session.unique_id}}
                           }
-                        </a></small>
+                        </a>
+                        </small>
                       </div>
                     }
                   </div>

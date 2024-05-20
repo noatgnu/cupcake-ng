@@ -1,0 +1,22 @@
+<div class="container" style="padding-top: 100px">
+  @if (!project) {
+    <div class="alert alert-danger" role="alert" xmlns="http://www.w3.org/1999/html">
+      Project not found
+    </div>
+  } @else {
+    <div class="container d-flex flex-column gap-2">
+      <form [formGroup]="form" class="d-flex flex-column gap-2" (ngSubmit)="updateProject()">
+        <div class="form-floating">
+          <input type="text" class="form-control" formControlName="name" id="name" placeholder="Project Name">
+          <label for="name">Project Name</label>
+        </div>
+        <div class="form-floating">
+          <textarea type="text" class="form-control" formControlName="description" id="description" placeholder="Project Description"></textarea>
+          <label for="description">Project Description</label>
+        </div>
+        <button type="submit" class="btn btn-primary">Save</button>
+      </form>
+    </div>
+  }
+</div>
+

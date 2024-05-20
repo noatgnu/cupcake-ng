@@ -24,6 +24,10 @@ export const routes: Routes = [
   {
     path: 'calendar',
     loadChildren: () => import('./calendar/calendar.module').then(m => m.CalendarModule)
+  },
+  {
+    path: 'project-editor',
+    loadChildren: () => import('./project-editor/project-editor.module').then(m => m.ProjectEditorModule)
   }
 
   ,
