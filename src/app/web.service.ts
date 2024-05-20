@@ -13,7 +13,7 @@ import {TimeKeeper} from "./time-keeper";
 import {Annotation, AnnotationFolder, AnnotationQuery} from "./annotation";
 import {ReagentQuery, ProtocolReagent, ProtocolStepReagent} from "./reagent";
 import {ProtocolTag, ProtocolTagQuery, StepTag, StepTagQuery, TagQuery} from "./tag";
-import {ProjectQuery} from "./project";
+import {Project, ProjectQuery} from "./project";
 
 @Injectable({
   providedIn: 'root'
@@ -841,7 +841,7 @@ export class WebService {
   }
 
   createProject(project_name: string, project_description: string) {
-    return this.http.post(
+    return this.http.post<Project>(
       `${this.baseURL}/api/project/`,
       {name: project_name, description: project_description},
       {responseType: 'json', observe: 'body'}
@@ -864,7 +864,7 @@ export class WebService {
   }
 
   addSessionToProject(project_id: number, session_id: string) {
-    return this.http.post(
+    return this.http.post<Project>(
       `${this.baseURL}/api/project/${project_id}/add_session/`,
       {session: session_id},
       {responseType: 'json', observe: 'body'}
@@ -898,6 +898,13 @@ export class WebService {
       `${this.baseURL}/api/project/`,
       {responseType: 'json', observe: 'body', params: params}
     );
+  }
+
+  getProject(project_id: number) {
+    return this.http.get<Project>(
+      `${this.baseURL}/api/project/${project_id}/`,
+      {responseType: 'json', observe: 'body'}
+    )
   }
 }
 

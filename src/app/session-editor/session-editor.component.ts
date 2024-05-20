@@ -11,6 +11,9 @@ import {Router} from "@angular/router";
 import {routes} from "../app.routes";
 import {SessionUserViewerModalComponent} from "./session-user-viewer-modal/session-user-viewer-modal.component";
 import {SessionUserEditorModalComponent} from "./session-user-editor-modal/session-user-editor-modal.component";
+import {forkJoin, Observable} from "rxjs";
+import {Project} from "../project";
+import {ProjectModalComponent} from "./project-modal/project-modal.component";
 
 @Component({
   selector: 'app-session-editor',
@@ -47,7 +50,7 @@ export class SessionEditorComponent {
   fromDate: NgbDate | null = null;
   toDate: NgbDate | null = null;
   toDatePreview: NgbDate | null = null;
-
+  associatedProjects: Project[] = [];
   @Input() set sessionID(value: string) {
     this._sessionID = value;
 
@@ -60,7 +63,15 @@ export class SessionEditorComponent {
         enabled: response.enabled,
         name: response.name
       })
-
+      if (response.projects.length > 0) {
+        const forkJoinTasks: Observable<Project>[] = [];
+        for (const projectId of response.projects) {
+          forkJoinTasks.push(this.web.getProject(projectId))
+        }
+        forkJoin(forkJoinTasks).subscribe((projects) => {
+          this.associatedProjects = projects;
+        })
+      }
     })
   }
 
@@ -218,6 +229,26 @@ export class SessionEditorComponent {
   openEditorModal() {
     const ref = this.modal.open(SessionUserEditorModalComponent, {scrollable: true})
     ref.componentInstance.sessionId = this.sessionID
+  }
+
+  openProjectModal() {
+    const ref = this.modal.open(ProjectModalComponent, {scrollable: true})
+    ref.componentInstance.session = this.session
+    ref.closed.subscribe((data: Project[]) => {
+      for (const project of data) {
+        if (!this.associatedProjects.includes(project)) {
+          this.web.addSessionToProject(project.id, this.sessionID).subscribe((data) => {
+            this.associatedProjects.push(project)
+          })
+        }
+      }
+    })
+  }
+
+  removeProjectFromSession(project: Project) {
+    this.web.removeSessionFromProject(project.id, this.sessionID).subscribe(() => {
+      this.associatedProjects = this.associatedProjects.filter((p) => p !== project)
+    })
   }
 
 }

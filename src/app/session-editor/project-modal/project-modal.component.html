@@ -6,7 +6,7 @@
 <div class="modal-body">
   Create a new project or select an existing project to bind this session to.
   <hr>
-  Search for a project:
+  <b>Search for a project:</b>
   <form [formGroup]="searchForm">
     <div class="form-floating">
       <input type="search" class="form-control" formControlName="searchTerm" id="search" placeholder="Search Projects">
@@ -15,27 +15,40 @@
   </form>
   @if (projectQuery) {
     @if (projectQuery.results.length > 0) {
-      <div class="list-group">
+      <div class="list-group mt-2">
         @for (project of projectQuery.results; track project) {
-          <div class="list-group-item list-group-item-action">
-            <p>{{ project.project_name }}</p>
+          <div class="list-group-item list-group-item-action" (click)="selectProject(project)">
+            <div><b>{{ project.project_name }}</b></div>
+            @if (selectedProjects.includes(project)) {
+              <span class="badge bg-primary">selected</span>
+            }
           </div>
         }
       </div>
+      @if (selectedProjects.length >0) {
+        <div>
+          <small>{{selectedProjects.length}} selected project(s)</small>
+        </div>
+
+      }
     }
   }
-
+  <button class="btn btn-primary mt-2" (click)="bindProjects()">Bind Projects</button>
 
   <hr>
-  Create a new project:
+  <b>Create a new project:</b>
   <form [formGroup]="form">
     <div class="form-floating">
       <input type="text" class="form-control" formControlName="name" id="name" placeholder="Project Name">
       <label for="name">Project Name</label>
     </div>
-    <div class="form-floating">
+    <div class="form-floating mt-2">
       <textarea type="text" class="form-control" formControlName="description" id="description" placeholder="Project Description"></textarea>
       <label for="description">Project Description</label>
     </div>
+    <button class="btn btn-primary mt-2" (click)="createProject()">Create Project</button>
   </form>
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn btn-secondary" (click)="close()">Close</button>
 </div>

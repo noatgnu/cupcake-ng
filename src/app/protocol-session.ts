@@ -12,6 +12,7 @@ export interface ProtocolSession {
   time_keeper: TimeKeeper[];
   started_at?: Date;
   ended_at?: Date;
+  projects: number[];
 }
 
 export interface ProtocolSessionQuery {

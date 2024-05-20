@@ -3,7 +3,7 @@ import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
 import {WebService} from "../../web.service";
 import {FormBuilder, ReactiveFormsModule, Validators} from "@angular/forms";
 import {ProtocolSession} from "../../protocol-session";
-import {ProjectQuery} from "../../project";
+import {Project, ProjectQuery} from "../../project";
 
 @Component({
   selector: 'app-project-modal',
@@ -23,10 +23,12 @@ export class ProjectModalComponent {
   })
 
   searchForm = this.fb.group({
-    searchTerm: ['']
+    searchTerm: ['', Validators.required]
   })
 
   projectQuery?: ProjectQuery
+
+  selectedProjects: Project[] = []
 
   constructor(private fb: FormBuilder, private activeModal: NgbActiveModal, private web: WebService) {
     this.searchForm.controls.searchTerm.valueChanges.subscribe((value) => {
@@ -43,6 +45,27 @@ export class ProjectModalComponent {
 
   close() {
     this.activeModal.dismiss()
+  }
+
+  selectProject(project: Project) {
+    if (this.selectedProjects.includes(project)) {
+      this.selectedProjects = this.selectedProjects.filter((p) => p !== project)
+      return
+    }
+    this.selectedProjects.push(project)
+  }
+
+  createProject() {
+    if (this.form.valid) {
+      // @ts-ignore
+      this.web.createProject(this.form.value.name, this.form.value.description).subscribe((project) => {
+        this.activeModal.close([project])
+      })
+    }
+  }
+
+  bindProjects() {
+    this.activeModal.close(this.selectedProjects)
   }
 
 }

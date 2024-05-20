@@ -10,6 +10,29 @@
         <label class="form-check-label" for="enabled">Enabled for Public View</label>
       </div>
     </form>
+    <div class="d-flex flex-column justify-content-center">
+      <b>
+        Associated Project
+      </b>
+      @if (associatedProjects.length > 0) {
+        <div class="list-group">
+          @for (project of associatedProjects; track project) {
+            <div class="list-group-item list-group-item-action">
+              <p>
+                {{project.project_name}}
+              </p>
+              <button class="btn btn-sm btn-outline-danger" (click)="removeProjectFromSession(project)"><i class="bi bi-trash"></i></button>
+            </div>
+          }
+        </div>
+      } @else {
+        <div class="alert alert-warning">No associated projects</div>
+      }
+      <div>
+        <button class="btn btn-primary mt-2" (click)="openProjectModal()">Add Project</button>
+      </div>
+
+    </div>
     <form [formGroup]="formSearch">
       <b>Associated Protocols</b>
       @if (associatedProtocols.length > 0) {
@@ -41,6 +64,7 @@
         </div>
       }
     </form>
+
     <div class="d-flex flex-row justify-content-center mt-2">
       <div>
         <div>
