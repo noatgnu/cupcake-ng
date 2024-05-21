@@ -113,7 +113,7 @@
                   @for (reagent of step.reagents; track reagent.id; let j = $index) {
                     <div class="d-flex flex-row gap-2">
                       <p>
-                        @if (reagent.scalable) {
+                        @if (reagent.scalable === true){
                           {{reagent.quantity}} x {{reagent.scalable_factor}} = {{reagent.quantity * reagent.scalable_factor}} {{reagent.reagent.unit}} {{reagent.reagent.name}}
 
                         } @else {

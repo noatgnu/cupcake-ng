@@ -100,6 +100,8 @@ export class ReagentEditorComponent {
           this._reagents = this._reagents.map(value => {
             if (value.id === data.id) {
               value.quantity = data.quantity
+              value.scalable = data.scalable
+              value.scalable_factor = data.scalable_factor
             }
             return value
           })

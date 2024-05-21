@@ -279,10 +279,12 @@ export class ProtocolEditorComponent {
     ref.componentInstance.reagents = step.reagents
     ref.componentInstance.stepId = step.id
     ref.closed.subscribe((data: ProtocolStepReagent[]) => {
-      step.reagents = data
+      step.reagents = [...data]
+      console.log(step.reagents)
+
       this.web.getProtocolReagents(this.protocolID).subscribe((data: ProtocolReagent[]) => {
         if (this.protocol) {
-          this.protocol.reagents = data
+          this.protocol.reagents = [...data]
         }
       })
     })

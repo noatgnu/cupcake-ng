@@ -3,6 +3,7 @@ import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
 import {environment} from "../../environments/environment";
 import {ToastService} from "../toast.service";
 import {WebsocketService} from "../websocket.service";
+import {WebService} from "../web.service";
 
 @Component({
   selector: 'app-download-modal',
@@ -13,12 +14,12 @@ import {WebsocketService} from "../websocket.service";
 })
 export class DownloadModalComponent {
 
-  constructor(private activeModal: NgbActiveModal, private ws: WebsocketService, private toastService: ToastService) {
+  constructor(private activeModal: NgbActiveModal, private ws: WebsocketService, private toastService: ToastService, private web: WebService) {
     this.ws.userWSConnection?.subscribe((data) => {
       if (data) {
         console.log(data)
 
-        if(data.signed_value && data.user_download) {
+        if(data.signed_value && data.user_download && data.instance_id === this.web.cupcakeInstanceID) {
           this.toastService.show("Export File", "Downloading file...")
           const downloadURL = environment.baseURL + "/api/protocol/download_temp_file/?token=" + data.signed_value
           const link = document.createElement('a');

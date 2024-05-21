@@ -15,10 +15,12 @@ import {ReagentQuery, ProtocolReagent, ProtocolStepReagent} from "./reagent";
 import {ProtocolTag, ProtocolTagQuery, StepTag, StepTagQuery, TagQuery} from "./tag";
 import {Project, ProjectQuery} from "./project";
 
+
 @Injectable({
   providedIn: 'root'
 })
 export class WebService {
+  cupcakeInstanceID: string = crypto.randomUUID()
   baseURL: string = environment.baseURL;
 
   constructor(private http: HttpClient) { }

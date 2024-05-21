@@ -133,5 +133,8 @@ export class NavbarComponent {
   openCloneModal() {
     const ref = this.modal.open(ProtocolCloneModalComponent)
     ref.componentInstance.protocol = this.dataService.protocol
+    ref.closed.subscribe((data)=> {
+
+    })
   }
 }

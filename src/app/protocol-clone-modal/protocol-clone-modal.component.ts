@@ -67,7 +67,7 @@ export class ProtocolCloneModalComponent {
   clone() {
     // @ts-ignore
     this.web.cloneProtocol(this.protocol.id, this.form.value.protocol_title, this.form.value.protocol_description).subscribe((data) => {
-      this.activeModal.close(data)
+      window.open(`/#/protocol-session/${data.id}`, "_blank")
     })
   }
 }
