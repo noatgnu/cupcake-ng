@@ -1,3 +1,5 @@
+import {InstrumentUsage} from "./instrument";
+
 export interface Annotation {
   id: number;
   step: number;
@@ -15,6 +17,7 @@ export interface Annotation {
   folder: {id: number, folder_name: string}[];
   annotation_name: string;
   summary: string;
+  instrument_usage: InstrumentUsage[]
 }
 
 export interface AnnotationQuery {

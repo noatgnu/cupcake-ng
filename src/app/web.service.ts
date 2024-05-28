@@ -14,6 +14,7 @@ import {Annotation, AnnotationFolder, AnnotationQuery} from "./annotation";
 import {ReagentQuery, ProtocolReagent, ProtocolStepReagent} from "./reagent";
 import {ProtocolTag, ProtocolTagQuery, StepTag, StepTagQuery, TagQuery} from "./tag";
 import {Project, ProjectQuery} from "./project";
+import {Instrument, InstrumentQuery, InstrumentUsageQuery} from "./instrument";
 
 
 @Injectable({
@@ -908,6 +909,77 @@ export class WebService {
       {responseType: 'json', observe: 'body'}
     )
   }
+
+  getInstruments(url?: string, limit: number = 5, offset: number = 0, searchTerm: string = "") {
+    if (url) {
+      return this.http.get<InstrumentQuery>(
+        url,
+        {responseType: 'json', observe: 'body'}
+
+      )
+    }
+    let params = new HttpParams()
+      .set('limit', limit.toString())
+      .set('offset', offset.toString())
+    if (searchTerm !== "") {
+      params = params.append('search', searchTerm);
+    }
+    return this.http.get<InstrumentQuery>(
+      `${this.baseURL}/api/instrument/`,
+      {responseType: 'json', observe: 'body', params: params}
+    )
+  }
+
+  createInstrument(instrument_name: string, instrument_description: string) {
+    return this.http.post<Instrument>(
+      `${this.baseURL}/api/instrument/`,
+      {name: instrument_name, description: instrument_description},
+      {responseType: 'json', observe: 'body'}
+    )
+  }
+
+  updateInstrument(instrument_id: number, instrument_name: string, instrument_description: string) {
+    return this.http.put<Instrument>(
+      `${this.baseURL}/api/instrument/${instrument_id}/`,
+      {name: instrument_name, description: instrument_description},
+      {responseType: 'json', observe: 'body'}
+    )
+  }
+
+  deleteInstrument(instrument_id: number) {
+    return this.http.delete(
+      `${this.baseURL}/api/instrument/${instrument_id}/`,
+      {responseType: 'json', observe: 'body'}
+    )
+  }
+
+  createInstrumentUsageAnnotation(session_id: string, instrument_id: number, time_started: Date, time_ended: Date) {
+    return this.http.post<Annotation>(
+      `${this.baseURL}/api/annotation/`,
+      {session: session_id, annotation_type: 'instrument', instrument: instrument_id, time_started: time_started, time_ended: time_ended},
+      {responseType: 'json', observe: 'body'}
+    )
+  }
+
+  getInstrumentUsage(instrument_id: number, time_started?: Date, time_ended?: Date) {
+    let params = new HttpParams()
+    params = params.set('instrument', instrument_id.toString())
+    if (time_started) {
+      params = params.set('time_started', time_started.toISOString())
+    }
+    if (time_ended) {
+      params = params.set('time_ended', time_ended.toISOString())
+    }
+
+    return this.http.get<InstrumentUsageQuery>(
+      `${this.baseURL}/api/instrument_usage/`,
+      {responseType: 'json', observe: 'body', params: params}
+    )
+  }
+
+
+
+
 }
 
 interface ChunkUploadResponse {

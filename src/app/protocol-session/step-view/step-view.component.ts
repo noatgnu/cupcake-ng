@@ -24,8 +24,8 @@ import {AddTableModalComponent} from "../add-table-modal/add-table-modal.compone
 import {AccountsService} from "../../accounts/accounts.service";
 import {SpeechService} from "../../speech.service";
 import {RandomAnnotationModalComponent} from "../random-annotation-modal/random-annotation-modal.component";
-import {animationFrame} from "rxjs";
 import {UploadLargeFileModalComponent} from "../../upload-large-file-modal/upload-large-file-modal.component";
+import {InstrumentBookingModalComponent} from "../instrument-booking-modal/instrument-booking-modal.component";
 
 @Component({
   selector: 'app-step-view',
@@ -535,7 +535,10 @@ export class StepViewComponent {
         this.refreshAnnotations()
       })
 
-    }else {
+    } else if (item === "Instrument") {
+      const ref = this.modal.open(InstrumentBookingModalComponent, {scrollable: true, size: "lg"})
+
+    } else {
       if (this.clickedElement === item) {
         this.clickedElement = "";
         return;

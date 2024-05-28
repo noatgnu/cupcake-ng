@@ -1,0 +1,70 @@
+<div class="modal-header">
+  <h5 class="modal-title">
+    Instrument Booking
+  </h5>
+</div>
+<div class="modal-body">
+  <form [formGroup]="instrumentForm" class="d-flex flex-column gap-2" (ngSubmit)="createInstrument()">
+    <div class="form-floating">
+      <input type="text" class="form-control" formControlName="name" id="instrumentName">
+      <label for="instrumentName">Instrument Name</label>
+    </div>
+    <div class="form-floating">
+      <textarea class="form-control" formControlName="description" id="instrumentDescription" style="height: 300px"></textarea>
+      <label for="instrumentDescription">Instrument Description</label>
+    </div>
+    <div>
+      <button type="submit" class="btn btn-primary">Create</button>
+    </div>
+  </form>
+  <form [formGroup]="searchForm" class="d-flex flex-column gap-2 mt-2">
+    <div class="form-floating">
+      <input type="search" class="form-control" formControlName="instrument" id="instrumentSearch">
+      <label for="instrumentSearch">Instrument</label>
+    </div>
+    @if (instrumentQuery) {
+      @if (instrumentQuery.results.length > 0) {
+        <div class="list-group">
+          @for (result of instrumentQuery.results; track result.id) {
+            <div class="list-group-item list-group-item-action" (click)="clickInstrument(result)">
+              <div>
+                <b>{{result.instrument_name}}</b>
+              </div>
+              <small>{{result.instrument_description}}</small>
+            </div>
+          }
+        </div>
+        <div class="d-flex flex-row gap-2">
+          @if (instrumentQuery.previous) {
+            <div>
+              <button class="btn btn-primary" (click)="getInstruments(instrumentQuery.previous)">Previous</button>
+            </div>
+          } @else {
+            <div>
+              <button class="btn btn-primary" disabled>Previous</button>
+            </div>
+          }
+          @if (instrumentQuery.next) {
+            <div>
+              <button class="btn btn-primary" (click)="getInstruments(instrumentQuery.next)">Next</button>
+            </div>
+          } @else {
+            <div>
+              <button class="btn btn-primary" disabled>Next</button>
+            </div>
+          }
+        </div>
+      }
+    }
+  </form>
+  @if (selectedInstrument) {
+    <div class="d-flex flex-row justify-content-center">
+      <app-booking-time-visualizer [instrument]="selectedInstrument"></app-booking-time-visualizer>
+    </div>
+
+  }
+
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn btn-secondary" (click)="close()">Close</button>
+</div>
