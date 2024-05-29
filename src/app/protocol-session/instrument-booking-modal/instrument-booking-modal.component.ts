@@ -2,7 +2,7 @@ import {Component, OnInit} from '@angular/core';
 import {Instrument, InstrumentQuery, InstrumentUsageQuery} from "../../instrument";
 import {NgbActiveModal, NgbTypeahead} from "@ng-bootstrap/ng-bootstrap";
 import {WebService} from "../../web.service";
-import {FormBuilder, ReactiveFormsModule, Validators} from "@angular/forms";
+import {FormBuilder, FormsModule, ReactiveFormsModule, Validators} from "@angular/forms";
 import {ToastService} from "../../toast.service";
 import {BookingTimeVisualizerComponent} from "./booking-time-visualizer/booking-time-visualizer.component";
 
@@ -12,7 +12,8 @@ import {BookingTimeVisualizerComponent} from "./booking-time-visualizer/booking-
   imports: [
     ReactiveFormsModule,
     NgbTypeahead,
-    BookingTimeVisualizerComponent
+    BookingTimeVisualizerComponent,
+    FormsModule
   ],
   templateUrl: './instrument-booking-modal.component.html',
   styleUrl: './instrument-booking-modal.component.scss'
@@ -34,6 +35,9 @@ export class InstrumentBookingModalComponent implements OnInit{
     description: ["", Validators.required],
   })
 
+  selectedRange: {started: Date|undefined, ended: Date|undefined} = {started: undefined, ended: undefined}
+
+  usageDescription: string = ""
 
   constructor(private activeModal: NgbActiveModal, private web: WebService, private fb: FormBuilder, private toastService: ToastService) {
     this.searchForm.controls.instrument.valueChanges.subscribe(value => {
@@ -70,8 +74,21 @@ export class InstrumentBookingModalComponent implements OnInit{
     })
   }
 
-  close() {
-    this.activeModal.close()
+  handleSelectedRange(range: {started: Date, ended: Date}) {
+    this.selectedRange = range
+  }
+
+
+  submit() {
+    this.activeModal.close({
+      instrument: this.selectedInstrument,
+      selectedRange: this.selectedRange,
+      usageDescription: this.usageDescription
+    })
+  }
+
+  cancel() {
+    this.activeModal.dismiss()
   }
 
 }

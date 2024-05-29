@@ -17,6 +17,9 @@ import {AnnotationRenameModalComponent} from "./annotation-rename-modal/annotati
 import {RandomizationPresenterComponent} from "../randomization-presenter/randomization-presenter.component";
 import {DataService} from "../../data.service";
 import {SpeechService} from "../../speech.service";
+import {
+  InstrumentBookingPresenterComponent
+} from "../instrument-booking-presenter/instrument-booking-presenter.component";
 
 @Component({
   selector: 'app-annotation-presenter',
@@ -37,7 +40,8 @@ import {SpeechService} from "../../speech.service";
     NgbDropdown,
     NgbDropdownToggle,
     NgbDropdownMenu,
-    RandomizationPresenterComponent
+    RandomizationPresenterComponent,
+    InstrumentBookingPresenterComponent
   ],
   templateUrl: './annotation-presenter.component.html',
   styleUrl: './annotation-presenter.component.scss'

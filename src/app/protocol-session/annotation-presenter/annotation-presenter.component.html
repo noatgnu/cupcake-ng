@@ -82,6 +82,10 @@
       } @else {
         @if (a.annotation_type === 'text') {
           <div [innerHTML]="a.annotation"></div>
+        } @else if (a.annotation_type === 'instrument') {
+          <div class="d-flex flex-row justify-content-center">
+            <app-instrument-booking-presenter [annotation]="a"></app-instrument-booking-presenter>
+          </div>
         } @else if (a.annotation_type === 'image') {
           <div class="d-flex flex-row justify-content-center">
             <app-image-presenter [annotation]="a"></app-image-presenter>

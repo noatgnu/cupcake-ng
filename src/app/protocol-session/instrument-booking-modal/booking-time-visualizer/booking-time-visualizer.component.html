@@ -1,16 +1,17 @@
 <div class="d-flex flex-column gap-1">
-  <div>
-    <b>
-      Date Window
-    </b>
-  </div>
-  <div>
-    <ngb-datepicker #dp (dateSelect)="onDateSelection($event)" [displayMonths]="2" [dayTemplate]="t" outsideDays="hidden" />
-  </div>
+  @if (enableEdit) {
+    <div>
+      <b>
+        Date Window
+      </b>
+    </div>
+    <div>
+      <ngb-datepicker #dp (dateSelect)="onDateSelection($event)" [displayMonths]="2" [dayTemplate]="t" outsideDays="hidden" />
+    </div>
 
 
-  <form [formGroup]="form" (ngSubmit)="updateTimeWindow()">
-    <ng-template #t let-date let-focused="focused">
+    <form [formGroup]="form" (ngSubmit)="updateTimeWindow()">
+      <ng-template #t let-date let-focused="focused">
       <span
         class="custom-day"
         [class.focused]="focused"
@@ -21,11 +22,25 @@
       >
         {{ date.day }}
       </span>
-    </ng-template>
+      </ng-template>
 
-    <button class="btn btn-primary mt-1" type="submit">Update Window</button>
-  </form>
+      <button class="btn btn-primary mt-1" type="submit">Update Window</button>
+    </form>
+    @if (selectedStartDate) {
+      <div>
+        <p>
+          <b>Preview Start Date:</b> {{selectedStartDate | date: 'short'}}<br>
+          @if (selectedEndDate) {
+            <b>Preview End Date:</b> {{selectedEndDate | date: 'short'}}<br>
+          }
+
+        </p>
+      </div>
+    }
+  }
+  <div class="overflow-auto" style="max-width: 600px">
+    <canvas (mousedown)="onMouseDown($event)" (mouseup)="onMouseUp($event)" (mousemove)="onMouseMove($event)" #canvas id="bookingCanvas" [height]="height"></canvas>
+  </div>
 </div>
-<div class="overflow-auto" style="max-width: 600px">
-  <canvas (mousedown)="onMouseDown($event)" (mouseup)="onMouseUp($event)" (mousemove)="onMouseMove($event)" #canvas id="bookingCanvas" [height]="height"></canvas>
-</div>
+
+

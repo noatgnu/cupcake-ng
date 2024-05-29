@@ -1,0 +1,24 @@
+@if (instrumentUsage.length > 0) {
+  <div>
+    @for (usage of instrumentUsage; track usage.usage.id) {
+      <div>
+        <p>
+          <b>Booking time:</b><br>
+          <b>Start:</b> {{usage.usage.time_started | date: 'short'}}<br>
+          <b>End:</b> {{usage.usage.time_ended | date: 'short'}}<br>
+          <b>Booking Description:</b>
+          {{annotation.annotation}}
+        </p>
+      </div>
+      <div>
+        <p>
+          <b>Instrument:</b> {{usage.instrument.instrument_name}}<br>
+          <b>Description:</b> {{usage.instrument.instrument_description}}
+        </p>
+      </div>
+      @if (usage.usage.time_started && usage.usage.time_ended && usage.windowStart && usage.windowEnd) {
+        <app-booking-time-visualizer [dateBeforeCurrent]="usage.windowStart" [dateAfterCurrent]="usage.windowEnd" [instrument]="usage.instrument" [enableEdit]="false" [selectedTimeRange]="{start: usage.usage.time_started, end: usage.usage.time_ended}"></app-booking-time-visualizer>
+      }
+    }
+  </div>
+}

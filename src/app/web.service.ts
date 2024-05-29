@@ -910,6 +910,13 @@ export class WebService {
     )
   }
 
+  getInstrument(instrument_id: number) {
+    return this.http.get<Instrument>(
+      `${this.baseURL}/api/instrument/${instrument_id}/`,
+      {responseType: 'json', observe: 'body'}
+    )
+  }
+
   getInstruments(url?: string, limit: number = 5, offset: number = 0, searchTerm: string = "") {
     if (url) {
       return this.http.get<InstrumentQuery>(
@@ -953,10 +960,14 @@ export class WebService {
     )
   }
 
-  createInstrumentUsageAnnotation(session_id: string, instrument_id: number, time_started: Date, time_ended: Date) {
+  createInstrumentUsageAnnotation(session_id: string, instrument_id: number, time_started: Date|undefined, time_ended: Date|undefined, step_id: number = 0, annotation: string) {
+    const payload: any = {session: session_id, annotation_type: 'instrument', instrument: instrument_id, time_started: time_started, time_ended: time_ended, annotation: annotation}
+    if (step_id !== 0) {
+      payload['step'] = step_id
+    }
     return this.http.post<Annotation>(
       `${this.baseURL}/api/annotation/`,
-      {session: session_id, annotation_type: 'instrument', instrument: instrument_id, time_started: time_started, time_ended: time_ended},
+      payload,
       {responseType: 'json', observe: 'body'}
     )
   }

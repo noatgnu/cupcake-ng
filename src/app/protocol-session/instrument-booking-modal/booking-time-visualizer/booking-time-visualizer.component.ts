@@ -1,7 +1,10 @@
-import {AfterViewInit, Component, ElementRef, Input, ViewChild} from '@angular/core';
-import {Instrument} from "../../../instrument";
+import {AfterViewInit, Component, ElementRef, EventEmitter, Input, Output, ViewChild} from '@angular/core';
+import {Instrument, InstrumentUsageQuery} from "../../../instrument";
 import {FormBuilder, ReactiveFormsModule} from "@angular/forms";
 import {NgbCalendar, NgbDate, NgbDatepicker, NgbTimepicker} from "@ng-bootstrap/ng-bootstrap";
+import {DatePipe} from "@angular/common";
+import {WebService} from "../../../web.service";
+import {ToastService} from "../../../toast.service";
 
 @Component({
   selector: 'app-booking-time-visualizer',
@@ -9,7 +12,8 @@ import {NgbCalendar, NgbDate, NgbDatepicker, NgbTimepicker} from "@ng-bootstrap/
   imports: [
     ReactiveFormsModule,
     NgbDatepicker,
-    NgbTimepicker
+    NgbTimepicker,
+    DatePipe
   ],
   templateUrl: './booking-time-visualizer.component.html',
   styleUrl: './booking-time-visualizer.component.scss'
@@ -25,40 +29,72 @@ export class BookingTimeVisualizerComponent implements AfterViewInit{
   padding = 0
   current = new Date().setHours(0, 0, 0, 0)
   timeBlocks: Date[] = []
-  dateBeforeCurrent = new Date(this.current - 24 * 60 * 60 * 1000)
-  dateAfterCurrent = new Date(this.current + 24 * 60 * 60 * 1000)
+
+  private _dateBeforeCurrent = new Date(this.current - 24 * 60 * 60 * 1000)
+
+  @Input() set dateBeforeCurrent(value: Date) {
+    this._dateBeforeCurrent = value
+    this.form.controls.windowStart.setValue(value)
+  }
+
+  get dateBeforeCurrent(): Date {
+    return this._dateBeforeCurrent
+  }
+
+  private _dateAfterCurrent = new Date(this.current + 24 * 60 * 60 * 1000)
+
+  @Input() set dateAfterCurrent(value: Date) {
+    this._dateAfterCurrent = value
+    this.form.controls.windowEnd.setValue(value)
+  }
+
+  get dateAfterCurrent(): Date {
+    return this._dateAfterCurrent
+  }
+
   form = this.fb.group({
     windowStart: [this.dateBeforeCurrent],
     windowEnd: [this.dateAfterCurrent]
   })
-  selectedTimeRange: {start: Date|null, end: Date|null} = {start: null, end: null}
+  @Input() selectedTimeRange: {start: Date|null, end: Date|null} = {start: null, end: null}
   blockSize = 10
   width = 0
   height = 125
   selected = false
+  instrumentUsageQuery?: InstrumentUsageQuery
 
   hoveredDate: NgbDate | null = null;
   fromDate: NgbDate = new NgbDate(this.dateBeforeCurrent.getFullYear(), this.dateBeforeCurrent.getMonth() + 1, this.dateBeforeCurrent.getDate());
   toDate: NgbDate | null = new NgbDate(this.dateAfterCurrent.getFullYear(), this.dateAfterCurrent.getMonth() + 1, this.dateAfterCurrent.getDate());
+  @Input() enableEdit = true;
+  @Input() selectedStartDate!: Date|undefined;
+  @Input() selectedEndDate!: Date|undefined;
 
-  constructor(private fb: FormBuilder, private calendar: NgbCalendar) {
+  @Output() selectedRangeOut: EventEmitter<{ started: Date, ended: Date}> = new EventEmitter<{ started: Date, ended: Date}>();
+
+  constructor(private fb: FormBuilder, private toastService: ToastService, private web: WebService, private calendar: NgbCalendar) {
 
   }
 
   ngAfterViewInit() {
-    if (this.instrument) {
-
-    }
     const ctx = this.canvas.nativeElement.getContext('2d')
-
-    if (ctx) {
-      this.ctx = ctx
-      // draw time blocks from the start of the day before the current time to the end of the day after the current time
-      this.prepare();
+    if (this.instrument) {
+      // @ts-ignore
+      this.web.getInstrumentUsage(this.instrument.id, this.form.value.windowStart, this.form.value.windowEnd).subscribe((data) => {
+        this.instrumentUsageQuery = data
+        if (ctx) {
+          this.ctx = ctx
+          // draw time blocks from the start of the day before the current time to the end of the day after the current time
+          this.prepare().then();
+        }
+      })
     }
+
+
+
   }
 
-  private prepare() {
+  private async prepare() {
     this.clearCanvas()
     const timeBlocks: Date[] = []
     const windowStart = this.form.value.windowStart
@@ -68,7 +104,6 @@ export class BookingTimeVisualizerComponent implements AfterViewInit{
       while (current <= windowEnd) {
         timeBlocks.push(new Date(current))
         current = new Date(current.getTime() + 60 * 60 * 1000)
-        console.log(current.getTime())
       }
       let currentMarker = new Date()
       this.timeBlocks = timeBlocks
@@ -125,9 +160,6 @@ export class BookingTimeVisualizerComponent implements AfterViewInit{
           this.ctx.rotate(-Math.PI / 2)
           this.ctx.fillText(timeBlock.toLocaleTimeString(), 50, blockSize)
           this.ctx.restore()
-          console.log(timeBlock)
-          console.log(timeBlock.getTime())
-          console.log(x)
         }
 
         // draw dashed line for each hour
@@ -141,6 +173,23 @@ export class BookingTimeVisualizerComponent implements AfterViewInit{
       })
       currentStart = xEnd
     })
+    // draw other instrument usages from the instrumentUsageQuery
+
+    for (const usage of this.instrumentUsageQuery!.results) {
+      usage.time_started = new Date(usage.time_started)
+      usage.time_ended = new Date(usage.time_ended)
+      if ((usage.time_started && usage.time_ended) && (usage.time_started.getTime() !== this.selectedTimeRange.start?.getTime() && usage.time_ended.getTime() !== this.selectedTimeRange.end?.getTime())) {
+        const start = new Date(usage.time_started)
+        const end = new Date(usage.time_ended)
+        const delta = end.getTime() - start.getTime()
+        const deltaPixel = delta * graphPixelOverTime
+        // @ts-ignore
+        const deltaStart = start.getTime() - this.form.value.windowStart.getTime()
+        const deltaStartPixel = this.padding + deltaStart * graphPixelOverTime
+        this.ctx.fillStyle = 'rgba(146,9,207,0.26)'
+        this.ctx.fillRect(this.padding + deltaStartPixel, 0, deltaPixel, this.height)
+      }
+    }
 
     //draw selected time range accurate to seconds
     if (this.selectedTimeRange.start && this.selectedTimeRange.end) {
@@ -159,11 +208,7 @@ export class BookingTimeVisualizerComponent implements AfterViewInit{
     // get delta from before current date to current date
     // @ts-ignore
     const deltaTime = currentMarker.getTime() - this.form.value.windowStart.getTime()
-    console.log(currentMarker)
-    console.log(currentMarker.getTime())
-    console.log(deltaTime)
     const x = this.padding + deltaTime * graphPixelOverTime-this.blockSize
-    console.log(x)
     this.ctx.fillRect(x, 0, 2, this.height)
   }
 
@@ -192,35 +237,94 @@ export class BookingTimeVisualizerComponent implements AfterViewInit{
   }
 
   onMouseDown(event: MouseEvent) {
+    if (!this.enableEdit) {
+      return
+    }
+    const positionInTime = this.convertPixelToTime(event.offsetX)
+
+    // check if the position is within an existing instrumentUsage block
+    for (const usage of this.instrumentUsageQuery!.results) {
+      if (positionInTime.getTime() >= usage.time_started.getTime() && positionInTime.getTime() <= usage.time_ended.getTime()) {
+        this.toastService.show("This time is already booked", "Please select another time")
+        return
+      }
+    }
+
 
     if (!this.selected) {
       this.dragStart = event.offsetX
       this.selectedStart = event.offsetX
+      this.selectedStartDate = positionInTime
     }
   }
 
   onMouseUp(event: MouseEvent) {
+    if (!this.enableEdit) {
+      return
+    }
     this.dragEnd = event.offsetX
+    let positionInTime = this.convertPixelToTime(event.offsetX)
     if (!this.selected) {
+      for (const usage of this.instrumentUsageQuery!.results) {
+        if (positionInTime.getTime() >= usage.time_started.getTime() && positionInTime.getTime() <= usage.time_ended.getTime()) {
+          return
+        }
+      }
       this.selected = true
 
+
     } else {
+      let startPosition = this.convertPixelToTime(this.selectedStart!)
+      // switch positionInTime and startPosition if positionInTime is less than startPosition
+      if (positionInTime.getTime() < startPosition.getTime()) {
+        const temp = new Date(positionInTime)
+        positionInTime = startPosition
+        startPosition = temp
+      }
+      // check if another usage is within the selected range
+      for (const usage of this.instrumentUsageQuery!.results) {
+        if (usage.time_started && usage.time_ended) {
+          if ((usage.time_started.getTime() >= startPosition.getTime() && usage.time_started.getTime() <= positionInTime.getTime()) ||
+            (usage.time_ended.getTime() >= startPosition.getTime() && usage.time_ended.getTime() <= positionInTime.getTime())) {
+            this.toastService.show("There are another usage block within the selection range", "Please select another time")
+            return
+          }
+        }
+      }
+
       this.selectedEnd = event.offsetX
+
       if (this.dragStart && this.dragEnd) {
+        // @ts-ignore
+        if (this.selectedStart < this.selectedEnd) {
+          // @ts-ignore
+          const temp = this.selectedStart+0
+          this.selectedStart = this.selectedEnd
+          this.selectedEnd = temp
+        }
         this.convertDragStartAndEndToExactTimeRange()
         this.selectedEnd = undefined
         this.selectedStart = undefined
         this.dragStart = undefined
         this.dragEnd = undefined
+        //this.selectedEndDate = undefined
+        //this.selectedStartDate = undefined
         this.selected = false
+        this.selectedRangeOut.emit({started: this.selectedTimeRange.start!, ended: this.selectedTimeRange.end!})
       }
     }
   }
 
   onMouseMove(event: MouseEvent) {
+    if (!this.enableEdit) {
+      return
+    }
     if (this.dragStart) {
       this.dragEnd = event.offsetX
+      this.selectedEndDate = this.convertPixelToTime(this.dragEnd)
       this.draw()
+    } else {
+      this.selectedStartDate = this.convertPixelToTime(event.offsetX)
     }
   }
 
@@ -247,6 +351,20 @@ export class BookingTimeVisualizerComponent implements AfterViewInit{
         this.drawBackground(this.timeBlocks, canvasWidth, new Date(), delta)
       }
     }
+  }
+
+  convertPixelToTime(pixel: number) {
+    const windowStart = this.form.value.windowStart
+    const windowEnd = this.form.value.windowEnd
+    if (windowStart && windowEnd) {
+      const delta = windowEnd.getTime() - windowStart.getTime()
+      const canvasWidth = this.width - this.padding * 2
+      const deltaSeconds = delta / 1000
+      const deltaPixels = canvasWidth / deltaSeconds
+      const startSeconds = (pixel - this.padding) / deltaPixels
+      return new Date(windowStart.getTime() + startSeconds * 1000)
+    }
+    return new Date()
   }
 
   onDateSelection(date: NgbDate) {
@@ -286,7 +404,7 @@ export class BookingTimeVisualizerComponent implements AfterViewInit{
       const end = new Date(this.toDate.year, this.toDate.month - 1, this.toDate.day)
       this.form.controls.windowStart.setValue(start)
       this.form.controls.windowEnd.setValue(end)
-      this.prepare()
+      this.prepare().then()
     }
 
   }

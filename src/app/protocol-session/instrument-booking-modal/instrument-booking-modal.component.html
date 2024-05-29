@@ -59,12 +59,17 @@
   </form>
   @if (selectedInstrument) {
     <div class="d-flex flex-row justify-content-center">
-      <app-booking-time-visualizer [instrument]="selectedInstrument"></app-booking-time-visualizer>
+      <app-booking-time-visualizer (selectedRangeOut)="handleSelectedRange($event)" [instrument]="selectedInstrument"></app-booking-time-visualizer>
+    </div>
+    <div class="form-group mt-2">
+      <label for="bookingDescription">Booking Description</label>
+      <textarea class="form-control" [(ngModel)]="usageDescription" id="bookingDescription" style="height: 300px"></textarea>
     </div>
 
   }
 
 </div>
 <div class="modal-footer">
-  <button type="button" class="btn btn-secondary" (click)="close()">Close</button>
+  <button type="button" class="btn btn-secondary" (click)="submit()">Submit</button>
+  <button type="button" class="btn btn-primary" (click)="cancel()">Close</button>
 </div>
