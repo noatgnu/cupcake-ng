@@ -32,7 +32,7 @@ export class InstrumentBookingPresenterComponent {
         let windowStart = new Date(usage.time_started).setHours(0, 0, 0, 0)
         let oneDayBeforeWindowStart = windowStart - 24 * 60 * 60 * 1000
         let windowEnd = new Date(usage.time_ended).setHours(0,0,0,0)
-        let oneDayAfterWindowEnd = windowEnd + 24 * 60 * 60 * 1000
+        let oneDayAfterWindowEnd = windowEnd + 24 * 60 * 60 * 1000 *2
         this.instrumentUsage.push({usage: usage, instrument: data, windowStart: new Date(oneDayBeforeWindowStart), windowEnd: new Date(oneDayAfterWindowEnd)})
       })
     }

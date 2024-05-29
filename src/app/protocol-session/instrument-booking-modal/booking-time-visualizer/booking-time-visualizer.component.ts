@@ -41,7 +41,7 @@ export class BookingTimeVisualizerComponent implements AfterViewInit{
     return this._dateBeforeCurrent
   }
 
-  private _dateAfterCurrent = new Date(this.current + 24 * 60 * 60 * 1000)
+  private _dateAfterCurrent = new Date(this.current + 48 * 60 * 60 * 1000)
 
   @Input() set dateAfterCurrent(value: Date) {
     this._dateAfterCurrent = value
@@ -107,9 +107,10 @@ export class BookingTimeVisualizerComponent implements AfterViewInit{
       }
       let currentMarker = new Date()
       this.timeBlocks = timeBlocks
-
+      console.log(timeBlocks)
       this.width = this.blockSize * timeBlocks.length
       this.canvas.nativeElement.width = this.width
+      console.log(this.width)
       const delta = windowEnd.getTime() - windowStart.getTime()
       // draw the time blocks above which include day before and day after the current day
       this.drawBackground(this.timeBlocks, this.width, currentMarker, delta);
@@ -128,46 +129,53 @@ export class BookingTimeVisualizerComponent implements AfterViewInit{
     })
     const totalDrawingBlock = timeBlocks.length
     let currentStart = this.padding
-    const blockSize = graphWidth / totalDrawingBlock
+
     const graphPixelOverTime = graphWidth/windowTimeRange
     uniqueDateFromTimeBlocks.forEach((time, index) => {
       this.ctx.textBaseline = 'top'
       this.ctx.fillStyle = 'gray'
       const filteredTimeBlocks = timeBlocks.filter(timeBlock => timeBlock.getDate() === time.getDate())
+      console.log(time)
       const xStart = currentStart
-      const xEnd = xStart + (filteredTimeBlocks.length) * blockSize
-      this.ctx.fillRect(xStart, 0, filteredTimeBlocks.length * blockSize, this.height)
+      const xEnd = xStart + (filteredTimeBlocks.length) * this.blockSize
+      this.ctx.fillRect(xStart, 0, filteredTimeBlocks.length * this.blockSize, this.height)
       this.ctx.fillStyle = 'white'
       this.ctx.fillText(time.toLocaleDateString(), xStart + 50, 10)
+      console.log(xStart, xEnd, filteredTimeBlocks.length, this.blockSize, this.height)
       // add marker for each day
       this.ctx.beginPath()
       this.ctx.setLineDash([])
-      this.ctx.moveTo(xStart, 0)
-      this.ctx.lineTo(xStart, this.height)
+      // @ts-ignore
+      const pixelStart = (time.getTime() - this.form.value.windowStart.getTime()) * graphPixelOverTime
+      this.ctx.moveTo(pixelStart, 0)
+      this.ctx.lineTo(pixelStart, this.height)
       this.ctx.stroke()
       this.ctx.closePath()
 
       // draw time marker for each day in 24hr format
       filteredTimeBlocks.forEach(timeBlock => {
         const hour = timeBlock.getHours()
+        // @ts-ignore
+        const timeBlockPixelStart = (timeBlock.getTime() - this.form.value.windowStart.getTime()) * graphPixelOverTime
+
         // draw block every two hours
         if (hour % 2 === 0) {
           this.ctx.fillStyle = 'white'
           this.ctx.textBaseline = 'bottom'
-          const x = (timeBlock.getHours() / 24) * (filteredTimeBlocks.length) * blockSize + xStart
+          //const x = (timeBlock.getHours() / 24) * (filteredTimeBlocks.length) * blockSize + xStart
           this.ctx.save()
-          this.ctx.translate(x, this.height)
+          this.ctx.translate(timeBlockPixelStart, this.height)
           this.ctx.rotate(-Math.PI / 2)
-          this.ctx.fillText(timeBlock.toLocaleTimeString(), 50, blockSize)
+          this.ctx.fillText(timeBlock.toLocaleTimeString(), 50, this.blockSize)
           this.ctx.restore()
         }
 
         // draw dashed line for each hour
         this.ctx.beginPath()
-        const x = (timeBlock.getHours() / 24) * (filteredTimeBlocks.length) * blockSize + xStart
+        //const x = (timeBlock.getHours() / 24) * (filteredTimeBlocks.length) * blockSize + xStart
         this.ctx.setLineDash([5, 15])
-        this.ctx.moveTo(x, 0)
-        this.ctx.lineTo(x, 2)
+        this.ctx.moveTo(timeBlockPixelStart, 0)
+        this.ctx.lineTo(timeBlockPixelStart, 2)
         this.ctx.stroke()
         this.ctx.closePath()
       })
@@ -195,6 +203,7 @@ export class BookingTimeVisualizerComponent implements AfterViewInit{
     if (this.selectedTimeRange.start && this.selectedTimeRange.end) {
       const start = this.selectedTimeRange.start
       const end = this.selectedTimeRange.end
+      console.log(start, end)
       const delta = end.getTime() - start.getTime()
       const deltaPixel = delta * graphPixelOverTime
       // @ts-ignore
@@ -208,7 +217,7 @@ export class BookingTimeVisualizerComponent implements AfterViewInit{
     // get delta from before current date to current date
     // @ts-ignore
     const deltaTime = currentMarker.getTime() - this.form.value.windowStart.getTime()
-    const x = this.padding + deltaTime * graphPixelOverTime-this.blockSize
+    const x = this.padding + deltaTime * graphPixelOverTime
     this.ctx.fillRect(x, 0, 2, this.height)
   }
 
@@ -296,7 +305,7 @@ export class BookingTimeVisualizerComponent implements AfterViewInit{
 
       if (this.dragStart && this.dragEnd) {
         // @ts-ignore
-        if (this.selectedStart < this.selectedEnd) {
+        if (this.selectedStart > this.selectedEnd) {
           // @ts-ignore
           const temp = this.selectedStart+0
           this.selectedStart = this.selectedEnd
@@ -310,6 +319,7 @@ export class BookingTimeVisualizerComponent implements AfterViewInit{
         //this.selectedEndDate = undefined
         //this.selectedStartDate = undefined
         this.selected = false
+
         this.selectedRangeOut.emit({started: this.selectedTimeRange.start!, ended: this.selectedTimeRange.end!})
       }
     }
@@ -402,8 +412,10 @@ export class BookingTimeVisualizerComponent implements AfterViewInit{
     if (this.fromDate && this.toDate) {
       const start = new Date(this.fromDate.year, this.fromDate.month - 1, this.fromDate.day)
       const end = new Date(this.toDate.year, this.toDate.month - 1, this.toDate.day)
+      // set end date to the end of the day
+
       this.form.controls.windowStart.setValue(start)
-      this.form.controls.windowEnd.setValue(end)
+      this.form.controls.windowEnd.setValue(new Date(end.setHours(0, 0, 0, 0) + 24 * 60 * 60 * 1000 *2))
       this.prepare().then()
     }
 
