@@ -988,7 +988,20 @@ export class WebService {
     )
   }
 
+  getStaffStatus() {
+    return this.http.get<{is_staff: boolean}>(
+      `${this.baseURL}/api/user/is_staff/`,
+      {responseType: 'json', observe: 'body'}
+    )
 
+  }
+
+  getInstrumentPermission(instrument_id: number) {
+    return this.http.get<{can_view: boolean, can_manage: boolean, can_book: boolean}>(
+      `${this.baseURL}/api/instrument/${instrument_id}/get_instrument_permission/`,
+      {responseType: 'json', observe: 'body'}
+    )
+  }
 
 
 }

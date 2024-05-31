@@ -1,0 +1,52 @@
+<div class="container">
+  <form [formGroup]="form">
+    <div class="form-floating">
+      <input class="form-control" id="searchTerm" formControlName="searchTerm" placeholder="Search Term">
+      <label for="searchTerm">Instrument Search Term</label>
+    </div>
+  </form>
+  @if (instrumentQuery) {
+    @if (instrumentQuery.results.length > 0) {
+      <div class="list-group mt-2">
+        @for (result of instrumentQuery.results; track result.id) {
+          <div class="list-group-item list-group-item-action" (click)="clickInstrument(result)">
+            <div>
+              <b>{{result.instrument_name}}</b>
+            </div>
+            <small>{{result.instrument_description}}</small>
+            <div class="d-flex flex-row gap-1">
+              @if (dataService.instrumentPermissions[result.id]) {
+                @if (dataService.instrumentPermissions[result.id]['can_view']) {
+                  <i class="bi bi-eye"></i>
+                } @else {
+                  <i class="bi bi-eye text-danger"></i>
+                }
+                @if (dataService.instrumentPermissions[result.id]['can_book']) {
+                  <i class="bi bi-book"></i>
+                } @else {
+                  <i class="bi bi-book text-danger"></i>
+                }
+              }
+            </div>
+          </div>
+        }
+      </div>
+      <div class="mt-2">
+        <ngb-pagination (pageChange)="handlePageChange($event)" [collectionSize]="instrumentQuery.count" [(page)]="currentInstrumentPage" [pageSize]="pageSize" [rotate]="true" [boundaryLinks]="true" />
+      </div>
+
+      <div>
+        <b>Legend</b>
+        <div class="d-flex flex-column gap-1">
+          <small><i class="bi bi-eye"></i> View Permission (red if denied)</small>
+          <small><i class="bi bi-book"></i> Book Permission (red if denied)</small>
+        </div>
+      </div>
+
+    } @else {
+      <div class="alert-warning">
+        No instruments found.
+      </div>
+    }
+  }
+</div>

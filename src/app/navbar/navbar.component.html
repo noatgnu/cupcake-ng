@@ -22,6 +22,7 @@
                 <div class="dropdown-item">
                   Session: {{dataService.currentSession.unique_id}}
                 </div>
+
                 @if (dataService.currentSessionPermissions['edit']) {
                   <a class="dropdown-item" href="/#/session-editor/{{dataService.currentSession.unique_id}}" target="_blank">Session Editor</a>
                 }
@@ -39,10 +40,7 @@
               </div>
             </div>
           </li>
-
         }
-
-
         <li class="nav-item">
           <div ngbDropdown display="dynamic" class="d-inline-black">
 
@@ -51,7 +49,7 @@
             </a>
             <div ngbDropdownMenu aria-labelledby="accountDropdown">
               @if (accounts.loggedIn) {
-                <button class="dropdown-item" (click)="navigateToAccount()">Account: {{accounts.username}}</button>
+                <button class="dropdown-item" (click)="navigateToAccount()">Account: {{accounts.username}} @if(accounts.is_staff) {<i class="bi bi-book"></i>} @else {<i class="bi bi-pen"></i>} </button>
                 <a class="dropdown-item" href="/#/calendar" target="_blank">Calendar</a>
                 <button class="dropdown-item" (click)="logout()">Logout</button>
               } @else {
@@ -59,6 +57,11 @@
               }
             </div>
           </div>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/#/instruments">
+            Instruments
+          </a>
         </li>
       </ul>
     </div>

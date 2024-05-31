@@ -13,6 +13,7 @@ export class AccountsService {
   username: string = ""
   lastVisited: Date = new Date()
   triggerLoginSubject: Subject<boolean> = new Subject<boolean>()
+  is_staff: boolean = false
 
   constructor(private http: HttpClient) { }
 

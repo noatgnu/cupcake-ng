@@ -1,10 +1,10 @@
 import {AfterViewInit, Component, ElementRef, EventEmitter, Input, Output, ViewChild} from '@angular/core';
-import {Instrument, InstrumentUsageQuery} from "../../../instrument";
+import {Instrument, InstrumentUsageQuery} from "../../instrument";
 import {FormBuilder, ReactiveFormsModule} from "@angular/forms";
 import {NgbCalendar, NgbDate, NgbDatepicker, NgbTimepicker} from "@ng-bootstrap/ng-bootstrap";
 import {DatePipe} from "@angular/common";
-import {WebService} from "../../../web.service";
-import {ToastService} from "../../../toast.service";
+import {WebService} from "../../web.service";
+import {ToastService} from "../../toast.service";
 
 @Component({
   selector: 'app-booking-time-visualizer',

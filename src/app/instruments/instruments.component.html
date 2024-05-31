@@ -1,0 +1,44 @@
+<div class="container-fluid p-0" style="margin-top: 80px">
+  <nav class="navbar navbar-expand-lg navbar-light d-flex flex-wrap">
+    <div class="container-fluid d-flex flex-row justify-content-center">
+      <a class="navbar-brand">Accounts Information</a>
+    </div>
+  </nav>
+  <div class="d-flex g-1" style="height: 86vh; position:relative">
+    <div class="border-end border-1 border-black d-flex flex-column h-100" style="width: 300px">
+      <nav class="navbar navbar-expand-lg navbar-light d-flex flex-wrap">
+        <div class="container-fluid">
+          <a class="navbar-brand">Sections</a>
+        </div>
+      </nav>
+      <div class="list-group d-flex flex-column rounded-0 overflow-auto">
+        <button type="button" class="list-group-item list-group-item-action" (click)="selectedSection='bookings'">Bookings</button>
+        <button type="button" class="list-group-item list-group-item-action" (click)="selectedSection='management'">Management</button>
+      </div>
+    </div>
+    <div class="d-flex flex-column w-100">
+      @if (selectedSection === 'bookings') {
+        <nav class="navbar navbar-expand-lg navbar-light d-flex flex-wrap">
+          <div class="container-fluid">
+            <a class="navbar-brand">Bookings</a>
+          </div>
+        </nav>
+        <div class="p-5">
+          <app-instrument-booking></app-instrument-booking>
+        </div>
+
+      } @else if (selectedSection === 'management') {
+        <nav class="navbar navbar-expand-lg navbar-light d-flex flex-wrap">
+          <div class="container-fluid">
+            <a class="navbar-brand">Management</a>
+          </div>
+        </nav>
+        <div class="d-flex flex-row">
+          <div class="d-flex flex-column p-5">
+          </div>
+        </div>
+      }
+
+    </div>
+  </div>
+</div>

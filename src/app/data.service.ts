@@ -29,6 +29,7 @@ export class DataService {
     use_whisper: false
   }
   annotationPermissions: {[key: string]: {edit: boolean, view: boolean, delete: boolean}} = {};
+  instrumentPermissions: {[key: string]: {can_view: boolean, can_book: boolean, can_manage: boolean}} = {};
 
   set protocol(value: Protocol) {
     this._protocol = value;

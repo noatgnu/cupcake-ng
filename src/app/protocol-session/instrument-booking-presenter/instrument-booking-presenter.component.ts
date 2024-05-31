@@ -5,7 +5,7 @@ import {Instrument, InstrumentUsage} from "../../instrument";
 import {DatePipe} from "@angular/common";
 import {
   BookingTimeVisualizerComponent
-} from "../instrument-booking-modal/booking-time-visualizer/booking-time-visualizer.component";
+} from "../../instruments/booking-time-visualizer/booking-time-visualizer.component";
 
 @Component({
   selector: 'app-instrument-booking-presenter',

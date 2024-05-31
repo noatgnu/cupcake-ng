@@ -25,7 +25,7 @@ import {AccountsService} from "../../accounts/accounts.service";
 import {SpeechService} from "../../speech.service";
 import {RandomAnnotationModalComponent} from "../random-annotation-modal/random-annotation-modal.component";
 import {UploadLargeFileModalComponent} from "../../upload-large-file-modal/upload-large-file-modal.component";
-import {InstrumentBookingModalComponent} from "../instrument-booking-modal/instrument-booking-modal.component";
+import {InstrumentBookingModalComponent} from "../../instruments/instrument-booking-modal/instrument-booking-modal.component";
 import {Instrument} from "../../instrument";
 
 @Component({
@@ -537,7 +537,7 @@ export class StepViewComponent {
       })
 
     } else if (item === "Instrument") {
-      const ref = this.modal.open(InstrumentBookingModalComponent, {scrollable: true, size: "lg"})
+      const ref = this.modal.open(InstrumentBookingModalComponent, {scrollable: true})
       ref.closed.subscribe((data: {instrument: Instrument, selectedRange: {started: Date |undefined, ended: Date | undefined}, usageDescription: string}) => {
         this.web.createInstrumentUsageAnnotation(this.dataService.currentSession?.unique_id, data.instrument.id, data.selectedRange.started, data.selectedRange.ended, this._currentStep?.id, data.usageDescription).subscribe((data: any) => {
           this.toastService.show('Annotation', 'Instrument Booking Saved Successfully')

@@ -90,6 +90,10 @@ export class HomeComponent implements OnInit, AfterViewInit {
           this.getProjects()
         }
       }
+      this.web.getStaffStatus().subscribe((data) => {
+        this.accounts.is_staff = data.is_staff
+        console.log(data.is_staff)
+      })
     })
 
   }
@@ -103,6 +107,7 @@ export class HomeComponent implements OnInit, AfterViewInit {
       this.getUserProtocols()
       this.getUserSessions()
       this.getProjects()
+
     } else {
       this.toastService.show("Login", "Please login to access your protocols")
       this.accounts.triggerLoginSubject.next(true)

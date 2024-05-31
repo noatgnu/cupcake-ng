@@ -28,6 +28,10 @@ export const routes: Routes = [
   {
     path: 'project-editor',
     loadChildren: () => import('./project-editor/project-editor.module').then(m => m.ProjectEditorModule)
+  },
+  {
+    path: 'instruments',
+    loadChildren: () => import('./instruments/instruments.module').then(m => m.InstrumentsModule)
   }
 
   ,

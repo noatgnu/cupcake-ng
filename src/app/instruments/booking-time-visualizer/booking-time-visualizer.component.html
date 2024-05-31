@@ -33,14 +33,14 @@
           @if (selectedEndDate) {
             <b>Preview End Date:</b> {{selectedEndDate | date: 'short'}}<br>
           }
-
         </p>
       </div>
     }
   }
-  <div class="overflow-auto" style="max-width: 600px">
-    <canvas (mousedown)="onMouseDown($event)" (mouseup)="onMouseUp($event)" (mousemove)="onMouseMove($event)" #canvas id="bookingCanvas" [height]="height"></canvas>
-  </div>
+
+</div>
+<div class="container overflow-auto mt-2" style="max-width: 450px">
+  <canvas (mousedown)="onMouseDown($event)" (mouseup)="onMouseUp($event)" (mousemove)="onMouseMove($event)" #canvas id="bookingCanvas" [height]="height"></canvas>
 </div>
 
 

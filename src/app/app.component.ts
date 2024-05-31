@@ -57,6 +57,10 @@ export class AppComponent {
             this.dataService.serverSettings = data
           }
         })
+        this.web.getStaffStatus().subscribe((data) => {
+          this.accounts.is_staff = data.is_staff
+          console.log(data.is_staff)
+        })
       }
     }
     console.log(this.accounts.token)
