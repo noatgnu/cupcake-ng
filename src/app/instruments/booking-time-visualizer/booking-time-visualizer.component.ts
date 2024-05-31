@@ -110,15 +110,10 @@ export class BookingTimeVisualizerComponent implements AfterViewInit{
       this.timeBlocks = timeBlocks
       console.log(timeBlocks)
       this.width = this.blockSize * timeBlocks.length
-      let dpi = window.devicePixelRatio
       this.canvas.nativeElement.width = this.width
-      let style_height = +getComputedStyle(this.canvas.nativeElement).getPropertyValue("height").slice(0, -2);
-      let style_width = +getComputedStyle(this.canvas.nativeElement).getPropertyValue("width").slice(0, -2);
-      this.canvas.nativeElement.setAttribute('height', (style_height * dpi).toString());
-      this.canvas.nativeElement.setAttribute('width', (style_width * dpi).toString());
-      this.width = style_width * dpi
-      console.log(this.width)
+
       const delta = windowEnd.getTime() - windowStart.getTime()
+      this.changeDPI(300, this.canvas.nativeElement)
       // draw the time blocks above which include day before and day after the current day
       this.drawBackground(this.timeBlocks, this.width, currentMarker, delta);
     }
@@ -425,6 +420,25 @@ export class BookingTimeVisualizerComponent implements AfterViewInit{
       this.form.controls.windowStart.setValue(start)
       this.form.controls.windowEnd.setValue(new Date(end.setHours(0, 0, 0, 0) + 24 * 60 * 60 * 1000 *2))
       this.prepare().then()
+    }
+
+  }
+
+  changeDPI(dpi: number, canvas: HTMLCanvasElement) {
+    // Set up CSS size.
+    canvas.style.width = canvas.style.width || canvas.width + 'px';
+    canvas.style.height = canvas.style.height || canvas.height + 'px';
+
+    // Get size information.
+    const scaleFactor = dpi / 96;
+    const rect = canvas.getBoundingClientRect();
+
+    // Scale canvas.
+    canvas.width = rect.width * scaleFactor;
+    canvas.height = rect.height * scaleFactor;
+    const ctx = canvas.getContext('2d');
+    if (ctx) {
+      ctx.scale(scaleFactor, scaleFactor);
     }
 
   }
