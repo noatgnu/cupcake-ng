@@ -78,6 +78,7 @@ export class BookingTimeVisualizerComponent implements AfterViewInit{
 
   ngAfterViewInit() {
     const ctx = this.canvas.nativeElement.getContext('2d')
+
     if (this.instrument) {
       // @ts-ignore
       this.web.getInstrumentUsage(this.instrument.id, this.form.value.windowStart, this.form.value.windowEnd).subscribe((data) => {
@@ -109,7 +110,13 @@ export class BookingTimeVisualizerComponent implements AfterViewInit{
       this.timeBlocks = timeBlocks
       console.log(timeBlocks)
       this.width = this.blockSize * timeBlocks.length
+      let dpi = window.devicePixelRatio
       this.canvas.nativeElement.width = this.width
+      let style_height = +getComputedStyle(this.canvas.nativeElement).getPropertyValue("height").slice(0, -2);
+      let style_width = +getComputedStyle(this.canvas.nativeElement).getPropertyValue("width").slice(0, -2);
+      this.canvas.nativeElement.setAttribute('height', (style_height * dpi).toString());
+      this.canvas.nativeElement.setAttribute('width', (style_width * dpi).toString());
+      this.width = style_width * dpi
       console.log(this.width)
       const delta = windowEnd.getTime() - windowStart.getTime()
       // draw the time blocks above which include day before and day after the current day
@@ -180,6 +187,7 @@ export class BookingTimeVisualizerComponent implements AfterViewInit{
         this.ctx.closePath()
       })
       currentStart = xEnd
+
     })
     // draw other instrument usages from the instrumentUsageQuery
 
