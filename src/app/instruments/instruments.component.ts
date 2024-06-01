@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import {ReactiveFormsModule} from "@angular/forms";
 import {UserDataComponent} from "../accounts/user-data/user-data.component";
 import {InstrumentBookingComponent} from "./instrument-booking/instrument-booking.component";
+import {InstrumentManagementComponent} from "./instrument-management/instrument-management.component";
 
 @Component({
   selector: 'app-instruments',
@@ -9,13 +10,15 @@ import {InstrumentBookingComponent} from "./instrument-booking/instrument-bookin
   imports: [
     ReactiveFormsModule,
     UserDataComponent,
-    InstrumentBookingComponent
+    InstrumentBookingComponent,
+    InstrumentManagementComponent
   ],
   templateUrl: './instruments.component.html',
   styleUrl: './instruments.component.scss'
 })
 export class InstrumentsComponent {
   selectedSection = 'bookings'
-
+  hideSection = false
+  constructor() { }
 
 }

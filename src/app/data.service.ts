@@ -134,4 +134,22 @@ export class DataService {
   convertMolarity(value: number, unit: string, targetUnit: string): number {
     return value * this.molarityUnitMap[unit].baseConversion / this.molarityUnitMap[targetUnit].baseConversion;
   }
+
+  changeDPI(dpi: number, canvas: HTMLCanvasElement) {
+    // Set up CSS size.
+    canvas.style.width = canvas.style.width || canvas.width + 'px';
+    canvas.style.height = canvas.style.height || canvas.height + 'px';
+
+    // Get size information.
+    const scaleFactor = dpi / 96;
+    const rect = canvas.getBoundingClientRect();
+
+    // Scale canvas.
+    canvas.width = rect.width * scaleFactor;
+    canvas.height = rect.height * scaleFactor;
+    const ctx = canvas.getContext('2d');
+    if (ctx) {
+      ctx.scale(scaleFactor, scaleFactor);
+    }
+  }
 }

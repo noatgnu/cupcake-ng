@@ -22,6 +22,7 @@ export interface InstrumentUsage {
   updated_at: Date;
   time_started: Date;
   time_ended: Date;
+  user: string;
 }
 
 export interface InstrumentUsageQuery {

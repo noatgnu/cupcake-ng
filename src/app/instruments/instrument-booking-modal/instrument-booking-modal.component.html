@@ -74,24 +74,34 @@
       }
     </form>
   }
-
   @if (selectedInstrument) {
-    <div>
-
-    </div>
     <div>
       <p><b>Selected instrument:</b> {{selectedInstrument.instrument_name}}</p>
     </div>
-    <div class="d-flex flex-row justify-content-center">
-      <app-booking-time-visualizer (selectedRangeOut)="handleSelectedRange($event)" [instrument]="selectedInstrument"></app-booking-time-visualizer>
-    </div>
-    <div class="container">
-      <div class="form-group mt-2">
-        <label for="bookingDescription">Booking Description</label>
-        <textarea class="form-control" [(ngModel)]="usageDescription" id="bookingDescription" style="height: 150px"></textarea>
-      </div>
-    </div>
+    @if (selectedInstrumentUsage) {
+      <div>
+        <p>
+          <b>Selected usage:</b> <br>
+          Stated: {{selectedInstrumentUsage.time_started|date:'short'}} <br>
+          Ended: {{selectedInstrumentUsage.time_ended|date:'short'}}<br>
+          User: {{selectedInstrumentUsage.user}}
+        </p>
+        <div class="d-flex flex-row gap-1">
+          <button class="btn btn-sm btn-outline-danger" (click)="deleteUsage(selectedInstrumentUsage)"><i class="bi bi-trash"></i></button>
+          <button class="btn btn-sm btn-outline-primary" (click)="selectedInstrumentUsage=undefined"><i class="bi bi-x"></i></button>
+        </div>
 
+      </div>
+    } @else {
+      <app-booking-time-visualizer [enableDelete]="true" (selectedUsageBlock)="handleSelectedInstrumentUsage($event)" (selectedRangeOut)="handleSelectedRange($event)" [instrument]="selectedInstrument"></app-booking-time-visualizer>
+
+      <div class="container">
+        <div class="form-group mt-2">
+          <label for="bookingDescription">Booking Description</label>
+          <textarea class="form-control" [(ngModel)]="usageDescription" id="bookingDescription" style="height: 150px"></textarea>
+        </div>
+      </div>
+    }
 
   }
 

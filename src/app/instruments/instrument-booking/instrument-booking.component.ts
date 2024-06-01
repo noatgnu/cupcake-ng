@@ -8,6 +8,8 @@ import {DataService} from "../../data.service";
 import {NgClass} from "@angular/common";
 import {InstrumentBookingModalComponent} from "../instrument-booking-modal/instrument-booking-modal.component";
 import {ToastService} from "../../toast.service";
+import {BookingTimeVisualizerComponent} from "../booking-time-visualizer/booking-time-visualizer.component";
+import {InstrumentService} from "../instrument.service";
 
 @Component({
   selector: 'app-instrument-booking',
@@ -16,7 +18,8 @@ import {ToastService} from "../../toast.service";
     ReactiveFormsModule,
     NgbPagination,
     NgClass,
-    NgbTooltip
+    NgbTooltip,
+    BookingTimeVisualizerComponent
   ],
   templateUrl: './instrument-booking.component.html',
   styleUrl: './instrument-booking.component.scss'
@@ -31,7 +34,7 @@ export class InstrumentBookingComponent {
     searchTerm: ['']
   })
 
-  constructor(private web: WebService, private fb: FormBuilder, public dataService: DataService, private modal: NgbModal, private toastService: ToastService) {
+  constructor(private web: WebService, private fb: FormBuilder, public dataService: DataService, private modal: NgbModal, private toastService: ToastService, private instrumentService: InstrumentService) {
     this.web.getInstruments().subscribe((data: any) => {
       this.instrumentQuery = data
       this.getInstrumentPermission()
@@ -51,13 +54,18 @@ export class InstrumentBookingComponent {
       const ref = this.modal.open(InstrumentBookingModalComponent, {scrollable: true})
       ref.componentInstance.selectedInstrument = instrument
       ref.componentInstance.enableSearch = false
-      ref.closed.subscribe((data: any) => {
-
+      ref.closed.subscribe((data: {instrument: Instrument, selectedRange: {started: Date |undefined, ended: Date | undefined}, usageDescription: string}) => {
+        // @ts-ignore
+        this.web.createInstrumentUsage(data.instrument.id, data.selectedRange.started, data.selectedRange.ended, data.usageDescription).subscribe((data) => {
+          this.instrumentService.updateTrigger.next(true)
+          this.toastService.show("Instrument booking", "Successfully booked instrument")
+        }, (error) => {
+          this.toastService.show("Instrument booking", "Failed to book instrument")
+        })
       })
     } else{
-      this.toastService.show("Instrument permission", "You do not have permission to view this instrument")
+      this.toastService.show("Instrument permission", "You do not have permission for this instrument")
     }
-
   }
 
   handlePageChange(event: any) {
@@ -84,7 +92,6 @@ export class InstrumentBookingComponent {
 
       })
     }
-
   }
 
 }

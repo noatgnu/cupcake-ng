@@ -17,25 +17,25 @@
       </div>
     </div>
     <div class="d-flex flex-column w-100">
+      <nav class="navbar navbar-expand-lg navbar-light d-flex flex-wrap">
+        <div class="container-fluid">
+          <button type="button" class="btn btn-outline-primary" (click)="hideSection=!hideSection"><i class="bi bi-menu-app"></i></button>
+          <a class="navbar-brand">
+            @if (selectedSection === 'management') {
+              Instrument Management
+            } @else if (selectedSection === 'bookings') {
+              Instrument Bookings
+            }
+          </a>
+        </div>
+      </nav>
       @if (selectedSection === 'bookings') {
-        <nav class="navbar navbar-expand-lg navbar-light d-flex flex-wrap">
-          <div class="container-fluid">
-            <a class="navbar-brand">Bookings</a>
-          </div>
-        </nav>
-        <div class="p-5">
+        <div class="d-flex flex-column p-2">
           <app-instrument-booking></app-instrument-booking>
         </div>
-
       } @else if (selectedSection === 'management') {
-        <nav class="navbar navbar-expand-lg navbar-light d-flex flex-wrap">
-          <div class="container-fluid">
-            <a class="navbar-brand">Management</a>
-          </div>
-        </nav>
-        <div class="d-flex flex-row">
-          <div class="d-flex flex-column p-5">
-          </div>
+        <div class="d-flex flex-column p-2">
+          <app-instrument-management></app-instrument-management>
         </div>
       }
 

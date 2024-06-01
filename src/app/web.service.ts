@@ -14,7 +14,7 @@ import {Annotation, AnnotationFolder, AnnotationQuery} from "./annotation";
 import {ReagentQuery, ProtocolReagent, ProtocolStepReagent} from "./reagent";
 import {ProtocolTag, ProtocolTagQuery, StepTag, StepTagQuery, TagQuery} from "./tag";
 import {Project, ProjectQuery} from "./project";
-import {Instrument, InstrumentQuery, InstrumentUsageQuery} from "./instrument";
+import {Instrument, InstrumentQuery, InstrumentUsage, InstrumentUsageQuery} from "./instrument";
 
 
 @Injectable({
@@ -1003,6 +1003,20 @@ export class WebService {
     )
   }
 
+  createInstrumentUsage(instrument_id: number, time_start: Date, time_end: Date, description: string) {
+    return this.http.post<InstrumentUsage>(
+      `${this.baseURL}/api/instrument_usage/`,
+      {time_started: time_start, time_ended: time_end, instrument: instrument_id, description: description},
+      {responseType: 'json', observe: 'body'}
+    )
+  }
+
+  deleteInstrumentUsage(usage_id: number) {
+    return this.http.delete(
+      `${this.baseURL}/api/instrument_usage/${usage_id}/delete_usage/`,
+      {responseType: 'json', observe: 'body'}
+    )
+  }
 
 }
 

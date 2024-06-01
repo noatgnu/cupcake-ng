@@ -1,10 +1,13 @@
 import {AfterViewInit, Component, ElementRef, EventEmitter, Input, Output, ViewChild} from '@angular/core';
-import {Instrument, InstrumentUsageQuery} from "../../instrument";
+import {Instrument, InstrumentUsage, InstrumentUsageQuery} from "../../instrument";
 import {FormBuilder, ReactiveFormsModule} from "@angular/forms";
 import {NgbCalendar, NgbDate, NgbDatepicker, NgbTimepicker} from "@ng-bootstrap/ng-bootstrap";
 import {DatePipe} from "@angular/common";
 import {WebService} from "../../web.service";
 import {ToastService} from "../../toast.service";
+import {DataService} from "../../data.service";
+import {AccountsService} from "../../accounts/accounts.service";
+import {InstrumentService} from "../instrument.service";
 
 @Component({
   selector: 'app-booking-time-visualizer',
@@ -57,7 +60,7 @@ export class BookingTimeVisualizerComponent implements AfterViewInit{
     windowEnd: [this.dateAfterCurrent]
   })
   @Input() selectedTimeRange: {start: Date|null, end: Date|null} = {start: null, end: null}
-  blockSize = 10
+  blockSize = 20
   width = 0
   height = 125
   selected = false
@@ -69,11 +72,19 @@ export class BookingTimeVisualizerComponent implements AfterViewInit{
   @Input() enableEdit = true;
   @Input() selectedStartDate!: Date|undefined;
   @Input() selectedEndDate!: Date|undefined;
-
+  @Input() enableDelete: boolean = false;
   @Output() selectedRangeOut: EventEmitter<{ started: Date, ended: Date}> = new EventEmitter<{ started: Date, ended: Date}>();
-
-  constructor(private fb: FormBuilder, private toastService: ToastService, private web: WebService, private calendar: NgbCalendar) {
-
+  @Output() selectedUsageBlock: EventEmitter<InstrumentUsage> = new EventEmitter<InstrumentUsage>();
+  constructor(private fb: FormBuilder, private toastService: ToastService, private web: WebService, private dataService: DataService, private accounts: AccountsService, private instrumentService: InstrumentService) {
+    this.instrumentService.updateTrigger.asObservable().subscribe(() => {
+      if (this.instrument) {
+        // @ts-ignore
+        this.web.getInstrumentUsage(this.instrument.id, this.form.value.windowStart, this.form.value.windowEnd).subscribe((data) => {
+          this.instrumentUsageQuery = data
+          this.prepare().then();
+        })
+      }
+    })
   }
 
   ngAfterViewInit() {
@@ -108,12 +119,11 @@ export class BookingTimeVisualizerComponent implements AfterViewInit{
       }
       let currentMarker = new Date()
       this.timeBlocks = timeBlocks
-      console.log(timeBlocks)
       this.width = this.blockSize * timeBlocks.length
       this.canvas.nativeElement.width = this.width
 
       const delta = windowEnd.getTime() - windowStart.getTime()
-      this.changeDPI(300, this.canvas.nativeElement)
+      this.dataService.changeDPI(300, this.canvas.nativeElement)
       // draw the time blocks above which include day before and day after the current day
       this.drawBackground(this.timeBlocks, this.width, currentMarker, delta);
     }
@@ -137,13 +147,11 @@ export class BookingTimeVisualizerComponent implements AfterViewInit{
       this.ctx.textBaseline = 'top'
       this.ctx.fillStyle = 'gray'
       const filteredTimeBlocks = timeBlocks.filter(timeBlock => timeBlock.getDate() === time.getDate())
-      console.log(time)
       const xStart = currentStart
       const xEnd = xStart + (filteredTimeBlocks.length) * this.blockSize
       this.ctx.fillRect(xStart, 0, filteredTimeBlocks.length * this.blockSize, this.height)
       this.ctx.fillStyle = 'white'
       this.ctx.fillText(time.toLocaleDateString(), xStart + 50, 10)
-      console.log(xStart, xEnd, filteredTimeBlocks.length, this.blockSize, this.height)
       // add marker for each day
       this.ctx.beginPath()
       this.ctx.setLineDash([])
@@ -197,8 +205,17 @@ export class BookingTimeVisualizerComponent implements AfterViewInit{
         // @ts-ignore
         const deltaStart = start.getTime() - this.form.value.windowStart.getTime()
         const deltaStartPixel = this.padding + deltaStart * graphPixelOverTime
-        this.ctx.fillStyle = 'rgba(146,9,207,0.26)'
+        if (usage.user === this.accounts.username) {
+          this.ctx.fillStyle = 'rgba(26,121,140,0.55)'
+        } else {
+          this.ctx.fillStyle = 'rgba(146,9,207,0.26)'
+        }
+
         this.ctx.fillRect(this.padding + deltaStartPixel, 0, deltaPixel, this.height)
+        // draw username on the block at the bottom
+        this.ctx.fillStyle = 'white'
+        this.ctx.textBaseline = 'bottom'
+        this.ctx.fillText("user: "+usage.user, this.padding + deltaStartPixel+1, this.height)
       }
     }
 
@@ -206,7 +223,6 @@ export class BookingTimeVisualizerComponent implements AfterViewInit{
     if (this.selectedTimeRange.start && this.selectedTimeRange.end) {
       const start = this.selectedTimeRange.start
       const end = this.selectedTimeRange.end
-      console.log(start, end)
       const delta = end.getTime() - start.getTime()
       const deltaPixel = delta * graphPixelOverTime
       // @ts-ignore
@@ -257,7 +273,14 @@ export class BookingTimeVisualizerComponent implements AfterViewInit{
     // check if the position is within an existing instrumentUsage block
     for (const usage of this.instrumentUsageQuery!.results) {
       if (positionInTime.getTime() >= usage.time_started.getTime() && positionInTime.getTime() <= usage.time_ended.getTime()) {
-        this.toastService.show("This time is already booked", "Please select another time")
+        if (this.enableDelete && this.enableEdit && usage.user === this.accounts.username) {
+
+          this.toastService.show("Instrument Usage", "Selected instrument usage block")
+          this.selectedUsageBlock.emit(usage)
+        } else {
+          this.toastService.show("This time is already booked", "Please select another time")
+
+        }
         return
       }
     }
@@ -329,6 +352,10 @@ export class BookingTimeVisualizerComponent implements AfterViewInit{
   }
 
   onMouseMove(event: MouseEvent) {
+    // draw marker show where the mouse is
+    this.drawMarker(event.offsetX, 'black')
+
+
     if (!this.enableEdit) {
       return
     }
@@ -424,22 +451,12 @@ export class BookingTimeVisualizerComponent implements AfterViewInit{
 
   }
 
-  changeDPI(dpi: number, canvas: HTMLCanvasElement) {
-    // Set up CSS size.
-    canvas.style.width = canvas.style.width || canvas.width + 'px';
-    canvas.style.height = canvas.style.height || canvas.height + 'px';
-
-    // Get size information.
-    const scaleFactor = dpi / 96;
-    const rect = canvas.getBoundingClientRect();
-
-    // Scale canvas.
-    canvas.width = rect.width * scaleFactor;
-    canvas.height = rect.height * scaleFactor;
-    const ctx = canvas.getContext('2d');
-    if (ctx) {
-      ctx.scale(scaleFactor, scaleFactor);
-    }
-
+  drawMarker(pixel: number, color: string) {
+    this.clearCanvas()
+    this.draw()
+    this.ctx.fillStyle = color
+    this.ctx.fillRect(pixel, 0, 1, this.height)
   }
+
+
 }
