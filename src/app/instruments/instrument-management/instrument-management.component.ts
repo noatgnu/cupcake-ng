@@ -6,6 +6,9 @@ import {DataService} from "../../data.service";
 import {NgbModal, NgbPagination} from "@ng-bootstrap/ng-bootstrap";
 import {InstrumentBookingModalComponent} from "../instrument-booking-modal/instrument-booking-modal.component";
 import {ToastService} from "../../toast.service";
+import {AccountsService} from "../../accounts/accounts.service";
+import {InstrumentCreateModalComponent} from "../instrument-create-modal/instrument-create-modal.component";
+import {InstrumentManagementModalComponent} from "../instrument-management-modal/instrument-management-modal.component";
 
 @Component({
   selector: 'app-instrument-management',
@@ -28,7 +31,7 @@ export class InstrumentManagementComponent {
     searchTerm: ['']
   })
 
-  constructor(private fb: FormBuilder, private web: WebService, public dataService: DataService, private modal: NgbModal, private toastService: ToastService) {
+  constructor(private fb: FormBuilder, private web: WebService, public dataService: DataService, private modal: NgbModal, private toastService: ToastService, public accounts: AccountsService) {
     this.web.getInstruments().subscribe((data: any) => {
       this.instrumentQuery = data
     })
@@ -57,12 +60,15 @@ export class InstrumentManagementComponent {
   }
 
   clickInstrument(instrument: Instrument) {
-    if (this.dataService.instrumentPermissions[instrument.id].can_manage) {
-      const ref = this.modal.open(InstrumentBookingModalComponent, {scrollable: true})
-      ref.componentInstance.selectedInstrument = instrument
-      ref.componentInstance.enableSearch = false
+    if (this.dataService.instrumentPermissions[instrument.id].can_manage || this.accounts.is_staff) {
+      const ref = this.modal.open(InstrumentManagementModalComponent, {scrollable: true})
+      ref.componentInstance.instrument = instrument
       ref.closed.subscribe((data: any) => {
-
+        this.web.assignInstrumentPermission(data.instrument.id, data.username, data.permissions).subscribe((data) => {
+          this.toastService.show("Instrument permission", "Successfully assigned permission")
+        }, (error) => {
+          this.toastService.show("Instrument permission", "Failed to assign permission")
+        })
       })
     } else{
       this.toastService.show("Instrument permission", "You do not have permission for this instrument")
@@ -79,6 +85,18 @@ export class InstrumentManagementComponent {
 
       })
     }
+  }
+
+  openInstrumentCreateModal() {
+    const ref = this.modal.open(InstrumentCreateModalComponent, {scrollable: true})
+    ref.closed.subscribe((data: any) => {
+      this.web.createInstrument(data.name, data.description).subscribe((instrument) => {
+        this.web.getInstruments().subscribe((data: any) => {
+          this.instrumentQuery = data
+          this.getInstrumentPermission()
+        })
+      })
+    })
   }
 
 }

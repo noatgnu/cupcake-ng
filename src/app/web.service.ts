@@ -1018,6 +1018,21 @@ export class WebService {
     )
   }
 
+  getUserInstrumentPermission(instrument_id: number, username: string) {
+    return this.http.get<{can_view: boolean, can_manage: boolean, can_book: boolean}>(
+      `${this.baseURL}/api/instrument/${instrument_id}/get_instrument_permission_for/?user=${username}`,
+      {responseType: 'json', observe: 'body'}
+    )
+  }
+
+  assignInstrumentPermission(instrument_id: number, username: string, permissions: any) {
+    return this.http.post(
+      `${this.baseURL}/api/instrument/${instrument_id}/assign_instrument_permission/`,
+      {user: username, can_view: permissions.can_view, can_manage: permissions.can_manage, can_book: permissions.can_book},
+      {responseType: 'json', observe: 'body'}
+    )
+  }
+
 }
 
 interface ChunkUploadResponse {
