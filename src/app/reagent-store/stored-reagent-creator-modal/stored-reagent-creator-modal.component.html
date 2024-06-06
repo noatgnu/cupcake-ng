@@ -1,0 +1,70 @@
+<div class="modal-header">
+  <h5 class="modal-title">
+    Expendable/Consumable/Sample Entry
+  </h5>
+</div>
+<div class="modal-body">
+  <form [formGroup]="reagentSearchForm">
+    <div>
+      Input entry for <b>{{stored_at?.object_name}}</b>
+    </div>
+    <div class="form-floating">
+      <input
+        [resultTemplate]="rt"
+        (selectItem)="onSearchIngredients($event)"
+        id="reagentNameSearch" type="search"
+        class="form-control" formControlName="name"
+        [ngbTypeahead]="search"
+        [inputFormatter]="formatIngredient"
+        [resultFormatter]="resultFormatter"
+      />
+      <label for="reagentNameSearch">Reagent</label>
+    </div>
+    <ng-template #rt let-r="result" let-t="term">
+      <ngb-highlight [result]="r.name + ' ' + '('+ r.unit+ ')' " [term]="t"></ngb-highlight>
+    </ng-template>
+
+    <div class="form-floating">
+      <input type="number" class="form-control" formControlName="quantity" />
+      <label>Quantity</label>
+    </div>
+    <div class="form-floating">
+      <select id="reagentUnit" class="form-select" formControlName="unit">
+        <optgroup label="Volume">
+          <option value="nL">nL</option>
+          <option value="uL">uL</option>
+          <option value="mL">mL</option>
+          <option value="L">L</option>
+        </optgroup>
+        <optgroup label="Mass">
+          <option value="ng">ng</option>
+          <option value="mg">mg</option>
+          <option value="g">g</option>
+          <option value="kg">kg</option>
+        </optgroup>
+        <optgroup label="Mole">
+          <option value="nM">nM</option>
+          <option value="uM">uM</option>
+          <option value="mM">mM</option>
+          <option value="M">M</option>
+        </optgroup>
+        <optgroup label="Count">
+          <option value="ea">ea</option>
+        </optgroup>
+        <optgroup label="Other">
+          <option value="pieces">pieces</option>
+          <option value="other">other</option>
+        </optgroup>
+      </select>
+      <label for="reagentUnit">Unit</label>
+    </div>
+    <div class="form-floating">
+      <textarea class="form-control" formControlName="notes"></textarea>
+      <label>Notes</label>
+    </div>
+  </form>
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn btn-primary" (click)="submit()">Add</button>
+  <button type="button" class="btn btn-secondary" (click)="close()">Close</button>
+</div>

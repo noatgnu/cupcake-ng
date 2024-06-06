@@ -1,0 +1,37 @@
+<div class="modal-header">
+  <h5 class="modal-title">
+    Storage Object Creator
+  </h5>
+</div>
+<div class="modal-body">
+  <form [formGroup]="form" class="d-flex flex-column gap-2">
+    @if (stored_at) {
+      <div>
+        Creating container within <b>{{stored_at.object_name}}</b>
+      </div>
+
+    }
+    <div class="form-floating">
+      <input type="text" class="form-control" id="name" formControlName="name" placeholder="Storage Object Name">
+      <label for="name">Storage Object Name</label>
+    </div>
+    <div class="form-floating">
+      <textarea class="form-control" id="description" formControlName="description" placeholder="Storage Object Description"></textarea>
+      <label for="description">Storage Object Description</label>
+    </div>
+    <div class="form-floating">
+      <select class="form-select" id="type" formControlName="type">
+        @for (t of typeChoices; track t) {
+          <option value="{{t}}">{{t}}</option>
+        }
+      </select>
+      <label for="type">
+        Storage Object Type
+      </label>
+    </div>
+  </form>
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn btn-primary" (click)="submit()">Submit</button>
+  <button type="button" class="btn btn-secondary" (click)="close()">Close</button>
+</div>

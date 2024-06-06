@@ -32,8 +32,11 @@ export const routes: Routes = [
   {
     path: 'instruments',
     loadChildren: () => import('./instruments/instruments.module').then(m => m.InstrumentsModule)
+  },
+  {
+    path: 'reagent-store',
+    loadChildren: () => import('./reagent-store/reagent-store.module').then(m => m.ReagentStoreModule)
   }
-
   ,
   {
     path: '**',

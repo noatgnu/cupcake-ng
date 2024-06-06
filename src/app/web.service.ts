@@ -15,6 +15,7 @@ import {ReagentQuery, ProtocolReagent, ProtocolStepReagent} from "./reagent";
 import {ProtocolTag, ProtocolTagQuery, StepTag, StepTagQuery, TagQuery} from "./tag";
 import {Project, ProjectQuery} from "./project";
 import {Instrument, InstrumentQuery, InstrumentUsage, InstrumentUsageQuery} from "./instrument";
+import {StorageObject, StorageObjectQuery, StoredReagent, StoredReagentQuery} from "./storage-object";
 
 
 @Injectable({
@@ -1033,6 +1034,123 @@ export class WebService {
     )
   }
 
+  getStorageObjects(url?: string, limit: number = 10, offset: number = 0, searchTerm: string = "", root: boolean = false, stored_at: number|null = null) {
+    if (url) {
+      return this.http.get<StorageObjectQuery>(
+        url,
+        {responseType: 'json', observe: 'body'}
+      );
+    }
+    let params = new HttpParams()
+      .set('limit', limit.toString())
+      .set('offset', offset.toString())
+    if (searchTerm !== "") {
+      params = params.append('search', searchTerm);
+    }
+    if (root) {
+      params = params.append('root', 'true')
+    }
+    if (stored_at) {
+      params = params.append('stored_at', stored_at.toString())
+    }
+
+    return this.http.get<StorageObjectQuery>(
+      `${this.baseURL}/api/storage_object/`,
+      {responseType: 'json', observe: 'body', params: params}
+    )
+  }
+
+  getStorageObject(object_id: number) {
+    return this.http.get<StorageObject>(
+      `${this.baseURL}/api/storage_object/${object_id}/`,
+      {responseType: 'json', observe: 'body'}
+    )
+  }
+
+  createStorageObject(object_name: string, object_description: string, object_type: string, stored_at: number|null) {
+    return this.http.post<StorageObject>(
+      `${this.baseURL}/api/storage_object/`,
+      {name: object_name, description: object_description, object_type: object_type, stored_at: stored_at},
+      {responseType: 'json', observe: 'body'}
+    )
+  }
+
+  deleteStorageObject(object_id: number) {
+    return this.http.delete(
+      `${this.baseURL}/api/storage_object/${object_id}/`,
+      {responseType: 'json', observe: 'body'}
+    )
+  }
+
+  updateStorageObject(object_id: number, object_name: string, object_description: string) {
+    return this.http.put<StorageObject>(
+      `${this.baseURL}/api/storage_object/${object_id}/`,
+      {name: object_name, description: object_description},
+      {responseType: 'json', observe: 'body'}
+    )
+  }
+
+  getStoredReagents(url?: string, limit: number = 10, offset: number = 0, searchTerm: string = "", storage_object: number|null = null) {
+    if (url) {
+      return this.http.get<StoredReagentQuery>(
+        url,
+        {responseType: 'json', observe: 'body'}
+      );
+    }
+    let params = new HttpParams()
+      .set('limit', limit.toString())
+      .set('offset', offset.toString())
+    if (searchTerm !== "") {
+      params = params.append('search', searchTerm);
+    }
+
+    if (storage_object) {
+      params = params.append('storage_object', storage_object.toString())
+    }
+
+    return this.http.get<StoredReagentQuery>(
+      `${this.baseURL}/api/stored_reagent/`,
+      {responseType: 'json', observe: 'body', params: params}
+    )
+  }
+
+  getStoredReagent(reagent_id: number) {
+    return this.http.get<StoredReagent>(
+      `${this.baseURL}/api/stored_reagent/${reagent_id}/`,
+      {responseType: 'json', observe: 'body'}
+    )
+  }
+
+
+  updateStoredReagent(quantity: number, notes: string) {
+    return this.http.put<StoredReagent>(
+      `${this.baseURL}/api/stored_reagent/${quantity}/`,
+      {quantity: quantity, notes: notes},
+      {responseType: 'json', observe: 'body'}
+    )
+  }
+
+  deleteStoredReagent(reagent_id: number) {
+    return this.http.delete(
+      `${this.baseURL}/api/stored_reagent/${reagent_id}/`,
+      {responseType: 'json', observe: 'body'}
+    )
+  }
+
+  getStorageObjectPathToRoot(object_id: number) {
+    return this.http.get<{id: number, name: string}[]>(
+      `${this.baseURL}/api/storage_object/${object_id}/get_path_to_root/`,
+      {responseType: 'json', observe: 'body'}
+    )
+  }
+
+  createStoredReagent(storage_object: number, name: string, unit: string, quantity: number, notes: string) {
+    return this.http.post<StoredReagent>(
+      `${this.baseURL}/api/stored_reagent/`,
+      {storage_object: storage_object, name: name, unit: unit, quantity: quantity, notes: notes},
+      {responseType: 'json', observe: 'body'}
+    )
+  }
 }
 
 interface ChunkUploadResponse {
