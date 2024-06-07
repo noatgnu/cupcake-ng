@@ -23,6 +23,7 @@ export interface StoredReagent {
   notes: string;
   user: string;
   png_base64: string;
+  barcode: string|null;
 }
 
 export interface StorageObjectQuery {

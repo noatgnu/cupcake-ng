@@ -108,31 +108,31 @@ export class QrScannerModalComponent implements AfterViewInit{
             //'code_32_reader'
           ],
           multiple: false,
-          debug: {
-            drawBoundingBox: true,
-            showFrequency: true,
-            drawScanline: true,
-            showPattern: true
-          }
+          //debug: {
+          //  drawBoundingBox: true,
+          //  showFrequency: true,
+          //  drawScanline: true,
+          //  showPattern: true
+          //}
         },
-        locate: false,
+        locate: true,
         locator: {
-          halfSample: true,
+          halfSample: false,
           patchSize: "medium",
-          debug: {
-            showCanvas: true,
-            showPatches: true,
-            showFoundPatches: true,
-            showSkeleton: true,
-            showLabels: true,
-            showPatchLabels: true,
-            showRemainingPatchLabels: true,
-            boxFromPatches: {
-              showTransformed: true,
-              showTransformedBox: true,
-              showBB: true
-            }
-          }
+          //debug: {
+          //  showCanvas: true,
+          //  showPatches: true,
+          //  showFoundPatches: true,
+          //  showSkeleton: true,
+          // showLabels: true,
+          //  showPatchLabels: true,
+          //  showRemainingPatchLabels: true,
+          //  boxFromPatches: {
+          //    showTransformed: true,
+          //    showTransformedBox: true,
+          //    showBB: true
+          //  }
+          //}
         }
       },
       (err) => {

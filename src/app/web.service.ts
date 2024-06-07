@@ -1124,8 +1124,8 @@ export class WebService {
   }
 
 
-  updateStoredReagent(reagent_id: number, quantity: number, notes: string, png_base64: string|null = null) {
-    const payload: any = {quantity: quantity, notes: notes, png_base64: png_base64}
+  updateStoredReagent(reagent_id: number, quantity: number, notes: string, png_base64: string|null = null, barcode: string|null = null) {
+    const payload: any = {quantity: quantity, notes: notes, png_base64: png_base64, barcode: barcode}
 
     return this.http.put<StoredReagent>(
       `${this.baseURL}/api/stored_reagent/${reagent_id}/`,

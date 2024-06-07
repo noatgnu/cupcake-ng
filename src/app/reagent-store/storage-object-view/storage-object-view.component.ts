@@ -190,5 +190,16 @@ export class StorageObjectViewComponent {
 
   openBarcodeScannerReagent(reagent: StoredReagent) {
     const ref = this.modal.open(QrScannerModalComponent)
+    ref.closed.subscribe((data) => {
+      this.web.updateStoredReagent(reagent.id, reagent.quantity, reagent.notes, reagent.png_base64, data).subscribe((data) => {
+        this.storedReagentQuery!.results = this.storedReagentQuery!.results.map((r) => {
+          if (r.id === reagent.id) {
+            return data
+          } else {
+            return r
+          }
+        })
+      })
+    })
   }
 }
