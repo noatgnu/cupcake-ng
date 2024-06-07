@@ -5,43 +5,45 @@
 </nav>
 <div>
   <div class="d-flex g-1" style="position:relative">
-    <div class="border-end border-1 border-black d-flex flex-column" style="width: 300px">
-      <nav class="navbar navbar-expand-lg navbar-light d-flex flex-wrap">
-        <div class="container-fluid">
-          <a class="navbar-brand">Storage Location</a> <button class="btn btn-sm btn-outline-primary" (click)="openStorageObjectCreator()"><i class="bi bi-folder-plus"></i></button>
-        </div>
-      </nav>
-      <div style="height: calc(100vh - 64px*4 - 20px); padding: 2px; overflow: auto">
-        @if (rootStorageObjects) {
-          <div class="list-group">
-            @if (selectedStorageObject) {
-              <div class="list-group-item list-group-item-action" (click)="goBack()">
-                <div>
-                  <b>..</b>
-                </div>
-              </div>
-            }
-            @if (rootStorageObjects.results.length > 0) {
-              @for (storage of rootStorageObjects.results; track storage.id) {
-                <div class="list-group-item list-group-item-action" (click)="clickStorage(storage)">
+    @if (sidePanel) {
+      <div class="border-end border-1 border-black d-flex flex-column" style="width: 300px">
+        <nav class="navbar navbar-expand-lg navbar-light d-flex flex-wrap">
+          <div class="container-fluid">
+            <a class="navbar-brand">Storage Location</a> <button class="btn btn-sm btn-outline-primary" (click)="openStorageObjectCreator()"><i class="bi bi-folder-plus"></i></button>
+          </div>
+        </nav>
+        <div style="height: calc(100vh - 64px*4 - 20px); padding: 2px; overflow: auto">
+          @if (rootStorageObjects) {
+            <div class="list-group">
+              @if (selectedStorageObject) {
+                <div class="list-group-item list-group-item-action" (click)="goBack()">
                   <div>
-                    <b>{{storage.object_name}}</b>
+                    <b>..</b>
                   </div>
-                  <small>{{storage.object_type}}</small>
                 </div>
               }
-            }
-          </div>
-        }
+              @if (rootStorageObjects.results.length > 0) {
+                @for (storage of rootStorageObjects.results; track storage.id) {
+                  <div class="list-group-item list-group-item-action" (click)="clickStorage(storage)">
+                    <div>
+                      <b>{{storage.object_name}}</b>
+                    </div>
+                    <small>{{storage.object_type}}</small>
+                  </div>
+                }
+              }
+            </div>
+          }
+        </div>
+        <div class="p-2">
+          @if ( rootStorageObjects) {
+            <ngb-pagination (pageChange)="handlePageChange($event)" [collectionSize]="rootStorageObjects.count" [(page)]="currentPage" [pageSize]="pageSize" [rotate]="true" [boundaryLinks]="true" />
+          }
+        </div>
       </div>
-      <div class="p-2">
-        @if ( rootStorageObjects) {
-          <ngb-pagination (pageChange)="handlePageChange($event)" [collectionSize]="rootStorageObjects.count" [(page)]="currentPage" [pageSize]="pageSize" [rotate]="true" [boundaryLinks]="true" />
-        }
-      </div>
-    </div>
+    }
     <div class="flex-grow-1">
-      <app-storage-object-view [storageObject]="selectedStorageObject"></app-storage-object-view>
+      <app-storage-object-view [storageObject]="selectedStorageObject" (toggleSidePanel)="sidePanel=!sidePanel"></app-storage-object-view>
     </div>
 
   </div>

@@ -1122,9 +1122,9 @@ export class WebService {
   }
 
 
-  updateStoredReagent(quantity: number, notes: string) {
+  updateStoredReagent(reagent_id: number, quantity: number, notes: string) {
     return this.http.put<StoredReagent>(
-      `${this.baseURL}/api/stored_reagent/${quantity}/`,
+      `${this.baseURL}/api/stored_reagent/${reagent_id}/`,
       {quantity: quantity, notes: notes},
       {responseType: 'json', observe: 'body'}
     )

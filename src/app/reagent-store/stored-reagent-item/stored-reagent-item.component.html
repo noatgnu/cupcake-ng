@@ -1,0 +1,26 @@
+@if (storedReagent) {
+  <div>
+    <b>{{storedReagent.reagent.name}}</b>
+  </div>
+  <p>
+    <small>{{storedReagent.quantity}} {{storedReagent.reagent.unit}}</small><br>
+    <small>User: {{storedReagent.user}}</small><br>
+    <small>
+      Path to entry: // >
+      @for (path of pathToRoot; track path.id) {
+        <a href="/#/reagent-store/{{path.id}}">{{path.name}}</a>
+      }
+    </small>
+  </p>
+
+
+  <div class="d-flex flex-row gap-2">
+    <button class="btn btn-sm btn-outline-primary" (click)="openStoredReagentEditorModal.emit(true)"><i class="bi bi-pencil"></i></button>
+    @if (storedReagent.user === accounts.username || accounts.is_staff) {
+      <button class="btn btn-sm btn-outline-danger" (click)="delete.emit(true)"><i class="bi bi-trash"></i></button>
+    } @else {
+      <button class="btn btn-sm btn-outline-danger" disabled><i class="bi bi-trash"></i></button>
+    }
+
+  </div>
+}

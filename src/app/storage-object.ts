@@ -19,6 +19,7 @@ export interface StoredReagent {
   storage_object: {id: number, object_name: string};
   created_at: Date;
   updated_at: Date;
+  notes: string;
   user: string;
 }
 

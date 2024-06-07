@@ -1,4 +1,4 @@
-import {Component, Input} from '@angular/core';
+import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {StorageObject, StoredReagent, StoredReagentQuery} from "../../storage-object";
 import {WebService} from "../../web.service";
 import {NgbModal, NgbPagination} from "@ng-bootstrap/ng-bootstrap";
@@ -10,13 +10,18 @@ import {
   StoredReagentCreatorModalComponent
 } from "../stored-reagent-creator-modal/stored-reagent-creator-modal.component";
 import {AreYouSureModalComponent} from "../../are-you-sure-modal/are-you-sure-modal.component";
+import {StoredReagentItemComponent} from "../stored-reagent-item/stored-reagent-item.component";
+import {StoredReagentEditorModalComponent} from "../stored-reagent-editor-modal/stored-reagent-editor-modal.component";
+import {HttpErrorResponse} from "@angular/common/http";
+import {ToastService} from "../../toast.service";
 
 @Component({
   selector: 'app-storage-object-view',
   standalone: true,
   imports: [
     NgbPagination,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    StoredReagentItemComponent
   ],
   templateUrl: './storage-object-view.component.html',
   styleUrl: './storage-object-view.component.scss'
@@ -38,6 +43,8 @@ export class StorageObjectViewComponent {
     }
   }
 
+  @Output() toggleSidePanel: EventEmitter<boolean> = new EventEmitter<boolean>()
+
   get storageObject(): StorageObject|undefined {
     return this._storageObject
   }
@@ -54,7 +61,7 @@ export class StorageObjectViewComponent {
     name: new FormControl("", Validators.required),
   })
 
-  constructor(private web: WebService, private fb: FormBuilder, private modal: NgbModal) {
+  constructor(private web: WebService, private fb: FormBuilder, private modal: NgbModal, private toastService: ToastService) {
     this.form.controls.name.valueChanges.subscribe((value) => {
       if (value) {
         this.getStoredReagents(undefined, this.pageSize, this.currentPageOffset, value, this.storageObject?.id)
@@ -101,6 +108,26 @@ export class StorageObjectViewComponent {
   }
 
   openStoredReagentEditorModal(reagent: StoredReagent) {
+    const ref = this.modal.open(StoredReagentEditorModalComponent, {scrollable: true})
+    ref.componentInstance.storedReagent = reagent
+    ref.closed.subscribe((data) => {
+      this.web.updateStoredReagent(reagent.id, data.quantity, data.notes).subscribe((data) => {
+        this.getStoredReagents(undefined, this.pageSize, this.currentPageOffset, undefined, this.storageObject?.id)
+      })
+    })
+  }
 
+  deleteStorageObject() {
+    const ref = this.modal.open(AreYouSureModalComponent)
+    ref.closed.subscribe((data) => {
+      this.web.deleteStorageObject(this.storageObject!.id).subscribe((data) => {
+
+      }, (error: HttpErrorResponse) => {
+        // check if error code is 409
+        if (error.status === 409) {
+          alert("Cannot delete storage object with stored reagents from other users")
+        }
+      })
+    })
   }
 }

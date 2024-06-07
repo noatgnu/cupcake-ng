@@ -2,7 +2,7 @@
   <div class="container-fluid">
     <div class="d-flex flex-row gap-2">
       <div class="d-flex flex-row justify-content-center align-items-center">
-        <button class="btn btn-sm btn-outline-primary"><i class="bi bi-menu-app"></i></button>
+        <button class="btn btn-sm btn-outline-primary" (click)="toggleSidePanel.emit(true)"><i class="bi bi-menu-app"></i></button>
       </div>
       <a class="navbar-brand">@if (storageObject) {{{storageObject.object_name}}} @else {
         Select a storage location
@@ -10,53 +10,43 @@
     </div>
 
     @if (storageObject) {
-      <button class="btn btn-sm btn-outline-primary" (click)="openStoredReagentCreatorModal()"><i class="bi bi-plus"></i></button>
+      <div class="d-flex flex-row gap-2">
+        <button class="btn btn-sm btn-outline-danger" (click)="deleteStorageObject()"><i class="bi bi-trash"></i></button>
+        <button class="btn btn-sm btn-outline-primary" (click)="openStoredReagentCreatorModal()"><i class="bi bi-plus"></i></button>
+      </div>
+
     }
   </div>
 </nav>
-@if (storageObject) {
-  <div class="p-2">
-    <div>
-      <a>//</a> >
-      @for (path of pathToRoot; track path.id) {
-        <a href="/#/reagent-store/{{path.id}}">{{path.name}}</a> >
-      }
-    </div>
-    <form [formGroup]="form" class="mt-2">
-      <div class="form-floating">
-        <input type="text" class="form-control" id="search" formControlName="name" placeholder="Search for reagents">
-        <label for="search">Search for reagents</label>
-      </div>
-    </form>
-    @if (storageObject) {
-      @if (storedReagentQuery) {
-        <div class="list-group mt-2" style="height: calc(100vh - 64px*5 - 50px); overflow: auto">
-          @if (storedReagentQuery.results.length > 0) {
-            @for (reagent of storedReagentQuery.results; track reagent.id) {
-              <div class="list-group-item list-group-item-action">
-                <div>
-                  <b>{{reagent.reagent.name}}</b>
-                </div>
-                <p>
-                  <small>{{reagent.quantity}} {{reagent.reagent.unit}}</small><br>
-                  <small>User: {{reagent.user}}</small>
-                </p>
-
-                <div class="d-flex flex-row gap-2">
-                  <button class="btn btn-sm btn-outline-primary" (click)="openStoredReagentEditorModal(reagent)"><i class="bi bi-pencil"></i></button>
-                  <button class="btn btn-sm btn-outline-primary" (click)="delete(reagent)"><i class="bi bi-trash"></i></button>
-                </div>
-              </div>
-            }
-          }
-        </div>
-      }
-      <div>
-        @if (storedReagentQuery) {
-          <ngb-pagination (pageChange)="handlePageChange($event)" [collectionSize]="storedReagentQuery.count" [(page)]="currentPage" [pageSize]="pageSize" [rotate]="true" [boundaryLinks]="true" />
-        }
-      </div>
+<div class="p-2">
+  <div>
+    <a>//</a> >
+    @for (path of pathToRoot; track path.id) {
+      <a href="/#/reagent-store/{{path.id}}">{{path.name}}</a>
     }
   </div>
-}
+  <form [formGroup]="form" class="mt-2">
+    <div class="form-floating">
+      <input type="search" class="form-control" id="search" formControlName="name" placeholder="Search for items">
+      <label for="search">Search for items</label>
+    </div>
+  </form>
+  @if (storedReagentQuery) {
+    <div class="list-group mt-2" style="height: calc(100vh - 64px*5 - 50px); overflow: auto">
+      @if (storedReagentQuery.results.length > 0) {
+        @for (reagent of storedReagentQuery.results; track reagent.id) {
+          <div class="list-group-item list-group-item-action">
+            <app-stored-reagent-item [storedReagent]="reagent" (delete)="delete(reagent)" (openStoredReagentEditorModal)="openStoredReagentEditorModal(reagent)"></app-stored-reagent-item>
+          </div>
+        }
+      }
+    </div>
+  }
+  <div>
+    @if (storedReagentQuery) {
+      <ngb-pagination (pageChange)="handlePageChange($event)" [collectionSize]="storedReagentQuery.count" [(page)]="currentPage" [pageSize]="pageSize" [rotate]="true" [boundaryLinks]="true" />
+    }
+  </div>
+</div>
+
 

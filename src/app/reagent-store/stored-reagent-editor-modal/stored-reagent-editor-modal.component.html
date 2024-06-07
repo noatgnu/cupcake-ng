@@ -1,0 +1,24 @@
+<div class="modal-header">
+  <h5 class="modal-title">
+    Entry Editor
+  </h5>
+</div>
+<div class="modal-body">
+  @if (storedReagent) {
+    <form [formGroup]="form" class="d-flex flex-column gap-2">
+      <div class="form-floating">
+        <input type="number" class="form-control" id="quantity" formControlName="quantity" placeholder="Entry Quantity ({{storedReagent.reagent.unit}})">
+        <label for="quantity">Entry Quantity ({{storedReagent.reagent.unit}})</label>
+      </div>
+      <div class="form-floating">
+        <textarea class="form-control" id="notes" formControlName="notes" placeholder="Entry Notes"></textarea>
+        <label for="notes">Entry Notes</label>
+      </div>
+
+    </form>
+  }
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn btn-primary" (click)="submit()">Submit</button>
+  <button type="button" class="btn btn-secondary" (click)="close()">Close</button>
+</div>

@@ -21,6 +21,7 @@ import {Location} from "@angular/common";
 export class ReagentStoreComponent {
   search?: string
   private _storageID?: number|undefined;
+  sidePanel: boolean = true
 
   @Input() set storageID(value: number|undefined) {
     this._storageID = value;
