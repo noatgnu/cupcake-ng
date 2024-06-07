@@ -17,6 +17,7 @@ import {ToastService} from "../../toast.service";
 import {StorageObjectEditorModalComponent} from "../storage-object-editor-modal/storage-object-editor-modal.component";
 import {CameraModalComponent} from "../../camera-modal/camera-modal.component";
 import {QrcodeModalComponent} from "../../qrcode-modal/qrcode-modal.component";
+import {QrScannerModalComponent} from "../../qr-scanner-modal/qr-scanner-modal.component";
 
 @Component({
   selector: 'app-storage-object-view',
@@ -24,7 +25,8 @@ import {QrcodeModalComponent} from "../../qrcode-modal/qrcode-modal.component";
   imports: [
     NgbPagination,
     ReactiveFormsModule,
-    StoredReagentItemComponent
+    StoredReagentItemComponent,
+    QrScannerModalComponent
   ],
   templateUrl: './storage-object-view.component.html',
   styleUrl: './storage-object-view.component.scss'
@@ -179,5 +181,14 @@ export class StorageObjectViewComponent {
   openQRCodeModal() {
     const ref = this.modal.open(QrcodeModalComponent, {scrollable: true})
     ref.componentInstance.url = location.origin + "/#/reagent-store/" + this.storageObject?.id
+  }
+
+  openBarcodeScannerModal() {
+    const ref = this.modal.open(QrScannerModalComponent)
+
+  }
+
+  openBarcodeScannerReagent(reagent: StoredReagent) {
+    const ref = this.modal.open(QrScannerModalComponent)
   }
 }

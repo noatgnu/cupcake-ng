@@ -17,6 +17,7 @@
     </div>
     <div class="d-flex flex-row gap-2">
       <button class="btn btn-sm btn-outline-primary" (click)="openStoredReagentEditorModal.emit(true)"><i class="bi bi-pencil"></i></button>
+      <button class="btn btn-sm btn-outline-primary" (click)="openQrScannerModal.emit(true)"><i class="bi bi-upc-scan"></i></button>
       <button class="btn btn-sm btn-outline-secondary" (click)="openCameraModal.emit(true)"><i class="bi bi-camera"></i></button>
       @if (storedReagent.user === accounts.username || accounts.is_staff) {
         <button class="btn btn-sm btn-outline-danger" (click)="delete.emit(true)"><i class="bi bi-trash"></i></button>

@@ -1,0 +1,23 @@
+
+
+#videoElementPreview {
+  height: 300px;
+  position: relative;
+  background: black;
+}
+
+#videoElementPreview::ng-deep canvas {
+  //visibility: hidden;
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 300px;
+  border: 3px solid green;
+}
+
+#videoElementPreview::ng-deep video {
+  width: 100%;
+  height: 300px;
+  object-fit: cover;
+}

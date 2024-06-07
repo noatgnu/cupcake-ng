@@ -1,4 +1,6 @@
-import { Injectable } from '@angular/core';
+import {ChangeDetectorRef, Injectable} from '@angular/core';
+import Quagga from "@ericblade/quagga2";
+import {main} from "@popperjs/core";
 
 @Injectable({
   providedIn: 'root'
@@ -11,6 +13,46 @@ export class CameraService {
   width = 480
   height = 480
   mediaStream: MediaStream|undefined = undefined
+  environmentFacingCameraLabelStrings: string[] = [
+    'rear',
+    'back',
+    'rück',
+    'arrière',
+    'trasera',
+    'trás',
+    'traseira',
+    'posteriore',
+    '后面',
+    '後面',
+    '背面',
+    '后置', // alternative
+    '後置', // alternative
+    '背置', // alternative
+    'задней',
+    'الخلفية',
+    '후',
+    'arka',
+    'achterzijde',
+    'หลัง',
+    'baksidan',
+    'bagside',
+    'sau',
+    'bak',
+    'tylny',
+    'takakamera',
+    'belakang',
+    'אחורית',
+    'πίσω',
+    'spate',
+    'hátsó',
+    'zadní',
+    'darrere',
+    'zadná',
+    'задня',
+    'stražnja',
+    'belakang',
+    'बैक'
+  ]
 
   constructor() { }
 
@@ -65,4 +107,6 @@ export class CameraService {
     this.stopCamera()
     this.initateCameraForPhoto(previewElement)
   }
+
+
 }
