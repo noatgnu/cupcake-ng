@@ -14,6 +14,9 @@ import {StoredReagentItemComponent} from "../stored-reagent-item/stored-reagent-
 import {StoredReagentEditorModalComponent} from "../stored-reagent-editor-modal/stored-reagent-editor-modal.component";
 import {HttpErrorResponse} from "@angular/common/http";
 import {ToastService} from "../../toast.service";
+import {StorageObjectEditorModalComponent} from "../storage-object-editor-modal/storage-object-editor-modal.component";
+import {CameraModalComponent} from "../../camera-modal/camera-modal.component";
+import {QrcodeModalComponent} from "../../qrcode-modal/qrcode-modal.component";
 
 @Component({
   selector: 'app-storage-object-view',
@@ -129,5 +132,52 @@ export class StorageObjectViewComponent {
         }
       })
     })
+  }
+
+  openStorageObjectEditorModal() {
+    const ref = this.modal.open(StorageObjectEditorModalComponent, {scrollable: true})
+    ref.componentInstance.storageObject = this.storageObject
+    ref.closed.subscribe((data) => {
+      this.web.updateStorageObject(this.storageObject!.id, data.name, data.description).subscribe((data) => {
+        this.storageObject = data
+      })
+    })
+  }
+
+  openCameraModal() {
+    const ref = this.modal.open(CameraModalComponent, {scrollable: true})
+    ref.closed.subscribe((data) => {
+      if (data.remove) {
+        this.web.updateStorageObject(this.storageObject!.id, this.storageObject!.object_name, this.storageObject!.object_description, undefined).subscribe((data) => {
+          this.storageObject = data
+        })
+      } else {
+        this.web.updateStorageObject(this.storageObject!.id, this.storageObject!.object_name, this.storageObject!.object_description, data).subscribe((data) => {
+          this.storageObject = data
+        })
+      }
+
+    })
+  }
+
+  openReagentCameraModal(reagent: StoredReagent) {
+    const ref = this.modal.open(CameraModalComponent, {scrollable: true})
+    ref.closed.subscribe((data) => {
+      if (data.remove) {
+        this.web.updateStoredReagent(reagent.id, reagent.quantity, reagent.notes, undefined).subscribe((data) => {
+          this.getStoredReagents(undefined, this.pageSize, this.currentPageOffset, undefined, this.storageObject?.id)
+        })
+      } else {
+        this.web.updateStoredReagent(reagent.id, reagent.quantity, reagent.notes, data).subscribe((data) => {
+          this.getStoredReagents(undefined, this.pageSize, this.currentPageOffset, undefined, this.storageObject?.id)
+        })
+      }
+
+    })
+  }
+
+  openQRCodeModal() {
+    const ref = this.modal.open(QrcodeModalComponent, {scrollable: true})
+    ref.componentInstance.url = location.origin + "/#/reagent-store/" + this.storageObject?.id
   }
 }

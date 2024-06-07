@@ -10,6 +10,7 @@ export interface StorageObject {
   created_at: Date;
   updated_at: Date;
   can_delete: boolean;
+  png_base64: string;
 }
 
 export interface StoredReagent {
@@ -21,6 +22,7 @@ export interface StoredReagent {
   updated_at: Date;
   notes: string;
   user: string;
+  png_base64: string;
 }
 
 export interface StorageObjectQuery {

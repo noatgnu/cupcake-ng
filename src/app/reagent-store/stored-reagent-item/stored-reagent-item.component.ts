@@ -27,7 +27,7 @@ export class StoredReagentItemComponent {
 
   @Output() delete: EventEmitter<boolean> = new EventEmitter<boolean>()
   @Output() openStoredReagentEditorModal: EventEmitter<boolean> = new EventEmitter<boolean>()
-
+  @Output() openCameraModal: EventEmitter<boolean> = new EventEmitter<boolean>()
   pathToRoot: {id: number, name: string}[] = []
 
   constructor(private web: WebService, public accounts: AccountsService) {

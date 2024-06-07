@@ -11,10 +11,12 @@
 
     @if (storageObject) {
       <div class="d-flex flex-row gap-2">
+        <button class="btn btn-sm btn-outline-primary" (click)="openQRCodeModal()">QR</button>
+        <button class="btn btn-sm btn-outline-primary" (click)="openCameraModal()"><i class="bi bi-camera"></i></button>
+        <button class="btn btn-sm btn-outline-primary" (click)="openStorageObjectEditorModal()"><i class="bi bi-pen"></i></button>
         <button class="btn btn-sm btn-outline-danger" (click)="deleteStorageObject()"><i class="bi bi-trash"></i></button>
         <button class="btn btn-sm btn-outline-primary" (click)="openStoredReagentCreatorModal()"><i class="bi bi-plus"></i></button>
       </div>
-
     }
   </div>
 </nav>
@@ -36,7 +38,13 @@
       @if (storedReagentQuery.results.length > 0) {
         @for (reagent of storedReagentQuery.results; track reagent.id) {
           <div class="list-group-item list-group-item-action">
-            <app-stored-reagent-item [storedReagent]="reagent" (delete)="delete(reagent)" (openStoredReagentEditorModal)="openStoredReagentEditorModal(reagent)"></app-stored-reagent-item>
+            <div class="d-flex flex-row gap-2">
+              @if (reagent.png_base64) {
+                <img [src]="reagent.png_base64" [width]="200" [height]="200" style="border-radius:10px">
+              }
+              <app-stored-reagent-item [storedReagent]="reagent" (delete)="delete(reagent)" (openStoredReagentEditorModal)="openStoredReagentEditorModal(reagent)" (openCameraModal)="openReagentCameraModal(reagent)"></app-stored-reagent-item>
+            </div>
+
           </div>
         }
       }

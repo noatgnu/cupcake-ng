@@ -1082,10 +1082,12 @@ export class WebService {
     )
   }
 
-  updateStorageObject(object_id: number, object_name: string, object_description: string) {
+  updateStorageObject(object_id: number, object_name: string, object_description: string, png_base64: string|null = null) {
+    const payload: any = {name: object_name, description: object_description, png_base64: png_base64}
+
     return this.http.put<StorageObject>(
       `${this.baseURL}/api/storage_object/${object_id}/`,
-      {name: object_name, description: object_description},
+      payload,
       {responseType: 'json', observe: 'body'}
     )
   }
@@ -1122,10 +1124,12 @@ export class WebService {
   }
 
 
-  updateStoredReagent(reagent_id: number, quantity: number, notes: string) {
+  updateStoredReagent(reagent_id: number, quantity: number, notes: string, png_base64: string|null = null) {
+    const payload: any = {quantity: quantity, notes: notes, png_base64: png_base64}
+
     return this.http.put<StoredReagent>(
       `${this.baseURL}/api/stored_reagent/${reagent_id}/`,
-      {quantity: quantity, notes: notes},
+      payload,
       {responseType: 'json', observe: 'body'}
     )
   }

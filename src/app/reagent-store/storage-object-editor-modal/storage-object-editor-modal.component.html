@@ -1,0 +1,19 @@
+<div class="modal-header">
+  <h5 class="modal-title">Object Editor</h5>
+</div>
+<div class="modal-body">
+  <form [formGroup]="form" class="d-flex flex-column gap-2">
+    <div class="form-floating">
+      <input type="text" class="form-control" id="object_name" formControlName="object_name" placeholder="Object Name">
+      <label for="object_name">Object Name</label>
+    </div>
+    <div class="form-floating">
+      <textarea id="object_description" class="form-control" formControlName="object_description" placeholder="Object Description"></textarea>
+      <label for="object_description">Object Description</label>
+    </div>
+  </form>
+</div>
+<div class="modal-footer">
+  <button class="btn btn-primary" (click)="submit()">Submit</button>
+  <button class="btn btn-secondary" (click)="close()">Close</button>
+</div>
