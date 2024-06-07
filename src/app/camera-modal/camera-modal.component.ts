@@ -50,11 +50,13 @@ export class CameraModalComponent implements AfterViewInit{
 
   submit() {
     if (this.result) {
+      this.camera.stopCamera()
       this.activeModal.close(this.result)
     }
   }
 
   close() {
+    this.camera.stopCamera()
     this.activeModal.dismiss()
   }
 
@@ -65,6 +67,7 @@ export class CameraModalComponent implements AfterViewInit{
   }
 
   remove() {
+    this.camera.stopCamera()
     this.activeModal.close({remove: true})
   }
 }

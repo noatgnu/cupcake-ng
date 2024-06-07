@@ -10,6 +10,7 @@ export class CameraService {
   mediaRecorder: MediaRecorder|undefined = undefined
   width = 480
   height = 480
+  mediaStream: MediaStream|undefined = undefined
 
   constructor() { }
 
@@ -36,20 +37,17 @@ export class CameraService {
           }
           previewElement.play()
         }
+        this.mediaStream = stream
         this.mediaRecorder = new MediaRecorder(stream)
 
       })
     })
   }
 
-  stopCamera(previewElement: HTMLVideoElement) {
-    if (previewElement.srcObject) {
-      const stream = previewElement.srcObject as MediaStream
-      const tracks = stream.getTracks()
-      tracks.forEach((track) => {
-        track.stop()
-      })
-    }
+  stopCamera() {
+    this.mediaStream?.getTracks().forEach((track) => {
+      track.stop()
+    })
   }
 
   takePhoto(previewElement: HTMLVideoElement, canvasElement: HTMLCanvasElement) {
@@ -64,7 +62,7 @@ export class CameraService {
   }
 
   changeDevice(previewElement: HTMLVideoElement) {
-    this.stopCamera(previewElement)
+    this.stopCamera()
     this.initateCameraForPhoto(previewElement)
   }
 }
