@@ -1,6 +1,13 @@
 import {AfterViewInit, ChangeDetectorRef, Component, ElementRef, ViewChild} from '@angular/core';
 import {CameraService} from "../camera.service";
-import {NgbNav, NgbNavContent, NgbNavItem, NgbNavLinkButton, NgbNavOutlet} from "@ng-bootstrap/ng-bootstrap";
+import {
+  NgbActiveModal,
+  NgbNav,
+  NgbNavContent,
+  NgbNavItem,
+  NgbNavLinkButton,
+  NgbNavOutlet
+} from "@ng-bootstrap/ng-bootstrap";
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import Quagga from "@ericblade/quagga2";
 
@@ -25,7 +32,7 @@ export class QrScannerModalComponent implements AfterViewInit{
   startedQR: boolean = false
   lastScannedCode: string = ''
   lastScannedCodeDate: number | undefined = undefined
-  constructor(private camera: CameraService, private change: ChangeDetectorRef) {
+  constructor(private camera: CameraService, private change: ChangeDetectorRef, private activeModal: NgbActiveModal) {
   }
 
   ngAfterViewInit() {
@@ -158,5 +165,15 @@ export class QrScannerModalComponent implements AfterViewInit{
     this.lastScannedCode = code;
     this.lastScannedCodeDate = now;
     this.change.detectChanges();
+  }
+
+  close() {
+    Quagga.stop()
+    this.activeModal.dismiss()
+  }
+
+  accept() {
+    Quagga.stop()
+    this.activeModal.close(this.lastScannedCode)
   }
 }
