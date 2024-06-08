@@ -1,4 +1,4 @@
-import {AfterViewInit, ChangeDetectorRef, Component, ElementRef, ViewChild} from '@angular/core';
+import {AfterViewInit, ChangeDetectorRef, Component, ElementRef, Input, ViewChild} from '@angular/core';
 import {CameraService} from "../camera.service";
 import {
   NgbActiveModal,
@@ -10,6 +10,9 @@ import {
 } from "@ng-bootstrap/ng-bootstrap";
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import Quagga from "@ericblade/quagga2";
+import JsBarcode from "jsbarcode";
+import {StoredReagentQuery} from "../storage-object";
+import {WebService} from "../web.service";
 
 @Component({
   selector: 'app-qr-scanner-modal',
@@ -32,7 +35,12 @@ export class QrScannerModalComponent implements AfterViewInit{
   startedQR: boolean = false
   lastScannedCode: string = ''
   lastScannedCodeDate: number | undefined = undefined
-  constructor(private camera: CameraService, private change: ChangeDetectorRef, private activeModal: NgbActiveModal) {
+
+  @Input() enableSearch: boolean = false
+
+  storedReagentQuery?: StoredReagentQuery | undefined
+
+  constructor(private web: WebService, private camera: CameraService, private change: ChangeDetectorRef, private activeModal: NgbActiveModal) {
   }
 
   ngAfterViewInit() {
@@ -165,6 +173,10 @@ export class QrScannerModalComponent implements AfterViewInit{
     this.lastScannedCode = code;
     this.lastScannedCodeDate = now;
     this.change.detectChanges();
+    this.drawBarcode();
+    if (this.enableSearch) {
+      this.search();
+    }
   }
 
   close() {
@@ -174,6 +186,27 @@ export class QrScannerModalComponent implements AfterViewInit{
 
   accept() {
     Quagga.stop()
+    this.startedQR = false
     this.activeModal.close(this.lastScannedCode)
+  }
+
+  stopCamera() {
+    Quagga.stop()
+    this.startedQR = false
+  }
+
+  drawBarcode() {
+    const canvas = document.getElementById('barcode-canvas') as HTMLCanvasElement
+    if (this.lastScannedCode) {
+      JsBarcode(canvas, this.lastScannedCode, {format: 'EAN13', width: 300, height:200, margin: 10, displayValue: true})
+    }
+  }
+
+  search() {
+    if (this.lastScannedCode && this.enableSearch){
+      this.web.getStoredReagents(undefined, 10, 0, this.lastScannedCode).subscribe((data) => {
+        this.storedReagentQuery = data
+      })
+    }
   }
 }

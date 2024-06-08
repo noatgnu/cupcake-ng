@@ -1,6 +1,6 @@
 <div class="modal-header">
   <h5 class="modal-title">
-    QR Scanner
+    Barcode Scanner
   </h5>
 </div>
 <div class="modal-body">
@@ -8,12 +8,27 @@
   <div>
     Detected code: {{lastScannedCode}}
   </div>
-
-  <div>
-
+  <div class="d-flex flex-row justify-content-center">
+    <canvas id="barcode-canvas" style="height: 100px; width: 300px"></canvas>
   </div>
+
+  @if (lastScannedCode && enableSearch) {
+    Found items:
+    <div class="list-group mt-2">
+      @for (r of storedReagentQuery?.results; track r) {
+        <div class="list-group-item list-group-item-action">
+          <div><b>{{ r.reagent.name }}</b> {{r.quantity}} {{r.reagent.unit}}</div>
+        </div>
+      }
+    </div>
+  }
 </div>
 <div class="modal-footer">
+  @if (startedQR) {
+    <button type="button" class="btn btn-danger" (click)="stopCamera()">Stop</button>
+  } @else {
+    <button type="button" class="btn btn-primary" (click)="initiateCameraForQRScan()">Start</button>
+  }
   <button type="button" class="btn btn-primary" (click)="accept()">Accept</button>
   <button type="button" class="btn btn-secondary" (click)="close()">Close</button>
 </div>

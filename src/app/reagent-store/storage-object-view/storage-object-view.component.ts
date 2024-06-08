@@ -184,7 +184,8 @@ export class StorageObjectViewComponent {
   }
 
   openBarcodeScannerModal() {
-    const ref = this.modal.open(QrScannerModalComponent)
+    const ref = this.modal.open(QrScannerModalComponent, {scrollable: true})
+    ref.componentInstance.enableSearch = true
 
   }
 
