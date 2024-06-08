@@ -1,0 +1,43 @@
+<div class="modal-header">
+  <h5 class="modal-title">
+    Action Logs
+  </h5>
+</div>
+<div class="modal-body">
+  @if (actionLogs && storedReagent) {
+    <div class="list-group">
+      @if (actionLogs.results.length > 0) {
+        @for (log of actionLogs.results; track log.id) {
+          @if (log.action_type === "add") {
+            <div class="list-group-item list-group-item-action list-group-item-success">
+              <p>
+                + {{log.quantity}} {{storedReagent.reagent.unit}}<br>
+                <small>{{log.user}}</small><br>
+                <small>{{log.created_at|date : "short"}}</small>
+              </p>
+            </div>
+          } @else {
+            <div class="list-group-item list-group-item-action list-group-item-danger">
+              <p>
+                - {{log.quantity}}{{storedReagent.reagent.unit}}<br>
+                <small>user: {{log.user}}</small><br>
+                <small>{{log.created_at|date : "short"}}</small>
+              </p>
+
+            </div>
+          }
+        }
+      }
+    </div>
+  } @else {
+    <div class="alert alert-info" role="alert">
+      No action logs found.
+    </div>
+  }
+</div>
+<div class="modal-footer d-flex justify-content-between">
+  @if (actionLogs) {
+    <ngb-pagination [collectionSize]="actionLogs.count" [(page)]="currentPage" [pageSize]="pageSize" (pageChange)="handlePageChange($event)"></ngb-pagination>
+  }
+  <button type="button" class="btn btn-secondary" (click)="close()">Close</button>
+</div>

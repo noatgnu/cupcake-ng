@@ -1,0 +1,19 @@
+<div class="modal-header">
+  <h5 class="modal-title">
+    Reserve Item Action
+  </h5>
+</div>
+<div class="modal-body">
+  @if (storedReagent) {
+    <form [formGroup]="form" >
+      <div class="form-floating">
+        <input type="number" class="form-control" id="quantity" formControlName="quantity" placeholder="Quantity ({{storedReagent.reagent.unit}})">
+        <label for="quantity">Quantity ({{storedReagent.reagent.unit}})</label>
+      </div>
+    </form>
+  }
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn btn-primary" (click)="submit()">Reserve</button>
+  <button type="button" class="btn btn-secondary" (click)="close()">Close</button>
+</div>

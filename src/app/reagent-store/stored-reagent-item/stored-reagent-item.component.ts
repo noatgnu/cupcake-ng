@@ -29,8 +29,13 @@ export class StoredReagentItemComponent {
   @Output() openStoredReagentEditorModal: EventEmitter<boolean> = new EventEmitter<boolean>()
   @Output() openCameraModal: EventEmitter<boolean> = new EventEmitter<boolean>()
   @Output() openQrScannerModal: EventEmitter<boolean> = new EventEmitter<boolean>()
+  @Output() openCloneStoredReagentModal: EventEmitter<boolean> = new EventEmitter<boolean>()
+  @Output() openActionLogsModal: EventEmitter<boolean> = new EventEmitter<boolean>()
+  @Output() openReserveActionModal: EventEmitter<boolean> = new EventEmitter<boolean>()
+  @Output() openAddActionModal: EventEmitter<boolean> = new EventEmitter<boolean>()
   pathToRoot: {id: number, name: string}[] = []
 
+  detailsOpen: boolean = false
   constructor(private web: WebService, public accounts: AccountsService) {
 
   }

@@ -4,7 +4,7 @@
   </h5>
 </div>
 <div class="modal-body">
-  <form [formGroup]="reagentSearchForm">
+  <form [formGroup]="reagentSearchForm" class="d-flex flex-column gap-2">
     <div>
       Input entry for <b>{{stored_at?.object_name}}</b>
     </div>
@@ -61,6 +61,12 @@
     <div class="form-floating">
       <textarea class="form-control" formControlName="notes"></textarea>
       <label>Notes</label>
+    </div>
+    <div class="form-check">
+      <input class="form-check-input" type="checkbox" id="shareable" formControlName="shareable" />
+      <label class="form-check-label" for="shareable">
+        Consumable
+      </label>
     </div>
   </form>
 </div>

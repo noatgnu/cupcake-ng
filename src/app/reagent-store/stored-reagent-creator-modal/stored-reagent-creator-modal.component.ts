@@ -3,7 +3,7 @@ import {debounceTime, map, Observable, switchMap} from "rxjs";
 import {WebService} from "../../web.service";
 import {FormBuilder, FormControl, ReactiveFormsModule, Validators} from "@angular/forms";
 import {NgbActiveModal, NgbHighlight, NgbTypeahead} from "@ng-bootstrap/ng-bootstrap";
-import {StorageObject} from "../../storage-object";
+import {StorageObject, StoredReagent} from "../../storage-object";
 import {Reagent} from "../../reagent";
 
 @Component({
@@ -30,6 +30,25 @@ export class StoredReagentCreatorModalComponent {
   get stored_at(): StorageObject|undefined {
     return this._stored_at
   }
+  private _storedReagent?: StoredReagent|undefined = undefined
+  @Input() set storedReagent(value: StoredReagent|undefined) {
+    this._storedReagent = value
+    console.log(value)
+    if (value) {
+      this.reagentSearchForm.patchValue({
+        quantity: value.quantity,
+        unit: value.reagent.unit,
+        barcode: value.barcode,
+      })
+      // @ts-ignore
+      this.reagentSearchForm.controls.name.setValue(value.reagent.name)
+      console.log(this.reagentSearchForm)
+    }
+  }
+
+  get storedReagent(): StoredReagent|undefined {
+    return this._storedReagent
+  }
 
   search = (text$: Observable<string>) => {
     return text$.pipe(
@@ -47,6 +66,8 @@ export class StoredReagentCreatorModalComponent {
     notes: [''],
     unit: ['', Validators.required],
     stored_object: new FormControl<number|null>(null, Validators.required),
+    barcode: [''],
+    shareable: [false]
   })
 
   constructor(private web: WebService, private activeModal: NgbActiveModal, private fb: FormBuilder) {
@@ -54,20 +75,28 @@ export class StoredReagentCreatorModalComponent {
 
   onSearchIngredients(event: any) {
     event.preventDefault()
+    console.log(event)
     this.reagentSearchForm.patchValue(
       {
         name: event.item.name,
         unit: event.item.unit
       }
     )
-    console.log(this.reagentSearchForm.value)
   }
 
   formatIngredient = (reagent: Reagent) => {
+    if (typeof reagent === 'string') {
+      return `${reagent}`;
+    }
     return `${reagent.name}`;
   }
 
-  resultFormatter = (reagent: Reagent) => reagent.name
+  resultFormatter = (reagent: Reagent) => {
+    if (typeof reagent === 'string') {
+      return `${reagent}`;
+    }
+    return reagent.name
+  }
 
   close() {
     this.activeModal.dismiss()

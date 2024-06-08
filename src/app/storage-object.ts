@@ -11,6 +11,7 @@ export interface StorageObject {
   updated_at: Date;
   can_delete: boolean;
   png_base64: string;
+  user: string;
 }
 
 export interface StoredReagent {
@@ -24,6 +25,8 @@ export interface StoredReagent {
   user: string;
   png_base64: string;
   barcode: string|null;
+  shareable: boolean;
+  current_quantity: number;
 }
 
 export interface StorageObjectQuery {
@@ -38,4 +41,21 @@ export interface StoredReagentQuery {
   next: string;
   previous: string;
   results: StoredReagent[];
+}
+
+export interface ReagentAction {
+  id: number;
+  action_type: string;
+  reagent: number;
+  quantity: number;
+  user: string;
+  created_at: Date;
+  updated_at: Date;
+}
+
+export interface ReagentActionQuery {
+  count: number;
+  next: string;
+  previous: string;
+  results: ReagentAction[];
 }

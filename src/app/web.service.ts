@@ -15,7 +15,14 @@ import {ReagentQuery, ProtocolReagent, ProtocolStepReagent} from "./reagent";
 import {ProtocolTag, ProtocolTagQuery, StepTag, StepTagQuery, TagQuery} from "./tag";
 import {Project, ProjectQuery} from "./project";
 import {Instrument, InstrumentQuery, InstrumentUsage, InstrumentUsageQuery} from "./instrument";
-import {StorageObject, StorageObjectQuery, StoredReagent, StoredReagentQuery} from "./storage-object";
+import {
+  ReagentAction,
+  ReagentActionQuery,
+  StorageObject,
+  StorageObjectQuery,
+  StoredReagent,
+  StoredReagentQuery
+} from "./storage-object";
 
 
 @Injectable({
@@ -1148,11 +1155,36 @@ export class WebService {
     )
   }
 
-  createStoredReagent(storage_object: number, name: string, unit: string, quantity: number, notes: string) {
+  createStoredReagent(storage_object: number, name: string, unit: string, quantity: number, notes: string, barcode: string|null = null) {
+    const payload: any = {storage_object: storage_object, name: name, unit: unit, quantity: quantity, notes: notes}
+    if (barcode) {
+      payload['barcode'] = barcode
+    }
     return this.http.post<StoredReagent>(
       `${this.baseURL}/api/stored_reagent/`,
-      {storage_object: storage_object, name: name, unit: unit, quantity: quantity, notes: notes},
+      payload,
       {responseType: 'json', observe: 'body'}
+    )
+  }
+
+  createStoredReagentAction(stored_reagent_id: number, action_type: string, quantity: number) {
+    return this.http.post<ReagentAction>(
+      `${this.baseURL}/api/reagent_action/`,
+      {action_type: action_type, quantity: quantity, reagent: stored_reagent_id},
+      {responseType: 'json', observe: 'body'}
+    )
+  }
+
+  getStoredReagentActions(reagent_id?: number, limit: number = 10, offset: number = 0) {
+    let params = new HttpParams()
+    if (reagent_id) {
+      params = params.set('reagent', reagent_id.toString())
+    }
+    params = params.set('limit', limit.toString())
+      .set('offset', offset.toString()).set('order_by', '-created_at')
+    return this.http.get<ReagentActionQuery>(
+      `${this.baseURL}/api/reagent_action/`,
+      {responseType: 'json', observe: 'body', params: params}
     )
   }
 }

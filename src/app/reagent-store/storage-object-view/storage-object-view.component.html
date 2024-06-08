@@ -43,7 +43,7 @@
               @if (reagent.png_base64) {
                 <img [src]="reagent.png_base64" [width]="200" [height]="200" style="border-radius:10px">
               }
-              <app-stored-reagent-item (openQrScannerModal)="openBarcodeScannerReagent(reagent)" [storedReagent]="reagent" (delete)="delete(reagent)" (openStoredReagentEditorModal)="openStoredReagentEditorModal(reagent)" (openCameraModal)="openReagentCameraModal(reagent)"></app-stored-reagent-item>
+              <app-stored-reagent-item (openAddActionModal)="openAddActionModal(reagent)" (openReserveActionModal)="openReserveActionModal(reagent)" (openActionLogsModal)="openActionLogsModal(reagent)" (openCloneStoredReagentModal)="openCloningReagentModal(reagent)" (openQrScannerModal)="openBarcodeScannerReagent(reagent)" [storedReagent]="reagent" (delete)="delete(reagent)" (openStoredReagentEditorModal)="openStoredReagentEditorModal(reagent)" (openCameraModal)="openReagentCameraModal(reagent)"></app-stored-reagent-item>
             </div>
 
           </div>

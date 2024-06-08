@@ -34,7 +34,7 @@ export class StorageObjectCreatorModalComponent {
   })
 
   typeChoices = [
-    "shelf", "box", "fridge", "freezer", "room", "other"
+    "shelf", "box", "fridge", "freezer", "room", "building", "floor", "other"
   ]
 
   constructor(private activeModal: NgbActiveModal, private fb: FormBuilder) {

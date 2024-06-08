@@ -11,11 +11,11 @@ import {
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import Quagga from "@ericblade/quagga2";
 import JsBarcode from "jsbarcode";
-import {StoredReagentQuery} from "../storage-object";
+import {StorageObject, StoredReagentQuery} from "../storage-object";
 import {WebService} from "../web.service";
 
 @Component({
-  selector: 'app-qr-scanner-modal',
+  selector: 'app-barcode-scanner-modal',
   standalone: true,
   imports: [
     NgbNav,
@@ -26,10 +26,10 @@ import {WebService} from "../web.service";
     NgbNavItem,
     NgbNavOutlet
   ],
-  templateUrl: './qr-scanner-modal.component.html',
-  styleUrl: './qr-scanner-modal.component.scss'
+  templateUrl: './barcode-scanner-modal.component.html',
+  styleUrl: './barcode-scanner-modal.component.scss'
 })
-export class QrScannerModalComponent implements AfterViewInit{
+export class BarcodeScannerModalComponent implements AfterViewInit{
   videoElementPreviewID: string = '#videoElementPreview'
   errorMessage: string = ''
   startedQR: boolean = false
@@ -37,6 +37,18 @@ export class QrScannerModalComponent implements AfterViewInit{
   lastScannedCodeDate: number | undefined = undefined
 
   @Input() enableSearch: boolean = false
+
+  private _storageObject?: StorageObject|undefined = undefined
+  @Input() set storageObject(value: StorageObject|undefined) {
+    this._storageObject = value
+    if (value) {
+
+    }
+  }
+
+  get storageObject(): StorageObject|undefined {
+    return this._storageObject
+  }
 
   storedReagentQuery?: StoredReagentQuery | undefined
 
@@ -187,7 +199,7 @@ export class QrScannerModalComponent implements AfterViewInit{
   accept() {
     Quagga.stop()
     this.startedQR = false
-    this.activeModal.close(this.lastScannedCode)
+    this.activeModal.close({barcode: this.lastScannedCode})
   }
 
   stopCamera() {
@@ -204,7 +216,7 @@ export class QrScannerModalComponent implements AfterViewInit{
 
   search() {
     if (this.lastScannedCode && this.enableSearch){
-      this.web.getStoredReagents(undefined, 10, 0, this.lastScannedCode).subscribe((data) => {
+      this.web.getStoredReagents(undefined, 10, 0, this.lastScannedCode, this.storageObject?.id).subscribe((data) => {
         this.storedReagentQuery = data
       })
     }

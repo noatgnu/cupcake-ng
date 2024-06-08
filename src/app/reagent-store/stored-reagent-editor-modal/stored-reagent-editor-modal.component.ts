@@ -32,7 +32,8 @@ export class StoredReagentEditorModalComponent implements AfterViewInit{
   form = this.fb.group({
     quantity: new FormControl(0),
     notes: new FormControl(''),
-    barcode: new FormControl('')
+    barcode: new FormControl(''),
+    shareable: new FormControl(false)
   })
 
   constructor(private activeModal: NgbActiveModal, private fb: FormBuilder) {

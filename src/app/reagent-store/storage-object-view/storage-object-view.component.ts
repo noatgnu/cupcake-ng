@@ -17,7 +17,9 @@ import {ToastService} from "../../toast.service";
 import {StorageObjectEditorModalComponent} from "../storage-object-editor-modal/storage-object-editor-modal.component";
 import {CameraModalComponent} from "../../camera-modal/camera-modal.component";
 import {QrcodeModalComponent} from "../../qrcode-modal/qrcode-modal.component";
-import {QrScannerModalComponent} from "../../qr-scanner-modal/qr-scanner-modal.component";
+import {BarcodeScannerModalComponent} from "../../barcode-scanner-modal/barcode-scanner-modal.component";
+import {ActionLogsModalComponent} from "../action-logs-modal/action-logs-modal.component";
+import {ReserveActionModalComponent} from "../reserve-action-modal/reserve-action-modal.component";
 
 @Component({
   selector: 'app-storage-object-view',
@@ -26,7 +28,7 @@ import {QrScannerModalComponent} from "../../qr-scanner-modal/qr-scanner-modal.c
     NgbPagination,
     ReactiveFormsModule,
     StoredReagentItemComponent,
-    QrScannerModalComponent
+    BarcodeScannerModalComponent
   ],
   templateUrl: './storage-object-view.component.html',
   styleUrl: './storage-object-view.component.scss'
@@ -45,6 +47,8 @@ export class StorageObjectViewComponent {
       this.web.getStorageObjectPathToRoot(value.id).subscribe((data) => {
         this.pathToRoot = data
       })
+    } else {
+      this.pathToRoot = []
     }
   }
 
@@ -97,7 +101,7 @@ export class StorageObjectViewComponent {
     const ref = this.modal.open(StoredReagentCreatorModalComponent, {scrollable: true})
     ref.componentInstance.stored_at = this.storageObject
     ref.closed.subscribe((data) => {
-      this.web.createStoredReagent(data.stored_object, data.name,data.unit, data.quantity, data.notes).subscribe((data) => {
+      this.web.createStoredReagent(data.stored_object, data.name,data.unit, data.quantity, data.notes, data.barcode).subscribe((data) => {
         this.getStoredReagents(undefined, this.pageSize, this.currentPageOffset, undefined, this.storageObject?.id)
       })
     })
@@ -184,21 +188,77 @@ export class StorageObjectViewComponent {
   }
 
   openBarcodeScannerModal() {
-    const ref = this.modal.open(QrScannerModalComponent, {scrollable: true})
+    const ref = this.modal.open(BarcodeScannerModalComponent, {scrollable: true})
     ref.componentInstance.enableSearch = true
-
+    ref.componentInstance.storageObject = this.storageObject
+    ref.closed.subscribe((data) => {
+      this.form.controls.name.setValue(data.barcode)
+      //this.getStoredReagents(undefined, this.pageSize, this.currentPageOffset, data.barcode, this.storageObject?.id)
+    })
   }
 
   openBarcodeScannerReagent(reagent: StoredReagent) {
-    const ref = this.modal.open(QrScannerModalComponent)
+    const ref = this.modal.open(BarcodeScannerModalComponent)
     ref.closed.subscribe((data) => {
-      this.web.updateStoredReagent(reagent.id, reagent.quantity, reagent.notes, reagent.png_base64, data).subscribe((data) => {
+      this.web.updateStoredReagent(reagent.id, reagent.quantity, reagent.notes, reagent.png_base64, data.barcode).subscribe((sr) => {
         this.storedReagentQuery!.results = this.storedReagentQuery!.results.map((r) => {
           if (r.id === reagent.id) {
-            return data
+            return sr
           } else {
             return r
           }
+        })
+      })
+    })
+  }
+
+  openCloningReagentModal(reagent: StoredReagent) {
+    const ref = this.modal.open(StoredReagentCreatorModalComponent, {scrollable: true})
+    ref.componentInstance.stored_at = this.storageObject
+    ref.componentInstance.storedReagent = reagent
+    ref.closed.subscribe((data) => {
+      this.web.createStoredReagent(data.stored_object, data.name, data.unit, data.quantity, data.notes, data.barcode).subscribe((data) => {
+        this.getStoredReagents(undefined, this.pageSize, this.currentPageOffset, undefined, this.storageObject?.id)
+      })
+    })
+  }
+
+  openActionLogsModal(reagent: StoredReagent) {
+    const ref = this.modal.open(ActionLogsModalComponent, {scrollable: true})
+    ref.componentInstance.storedReagent = reagent
+  }
+
+  openReserveActionModal(reagent: StoredReagent) {
+    const ref = this.modal.open(ReserveActionModalComponent)
+    ref.componentInstance.storedReagent = reagent
+    ref.closed.subscribe((data) => {
+      this.web.createStoredReagentAction(reagent.id, "reserve", data.quantity).subscribe((data) => {
+        this.web.getStoredReagent(reagent.id).subscribe((data) => {
+          this.storedReagentQuery!.results = this.storedReagentQuery!.results.map((r) => {
+            if (r.id === reagent.id) {
+              return data
+            } else {
+              return r
+            }
+          })
+        })
+      })
+    })
+  }
+
+  openAddActionModal(reagent: StoredReagent) {
+    const ref = this.modal.open(ReserveActionModalComponent)
+    ref.componentInstance.storedReagent = reagent
+    ref.closed.subscribe((data) => {
+      this.web.createStoredReagentAction(reagent.id, "add", data.quantity).subscribe((data) => {
+        this.web.getStoredReagent(reagent.id).subscribe((data) => {
+          this.storedReagentQuery!.results = this.storedReagentQuery!.results.map((r) => {
+            if (r.id === reagent.id) {
+              return data
+            } else {
+              return r
+            }
+          })
         })
       })
     })
