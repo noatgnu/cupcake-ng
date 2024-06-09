@@ -3,7 +3,7 @@
     @if (storedReagent.png_base64) {
       <img alt="{{storedReagent.reagent.name}}-{{storedReagent.id}}-image" [src]="storedReagent.png_base64" [width]="100" [height]="100" style="border-radius:10px">
     }
-    <div class="d-flex flex-column justify-content-between h-100">
+    <div class="d-flex flex-column justify-content-between h-100" style="max-width: 500px">
       <div>
         <div>
           <b>Item: {{storedReagent.reagent.name}} @if (storedReagent.shareable) {<i class="bi bi-share"></i> } </b>
@@ -19,13 +19,7 @@
           </small>
         </p>
       </div>
-      @if (detailsOpen) {
-        <div>
-          <p>
-            <b>Notes:</b> {{storedReagent.notes}}<br>
-          </p>
-        </div>
-      }
+
     </div>
     <app-stored-reagent-activity-calendar [storedReagent]="storedReagent"></app-stored-reagent-activity-calendar>
 
@@ -36,6 +30,13 @@
 
 
 @if (storedReagent) {
+  @if (detailsOpen) {
+    <div class="alert alert-info">
+      <p>
+        <b>Notes:</b> {{storedReagent.notes}}<br>
+      </p>
+    </div>
+  }
   <div class="d-flex flex-row gap-2 mt-2 flex-wrap">
     <button class="btn btn-sm btn-outline-secondary" (click)="detailsOpen=!detailsOpen"><i class="bi bi-ticket-detailed"></i></button>
     <button class="btn btn-sm btn-outline-secondary" (click)="openCloneStoredReagentModal.emit(true)"><i class="bi bi-copy"></i></button>

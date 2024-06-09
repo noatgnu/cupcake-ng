@@ -1181,7 +1181,7 @@ export class WebService {
       params = params.set('reagent', reagent_id.toString())
     }
     params = params.set('limit', limit.toString())
-      .set('offset', offset.toString()).set('order_by', '-created_at')
+      .set('offset', offset.toString()).set('ordering', '-created_at')
     return this.http.get<ReagentActionQuery>(
       `${this.baseURL}/api/reagent_action/`,
       {responseType: 'json', observe: 'body', params: params}

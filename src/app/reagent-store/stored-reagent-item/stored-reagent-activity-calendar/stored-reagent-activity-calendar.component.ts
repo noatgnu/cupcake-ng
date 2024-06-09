@@ -21,7 +21,7 @@ export class StoredReagentActivityCalendarComponent implements AfterViewInit{
   get storedReagent(): StoredReagent|undefined {
     return this._storedReagent!
   }
-  
+
   @ViewChild('calendar') calendar: ElementRef|undefined
   cal: CalHeatmap|undefined
 
@@ -37,11 +37,12 @@ export class StoredReagentActivityCalendarComponent implements AfterViewInit{
     // Get the current date
     let now = new Date();
 
-    // Get the first day of the current month
-    this.startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+    // Get the start date of the time range window
+    let startDate = new Date(now.getFullYear(), now.getMonth() - 4, 1);
 
-    // Get the last day of the current month
-    this.endDate = new Date(now.getFullYear(), now.getMonth() + 2, 0);
+    // Set the start and end dates
+    this.startDate = startDate;
+    this.endDate = now;
 
   }
 
@@ -61,7 +62,7 @@ export class StoredReagentActivityCalendarComponent implements AfterViewInit{
       if (this.calendar && this.cal) {
         const options: any = {
           itemSelector: this.calendar.nativeElement,
-          range: 2,
+          range: 5,
           domain: {
             type: 'month',
           },
