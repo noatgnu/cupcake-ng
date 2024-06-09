@@ -1,53 +1,63 @@
-@if (storedReagent) {
-  <div class="d-flex flex-column justify-content-between h-100">
-    <div>
+<div class="d-flex flex-row gap-2 flex-wrap">
+  @if (storedReagent) {
+    @if (storedReagent.png_base64) {
+      <img alt="{{storedReagent.reagent.name}}-{{storedReagent.id}}-image" [src]="storedReagent.png_base64" [width]="100" [height]="100" style="border-radius:10px">
+    }
+    <div class="d-flex flex-column justify-content-between h-100">
       <div>
-        <b>Item: {{storedReagent.reagent.name}}</b>
-      </div>
-      <p>
-        <small>Current quantity: {{storedReagent.current_quantity}} {{storedReagent.reagent.unit}}</small><br>
-        <small>User: {{storedReagent.user}}</small><br>
-        <small>
-          Path to entry: // >
-          @for (path of pathToRoot; track path.id) {
-            <a href="/#/reagent-store/{{path.id}}">{{path.name}}</a> >
-          }
-        </small>
-      </p>
-    </div>
-    @if (detailsOpen) {
-      <div>
+        <div>
+          <b>Item: {{storedReagent.reagent.name}} @if (storedReagent.shareable) {<i class="bi bi-share"></i> } </b>
+        </div>
         <p>
-          <b>Notes:</b> {{storedReagent.notes}}<br>
+          <small>Current quantity: {{storedReagent.current_quantity}} {{storedReagent.reagent.unit}}</small><br>
+          <small>User: {{storedReagent.user}}</small><br>
+          <small>
+            Path to entry: // >
+            @for (path of pathToRoot; track path.id) {
+              <a href="/#/reagent-store/{{path.id}}">{{path.name}}</a> >
+            }
+          </small>
         </p>
       </div>
-    }
-    <div class="d-flex flex-row gap-2">
-      <button class="btn btn-sm btn-outline-secondary" (click)="detailsOpen=!detailsOpen"><i class="bi bi-ticket-detailed"></i></button>
-      <button class="btn btn-sm btn-outline-secondary" (click)="openCloneStoredReagentModal.emit(true)"><i class="bi bi-copy"></i></button>
-      @if (storedReagent.user === accounts.username || accounts.is_staff) {
-        <button class="btn btn-sm btn-outline-secondary" (click)="openCameraModal.emit(true)"><i class="bi bi-camera"></i></button>
-        <button class="btn btn-sm btn-outline-primary" (click)="openStoredReagentEditorModal.emit(true)"><i class="bi bi-pencil"></i></button>
-        @if (storedReagent.barcode) {
-          <button class="btn btn-sm btn-outline-success" (click)="openQrScannerModal.emit(true)"><i class="bi bi-upc-scan"></i></button>
-        } @else {
-          <button class="btn btn-sm btn-outline-secondary" (click)="openQrScannerModal.emit(true)"><i class="bi bi-upc-scan"></i></button>
-        }
-        <button class="btn btn-sm btn-outline-danger" (click)="delete.emit(true)"><i class="bi bi-trash"></i></button>
-      } @else {
-        <button class="btn btn-sm btn-outline-danger" disabled><i class="bi bi-trash"></i></button>
+      @if (detailsOpen) {
+        <div>
+          <p>
+            <b>Notes:</b> {{storedReagent.notes}}<br>
+          </p>
+        </div>
       }
-      @if (storedReagent.shareable || storedReagent.user === accounts.username) {
-        <button class="btn btn-sm btn-outline-primary" (click)="openActionLogsModal.emit(true)"><i class="bi bi-journal-text"></i></button>
-        <button class="btn btn-sm btn-outline-danger" (click)="openReserveActionModal.emit(true)"><i class="bi bi-dash-circle"></i></button>
-        <button class="btn btn-sm btn-outline-primary" (click)="openAddActionModal.emit(true)"><i class="bi bi-plus-circle"></i></button>
-
-      }
-
     </div>
+    <app-stored-reagent-activity-calendar [storedReagent]="storedReagent"></app-stored-reagent-activity-calendar>
+
+  }
+
+</div>
+
+
+
+@if (storedReagent) {
+  <div class="d-flex flex-row gap-2 mt-2 flex-wrap">
+    <button class="btn btn-sm btn-outline-secondary" (click)="detailsOpen=!detailsOpen"><i class="bi bi-ticket-detailed"></i></button>
+    <button class="btn btn-sm btn-outline-secondary" (click)="openCloneStoredReagentModal.emit(true)"><i class="bi bi-copy"></i></button>
+    @if (storedReagent.user === accounts.username || accounts.is_staff) {
+      <button class="btn btn-sm btn-outline-secondary" (click)="openCameraModal.emit(true)"><i class="bi bi-camera"></i></button>
+      <button class="btn btn-sm btn-outline-primary" (click)="openStoredReagentEditorModal.emit(true)"><i class="bi bi-pencil"></i></button>
+      @if (storedReagent.barcode) {
+        <button class="btn btn-sm btn-outline-success" (click)="openQrScannerModal.emit(true)"><i class="bi bi-upc-scan"></i></button>
+      } @else {
+        <button class="btn btn-sm btn-outline-secondary" (click)="openQrScannerModal.emit(true)"><i class="bi bi-upc-scan"></i></button>
+      }
+      <button class="btn btn-sm btn-outline-danger" (click)="delete.emit(true)"><i class="bi bi-trash"></i></button>
+    } @else {
+      <button class="btn btn-sm btn-outline-danger" disabled><i class="bi bi-trash"></i></button>
+    }
+    @if (storedReagent.shareable || storedReagent.user === accounts.username) {
+      <button class="btn btn-sm btn-outline-primary" (click)="openActionLogsModal.emit(true)"><i class="bi bi-journal-text"></i></button>
+      <button class="btn btn-sm btn-outline-danger" (click)="openReserveActionModal.emit(true)"><i class="bi bi-dash-circle"></i></button>
+      <button class="btn btn-sm btn-outline-primary" (click)="openAddActionModal.emit(true)"><i class="bi bi-plus-circle"></i></button>
+
+    }
   </div>
-
-
-
-
 }
+
+

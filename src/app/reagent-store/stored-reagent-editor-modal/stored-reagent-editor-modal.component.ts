@@ -22,6 +22,7 @@ export class StoredReagentEditorModalComponent implements AfterViewInit{
       this.form.controls.quantity.setValue(value.quantity)
       this.form.controls.notes.setValue(value.notes)
       this.form.controls.barcode.setValue(value.barcode)
+      this.form.controls.shareable.setValue(value.shareable)
     }
   }
 
@@ -33,7 +34,7 @@ export class StoredReagentEditorModalComponent implements AfterViewInit{
     quantity: new FormControl(0),
     notes: new FormControl(''),
     barcode: new FormControl(''),
-    shareable: new FormControl(false)
+    shareable: new FormControl(true)
   })
 
   constructor(private activeModal: NgbActiveModal, private fb: FormBuilder) {

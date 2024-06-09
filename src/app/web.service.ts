@@ -1131,8 +1131,8 @@ export class WebService {
   }
 
 
-  updateStoredReagent(reagent_id: number, quantity: number, notes: string, png_base64: string|null = null, barcode: string|null = null) {
-    const payload: any = {quantity: quantity, notes: notes, png_base64: png_base64, barcode: barcode}
+  updateStoredReagent(reagent_id: number, quantity: number, notes: string, png_base64: string|null = null, barcode: string|null = null, shareable: boolean = true) {
+    const payload: any = {quantity: quantity, notes: notes, png_base64: png_base64, barcode: barcode, shareable: shareable}
 
     return this.http.put<StoredReagent>(
       `${this.baseURL}/api/stored_reagent/${reagent_id}/`,
@@ -1155,8 +1155,8 @@ export class WebService {
     )
   }
 
-  createStoredReagent(storage_object: number, name: string, unit: string, quantity: number, notes: string, barcode: string|null = null) {
-    const payload: any = {storage_object: storage_object, name: name, unit: unit, quantity: quantity, notes: notes}
+  createStoredReagent(storage_object: number, name: string, unit: string, quantity: number, notes: string, barcode: string|null = null, shareable: boolean = true) {
+    const payload: any = {storage_object: storage_object, name: name, unit: unit, quantity: quantity, notes: notes, shareable: shareable}
     if (barcode) {
       payload['barcode'] = barcode
     }
@@ -1184,6 +1184,17 @@ export class WebService {
       .set('offset', offset.toString()).set('order_by', '-created_at')
     return this.http.get<ReagentActionQuery>(
       `${this.baseURL}/api/reagent_action/`,
+      {responseType: 'json', observe: 'body', params: params}
+    )
+  }
+
+  getStoredReagentActionWithinRange(reagent_id: number, start: Date, end: Date) {
+    let params = new HttpParams()
+    params = params.set('reagent', reagent_id.toString())
+      .set('start_date', start.toISOString())
+      .set('end_date', end.toISOString())
+    return this.http.get<ReagentAction[]>(
+      `${this.baseURL}/api/reagent_action/get_reagent_action_range/`,
       {responseType: 'json', observe: 'body', params: params}
     )
   }

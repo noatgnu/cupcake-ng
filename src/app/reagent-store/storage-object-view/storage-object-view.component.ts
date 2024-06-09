@@ -120,7 +120,7 @@ export class StorageObjectViewComponent {
     const ref = this.modal.open(StoredReagentEditorModalComponent, {scrollable: true})
     ref.componentInstance.storedReagent = reagent
     ref.closed.subscribe((data) => {
-      this.web.updateStoredReagent(reagent.id, data.quantity, data.notes).subscribe((data) => {
+      this.web.updateStoredReagent(reagent.id, data.quantity, data.notes, reagent.png_base64, data.barcode, data.shareable).subscribe((data) => {
         this.getStoredReagents(undefined, this.pageSize, this.currentPageOffset, undefined, this.storageObject?.id)
       })
     })
@@ -170,11 +170,11 @@ export class StorageObjectViewComponent {
     const ref = this.modal.open(CameraModalComponent, {scrollable: true})
     ref.closed.subscribe((data) => {
       if (data.remove) {
-        this.web.updateStoredReagent(reagent.id, reagent.quantity, reagent.notes, undefined).subscribe((data) => {
+        this.web.updateStoredReagent(reagent.id, reagent.quantity, reagent.notes, undefined, reagent.barcode, reagent.shareable).subscribe((data) => {
           this.getStoredReagents(undefined, this.pageSize, this.currentPageOffset, undefined, this.storageObject?.id)
         })
       } else {
-        this.web.updateStoredReagent(reagent.id, reagent.quantity, reagent.notes, data).subscribe((data) => {
+        this.web.updateStoredReagent(reagent.id, reagent.quantity, reagent.notes, data, reagent.barcode, reagent.shareable).subscribe((data) => {
           this.getStoredReagents(undefined, this.pageSize, this.currentPageOffset, undefined, this.storageObject?.id)
         })
       }
@@ -200,7 +200,7 @@ export class StorageObjectViewComponent {
   openBarcodeScannerReagent(reagent: StoredReagent) {
     const ref = this.modal.open(BarcodeScannerModalComponent)
     ref.closed.subscribe((data) => {
-      this.web.updateStoredReagent(reagent.id, reagent.quantity, reagent.notes, reagent.png_base64, data.barcode).subscribe((sr) => {
+      this.web.updateStoredReagent(reagent.id, reagent.quantity, reagent.notes, reagent.png_base64, data.barcode, reagent.shareable).subscribe((sr) => {
         this.storedReagentQuery!.results = this.storedReagentQuery!.results.map((r) => {
           if (r.id === reagent.id) {
             return sr

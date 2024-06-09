@@ -67,7 +67,7 @@ export class StoredReagentCreatorModalComponent {
     unit: ['', Validators.required],
     stored_object: new FormControl<number|null>(null, Validators.required),
     barcode: [''],
-    shareable: [false]
+    shareable: [true]
   })
 
   constructor(private web: WebService, private activeModal: NgbActiveModal, private fb: FormBuilder) {

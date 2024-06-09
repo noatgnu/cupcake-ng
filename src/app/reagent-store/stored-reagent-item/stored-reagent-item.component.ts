@@ -2,11 +2,16 @@ import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {StoredReagent} from "../../storage-object";
 import {WebService} from "../../web.service";
 import {AccountsService} from "../../accounts/accounts.service";
+import {
+  StoredReagentActivityCalendarComponent
+} from "./stored-reagent-activity-calendar/stored-reagent-activity-calendar.component";
 
 @Component({
   selector: 'app-stored-reagent-item',
   standalone: true,
-  imports: [],
+  imports: [
+    StoredReagentActivityCalendarComponent
+  ],
   templateUrl: './stored-reagent-item.component.html',
   styleUrl: './stored-reagent-item.component.scss'
 })
