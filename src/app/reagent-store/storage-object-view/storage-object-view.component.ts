@@ -20,6 +20,7 @@ import {QrcodeModalComponent} from "../../qrcode-modal/qrcode-modal.component";
 import {BarcodeScannerModalComponent} from "../../barcode-scanner-modal/barcode-scanner-modal.component";
 import {ActionLogsModalComponent} from "../action-logs-modal/action-logs-modal.component";
 import {ReserveActionModalComponent} from "../reserve-action-modal/reserve-action-modal.component";
+import {AddActionModalComponent} from "../add-action-modal/add-action-modal.component";
 
 @Component({
   selector: 'app-storage-object-view',
@@ -226,6 +227,17 @@ export class StorageObjectViewComponent {
   openActionLogsModal(reagent: StoredReagent) {
     const ref = this.modal.open(ActionLogsModalComponent, {scrollable: true})
     ref.componentInstance.storedReagent = reagent
+    ref.dismissed.subscribe(() => {
+      this.web.getStoredReagent(reagent.id).subscribe((data) => {
+        this.storedReagentQuery!.results = this.storedReagentQuery!.results.map((r) => {
+          if (r.id === reagent.id) {
+            return data
+          } else {
+            return r
+          }
+        })
+      })
+    })
   }
 
   openReserveActionModal(reagent: StoredReagent) {
@@ -247,7 +259,7 @@ export class StorageObjectViewComponent {
   }
 
   openAddActionModal(reagent: StoredReagent) {
-    const ref = this.modal.open(ReserveActionModalComponent)
+    const ref = this.modal.open(AddActionModalComponent)
     ref.componentInstance.storedReagent = reagent
     ref.closed.subscribe((data) => {
       this.web.createStoredReagentAction(reagent.id, "add", data.quantity).subscribe((data) => {

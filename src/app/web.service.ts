@@ -1198,6 +1198,13 @@ export class WebService {
       {responseType: 'json', observe: 'body', params: params}
     )
   }
+
+  deleteReagentAction(action_id: number) {
+    return this.http.delete(
+      `${this.baseURL}/api/reagent_action/${action_id}/`,
+      {responseType: 'json', observe: 'body'}
+    )
+  }
 }
 
 interface ChunkUploadResponse {

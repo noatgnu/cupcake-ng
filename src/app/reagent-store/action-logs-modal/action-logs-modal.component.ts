@@ -1,9 +1,10 @@
 import {Component, Input} from '@angular/core';
-import {ReagentActionQuery, StoredReagent} from "../../storage-object";
+import {ReagentAction, ReagentActionQuery, StoredReagent} from "../../storage-object";
 import {FormBuilder} from "@angular/forms";
 import {NgbActiveModal, NgbPagination} from "@ng-bootstrap/ng-bootstrap";
 import {WebService} from "../../web.service";
 import {DatePipe} from "@angular/common";
+import {AccountsService} from "../../accounts/accounts.service";
 
 @Component({
   selector: 'app-action-logs-modal',
@@ -36,7 +37,7 @@ export class ActionLogsModalComponent {
   currentPageOffset = 0
   currentPage = 1
 
-  constructor(private activeModal: NgbActiveModal, private web: WebService) {
+  constructor(private activeModal: NgbActiveModal, private web: WebService, public accounts: AccountsService) {
   }
 
   close() {
@@ -51,5 +52,19 @@ export class ActionLogsModalComponent {
     })
   }
 
+  checkIfCreateAtLessThan(action: ReagentAction, minute: 5) {
+    const currentDate = new Date().getTime()
+    const actionDate = new Date(action.created_at).getTime()
+    return currentDate - actionDate < minute * 60 * 1000
+  }
 
+  remove(action: ReagentAction) {
+    this.web.deleteReagentAction(action.id).subscribe(() => {
+      if (this.storedReagent) {
+        this.web.getStoredReagentActions(this.storedReagent.id, this.pageSize, this.currentPageOffset).subscribe((data) => {
+          this.actionLogs = data
+        })
+      }
+    })
+  }
 }
