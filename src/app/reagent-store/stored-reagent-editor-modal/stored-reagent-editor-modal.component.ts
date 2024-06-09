@@ -61,9 +61,18 @@ export class StoredReagentEditorModalComponent implements AfterViewInit{
   }
 
   drawBarcode() {
-    const canvas = document.getElementById('barcode-canvas') as HTMLCanvasElement
-    if (this.form.controls.barcode.value) {
-      JsBarcode(canvas, this.form.controls.barcode.value)
+    if (this.storedReagent) {
+      const canvas = document.getElementById(`stored-reagent-${this.storedReagent.id}-barcode-canvas`) as HTMLOrSVGImageElement
+      if (this.form.controls.barcode.value) {
+        JsBarcode(canvas, this.form.controls.barcode.value, {
+          format: 'EAN13',
+          width: 5,  // Increase this value to make the barcode thicker
+          height: 100,  // Decrease this value to make the barcode shorter
+          margin: 50,
+          displayValue: true
+        })
+      }
     }
+
   }
 }

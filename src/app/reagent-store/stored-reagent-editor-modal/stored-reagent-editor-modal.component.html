@@ -24,7 +24,9 @@
         <input type="text" class="form-control" id="barcode" formControlName="barcode" placeholder="Barcode">
         <label for="barcode">Barcode</label>
       </div>
-      <canvas id="barcode-canvas" style="width: 300px; height: 100px"></canvas>
+      <div class="d-flex flex-row justify-content-center">
+        <svg id="stored-reagent-{{storedReagent.id}}-barcode-canvas" width="300" height="300"></svg>
+      </div>
 
     </form>
   }

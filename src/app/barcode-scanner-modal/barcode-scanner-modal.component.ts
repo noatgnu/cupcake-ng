@@ -208,9 +208,16 @@ export class BarcodeScannerModalComponent implements AfterViewInit{
   }
 
   drawBarcode() {
-    const canvas = document.getElementById('barcode-canvas') as HTMLCanvasElement
+    const canvas = document.getElementById('barcode-canvas') as HTMLOrSVGImageElement
     if (this.lastScannedCode) {
-      JsBarcode(canvas, this.lastScannedCode, {format: 'EAN13', width: 300, height:200, margin: 10, displayValue: true})
+      JsBarcode(canvas,
+        this.lastScannedCode,
+        {
+          format: 'EAN13',
+          width: 5,  // Increase this value to make the barcode thicker
+          height: 100,  // Decrease this value to make the barcode shorter
+          margin: 50, displayValue: true}
+      )
     }
   }
 
