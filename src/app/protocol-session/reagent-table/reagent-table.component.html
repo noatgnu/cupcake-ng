@@ -21,6 +21,9 @@
             <tr>
               <td colspan="4">
                 <div class="d-flex flex-column">
+                  @if (selectedStoredReagent.png_base64) {
+                    <img src="{{selectedStoredReagent.png_base64}}" width="100" height="100">
+                  }
                   <p>
                     Reserved stock: {{selectedStoredReagent.reagent.name}} <br>
                     Reserved quantity: {{reagentActionMap[r.id].quantity}} {{selectedStoredReagent.reagent.unit}}<br>
