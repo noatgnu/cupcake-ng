@@ -27,6 +27,7 @@ import {RandomAnnotationModalComponent} from "../random-annotation-modal/random-
 import {UploadLargeFileModalComponent} from "../../upload-large-file-modal/upload-large-file-modal.component";
 import {InstrumentBookingModalComponent} from "../../instruments/instrument-booking-modal/instrument-booking-modal.component";
 import {Instrument} from "../../instrument";
+import {ReagentTableComponent} from "../reagent-table/reagent-table.component";
 
 @Component({
   selector: 'app-step-view',
@@ -40,7 +41,8 @@ import {Instrument} from "../../instrument";
     NgbDropdownItem,
     NgbDropdownMenu,
     NgbDropdownToggle,
-    NgbProgressbar
+    NgbProgressbar,
+    ReagentTableComponent
   ],
   templateUrl: './step-view.component.html',
   styleUrl: './step-view.component.scss'

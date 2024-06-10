@@ -56,6 +56,9 @@
   </div>
   <div class="container-fluid d-flex flex-column justify-content-center">
     <div [innerHTML]="getStepDescription(currentStep)"></div>
+    @if (currentStep.reagents.length > 0) {
+      <app-reagent-table [step]="currentStep"></app-reagent-table>
+    }
 
     <div class="d-flex flex-column gap-2">
       @if (!dataService.stepCompletionSummary[currentStep.id].started) {

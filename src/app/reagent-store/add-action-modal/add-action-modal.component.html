@@ -5,10 +5,14 @@
 </div>
 <div class="modal-body">
   @if (storedReagent) {
-    <form [formGroup]="form" >
+    <form [formGroup]="form" class="d-flex flex-column gap-2" >
       <div class="form-floating">
         <input type="number" class="form-control" id="quantity" formControlName="quantity" placeholder="Quantity ({{storedReagent.reagent.unit}})">
         <label for="quantity">Quantity ({{storedReagent.reagent.unit}})</label>
+      </div>
+      <div class="form-floating">
+        <textarea class="form-control" id="notes" formControlName="notes" placeholder="Notes"></textarea>
+        <label for="notes">Notes</label>
       </div>
     </form>
   }

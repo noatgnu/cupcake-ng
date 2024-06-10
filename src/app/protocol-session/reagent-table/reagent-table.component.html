@@ -1,0 +1,44 @@
+<div class="d-flex flex-row">
+  <div>
+    <table class="table table-bordered table-striped">
+      <thead>
+      <tr>
+        <th scope="col">Reagent</th>
+        <th scope="col">Quantity</th>
+        <th scope="col">Unit</th>
+        <th scope="col">Status</th>
+      </tr>
+      </thead>
+      <tbody>
+        @for (r of step.reagents; track r.id) {
+          <tr>
+            <td>{{r.reagent.name}}</td>
+            <td>{{r.quantity}}</td>
+            <td>{{r.reagent.unit}}</td>
+            <td>@if(reagentActionMap[r.id]) {<i class="bi bi-check" (click)="selectReagent(r)"></i>} @else {<i class="bi bi-square" (click)="openReserveReagentActionModal(r)"></i>} </td>
+          </tr>
+          @if (selectedReagent===r && selectedStoredReagent) {
+            <tr>
+              <td colspan="4">
+                <div class="d-flex flex-column">
+                  <p>
+                    Reserved stock: {{selectedStoredReagent.reagent.name}} <br>
+                    Reserved quantity: {{reagentActionMap[r.id].quantity}} {{selectedStoredReagent.reagent.unit}}<br>
+                    Reserved at: {{reagentActionMap[r.id].created_at | date:'short'}} <br>
+                    Path: // @for (p of selectedStoredReagentPath; track p.id) { <a href="/#/reagent-store/{{p.id}}">{{p.name}}</a> > } <br>
+
+                  </p>
+                  @if (reagentActionMap[r.id]) {
+                    @if (checkIfCreatedAtIsLessThanMinute(reagentActionMap[r.id], web.reagentActionDeleteExpireMinutes)) {
+                      <button class="btn btn-sm btn-outline-danger" (click)="deleteAction(reagentActionMap[r.id])"><i class="bi bi-trash"></i></button>
+                    }
+                  }
+                </div>
+              </td>
+            </tr>
+          }
+        }
+      </tbody>
+    </table>
+  </div>
+</div>

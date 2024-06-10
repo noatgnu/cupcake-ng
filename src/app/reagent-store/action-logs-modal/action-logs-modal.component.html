@@ -15,6 +15,9 @@
                 <small>user: {{log.user}}</small><br>
                 <small>{{log.created_at|date : "short"}}</small>
               </p>
+              @if (log.notes) {
+                <small>Notes: {{log.notes}}</small>
+              }
               @if (checkIfCreateAtLessThan(log, 5) && log.user === accounts.username) {
                 <button class="btn btn-sm btn-outline-danger" (click)="remove(log)"><i class="bi bi-trash"></i></button>
               }
@@ -26,7 +29,7 @@
                 <small>user: {{log.user}}</small><br>
                 <small>{{log.created_at|date : "short"}}</small>
               </p>
-              @if (checkIfCreateAtLessThan(log, 5) && log.user === accounts.username) {
+              @if (checkIfCreateAtLessThan(log, web.reagentActionDeleteExpireMinutes) && log.user === accounts.username) {
                 <button class="btn btn-sm btn-outline-danger" (click)="remove(log)"><i class="bi bi-trash"></i></button>
               }
             </div>

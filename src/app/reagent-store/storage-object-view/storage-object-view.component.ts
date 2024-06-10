@@ -244,7 +244,7 @@ export class StorageObjectViewComponent {
     const ref = this.modal.open(ReserveActionModalComponent)
     ref.componentInstance.storedReagent = reagent
     ref.closed.subscribe((data) => {
-      this.web.createStoredReagentAction(reagent.id, "reserve", data.quantity).subscribe((data) => {
+      this.web.createStoredReagentAction(reagent.id, "reserve", data.quantity, data.notes).subscribe((data) => {
         this.web.getStoredReagent(reagent.id).subscribe((data) => {
           this.storedReagentQuery!.results = this.storedReagentQuery!.results.map((r) => {
             if (r.id === reagent.id) {
@@ -262,7 +262,7 @@ export class StorageObjectViewComponent {
     const ref = this.modal.open(AddActionModalComponent)
     ref.componentInstance.storedReagent = reagent
     ref.closed.subscribe((data) => {
-      this.web.createStoredReagentAction(reagent.id, "add", data.quantity).subscribe((data) => {
+      this.web.createStoredReagentAction(reagent.id, "add", data.quantity, data.notes).subscribe((data) => {
         this.web.getStoredReagent(reagent.id).subscribe((data) => {
           this.storedReagentQuery!.results = this.storedReagentQuery!.results.map((r) => {
             if (r.id === reagent.id) {

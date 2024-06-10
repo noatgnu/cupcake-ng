@@ -26,6 +26,7 @@ export class ReserveActionModalComponent {
 
   form = this.fb.group({
     quantity: 0,
+    notes: '',
   })
 
 

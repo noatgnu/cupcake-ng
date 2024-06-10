@@ -25,6 +25,7 @@ export class AddActionModalComponent {
 
   form = this.fb.group({
     quantity: 0,
+    notes: '',
   })
 
 

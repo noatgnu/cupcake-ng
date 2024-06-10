@@ -75,7 +75,7 @@ export class StoredReagentActivityCalendarComponent implements AfterViewInit{
           },
           data: {
             source: this.data,
-            x: 'start_date',
+            x: (datum: ReagentAction) => new Date(datum.created_at),
             y: (datum: ReagentAction) => {
               if (datum.action_type === 'add') {
                 return +datum.quantity

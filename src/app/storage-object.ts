@@ -48,9 +48,11 @@ export interface ReagentAction {
   action_type: string;
   reagent: number;
   quantity: number;
+  notes: string;
   user: string;
   created_at: Date;
   updated_at: Date;
+  step_reagent: number;
 }
 
 export interface ReagentActionQuery {

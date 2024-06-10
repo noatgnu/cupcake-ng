@@ -31,6 +31,7 @@ import {
 export class WebService {
   cupcakeInstanceID: string = crypto.randomUUID()
   baseURL: string = environment.baseURL;
+  reagentActionDeleteExpireMinutes: number = 120
 
   constructor(private http: HttpClient) { }
 
@@ -1099,7 +1100,7 @@ export class WebService {
     )
   }
 
-  getStoredReagents(url?: string, limit: number = 10, offset: number = 0, searchTerm: string = "", storage_object: number|null = null) {
+  getStoredReagents(url?: string, limit: number = 10, offset: number = 0, searchTerm: string = "", storage_object: number|null = null, storage_object_name: string|null = null, user_owned_only: boolean= false) {
     if (url) {
       return this.http.get<StoredReagentQuery>(
         url,
@@ -1109,6 +1110,14 @@ export class WebService {
     let params = new HttpParams()
       .set('limit', limit.toString())
       .set('offset', offset.toString())
+
+    if (user_owned_only) {
+      params = params.append('user_owned_only', 'true')
+    }
+    if (storage_object_name) {
+      params = params.append('storage_object_name', storage_object_name)
+    }
+
     if (searchTerm !== "") {
       params = params.append('search', searchTerm);
     }
@@ -1167,10 +1176,15 @@ export class WebService {
     )
   }
 
-  createStoredReagentAction(stored_reagent_id: number, action_type: string, quantity: number) {
+  createStoredReagentAction(stored_reagent_id: number, action_type: string, quantity: number, notes: string = "", step_reagent: number|null = null) {
+    const payload: any = {action_type: action_type, quantity: quantity, reagent: stored_reagent_id, notes: notes}
+    if (step_reagent) {
+      payload['step_reagent'] = step_reagent
+    }
+
     return this.http.post<ReagentAction>(
       `${this.baseURL}/api/reagent_action/`,
-      {action_type: action_type, quantity: quantity, reagent: stored_reagent_id},
+      payload,
       {responseType: 'json', observe: 'body'}
     )
   }
@@ -1202,6 +1216,13 @@ export class WebService {
   deleteReagentAction(action_id: number) {
     return this.http.delete(
       `${this.baseURL}/api/reagent_action/${action_id}/`,
+      {responseType: 'json', observe: 'body'}
+    )
+  }
+
+  getStepAssociatedReagentActions(step_id: number) {
+    return this.http.get<ReagentAction[]>(
+      `${this.baseURL}/api/step/${step_id}/get_associated_reagent_actions/`,
       {responseType: 'json', observe: 'body'}
     )
   }

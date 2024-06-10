@@ -1,0 +1,61 @@
+<div class="modal-header">
+  <h5 class="modal-title">
+    Stock Search
+  </h5>
+</div>
+<div class="modal-body">
+  <form [formGroup]="form" class="d-flex flex-column gap-2" (ngSubmit)="searchReagent()">
+    <div class="form-floating">
+      <input type="search" class="form-control" id="searchTerm" formControlName="searchTerm" placeholder="Stock name search term">
+      <label for="searchTerm">Stock name search term</label>
+    </div>
+    <div class="form-floating">
+      <input type="search" class="form-control" id="storageObjectName" formControlName="storageObjectName" placeholder="Storage object name">
+      <label for="storageObjectName">Storage object name</label>
+    </div>
+    <div class="form-check">
+      <input class="form-check-input" type="checkbox" id="userOwnedOnly" formControlName="userOwnedOnly">
+      <label class="form-check-label" for="userOwnedOnly">
+        User owned only
+      </label>
+    </div>
+    <button type="submit" class="btn btn-primary">Search</button>
+  </form>
+
+  @if (storedReagentQuery) {
+    <hr>
+    @if (storedReagentQuery.results.length > 0) {
+      <div class="list-group mt-2">
+      @for (r of storedReagentQuery.results; track r.id) {
+        <div (click)="clickReagent(r)" class="list-group-item list-group-item-action" [ngClass]="{'list-group-item-primary': selectedReagent===r}">
+          <p>
+            {{r.reagent.name}} {{r.current_quantity}} {{r.reagent.unit}} <br>
+            <small><a href="/#/reagent_store/{{r.storage_object.id}}" target="_blank">{{r.storage_object.object_name}}</a></small>
+          </p>
+
+        </div>
+      }
+      </div>
+    } @else {
+      <div class="alert alert-info mt-2" role="alert">
+        No results found
+      </div>
+    }
+  }
+  <div>
+
+  </div>
+
+</div>
+<div class="modal-footer d-flex flex-row justify-content-between">
+  @if (storedReagentQuery) {
+    <ngb-pagination [collectionSize]="storedReagentQuery.count" [pageSize]="this.pageSize" [rotate]="true" [(page)]="currentPage" (pageChange)="handlePageChange($event)"></ngb-pagination>
+  }
+  <div class="d-flex flex-row gap-2">
+    @if (selectedReagent) {
+      <button type="button" class="btn btn-primary" (click)="accept()">Accept {{selectedReagent.reagent.name}} ({{selectedReagent.reagent.unit}})</button>
+    }
+
+    <button type="button" class="btn btn-secondary" (click)="close()">Close</button>
+  </div>
+</div>

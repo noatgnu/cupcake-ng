@@ -37,7 +37,7 @@ export class ActionLogsModalComponent {
   currentPageOffset = 0
   currentPage = 1
 
-  constructor(private activeModal: NgbActiveModal, private web: WebService, public accounts: AccountsService) {
+  constructor(private activeModal: NgbActiveModal, public web: WebService, public accounts: AccountsService) {
   }
 
   close() {
@@ -52,7 +52,7 @@ export class ActionLogsModalComponent {
     })
   }
 
-  checkIfCreateAtLessThan(action: ReagentAction, minute: 5) {
+  checkIfCreateAtLessThan(action: ReagentAction, minute: number = 5) {
     const currentDate = new Date().getTime()
     const actionDate = new Date(action.created_at).getTime()
     return currentDate - actionDate < minute * 60 * 1000
