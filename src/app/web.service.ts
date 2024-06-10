@@ -31,7 +31,7 @@ import {
 export class WebService {
   cupcakeInstanceID: string = crypto.randomUUID()
   baseURL: string = environment.baseURL;
-  reagentActionDeleteExpireMinutes: number = 120
+  reagentActionDeleteExpireMinutes: number = 5
 
   constructor(private http: HttpClient) { }
 

@@ -50,9 +50,9 @@ export class ReagentTableComponent {
   openReserveReagentActionModal(reagent: ProtocolStepReagent) {
     const ref = this.modal.open(ReagentStockSearchModalComponent, {scrollable: true})
     ref.componentInstance.reagent = reagent
-    ref.closed.subscribe((data: StoredReagent) => {
+    ref.closed.subscribe((data: { reagent:StoredReagent, quantity: number }) => {
       if (data) {
-        this.web.createStoredReagentAction(data.id, 'reserve', reagent.quantity, "", reagent.id).subscribe(
+        this.web.createStoredReagentAction(data.reagent.id, 'reserve', data.quantity, "", reagent.id).subscribe(
           (dataReagent: ReagentAction) => {
             this.getReagentAction(this.step.id)
           }

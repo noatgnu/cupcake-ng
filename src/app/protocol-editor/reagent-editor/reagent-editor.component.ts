@@ -70,7 +70,9 @@ export class ReagentEditorComponent {
         this.reagentForms.push(this.fb.group({
           name: new FormControl({value: data.reagent.name, disabled: true}),
           quantity: [data.quantity, Validators.required],
-          unit: new FormControl({value: data.reagent.unit, disabled: true})
+          unit: new FormControl({value: data.reagent.unit, disabled: true}),
+          scalable: [data.scalable],
+          scalable_factor: [data.scalable_factor],
         }))
         this.reagentSearchForm.reset()
       })
@@ -85,10 +87,15 @@ export class ReagentEditorComponent {
   }
 
   formatIngredient = (reagent: Reagent) => {
+    if (typeof reagent === 'string') {
+      return `${reagent}`;
+    }
     return `${reagent.name}`;
   }
 
   onSearchIngredients(event: any) {
+    event.preventDefault()
+    console.log(event)
     this.reagentSearchForm.controls.unit.setValue(event.item.unit)
   }
 

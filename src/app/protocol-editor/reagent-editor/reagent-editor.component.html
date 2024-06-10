@@ -42,19 +42,17 @@
         </div>
       </div>
       <div class="d-flex flex-row gap-2">
-        <div class="form-check">
-          <input class="form-check-input" formControlName="scalable" type="checkbox">
-          <label class="form-check-label">Scalable</label>
-        </div>
         @if (reagentSearchForm.controls.scalable.value) {
           <div class="form-floating">
             <input class="form-control" formControlName="scalable_factor" type="number">
             <label>Scale Factor</label>
           </div>
         }
+        <div class="form-check">
+          <input class="form-check-input" formControlName="scalable" type="checkbox">
+          <label class="form-check-label">Scalable</label>
+        </div>
       </div>
-
-
     </form>
     <button type="button" class="btn btn-primary" (click)="addIngredient()"><i class="bi bi-plus"></i></button>
     <hr>

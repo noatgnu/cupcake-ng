@@ -53,6 +53,13 @@
   }
   <div class="d-flex flex-row gap-2">
     @if (selectedReagent) {
+      <form [formGroup]="form">
+        <div class="form-floating">
+          <input type="number" class="form-control" id="quantity" formControlName="quantity" placeholder="Quantity ({{reagent.reagent.unit}})">
+          <label for="quantity">Quantity ({{reagent.reagent.unit}})</label>
+        </div>
+      </form>
+
       <button type="button" class="btn btn-primary" (click)="accept()">Accept {{selectedReagent.reagent.name}} ({{selectedReagent.reagent.unit}})</button>
     }
 

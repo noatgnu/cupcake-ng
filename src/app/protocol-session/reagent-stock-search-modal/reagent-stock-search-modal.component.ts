@@ -26,6 +26,7 @@ export class ReagentStockSearchModalComponent {
   @Input() set reagent(value: ProtocolStepReagent) {
     this._reagent = value
     this.form.controls.searchTerm.setValue(value.reagent.name)
+    this.form.controls.quantity.setValue(value.quantity)
     this.searchReagent()
   }
 
@@ -39,6 +40,7 @@ export class ReagentStockSearchModalComponent {
     searchTerm: [''],
     userOwnedOnly: [false],
     storageObjectName: [''],
+    quantity: [0]
   })
 
   currentPage: number = 1
@@ -61,7 +63,7 @@ export class ReagentStockSearchModalComponent {
   }
 
   accept() {
-    this.activeModal.close(this.selectedReagent)
+    this.activeModal.close({reagent: this.selectedReagent, quantity: this.form.value.quantity})
   }
 
   handlePageChange(event: number) {
