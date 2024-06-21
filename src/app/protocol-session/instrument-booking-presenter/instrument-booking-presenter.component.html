@@ -17,7 +17,9 @@
         </p>
       </div>
       @if (usage.usage.time_started && usage.usage.time_ended && usage.windowStart && usage.windowEnd) {
-        <app-booking-time-visualizer [dateBeforeCurrent]="usage.windowStart" [dateAfterCurrent]="usage.windowEnd" [instrument]="usage.instrument" [enableEdit]="false" [selectedTimeRange]="{start: usage.usage.time_started, end: usage.usage.time_ended}"></app-booking-time-visualizer>
+        <div style="max-width: 500px; overflow: auto">
+          <app-booking-time-visualizer [dateBeforeCurrent]="usage.windowStart" [dateAfterCurrent]="usage.windowEnd" [instrument]="usage.instrument" [enableEdit]="false" [selectedTimeRange]="{start: usage.usage.time_started, end: usage.usage.time_ended}"></app-booking-time-visualizer>
+        </div>
       }
     }
   </div>
