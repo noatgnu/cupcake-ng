@@ -97,6 +97,7 @@ export class ReagentEditorComponent {
     event.preventDefault()
     console.log(event)
     this.reagentSearchForm.controls.unit.setValue(event.item.unit)
+    this.reagentSearchForm.controls.name.setValue(event.item.name)
   }
 
   async save() {
