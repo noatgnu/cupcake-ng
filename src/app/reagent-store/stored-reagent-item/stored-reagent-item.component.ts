@@ -5,12 +5,14 @@ import {AccountsService} from "../../accounts/accounts.service";
 import {
   StoredReagentActivityCalendarComponent
 } from "./stored-reagent-activity-calendar/stored-reagent-activity-calendar.component";
+import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 
 @Component({
   selector: 'app-stored-reagent-item',
   standalone: true,
   imports: [
-    StoredReagentActivityCalendarComponent
+    StoredReagentActivityCalendarComponent,
+    NgbTooltip
   ],
   templateUrl: './stored-reagent-item.component.html',
   styleUrl: './stored-reagent-item.component.scss'

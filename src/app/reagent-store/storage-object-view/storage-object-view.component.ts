@@ -1,7 +1,7 @@
 import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {StorageObject, StoredReagent, StoredReagentQuery} from "../../storage-object";
 import {WebService} from "../../web.service";
-import {NgbModal, NgbPagination} from "@ng-bootstrap/ng-bootstrap";
+import {NgbModal, NgbPagination, NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {FormBuilder, FormControl, ReactiveFormsModule, Validators} from "@angular/forms";
 import {
   StorageObjectCreatorModalComponent
@@ -29,7 +29,8 @@ import {AddActionModalComponent} from "../add-action-modal/add-action-modal.comp
     NgbPagination,
     ReactiveFormsModule,
     StoredReagentItemComponent,
-    BarcodeScannerModalComponent
+    BarcodeScannerModalComponent,
+    NgbTooltip
   ],
   templateUrl: './storage-object-view.component.html',
   styleUrl: './storage-object-view.component.scss'

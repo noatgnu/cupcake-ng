@@ -1,7 +1,7 @@
 import {Component, Input} from '@angular/core';
 import {WebService} from "../web.service";
 import {StorageObject, StorageObjectQuery} from "../storage-object";
-import {NgbModal, NgbPagination} from "@ng-bootstrap/ng-bootstrap";
+import {NgbModal, NgbPagination, NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {
   StorageObjectCreatorModalComponent
 } from "./storage-object-creator-modal/storage-object-creator-modal.component";
@@ -13,7 +13,8 @@ import {Location} from "@angular/common";
   standalone: true,
   imports: [
     NgbPagination,
-    StorageObjectViewComponent
+    StorageObjectViewComponent,
+    NgbTooltip
   ],
   templateUrl: './reagent-store.component.html',
   styleUrl: './reagent-store.component.scss'
