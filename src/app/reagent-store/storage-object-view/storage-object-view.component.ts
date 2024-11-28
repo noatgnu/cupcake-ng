@@ -12,7 +12,7 @@ import {
 import {AreYouSureModalComponent} from "../../are-you-sure-modal/are-you-sure-modal.component";
 import {StoredReagentItemComponent} from "../stored-reagent-item/stored-reagent-item.component";
 import {StoredReagentEditorModalComponent} from "../stored-reagent-editor-modal/stored-reagent-editor-modal.component";
-import {HttpErrorResponse} from "@angular/common/http";
+import { HttpErrorResponse } from "@angular/common/http";
 import {ToastService} from "../../toast.service";
 import {StorageObjectEditorModalComponent} from "../storage-object-editor-modal/storage-object-editor-modal.component";
 import {CameraModalComponent} from "../../camera-modal/camera-modal.component";
