@@ -5,6 +5,7 @@
 </div>
 <div class="modal-body">
   @if (storedReagent) {
+    <b>Entry Basic Data</b>
     <form [formGroup]="form" class="d-flex flex-column gap-2">
       <div class="form-floating">
         <input type="number" class="form-control" id="quantity" formControlName="quantity" placeholder="Entry Quantity ({{storedReagent.reagent.unit}})">
@@ -26,6 +27,31 @@
       </div>
       <div class="d-flex flex-row justify-content-center">
         <svg id="stored-reagent-{{storedReagent.id}}-barcode-canvas" width="300" height="300"></svg>
+      </div>
+    </form>
+    <hr>
+    <b>Item Metadata</b>
+    @if (storedReagent.metadata_columns.length > 0) {
+      <div class="d-flex gap-2 flex-wrap">
+        @for (m of storedReagent.metadata_columns; track m.id) {
+          <span class="badge bg-primary">{{m.name}}: {{m.value}} <i class="bi bi-x-circle" ngbTooltip="Remove" (click)="removeMetadata(m)"></i></span>
+        }
+      </div>
+    }
+
+
+    <form [formGroup]="formMetadata" class="d-flex flex-column gap-2">
+
+      <div class="form-group">
+        <label for="metadataName">Metadata Name</label>
+        <input type="text" id="metadataName" formControlName="name" [ngbTypeahead]="searchName" class="form-control">
+      </div>
+      <div class="form-group">
+        <label for="metadataValue">Metadata Value</label>
+        <input type="text" id="metadataValue" formControlName="value" [ngbTypeahead]="searchValue" class="form-control">
+      </div>
+      <div>
+        <button ngbTooltip="Adding metadata" type="submit" class="btn btn-primary" (click)="addMetadataColumn()">+</button>
       </div>
 
     </form>

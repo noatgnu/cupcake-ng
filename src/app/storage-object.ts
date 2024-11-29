@@ -1,4 +1,5 @@
 import {Reagent} from "./reagent";
+import {MetadataColumn} from "./metadata-column";
 
 export interface StorageObject {
   id: number;
@@ -27,6 +28,7 @@ export interface StoredReagent {
   barcode: string|null;
   shareable: boolean;
   current_quantity: number;
+  metadata_columns: MetadataColumn[];
 }
 
 export interface StorageObjectQuery {

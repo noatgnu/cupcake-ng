@@ -23,6 +23,13 @@ import {
   StoredReagent,
   StoredReagentQuery
 } from "./storage-object";
+import {MetadataColumn} from "./metadata-column";
+import {LabGroup} from "./lab-group";
+import {HumanDiseaseQuery} from "./human-disease";
+import {SubcellularLocation, SubcellularLocationQuery} from "./subcellular-location";
+import {Tissue, TissueQuery} from "./tissue";
+import {Species, SpeciesQuery} from "./species";
+import {MsVocabQuery} from "./ms-vocab";
 
 
 @Injectable({
@@ -1224,6 +1231,231 @@ export class WebService {
     return this.http.get<ReagentAction[]>(
       `${this.baseURL}/api/step/${step_id}/get_associated_reagent_actions/`,
       {responseType: 'json', observe: 'body'}
+    )
+  }
+
+  createMetaDataColumn(stored_reagent: number, metadataColumn?: any) {
+    const payload: any = {stored_reagent: stored_reagent}
+
+    if (metadataColumn) {
+      payload["name"] = metadataColumn.name
+      payload["type"] = metadataColumn.type
+      payload["value"] = metadataColumn.value
+    }
+    if (payload["name"] === "Modification parameters") {
+      if (metadataColumn.metadataMM) {
+        payload["value"] += `;MM=${metadataColumn.metadataMM}`
+      }
+      if (metadataColumn.metadataPP) {
+        payload["value"] += `;PP=${metadataColumn.metadataPP}`
+      }
+      if (metadataColumn.metadataTA) {
+        payload["value"] += `;TA=${metadataColumn.metadataTA}`
+      }
+      if (metadataColumn.metadataTS) {
+        payload["value"] += `;TS=${metadataColumn.metadataTS}`
+      }
+      if (metadataColumn.metadataMT) {
+        payload["value"] += `;MT=${metadataColumn.metadataMT}`
+      }
+    }
+
+    console.log(payload)
+    return this.http.post<MetadataColumn>(
+      `${this.baseURL}/api/metadata_columns/`,
+      payload,
+      {responseType: 'json', observe: 'body'}
+    )
+  }
+
+  updateMetaDataColumn(id: number, name?: string, type?: string, value?: string, not_applicable?: boolean) {
+    const payload: any = {}
+    if (name) {
+      payload["name"] = name
+    }
+    if (value) {
+      payload["value"] = value
+    }
+    if (type) {
+      payload["type"] = type
+    }
+    if (not_applicable !== undefined) {
+      payload["not_applicable"] = not_applicable
+    }
+    return this.http.put<MetadataColumn>(
+      `${this.baseURL}/api/metadata_columns/${id}/`,
+      payload,
+      {responseType: 'json', observe: 'body'}
+    )
+  }
+
+  deleteMetaDataColumn(id: number) {
+    return this.http.delete(
+      `${this.baseURL}/api/metadata_columns/${id}/`,
+      {responseType: 'json', observe: 'body'}
+    )
+  }
+
+  createLabGroup(name: string) {
+    return this.http.post<any>(
+      `${this.baseURL}/api/lab_groups/`,
+      {name: name},
+      {responseType: 'json', observe: 'body'}
+    )
+  }
+
+  deleteLabGroup(id: number) {
+    return this.http.delete(
+      `${this.baseURL}/api/lab_groups/${id}/`,
+      {responseType: 'json', observe: 'body'}
+    )
+  }
+
+  addLabGroupMember(lab_group_id: number, member_id: number) {
+    return this.http.post<LabGroup>(
+      `${this.baseURL}/api/lab_groups/${lab_group_id}/add_member/`,
+      {user: member_id},
+      {responseType: 'json', observe: 'body'}
+    )
+  }
+
+  removeLabGroupMember(lab_group_id: number, member_id: number) {
+    return this.http.post(
+      `${this.baseURL}/api/lab_groups/${lab_group_id}/remove_member/`,
+      {user: member_id},
+      {responseType: 'json', observe: 'body'}
+    )
+  }
+
+  getSpecies(url?: string, limit: number = 10, offset: number = 0, search?: string) {
+    if (url) {
+      return this.http.get<SpeciesQuery>(url, {responseType: 'json', observe: 'body'})
+    }
+    let params = new HttpParams()
+    if (limit) {
+      params = params.append('limit', limit.toString())
+    }
+    if (offset) {
+      params = params.append('offset', offset.toString())
+    }
+    if (search && search !== "") {
+      params = params.append('search', `'${search}'`)
+    }
+    params = params.append('ordering', 'official_name')
+    return this.http.get<SpeciesQuery>(
+      `${this.baseURL}/api/species/`,
+      {responseType: 'json', observe: 'body', params: params}
+    )
+  }
+
+  getSpeciesByID(id: number) {
+    return this.http.get<Species>(
+      `${this.baseURL}/api/species/${id}/`,
+      {responseType: 'json', observe: 'body'}
+    )
+  }
+
+  getTissues(url?: string, limit: number = 10, offset: number = 0, search?: string) {
+    if (url) {
+      return this.http.get<TissueQuery>(url, {responseType: 'json', observe: 'body'})
+    }
+    let params = new HttpParams()
+    if (limit) {
+      params = params.append('limit', limit.toString())
+    }
+    if (offset) {
+      params = params.append('offset', offset.toString())
+    }
+    if (search && search !== "") {
+      params = params.append('search', `'${search}'`)
+    }
+    params = params.append('ordering', 'identifier')
+    return this.http.get<TissueQuery>(
+      `${this.baseURL}/api/tissues/`,
+      {responseType: 'json', observe: 'body', params: params}
+    )
+  }
+
+  getTissueByID(id: number) {
+    return this.http.get<Tissue>(
+      `${this.baseURL}/api/tissues/${id}/`,
+      {responseType: 'json', observe: 'body'}
+    )
+  }
+
+  getSubcellularLocations(url?: string, limit: number = 10, offset: number = 0, search?: string) {
+    if (url) {
+      return this.http.get<SubcellularLocationQuery>(url, {responseType: 'json', observe: 'body'})
+    }
+    let params = new HttpParams()
+    if (limit) {
+      params = params.append('limit', limit.toString())
+    }
+    if (offset) {
+      params = params.append('offset', offset.toString())
+    }
+    if (search && search !== "") {
+      params = params.append('search', `'${search}'`)
+    }
+    params = params.append('ordering', 'identifier')
+    return this.http.get<SubcellularLocationQuery>(
+      `${this.baseURL}/api/subcellular_locations/`,
+      {responseType: 'json', observe: 'body', params: params}
+    )
+  }
+
+  getSubcellularLocationByID(id: number) {
+    return this.http.get<SubcellularLocation>(
+      `${this.baseURL}/api/subcellular_locations/${id}/`,
+      {responseType: 'json', observe: 'body'}
+    )
+  }
+
+  getHumandDiseases(url?: string, limit: number = 10, offset: number = 0, search?: string) {
+    if (url) {
+      return this.http.get<HumanDiseaseQuery>(url, {responseType: 'json', observe: 'body'})
+    }
+    let params = new HttpParams()
+    if (limit) {
+      params = params.append('limit', limit.toString())
+    }
+    if (offset) {
+      params = params.append('offset', offset.toString())
+    }
+    if (search && search !== "") {
+      params = params.append('search', `'${search}'`)
+    }
+    params = params.append('ordering', 'identifier')
+    return this.http.get<HumanDiseaseQuery>(
+      `${this.baseURL}/api/human_diseases/`,
+      {responseType: 'json', observe: 'body', params: params}
+    )
+  }
+
+  getMSVocab(url?: string, limit: number = 10, offset: number = 0, search?: string, term_type?: string) {
+    if (url) {
+      return this.http.get<MsVocabQuery>(url, {responseType: 'json', observe: 'body'})
+    }
+    let params = new HttpParams()
+    if (limit) {
+      params = params.append('limit', limit.toString())
+    }
+    if (offset) {
+      params = params.append('offset', offset.toString())
+    }
+    if (search && search !== "") {
+      params = params.append('search', `'${search}'`)
+    }
+    if (term_type && term_type !== "") {
+      if (term_type === "cleavage agent details") {
+        term_type = "cleavage agent"
+      }
+      params = params.append('term_type', term_type)
+    }
+    params = params.append('ordering', 'name')
+    return this.http.get<MsVocabQuery>(
+      `${this.baseURL}/api/ms_vocab/`,
+      {responseType: 'json', observe: 'body', params: params}
     )
   }
 }

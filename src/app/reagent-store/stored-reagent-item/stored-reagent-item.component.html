@@ -18,6 +18,16 @@
             }
           </small>
         </p>
+        @if (storedReagent.metadata_columns.length > 0) {
+          <div class="d-flex flex-wrap gap-2">
+            @for (m of storedReagent.metadata_columns; track m.id) {
+              <span class="badge bg-primary">
+                <b>{{m.name}}:</b> {{m.value}}
+              </span>
+            }
+          </div>
+
+        }
       </div>
 
     </div>
