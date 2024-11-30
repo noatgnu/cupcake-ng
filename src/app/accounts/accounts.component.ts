@@ -5,6 +5,7 @@ import {WebService} from "../web.service";
 import {DataService} from "../data.service";
 import {NgbDropdown, NgbDropdownMenu, NgbDropdownToggle} from "@ng-bootstrap/ng-bootstrap";
 import {UserDataComponent} from "./user-data/user-data.component";
+import {LabGroupComponent} from "./lab-group/lab-group.component";
 
 @Component({
   selector: 'app-accounts',
@@ -15,7 +16,8 @@ import {UserDataComponent} from "./user-data/user-data.component";
     NgbDropdown,
     NgbDropdownToggle,
     NgbDropdownMenu,
-    UserDataComponent
+    UserDataComponent,
+    LabGroupComponent
   ],
   templateUrl: './accounts.component.html',
   styleUrl: './accounts.component.scss'

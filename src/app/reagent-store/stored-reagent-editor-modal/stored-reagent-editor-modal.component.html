@@ -25,8 +25,85 @@
         <input type="text" class="form-control" id="barcode" formControlName="barcode" placeholder="Barcode">
         <label for="barcode">Barcode</label>
       </div>
+      <div class="row row-cols-sm-auto">
+        <div class="col-12">
+          <label for="expiration_date">Expiration Date</label>
+          <div class="input-group">
+            <input
+              class="form-control"
+              placeholder="yyyy-mm-dd"
+              name="dp"
+              formControlName="expiration_date"
+              ngbDatepicker
+              #d="ngbDatepicker"
+              id="expiration_date"
+            />
+            <button class="btn btn-outline-secondary bi bi-calendar3" (click)="d.toggle()" type="button"></button>
+          </div>
+        </div>
+      </div>
       <div class="d-flex flex-row justify-content-center">
         <svg id="stored-reagent-{{storedReagent.id}}-barcode-canvas" width="300" height="300"></svg>
+      </div>
+    </form>
+    <hr>
+    <form [formGroup]="formAutocomplete" class="d-flex flex-column gap-2">
+      <div>
+        <b>Related Protocol</b>
+        <div>
+          @if (createdByProtocol) {
+            <div>
+              @if (createdByProtocol.protocol_title) {
+                {{createdByProtocol.protocol_title}}
+              }
+            </div>
+            <small class="text-muted"><a href="/#/protocol-session/{{createdByProtocol.id}}" target="_blank">Go to protocol</a></small>
+          }
+          <input (selectItem)="selectedProtocol($event)" [resultTemplate]="rtProtocol" [inputFormatter]="inputFormatterProtocol" [resultFormatter]="resultFormatterProtocol" type="search" class="form-control" placeholder="Search Protocol" [ngbTypeahead]="searchProtocol" formControlName="protocolName">
+
+          <ng-template #rtProtocol let-r="result" let-t="term">
+            <ngb-highlight [result]="r.protocol_title" [term]="t"></ngb-highlight>
+          </ng-template>
+        </div>
+      </div>
+      @if (form.value.created_by_protocol) {
+        <b>Related Session</b>
+        @if (createdBySession && createdByProtocol) {
+          <div>
+            @if (createdBySession.name) {
+              {{createdBySession.name}}
+            } @else {
+              {{createdBySession.unique_id}}
+            }
+          </div>
+          <small class="text-muted"><a href="/#/protocol-session/{{createdByProtocol.id}}&{{createdBySession.unique_id}}" target="_blank">Go to session</a></small>
+        }
+        <div>
+          <input #sessionSearch (selectItem)="selectedSession($event)" (focus)="onSessionFocus(sessionSearch)" [resultTemplate]="rtSession" [ngbTypeahead]="searchSession" [inputFormatter]="inputFormatterSession" [resultFormatter]="resultFormatterSession" type="search" class="form-control" placeholder="Search Session" formControlName="sessionName">
+
+          <ng-template #rtSession let-r="result" let-t="term">
+            @if (r.name) {
+              <ngb-highlight [result]="r.name" [term]="t"></ngb-highlight>
+            } @else {
+              <ngb-highlight [result]="r.unique_id" [term]="t"></ngb-highlight>
+            }
+          </ng-template>
+        </div>
+      }
+      <div>
+        <b>Related Project</b>
+        <div>
+          @if (createdByProject) {
+            <div>
+              {{createdByProject.project_name}}
+            </div>
+          }
+          <input (selectItem)="selectedProject($event)" [resultTemplate]="rt" [inputFormatter]="inputFormatter" [resultFormatter]="resultFormatter" type="search" class="form-control" placeholder="Search Project" [ngbTypeahead]="searchProject" formControlName="projectName">
+
+          <ng-template #rt let-r="result" let-t="term">
+            <ngb-highlight [result]="r.project_name" [term]="t"></ngb-highlight>
+          </ng-template>
+        </div>
       </div>
     </form>
     <hr>
@@ -38,10 +115,7 @@
         }
       </div>
     }
-
-
     <form [formGroup]="formMetadata" class="d-flex flex-column gap-2">
-
       <div class="form-group">
         <label for="metadataName">Metadata Name</label>
         <input type="text" id="metadataName" formControlName="name" [ngbTypeahead]="searchName" class="form-control">

@@ -4,9 +4,6 @@ import {WebService} from "../../web.service";
 import {NgbModal, NgbPagination, NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {FormBuilder, FormControl, ReactiveFormsModule, Validators} from "@angular/forms";
 import {
-  StorageObjectCreatorModalComponent
-} from "../storage-object-creator-modal/storage-object-creator-modal.component";
-import {
   StoredReagentCreatorModalComponent
 } from "../stored-reagent-creator-modal/stored-reagent-creator-modal.component";
 import {AreYouSureModalComponent} from "../../are-you-sure-modal/are-you-sure-modal.component";
@@ -122,7 +119,7 @@ export class StorageObjectViewComponent {
     const ref = this.modal.open(StoredReagentEditorModalComponent, {scrollable: true})
     ref.componentInstance.storedReagent = reagent
     ref.closed.subscribe((data) => {
-      this.web.updateStoredReagent(reagent.id, data.quantity, data.notes, reagent.png_base64, data.barcode, data.shareable).subscribe((data) => {
+      this.web.updateStoredReagent(reagent.id, data.quantity, data.notes, reagent.png_base64, data.barcode, data.shareable, data.expiration_date, data.created_by_project, data.created_by_protocol, data.created_by_session).subscribe((data) => {
         this.getStoredReagents(undefined, this.pageSize, this.currentPageOffset, undefined, this.storageObject?.id)
       })
     })

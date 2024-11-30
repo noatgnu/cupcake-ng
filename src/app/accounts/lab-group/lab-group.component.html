@@ -1,0 +1,53 @@
+<div class="d-flex flex-column gap-2 p-5">
+  <hr>
+
+  <hr>
+  <b>Lab Groups</b>
+
+  <table class="table table-striped">
+    <thead>
+    <tr>
+      <th scope="col">
+        Name
+      </th>
+      <th scope="col">
+        Description
+      </th>
+      @if (accountsService.is_staff) {
+        <th scope="col">
+          Actions
+        </th>
+      }
+    </tr>
+    </thead>
+    <tbody>
+    @if (labGroupQuery) {
+      @if (labGroupQuery.results.length > 0) {
+        @for (l of labGroupQuery.results; track l.id) {
+          <tr>
+            <td>
+              {{l.name}}
+            </td>
+            <td>
+              {{l.description}}
+            </td>
+            @if (accountsService.is_staff) {
+              <td class="d-flex gap-2">
+                <button class="btn btn-sm btn-primary" (click)="editLabGroup(l)" ngbTooltip="Edit this lab group"><i class="bi bi-pen"></i></button>
+                <button class="btn btn-sm btn-danger" (click)="deleteLabGroup(l)" ngbTooltip="Remove this lab group"><i class="bi bi-trash"></i></button>
+              </td>
+            }
+          </tr>
+        }
+      }
+    }
+    </tbody>
+  </table>
+  @if (accountsService.is_staff) {
+    <b>Administration</b>
+    <div>
+      <button class="btn btn-primary" (click)="addLabGroup()" ngbTooltip="Add a new lab group">+</button>
+    </div>
+  }
+
+</div>

@@ -24,12 +24,13 @@ import {
   StoredReagentQuery
 } from "./storage-object";
 import {MetadataColumn} from "./metadata-column";
-import {LabGroup} from "./lab-group";
+import {LabGroup, LabGroupQuery} from "./lab-group";
 import {HumanDiseaseQuery} from "./human-disease";
 import {SubcellularLocation, SubcellularLocationQuery} from "./subcellular-location";
 import {Tissue, TissueQuery} from "./tissue";
 import {Species, SpeciesQuery} from "./species";
 import {MsVocabQuery} from "./ms-vocab";
+import {NgbDateStruct} from "@ng-bootstrap/ng-bootstrap";
 
 
 @Injectable({
@@ -1147,9 +1148,20 @@ export class WebService {
   }
 
 
-  updateStoredReagent(reagent_id: number, quantity: number, notes: string, png_base64: string|null = null, barcode: string|null = null, shareable: boolean = true) {
+  updateStoredReagent(reagent_id: number, quantity: number, notes: string, png_base64: string|null = null, barcode: string|null = null, shareable: boolean = true, expiration_date: NgbDateStruct|null = null, created_by_project: number|null = null, created_by_protocol: number|null = null, created_by_session: number|null = null) {
     const payload: any = {quantity: quantity, notes: notes, png_base64: png_base64, barcode: barcode, shareable: shareable}
-
+    if (expiration_date) {
+      payload['expiration_date'] = `${expiration_date.year}-${expiration_date.month}-${expiration_date.day}`
+    }
+    if (created_by_project) {
+      payload['created_by_project'] = created_by_project
+    }
+    if (created_by_protocol) {
+      payload['created_by_protocol'] = created_by_protocol
+    }
+    if (created_by_session) {
+      payload['created_by_session'] = created_by_session
+    }
     return this.http.put<StoredReagent>(
       `${this.baseURL}/api/stored_reagent/${reagent_id}/`,
       payload,
@@ -1296,10 +1308,10 @@ export class WebService {
     )
   }
 
-  createLabGroup(name: string) {
+  createLabGroup(name: string, description: string) {
     return this.http.post<any>(
       `${this.baseURL}/api/lab_groups/`,
-      {name: name},
+      {name: name, description: description},
       {responseType: 'json', observe: 'body'}
     )
   }
@@ -1456,6 +1468,31 @@ export class WebService {
     return this.http.get<MsVocabQuery>(
       `${this.baseURL}/api/ms_vocab/`,
       {responseType: 'json', observe: 'body', params: params}
+    )
+  }
+
+  getLabGroups(search_term: string = "", limit: number = 10, offset: number = 0) {
+    let params = new HttpParams()
+    if (search_term && search_term !== "") {
+      params = params.append('search', search_term)
+    }
+    if (limit) {
+      params = params.append('limit', limit.toString())
+    }
+    if (offset) {
+      params = params.append('offset', offset.toString())
+    }
+    return this.http.get<LabGroupQuery>(
+      `${this.baseURL}/api/lab_groups/`,
+      {responseType: 'json', observe: 'body', params: params}
+    )
+  }
+
+  updateLabGroup(lab_group_id: number, name: string, description: string) {
+    return this.http.put<LabGroup>(
+      `${this.baseURL}/api/lab_groups/${lab_group_id}/`,
+      {name: name, description: description},
+      {responseType: 'json', observe: 'body'}
     )
   }
 }

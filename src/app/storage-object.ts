@@ -28,6 +28,10 @@ export interface StoredReagent {
   barcode: string|null;
   shareable: boolean;
   current_quantity: number;
+  expiration_date: Date;
+  created_by_project: number|null;
+  created_by_session: string|null;
+  created_by_protocol: number|null;
   metadata_columns: MetadataColumn[];
 }
 
