@@ -1,0 +1,110 @@
+@if (storedReagent) {
+  @if (storedReagent.metadata_columns.length > 0) {
+    <div class="d-flex gap-2 flex-wrap">
+      @for (m of storedReagent.metadata_columns; track m.id) {
+        @if (m.type === "Characteristics") {
+          <span class="badge bg-primary" ngbTooltip="Characteristics">{{m.name}}: {{m.value}} <i class="bi bi-x-circle" ngbTooltip="Remove" (click)="removeMetadata(m)"></i></span>
+        } @else if (m.type === "Comment") {
+          <span class="badge bg-secondary" ngbTooltip="Comment">{{m.name}}: {{m.value}} <i class="bi bi-x-circle" ngbTooltip="Remove" (click)="removeMetadata(m)"></i></span>
+        } @else if (m.type === "Factor value") {
+          <span class="badge bg-success" ngbTooltip="Factor value">{{m.name}}: {{m.value}} <i class="bi bi-x-circle" ngbTooltip="Remove" (click)="removeMetadata(m)"></i></span>
+        } @else {
+          <span class="badge bg-danger" ngbTooltip="Other">{{m.name}}: {{m.value}} <i class="bi bi-x-circle" ngbTooltip="Remove" (click)="removeMetadata(m)"></i></span>
+        }
+      }
+    </div>
+  }
+} @else if (annotation) {
+  @if (annotation.metadata_columns.length >0) {
+    <div class="d-flex gap-2 flex-wrap">
+      @for (m of annotation.metadata_columns; track m.id) {
+        @if (m.type === "Characteristics") {
+          <span class="badge bg-primary" ngbTooltip="Characteristics">{{m.name}}: {{m.value}} <i class="bi bi-x-circle" ngbTooltip="Remove" (click)="removeMetadata(m)"></i></span>
+        } @else if (m.type === "Comment") {
+          <span class="badge bg-secondary" ngbTooltip="Comment">{{m.name}}: {{m.value}} <i class="bi bi-x-circle" ngbTooltip="Remove" (click)="removeMetadata(m)"></i></span>
+        } @else if (m.type === "Factor value") {
+          <span class="badge bg-success" ngbTooltip="Factor value">{{m.name}}: {{m.value}} <i class="bi bi-x-circle" ngbTooltip="Remove" (click)="removeMetadata(m)"></i></span>
+        } @else {
+          <span class="badge bg-danger" ngbTooltip="Other">{{m.name}}: {{m.value}} <i class="bi bi-x-circle" ngbTooltip="Remove" (click)="removeMetadata(m)"></i></span>
+        }
+      }
+    </div>
+  }
+} @else if (instrument) {
+  @if (instrument.metadata_columns.length > 0) {
+    <div class="d-flex gap-2 flex-wrap">
+      @for (m of instrument.metadata_columns; track m.id) {
+        @if (m.type === "Characteristics") {
+          <span class="badge bg-primary" ngbTooltip="Characteristics">{{m.name}}: {{m.value}} <i class="bi bi-x-circle" ngbTooltip="Remove" (click)="removeMetadata(m)"></i></span>
+        } @else if (m.type === "Comment") {
+          <span class="badge bg-secondary" ngbTooltip="Comment">{{m.name}}: {{m.value}} <i class="bi bi-x-circle" ngbTooltip="Remove" (click)="removeMetadata(m)"></i></span>
+        } @else if (m.type === "Factor value") {
+          <span class="badge bg-success" ngbTooltip="Factor value">{{m.name}}: {{m.value}} <i class="bi bi-x-circle" ngbTooltip="Remove" (click)="removeMetadata(m)"></i></span>
+        } @else {
+          <span class="badge bg-danger" ngbTooltip="Other">{{m.name}}: {{m.value}} <i class="bi bi-x-circle" ngbTooltip="Remove" (click)="removeMetadata(m)"></i></span>
+        }
+      }
+    </div>
+  }
+}
+
+<form [formGroup]="formMetadata" class="d-flex flex-column gap-2">
+  <div class="form-group">
+    <label for="metadataName">Metadata Name</label>
+    <input type="text" id="metadataName" formControlName="name" [ngbTypeahead]="searchName" class="form-control">
+  </div>
+  <div class="form-group">
+    <label for="metadataValue">Metadata Value</label>
+    <input (selectItem)="selectAutoComplete($event)" type="text" id="metadataValue" formControlName="value" [ngbTypeahead]="searchValue" class="form-control">
+  </div>
+  <div class="form-group">
+    <label for="metadataType">Metadata Type</label>
+    <select id="metadataType" formControlName="type" class="form-select">
+      @for (t of metadataTypeAutocomplete; track t) {
+        <option [value]="t">{{t}}</option>
+      }
+    </select>
+  </div>
+  @if (formMetadata.value.name === "Modification parameters") {
+    <div class="form-group">
+      <label for="metadataSpec">Unimod Specifications</label>
+      <select (change)="selectSpec($event)" id="metadataSpec" class="form-select">
+        @for (s of availableSpecs; track s) {
+          <option [value]="s">{{s.name}} @if (s.classification) {({{s.classification}})}</option>
+        }
+      </select>
+    </div>
+    <div class="form-group">
+      <label for="metadataPP">Modification Position</label>
+      <select id="metadataPP" formControlName="metadataPP" class="form-select">
+        @for (p of ["Anywhere", "Protein N-term", "Protein C-term", "Any N-term", "Any C-term"]; track p) {
+          <option [value]="p">{{p}}</option>
+        }
+      </select>
+    </div>
+    <div class="form-group">
+      <label for="metadataMT">Modification Type</label>
+      <select id="metadataMT" formControlName="metadataMT" class="form-select">
+        @for (m of ["Fixed", "Variable", "Annotated"]; track m) {
+          <option [value]="m">{{m}}</option>
+        }
+      </select>
+    </div>
+    <div class="form-group">
+      <label for="metadataTA">Target Amino Acid</label>
+      <input type="text" id="metadataTA" formControlName="metadataTA" class="form-control">
+    </div>
+    <div class="form-group">
+      <label for="metadataMM">Monoisotopic Mass</label>
+      <input type="number" id="metadataMM" formControlName="metadataMM" class="form-control">
+    </div>
+    <div class="form-group">
+      <label for="metadataTS">Target Site</label>
+      <input type="text" id="metadataTS" formControlName="metadataTS" class="form-control">
+    </div>
+  }
+  <div>
+    <button ngbTooltip="Adding metadata" type="submit" class="btn btn-primary" (click)="addMetadataColumn()">+</button>
+  </div>
+
+</form>

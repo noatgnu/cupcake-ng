@@ -31,6 +31,8 @@ import {Tissue, TissueQuery} from "./tissue";
 import {Species, SpeciesQuery} from "./species";
 import {MsVocabQuery} from "./ms-vocab";
 import {NgbDateStruct} from "@ng-bootstrap/ng-bootstrap";
+import {User, UserQuery} from "./user";
+import {UnimodQuery} from "./unimod";
 
 
 @Injectable({
@@ -1108,7 +1110,7 @@ export class WebService {
     )
   }
 
-  getStoredReagents(url?: string, limit: number = 10, offset: number = 0, searchTerm: string = "", storage_object: number|null = null, storage_object_name: string|null = null, user_owned_only: boolean= false) {
+  getStoredReagents(url?: string, limit: number = 10, offset: number = 0, searchTerm: string = "", storage_object: number|null = null, storage_object_name: string|null = null, user_owned_only: boolean= false, stored_reagent_id: number|null|undefined = null) {
     if (url) {
       return this.http.get<StoredReagentQuery>(
         url,
@@ -1132,6 +1134,10 @@ export class WebService {
 
     if (storage_object) {
       params = params.append('storage_object', storage_object.toString())
+    }
+
+    if (stored_reagent_id) {
+      params = params.append('id', stored_reagent_id.toString())
     }
 
     return this.http.get<StoredReagentQuery>(
@@ -1246,8 +1252,8 @@ export class WebService {
     )
   }
 
-  createMetaDataColumn(stored_reagent: number, metadataColumn?: any) {
-    const payload: any = {stored_reagent: stored_reagent}
+  createMetaDataColumn(parent_id: number, metadataColumn?: any, parent_type: "instrument"|"stored_reagent"|"annotation" = "stored_reagent") {
+    const payload: any = {parent_id: parent_id, parent_type: parent_type}
 
     if (metadataColumn) {
       payload["name"] = metadataColumn.name
@@ -1493,6 +1499,127 @@ export class WebService {
       `${this.baseURL}/api/lab_groups/${lab_group_id}/`,
       {name: name, description: description},
       {responseType: 'json', observe: 'body'}
+    )
+  }
+
+  checkStoredReagentPermission(reagent_ids: number[]) {
+    return this.http.post<{permission: {edit: boolean, view: boolean, delete: boolean}, "stored_reagent": number}[]>(
+      `${this.baseURL}/api/user/check_stored_reagent_permission/`,
+      {stored_reagents: reagent_ids},
+      {responseType: 'json', observe: 'body'}
+    )
+  }
+
+  getUsers(url?: string, limit: number = 10, offset: number = 0, search?: string) {
+    if (url) {
+      return this.http.get<UserQuery>(url, {responseType: 'json', observe: 'body'})
+    }
+    let params = new HttpParams()
+    if (limit) {
+      params = params.append('limit', limit.toString())
+    }
+    if (offset) {
+      params = params.append('offset', offset.toString())
+    }
+    if (search && search !== "") {
+      params = params.append('search', `'${search}'`)
+    }
+    return this.http.get<UserQuery>(
+      `${this.baseURL}/api/user/`,
+      {responseType: 'json', observe: 'body', params: params}
+    )
+  }
+
+  getUsersByLabGroup(lab_group_id: number, limit: number = 10, offset: number = 0) {
+    let params = new HttpParams()
+    params = params.append('lab_group', lab_group_id.toString())
+    params = params.append('limit', limit.toString())
+    params = params.append('offset', offset.toString())
+    return this.http.get<UserQuery>(
+      `${this.baseURL}/api/user/`,
+      {responseType: 'json', observe: 'body', params: params}
+    )
+  }
+
+  getUsersByStoredReagent(stored_reagent_id: number, limit: number = 10, offset: number = 0) {
+    let params = new HttpParams()
+    params = params.append('stored_reagent', stored_reagent_id.toString())
+    params = params.append('limit', limit.toString())
+    params = params.append('offset', offset.toString())
+    return this.http.get<UserQuery>(
+      `${this.baseURL}/api/user/`,
+      {responseType: 'json', observe: 'body', params: params}
+    )
+  }
+
+  getLabGroupsByStoredReagent(stored_reagent_id: number, limit: number = 10, offset: number = 0) {
+    let params = new HttpParams()
+    params = params.append('stored_reagent', stored_reagent_id.toString())
+    params = params.append('limit', limit.toString())
+    params = params.append('offset', offset.toString())
+    return this.http.get<LabGroupQuery>(
+      `${this.baseURL}/api/lab_groups/`,
+      {responseType: 'json', observe: 'body', params: params}
+    )
+  }
+
+  getUser(id: string) {
+    return this.http.get<User>(
+      `${this.baseURL}/api/user/${id}/`,
+      {responseType: 'json', observe: 'body'}
+    )
+  }
+
+  addAccessUserToStoredReagent(stored_reagent_id: number, username: string) {
+    return this.http.post<User>(
+      `${this.baseURL}/api/stored_reagent/${stored_reagent_id}/add_access_user/`,
+      {user: username},
+      {responseType: 'json', observe: 'body'}
+    )
+  }
+
+  removeAccessUserFromStoredReagent(stored_reagent_id: number, username: string) {
+    return this.http.post<User>(
+      `${this.baseURL}/api/stored_reagent/${stored_reagent_id}/remove_access_user/`,
+      {user: username},
+      {responseType: 'json', observe: 'body'}
+    )
+  }
+
+  addAccessGroupToStoredReagent(stored_reagent_id: number, lab_group_id: number) {
+    return this.http.post(
+      `${this.baseURL}/api/stored_reagent/${stored_reagent_id}/add_access_group/`,
+      {lab_group: lab_group_id},
+      {responseType: 'json', observe: 'body'}
+    )
+  }
+
+  removeAccessGroupFromStoredReagent(stored_reagent_id: number, lab_group_id: number) {
+    return this.http.post(
+      `${this.baseURL}/api/stored_reagent/${stored_reagent_id}/remove_access_group/`,
+      {lab_group: lab_group_id},
+      {responseType: 'json', observe: 'body'}
+    )
+  }
+
+  getUnimod(url?: string, limit: number = 10, offset: number = 0, search?: string) {
+    if (url) {
+      return this.http.get<any>(url, {responseType: 'json', observe: 'body'})
+    }
+    let params = new HttpParams()
+    if (limit) {
+      params = params.append('limit', limit.toString())
+    }
+    if (offset) {
+      params = params.append('offset', offset.toString())
+    }
+    if (search && search !== "") {
+      params = params.append('search', `'${search}'`)
+    }
+    params = params.append('ordering', 'name')
+    return this.http.get<UnimodQuery>(
+      `${this.baseURL}/api/unimod/`,
+      {responseType: 'json', observe: 'body', params: params}
     )
   }
 }

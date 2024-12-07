@@ -16,18 +16,16 @@
             @for (path of pathToRoot; track path.id) {
               <a href="/#/reagent-store/{{path.id}}">{{path.name}}</a> >
             }
-          </small>
-        </p>
-        @if (storedReagent.metadata_columns.length > 0) {
-          <div class="d-flex flex-wrap gap-2">
-            @for (m of storedReagent.metadata_columns; track m.id) {
-              <span class="badge bg-primary">
-                <b>{{m.name}}:</b> {{m.value}}
-              </span>
-            }
-          </div>
+          </small><br>
+          @if (storedReagent.expiration_date) {
+            <small [ngbTooltip]="expiryDate">{{daysToExpire}} days until expired</small>
+            <ng-template #expiryDate>
+              {{storedReagent.expiration_date | date:'YYYY-MM-dd'}}
+            </ng-template>
+          }
 
-        }
+        </p>
+
       </div>
 
     </div>
@@ -40,6 +38,21 @@
 
 
 @if (storedReagent) {
+  @if (storedReagent.metadata_columns.length > 0) {
+    <div class="d-flex flex-wrap gap-2 mt-2 mb-2">
+      @for (m of storedReagent.metadata_columns; track m.id) {
+        @if (m.type === "Characteristics") {
+          <span class="badge bg-primary" ngbTooltip="Characteristics">{{m.name}}: {{m.value}}</span>
+        } @else if (m.type === "Comment") {
+          <span class="badge bg-secondary" ngbTooltip="Comment">{{m.name}}: {{m.value}}</span>
+        } @else if (m.type === "Factor value") {
+          <span class="badge bg-success" ngbTooltip="Factor value">{{m.name}}: {{m.value}}</span>
+        } @else {
+          <span class="badge bg-danger" ngbTooltip="Other">{{m.name}}: {{m.value}}</span>
+        }
+      }
+    </div>
+  }
   @if (detailsOpen) {
     <div class="alert alert-info">
       <p>
@@ -50,7 +63,8 @@
   <div class="d-flex flex-row gap-2 mt-2 flex-wrap">
     <button class="btn btn-sm btn-outline-secondary" (click)="detailsOpen=!detailsOpen" ngbTooltip="View item note details"><i class="bi bi-ticket-detailed"></i></button>
     <button class="btn btn-sm btn-outline-secondary" (click)="openCloneStoredReagentModal.emit(true)" ngbTooltip="Clone item detail into a new entry"><i class="bi bi-copy"></i></button>
-    @if (storedReagent.user === accounts.username || accounts.is_staff) {
+    @if (accounts.is_staff || storedReagent.user === accounts.username) {
+      <button class="btn btn-sm btn-outline-danger" (click)="openStoredReagentAccessControlModal.emit(true)" ngbTooltip="Item access control"><i class="bi bi-people"></i></button>
       <button class="btn btn-sm btn-outline-secondary" (click)="openCameraModal.emit(true)" ngbTooltip="Upload item photo"><i class="bi bi-camera"></i></button>
       <button class="btn btn-sm btn-outline-primary" (click)="openStoredReagentEditorModal.emit(true)" ngbTooltip="Edit item"><i class="bi bi-pencil"></i></button>
       @if (storedReagent.barcode) {
@@ -62,12 +76,12 @@
     } @else {
       <button class="btn btn-sm btn-outline-danger" disabled ngbTooltip="Remove item (disabled)"><i class="bi bi-trash"></i></button>
     }
-    @if (storedReagent.shareable || storedReagent.user === accounts.username) {
+    @if (permission.edit) {
       <button class="btn btn-sm btn-outline-primary" (click)="openActionLogsModal.emit(true)" ngbTooltip="View usage journal"><i class="bi bi-journal-text"></i></button>
       <button class="btn btn-sm btn-outline-danger" (click)="openReserveActionModal.emit(true)" ngbTooltip="Reserve an amount for usage"><i class="bi bi-dash-circle"></i></button>
       <button class="btn btn-sm btn-outline-primary" (click)="openAddActionModal.emit(true)" ngbTooltip="Topup item"><i class="bi bi-plus-circle"></i></button>
-
     }
+    <button class="btn btn-sm btn-outline-primary" (click)="copyDirectLinkToClipboard()" ngbTooltip="Copy direct link to clipboard"><i class="bi bi-clipboard"></i> </button>
   </div>
 }
 

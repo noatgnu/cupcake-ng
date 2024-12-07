@@ -11,7 +11,12 @@ const routes: Routes = [
   {
     path: ':storageID',
     component: ReagentStoreComponent,
+  },
+  {
+    path: ':storageID/:storedReagentID',
+    component: ReagentStoreComponent,
   }
+
 ]
 
 @NgModule({

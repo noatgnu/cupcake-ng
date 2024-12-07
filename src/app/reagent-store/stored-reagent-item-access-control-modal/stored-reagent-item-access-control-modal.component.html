@@ -1,0 +1,140 @@
+<div class="modal-header">
+  <h5 class="modal-title">Access Control</h5>
+</div>
+<div class="modal-body">
+  <ul ngbNav #nav="ngbNav" [(activeId)]="activeID" class="nav-tabs">
+    <li [ngbNavItem]="'user'">
+      <button ngbNavLink>User Access</button>
+      <ng-template ngbNavContent>
+        <div class="alert alert-info">
+          <p>
+            Any users regardless of lab group given access to the reagent through this interface will be able to reserve or top up the reagent.
+          </p>
+        </div>
+        @if (reagentUserAccess) {
+          <b>{{reagentUserAccess.count}} users have been given access</b>
+          <table class="table table-striped">
+            <thead>
+            <tr>
+              <th scope="col">ID</th>
+              <th scope="col">Username</th>
+              <th scope="col">Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+              @for (u of reagentUserAccess.results; track u.id) {
+                <tr>
+                  <td>{{u.id}}</td>
+                  <td>{{u.username}}</td>
+                  <td><button class="btn btn-sm btn-danger" (click)="removeUser(u)"><i class="bi bi-trash"></i></button></td>
+                </tr>
+              }
+            </tbody>
+          </table>
+          <ngb-pagination (pageChange)="pageEvent($event)" [collectionSize]="reagentUserAccess.count" [(page)]="this.currentUserPage" [pageSize]="10"></ngb-pagination>
+        } @else {
+          <b>0 user has been given access</b>
+        }
+        <hr>
+        <b>Add user to access list</b>
+        <form [formGroup]="form">
+          <div class="form-group">
+            <label for="usernameSearch">Search for user</label>
+            <input id="usernameSearch" type="search" class="form-control" formControlName="username">
+          </div>
+          @if (userQuery) {
+            <table class="table table-striped">
+              <thead>
+              <tr>
+                <th scope="col">ID</th>
+                <th scope="col">Username</th>
+                <th scope="col">Actions</th>
+              </tr>
+              </thead>
+              <tbody>
+                @for (u of userQuery.results; track u.id) {
+                  <tr>
+                    <td>{{u.id}}</td>
+                    <td>{{u.username}}</td>
+                    <td>
+                      <button class="btn btn-primary" (click)="addUser(u)">+</button>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          }
+        </form>
+      </ng-template>
+    </li>
+    <li [ngbNavItem]="'lab_group'">
+      <button ngbNavLink>Lab Group Access</button>
+      <ng-template ngbNavContent>
+        <div class="alert alert-info">
+          <p>
+            Any lab group given access to the reagent through this user interface automatically allow all their members to reserve or top up the reagent.
+          </p>
+        </div>
+        @if (reagentLabGroupAccess) {
+          <b>{{reagentLabGroupAccess.count}} lab groups have been given access</b>
+          <table class="table table-striped">
+            <thead>
+            <tr>
+              <th scope="col">ID</th>
+              <th scope="col">Lab Group</th>
+              <th scope="col">Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+              @for (l of reagentLabGroupAccess.results; track l.id) {
+                <tr>
+                  <td>{{l.id}}</td>
+                  <td>{{l.name}}</td>
+                  <td><button class="btn btn-sm btn-danger" (click)="removeLabGroup(l)"><i class="bi bi-trash"></i></button></td>
+                </tr>
+              }
+            </tbody>
+          </table>
+          <ngb-pagination (pageChange)="pageEvent($event)" [collectionSize]="reagentLabGroupAccess.count" [(page)]="this.currentLabGroupPage" [pageSize]="10"></ngb-pagination>
+        } @else {
+          <b>0 lab groups hve been given access</b>
+        }
+        <hr>
+        <b>Add lab group to access list</b>
+        <form [formGroup]="formLabGroup">
+          <div class="form-group">
+            <label for="labgroupSearch">Search for lab group</label>
+            <input id="labgroupSearch" type="search" class="form-control" formControlName="name">
+          </div>
+          @if (labQuery) {
+            <table class="table table-striped">
+              <thead>
+              <tr>
+                <th scope="col">ID</th>
+                <th scope="col">name</th>
+                <th scope="col">Actions</th>
+              </tr>
+              </thead>
+              <tbody>
+                @for (l of labQuery.results; track l.id) {
+                  <tr>
+                    <td>{{l.id}}</td>
+                    <td>{{l.name}}</td>
+                    <td>
+                      <button class="btn btn-primary" (click)="addLabGroup(l)">+</button>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          }
+        </form>
+      </ng-template>
+    </li>
+  </ul>
+  <div [ngbNavOutlet]="nav" class="mt-2"></div>
+
+</div>
+<div class="modal-footer">
+  <button class="btn btn-primar" (click)="close()">Close</button>
+</div>

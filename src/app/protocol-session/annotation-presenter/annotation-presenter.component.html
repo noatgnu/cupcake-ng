@@ -11,14 +11,15 @@
         </p>
         <div id="annotationControlPanel" class="d-flex flex-row gap-1">
           @if (dataService.annotationPermissions[a.id].edit){
-            <button class="btn btn-outline-danger" (click)="scratch(a)"><i class="bi bi-type-strikethrough"></i></button>
-            <button class="btn btn-outline-primary" (click)="annotationRename(a)"><i class="bi bi-input-cursor-text"></i></button>
+            <button class="btn btn-outline-info" ngbTooltip="Add metadata" (click)="addMetadata(a)"><i class="bi bi-database-add"></i></button>
+            <button class="btn btn-outline-danger" (click)="scratch(a)" ngbTooltip="Strike content"><i class="bi bi-type-strikethrough"></i></button>
+            <button class="btn btn-outline-primary" (click)="annotationRename(a)" ngbTooltip="Rename annotation"><i class="bi bi-input-cursor-text"></i></button>
             @if (['audio', 'video'].includes(a.annotation_type)) {
               <button class="btn btn-outline-primary" (click)="openTranscribeModal(a)">Re-transcribe</button>
-              <button class="btn btn-outline-primary" (click)="transcriptSummarize(a.id)"><i class="bi bi-body-text"></i></button>
+              <button class="btn btn-outline-primary" (click)="transcriptSummarize(a.id)" ngbTooltip="Transcribe annotation"><i class="bi bi-body-text"></i></button>
             }
             @if (['sketch'].includes(a.annotation_type)) {
-              <button class="btn btn-outline-primary" (click)="ocrAnnotation(a)">OCR</button>
+              <button class="btn btn-outline-primary" (click)="ocrAnnotation(a)" ngbTooltip="Perform Optical Character Recognition">OCR</button>
             }
           }
           @if (['counter'].includes(a.annotation_type) && speech.speechRecognition) {
@@ -133,7 +134,23 @@
             <app-randomization-presenter [annotation]="a"></app-randomization-presenter>
           </div>
         }
+        @if (a.metadata_columns.length >0) {
+          <div class="d-flex flex-wrap gap-2 mt-2 mb-2">
+            @for (m of a.metadata_columns; track m.id) {
+              @if (m.type === "Characteristics") {
+                <span class="badge bg-primary" ngbTooltip="Characteristics">{{m.name}}: {{m.value}}</span>
+              } @else if (m.type === "Comment") {
+                <span class="badge bg-secondary" ngbTooltip="Comment">{{m.name}}: {{m.value}}</span>
+              } @else if (m.type === "Factor value") {
+                <span class="badge bg-success" ngbTooltip="Factor value">{{m.name}}: {{m.value}}</span>
+              } @else {
+                <span class="badge bg-danger" ngbTooltip="Other">{{m.name}}: {{m.value}}</span>
+              }
+            }
+          </div>
+        }
       }
+
 
 
     </div>

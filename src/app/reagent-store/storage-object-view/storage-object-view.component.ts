@@ -18,6 +18,10 @@ import {BarcodeScannerModalComponent} from "../../barcode-scanner-modal/barcode-
 import {ActionLogsModalComponent} from "../action-logs-modal/action-logs-modal.component";
 import {ReserveActionModalComponent} from "../reserve-action-modal/reserve-action-modal.component";
 import {AddActionModalComponent} from "../add-action-modal/add-action-modal.component";
+import {DataService} from "../../data.service";
+import {
+  StoredReagentItemAccessControlModalComponent
+} from "../stored-reagent-item-access-control-modal/stored-reagent-item-access-control-modal.component";
 
 @Component({
   selector: 'app-storage-object-view',
@@ -33,16 +37,23 @@ import {AddActionModalComponent} from "../add-action-modal/add-action-modal.comp
   styleUrl: './storage-object-view.component.scss'
 })
 export class StorageObjectViewComponent {
+  private _storedReagentID?: number|undefined
+
+  @Input() set storedReagentID(value: number|undefined) {
+    this._storedReagentID = value
+    console.log(value)
+  }
+  get storedReagentID(): number|undefined {
+    return this._storedReagentID
+  }
 
   private _storageObject?: StorageObject|undefined
 
   @Input() set storageObject(value: StorageObject|undefined) {
     this._storageObject = value
-    console.log(value)
     this.storedReagentQuery = undefined
-    console.log(this.storedReagentQuery)
     if (value) {
-      this.getStoredReagents(undefined, this.pageSize, this.currentPageOffset, undefined, value.id)
+      this.getStoredReagents(undefined, this.pageSize, this.currentPageOffset, undefined, value.id, this.storedReagentID)
       this.web.getStorageObjectPathToRoot(value.id).subscribe((data) => {
         this.pathToRoot = data
       })
@@ -69,7 +80,7 @@ export class StorageObjectViewComponent {
     name: new FormControl("", Validators.required),
   })
 
-  constructor(private web: WebService, private fb: FormBuilder, private modal: NgbModal, private toastService: ToastService) {
+  constructor(private web: WebService, private fb: FormBuilder, private modal: NgbModal, private toastService: ToastService, public dataService: DataService) {
     this.form.controls.name.valueChanges.subscribe((value) => {
       if (value) {
         this.getStoredReagents(undefined, this.pageSize, this.currentPageOffset, value, this.storageObject?.id)
@@ -78,11 +89,14 @@ export class StorageObjectViewComponent {
 
   }
 
-  getStoredReagents(url?: string, limit: number = 10, offset : number = 0, search?: string, storage_object?: number) {
-    console.log(storage_object)
-    this.web.getStoredReagents(url, limit, offset, search, storage_object).subscribe((data) => {
+  getStoredReagents(url?: string, limit: number = 10, offset : number = 0, search?: string, storage_object?: number, stored_reagent_id?: number) {
+    this.web.getStoredReagents(url, limit, offset, search, storage_object, undefined, undefined, stored_reagent_id).subscribe((data) => {
       this.storedReagentQuery = data
-      console.log(data)
+      this.web.checkStoredReagentPermission(data.results.map((r) => r.id)).subscribe((permissions) => {
+        for (const c of permissions) {
+          this.dataService.storedReagentPermissions[c.stored_reagent] = c.permission
+        }
+      })
     })
   }
 
@@ -121,7 +135,9 @@ export class StorageObjectViewComponent {
     ref.closed.subscribe((data) => {
       this.web.updateStoredReagent(reagent.id, data.quantity, data.notes, reagent.png_base64, data.barcode, data.shareable, data.expiration_date, data.created_by_project, data.created_by_protocol, data.created_by_session).subscribe((data) => {
         this.getStoredReagents(undefined, this.pageSize, this.currentPageOffset, undefined, this.storageObject?.id)
+        this.toastService.show(`Reagent ${reagent.reagent.name}`, "Updated")
       })
+
     })
   }
 
@@ -272,5 +288,11 @@ export class StorageObjectViewComponent {
         })
       })
     })
+  }
+
+  openStoredReagentAccessControlModal(reagent: StoredReagent) {
+    const ref = this.modal.open(StoredReagentItemAccessControlModalComponent)
+    ref.componentInstance.storedReagent = reagent
+
   }
 }

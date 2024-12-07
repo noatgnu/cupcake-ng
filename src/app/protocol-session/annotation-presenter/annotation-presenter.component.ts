@@ -5,7 +5,14 @@ import {SketchPresenterComponent} from "../sketch-presenter/sketch-presenter.com
 import {ImagePresenterComponent} from "../image-presenter/image-presenter.component";
 import {MediaPresenterComponent} from "../media-presenter/media-presenter.component";
 import {WebService} from "../../web.service";
-import {NgbDropdown, NgbDropdownMenu, NgbDropdownToggle, NgbModal, NgbModalConfig} from "@ng-bootstrap/ng-bootstrap";
+import {
+  NgbDropdown,
+  NgbDropdownMenu,
+  NgbDropdownToggle,
+  NgbModal,
+  NgbModalConfig,
+  NgbTooltip
+} from "@ng-bootstrap/ng-bootstrap";
 import {TranscribeModalComponent} from "../transcribe-modal/transcribe-modal.component";
 import {ChecklistPresenterComponent} from "../checklist-presenter/checklist-presenter.component";
 import {CounterPresenterComponent} from "../counter-presenter/counter-presenter.component";
@@ -20,6 +27,7 @@ import {SpeechService} from "../../speech.service";
 import {
   InstrumentBookingPresenterComponent
 } from "../instrument-booking-presenter/instrument-booking-presenter.component";
+import {AnnotationMetadataModalComponent} from "./annotation-metadata-modal/annotation-metadata-modal.component";
 
 @Component({
   selector: 'app-annotation-presenter',
@@ -41,7 +49,8 @@ import {
     NgbDropdownToggle,
     NgbDropdownMenu,
     RandomizationPresenterComponent,
-    InstrumentBookingPresenterComponent
+    InstrumentBookingPresenterComponent,
+    NgbTooltip
   ],
   templateUrl: './annotation-presenter.component.html',
   styleUrl: './annotation-presenter.component.scss'
@@ -184,5 +193,10 @@ export class AnnotationPresenterComponent {
       console.log(event)
     }
     this.speechRecognition.start();
+  }
+
+  addMetadata(annotation: Annotation) {
+    const ref = this.modal.open(AnnotationMetadataModalComponent)
+    ref.componentInstance.annotation = annotation
   }
 }

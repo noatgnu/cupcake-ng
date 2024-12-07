@@ -38,10 +38,11 @@
     <div class="list-group mt-2" style="height: calc(100vh - 64px*5 - 50px); overflow: auto">
       @if (storedReagentQuery.results.length > 0) {
         @for (reagent of storedReagentQuery.results; track reagent.id) {
-          <div class="list-group-item">
-            <app-stored-reagent-item (openAddActionModal)="openAddActionModal(reagent)" (openReserveActionModal)="openReserveActionModal(reagent)" (openActionLogsModal)="openActionLogsModal(reagent)" (openCloneStoredReagentModal)="openCloningReagentModal(reagent)" (openQrScannerModal)="openBarcodeScannerReagent(reagent)" [storedReagent]="reagent" (delete)="delete(reagent)" (openStoredReagentEditorModal)="openStoredReagentEditorModal(reagent)" (openCameraModal)="openReagentCameraModal(reagent)"></app-stored-reagent-item>
-
-          </div>
+          @if (dataService.storedReagentPermissions[reagent.id]) {
+            <div class="list-group-item">
+              <app-stored-reagent-item [permission]="dataService.storedReagentPermissions[reagent.id]" (openAddActionModal)="openAddActionModal(reagent)" (openReserveActionModal)="openReserveActionModal(reagent)" (openActionLogsModal)="openActionLogsModal(reagent)" (openCloneStoredReagentModal)="openCloningReagentModal(reagent)" (openQrScannerModal)="openBarcodeScannerReagent(reagent)" [storedReagent]="reagent" (delete)="delete(reagent)" (openStoredReagentEditorModal)="openStoredReagentEditorModal(reagent)" (openCameraModal)="openReagentCameraModal(reagent)" (openStoredReagentAccessControlModal)="openStoredReagentAccessControlModal(reagent)"></app-stored-reagent-item>
+            </div>
+          }
         }
       }
     </div>

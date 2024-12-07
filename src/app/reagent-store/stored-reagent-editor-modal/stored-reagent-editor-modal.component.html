@@ -49,7 +49,7 @@
     <hr>
     <form [formGroup]="formAutocomplete" class="d-flex flex-column gap-2">
       <div>
-        <b>Related Protocol</b>
+        <b>Created from Protocol</b>
         <div>
           @if (createdByProtocol) {
             <div>
@@ -67,7 +67,7 @@
         </div>
       </div>
       @if (form.value.created_by_protocol) {
-        <b>Related Session</b>
+        <b>Created from Session</b>
         @if (createdBySession && createdByProtocol) {
           <div>
             @if (createdBySession.name) {
@@ -91,7 +91,7 @@
         </div>
       }
       <div>
-        <b>Related Project</b>
+        <b>Created from Project</b>
         <div>
           @if (createdByProject) {
             <div>
@@ -108,27 +108,7 @@
     </form>
     <hr>
     <b>Item Metadata</b>
-    @if (storedReagent.metadata_columns.length > 0) {
-      <div class="d-flex gap-2 flex-wrap">
-        @for (m of storedReagent.metadata_columns; track m.id) {
-          <span class="badge bg-primary">{{m.name}}: {{m.value}} <i class="bi bi-x-circle" ngbTooltip="Remove" (click)="removeMetadata(m)"></i></span>
-        }
-      </div>
-    }
-    <form [formGroup]="formMetadata" class="d-flex flex-column gap-2">
-      <div class="form-group">
-        <label for="metadataName">Metadata Name</label>
-        <input type="text" id="metadataName" formControlName="name" [ngbTypeahead]="searchName" class="form-control">
-      </div>
-      <div class="form-group">
-        <label for="metadataValue">Metadata Value</label>
-        <input type="text" id="metadataValue" formControlName="value" [ngbTypeahead]="searchValue" class="form-control">
-      </div>
-      <div>
-        <button ngbTooltip="Adding metadata" type="submit" class="btn btn-primary" (click)="addMetadataColumn()">+</button>
-      </div>
-
-    </form>
+    <app-item-metadata [parentType]="'stored_reagent'" [storedReagent]="storedReagent"></app-item-metadata>
   }
 </div>
 <div class="modal-footer">

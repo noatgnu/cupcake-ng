@@ -1,4 +1,5 @@
 import {InstrumentUsage} from "./instrument";
+import {MetadataColumn} from "./metadata-column";
 
 export interface Annotation {
   id: number;
@@ -17,6 +18,7 @@ export interface Annotation {
   folder: {id: number, folder_name: string}[];
   annotation_name: string;
   summary: string;
+  metadata_columns: MetadataColumn[];
   instrument_usage: InstrumentUsage[]
 }
 

@@ -1,3 +1,5 @@
+import {MetadataColumn} from "./metadata-column";
+
 export interface Instrument {
   id: number;
   instrument_name: string;
@@ -5,6 +7,7 @@ export interface Instrument {
   created_at: Date;
   updated_at: Date;
   enabled: boolean;
+  metadata_columns: MetadataColumn[];
 }
 
 export interface InstrumentQuery {

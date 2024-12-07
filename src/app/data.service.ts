@@ -28,6 +28,7 @@ export class DataService {
     use_coturn: false,
     use_whisper: false
   }
+  storedReagentPermissions: {[key: string]: {edit: boolean, view: boolean, delete: boolean}} = {};
   annotationPermissions: {[key: string]: {edit: boolean, view: boolean, delete: boolean}} = {};
   instrumentPermissions: {[key: string]: {can_view: boolean, can_book: boolean, can_manage: boolean}} = {};
 

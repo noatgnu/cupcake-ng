@@ -22,6 +22,7 @@ import {Location} from "@angular/common";
 export class ReagentStoreComponent {
   search?: string
   private _storageID?: number|undefined;
+  private _storedReagentID?: number|undefined;
   sidePanel: boolean = true
 
   @Input() set storageID(value: number|undefined) {
@@ -38,6 +39,13 @@ export class ReagentStoreComponent {
 
   get storageID(): number|undefined {
     return this._storageID;
+  }
+
+  get storedReagentID(): number|undefined {
+    return this._storedReagentID;
+  }
+  @Input() set storedReagentID(value: number|undefined) {
+    this._storedReagentID = value
   }
 
   rootStorageObjects?: StorageObjectQuery
@@ -64,9 +72,6 @@ export class ReagentStoreComponent {
   clickStorage(storageObject: StorageObject) {
     this.selectedStorageObject = storageObject
     this.getStorageObjects(undefined, this.pageSize, 0, undefined, false, storageObject.id)
-
-
-
   }
 
   openStorageObjectCreator() {

@@ -1,12 +1,13 @@
 import { Component } from '@angular/core';
 import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
 import {FormBuilder, ReactiveFormsModule} from "@angular/forms";
+import {ItemMetadataComponent} from "../../item-metadata/item-metadata.component";
 
 @Component({
   selector: 'app-instrument-create-modal',
   standalone: true,
   imports: [
-    ReactiveFormsModule
+    ReactiveFormsModule,
   ],
   templateUrl: './instrument-create-modal.component.html',
   styleUrl: './instrument-create-modal.component.scss'
