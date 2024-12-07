@@ -3,12 +3,15 @@ import {Instrument, InstrumentQuery} from "../../instrument";
 import {FormBuilder, FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {WebService} from "../../web.service";
 import {DataService} from "../../data.service";
-import {NgbModal, NgbPagination} from "@ng-bootstrap/ng-bootstrap";
+import {NgbModal, NgbPagination, NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {InstrumentBookingModalComponent} from "../instrument-booking-modal/instrument-booking-modal.component";
 import {ToastService} from "../../toast.service";
 import {AccountsService} from "../../accounts/accounts.service";
 import {InstrumentCreateModalComponent} from "../instrument-create-modal/instrument-create-modal.component";
 import {InstrumentManagementModalComponent} from "../instrument-management-modal/instrument-management-modal.component";
+import {
+  InstrumentMetadataManagementModalComponent
+} from "../instrument-metadata-management-modal/instrument-metadata-management-modal.component";
 
 @Component({
   selector: 'app-instrument-management',
@@ -16,7 +19,8 @@ import {InstrumentManagementModalComponent} from "../instrument-management-modal
   imports: [
     FormsModule,
     NgbPagination,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    NgbTooltip
   ],
   templateUrl: './instrument-management.component.html',
   styleUrl: './instrument-management.component.scss'
@@ -97,6 +101,12 @@ export class InstrumentManagementComponent {
         })
       })
     })
+  }
+
+  manageMetadata(instrument: Instrument) {
+    const ref = this.modal.open(InstrumentMetadataManagementModalComponent, {scrollable: true})
+    ref.componentInstance.instrument = instrument
+
   }
 
 }

@@ -14,6 +14,21 @@
               <b>{{result.instrument_name}}</b>
             </div>
             <small>{{result.instrument_description}}</small>
+            <div class="d-flex flex-row">
+              @if (result.metadata_columns.length > 0) {
+                @for (m of result.metadata_columns; track m.id) {
+                  @if (m.type === "Characteristics") {
+                    <span class="badge bg-primary" ngbTooltip="Characteristics">{{m.name}}: {{m.value}}</span>
+                  } @else if (m.type === "Comment") {
+                    <span class="badge bg-secondary" ngbTooltip="Comment">{{m.name}}: {{m.value}}</span>
+                  } @else if (m.type === "Factor value") {
+                    <span class="badge bg-success" ngbTooltip="Factor value">{{m.name}}: {{m.value}}</span>
+                  } @else {
+                    <span class="badge bg-danger" ngbTooltip="Other">{{m.name}}: {{m.value}}</span>
+                  }
+                }
+              }
+            </div>
             <div class="d-flex flex-row gap-1">
               @if (dataService.instrumentPermissions[result.id]) {
                 @if (dataService.instrumentPermissions[result.id]['can_view']) {

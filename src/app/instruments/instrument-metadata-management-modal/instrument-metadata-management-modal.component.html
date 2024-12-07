@@ -4,7 +4,9 @@
 <div class="modal-body">
   <div>
     <b>Instrument metadata</b>
-    <app-item-metadata [parentType]="'instrument'" [instrument]="instrument"></app-item-metadata>
+    @if (instrument) {
+      <app-item-metadata [parentType]="'instrument'" [instrument]="instrument"></app-item-metadata>
+    }
   </div>
 </div>
 <div class="modal-footer">
