@@ -15,45 +15,57 @@
             <td>{{r.reagent.name}}</td>
             <td>{{r.quantity}}</td>
             <td>{{r.reagent.unit}}</td>
-            <td>@if(reagentActionMap[r.id]) {<i class="bi bi-check" (click)="selectReagent(r)"></i>} @else {<i class="bi bi-square" (click)="openReserveReagentActionModal(r)"></i>} </td>
+            <td>
+              <div class="d-flex flex-wrap gap-2">
+                @if(reagentActionMap[r.id]) {<button type="button" class="btn btn-sm btn-outline-info"  (click)="selectReagent(r)" ngbTooltip="View reservation details"><i class="bi bi-ticket-detailed"></i></button> }
+                <button type="button" class="btn btn-sm btn-outline-primary" (click)="openReserveReagentActionModal(r)" ngbTooltip="Reserve this reagent"><i class="bi bi-square"></i></button>
+              </div>
+            </td>
           </tr>
-          @if (selectedReagent===r && selectedStoredReagent) {
-            <tr>
-              <td colspan="4">
-                <div class="d-flex flex-column">
-                  @if (selectedStoredReagent.png_base64) {
-                    <img src="{{selectedStoredReagent.png_base64}}" width="100" height="100">
-                  }
-                  <p>
-                    Reserved stock: {{selectedStoredReagent.reagent.name}} <br>
-                    Reserved quantity: {{reagentActionMap[r.id].quantity}} {{selectedStoredReagent.reagent.unit}}<br>
-                    Reserved at: {{reagentActionMap[r.id].created_at | date:'short'}} <br>
-                    Path: // @for (p of selectedStoredReagentPath; track p.id) { <a href="/#/reagent-store/{{p.id}}">{{p.name}}</a> > } <br>
-
-                  </p>
-                  @if (selectedStoredReagent.metadata_columns.length > 0) {
-                    <div class="d-flex flex-wrap gap-2 mt-2 mb-2">
-                      @for (m of selectedStoredReagent.metadata_columns; track m.id) {
-                        @if (m.type === "Characteristics") {
-                          <span class="badge bg-primary" ngbTooltip="Characteristics">{{m.name}}: {{m.value}}</span>
-                        } @else if (m.type === "Comment") {
-                          <span class="badge bg-secondary" ngbTooltip="Comment">{{m.name}}: {{m.value}}</span>
-                        } @else if (m.type === "Factor value") {
-                          <span class="badge bg-success" ngbTooltip="Factor value">{{m.name}}: {{m.value}}</span>
-                        } @else {
-                          <span class="badge bg-danger" ngbTooltip="Other">{{m.name}}: {{m.value}}</span>
+          @if (selectedReagent===r && selectedStoredReagent.length > 0) {
+            @for (s of selectedStoredReagent; track s.id) {
+              @if (reagentActionMap[r.id][s.id]) {
+                @for (a of reagentActionMap[r.id][s.id]; track a.id) {
+                  <tr>
+                    <td colspan="4">
+                      <div class="d-flex flex-column">
+                        @if (s.png_base64) {
+                          <img src="{{s.png_base64}}" width="100" height="100">
                         }
-                      }
-                    </div>
-                  }
-                  @if (reagentActionMap[r.id]) {
-                    @if (checkIfCreatedAtIsLessThanMinute(reagentActionMap[r.id], web.reagentActionDeleteExpireMinutes)) {
-                      <button class="btn btn-sm btn-outline-danger" (click)="deleteAction(reagentActionMap[r.id])"><i class="bi bi-trash"></i></button>
-                    }
-                  }
-                </div>
-              </td>
-            </tr>
+                        <p>
+                          Reserved stock: {{s.reagent.name}} <br>
+                          Reserved quantity: {{a.quantity}} {{s.reagent.unit}}<br>
+                          Reserved at: {{a.created_at | date:'short'}} <br>
+                          @if (selectedStoredReagentPath[s.id]) {
+                            Path: // @for (p of selectedStoredReagentPath[s.id]; track p.id) { <a href="/#/reagent-store/{{p.id}}">{{p.name}}</a> > } <br>
+                          }
+                        </p>
+                        @if (selectedStoredReagent[s.id].metadata_columns.length > 0) {
+                          <div class="d-flex flex-wrap gap-2 mt-2 mb-2">
+                            @for (m of selectedStoredReagent[s.id].metadata_columns; track m.id) {
+                              @if (m.type === "Characteristics") {
+                                <span class="badge bg-primary" ngbTooltip="Characteristics">{{m.name}}: {{m.value}}</span>
+                              } @else if (m.type === "Comment") {
+                                <span class="badge bg-secondary" ngbTooltip="Comment">{{m.name}}: {{m.value}}</span>
+                              } @else if (m.type === "Factor value") {
+                                <span class="badge bg-success" ngbTooltip="Factor value">{{m.name}}: {{m.value}}</span>
+                              } @else {
+                                <span class="badge bg-danger" ngbTooltip="Other">{{m.name}}: {{m.value}}</span>
+                              }
+                            }
+                          </div>
+                        }
+                        @if (reagentActionMap[r.id][s.id].includes(a)) {
+                          @if (checkIfCreatedAtIsLessThanMinute(a, web.reagentActionDeleteExpireMinutes)) {
+                            <button class="btn btn-sm btn-outline-danger" (click)="deleteAction(a)"><i class="bi bi-trash"></i></button>
+                          }
+                        }
+                      </div>
+                    </td>
+                  </tr>
+                }
+              }
+            }
           }
         }
       </tbody>

@@ -7,6 +7,7 @@ import {NgbModal, NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {ReagentStockSearchModalComponent} from "../reagent-stock-search-modal/reagent-stock-search-modal.component";
 import {DatePipe} from "@angular/common";
 import {DataService} from "../../data.service";
+import {forkJoin} from "rxjs";
 
 @Component({
   selector: 'app-reagent-table',
@@ -20,8 +21,8 @@ import {DataService} from "../../data.service";
 })
 export class ReagentTableComponent {
   selectedReagent: ProtocolStepReagent|undefined = undefined
-  selectedStoredReagent: StoredReagent|undefined = undefined
-  selectedStoredReagentPath: {id: number, name: string}[] = []
+  selectedStoredReagent: StoredReagent[] = []
+  selectedStoredReagentPath: {[key: number]: {id: number, name: string}[]} = {}
   private _step: ProtocolStep|undefined = undefined
   @Input() set step(value: ProtocolStep) {
     this._step = value
@@ -33,7 +34,7 @@ export class ReagentTableComponent {
   }
 
   reagentActions: ReagentAction[] = []
-  reagentActionMap: {[key: string]: ReagentAction} = {}
+  reagentActionMap: {[key: string]: {[storedReagentKey: string]: ReagentAction[]}} = {}
 
   constructor(public web: WebService, private modal: NgbModal, private data: DataService) {
   }
@@ -43,7 +44,13 @@ export class ReagentTableComponent {
       this.reagentActions = data
       for (let action of data) {
         if (action.step_reagent) {
-          this.reagentActionMap[action.step_reagent] = action
+          if (!this.reagentActionMap[action.step_reagent]) {
+            this.reagentActionMap[action.step_reagent] = {}
+          }
+          if (!this.reagentActionMap[action.step_reagent][action.reagent]) {
+            this.reagentActionMap[action.step_reagent][action.reagent] = []
+          }
+          this.reagentActionMap[action.step_reagent][action.reagent].push(action)
         }
       }
     })
@@ -66,15 +73,21 @@ export class ReagentTableComponent {
   selectReagent(reagent: ProtocolStepReagent) {
     if (this.selectedReagent) {
       this.selectedReagent = undefined
-      this.selectedStoredReagent = undefined
-      this.selectedStoredReagentPath = []
+      this.selectedStoredReagent = []
+      //this.selectedStoredReagentPath = []
     } else {
       this.selectedReagent = reagent
-      this.web.getStoredReagent(this.reagentActionMap[reagent.id].reagent).subscribe((data) => {
+      const works = []
+      for (const storedReagent in this.reagentActionMap[reagent.id]) {
+        works.push(this.web.getStoredReagent(parseInt(storedReagent)))
+      }
+      forkJoin(works).subscribe((data) => {
         this.selectedStoredReagent = data
-        this.web.getStorageObjectPathToRoot(data.storage_object.id).subscribe((path) => {
-          this.selectedStoredReagentPath = path
-        })
+        for (const i of data) {
+          this.web.getStorageObjectPathToRoot(i.storage_object.id).subscribe((path) => {
+            this.selectedStoredReagentPath[i.storage_object.id] = path
+          })
+        }
       })
     }
   }
@@ -87,10 +100,16 @@ export class ReagentTableComponent {
 
   deleteAction(reagentAction: ReagentAction) {
     this.web.deleteReagentAction(reagentAction.id).subscribe(() => {
-      delete this.reagentActionMap[reagentAction.step_reagent]
-      this.selectedStoredReagent = undefined
-      this.selectedReagent = undefined
-      this.selectedStoredReagentPath = []
+      // check if more than one action for this reagent
+      if (this.reagentActionMap[reagentAction.step_reagent][reagentAction.reagent].length > 1) {
+        this.reagentActionMap[reagentAction.step_reagent][reagentAction.reagent] = this.reagentActionMap[reagentAction.step_reagent][reagentAction.reagent].filter((r) => r.id !== reagentAction.id)
+
+      } else {
+        delete this.reagentActionMap[reagentAction.step_reagent][reagentAction.reagent]
+        this.selectedStoredReagent = this.selectedStoredReagent.filter((r) => r.id !== reagentAction.reagent)
+        this.selectedStoredReagentPath[reagentAction.reagent] = []
+      }
+      this.reagentActions = this.reagentActions.filter((r) => r.id !== reagentAction.id)
     })
   }
 }
