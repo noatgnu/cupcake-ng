@@ -22,6 +22,22 @@
     <button type="submit" class="btn btn-primary">Search</button>
   </form>
 
+  @if (selectedReagent) {
+    <b>Stock Preview</b>
+    <div>
+      @if (selectedReagent.png_base64) {
+        <img src="{{selectedReagent.png_base64}}" width="100" height="100">
+        <p>
+          Reserved stock: {{selectedReagent.reagent.name}} <br>
+          Current quantity: {{selectedReagent.current_quantity}} {{selectedReagent.reagent.unit}} <br>
+          @if (selectedReagentPath.length >0) {
+            Path: // @for (p of selectedReagentPath; track p.id) { <a href="/#/reagent-store/{{p.id}}">{{p.name}}</a> > } <br>
+          }
+        </p>
+      }
+    </div>
+  }
+
   @if (storedReagentQuery) {
     <hr>
     @if (storedReagentQuery.results.length > 0) {

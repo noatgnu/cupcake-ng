@@ -50,7 +50,9 @@ export class ReagentTableComponent {
           if (!this.reagentActionMap[action.step_reagent][action.reagent]) {
             this.reagentActionMap[action.step_reagent][action.reagent] = []
           }
-          this.reagentActionMap[action.step_reagent][action.reagent].push(action)
+          if (!this.reagentActionMap[action.step_reagent][action.reagent].find((r) => r.id === action.id)) {
+            this.reagentActionMap[action.step_reagent][action.reagent].push(action)
+          }
         }
       }
     })

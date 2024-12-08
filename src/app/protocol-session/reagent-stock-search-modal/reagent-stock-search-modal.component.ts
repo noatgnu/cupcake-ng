@@ -4,7 +4,7 @@ import {StoredReagent, StoredReagentQuery} from "../../storage-object";
 import {FormBuilder, ReactiveFormsModule} from "@angular/forms";
 import {NgbActiveModal, NgbPagination} from "@ng-bootstrap/ng-bootstrap";
 import {WebService} from "../../web.service";
-import {NgClass} from "@angular/common";
+import {DatePipe, NgClass} from "@angular/common";
 
 @Component({
   selector: 'app-reagent-stock-search-modal',
@@ -12,7 +12,8 @@ import {NgClass} from "@angular/common";
   imports: [
     ReactiveFormsModule,
     NgbPagination,
-    NgClass
+    NgClass,
+    DatePipe
   ],
   templateUrl: './reagent-stock-search-modal.component.html',
   styleUrl: './reagent-stock-search-modal.component.scss'
@@ -20,6 +21,7 @@ import {NgClass} from "@angular/common";
 export class ReagentStockSearchModalComponent {
 
   selectedReagent: StoredReagent|undefined = undefined
+  selectedReagentPath: {id: number, name: string}[] = []
 
   private _reagent: ProtocolStepReagent|undefined = undefined
 
@@ -54,6 +56,7 @@ export class ReagentStockSearchModalComponent {
     // @ts-ignore
     this.web.getStoredReagents(undefined, this.pageSize, 0, this.form.value.searchTerm, null, this.form.value.storageObjectName, this.form.value.userOwnedOnly).subscribe((data) => {
       this.storedReagentQuery = data
+
     })
 
   }
@@ -75,8 +78,14 @@ export class ReagentStockSearchModalComponent {
   clickReagent(reagent: StoredReagent) {
     if (this.selectedReagent === reagent) {
       this.selectedReagent = undefined
+      this.selectedReagentPath = []
     }
-    this.selectedReagent = reagent
+    this.web.getStorageObjectPathToRoot(reagent.storage_object.id).subscribe((data) => {
+      this.selectedReagentPath = data
+      this.selectedReagent = reagent
+    })
+
+
   }
 
 }
