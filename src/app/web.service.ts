@@ -1201,10 +1201,13 @@ export class WebService {
     )
   }
 
-  createStoredReagentAction(stored_reagent_id: number, action_type: string, quantity: number, notes: string = "", step_reagent: number|null = null) {
+  createStoredReagentAction(stored_reagent_id: number, action_type: string, quantity: number, notes: string = "", step_reagent: number|null = null, session: string|null = null) {
     const payload: any = {action_type: action_type, quantity: quantity, reagent: stored_reagent_id, notes: notes}
     if (step_reagent) {
       payload['step_reagent'] = step_reagent
+    }
+    if (session) {
+      payload['session'] = session
     }
 
     return this.http.post<ReagentAction>(

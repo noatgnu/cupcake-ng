@@ -53,7 +53,7 @@ export class ReagentTableComponent {
     ref.componentInstance.reagent = reagent
     ref.closed.subscribe((data: { reagent:StoredReagent, quantity: number }) => {
       if (data) {
-        this.web.createStoredReagentAction(data.reagent.id, 'reserve', data.quantity, "", reagent.id).subscribe(
+        this.web.createStoredReagentAction(data.reagent.id, 'reserve', data.quantity, "", reagent.id, this.data.currentSession.unique_id).subscribe(
           (dataReagent: ReagentAction) => {
             this.getReagentAction(this.step.id)
           }
