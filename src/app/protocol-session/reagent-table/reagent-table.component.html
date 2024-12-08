@@ -40,10 +40,10 @@
                             Path: // @for (p of selectedStoredReagentPath[s.id]; track p.id) { <a href="/#/reagent-store/{{p.id}}">{{p.name}}</a> > } <br>
                           }
                         </p>
-                        @if (selectedStoredReagent[s.id].metadata_columns) {
-                          @if (selectedStoredReagent[s.id].metadata_columns.length > 0) {
+                        @if (s.metadata_columns) {
+                          @if (s.metadata_columns.length > 0) {
                             <div class="d-flex flex-wrap gap-2 mt-2 mb-2">
-                              @for (m of selectedStoredReagent[s.id].metadata_columns; track m.id) {
+                              @for (m of s.metadata_columns; track m.id) {
                                 @if (m.type === "Characteristics") {
                                   <span class="badge bg-primary" ngbTooltip="Characteristics">{{m.name}}: {{m.value}}</span>
                                 } @else if (m.type === "Comment") {
