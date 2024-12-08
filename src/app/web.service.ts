@@ -1245,10 +1245,10 @@ export class WebService {
     )
   }
 
-  getStepAssociatedReagentActions(step_id: number) {
+  getStepAssociatedReagentActions(step_id: number, session_id: string) {
     return this.http.get<ReagentAction[]>(
       `${this.baseURL}/api/step/${step_id}/get_associated_reagent_actions/`,
-      {responseType: 'json', observe: 'body'}
+      {responseType: 'json', observe: 'body', params: new HttpParams().set('session', session_id)}
     )
   }
 

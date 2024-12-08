@@ -6,6 +6,7 @@ import {ReagentAction, StoredReagent} from "../../storage-object";
 import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import {ReagentStockSearchModalComponent} from "../reagent-stock-search-modal/reagent-stock-search-modal.component";
 import {DatePipe} from "@angular/common";
+import {DataService} from "../../data.service";
 
 @Component({
   selector: 'app-reagent-table',
@@ -33,11 +34,11 @@ export class ReagentTableComponent {
   reagentActions: ReagentAction[] = []
   reagentActionMap: {[key: string]: ReagentAction} = {}
 
-  constructor(public web: WebService, private modal: NgbModal) {
+  constructor(public web: WebService, private modal: NgbModal, private data: DataService) {
   }
 
   getReagentAction(step_id: number) {
-    this.web.getStepAssociatedReagentActions(step_id).subscribe((data) => {
+    this.web.getStepAssociatedReagentActions(step_id, this.data.currentSession.unique_id).subscribe((data) => {
       this.reagentActions = data
       for (let action of data) {
         if (action.step_reagent) {
