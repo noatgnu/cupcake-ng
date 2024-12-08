@@ -3,7 +3,7 @@ import {ProtocolStepReagent} from "../../reagent";
 import {ProtocolStep} from "../../protocol";
 import {WebService} from "../../web.service";
 import {ReagentAction, StoredReagent} from "../../storage-object";
-import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
+import {NgbModal, NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {ReagentStockSearchModalComponent} from "../reagent-stock-search-modal/reagent-stock-search-modal.component";
 import {DatePipe} from "@angular/common";
 import {DataService} from "../../data.service";
@@ -12,7 +12,8 @@ import {DataService} from "../../data.service";
   selector: 'app-reagent-table',
   standalone: true,
   imports: [
-    DatePipe
+    DatePipe,
+    NgbTooltip
   ],
   templateUrl: './reagent-table.component.html',
   styleUrl: './reagent-table.component.scss'

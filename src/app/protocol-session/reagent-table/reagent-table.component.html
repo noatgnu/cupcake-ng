@@ -31,6 +31,21 @@
                     Path: // @for (p of selectedStoredReagentPath; track p.id) { <a href="/#/reagent-store/{{p.id}}">{{p.name}}</a> > } <br>
 
                   </p>
+                  @if (selectedStoredReagent.metadata_columns.length > 0) {
+                    <div class="d-flex flex-wrap gap-2 mt-2 mb-2">
+                      @for (m of selectedStoredReagent.metadata_columns; track m.id) {
+                        @if (m.type === "Characteristics") {
+                          <span class="badge bg-primary" ngbTooltip="Characteristics">{{m.name}}: {{m.value}}</span>
+                        } @else if (m.type === "Comment") {
+                          <span class="badge bg-secondary" ngbTooltip="Comment">{{m.name}}: {{m.value}}</span>
+                        } @else if (m.type === "Factor value") {
+                          <span class="badge bg-success" ngbTooltip="Factor value">{{m.name}}: {{m.value}}</span>
+                        } @else {
+                          <span class="badge bg-danger" ngbTooltip="Other">{{m.name}}: {{m.value}}</span>
+                        }
+                      }
+                    </div>
+                  }
                   @if (reagentActionMap[r.id]) {
                     @if (checkIfCreatedAtIsLessThanMinute(reagentActionMap[r.id], web.reagentActionDeleteExpireMinutes)) {
                       <button class="btn btn-sm btn-outline-danger" (click)="deleteAction(reagentActionMap[r.id])"><i class="bi bi-trash"></i></button>
