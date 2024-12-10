@@ -34,7 +34,7 @@ export class ReagentTableComponent {
   }
 
   reagentActions: ReagentAction[] = []
-  reagentActionMap: {[key: string]: {[storedReagentKey: string]: ReagentAction[]}} = {}
+  reagentActionMap: {[stepReagentID: string]: {[storedReagentKey: string]: ReagentAction[]}} = {}
 
   constructor(public web: WebService, private modal: NgbModal, private data: DataService) {
   }
