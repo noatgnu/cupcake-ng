@@ -8,7 +8,7 @@ import {
   NgbDropdownItem,
   NgbDropdownMenu,
   NgbDropdownToggle, NgbModal,
-  NgbModalConfig, NgbProgressbar
+  NgbModalConfig, NgbProgressbar, NgbTooltip
 } from "@ng-bootstrap/ng-bootstrap";
 import {ProtocolSection, ProtocolStep} from "../../protocol";
 import {TimerService} from "../../timer.service";
@@ -42,7 +42,8 @@ import {ReagentTableComponent} from "../reagent-table/reagent-table.component";
     NgbDropdownMenu,
     NgbDropdownToggle,
     NgbProgressbar,
-    ReagentTableComponent
+    ReagentTableComponent,
+    NgbTooltip
   ],
   templateUrl: './step-view.component.html',
   styleUrl: './step-view.component.scss'
@@ -706,6 +707,15 @@ export class StepViewComponent {
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
+  }
+
+  exportMetadata() {
+    if (this.dataService.currentSession) {
+      this.web.stepExportMetadata(this.currentStep.id, this.dataService.currentSession.unique_id).subscribe((data: any) => {
+        console.log(data)
+        this.toastService.show('Export', 'Metadata Exported Successfully')
+      })
+    }
   }
 
 }

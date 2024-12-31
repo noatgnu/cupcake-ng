@@ -1625,6 +1625,15 @@ export class WebService {
       {responseType: 'json', observe: 'body', params: params}
     )
   }
+
+  stepExportMetadata(step: number, session: string) {
+    return this.http.get<{
+      column_position: number, name: string, type: string, value: string|null, not_applicable: boolean
+    }[]>(
+      `${this.baseURL}/api/step/${step}/export_associated_metadata/`,
+      {responseType: 'json', observe: 'body', params: new HttpParams().set('session', session)}
+    )
+  }
 }
 
 interface ChunkUploadResponse {

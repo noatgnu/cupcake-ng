@@ -11,9 +11,11 @@
     }
 
     @if (currentStep) {
-      @if(timer.timeKeeper[currentStep.id.toString()]){
-
-        <div class="d-flex flex-row justify-content-end gap-2">
+      <div class="d-flex flex-row justify-content-end gap-2">
+        @if (dataService.currentSession) {
+          <button class="btn btn-sm btn-outline-primary" (click)="exportMetadata()" [ngbTooltip]="'Export Metadata up to this step'"><i class="bi bi-info"></i></button>
+        }
+        @if(timer.timeKeeper[currentStep.id.toString()]){
           @if (dataService.currentSessionPermissions["edit"]) {
             <button class="btn btn-outline-primary" (click)="cauldronConnect(currentStep)"><i class="bi bi-intersect"></i> Cauldron</button>
             @if (recording) {
@@ -31,9 +33,8 @@
           } @else {
             <button class="btn btn-outline-primary">{{timer.convertTime(timer.timeKeeper[currentStep.id.toString()].current)}}</button>
           }
-
-        </div>
-      }
+        }
+      </div>
     }
   </div>
 </nav>
