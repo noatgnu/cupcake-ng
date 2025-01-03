@@ -13,7 +13,7 @@
     @if (currentStep) {
       <div class="d-flex flex-row justify-content-end gap-2">
         @if (dataService.currentSession) {
-          <button class="btn btn-sm btn-outline-primary" (click)="exportMetadata()" [ngbTooltip]="'Export Metadata up to this step'"><i class="bi bi-info"></i></button>
+          <button class="btn btn-sm btn-outline-primary" (click)="exportMetadata()" [ngbTooltip]="'Export Metadata up to this step'"><i class="bi bi-database-down"></i></button>
         }
         @if(timer.timeKeeper[currentStep.id.toString()]){
           @if (dataService.currentSessionPermissions["edit"]) {

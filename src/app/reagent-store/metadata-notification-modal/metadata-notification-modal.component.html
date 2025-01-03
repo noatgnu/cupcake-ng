@@ -1,0 +1,11 @@
+<div class="modal-header">
+  <h4 class="modal-title">Exported Metadata Available</h4>
+  <button type="button" class="btn-close" aria-label="Close" (click)="close()"></button>
+</div>
+<div class="modal-body">
+  <p>Please browse to the storage object of the target to create a new item with the metadata from localStorage.</p>
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn btn-secondary" (click)="close()">Close</button>
+  <button type="button" class="btn btn-danger" (click)="clearMetadata()">Remove Exported Metadata</button>
+</div>

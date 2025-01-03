@@ -68,9 +68,64 @@
         Shareable
       </label>
     </div>
+    <div class="form-check">
+      <input class="form-check-input" type="checkbox" id="access_all" formControlName="access_all" />
+      <label class="form-check-label" for="access_all">
+        Allow Everyone to Access
+      </label>
+    </div>
   </form>
+
+  @if (exportedMetadata) {
+    <hr>
+    <div>
+      <div class="card">
+        <div class="card-header">
+          Exported Metadata
+        </div>
+        <div class="card-body">
+          <div>
+            <b>Protocol:</b> {{exportedMetadata.protocol.protocol_title}}
+          </div>
+          <div>
+            <b>Session:</b> {{exportedMetadata.session.unique_id}}
+          </div>
+          <div>
+            <b>Step:</b>
+            <div [innerHTML]="exportedMetadata.step.step_description">
+            </div>
+          </div>
+          @if (exportedMetadata.metadata.length > 0) {
+            <div>
+              <b>Metadata:</b>
+              <div>
+                @for (m of exportedMetadata.metadata; track m) {
+                  @if (m.type === "Characteristics") {
+                    <span class="badge bg-primary" ngbTooltip="Characteristics">{{m.name}}: {{m.value}}</span>
+                  } @else if (m.type === "Comment") {
+                    <span class="badge bg-secondary" ngbTooltip="Comment">{{m.name}}: {{m.value}}</span>
+                  } @else if (m.type === "Factor value") {
+                    <span class="badge bg-success" ngbTooltip="Factor value">{{m.name}}: {{m.value}}</span>
+                  } @else {
+                    <span class="badge bg-danger" ngbTooltip="Other">{{m.name}}: {{m.value}}</span>
+                  }
+                }
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+
+    </div>
+  }
 </div>
 <div class="modal-footer">
-  <button type="button" class="btn btn-primary" (click)="submit()">Add</button>
+  @if (exportedMetadata) {
+    <button type="button" class="btn btn-primary" (click)="submit()">Add Without Metadata</button>
+    <button type="button" class="btn btn-primary" (click)="submit(true)">Add With Metadata</button>
+  } @else {
+    <button type="button" class="btn btn-primary" (click)="submit()">Add</button>
+  }
+
   <button type="button" class="btn btn-secondary" (click)="close()">Close</button>
 </div>

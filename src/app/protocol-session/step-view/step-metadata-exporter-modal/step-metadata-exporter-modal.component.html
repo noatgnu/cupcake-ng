@@ -1,0 +1,40 @@
+<div class="modal-header">
+  <h5 class="modal-title">Step Metadata Exporter</h5>
+</div>
+<div class="modal-body">
+  @if (data.length > 0) {
+    @for (i of form.controls; track i) {
+      <form [formGroup]="i">
+        <div>
+          <label>Position</label>
+          <input type="number" readonly formControlName="column_position" class="form-control">
+        </div>
+        <div>
+          <label>Name</label>
+          <input type="text" readonly formControlName="name" class="form-control">
+        </div>
+        <div>
+          <label>Type</label>
+          <input type="text" readonly formControlName="type" class="form-control">
+        </div>
+        <div>
+          <label>Value</label>
+          <input type="text" formControlName="value" class="form-control">
+        </div>
+      </form>
+      <hr>
+    }
+  }
+
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn btn-secondary" (click)="close()">Close</button>
+  <div ngbDropdown class="d-inline-block">
+    <button class="btn btn-secondary" id="exportMetadataDropdown" ngbDropdownToggle>Export as</button>
+    <div ngbDropdownMenu aria-labelledby="exportMetadataDropdown">
+      <button ngbDropdownItem (click)="exportAs('cinder-clipboard')">CINDER Clipboard</button>
+      <button ngbDropdownItem (click)="exportAs('cupcake-reagent')">CUPCAKE Reagent</button>
+      <button ngbDropdownItem (click)="exportAs('txt')">SDRF File</button>
+    </div>
+  </div>
+</div>

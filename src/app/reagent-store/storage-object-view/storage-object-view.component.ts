@@ -22,6 +22,8 @@ import {DataService} from "../../data.service";
 import {
   StoredReagentItemAccessControlModalComponent
 } from "../stored-reagent-item-access-control-modal/stored-reagent-item-access-control-modal.component";
+import {forkJoin, Observable} from "rxjs";
+import {MetadataColumn} from "../../metadata-column";
 
 @Component({
   selector: 'app-storage-object-view',
@@ -114,8 +116,21 @@ export class StorageObjectViewComponent {
     const ref = this.modal.open(StoredReagentCreatorModalComponent, {scrollable: true})
     ref.componentInstance.stored_at = this.storageObject
     ref.closed.subscribe((data) => {
-      this.web.createStoredReagent(data.stored_object, data.name,data.unit, data.quantity, data.notes, data.barcode).subscribe((data) => {
-        this.getStoredReagents(undefined, this.pageSize, this.currentPageOffset, undefined, this.storageObject?.id)
+      this.web.createStoredReagent(data.stored_object, data.name,data.unit, data.quantity, data.notes, data.barcode, data.shareable, data.access_all, data.created_by_project, data.created_by_protocol, data.created_by_session, data.created_by_step).subscribe((storedReagent) => {
+        if (data.metadata) {
+          const batchWork: Observable<MetadataColumn>[] = []
+          for (const m of data.metadata) {
+             batchWork.push(this.web.createMetaDataColumn(storedReagent.id, m, "stored_reagent"))
+          }
+          if (batchWork.length > 0) {
+            forkJoin(batchWork).subscribe((mData) => {
+              this.getStoredReagents(undefined, this.pageSize, this.currentPageOffset, undefined, this.storageObject?.id)
+            })
+          }
+        } else {
+          this.getStoredReagents(undefined, this.pageSize, this.currentPageOffset, undefined, this.storageObject?.id)
+        }
+
       })
     })
   }
@@ -133,7 +148,7 @@ export class StorageObjectViewComponent {
     const ref = this.modal.open(StoredReagentEditorModalComponent, {scrollable: true})
     ref.componentInstance.storedReagent = reagent
     ref.closed.subscribe((data) => {
-      this.web.updateStoredReagent(reagent.id, data.quantity, data.notes, reagent.png_base64, data.barcode, data.shareable, data.expiration_date, data.created_by_project, data.created_by_protocol, data.created_by_session).subscribe((data) => {
+      this.web.updateStoredReagent(reagent.id, data.quantity, data.notes, reagent.png_base64, data.barcode, data.shareable, data.expiration_date, data.created_by_project, data.created_by_protocol, data.created_by_session, data.created_by_step).subscribe((data) => {
         this.getStoredReagents(undefined, this.pageSize, this.currentPageOffset, undefined, this.storageObject?.id)
         this.toastService.show(`Reagent ${reagent.reagent.name}`, "Updated")
       })
@@ -232,8 +247,20 @@ export class StorageObjectViewComponent {
     ref.componentInstance.stored_at = this.storageObject
     ref.componentInstance.storedReagent = reagent
     ref.closed.subscribe((data) => {
-      this.web.createStoredReagent(data.stored_object, data.name, data.unit, data.quantity, data.notes, data.barcode).subscribe((data) => {
-        this.getStoredReagents(undefined, this.pageSize, this.currentPageOffset, undefined, this.storageObject?.id)
+      this.web.createStoredReagent(data.stored_object, data.name, data.unit, data.quantity, data.notes, data.barcode, data.shareable, data.access_all, data.created_by_project, data.created_by_protocol, data.created_by_session, data.created_by_step).subscribe((storedReagent) => {
+        if (data.metadata) {
+          const batchWork: Observable<MetadataColumn>[] = []
+          for (const m of data.metadata) {
+            batchWork.push(this.web.createMetaDataColumn(storedReagent.id, m, "stored_reagent"))
+          }
+          if (batchWork.length > 0) {
+            forkJoin(batchWork).subscribe((mData) => {
+              this.getStoredReagents(undefined, this.pageSize, this.currentPageOffset, undefined, this.storageObject?.id)
+            })
+          }
+        } else {
+          this.getStoredReagents(undefined, this.pageSize, this.currentPageOffset, undefined, this.storageObject?.id)
+        }
       })
     })
   }

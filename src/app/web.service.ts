@@ -1154,7 +1154,7 @@ export class WebService {
   }
 
 
-  updateStoredReagent(reagent_id: number, quantity: number, notes: string, png_base64: string|null = null, barcode: string|null = null, shareable: boolean = true, expiration_date: NgbDateStruct|null = null, created_by_project: number|null = null, created_by_protocol: number|null = null, created_by_session: number|null = null) {
+  updateStoredReagent(reagent_id: number, quantity: number, notes: string, png_base64: string|null = null, barcode: string|null = null, shareable: boolean = true, expiration_date: NgbDateStruct|null = null, created_by_project: number|null = null, created_by_protocol: number|null = null, created_by_session: number|null = null, created_by_step: number|null = null) {
     const payload: any = {quantity: quantity, notes: notes, png_base64: png_base64, barcode: barcode, shareable: shareable}
     if (expiration_date) {
       payload['expiration_date'] = `${expiration_date.year}-${expiration_date.month}-${expiration_date.day}`
@@ -1167,6 +1167,9 @@ export class WebService {
     }
     if (created_by_session) {
       payload['created_by_session'] = created_by_session
+    }
+    if (created_by_step) {
+      payload['created_by_step'] = created_by_step
     }
     return this.http.put<StoredReagent>(
       `${this.baseURL}/api/stored_reagent/${reagent_id}/`,
@@ -1189,10 +1192,22 @@ export class WebService {
     )
   }
 
-  createStoredReagent(storage_object: number, name: string, unit: string, quantity: number, notes: string, barcode: string|null = null, shareable: boolean = true) {
-    const payload: any = {storage_object: storage_object, name: name, unit: unit, quantity: quantity, notes: notes, shareable: shareable}
+  createStoredReagent(storage_object: number, name: string, unit: string, quantity: number, notes: string, barcode: string|null = null, shareable: boolean = true, access_all: boolean = false, created_by_project: number|null = null, created_by_protocol: number|null = null, created_by_session: number|null = null, created_by_step: number|null = null) {
+    const payload: any = {storage_object: storage_object, name: name, unit: unit, quantity: quantity, notes: notes, shareable: shareable, access_all: access_all}
     if (barcode) {
       payload['barcode'] = barcode
+    }
+    if (created_by_project) {
+      payload['created_by_project'] = created_by_project
+    }
+    if (created_by_protocol) {
+      payload['created_by_protocol'] = created_by_protocol
+    }
+    if (created_by_session) {
+      payload['created_by_session'] = created_by_session
+    }
+    if (created_by_step) {
+      payload['created_by_step'] = created_by_step
     }
     return this.http.post<StoredReagent>(
       `${this.baseURL}/api/stored_reagent/`,
@@ -1633,6 +1648,10 @@ export class WebService {
       `${this.baseURL}/api/step/${step}/export_associated_metadata/`,
       {responseType: 'json', observe: 'body', params: new HttpParams().set('session', session)}
     )
+  }
+
+  convertMetadataToSDRFTxt(step_id: number, data: any[]) {
+    return this.http.post<any>(`${this.baseURL}/api/step/${step_id}/convert_metadata_to_sdrf_txt/`, data, {responseType: 'json', observe: 'body'})
   }
 }
 

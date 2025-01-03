@@ -1,10 +1,12 @@
-import {Component, Input} from '@angular/core';
+import {Component, Input, OnInit} from '@angular/core';
 import {debounceTime, map, Observable, switchMap} from "rxjs";
 import {WebService} from "../../web.service";
 import {FormBuilder, FormControl, ReactiveFormsModule, Validators} from "@angular/forms";
-import {NgbActiveModal, NgbHighlight, NgbTypeahead} from "@ng-bootstrap/ng-bootstrap";
+import {NgbActiveModal, NgbHighlight, NgbTooltip, NgbTypeahead} from "@ng-bootstrap/ng-bootstrap";
 import {StorageObject, StoredReagent} from "../../storage-object";
 import {Reagent} from "../../reagent";
+import {Protocol, ProtocolStep} from "../../protocol";
+import {ProtocolSession} from "../../protocol-session";
 
 @Component({
   selector: 'app-stored-reagent-creator-modal',
@@ -12,12 +14,17 @@ import {Reagent} from "../../reagent";
   imports: [
     ReactiveFormsModule,
     NgbTypeahead,
-    NgbHighlight
+    NgbHighlight,
+    NgbTooltip
   ],
   templateUrl: './stored-reagent-creator-modal.component.html',
   styleUrl: './stored-reagent-creator-modal.component.scss'
 })
-export class StoredReagentCreatorModalComponent {
+export class StoredReagentCreatorModalComponent implements OnInit {
+  exportedMetadata?: {metadata: {
+      column_position: number, name: string, type: string, value: string|null, not_applicable: boolean
+    }[], step: ProtocolStep, session: ProtocolSession, protocol: Protocol}
+
   private _stored_at: StorageObject|undefined = undefined
 
   @Input() set stored_at(value: StorageObject|undefined) {
@@ -67,7 +74,8 @@ export class StoredReagentCreatorModalComponent {
     unit: ['', Validators.required],
     stored_object: new FormControl<number|null>(null, Validators.required),
     barcode: [''],
-    shareable: [true]
+    shareable: [true],
+    access_all: [false]
   })
 
   constructor(private web: WebService, private activeModal: NgbActiveModal, private fb: FormBuilder) {
@@ -102,11 +110,28 @@ export class StoredReagentCreatorModalComponent {
     this.activeModal.dismiss()
   }
 
-  submit() {
-    console.log(this.reagentSearchForm.value)
+  submit(withMetadata: boolean = false) {
     if (this.reagentSearchForm.valid) {
-      this.activeModal.close(this.reagentSearchForm.value)
+      const payload: any = this.reagentSearchForm.value
+      if (withMetadata) {
+        if (this.exportedMetadata) {
+          payload.created_by_project = undefined
+          payload.created_by_session = this.exportedMetadata.session.id
+          payload.created_by_step = this.exportedMetadata.step.id
+          payload.created_by_protocol = this.exportedMetadata.protocol.id
+          payload.metadata = this.exportedMetadata.metadata
+          this.activeModal.close(payload)
+        }
+      } else {
+        this.activeModal.close(payload)
+      }
+
     }
+  }
+
+  ngOnInit() {
+    const metadata = localStorage.getItem('metadata-cupcake-reagent');
+    this.exportedMetadata = metadata ? JSON.parse(metadata) : undefined
   }
 
 }

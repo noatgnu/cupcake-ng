@@ -21,6 +21,12 @@
           Shareable
         </label>
       </div>
+      <div class="form-check">
+        <input class="form-check-input" type="checkbox" id="access_all" formControlName="access_all">
+        <label class="form-check-label" for="access_all">
+          Allow Everyone to Access
+        </label>
+      </div>
       <div class="form-floating">
         <input type="text" class="form-control" id="barcode" formControlName="barcode" placeholder="Barcode">
         <label for="barcode">Barcode</label>
@@ -89,6 +95,51 @@
             }
           </ng-template>
         </div>
+
+        @if (stepList.length > 0) {
+          <b>Created From Step</b>
+          @if (!storedReagent.created_by_step) {
+            <div>
+              <small class="text-muted">No step selected. Please select one from this protocol</small>
+            </div>
+          } @else {
+            <div>
+              <div class="card bg-info">
+                <div class="card-body">
+                  <div [innerHTML]="storedReagent.created_by_step.step_description">
+
+                  </div>
+                </div>
+              </div>
+            </div>
+          }
+          <div>
+            Steps from this protocol
+          </div>
+          <div class="d-flex flex-column gap-2">
+            @for (s of paginatedSteps; track s.id) {
+              <div class="card"
+                   [ngClass]="{'bg-primary text-light': form.value.created_by_step === s.id}"
+                   (mouseover)="onStepHover(s)"
+                   (mouseleave)="onStepUnhover()"
+                   (click)="selectStep(s)"
+              >
+                <div class="card-body">
+                  <div [innerHTML]="s.step_description">
+                  </div>
+                </div>
+              </div>
+            }
+            <ngb-pagination
+              [collectionSize]="stepList.length"
+              [(page)]="page"
+              [pageSize]="pageSize"
+              (pageChange)="onPageChange($event)"
+              [maxSize]="5"
+              [rotate]="true"
+            ></ngb-pagination>
+          </div>
+        }
       }
       <div>
         <b>Created from Project</b>

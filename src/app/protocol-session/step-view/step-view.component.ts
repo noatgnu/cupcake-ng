@@ -28,6 +28,9 @@ import {UploadLargeFileModalComponent} from "../../upload-large-file-modal/uploa
 import {InstrumentBookingModalComponent} from "../../instruments/instrument-booking-modal/instrument-booking-modal.component";
 import {Instrument} from "../../instrument";
 import {ReagentTableComponent} from "../reagent-table/reagent-table.component";
+import {
+  StepMetadataExporterModalComponent
+} from "./step-metadata-exporter-modal/step-metadata-exporter-modal.component";
 
 @Component({
   selector: 'app-step-view',
@@ -711,8 +714,13 @@ export class StepViewComponent {
 
   exportMetadata() {
     if (this.dataService.currentSession) {
-      this.web.stepExportMetadata(this.currentStep.id, this.dataService.currentSession.unique_id).subscribe((data: any) => {
-        console.log(data)
+      const ref = this.modal.open(StepMetadataExporterModalComponent, {scrollable: true})
+      this.web.stepExportMetadata(this.currentStep.id, this.dataService.currentSession.unique_id).subscribe((data) => {
+        ref.componentInstance.data = data
+        ref.componentInstance.step = this.currentStep
+        ref.componentInstance.session = this.dataService.currentSession
+        ref.componentInstance.protocol = this.dataService.protocol
+
         this.toastService.show('Export', 'Metadata Exported Successfully')
       })
     }

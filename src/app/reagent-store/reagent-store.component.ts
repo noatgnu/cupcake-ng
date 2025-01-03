@@ -1,4 +1,4 @@
-import {Component, Input} from '@angular/core';
+import {Component, Input, OnInit} from '@angular/core';
 import {WebService} from "../web.service";
 import {StorageObject, StorageObjectQuery} from "../storage-object";
 import {NgbModal, NgbPagination, NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
@@ -7,6 +7,7 @@ import {
 } from "./storage-object-creator-modal/storage-object-creator-modal.component";
 import {StorageObjectViewComponent} from "./storage-object-view/storage-object-view.component";
 import {Location} from "@angular/common";
+import {MetadataNotificationModalComponent} from "./metadata-notification-modal/metadata-notification-modal.component";
 
 @Component({
   selector: 'app-reagent-store',
@@ -19,7 +20,7 @@ import {Location} from "@angular/common";
   templateUrl: './reagent-store.component.html',
   styleUrl: './reagent-store.component.scss'
 })
-export class ReagentStoreComponent {
+export class ReagentStoreComponent implements OnInit{
   search?: string
   private _storageID?: number|undefined;
   private _storedReagentID?: number|undefined;
@@ -59,8 +60,6 @@ export class ReagentStoreComponent {
   constructor(private web: WebService, private modal: NgbModal, private location: Location) {
 
   }
-
-
 
   getStorageObjects(url?: string, limit: number = 10, offset: number = 0, search?: string, root: boolean = true, stored_at?: number) {
     console.log(url, limit, offset, search, root, stored_at)
@@ -107,6 +106,16 @@ export class ReagentStoreComponent {
         this.selectedStorageObject = undefined
         this.getStorageObjects(undefined, this.pageSize, this.currentPageOffset, this.search, true)
       }
+    }
+  }
+
+  ngOnInit() {
+    const metadata = localStorage.getItem('metadata-cupcake-reagent');
+    if (metadata) {
+      const ref = this.modal.open(MetadataNotificationModalComponent);
+      ref.closed.subscribe((data) => {
+        localStorage.removeItem('metadata-cupcake-reagent')
+      })
     }
   }
 }

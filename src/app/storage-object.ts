@@ -1,5 +1,6 @@
 import {Reagent} from "./reagent";
 import {MetadataColumn} from "./metadata-column";
+import {ProtocolStep} from "./protocol";
 
 export interface StorageObject {
   id: number;
@@ -27,11 +28,13 @@ export interface StoredReagent {
   png_base64: string;
   barcode: string|null;
   shareable: boolean;
+  access_all: boolean;
   current_quantity: number;
   expiration_date: Date;
   created_by_project: number|null;
   created_by_session: string|null;
   created_by_protocol: number|null;
+  created_by_step: ProtocolStep|null;
   metadata_columns: MetadataColumn[];
 }
 

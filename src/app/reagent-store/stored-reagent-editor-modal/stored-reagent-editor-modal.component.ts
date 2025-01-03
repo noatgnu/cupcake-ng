@@ -12,7 +12,7 @@ import {
 import {
   NgbActiveModal,
   NgbDateStruct, NgbHighlight,
-  NgbInputDatepicker,
+  NgbInputDatepicker, NgbPagination,
   NgbTooltip,
   NgbTypeahead,
   NgbTypeaheadSelectItemEvent
@@ -27,10 +27,11 @@ import {MsVocab} from "../../ms-vocab";
 import {WebService} from "../../web.service";
 import {MetadataColumn} from "../../metadata-column";
 import {Project} from "../../project";
-import {Protocol} from "../../protocol";
+import {Protocol, ProtocolStep} from "../../protocol";
 import {ProtocolSession} from "../../protocol-session";
 import {Unimod} from "../../unimod";
 import {ItemMetadataComponent} from "../../item-metadata/item-metadata.component";
+import {NgClass} from "@angular/common";
 
 @Component({
   selector: 'app-stored-reagent-editor-modal',
@@ -42,7 +43,9 @@ import {ItemMetadataComponent} from "../../item-metadata/item-metadata.component
     NgbInputDatepicker,
     FormsModule,
     NgbHighlight,
-    ItemMetadataComponent
+    ItemMetadataComponent,
+    NgbPagination,
+    NgClass
   ],
   templateUrl: './stored-reagent-editor-modal.component.html',
   styleUrl: './stored-reagent-editor-modal.component.scss'
@@ -53,11 +56,18 @@ export class StoredReagentEditorModalComponent implements AfterViewInit, OnInit{
   createdByProject!: Project
   createdBySession!: ProtocolSession
   createdByProtocol!: Protocol
+  createdByStep!: ProtocolStep
+  stepList: ProtocolStep[] = []
+  page = 1;
+  pageSize = 5;
+  paginatedSteps: ProtocolStep[] = []
+  hoveredStep: ProtocolStep|undefined = undefined
 
   formAutocomplete = this.fb.group({
     projectName: new FormControl(''),
     protocolName: new FormControl(''),
-    sessionName: new FormControl('')
+    sessionName: new FormControl(''),
+    step: new FormControl('')
   })
 
   @Input() set storedReagent(value: StoredReagent|undefined) {
@@ -67,6 +77,7 @@ export class StoredReagentEditorModalComponent implements AfterViewInit, OnInit{
       this.form.controls.notes.setValue(value.notes)
       this.form.controls.barcode.setValue(value.barcode)
       this.form.controls.shareable.setValue(value.shareable)
+      this.form.controls.access_all.setValue(value.access_all)
       if (value.expiration_date) {
         const da = new Date(value.expiration_date)
         const ngbDateStruct = {
@@ -87,6 +98,10 @@ export class StoredReagentEditorModalComponent implements AfterViewInit, OnInit{
       if (value.created_by_session) {
         this.getSession(value.created_by_session)
       }
+      if (value.created_by_step) {
+        this.form.controls.created_by_step.setValue(value.created_by_step.id)
+
+      }
     }
   }
 
@@ -99,10 +114,12 @@ export class StoredReagentEditorModalComponent implements AfterViewInit, OnInit{
     notes: new FormControl(''),
     barcode: new FormControl(''),
     shareable: new FormControl(true),
+    access_all: new FormControl(false),
     expiration_date: new FormControl<NgbDateStruct|null>(null),
     created_by_project: new FormControl<number|null>(null),
     created_by_protocol: new FormControl<number|null>(null),
-    created_by_session: new FormControl<number|null>(null)
+    created_by_session: new FormControl<number|null>(null),
+    created_by_step: new FormControl<number|null>(null)
   })
 
 
@@ -162,6 +179,8 @@ export class StoredReagentEditorModalComponent implements AfterViewInit, OnInit{
 
   selectedProtocol(event: NgbTypeaheadSelectItemEvent) {
     this.createdByProtocol = event.item
+    this.stepList = event.item.steps
+    this.paginatedSteps = this.stepList.slice(0, this.pageSize)
     this.form.controls.created_by_protocol.setValue(event.item.id)
   }
 
@@ -285,6 +304,8 @@ export class StoredReagentEditorModalComponent implements AfterViewInit, OnInit{
       (protocol) => {
         this.zone.run(() => {
           this.createdByProtocol = protocol
+          this.stepList = protocol.steps
+          this.paginatedSteps = this.stepList.slice(0, this.pageSize)
           this.formAutocomplete.controls.protocolName.setValue(protocol.protocol_title)
           console.log(this.formAutocomplete.value)
         })
@@ -315,5 +336,29 @@ export class StoredReagentEditorModalComponent implements AfterViewInit, OnInit{
     return this.web.getAssociatedSessions(protocolId)
   }
 
+  onPageChange(page: number): void {
+    this.page = page;
+    this.updatePaginatedSteps();
+  }
 
+  updatePaginatedSteps(): void {
+    const start = (this.page - 1) * this.pageSize;
+    const end = start + this.pageSize;
+    this.paginatedSteps = this.stepList.slice(start, end);
+  }
+
+  onStepHover(step: ProtocolStep): void {
+    this.hoveredStep = step;
+  }
+
+  onStepUnhover(): void {
+    this.hoveredStep = undefined;
+  }
+
+  selectStep(step: ProtocolStep): void {
+    this.form.controls.created_by_step.setValue(step.id);
+    if (this.storedReagent) {
+      this.storedReagent.created_by_step = step;
+    }
+  }
 }
