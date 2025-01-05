@@ -104,6 +104,10 @@ export class NavbarComponent {
         this.web.exportToDocx(this.dataService.protocol.id, currentSession, format).subscribe((data: any) => {
           this.toastService.show("Exporting Session", "Processing Request")
         })
+      } else if (exportType === "session-sqlite") {
+        this.web.exportToDocx(this.dataService.protocol.id, currentSession, format).subscribe((data: any) => {
+          this.toastService.show("Exporting Session", "Processing Request")
+        })
       }
 
     }

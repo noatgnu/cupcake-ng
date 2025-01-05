@@ -93,7 +93,10 @@
         <div ngbDropdownMenu aria-labelledby="exportDropdown">
           <button class="dropdown-item" (click)="exportToDocx('session', 'docx')">Export Session to DOCX</button>
           <button class="dropdown-item" (click)="exportToDocx('protocol', 'docx')">Export Protocol to DOCX</button>
-          <button class="dropdown-item" (click)="exportToDocx('protocol', 'tar.gz')">Export Protocol to tar.gz</button>
+          @if (dataService.currentSession) {
+            <button class="dropdown-item" (click)="exportToDocx('session-sqlite', 'cupcake')">Export Archived Session</button>
+          }
+
         </div>
       </div>
     </div>

@@ -379,6 +379,9 @@ export class WebService {
     } else {
       body["export_type"] = "protocol";
     }
+    if (format === "cupcake") {
+      body["export_type"] = "session-sqlite"
+    }
     return this.http.post(
       `${this.baseURL}/api/protocol/${protocol_id}/create_export/`,
       body,
