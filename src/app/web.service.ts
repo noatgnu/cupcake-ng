@@ -33,6 +33,7 @@ import {MsVocabQuery} from "./ms-vocab";
 import {NgbDateStruct} from "@ng-bootstrap/ng-bootstrap";
 import {User, UserQuery} from "./user";
 import {UnimodQuery} from "./unimod";
+import {InstrumentJob, InstrumentJobQuery} from "./instrument-job";
 
 
 @Injectable({
@@ -1081,6 +1082,20 @@ export class WebService {
     )
   }
 
+  getStorageObjectsByLabGroup(lab_group_id: number, limit: number = 10, offset: number = 0, searchTerm: string|undefined|null = "") {
+    let params = new HttpParams()
+      .set('limit', limit.toString())
+      .set('offset', offset.toString())
+    if (searchTerm !== "" && searchTerm) {
+      params = params.append('search', searchTerm);
+    }
+    params = params.append('lab_group', lab_group_id.toString())
+    return this.http.get<StorageObjectQuery>(
+      `${this.baseURL}/api/storage_object/`,
+      {responseType: 'json', observe: 'body', params: params}
+    )
+  }
+
   getStorageObject(object_id: number) {
     return this.http.get<StorageObject>(
       `${this.baseURL}/api/storage_object/${object_id}/`,
@@ -1352,7 +1367,7 @@ export class WebService {
 
   addLabGroupMember(lab_group_id: number, member_id: number) {
     return this.http.post<LabGroup>(
-      `${this.baseURL}/api/lab_groups/${lab_group_id}/add_member/`,
+      `${this.baseURL}/api/lab_groups/${lab_group_id}/add_user/`,
       {user: member_id},
       {responseType: 'json', observe: 'body'}
     )
@@ -1360,7 +1375,7 @@ export class WebService {
 
   removeLabGroupMember(lab_group_id: number, member_id: number) {
     return this.http.post(
-      `${this.baseURL}/api/lab_groups/${lab_group_id}/remove_member/`,
+      `${this.baseURL}/api/lab_groups/${lab_group_id}/remove_user/`,
       {user: member_id},
       {responseType: 'json', observe: 'body'}
     )
@@ -1531,7 +1546,7 @@ export class WebService {
     )
   }
 
-  getUsers(url?: string, limit: number = 10, offset: number = 0, search?: string) {
+  getUsers(url?: string, limit: number = 10, offset: number = 0, search?: string|undefined|null) {
     if (url) {
       return this.http.get<UserQuery>(url, {responseType: 'json', observe: 'body'})
     }
@@ -1551,11 +1566,14 @@ export class WebService {
     )
   }
 
-  getUsersByLabGroup(lab_group_id: number, limit: number = 10, offset: number = 0) {
+  getUsersByLabGroup(lab_group_id: number, limit: number = 10, offset: number = 0, searchTerm: string|undefined|null = "") {
     let params = new HttpParams()
     params = params.append('lab_group', lab_group_id.toString())
     params = params.append('limit', limit.toString())
     params = params.append('offset', offset.toString())
+    if (searchTerm !== "" && searchTerm !== undefined && searchTerm !== null) {
+      params = params.append('search', searchTerm);
+    }
     return this.http.get<UserQuery>(
       `${this.baseURL}/api/user/`,
       {responseType: 'json', observe: 'body', params: params}
@@ -1578,6 +1596,20 @@ export class WebService {
     params = params.append('stored_reagent', stored_reagent_id.toString())
     params = params.append('limit', limit.toString())
     params = params.append('offset', offset.toString())
+    return this.http.get<LabGroupQuery>(
+      `${this.baseURL}/api/lab_groups/`,
+      {responseType: 'json', observe: 'body', params: params}
+    )
+  }
+
+  getLabGroupsByStorageObject(storage_object_id: number, limit: number = 10, offset: number = 0, searchTerm: string|undefined|null = "") {
+    let params = new HttpParams()
+    params = params.append('storage_object', storage_object_id.toString())
+    params = params.append('limit', limit.toString())
+    params = params.append('offset', offset.toString())
+    if (searchTerm !== "" && searchTerm !== undefined && searchTerm !== null) {
+      params = params.append('search', searchTerm);
+    }
     return this.http.get<LabGroupQuery>(
       `${this.baseURL}/api/lab_groups/`,
       {responseType: 'json', observe: 'body', params: params}
@@ -1655,6 +1687,101 @@ export class WebService {
 
   convertMetadataToSDRFTxt(step_id: number, data: any[]) {
     return this.http.post<any>(`${this.baseURL}/api/step/${step_id}/convert_metadata_to_sdrf_txt/`, data, {responseType: 'json', observe: 'body'})
+  }
+
+  getInstrumentJobs(limit: number = 10, offset: number = 0, search: string = "") {
+    let params = new HttpParams()
+      .set('limit', limit.toString())
+      .set('offset', offset.toString())
+
+    if (search !== "") {
+      params = params.append('search', search);
+    }
+
+    return this.http.get<InstrumentJobQuery>(
+      `${this.baseURL}/api/instrument_jobs/`,
+      {responseType: 'json', observe: 'body', params: params}
+    )
+  }
+
+  getInstrumentJob(job_id: number) {
+    return this.http.get<InstrumentJob>(
+      `${this.baseURL}/api/instrument_jobs/${job_id}/`,
+      {responseType: 'json', observe: 'body'}
+    )
+  }
+
+  createInstrumentJob(job_name: string, project: number) {
+    return this.http.post<InstrumentJob>(
+      `${this.baseURL}/api/instrument_jobs/`,
+      {job_name: job_name, project: project},
+      {responseType: 'json', observe: 'body'}
+    )
+  }
+  updateInstrumentJob(
+    job_id: number,
+    job_name: string|undefined,
+    project: number|undefined,
+    funder: string|undefined,
+    cost_center: string|undefined,
+    sample_type: string|undefined,
+    sample_number: number|undefined,
+    protocol: number|undefined,
+    staff: number[]|undefined
+  ) {
+    const payload: any = {}
+    if (job_name) {
+      payload['job_name'] = job_name
+    }
+    if (project) {
+      payload['project'] = project
+    }
+    if (funder) {
+      payload['funder'] = funder
+    }
+    if (cost_center) {
+      payload['cost_center'] = cost_center
+    }
+    if (sample_type) {
+      payload['sample_type'] = sample_type
+    }
+    if (sample_number) {
+      payload['sample_number'] = sample_number
+    }
+    if (protocol) {
+      payload['protocol'] = protocol
+    }
+    if (staff) {
+      payload['staff'] = staff
+    }
+    return this.http.put<InstrumentJob>(
+      `${this.baseURL}/api/instrument_jobs/${job_id}/`,
+      payload,
+      {responseType: 'json', observe: 'body'}
+    )
+  }
+
+  addLabGroupToStorageObject(storage_object_id: number, lab_group_id: number) {
+    return this.http.post(
+      `${this.baseURL}/api/storage_object/${storage_object_id}/add_access_group/`,
+      {lab_group: lab_group_id},
+      {responseType: 'json', observe: 'body'}
+    )
+  }
+
+  removeLabGroupFromStorageObject(storage_object_id: number, lab_group_id: number) {
+    return this.http.post(
+      `${this.baseURL}/api/storage_object/${storage_object_id}/remove_access_group/`,
+      {lab_group: lab_group_id},
+      {responseType: 'json', observe: 'body'}
+    )
+  }
+
+  getUserLabGroups() {
+    return this.http.get<LabGroupQuery>(
+      `${this.baseURL}/api/user/get_user_lab_groups/`,
+      {responseType: 'json', observe: 'body'}
+    )
   }
 }
 

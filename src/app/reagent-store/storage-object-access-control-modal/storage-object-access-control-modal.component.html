@@ -1,0 +1,98 @@
+<div class="modal-header">
+  <h5 class="modal-title">
+    Add/Remove Lab Group From Storage Object
+  </h5>
+</div>
+<div class="modal-body">
+  <form [formGroup]="form">
+    <div class="form-group">
+      <label for="labGroupSearch">Lab Group Search</label>
+      <input type="search" class="form-control" formControlName="name" id="labGroupSearch">
+    </div>
+  </form>
+  @if (labGroupQuery) {
+    <hr>
+    <h5>Lab Group List</h5>
+    <table class="table table-striped">
+      <thead>
+      <tr>
+        <th scope="col">
+          ID
+        </th>
+        <th scope="col">
+          Name
+        </th>
+        <th scope="col">
+          Actions
+        </th>
+      </tr>
+      </thead>
+      <tbody>
+
+        @for (l of labGroupQuery.results; track l.id) {
+          <tr>
+            <td>
+              {{l.id}}
+            </td>
+            <td>
+              {{l.name}}
+            </td>
+            <td>
+              <div class="d-flex gap-2 h-100">
+                @if (inThisStorageObjectMap[l.id]) {
+                  <button class="btn btn-sm btn-danger" ngbTooltip="Add group to object" (click)="removeFromLabGroup(l)"><i class="bi bi-person-dash"></i></button>
+                } @else {
+                  <button class="btn btn-sm btn-primary" ngbTooltip="Remove group from object" (click)="addToLabGroup(l)"><i class="bi bi-person-add"></i></button>
+                }
+              </div>
+
+            </td>
+          </tr>
+        }
+
+      </tbody>
+    </table>
+    <ngb-pagination (pageChange)="onLabGroupPageChange($event)" [collectionSize]="labGroupQuery.count" [(page)]="labGroupPage" [pageSize]="10" [rotate]="true" [boundaryLinks]="true" />
+  }
+  @if (currentLabGroupQuery) {
+    <hr>
+    <h5>Lab Group List With Access</h5>
+    <table class="table table-striped">
+      <thead>
+      <tr>
+        <th scope="col">
+          ID
+        </th>
+        <th scope="col">
+          Name
+        </th>
+        <th scope="col">
+          Actions
+        </th>
+      </tr>
+      </thead>
+      <tbody>
+
+        @for (l of currentLabGroupQuery.results; track l.id) {
+          <tr>
+            <td>
+              {{l.id}}
+            </td>
+            <td>
+              {{l.name}}
+            </td>
+            <td>
+              <div class="d-flex gap-2">
+                <button class="btn btn-sm btn-danger" ngbTooltip="Remove group from object" (click)="removeFromLabGroup(l)"><i class="bi bi-person-dash"></i></button>
+              </div>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+    <ngb-pagination (pageChange)="onLabGroupByStorageObjectPageChange($event)" [collectionSize]="currentLabGroupQuery.count" [(page)]="currentLabGroupByStorageObjectPage" [pageSize]="10" [rotate]="true" [boundaryLinks]="true" />
+  }
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn btn-secondary" (click)="close()">Close</button>
+</div>

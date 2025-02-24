@@ -1,0 +1,98 @@
+<div class="modal-header">
+  <h5 class="modal-title">
+    Add/Remove User from Group
+  </h5>
+</div>
+<div class="modal-body">
+  <form [formGroup]="form">
+    <div class="form-group">
+      <label for="userSearch">User Search</label>
+      <input type="search" class="form-control" formControlName="name" id="userSearch">
+    </div>
+  </form>
+  @if (userQuery) {
+    <hr>
+    <h5>User List From Entire Database</h5>
+    <table class="table table-striped">
+      <thead>
+      <tr>
+        <th scope="col">
+          ID
+        </th>
+        <th scope="col">
+          Username
+        </th>
+        <th scope="col">
+          Actions
+        </th>
+      </tr>
+      </thead>
+      <tbody>
+
+        @for (user of userQuery.results; track user.id) {
+          <tr>
+            <td>
+              {{user.id}}
+            </td>
+            <td>
+              {{user.username}}
+            </td>
+            <td>
+              <div class="d-flex gap-2 h-100">
+                @if (inThisLabGroupMap[user.id]) {
+                  <button class="btn btn-sm btn-danger" ngbTooltip="Add user to group" (click)="removeUserFromLabGroup(user)"><i class="bi bi-person-dash"></i></button>
+                } @else {
+                  <button class="btn btn-sm btn-primary" ngbTooltip="Remove user from group" (click)="addUserToLabGroup(user)"><i class="bi bi-person-add"></i></button>
+                }
+              </div>
+
+            </td>
+          </tr>
+        }
+
+      </tbody>
+    </table>
+    <ngb-pagination (pageChange)="handleUserPageChange($event)" [collectionSize]="userQuery.count" [(page)]="userPage" [pageSize]="10" [rotate]="true" [boundaryLinks]="true" />
+  }
+  @if (currentLabGroupUserQuery) {
+    <hr>
+    <h5>User List From Lab Group</h5>
+    <table class="table table-striped">
+      <thead>
+      <tr>
+        <th scope="col">
+          ID
+        </th>
+        <th scope="col">
+          Username
+        </th>
+        <th scope="col">
+          Actions
+        </th>
+      </tr>
+      </thead>
+      <tbody>
+
+        @for (user of currentLabGroupUserQuery.results; track user.id) {
+          <tr>
+            <td>
+              {{user.id}}
+            </td>
+            <td>
+              {{user.username}}
+            </td>
+            <td>
+              <div class="d-flex gap-2">
+                <button class="btn btn-sm btn-danger" ngbTooltip="Remove user from group" (click)="removeUserFromLabGroup(user)"><i class="bi bi-person-dash"></i></button>
+              </div>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+    <ngb-pagination (pageChange)="handleLabGroupUserPageChange($event)" [collectionSize]="currentLabGroupUserQuery.count" [(page)]="currentLabGroupUserPage" [pageSize]="10" [rotate]="true" [boundaryLinks]="true" />
+  }
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn btn-secondary" (click)="close()">Close</button>
+</div>

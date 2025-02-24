@@ -5,6 +5,9 @@ import {AsyncPipe} from "@angular/common";
 import {LabGroup, LabGroupQuery} from "../../lab-group";
 import {NgbModal, NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {EditLabGroupModalComponent} from "./edit-lab-group-modal/edit-lab-group-modal.component";
+import {
+  AddRemoveUserFromGroupModalComponent
+} from "./add-remove-user-from-group-modal/add-remove-user-from-group-modal.component";
 
 @Component({
   selector: 'app-lab-group',
@@ -64,5 +67,11 @@ export class LabGroupComponent implements OnInit {
         })
       }
     })
+  }
+
+  openAddRemoveUserFromGroupModel(labGroup: LabGroup) {
+    const ref = this.modal.open(AddRemoveUserFromGroupModalComponent)
+    ref.componentInstance.labGroup = labGroup
+
   }
 }

@@ -12,6 +12,7 @@
     @if (storageObject) {
       <div class="d-flex flex-row gap-2">
         <button class="btn btn-sm btn-outline-primary" (click)="openQRCodeModal()" ngbTooltip="View QR code of this location">QR</button>
+        <button class="btn btn-sm btn-outline-danger" (click)="openStorageObjectAccessControlModal()" ngbTooltip="Storage object access control"><i class="bi bi-people"></i></button>
         <button class="btn btn-sm btn-outline-primary" (click)="openCameraModal()" ngbTooltip="Add photo identification for this storage location"><i class="bi bi-camera"></i></button>
         <button class="btn btn-sm btn-outline-primary" (click)="openStorageObjectEditorModal()" ngbTooltip="Edit storage location detail"><i class="bi bi-pen"></i></button>
         <button class="btn btn-sm btn-outline-danger" (click)="deleteStorageObject()" ngbTooltip="Delete storage location"><i class="bi bi-trash"></i></button>

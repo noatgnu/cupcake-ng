@@ -1,6 +1,9 @@
+import {LabGroup} from "./lab-group";
+
 export interface User {
   id: number;
   username: string;
+  lab_groups: LabGroup[];
 }
 
 export interface UserQuery {

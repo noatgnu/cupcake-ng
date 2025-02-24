@@ -1,0 +1,26 @@
+<div>
+  <table class="table">
+    <thead>
+    <tr>
+      <th scope="col">
+        ID
+      </th>
+      <th scope="col">
+        Name
+      </th>
+    </tr>
+    </thead>
+    <tbody>
+    @if (instrumentJobQuery) {
+      @for (j of instrumentJobQuery.results; track j.id) {
+        <tr>
+          <td>
+            <a href="/#/instruments/jobs/{{j.id}}">{{j.id}}</a>
+          </td>
+          <td>{{j.job_name}}</td>
+        </tr>
+      }
+    }
+    </tbody>
+  </table>
+</div>

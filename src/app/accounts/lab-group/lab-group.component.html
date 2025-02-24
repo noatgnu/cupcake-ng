@@ -32,9 +32,14 @@
               {{l.description}}
             </td>
             @if (accountsService.is_staff) {
-              <td class="d-flex gap-2">
-                <button class="btn btn-sm btn-primary" (click)="editLabGroup(l)" ngbTooltip="Edit this lab group"><i class="bi bi-pen"></i></button>
-                <button class="btn btn-sm btn-danger" (click)="deleteLabGroup(l)" ngbTooltip="Remove this lab group"><i class="bi bi-trash"></i></button>
+              <td>
+                <div class="d-flex gap-2 h-100">
+                  <button class="btn btn-sm btn-primary" (click)="editLabGroup(l)" ngbTooltip="Edit this lab group"><i class="bi bi-pen"></i></button>
+                  <button class="btn btn-sm btn-danger" (click)="deleteLabGroup(l)" ngbTooltip="Remove this lab group"><i class="bi bi-trash"></i></button>
+                  @if (accountsService.is_staff) {
+                    <button class="btn btn-sm btn-primary" (click)="openAddRemoveUserFromGroupModel(l)" ngbTooltip="Add or remove users from this lab group"><i class="bi bi-people"></i></button>
+                  }
+                </div>
               </td>
             }
           </tr>

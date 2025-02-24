@@ -51,7 +51,7 @@ export class InstrumentBookingComponent {
 
   clickInstrument(instrument: Instrument) {
     if (this.dataService.instrumentPermissions[instrument.id].can_view||this.dataService.instrumentPermissions[instrument.id].can_book||this.dataService.instrumentPermissions[instrument.id].can_manage) {
-      const ref = this.modal.open(InstrumentBookingModalComponent, {scrollable: true})
+      const ref = this.modal.open(InstrumentBookingModalComponent, {scrollable: true, backdrop: "static", size: "lg"})
       ref.componentInstance.selectedInstrument = instrument
       ref.componentInstance.enableSearch = false
       ref.closed.subscribe((data: {instrument: Instrument, selectedRange: {started: Date |undefined, ended: Date | undefined}, usageDescription: string}) => {

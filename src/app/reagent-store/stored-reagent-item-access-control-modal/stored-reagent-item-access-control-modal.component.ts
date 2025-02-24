@@ -126,7 +126,7 @@ export class StoredReagentItemAccessControlModalComponent {
 
   getCurrentAccessUsers(page: number = 0){
     if (this._storedReagent) {
-      this.web.getUsersByStoredReagent(this.storedReagent.id, 10, page).subscribe((value) => {
+      this.web.getUsersByStoredReagent(this.storedReagent.id, 10, page*10).subscribe((value) => {
         this.reagentUserAccess = value
       })
     }
@@ -145,7 +145,7 @@ export class StoredReagentItemAccessControlModalComponent {
 
   getCurrentAccessLabGroups(page: number = 0) {
     if (this._storedReagent) {
-      this.web.getLabGroupsByStoredReagent(this._storedReagent.id, 10, page).subscribe((value)=>{
+      this.web.getLabGroupsByStoredReagent(this._storedReagent.id, 10, page*10).subscribe((value)=>{
         this.reagentLabGroupAccess = value
       })
     }

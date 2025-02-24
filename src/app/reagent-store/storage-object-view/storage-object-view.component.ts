@@ -24,6 +24,9 @@ import {
 } from "../stored-reagent-item-access-control-modal/stored-reagent-item-access-control-modal.component";
 import {forkJoin, Observable} from "rxjs";
 import {MetadataColumn} from "../../metadata-column";
+import {
+  StorageObjectAccessControlModalComponent
+} from "../storage-object-access-control-modal/storage-object-access-control-modal.component";
 
 @Component({
   selector: 'app-storage-object-view',
@@ -321,5 +324,9 @@ export class StorageObjectViewComponent {
     const ref = this.modal.open(StoredReagentItemAccessControlModalComponent)
     ref.componentInstance.storedReagent = reagent
 
+  }
+  openStorageObjectAccessControlModal() {
+    const ref = this.modal.open(StorageObjectAccessControlModalComponent)
+    ref.componentInstance.data = this.storageObject
   }
 }

@@ -19,7 +19,8 @@ export interface Annotation {
   annotation_name: string;
   summary: string;
   metadata_columns: MetadataColumn[];
-  instrument_usage: InstrumentUsage[]
+  instrument_usage: InstrumentUsage[];
+  fixed: boolean;
 }
 
 export interface AnnotationQuery {
