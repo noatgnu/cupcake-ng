@@ -35,7 +35,7 @@ export class LabGroupComponent implements OnInit {
     ref.componentInstance.labGroup = labGroup
     ref.closed.subscribe((data) => {
       if (data) {
-        this.web.updateLabGroup(data.id, data.name, data.description).subscribe((data) => {
+        this.web.updateLabGroup(data.id, data.name, data.description, data.default_storage_id, data.service_storage_id, data.is_professional).subscribe((data) => {
           this.labGroupQuery.results = this.labGroupQuery.results.map((labGroup) => {
             if (labGroup.id === data.id) {
               return data
@@ -60,7 +60,7 @@ export class LabGroupComponent implements OnInit {
     const ref = this.modal.open(EditLabGroupModalComponent)
     ref.closed.subscribe((data) => {
       if (data) {
-        this.web.createLabGroup(data.name, data.description).subscribe((data) => {
+        this.web.createLabGroup(data.name, data.description, data.is_professional).subscribe(() => {
           this.web.getLabGroups().subscribe((data) => {
             this.labGroupQuery = data
           })

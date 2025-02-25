@@ -8,6 +8,7 @@ import {MetadataColumn} from "../metadata-column";
 import {StoredReagent} from "../storage-object";
 import {Annotation} from "../annotation";
 import {Instrument} from "../instrument";
+import { MetadataService } from '../metadata.service';
 
 @Component({
   selector: 'app-item-metadata',
@@ -56,11 +57,6 @@ export class ItemMetadataComponent {
     return this._instrument!
   }
 
-  metadataTypeAutocomplete: string[] = ["Characteristics", "Comment", "Factor value", "Other"]
-  metadataNameAutocomplete: string[] = ["Disease", "Tissue", "Subcellular location", "Organism", "Instrument", "Label", "Cleavage agent details", "Dissociation method", "Modification parameters", "Cell type", "Enrichment process"]
-  metadataOtherAutocomplete: string[] = ["Source name", "Material type", "Assay name", "Technology type"]
-  metadataCharacteristics: string[] = ["Disease", "Tissue", "Subcellular location", "Organism", "Cell type", "Cell line", "Developmental stage", "Ancestry category", "Sex", "Age", "Biological replicate", "Enrichment process"]
-  metadataComment: string[] = ["Data file", "File uri", "Technical replicate", "Fraction identifier", "Label", "Cleavage agent details", "Instrument", "Modification parameters", "Dissociation method", "Precursor mass tolerance", "Fragment mass tolerance", ""]
 
 
   formMetadata = this.fb.group({
@@ -80,7 +76,7 @@ export class ItemMetadataComponent {
   availableSpecs: any[] = []
 
 
-  constructor(private fb: FormBuilder, private web: WebService) {
+  constructor(private fb: FormBuilder, private web: WebService, public metadataService: MetadataService) {
   }
 
   selectAutoComplete(event: NgbTypeaheadSelectItemEvent) {
@@ -229,14 +225,14 @@ export class ItemMetadataComponent {
       debounceTime(200),
       switchMap(value => {
         if (value.length < 2) {
-          return of(this.metadataNameAutocomplete.slice(0, 5))
+          return of(this.metadataService.metadataNameAutocomplete.slice(0, 5))
         }
         if (this.formMetadata.controls.type.value === "Characteristics") {
-          return of(this.metadataCharacteristics.filter(v => v.toLowerCase().indexOf(value.toLowerCase()) > -1).slice(0, 5))
+          return of(this.metadataService.metadataCharacteristics.filter(v => v.toLowerCase().indexOf(value.toLowerCase()) > -1).slice(0, 5))
         } else if (this.formMetadata.controls.type.value === "Comment") {
-          return of(this.metadataComment.filter(v => v.toLowerCase().indexOf(value.toLowerCase()) > -1).slice(0, 5))
+          return of(this.metadataService.metadataComment.filter(v => v.toLowerCase().indexOf(value.toLowerCase()) > -1).slice(0, 5))
         } else {
-          return of(this.metadataOtherAutocomplete.filter(v => v.toLowerCase().indexOf(value.toLowerCase()) > -1).slice(0, 5))
+          return of(this.metadataService.metadataOtherAutocomplete.filter(v => v.toLowerCase().indexOf(value.toLowerCase()) > -1).slice(0, 5))
         }
       })
     )

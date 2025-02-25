@@ -2,7 +2,13 @@ import {Component, Input, OnInit} from '@angular/core';
 import {FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
 import {InstrumentJob} from "../../../instrument-job";
 import {WebService} from "../../../web.service";
-import {NgbTooltip, NgbTypeahead, NgbTypeaheadSelectItemEvent} from "@ng-bootstrap/ng-bootstrap";
+import {
+  NgbDropdown,
+  NgbDropdownMenu, NgbDropdownToggle,
+  NgbTooltip,
+  NgbTypeahead,
+  NgbTypeaheadSelectItemEvent
+} from "@ng-bootstrap/ng-bootstrap";
 import {Observable, debounceTime, distinctUntilChanged, switchMap, map, catchError, of, tap} from 'rxjs';
 import {Project} from "../../../project";
 import {DatePipe} from "@angular/common";
@@ -10,9 +16,10 @@ import {Unimod} from "../../../unimod";
 import {ToastService} from "../../../toast.service";
 import {Protocol} from "../../../protocol";
 import {QuillEditorComponent, QuillViewComponent} from "ngx-quill";
-import {StoredReagent} from "../../../storage-object";
+import {StorageObject, StoredReagent} from "../../../storage-object";
 import {LabGroup, LabGroupQuery} from "../../../lab-group";
 import {UserQuery} from "../../../user";
+import {MetadataService} from "../../../metadata.service";
 
 @Component({
   selector: 'app-job-submission',
@@ -23,7 +30,10 @@ import {UserQuery} from "../../../user";
     DatePipe,
     NgbTooltip,
     QuillEditorComponent,
-    QuillViewComponent
+    QuillViewComponent,
+    NgbDropdown,
+    NgbDropdownMenu,
+    NgbDropdownToggle
   ],
   templateUrl: './job-submission.component.html',
   styleUrl: './job-submission.component.scss'
@@ -39,6 +49,9 @@ export class JobSubmissionComponent implements OnInit {
   storedReagentSearchLoading = false
   searchMetadataLoading = false
   selectedGroup: LabGroup | undefined
+
+
+
   @Input() set job(value: InstrumentJob|undefined) {
     this._job = value
     console.log(value)
@@ -155,14 +168,16 @@ export class JobSubmissionComponent implements OnInit {
 
   labUserMemberPage = 0
   labUserMemberPageSize = 10
+  default_storage: StorageObject|undefined|null
 
-  constructor(private fb: FormBuilder, private web: WebService, private toast: ToastService) {
+  constructor(private fb: FormBuilder, private web: WebService, private toast: ToastService, public metadataService: MetadataService) {
     this.labGroupForm.patchValue({name: this.defaultLabGroup})
     this.web.getLabGroups(this.defaultLabGroup).subscribe((labGroup) => {
       this.labGroupQuery = labGroup
       if (labGroup.results.length > 0) {
         // @ts-ignore
         this.labGroupForm.patchValue({selected: labGroup.results[0].id})
+        this.default_storage = labGroup.results[0].default_storage
         this.selectedGroup = labGroup.results[0]
         this.web.getUsersByLabGroup(labGroup.results[0].id).subscribe((users) => {
           this.labGroupUserQuery = users
@@ -171,6 +186,12 @@ export class JobSubmissionComponent implements OnInit {
     })
     this.labGroupForm.controls.selected.valueChanges.subscribe((value) => {
       if (value) {
+        this.web.getLabGroup(value).subscribe((labGroup) => {
+          this.selectedGroup = labGroup
+          if (this.default_storage) {
+            this.default_storage = labGroup.default_storage
+          }
+        })
         this.web.getUsersByLabGroup(value, this.labUserMemberPageSize, this.labUserMemberPage).subscribe((users) => {
           this.labGroupUserQuery = users
         })
@@ -228,12 +249,16 @@ export class JobSubmissionComponent implements OnInit {
     )
   }
   reagentFormatter = (result: StoredReagent) => {
+    if (typeof result === 'string') {
+      return result
+    }
     if (result) {
       return result.reagent.name
     } else {
       return ''
     }
   }
+
   searchReagent = (text$: Observable<string>) => {
     return text$.pipe(
       debounceTime(200),
@@ -243,17 +268,21 @@ export class JobSubmissionComponent implements OnInit {
         if (value.length < 2) {
           return of([]);
         }
-        return this.web.getStoredReagents(undefined, 5, 0, value, null, "MS Facility", true).pipe(
-          map((response) => {
-            this.storedReagentSearchLoading = false;
-            return response.results || []
-          }), catchError(() => {
-            this.storedReagentSearchLoading = false;
-            return of([]);
-          })
-        );
+        if (this.labGroupForm.value.selected && this.default_storage) {
+          return this.web.getStoredReagents(undefined, 5, 0, value, this.default_storage.id, null, true).pipe(
+            map((response) => {
+              this.storedReagentSearchLoading = false;
+              return response.results || [];
+            }), catchError(() => {
+              this.storedReagentSearchLoading = false;
+              return of([]);
+            })
+          );
+        } else {
+          return of([]);
+        }
       })
-    )
+    );
   }
 
   onProjectSelected(event: NgbTypeaheadSelectItemEvent): void {
@@ -278,11 +307,12 @@ export class JobSubmissionComponent implements OnInit {
 
   onStoredReagentSelected(event: NgbTypeaheadSelectItemEvent): void {
     const reagent = event.item;
+    console.log(reagent)
     this.selectedStoredReagent = reagent;
     this.reagentForm.patchValue({
       id: reagent.id,
       name: reagent.reagent.name,
-      current_quantity: reagent.current_quantity,
+      current_quantity: reagent.quantity,
       unit: reagent.reagent.unit
     });
   }
@@ -428,27 +458,74 @@ export class JobSubmissionComponent implements OnInit {
 
   async update() {
     if (this.job) {
-      if (this.form.valid && this.formSampleExtraData.valid && this.projectForm.valid && this.protocolForm.valid) {
-        if (!this.protocolForm.value.id) {
+      if (!this.protocolForm.value.id) {
+        // @ts-ignore
+        const protocol = await this.web.createProtocol(this.protocolForm.value.protocol_title, this.protocolForm.value.protocol_description).toPromise()
+        if (protocol) {
           // @ts-ignore
-          const protocol = await this.web.createProtocol(this.protocolForm.value.protocol_title, this.protocolForm.value.protocol_description).toPromise()
-          if (protocol) {
-            // @ts-ignore
-            this.protocolForm.patchValue({id: protocol.id, protocol_title: protocol.protocol_title, protocol_description: protocol.protocol_description})
-            this.selectedProtocol = protocol
-          }
+          this.protocolForm.patchValue({id: protocol.id, protocol_title: protocol.protocol_title, protocol_description: protocol.protocol_description})
+          this.selectedProtocol = protocol
         }
+      }
+      if (this.labGroupForm.valid && this.labGroupForm.value.selected) {
+        const selectedLabGroup = await this.web.getLabGroup(this.labGroupForm.value.selected).toPromise()
         if (!this.reagentForm.value.id) {
           if (this.reagentForm.value.name) {
-
-
+            if (this.labGroupForm.valid && this.labGroupForm.value.selected) {
+              if (selectedLabGroup) {
+                if (selectedLabGroup.default_storage) {
+                  // @ts-ignore
+                  const reagent = await this.web.createStoredReagent(selectedLabGroup.default_storage.id, this.reagentForm.value.name, this.reagentForm.value.unit, this.reagentForm.value.current_quantity, `Added from job with id${this.job.id}`, null, false, false, this.projectForm.value.id, this.protocolForm.value.id).toPromise()
+                  if (reagent) {
+                    // @ts-ignore
+                    this.reagentForm.patchValue({id: reagent.id, name: reagent.reagent.name, current_quantity: reagent.quantity, unit: reagent.reagent.unit})
+                  }
+                }
+              }
+            }
+          }
+        } else {
+          const selectedLabGroup = await this.web.getLabGroup(this.labGroupForm.value.selected).toPromise()
+          if (selectedLabGroup) {
+            if (selectedLabGroup.default_storage) {
+              // @ts-ignore
+              const reagent = await this.web.createStoredReagent(selectedLabGroup.default_storage.id, this.reagentForm.value.name, this.reagentForm.value.unit, this.reagentForm.value.current_quantity, `Added from job with id${this.job.id}`, null, false, false, this.projectForm.value.id, this.protocolForm.value.id).toPromise()
+              if (reagent) {
+                // @ts-ignore
+                this.reagentForm.patchValue({id: reagent.id, name: reagent.reagent.name, current_quantity: reagent.quantity, unit: reagent.reagent.unit})
+              }
+            }
           }
         }
-        // @ts-ignore
-        const response = await this.web.updateInstrumentJob(this.job.id, this.form.value.job_name, this.projectForm.value.id, this.fundingForm.value.cost_center, this.fundingForm.value.funder, this.formSampleExtraData.value.sample_type, this.formSampleExtraData.value.sample_number, this.protocolForm.value.id).toPromise()
-        this.toast.show('Job', 'Job updated successfully');
+      } else {
+        await this.toast.show('Lab Group', 'Please select a lab group before update with reagent information');
+      }
+      // @ts-ignore
+      const staffIds = this.form.value.staff.map((s) => s.id)
+      // @ts-ignore
+      const response = await this.web.updateInstrumentJob(this.job.id, this.form.value.job_name, this.projectForm.value.id, this.fundingForm.value.cost_center, this.fundingForm.value.funder, this.formSampleExtraData.value.sample_type, this.formSampleExtraData.value.sample_number, this.protocolForm.value.id, staffIds, this.reagentForm.value.id).toPromise()
+      if (response) {
+         await this.toast.show('Job', 'Job updated successfully');
         this.job = response
       }
+
     }
+  }
+
+  addMetadata(metadata: {name: string, type: string}) {
+    const formArray = this.metadata.get('user_metadata') as FormArray;
+    const group = this.fb.group({
+      name: metadata.name,
+      type: metadata.type,
+      value: '',
+      mandatory: false,
+      id: null
+    })
+    formArray.push(group);
+    this.subscribeToFormGroupChanges(group)
+  }
+
+  checkMetadataAdd() {
+
   }
 }

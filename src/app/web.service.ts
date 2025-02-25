@@ -1350,10 +1350,10 @@ export class WebService {
     )
   }
 
-  createLabGroup(name: string, description: string) {
+  createLabGroup(name: string, description: string, is_professional: boolean = false) {
     return this.http.post<any>(
       `${this.baseURL}/api/lab_groups/`,
-      {name: name, description: description},
+      {name: name, description: description, is_professional: is_professional},
       {responseType: 'json', observe: 'body'}
     )
   }
@@ -1530,10 +1530,22 @@ export class WebService {
     )
   }
 
-  updateLabGroup(lab_group_id: number, name: string, description: string) {
+  updateLabGroup(lab_group_id: number, name: string, description: string, default_storage: number|null = null, service_storage: number|null = null, is_professional: undefined|boolean = undefined) {
+    const payload: any = {name: name, description: description}
+    if (default_storage) {
+      payload['default_storage'] = default_storage
+    }
+
+    if (service_storage) {
+      payload['service_storage'] = service_storage
+    }
+
+    if (is_professional !== undefined) {
+      payload['is_professional'] = is_professional
+    }
     return this.http.put<LabGroup>(
       `${this.baseURL}/api/lab_groups/${lab_group_id}/`,
-      {name: name, description: description},
+      payload,
       {responseType: 'json', observe: 'body'}
     )
   }
@@ -1727,7 +1739,8 @@ export class WebService {
     sample_type: string|undefined,
     sample_number: number|undefined,
     protocol: number|undefined,
-    staff: number[]|undefined
+    staff: number[]|undefined,
+    stored_reagent: number|undefined,
   ) {
     const payload: any = {}
     if (job_name) {
@@ -1753,6 +1766,9 @@ export class WebService {
     }
     if (staff) {
       payload['staff'] = staff
+    }
+    if (stored_reagent) {
+      payload['stored_reagent'] = stored_reagent
     }
     return this.http.put<InstrumentJob>(
       `${this.baseURL}/api/instrument_jobs/${job_id}/`,
@@ -1780,6 +1796,13 @@ export class WebService {
   getUserLabGroups() {
     return this.http.get<LabGroupQuery>(
       `${this.baseURL}/api/user/get_user_lab_groups/`,
+      {responseType: 'json', observe: 'body'}
+    )
+  }
+
+  getLabGroup(id: number) {
+    return this.http.get<LabGroup>(
+      `${this.baseURL}/api/lab_groups/${id}/`,
       {responseType: 'json', observe: 'body'}
     )
   }

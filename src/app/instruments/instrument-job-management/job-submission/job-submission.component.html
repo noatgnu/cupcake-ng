@@ -46,82 +46,46 @@
         <label>Funder</label>
         <input type="text" class="form-control" formControlName="funder">
       </div>
-
     </form>
     <hr>
-    <div [formGroup]="metadata">
-      <section>
-        <h5>Sample Details</h5>
-        <div [formArrayName]="'user_metadata'" class="d-flex gap-2 flex-column">
-          @for (i of metadata.controls['user_metadata'].controls; track i; let index = $index) {
-            <form [formGroupName]="index" class="d-flex gap-2">
-              <div class="form-group">
-                <label>{{metadata.controls['user_metadata'].controls[index].value['name']}}</label>
-                <input (focus)="setCurrentForm(metadata.controls['user_metadata'].controls[index])" type="search" [ngbTypeahead]="searchValue" class="form-control" formControlName="value">
-              </div>
-            </form>
+    <div>
+      <h5>Job Submission To</h5>
+      <form [formGroup]="labGroupForm">
+        <b>Facility Group</b>
+        <div class="d-flex gap-2">
+          <div class="form-group">
+            <label>Group Name Search</label>
+            <input formControlName="name" class="form-control" type="search">
+            <small class="form-text text-muted">Search for a group name default to "MS Facility"</small>
+          </div>
+          @if (labGroupQuery) {
+            <div class="form-group">
+              <label>Select Group</label>
+              <select class="form-select" size="5" formControlName="selected">
+                @for (group of labGroupQuery.results; track group.id) {
+                  <option [value]="group.id">{{group.name}}</option>
+                }
+              </select>
+              <small class="form-text text-muted">Select a group to submit the job to</small>
+            </div>
           }
         </div>
-
-        <form [formGroup]="formSampleExtraData" class="d-flex gap-2">
-          <div class="form-group">
-            <label>Sample Number</label>
-            <input type="number" class="form-control" formControlName="sample_number">
-          </div>
-          <div class="form-group">
-            <label>Sample type</label>
-            <select class="form-select" formControlName="sample_type">
-              <option value="wcl">Whole Cell Lysage</option>
-              <option value="ip">Immunopricipitate</option>
-              <option value="other">Other</option>
-            </select>
-          </div>
-        </form>
-        <form [formGroup]="reagentForm" class="d-flex gap-2">
-          <div class="form-group">
-            <label>Sample Name</label>
-            <input (selectItem)="onStoredReagentSelected($event)" type="search" [ngbTypeahead]="searchReagent" class="form-control" formControlName="name" [inputFormatter]="reagentFormatter" [resultFormatter]="reagentFormatter" placeholder="Search or new sample name">
-          </div>
-          <div class="form-group">
-            <label>Amount</label>
-            <input type="number" class="form-control" formControlName="current_quantity">
-          </div>
-          <div class="form-group">
-            <label for="reagentUnit">Unit</label>
-            <select id="reagentUnit" class="form-select" formControlName="unit">
-              <optgroup label="Volume">
-                <option value="nL">nL</option>
-                <option value="uL">uL</option>
-                <option value="mL">mL</option>
-                <option value="L">L</option>
-              </optgroup>
-              <optgroup label="Mass">
-                <option value="ng">ng</option>
-                <option value="ug">ug</option>
-                <option value="mg">mg</option>
-                <option value="g">g</option>
-                <option value="kg">kg</option>
-              </optgroup>
-              <optgroup label="Mole">
-                <option value="nM">nM</option>
-                <option value="uM">uM</option>
-                <option value="mM">mM</option>
-                <option value="M">M</option>
-              </optgroup>
-              <optgroup label="Count">
-                <option value="ea">ea</option>
-              </optgroup>
-            </select>
-          </div>
-          <div class="form-check">
-            <input type="checkbox" class="form-check-input" id="use_previous" formControlName="use_previous">
-            <label class="form-check-label" for="use_previous">Use previous reagent</label>
-            <div>
-              <small class="form-text text-muted">If checked, the reagent will be used from the selected source and a new reagent record won't be create</small>
+      </form>
+      @if (labGroupUserQuery) {
+        <form [formGroup]="form">
+          <div class="d-flex gap-2">
+            <div class="form-group">
+              <label>Facility staff</label>
+              <select class="form-select" multiple formControlName="staff">
+                @for (user of labGroupUserQuery.results; track user.id) {
+                  <option [value]="user.id">{{user.username}}</option>
+                }
+              </select>
+              <small class="form-text text-muted">Select the staff members to notify</small>
             </div>
           </div>
         </form>
-      </section>
+      }
     </div>
     <hr>
     <div  class="d-flex gap-2 flex-column">
@@ -156,52 +120,107 @@
       }
     </div>
     <hr>
-    <div>
-      <h5>Job Submission To</h5>
-      <form [formGroup]="labGroupForm">
-        <b>Facility Group</b>
-        <div class="d-flex gap-2">
+    <div [formGroup]="metadata">
+      <section>
+        <h5>Sample Details</h5>
+        <form [formGroup]="reagentForm" class="d-flex gap-2">
           <div class="form-group">
-            <label>Group Name Search</label>
-            <input formControlName="name" class="form-control" type="search">
-            <small class="form-text text-muted">Search for a group name default to "MS Facility"</small>
+            <label>Sample Name</label>
+            <input (selectItem)="onStoredReagentSelected($event)" [resultTemplate]="rt" type="search" [ngbTypeahead]="searchReagent" class="form-control" [inputFormatter]="reagentFormatter" placeholder="Search or new sample name">
+            <ng-template #rt let-r="result" let-t="term">
+              <div class="d-flex justify-content-between">
+                <span>{{ r.reagent.name }} ({{ r.current_quantity }} {{ r.reagent.unit }})</span>
+                <small class="text-muted">{{ r.reagent.note }}</small>
+              </div>
+            </ng-template>
           </div>
-          @if (labGroupQuery) {
-            <div class="form-group">
-              <label>Select Group</label>
-              <select class="form-select" size="5">
-                @for (group of labGroupQuery.results; track group.id) {
-                  <option [value]="group.id">{{group.name}}</option>
-                }
-              </select>
-              <small class="form-text text-muted">Select a group to submit the job to</small>
+          <div class="form-group">
+            <label>Amount</label>
+            <input type="number" class="form-control" formControlName="current_quantity">
+          </div>
+          <div class="form-group" style="width:150px">
+            <label for="reagentUnit">Unit</label>
+            <select id="reagentUnit" class="form-select" formControlName="unit">
+              <optgroup label="Volume">
+                <option value="nL">nL</option>
+                <option value="uL">uL</option>
+                <option value="mL">mL</option>
+                <option value="L">L</option>
+              </optgroup>
+              <optgroup label="Mass">
+                <option value="ng">ng</option>
+                <option value="ug">ug</option>
+                <option value="mg">mg</option>
+                <option value="g">g</option>
+                <option value="kg">kg</option>
+              </optgroup>
+              <optgroup label="Mole">
+                <option value="nM">nM</option>
+                <option value="uM">uM</option>
+                <option value="mM">mM</option>
+                <option value="M">M</option>
+              </optgroup>
+              <optgroup label="Count">
+                <option value="ea">ea</option>
+              </optgroup>
+            </select>
+          </div>
+          <div class="form-check">
+            <input type="checkbox" class="form-check-input" id="use_previous" formControlName="use_previous">
+            <label class="form-check-label" for="use_previous">Use previous reagent</label>
+            <div>
+              <small class="form-text text-muted">
+                If checked, the reagent will be used from the selected source and a new reagent record won't be create
+              </small>
             </div>
-            @if (labGroupUserQuery) {
-              <form [formGroup]="form">
-                <div class="d-flex gap-2">
-                  <div class="form-group">
-                    <label>Facility staff</label>
-                    <select class="form-select" multiple formControlName="staff">
-                      @for (user of labGroupUserQuery.results; track user.id) {
-                        <option [value]="user.id">{{user.username}}</option>
-                      }
-                    </select>
-                    <small class="form-text text-muted">Select the staff members to notify</small>
-                  </div>
-                </div>
-              </form>
-            }
+          </div>
+        </form>
+        <div [formArrayName]="'user_metadata'" class="d-flex gap-2 flex-column">
+          @for (i of metadata.controls['user_metadata'].controls; track i; let index = $index) {
+            <form [formGroupName]="index" class="d-flex gap-2">
+              <div class="form-group">
+                <label>{{metadata.controls['user_metadata'].controls[index].value['name']}}</label>
+                <input (focus)="setCurrentForm(metadata.controls['user_metadata'].controls[index])" type="search" [ngbTypeahead]="searchValue" class="form-control" formControlName="value">
+              </div>
+            </form>
           }
         </div>
-      </form>
+        <div class="mt-2">
+          <div ngbDropdown display="dynamic" class="d-inline-black">
+            <button class="btn btn-primary" id="addMetadata" ngbDropdownToggle>
+             + Metadata
+            </button>
+            <div ngbDropdownMenu aria-labelledby="addMetadata">
+              @for (m of metadataService.userMetadataTemplate; track m.name) {
+                <a class="dropdown-item" (click)="addMetadata(m)">
+                  {{m.name}}
+                </a>
+              }
+            </div>
+          </div>
+        </div>
 
 
-      <div class="d-flex gap-2">
+        <form [formGroup]="formSampleExtraData" class="d-flex gap-2">
+          <div class="form-group">
+            <label>Sample Number</label>
+            <input type="number" class="form-control" formControlName="sample_number">
+          </div>
+          <div class="form-group">
+            <label>Sample type</label>
+            <select class="form-select" formControlName="sample_type">
+              <option value="wcl">Whole Cell Lysage</option>
+              <option value="ip">Immunopricipitate</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+        </form>
 
-      </div>
-
-
+      </section>
     </div>
+
+    <hr>
+
 
     @if (job.status) {
       <div>

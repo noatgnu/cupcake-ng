@@ -7,6 +7,8 @@ export interface LabGroup {
   created_at: string;
   updated_at: string;
   default_storage: StorageObject|null;
+  is_professional: boolean;
+  service_storage: StorageObject|null;
 }
 
 export interface LabGroupQuery {

@@ -60,7 +60,7 @@
   <div class="form-group">
     <label for="metadataType">Metadata Type</label>
     <select id="metadataType" formControlName="type" class="form-select">
-      @for (t of metadataTypeAutocomplete; track t) {
+      @for (t of metadataService.metadataTypeAutocomplete; track t) {
         <option [value]="t">{{t}}</option>
       }
     </select>
