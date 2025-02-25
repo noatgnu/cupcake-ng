@@ -132,7 +132,7 @@ export class JobSubmissionComponent implements OnInit {
     id: [null],
     current_quantity: [0,],
     unit: ['ug',],
-    use_previous: [false],
+    use_previous: [true],
   })
 
   optionsArray: Unimod[] = []
@@ -168,7 +168,7 @@ export class JobSubmissionComponent implements OnInit {
 
   labUserMemberPage = 0
   labUserMemberPageSize = 10
-  default_storage: StorageObject|undefined|null
+  service_storage: StorageObject|undefined|null
 
   constructor(private fb: FormBuilder, private web: WebService, private toast: ToastService, public metadataService: MetadataService) {
     this.labGroupForm.patchValue({name: this.defaultLabGroup})
@@ -177,7 +177,7 @@ export class JobSubmissionComponent implements OnInit {
       if (labGroup.results.length > 0) {
         // @ts-ignore
         this.labGroupForm.patchValue({selected: labGroup.results[0].id})
-        this.default_storage = labGroup.results[0].default_storage
+        this.service_storage = labGroup.results[0].service_storage
         this.selectedGroup = labGroup.results[0]
         this.web.getUsersByLabGroup(labGroup.results[0].id).subscribe((users) => {
           this.labGroupUserQuery = users
@@ -188,8 +188,8 @@ export class JobSubmissionComponent implements OnInit {
       if (value) {
         this.web.getLabGroup(value).subscribe((labGroup) => {
           this.selectedGroup = labGroup
-          if (this.default_storage) {
-            this.default_storage = labGroup.default_storage
+          if (this.service_storage) {
+            this.service_storage = labGroup.service_storage
           }
         })
         this.web.getUsersByLabGroup(value, this.labUserMemberPageSize, this.labUserMemberPage).subscribe((users) => {
@@ -268,8 +268,8 @@ export class JobSubmissionComponent implements OnInit {
         if (value.length < 2) {
           return of([]);
         }
-        if (this.labGroupForm.value.selected && this.default_storage) {
-          return this.web.getStoredReagents(undefined, 5, 0, value, this.default_storage.id, null, true).pipe(
+        if (this.labGroupForm.value.selected && this.service_storage) {
+          return this.web.getStoredReagents(undefined, 5, 0, value, this.service_storage.id, null, true).pipe(
             map((response) => {
               this.storedReagentSearchLoading = false;
               return response.results || [];
@@ -473,9 +473,9 @@ export class JobSubmissionComponent implements OnInit {
           if (this.reagentForm.value.name) {
             if (this.labGroupForm.valid && this.labGroupForm.value.selected) {
               if (selectedLabGroup) {
-                if (selectedLabGroup.default_storage) {
+                if (selectedLabGroup.service_storage) {
                   // @ts-ignore
-                  const reagent = await this.web.createStoredReagent(selectedLabGroup.default_storage.id, this.reagentForm.value.name, this.reagentForm.value.unit, this.reagentForm.value.current_quantity, `Added from job with id${this.job.id}`, null, false, false, this.projectForm.value.id, this.protocolForm.value.id).toPromise()
+                  const reagent = await this.web.createStoredReagent(selectedLabGroup.service_storage.id, this.reagentForm.value.name, this.reagentForm.value.unit, this.reagentForm.value.current_quantity, `Added from job with id${this.job.id}`, null, false, false, this.projectForm.value.id, this.protocolForm.value.id).toPromise()
                   if (reagent) {
                     // @ts-ignore
                     this.reagentForm.patchValue({id: reagent.id, name: reagent.reagent.name, current_quantity: reagent.quantity, unit: reagent.reagent.unit})
@@ -487,9 +487,9 @@ export class JobSubmissionComponent implements OnInit {
         } else {
           const selectedLabGroup = await this.web.getLabGroup(this.labGroupForm.value.selected).toPromise()
           if (selectedLabGroup) {
-            if (selectedLabGroup.default_storage) {
+            if (selectedLabGroup.service_storage) {
               // @ts-ignore
-              const reagent = await this.web.createStoredReagent(selectedLabGroup.default_storage.id, this.reagentForm.value.name, this.reagentForm.value.unit, this.reagentForm.value.current_quantity, `Added from job with id${this.job.id}`, null, false, false, this.projectForm.value.id, this.protocolForm.value.id).toPromise()
+              const reagent = await this.web.createStoredReagent(selectedLabGroup.service_storage.id, this.reagentForm.value.name, this.reagentForm.value.unit, this.reagentForm.value.current_quantity, `Added from job with id${this.job.id}`, null, false, false, this.projectForm.value.id, this.protocolForm.value.id).toPromise()
               if (reagent) {
                 // @ts-ignore
                 this.reagentForm.patchValue({id: reagent.id, name: reagent.reagent.name, current_quantity: reagent.quantity, unit: reagent.reagent.unit})
