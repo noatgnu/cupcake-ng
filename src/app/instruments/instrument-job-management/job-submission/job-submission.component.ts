@@ -3,8 +3,8 @@ import {FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators} from
 import {InstrumentJob} from "../../../instrument-job";
 import {WebService} from "../../../web.service";
 import {
-  NgbDropdown,
-  NgbDropdownMenu, NgbDropdownToggle,
+  NgbDropdown, NgbDropdownItem,
+  NgbDropdownMenu, NgbDropdownToggle, NgbModal,
   NgbTooltip,
   NgbTypeahead,
   NgbTypeaheadSelectItemEvent
@@ -20,6 +20,11 @@ import {StorageObject, StoredReagent} from "../../../storage-object";
 import {LabGroup, LabGroupQuery} from "../../../lab-group";
 import {UserQuery} from "../../../user";
 import {MetadataService} from "../../../metadata.service";
+import {JobMetadataCreationModalComponent} from "../job-metadata-creation-modal/job-metadata-creation-modal.component";
+import {
+  AnnotationPresenterComponent
+} from "../../../protocol-session/annotation-presenter/annotation-presenter.component";
+import {AnnotationService} from "../../../annotation.service";
 
 @Component({
   selector: 'app-job-submission',
@@ -30,10 +35,11 @@ import {MetadataService} from "../../../metadata.service";
     DatePipe,
     NgbTooltip,
     QuillEditorComponent,
-    QuillViewComponent,
     NgbDropdown,
     NgbDropdownMenu,
-    NgbDropdownToggle
+    NgbDropdownToggle,
+    AnnotationPresenterComponent,
+    NgbDropdownItem
   ],
   templateUrl: './job-submission.component.html',
   styleUrl: './job-submission.component.scss'
@@ -62,10 +68,31 @@ export class JobSubmissionComponent implements OnInit {
         sample_type: value.sample_type,
         sample_number: value.sample_number
       })
+      if (value.service_lab_group) {
+        // @ts-ignore
+        this.labGroupForm.patchValue({name: value.service_lab_group.name, selected: value.service_lab_group.id})
+        this.web.getLabGroup(value.service_lab_group.id).subscribe((labGroup) => {
+          this.selectedGroup = labGroup
+          if (labGroup.service_storage) {
+            this.service_storage = labGroup.service_storage
+          }
+        })
+      }
       this.fundingForm.patchValue({
         cost_center: value.cost_center,
         funder: value.funder,
       })
+      if (value.stored_reagent) {
+        // @ts-ignore
+        this.reagentForm.patchValue({id: value.stored_reagent.id,
+          name: value.stored_reagent.reagent.name,
+          current_quantity: value.stored_reagent.quantity,
+          unit: value.stored_reagent.reagent.unit
+        })
+        this.web.getStoredReagent(value.stored_reagent.id).subscribe((reagent) => {
+          this.selectedStoredReagent = reagent
+        })
+      }
       if (value.protocol) {
         // @ts-ignore
         this.protocolForm.patchValue({id: value.protocol.id,
@@ -135,7 +162,6 @@ export class JobSubmissionComponent implements OnInit {
     use_previous: [true],
   })
 
-  optionsArray: Unimod[] = []
   editorConfig = {
     toolbar: {
       container: [
@@ -170,18 +196,28 @@ export class JobSubmissionComponent implements OnInit {
   labUserMemberPageSize = 10
   service_storage: StorageObject|undefined|null
 
-  constructor(private fb: FormBuilder, private web: WebService, private toast: ToastService, public metadataService: MetadataService) {
+  constructor(public annotationService: AnnotationService, private modal: NgbModal, private fb: FormBuilder, private web: WebService, private toast: ToastService, public metadataService: MetadataService) {
+    this.annotationService.refreshAnnotation.asObservable().subscribe((value) => {
+      if (this.job) {
+        this.web.getInstrumentJob(this.job.id).subscribe((job) => {
+          this.job = job
+        })
+      }
+
+    })
     this.labGroupForm.patchValue({name: this.defaultLabGroup})
     this.web.getLabGroups(this.defaultLabGroup).subscribe((labGroup) => {
       this.labGroupQuery = labGroup
       if (labGroup.results.length > 0) {
-        // @ts-ignore
-        this.labGroupForm.patchValue({selected: labGroup.results[0].id})
-        this.service_storage = labGroup.results[0].service_storage
-        this.selectedGroup = labGroup.results[0]
-        this.web.getUsersByLabGroup(labGroup.results[0].id).subscribe((users) => {
-          this.labGroupUserQuery = users
-        })
+        if (!this.labGroupForm.value.selected) {
+          // @ts-ignore
+          this.labGroupForm.patchValue({selected: labGroup.results[0].id})
+          this.service_storage = labGroup.results[0].service_storage
+          this.selectedGroup = labGroup.results[0]
+          this.web.getUsersByLabGroup(labGroup.results[0].id).subscribe((users) => {
+            this.labGroupUserQuery = users
+          })
+        }
       }
     })
     this.labGroupForm.controls.selected.valueChanges.subscribe((value) => {
@@ -383,6 +419,8 @@ export class JobSubmissionComponent implements OnInit {
     });
   }
 
+
+
   searchValue = (text$: Observable<string>) => {
     return text$.pipe(
       debounceTime(200),
@@ -399,46 +437,7 @@ export class JobSubmissionComponent implements OnInit {
           return of([]);
         }
         name = name.toLowerCase();
-        let searchObservable: Observable<any[]>;
-        if (name === "subcellular location") {
-          searchObservable = this.web.getSubcellularLocations(undefined, 5, 0, value).pipe(
-            map((response) => response.results.map((location) => location.location_identifier))
-          );
-        } else if (name === "disease") {
-          searchObservable = this.web.getHumandDiseases(undefined, 5, 0, value).pipe(
-            map((response) => response.results.map((disease) => disease.identifier))
-          );
-        } else if (name === "tissue") {
-          searchObservable = this.web.getTissues(undefined, 5, 0, value).pipe(
-            map((response) => response.results.map((tissue) => tissue.identifier))
-          );
-        } else if (name === "organism") {
-          searchObservable = this.web.getSpecies(undefined, 5, 0, value).pipe(
-            map((response) => response.results.map((species) => species.official_name))
-          );
-        } else if (["cleavage agent details", "instrument", "dissociation method", "enrichment process"].includes(name)) {
-          searchObservable = this.web.getMSVocab(undefined, 5, 0, value, name).pipe(
-            map((response) => response.results.map((vocab) => vocab.name))
-          );
-        } else if (name === "label") {
-          searchObservable = this.web.getMSVocab(undefined, 5, 0, value, "sample attribute").pipe(
-            map((response) => response.results.map((vocab) => vocab.name))
-          );
-        } else if (name === "cell type") {
-          searchObservable = this.web.getMSVocab(undefined, 5, 0, value, "cell line").pipe(
-            map((response) => response.results.map((vocab) => vocab.name))
-          );
-        } else if (name === "modification parameters") {
-          searchObservable = this.web.getUnimod(undefined, 5, 0, value).pipe(
-            map((response) => {
-              this.optionsArray = response.results;
-              return response.results.map((unimod: Unimod) => unimod.name);
-            })
-          );
-        } else {
-          searchObservable = of([]);
-        }
-        return searchObservable.pipe(
+        return this.metadataService.metadataTypeAheadDataGetter(name, value).pipe(
           map(results => {
             this.searchMetadataLoading = false;
             return results;
@@ -475,7 +474,7 @@ export class JobSubmissionComponent implements OnInit {
               if (selectedLabGroup) {
                 if (selectedLabGroup.service_storage) {
                   // @ts-ignore
-                  const reagent = await this.web.createStoredReagent(selectedLabGroup.service_storage.id, this.reagentForm.value.name, this.reagentForm.value.unit, this.reagentForm.value.current_quantity, `Added from job with id${this.job.id}`, null, false, false, this.projectForm.value.id, this.protocolForm.value.id).toPromise()
+                  const reagent = await this.web.createStoredReagent(selectedLabGroup.service_storage.id, this.reagentForm.value.name, this.reagentForm.value.unit, this.reagentForm.value.current_quantity, `Added from job with id ${this.job.id}`, null, false, false, this.projectForm.value.id, this.protocolForm.value.id).toPromise()
                   if (reagent) {
                     // @ts-ignore
                     this.reagentForm.patchValue({id: reagent.id, name: reagent.reagent.name, current_quantity: reagent.quantity, unit: reagent.reagent.unit})
@@ -501,31 +500,116 @@ export class JobSubmissionComponent implements OnInit {
         await this.toast.show('Lab Group', 'Please select a lab group before update with reagent information');
       }
       // @ts-ignore
-      const staffIds = this.form.value.staff.map((s) => s.id)
+      const staffIds = this.form.value.staff.map((s) => s)
+      const userMetadata = (this.metadata.get('user_metadata') as FormArray).controls.map((c) => c.value)
+      console.log(this.labGroupForm.value.selected)
       // @ts-ignore
-      const response = await this.web.updateInstrumentJob(this.job.id, this.form.value.job_name, this.projectForm.value.id, this.fundingForm.value.cost_center, this.fundingForm.value.funder, this.formSampleExtraData.value.sample_type, this.formSampleExtraData.value.sample_number, this.protocolForm.value.id, staffIds, this.reagentForm.value.id).toPromise()
+      const response = await this.web.updateInstrumentJob(this.job.id, this.form.value.job_name, this.projectForm.value.id, this.fundingForm.value.cost_center, this.fundingForm.value.funder, this.formSampleExtraData.value.sample_type, this.formSampleExtraData.value.sample_number, this.protocolForm.value.id, staffIds, this.reagentForm.value.id, userMetadata, [], this.labGroupForm.value.selected).toPromise()
       if (response) {
          await this.toast.show('Job', 'Job updated successfully');
         this.job = response
       }
-
     }
   }
 
-  addMetadata(metadata: {name: string, type: string}) {
-    const formArray = this.metadata.get('user_metadata') as FormArray;
-    const group = this.fb.group({
-      name: metadata.name,
-      type: metadata.type,
-      value: '',
-      mandatory: false,
-      id: null
+  addMetadata(metadata: {name: string, type: string}, arrayName: 'user_metadata'|'staff_metadata') {
+    const ref = this.modal.open(JobMetadataCreationModalComponent, {scrollable: true})
+    ref.componentInstance.name = metadata.name
+    ref.componentInstance.type = metadata.type
+    ref.closed.subscribe((result: any[]) => {
+      if (result) {
+        const formArray = this.metadata.get(arrayName) as FormArray;
+        for (const r of result) {
+          let value = r.metadataValue
+          if (r.metadataName === "Modification parameters") {
+            if (r.metadataMT) {
+              value += `;mt=${r.metadataMT}`
+            }
+            if (r.metadataPP) {
+              value += `;pp=${r.metadataPP}`
+            }
+            if (r.metadataTA) {
+              value += `;ta=${r.metadataTA}`
+            }
+            if (r.metadataTS) {
+              value += `;ts=${r.metadataTS}`
+            }
+            if (r.metadataMM) {
+              value += `;mm=${r.metadataMM}`
+            }
+            if (r.metadataAC) {
+              value += `;ac=${r.metadataAC}`
+            }
+          }
+          const group = this.fb.group({
+            name: metadata.name,
+            type: metadata.type,
+            value: value,
+            mandatory: false,
+            id: null
+          })
+          formArray.push(group);
+          this.subscribeToFormGroupChanges(group)
+        }
+      }
     })
-    formArray.push(group);
-    this.subscribeToFormGroupChanges(group)
+  }
+
+  removeMetadata(index: number, arrayName: 'user_metadata'|'staff_metadata') {
+    const formArray = this.metadata.get(arrayName) as FormArray;
+    formArray.removeAt(index);
   }
 
   checkMetadataAdd() {
 
+  }
+
+  editMetadata(index: number, arrayName: 'user_metadata'|'staff_metadata') {
+    const ref = this.modal.open(JobMetadataCreationModalComponent, {scrollable: true})
+    const metadata = (this.metadata.get(arrayName) as FormArray).controls[index].value
+    ref.componentInstance.name = metadata.name
+    ref.componentInstance.type = metadata.type
+    if (metadata.value) {
+      ref.componentInstance.value = metadata.value
+    }
+    if (metadata.name === "Modification parameters") {
+      ref.componentInstance.allowMultipleSpecSelection = false
+    }
+
+    ref.result.then((result: any[]) => {
+      if (result) {
+        const formArray = this.metadata.get(arrayName) as FormArray;
+        for (const r of result) {
+          let value = r.metadataValue
+          if (r.metadataName === "Modification parameters") {
+            if (r.metadataMT) {
+              value += `;mt=${r.metadataMT}`
+            }
+            if (r.metadataPP) {
+              value += `;pp=${r.metadataPP}`
+            }
+            if (r.metadataTA) {
+              value += `;ta=${r.metadataTA}`
+            }
+            if (r.metadataTS) {
+              value += `;ts=${r.metadataTS}`
+            }
+            if (r.metadataMM) {
+              value += `;mm=${r.metadataMM}`
+            }
+            if (r.metadataAC) {
+              value += `;ac=${r.metadataAC}`
+            }
+          }
+          formArray.controls[index].patchValue({
+            value: value
+          })
+          console.log(formArray.controls[index].value)
+
+        }
+      }
+    }).catch((error) => {
+      console.log(error)
+    })
   }
 }

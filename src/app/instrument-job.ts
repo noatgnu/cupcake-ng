@@ -51,6 +51,10 @@ export interface InstrumentJob {
   staff_metadata: MetadataColumn[],
   sample_type: string,
   sample_number: number,
+  service_lab_group: {
+    id: number,
+    name: string,
+  }|null,
 }
 
 export interface InstrumentJobQuery {

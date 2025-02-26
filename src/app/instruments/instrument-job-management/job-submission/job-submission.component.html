@@ -123,48 +123,65 @@
     <div [formGroup]="metadata">
       <section>
         <h5>Sample Details</h5>
+
+
         <form [formGroup]="reagentForm" class="d-flex gap-2">
-          <div class="form-group">
-            <label>Sample Name</label>
-            <input (selectItem)="onStoredReagentSelected($event)" [resultTemplate]="rt" type="search" [ngbTypeahead]="searchReagent" class="form-control" [inputFormatter]="reagentFormatter" placeholder="Search or new sample name">
-            <ng-template #rt let-r="result" let-t="term">
-              <div class="d-flex justify-content-between">
-                <span>{{ r.reagent.name }} ({{ r.current_quantity }} {{ r.reagent.unit }})</span>
-                <small class="text-muted">{{ r.reagent.note }}</small>
-              </div>
-            </ng-template>
-          </div>
-          <div class="form-group">
-            <label>Amount</label>
-            <input type="number" class="form-control" formControlName="current_quantity">
-          </div>
-          <div class="form-group" style="width:150px">
-            <label for="reagentUnit">Unit</label>
-            <select id="reagentUnit" class="form-select" formControlName="unit">
-              <optgroup label="Volume">
-                <option value="nL">nL</option>
-                <option value="uL">uL</option>
-                <option value="mL">mL</option>
-                <option value="L">L</option>
-              </optgroup>
-              <optgroup label="Mass">
-                <option value="ng">ng</option>
-                <option value="ug">ug</option>
-                <option value="mg">mg</option>
-                <option value="g">g</option>
-                <option value="kg">kg</option>
-              </optgroup>
-              <optgroup label="Mole">
-                <option value="nM">nM</option>
-                <option value="uM">uM</option>
-                <option value="mM">mM</option>
-                <option value="M">M</option>
-              </optgroup>
-              <optgroup label="Count">
-                <option value="ea">ea</option>
-              </optgroup>
-            </select>
-          </div>
+          @if (selectedStoredReagent) {
+            <div>
+              <p>
+                <b>{{selectedStoredReagent.reagent.name}}</b><br>
+                <b>Quantity</b>: {{selectedStoredReagent.quantity}} {{selectedStoredReagent.reagent.unit}}<br>
+                <b>Note</b>: {{selectedStoredReagent.notes}}
+              </p>
+              <button class="btn btn-sm btn-danger" ngbTooltip="Remove from selection" (click)="selectedStoredReagent = undefined; reagentForm.reset()">
+                <i class="bi bi-trash"></i>
+              </button>
+            </div>
+          } @else {
+            <div class="form-group">
+              <label>Sample Name</label>
+              <input (selectItem)="onStoredReagentSelected($event)" [resultTemplate]="rt" type="search" [ngbTypeahead]="searchReagent" class="form-control" [inputFormatter]="reagentFormatter" placeholder="Search or new sample name">
+              <ng-template #rt let-r="result" let-t="term">
+                <div class="d-flex justify-content-between">
+                  <span>{{ r.reagent.name }} ({{ r.quantity }} {{ r.reagent.unit }})</span>
+                  <small class="text-muted">{{ r.reagent.note }}</small>
+                </div>
+              </ng-template>
+
+            </div>
+            <div class="form-group">
+              <label>Amount</label>
+              <input type="number" class="form-control" formControlName="current_quantity">
+            </div>
+            <div class="form-group" style="width:150px">
+              <label for="reagentUnit">Unit</label>
+              <select id="reagentUnit" class="form-select" formControlName="unit">
+                <optgroup label="Volume">
+                  <option value="nL">nL</option>
+                  <option value="uL">uL</option>
+                  <option value="mL">mL</option>
+                  <option value="L">L</option>
+                </optgroup>
+                <optgroup label="Mass">
+                  <option value="ng">ng</option>
+                  <option value="ug">ug</option>
+                  <option value="mg">mg</option>
+                  <option value="g">g</option>
+                  <option value="kg">kg</option>
+                </optgroup>
+                <optgroup label="Mole">
+                  <option value="nM">nM</option>
+                  <option value="uM">uM</option>
+                  <option value="mM">mM</option>
+                  <option value="M">M</option>
+                </optgroup>
+                <optgroup label="Count">
+                  <option value="ea">ea</option>
+                </optgroup>
+              </select>
+            </div>
+          }
+
           <div class="form-check">
             <input type="checkbox" class="form-check-input" id="use_previous" formControlName="use_previous">
             <label class="form-check-label" for="use_previous">Use previous reagent</label>
@@ -178,9 +195,20 @@
         <div [formArrayName]="'user_metadata'" class="d-flex gap-2 flex-column">
           @for (i of metadata.controls['user_metadata'].controls; track i; let index = $index) {
             <form [formGroupName]="index" class="d-flex gap-2">
-              <div class="form-group">
+              <div class="form-group" style="width:400px">
                 <label>{{metadata.controls['user_metadata'].controls[index].value['name']}}</label>
-                <input (focus)="setCurrentForm(metadata.controls['user_metadata'].controls[index])" type="search" [ngbTypeahead]="searchValue" class="form-control" formControlName="value">
+                <div class="d-flex gap-2">
+                  @if (metadata.controls['user_metadata'].controls[index].value['name']==='Modification parameters') {
+                    <input readonly (focus)="setCurrentForm(metadata.controls['user_metadata'].controls[index])" type="search" [ngbTypeahead]="searchValue" class="form-control" formControlName="value">
+                    <button class="btn btn-sm btn-primary" (click)="editMetadata(index, 'user_metadata')"><i class="bi bi-pen"></i></button>
+                  } @else {
+                    <input (focus)="setCurrentForm(metadata.controls['user_metadata'].controls[index])" type="search" [ngbTypeahead]="searchValue" class="form-control" formControlName="value">
+                  }
+                  @if (!metadata.controls['user_metadata'].controls[index].value['mandatory']) {
+                    <button class="btn btn-sm btn-danger" (click)="removeMetadata(index, 'user_metadata')"><i class="bi bi-trash2"></i></button>
+                  }
+                </div>
+
               </div>
             </form>
           }
@@ -192,7 +220,7 @@
             </button>
             <div ngbDropdownMenu aria-labelledby="addMetadata">
               @for (m of metadataService.userMetadataTemplate; track m.name) {
-                <a class="dropdown-item" (click)="addMetadata(m)">
+                <a class="dropdown-item" (click)="addMetadata(m, 'user_metadata')">
                   {{m.name}}
                 </a>
               }
@@ -242,6 +270,25 @@
     }
     <a class="btn btn-danger" href="/#/instruments/jobs">New Submission</a>
   </div>
+  @if (job) {
+    @if (job.user_annotations) {
+      <app-annotation-presenter [annotations]="job.user_annotations"></app-annotation-presenter>
+      <div style="position: fixed; z-index: 1030; bottom: 50px; right: 50px">
+        <div class="d-flex flex-row gap-2 align-items-center">
+          <div ngbDropdown placement="top-end" class="d-inline-block">
+            <button class="btn btn-outline-success" ngbDropdownToggle><i class="bi bi-plus"></i></button>
+            <div ngbDropdownMenu>
+              @if (this.job) {
+                @for (a of ['Audio', 'Text', 'Video', 'Image', 'Sketchpad', 'Counter','File', 'Checklist', 'Table', 'Alignment', 'Calculator', 'Molarity Calculator', 'Randomization', 'Large/Multiple Files']; track a) {
+                  <button ngbDropdownItem (click)="annotationService.annotationInstrumentMenuClick(a, 'user_annotation', this.job.id)">{{a}}</button>
+                }
+              }
 
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+  }
 </div>
 

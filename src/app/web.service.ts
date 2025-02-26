@@ -121,14 +121,22 @@ export class WebService {
     );
   }
 
-  saveAnnotationText(session_id: string, step_id: number = 0, text: string) {
+  saveAnnotationText(session_id: string|undefined|null, step_id: number = 0, text: string, instrument_job_id: number|null|undefined = null, instrument_user_type: null|'user_annotation'|'staff_annotation' = null) {
     const form = new FormData();
     form.append('annotation', text);
     form.append('annotation_type', 'text');
     if (step_id !== 0) {
       form.append('step', step_id.toString());
     }
-    form.append('session', session_id);
+    if (session_id) {
+      form.append('session', session_id);
+    }
+    if (instrument_job_id) {
+      form.append('instrument_job', instrument_job_id.toString());
+    }
+    if (instrument_user_type) {
+      form.append('instrument_user_type', instrument_user_type);
+    }
     return this.http.post(
       `${this.baseURL}/api/annotation/`,
       form,
@@ -154,16 +162,23 @@ export class WebService {
     );
   }
 
-  saveAnnotationFile(session_id: string, step_id: number = 0, file: File, annotation_type: string = 'file') {
+  saveAnnotationFile(session_id: string|undefined|null, step_id: number = 0, file: File, annotation_type: string = 'file', instrument_job_id: number|null|undefined = null, instrument_user_type: null|'user_annotation'|'staff_annotation' = null) {
     const form = new FormData()
     form.append('annotation', "");
     form.append('annotation_type', annotation_type);
     if (step_id !== 0) {
       form.append('step', step_id.toString());
     }
-    form.append('session', session_id);
+    if (session_id) {
+      form.append('session', session_id);
+    }
+    if (instrument_job_id) {
+      form.append('instrument_job', instrument_job_id.toString());
+    }
+    if (instrument_user_type) {
+      form.append('instrument_user_type', instrument_user_type);
+    }
     form.append('file', file);
-    console.log(session_id, step_id, file)
     return this.http.post(
       `${this.baseURL}/api/annotation/`,
       form,
@@ -171,14 +186,22 @@ export class WebService {
     );
   }
 
-  saveSketch(session_id: string, step_id: number = 0, strokes: any[]) {
+  saveSketch(session_id: string|undefined|null, step_id: number = 0, strokes: any[],  instrument_job_id: number|null|undefined = null, instrument_user_type: null|'user_annotation'|'staff_annotation' = null) {
     const form = new FormData()
     form.append('annotation', "");
     form.append('annotation_type', 'sketch');
     if (step_id !== 0) {
       form.append('step', step_id.toString());
     }
-    form.append('session', session_id);
+    if (session_id) {
+      form.append('session', session_id);
+    }
+    if (instrument_job_id) {
+      form.append('instrument_job', instrument_job_id.toString());
+    }
+    if (instrument_user_type) {
+      form.append('instrument_user_type', instrument_user_type);
+    }
     const file = new File([JSON.stringify(strokes)], 'sketch.json', {type: 'application/json'});
     form.append('file', file);
     return this.http.post(
@@ -188,14 +211,22 @@ export class WebService {
     );
   }
 
-  saveAnnotationJSON(session_id: string, step_id: number = 0, json: any, annotation_type: string ) {
+  saveAnnotationJSON(session_id: string|undefined|null, step_id: number = 0, json: any, annotation_type: string, instrument_job_id: number|null|undefined = null, instrument_user_type: null|'user_annotation'|'staff_annotation' = null) {
     const form = new FormData()
     form.append('annotation', JSON.stringify(json));
     form.append('annotation_type', annotation_type);
     if (step_id !== 0) {
       form.append('step', step_id.toString());
     }
-    form.append('session', session_id);
+    if (session_id) {
+      form.append('session', session_id);
+    }
+    if (instrument_job_id) {
+      form.append('instrument_job', instrument_job_id.toString());
+    }
+    if (instrument_user_type) {
+      form.append('instrument_user_type', instrument_user_type);
+    }
     return this.http.post(
       `${this.baseURL}/api/annotation/`,
       form,
@@ -246,12 +277,20 @@ export class WebService {
     )
   }
 
-  saveMediaRecorderBlob(session_id: string, step_id: number, blob: Blob, annotation_type: string) {
+  saveMediaRecorderBlob(session_id: string|undefined|null, step_id: number, blob: Blob, annotation_type: string, instrument_job_id: number|null|undefined = null, instrument_user_type: null|'user_annotation'|'staff_annotation' = null) {
     const form = new FormData()
     form.append('annotation', "");
     form.append('annotation_type', annotation_type);
     form.append('step', step_id.toString());
-    form.append('session', session_id);
+    if (session_id) {
+      form.append('session', session_id);
+    }
+    if (instrument_job_id) {
+      form.append('instrument_job', instrument_job_id.toString());
+    }
+    if (instrument_user_type) {
+      form.append('instrument_user_type', instrument_user_type);
+    }
     let file: File
     if (annotation_type === 'audio') {
       file = new File([blob], `recording${annotation_type}.webm`, {type: 'audio/webm'});
@@ -858,10 +897,21 @@ export class WebService {
       {responseType: 'json', observe: 'body'}
     )
   }
-  bindUploadedFile(session_id: string, upload_id: string, file_name: string, annotation_name: string, step: number = 0, folder: number = 0) {
+  bindUploadedFile(session_id: string|undefined|null, upload_id: string, file_name: string, annotation_name: string, step: number = 0, folder: number = 0, instrument_job_id: number|null|undefined = null, instrument_user_type: null|'user_annotation'|'staff_annotation' = null) {
+    const payload: any = {upload_id: upload_id, file_name: file_name, annotation_name: annotation_name, step: step, folder: folder}
+    if (session_id) {
+      payload['session'] = session_id
+    }
+    if (instrument_job_id) {
+      payload['instrument_job'] = instrument_job_id
+    }
+    if (instrument_user_type) {
+      payload['instrument_user_type'] = instrument_user_type
+    }
+
     return this.http.post(
       `${this.baseURL}/api/annotation/bind_uploaded_file/`,
-      {session: session_id, upload_id: upload_id, file_name: file_name, annotation_name: annotation_name, step: step, folder: folder},
+      payload,
       {responseType: 'json', observe: 'body'}
     )
   }
@@ -983,10 +1033,19 @@ export class WebService {
     )
   }
 
-  createInstrumentUsageAnnotation(session_id: string, instrument_id: number, time_started: Date|undefined, time_ended: Date|undefined, step_id: number = 0, annotation: string) {
-    const payload: any = {session: session_id, annotation_type: 'instrument', instrument: instrument_id, time_started: time_started, time_ended: time_ended, annotation: annotation}
+  createInstrumentUsageAnnotation(session_id: string|undefined|null, instrument_id: number, time_started: Date|undefined, time_ended: Date|undefined, step_id: number = 0, annotation: string, instrument_job_id: number|null|undefined = undefined, instrument_user_type: null|'user_annotation'|'staff_annotation' = null) {
+    const payload: any = { annotation_type: 'instrument', instrument: instrument_id, time_started: time_started, time_ended: time_ended, annotation: annotation}
     if (step_id !== 0) {
       payload['step'] = step_id
+    }
+    if (session_id) {
+      payload['session'] = session_id
+    }
+    if (instrument_job_id) {
+      payload['instrument_job'] = instrument_job_id
+    }
+    if (instrument_user_type && instrument_user_type === "staff_annotation") {
+      payload['instrument_user_type'] = instrument_user_type
     }
     return this.http.post<Annotation>(
       `${this.baseURL}/api/annotation/`,
@@ -1741,6 +1800,9 @@ export class WebService {
     protocol: number|undefined,
     staff: number[]|undefined,
     stored_reagent: number|undefined,
+    user_metadata: any[]|undefined,
+    staff_metadata: any[]|undefined,
+    service_lab_group: number|undefined
   ) {
     const payload: any = {}
     if (job_name) {
@@ -1770,6 +1832,16 @@ export class WebService {
     if (stored_reagent) {
       payload['stored_reagent'] = stored_reagent
     }
+    if (user_metadata) {
+      payload['user_metadata'] = user_metadata
+    }
+    if (staff_metadata) {
+      payload['staff_metadata'] = staff_metadata
+    }
+    if (service_lab_group) {
+      payload['service_lab_group'] = service_lab_group
+    }
+
     return this.http.put<InstrumentJob>(
       `${this.baseURL}/api/instrument_jobs/${job_id}/`,
       payload,

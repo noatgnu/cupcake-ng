@@ -17,6 +17,8 @@ export class UploadLargeFileModalComponent {
   @Input() session_id: string = "";
   @Input() folder_id: number = 0;
   @Input() step_id: number = 0;
+  @Input() instrument_job_id: number = 0;
+  @Input() instrument_user_type: "user_annotation" | "staff_annotation" | null = null;
   fileProgressMap: {[key: string]: {progress: number, total: number}} = {};
   fileList: File[] = [];
 
@@ -54,9 +56,15 @@ export class UploadLargeFileModalComponent {
       if (result?.completed_at) {
         this.toastService.show(file.name, "Upload completed")
         this.toastService.show(file.name, "Binding file...")
-        this.web.bindUploadedFile(this.session_id, result?.id, file.name, file.name, this.step_id, this.folder_id).subscribe((data) => {
-          this.toastService.show(file.name, "Binding completed")
-        })
+        if (this.instrument_job_id && this.instrument_user_type) {
+          this.web.bindUploadedFile(null, result?.id, file.name, file.name, this.step_id, this.folder_id, this.instrument_job_id, this.instrument_user_type).subscribe((data) => {
+            this.toastService.show(file.name, "Binding completed")
+          })
+        } else {
+          this.web.bindUploadedFile(this.session_id, result?.id, file.name, file.name, this.step_id, this.folder_id).subscribe((data) => {
+            this.toastService.show(file.name, "Binding completed")
+          })
+        }
       }
     } else {
       let currentURL = "";
@@ -85,9 +93,16 @@ export class UploadLargeFileModalComponent {
         if (result?.completed_at) {
           this.toastService.show(file.name, "Upload completed")
           this.toastService.show(file.name, "Binding file...")
-          this.web.bindUploadedFile(this.session_id, result?.id, file.name, file.name, this.step_id, this.folder_id).subscribe((data) => {
-            this.toastService.show(file.name, "Binding completed")
-          })
+          if (this.instrument_job_id && this.instrument_user_type) {
+            this.web.bindUploadedFile(null, result?.id, file.name, file.name, this.step_id, this.folder_id, this.instrument_job_id, this.instrument_user_type).subscribe((data) => {
+              this.toastService.show(file.name, "Binding completed")
+            })
+          } else {
+            this.web.bindUploadedFile(this.session_id, result?.id, file.name, file.name, this.step_id, this.folder_id).subscribe((data) => {
+              this.toastService.show(file.name, "Binding completed")
+            })
+          }
+
         }
       }
     }

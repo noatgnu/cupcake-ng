@@ -1,0 +1,71 @@
+<div class="modal-header">
+  <h5 class="modal-title">Metadata Editor</h5>
+</div>
+<div class="modal-body">
+  <form [formGroup]="form" class="d-flex gap-2 flex-column">
+    <div class="form-group">
+      <label for="metadataName">Metadata Name</label>
+      <input class="form-control" id="metadataName" formControlName="metadataName" placeholder="Metadata Name" readonly>
+    </div>
+    <div class="form-group">
+      <label for="metadataValue">Metadata Value</label>
+      <input (selectItem)="onItemSelect($event)" [ngbTypeahead]="searchMetadata" [resultFormatter]="formatter" [inputFormatter]="formatter" class="form-control" id="metadataValue" formControlName="metadataValue" placeholder="Metadata Value">
+    </div>
+    <hr>
+    @if (form.value['metadataName'] === 'Modification parameters') {
+      <div class="form-group">
+        <label for="metadataMT">Modification Type</label>
+        <select class="form-select" id="metadataMT" formControlName="metadataMT">
+          <option value="Fixed">Fixed</option>
+          <option value="Variable">Variable</option>
+          <option value="Annotated">Annotated</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Select available Unimod specs</label>
+        <select size="5" [multiple]="allowMultipleSpecSelection" class="form-select" [(ngModel)]="selectedSpecs" [ngModelOptions]="{standalone: true}">
+          @for (spec of metadataService.availableSpecs; track spec) {
+            <option [ngValue]="spec">{{spec.id}} AA:{{spec.aa}} {{spec.classification}} {{spec.mono_mass}}</option>
+          }
+        </select>
+      </div>
+
+      @for (s of selectedSpecs; track s) {
+        <div class="card">
+          <div class="card-header">
+            <h5 class="card-title">AA:{{s.aa}} {{s.mono_mass}} {{s.position}}</h5>
+          </div>
+          <div class="card-body">
+            <div class="form-group">
+              <label>Modification Position</label>
+              <select class="form-select" [(ngModel)]="s.position" [ngModelOptions]="{standalone: true}">
+                <option value="Any N-term">Any N-term</option>
+                <option value="Any C-term">Any C-term</option>
+                <option value="Anywhere">Anywhere</option>
+                <option value="Protein N-term">Protein N-term</option>
+                <option value="Protein C-term">Protein C-term</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Modification AA</label>
+              <input type="text" class="form-control" [(ngModel)]="s.aa" [ngModelOptions]="{standalone: true}">
+            </div>
+            <div class="form-group">
+              <label>Modification Mono Mass</label>
+              <input type="text" class="form-control" [(ngModel)]="s.mono_mass" [ngModelOptions]="{standalone: true}">
+            </div>
+            <div class="form-group">
+              <label>Target Site</label>
+              <input type="text" class="form-control" [(ngModel)]="s.target_site" [ngModelOptions]="{standalone: true}">
+            </div>
+          </div>
+        </div>
+      }
+    }
+
+  </form>
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn btn-secondary" (click)="close()">Close</button>
+  <button type="button" class="btn btn-primary" (click)="save()">Save</button>
+</div>
