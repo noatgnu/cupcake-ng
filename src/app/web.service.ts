@@ -162,9 +162,13 @@ export class WebService {
     );
   }
 
-  saveAnnotationFile(session_id: string|undefined|null, step_id: number = 0, file: File, annotation_type: string = 'file', instrument_job_id: number|null|undefined = null, instrument_user_type: null|'user_annotation'|'staff_annotation' = null) {
+  saveAnnotationFile(session_id: string|undefined|null, step_id: number = 0, file: File, annotation_type: string = 'file', instrument_job_id: number|null|undefined = null, instrument_user_type: null|'user_annotation'|'staff_annotation' = null, annotation: string = "") {
     const form = new FormData()
-    form.append('annotation', "");
+    if (annotation) {
+      form.append('annotation', annotation);
+    } else {
+      form.append('annotation', "");
+    }
     form.append('annotation_type', annotation_type);
     if (step_id !== 0) {
       form.append('step', step_id.toString());
@@ -277,11 +281,13 @@ export class WebService {
     )
   }
 
-  saveMediaRecorderBlob(session_id: string|undefined|null, step_id: number, blob: Blob, annotation_type: string, instrument_job_id: number|null|undefined = null, instrument_user_type: null|'user_annotation'|'staff_annotation' = null) {
+  saveMediaRecorderBlob(session_id: string|undefined|null, step_id: number|undefined|null, blob: Blob, annotation_type: string, instrument_job_id: number|null|undefined = null, instrument_user_type: null|'user_annotation'|'staff_annotation' = null) {
     const form = new FormData()
     form.append('annotation', "");
     form.append('annotation_type', annotation_type);
-    form.append('step', step_id.toString());
+    if (step_id) {
+      form.append('step', step_id.toString());
+    }
     if (session_id) {
       form.append('session', session_id);
     }

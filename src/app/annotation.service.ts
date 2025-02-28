@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import {ElementRef, Injectable} from '@angular/core';
 import {
   AddSimpleCounterModalComponent
 } from "./protocol-session/add-simple-counter-modal/add-simple-counter-modal.component";
@@ -12,6 +12,7 @@ import {WebService} from "./web.service";
 import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import {ToastService} from "./toast.service";
 import {Subject} from "rxjs";
+import {AnnotationQuery} from "./annotation";
 
 @Injectable({
   providedIn: 'root'
@@ -19,10 +20,32 @@ import {Subject} from "rxjs";
 export class AnnotationService {
   clickedInstrumentItem: string = "";
   refreshAnnotation: Subject<boolean> = new Subject<boolean>();
+  recording: boolean = false;
+  screenRecording: boolean = false;
+  speechRecognition: any;
+  recordingChunks: any[] = [];
+  recordedBlob?: Blob;
+  mediaRecorder?: MediaRecorder
+  audioURL?: string;
+  cameraDevices: MediaDeviceInfo[] = [];
+  currentCameraDevice: MediaDeviceInfo|null = null;
+  audioDevices: MediaDeviceInfo[] = [];
+  currentAudioDevice: MediaDeviceInfo|null = null;
+  audioContext: AudioContext = new AudioContext();
+  analyser: AnalyserNode = this.audioContext.createAnalyser();
+  dataArray: Uint8Array = new Uint8Array(this.analyser.frequencyBinCount);
+  animationFrame: any
+  moveToAnnotationCreator: Subject<boolean> = new Subject<boolean>();
 
-  constructor(private web: WebService, private modal: NgbModal, private toastService: ToastService) { }
+  constructor(private web: WebService, private modal: NgbModal, private toastService: ToastService) {
+    navigator.mediaDevices.enumerateDevices().then((devices) => {
+      this.cameraDevices = devices.filter((device) => device.kind === 'videoinput');
+      this.audioDevices = devices.filter((device) => device.kind === 'audioinput');
+    })
+  }
 
   annotationInstrumentMenuClick(item: string, instrument_user_type: "user_annotation"|"staff_annotation", instrument_job_id: number) {
+    console.log(item, instrument_user_type, instrument_job_id)
     if (item === 'Counter') {
       const ref = this.modal.open(AddSimpleCounterModalComponent)
       ref.closed.subscribe((data: any) => {
@@ -108,7 +131,188 @@ export class AnnotationService {
         return;
       }
       this.clickedInstrumentItem = item;
+      this.moveToAnnotationCreator.next(true);
     }
 
+  }
+
+  startScreenRecording(audio: boolean) {
+    this.recording = true;
+    this.recordingChunks = [];
+    let constraints: any = { audio: audio, video: {cursor: "always"} };
+    if (this.currentAudioDevice && audio) {
+      constraints.audio = { deviceId: {exact: this.currentAudioDevice.deviceId} }
+    }
+    navigator.mediaDevices.getDisplayMedia(constraints).then((stream) => {
+      this.mediaRecorder = new MediaRecorder(stream);
+      this.mediaRecorder.onstart = () => {
+        this.toastService.show('Recording', 'Recording Started')
+        console.log('recording started')
+        this.recording = true;
+        this.screenRecording = true;
+      }
+      this.mediaRecorder.ondataavailable = (event) => {
+        console.log(event);
+        this.recordingChunks.push(event.data);
+      }
+      this.mediaRecorder.onstop = () => {
+        stream.getTracks().forEach((track) => track.stop());
+        console.log('recording stopped')
+        this.toastService.show('Recording', 'Recording Stopped')
+        this.recordedBlob = new Blob(this.recordingChunks, {type: 'video/webm'});
+        this.audioURL = window.URL.createObjectURL(this.recordedBlob);
+        this.recording = false;
+        this.screenRecording = false;
+      }
+      this.mediaRecorder.start();
+    })
+  }
+
+  startRecording(audio: boolean, video: boolean, previewVideo: ElementRef) {
+    //this.speechRecognition.start();
+    console.log('start recording')
+    this.recording = true;
+    this.recordingChunks = [];
+    let constraints: MediaStreamConstraints = { audio: audio, video: video };
+    if (video) {
+      // check agent if mobile or desktop
+      if (navigator.userAgent.match(/Android/i) || navigator.userAgent.match(/iPhone/i) || navigator.userAgent.match(/iPad/i)) {
+        constraints.video = { width: { ideal: 1920 }, height: { ideal: 1080 }, facingMode: {exact: 'environment'}};
+      } else {
+        constraints.video = { width: { ideal: 1920 }, height: { ideal: 1080 }};
+      }
+      //constraints.video = { width: { ideal: 1920 }, height: { ideal: 1080 }, facingMode: {exact: 'environment'}};
+      if (this.currentCameraDevice) {
+        console.log(this.currentCameraDevice)
+        constraints.video = { deviceId: {exact: this.currentCameraDevice.deviceId}, width: { ideal: 1920 }, height: { ideal: 1080 }};
+      }
+    }
+
+    if (this.currentAudioDevice) {
+      console.log(this.currentAudioDevice)
+      constraints.audio = { deviceId: {exact: this.currentAudioDevice.deviceId} }
+    }
+    navigator.mediaDevices.getUserMedia(constraints).then(
+      (stream) => {
+        if (previewVideo) {
+          previewVideo.nativeElement.srcObject = stream;
+          previewVideo.nativeElement.oncanplaythrough = () => {
+            // @ts-ignore
+            this.previewVideo.nativeElement.muted = true;
+          }
+          previewVideo.nativeElement.play();
+
+        }
+        if (audio) {
+          let source = this.audioContext.createMediaStreamSource(stream);
+          source.connect(this.analyser);
+        }
+        this.mediaRecorder = new MediaRecorder(stream);
+        this.mediaRecorder.onstart = () => {
+          this.toastService.show('Recording', 'Recording Started')
+          console.log('recording started')
+        }
+        this.mediaRecorder.ondataavailable = (event) => {
+          console.log(event);
+          this.recordingChunks.push(event.data);
+        }
+        this.mediaRecorder.onstop = () => {
+          stream.getTracks().forEach((track) => track.stop());
+          console.log('recording stopped')
+          this.toastService.show('Recording', 'Recording Stopped')
+          this.recordedBlob = new Blob(this.recordingChunks, {type: 'audio/webm'});
+          this.audioURL = window.URL.createObjectURL(this.recordedBlob);
+          if (previewVideo) {
+            previewVideo.nativeElement.stop()
+          }
+        }
+        this.mediaRecorder.start();
+        this.drawVisualizer();
+        console.log(this.mediaRecorder)
+      }
+    )
+  }
+
+  drawVisualizer() {
+    this.animationFrame = requestAnimationFrame(() => this.drawVisualizer());
+    this.analyser.getByteFrequencyData(this.dataArray);
+    let canvas = document.getElementById('visualizer') as HTMLCanvasElement;
+    let ctx = canvas.getContext('2d');
+    if (ctx) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      let barWidth = (canvas.width / this.analyser.frequencyBinCount) * 2.5;
+      let barHeight;
+      let x = 0;
+      for (let i = 0; i < this.analyser.frequencyBinCount; i++) {
+        barHeight = this.dataArray[i];
+        ctx.fillStyle = 'rgb(' + (barHeight + 100) + ',50,50)';
+        ctx.fillRect(x, canvas.height - barHeight / 2, barWidth, barHeight / 2);
+        x += barWidth + 1;
+      }
+    }
+  }
+
+  stopRecording() {
+    console.log(this.mediaRecorder)
+    this.mediaRecorder?.stop();
+    this.recording = false;
+    if (this.animationFrame) {
+      cancelAnimationFrame(this.animationFrame);
+    }
+  }
+
+  deletePreviewRecording() {
+    this.recordedBlob = undefined;
+    this.audioURL = undefined;
+  }
+
+  saveRecording(instrument_job_id: number, instrument_user_type: "user_annotation"|"staff_annotation") {
+    if (this.recordedBlob) {
+      this.web.saveMediaRecorderBlob(undefined, undefined, this.recordedBlob, this.clickedInstrumentItem.toLowerCase(), instrument_job_id, instrument_user_type).subscribe((data: any) => {
+        this.toastService.show('Annotation', 'Recording Saved Successfully')
+        this.refreshAnnotation.next(true);
+      })
+    }
+  }
+
+  handleTextAnnotation(text: string,instrument_job_id: number, instrument_user_type: "user_annotation"|"staff_annotation") {
+    this.web.saveAnnotationText(undefined, undefined, text, instrument_job_id, instrument_user_type).subscribe((data: any) => {
+      this.toastService.show('Annotation', 'Text Saved Successfully')
+      this.refreshAnnotation.next(true);
+    })
+  }
+
+  handleSketchAnnotation(sketch: any, instrument_job_id: number, instrument_user_type: "user_annotation"|"staff_annotation") {
+
+    this.web.saveSketch(undefined, undefined, sketch, instrument_job_id, instrument_user_type).subscribe((data: any) => {
+      this.toastService.show('Annotation', 'Sketch Saved Successfully')
+      this.refreshAnnotation.next(true);
+    })
+  }
+
+  handleFileInput(event: any, instrument_job_id: number, instrument_user_type: "user_annotation"|"staff_annotation", annotation: string = "", annotation_type: string = "") {
+    if (event.target.files.length > 0) {
+      const file = event.target.files[0];
+      if (annotation_type) {
+        this.web.saveAnnotationFile(undefined, undefined, file, annotation_type, instrument_job_id, instrument_user_type, annotation).subscribe((data: any) => {
+          this.toastService.show('Annotation', 'File Saved Successfully')
+          this.refreshAnnotation.next(true);
+        })
+      } else {
+        this.web.saveAnnotationFile(undefined, undefined, file, this.clickedInstrumentItem.toLowerCase(), instrument_job_id, instrument_user_type).subscribe((data: any) => {
+          this.toastService.show('Annotation', 'File Saved Successfully')
+          this.refreshAnnotation.next(true);
+        })
+      }
+
+    }
+  }
+
+
+  deleteAnnotation(annotation_id: number) {
+    this.web.deleteAnnotation(annotation_id).subscribe((data: any) => {
+      this.toastService.show('Annotation', 'Annotation Deleted Successfully')
+      this.refreshAnnotation.next(true);
+    })
   }
 }

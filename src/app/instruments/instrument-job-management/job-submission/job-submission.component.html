@@ -1,4 +1,5 @@
 <div class="container d-flex flex-column gap-2">
+
   <form [formGroup]="form">
     <div class="form-group">
       <label for="jobName">Job Name</label>
@@ -119,160 +120,252 @@
         </form>
       }
     </div>
-    <hr>
-    <div [formGroup]="metadata">
-      <section>
-        <h5>Sample Details</h5>
-
-
-        <form [formGroup]="reagentForm" class="d-flex gap-2">
-          @if (selectedStoredReagent) {
-            <div>
-              <p>
-                <b>{{selectedStoredReagent.reagent.name}}</b><br>
-                <b>Quantity</b>: {{selectedStoredReagent.quantity}} {{selectedStoredReagent.reagent.unit}}<br>
-                <b>Note</b>: {{selectedStoredReagent.notes}}
-              </p>
-              <button class="btn btn-sm btn-danger" ngbTooltip="Remove from selection" (click)="selectedStoredReagent = undefined; reagentForm.reset()">
-                <i class="bi bi-trash"></i>
-              </button>
-            </div>
-          } @else {
-            <div class="form-group">
-              <label>Sample Name</label>
-              <input (selectItem)="onStoredReagentSelected($event)" [resultTemplate]="rt" type="search" [ngbTypeahead]="searchReagent" class="form-control" [inputFormatter]="reagentFormatter" placeholder="Search or new sample name">
-              <ng-template #rt let-r="result" let-t="term">
-                <div class="d-flex justify-content-between">
-                  <span>{{ r.reagent.name }} ({{ r.quantity }} {{ r.reagent.unit }})</span>
-                  <small class="text-muted">{{ r.reagent.note }}</small>
-                </div>
-              </ng-template>
-
-            </div>
-            <div class="form-group">
-              <label>Amount</label>
-              <input type="number" class="form-control" formControlName="current_quantity">
-            </div>
-            <div class="form-group" style="width:150px">
-              <label for="reagentUnit">Unit</label>
-              <select id="reagentUnit" class="form-select" formControlName="unit">
-                <optgroup label="Volume">
-                  <option value="nL">nL</option>
-                  <option value="uL">uL</option>
-                  <option value="mL">mL</option>
-                  <option value="L">L</option>
-                </optgroup>
-                <optgroup label="Mass">
-                  <option value="ng">ng</option>
-                  <option value="ug">ug</option>
-                  <option value="mg">mg</option>
-                  <option value="g">g</option>
-                  <option value="kg">kg</option>
-                </optgroup>
-                <optgroup label="Mole">
-                  <option value="nM">nM</option>
-                  <option value="uM">uM</option>
-                  <option value="mM">mM</option>
-                  <option value="M">M</option>
-                </optgroup>
-                <optgroup label="Count">
-                  <option value="ea">ea</option>
-                </optgroup>
-              </select>
-            </div>
-          }
-
-          <div class="form-check">
-            <input type="checkbox" class="form-check-input" id="use_previous" formControlName="use_previous">
-            <label class="form-check-label" for="use_previous">Use previous reagent</label>
-            <div>
-              <small class="form-text text-muted">
-                If checked, the reagent will be used from the selected source and a new reagent record won't be create
-              </small>
-            </div>
-          </div>
-        </form>
-        <div [formArrayName]="'user_metadata'" class="d-flex gap-2 flex-column">
-          @for (i of metadata.controls['user_metadata'].controls; track i; let index = $index) {
-            <form [formGroupName]="index" class="d-flex gap-2">
-              <div class="form-group" style="width:400px">
-                <label>{{metadata.controls['user_metadata'].controls[index].value['name']}}</label>
-                <div class="d-flex gap-2">
-                  @if (metadata.controls['user_metadata'].controls[index].value['name']==='Modification parameters') {
-                    <input readonly (focus)="setCurrentForm(metadata.controls['user_metadata'].controls[index])" type="search" [ngbTypeahead]="searchValue" class="form-control" formControlName="value">
-                    <button class="btn btn-sm btn-primary" (click)="editMetadata(index, 'user_metadata')"><i class="bi bi-pen"></i></button>
-                  } @else {
-                    <input (focus)="setCurrentForm(metadata.controls['user_metadata'].controls[index])" type="search" [ngbTypeahead]="searchValue" class="form-control" formControlName="value">
-                  }
-                  @if (!metadata.controls['user_metadata'].controls[index].value['mandatory']) {
-                    <button class="btn btn-sm btn-danger" (click)="removeMetadata(index, 'user_metadata')"><i class="bi bi-trash2"></i></button>
-                  }
-                </div>
-
-              </div>
-            </form>
-          }
-        </div>
-        <div class="mt-2">
-          <div ngbDropdown display="dynamic" class="d-inline-black">
-            <button class="btn btn-primary" id="addMetadata" ngbDropdownToggle>
-             + Metadata
+    @if (selectedProtocol) {
+      <hr>
+      <h5>Sample Details</h5>
+      <form [formGroup]="reagentForm" class="d-flex gap-2">
+        @if (selectedStoredReagent) {
+          <div>
+            <p>
+              <b>{{selectedStoredReagent.reagent.name}}</b><br>
+              <b>Quantity</b>: {{selectedStoredReagent.quantity}} {{selectedStoredReagent.reagent.unit}}<br>
+              <b>Note</b>: {{selectedStoredReagent.notes}}
+            </p>
+            <button class="btn btn-sm btn-danger" ngbTooltip="Remove from selection" (click)="selectedStoredReagent = undefined; reagentForm.reset()">
+              <i class="bi bi-trash"></i>
             </button>
-            <div ngbDropdownMenu aria-labelledby="addMetadata">
-              @for (m of metadataService.userMetadataTemplate; track m.name) {
-                <a class="dropdown-item" (click)="addMetadata(m, 'user_metadata')">
-                  {{m.name}}
-                </a>
-              }
-            </div>
           </div>
-        </div>
-
-
-        <form [formGroup]="formSampleExtraData" class="d-flex gap-2">
+        } @else {
           <div class="form-group">
-            <label>Sample Number</label>
-            <input type="number" class="form-control" formControlName="sample_number">
+            <label>Sample Name</label>
+            <input (selectItem)="onStoredReagentSelected($event)" [resultTemplate]="rt" type="search" [ngbTypeahead]="searchReagent" class="form-control" [inputFormatter]="reagentFormatter" placeholder="Search or new sample name">
+            <ng-template #rt let-r="result" let-t="term">
+              <div class="d-flex justify-content-between">
+                <span>{{ r.reagent.name }} ({{ r.quantity }} {{ r.reagent.unit }})</span>
+                <small class="text-muted">{{ r.reagent.note }}</small>
+              </div>
+            </ng-template>
+
           </div>
           <div class="form-group">
-            <label>Sample type</label>
-            <select class="form-select" formControlName="sample_type">
-              <option value="wcl">Whole Cell Lysage</option>
-              <option value="ip">Immunopricipitate</option>
-              <option value="other">Other</option>
+            <label>Amount</label>
+            <input type="number" class="form-control" formControlName="current_quantity">
+          </div>
+          <div class="form-group" style="width:150px">
+            <label for="reagentUnit">Unit</label>
+            <select id="reagentUnit" class="form-select" formControlName="unit">
+              <optgroup label="Volume">
+                <option value="nL">nL</option>
+                <option value="uL">uL</option>
+                <option value="mL">mL</option>
+                <option value="L">L</option>
+              </optgroup>
+              <optgroup label="Mass">
+                <option value="ng">ng</option>
+                <option value="ug">ug</option>
+                <option value="mg">mg</option>
+                <option value="g">g</option>
+                <option value="kg">kg</option>
+              </optgroup>
+              <optgroup label="Mole">
+                <option value="nM">nM</option>
+                <option value="uM">uM</option>
+                <option value="mM">mM</option>
+                <option value="M">M</option>
+              </optgroup>
+              <optgroup label="Count">
+                <option value="ea">ea</option>
+              </optgroup>
             </select>
           </div>
-        </form>
+        }
 
-      </section>
-    </div>
-
-    <hr>
-
-
-    @if (job.status) {
-      <div>
-
-      </div>
-      <div>
-
-      </div>
+        <div class="form-check">
+          <input type="checkbox" class="form-check-input" id="use_previous" formControlName="use_previous">
+          <label class="form-check-label" for="use_previous">Use previous reagent</label>
+          <div>
+            <small class="form-text text-muted">
+              If checked, the reagent will be used from the selected source and a new reagent record won't be create
+            </small>
+          </div>
+        </div>
+      </form>
+      @if (job.user_annotations.length > 0) {
+        <div [formGroup]="metadata">
+          <div [formArrayName]="'user_metadata'" class="d-flex gap-2 flex-column">
+            @for (i of metadata.controls['user_metadata'].controls; track i; let index = $index) {
+              <form [formGroupName]="index" class="d-flex gap-2">
+                <div class="form-group" style="width:400px">
+                  <label>{{i.value['name']}}</label>
+                  <div class="d-flex gap-2">
+                    @if (i.value['name']==='Modification parameters') {
+                      <input readonly (focus)="setCurrentForm(i)" type="search" [ngbTypeahead]="searchValue" class="form-control" [formControl]="metadata.controls['user_metadata'].controls[index].controls['value']">
+                      <button class="btn btn-sm btn-primary" (click)="editMetadata(index, 'user_metadata')"><i class="bi bi-pen"></i></button>
+                    } @else {
+                      <input (focus)="setCurrentForm(i)" type="search" [ngbTypeahead]="searchValue" class="form-control" [formControl]="metadata.controls['user_metadata'].controls[index].controls['value']">
+                    }
+                    @if (!i.value['mandatory']) {
+                      <button class="btn btn-sm btn-danger" (click)="removeMetadata(index, 'user_metadata')"><i class="bi bi-trash2"></i></button>
+                    }
+                  </div>
+                </div>
+              </form>
+            }
+          </div>
+        </div>
+      }
+      <hr>
     }
 
   }
-
-  <div class="d-flex gap-2">
+  <div class="d-flex gap-2 mt-2">
     @if (!job) {
       <button class="btn btn-primary" (click)="createDraftJob()">Create Job</button>
     } @else {
       <button class="btn btn-primary" [disabled]="job.status !== 'draft'">Submit</button>
       <button class="btn btn-primary" (click)="update()">Update</button>
+      <button class="btn btn-primary" (click)="fastaFileUpload.click()">Upload Fasta File</button>
+      <input type="file" hidden #fastaFileUpload (change)="annotationService.handleFileInput($event, job.id, 'user_annotation', 'fasta file from job '+job.job_name, 'file')">
+
     }
+
     <a class="btn btn-danger" href="/#/instruments/jobs">New Submission</a>
   </div>
+
   @if (job) {
+    <div class="d-flex flex-column g-2">
+      @if (annotationService.audioURL) {
+        <div class="d-flex flex-column gap-1">
+          <div class="d-flex flex-row justify-content-center">
+            <div class="d-flex flex-column">
+              <p>
+                <b>Recording Preview</b>
+              </p>
+              @if (annotationService.clickedInstrumentItem==='Audio') {
+                <audio controls>
+                  <source [src]="annotationService.audioURL" type="audio/webm">
+                  Your browser does not support the audio element.
+                </audio>
+              } @else if (annotationService.clickedInstrumentItem==='Video') {
+                <video controls [width]="400" [height]="300">
+                  <source [src]="annotationService.audioURL" type="video/webm">
+                  Your browser does not support the video element.
+                </video>
+              }
+            </div>
+
+          </div>
+          <div class="d-flex flex-row gap-2">
+            <button class="btn btn-primary" (click)="annotationService.saveRecording(job.id, 'user_annotation')">Save</button>
+            <button class="btn btn-danger" (click)="annotationService.deletePreviewRecording()">Delete</button>
+
+          </div>
+        </div>
+      }
+    </div>
+    <div class="p-2" id="annotationCreator">
+      @if (this.annotationService.clickedInstrumentItem==='Text') {
+        <app-annotation-text-form (text)="this.annotationService.handleTextAnnotation($event, job.id, 'user_annotation')"></app-annotation-text-form>
+      } @else if (this.annotationService.clickedInstrumentItem==='Sketchpad') {
+        <app-handwritten-annotation (sketch)="this.annotationService.handleSketchAnnotation($event, job.id, 'user_annotation')"></app-handwritten-annotation>
+      } @else if (this.annotationService.clickedInstrumentItem==='File') {
+        <div class="form-group">
+          <label for="file">Upload File</label>
+          <input type="file" class="form-control" id="file" (change)="this.annotationService.handleFileInput($event, job.id, 'user_annotation')">
+        </div>
+      } @else if (this.annotationService.clickedInstrumentItem==='Audio') {
+        <div class="d-flex flex-row gap-2 flex-wrap">
+          @if (this.annotationService.recording) {
+            <button class="btn btn-danger" (click)="this.annotationService.stopRecording()">Stop Recording</button>
+          } @else {
+            @if (previewVideo) {
+              <button class="btn btn-primary" (click)="this.annotationService.startRecording(true, false, previewVideo)">Start Recording</button>
+            } @else {
+
+            }
+          }
+
+          <div class="form-floating">
+            <select class="form-select" [(ngModel)]="this.annotationService.currentAudioDevice" >
+              <option selected [value]="null">Default Selected</option>
+              @for (a of this.annotationService.audioDevices; track a) {
+                <option [ngValue]="a">{{a.label}}</option>
+              }
+            </select>
+            <label>Select Audio Device</label>
+          </div>
+          <canvas id="visualizer" width="200" height="50"></canvas>
+        </div>
+
+      } @else if (annotationService.clickedInstrumentItem==='Video') {
+        <div class="container">
+          <div class="d-flex flex-column gap-2">
+            <div class="d-flex flex-row gap-2">
+              @if (annotationService.recording) {
+                <button class="btn btn-danger" (click)="annotationService.stopRecording()">Stop Recording</button>
+              } @else {
+                @if (previewVideo) {
+                  <button class="btn btn-primary" (click)="annotationService.startRecording(enableAudio.checked, enableVideo.checked, previewVideo)">Record Video</button>
+                }
+                <button class="btn btn-primary" (click)="annotationService.startScreenRecording(enableAudio.checked)">Record Screen</button>
+              }
+            </div>
+            <div class="d-flex flex-row gap-2">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" #enableVideo>
+                <label class="form-check-label">Enable Video</label>
+              </div>
+              @if (enableVideo.checked) {
+                <div class="form-floating">
+                  <select class="form-select" [(ngModel)]="annotationService.currentCameraDevice">
+                    <option selected>Default Selected</option>
+                    @for (a of annotationService.cameraDevices; track a) {
+                      <option [ngValue]="a">{{a.label}}</option>
+                    }
+                  </select>
+                  <label>Select Camera Device</label>
+                </div>
+              }
+            </div>
+            <div class="d-flex flex-row gap-2">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" #enableAudio>
+                <label class="form-check-label">Enable Audio</label>
+              </div>
+              @if (enableAudio.checked) {
+                <div class="form-floating">
+                  <select class="form-select" [(ngModel)]="this.annotationService.currentAudioDevice">
+                    <option selected>Default Selected</option>
+                    @for (a of this.annotationService.audioDevices; track a) {
+                      <option [ngValue]="a">{{a.label}}</option>
+                    }
+                  </select>
+                  <label>Select Audio Device</label>
+                </div>
+              }
+            </div>
+          </div>
+          @if (this.annotationService.recording && !this.annotationService.screenRecording) {
+            <div class="d-flex flex-row justify-content-center">
+              <video autoplay muted #previewVideo [width]="400" [height]="300"></video>
+            </div>
+          }
+        </div>
+
+      } @else if (this.annotationService.clickedInstrumentItem==='Image') {
+        <div class="form-group">
+          <label for="image">Upload Image</label>
+          <input type="file" class="form-control" id="image" (change)="this.annotationService.handleFileInput($event, job.id, 'user_annotation')">
+        </div>
+      } @else if (this.annotationService.clickedInstrumentItem === 'Alignment') {
+        <div class="form-group">
+          <label for="file">Upload Alignment</label>
+          <input type="file" class="form-control" id="alignment-file" (change)="this.annotationService.handleFileInput($event, job.id, 'user_annotation')">
+        </div>
+      }
+    </div>
     @if (job.user_annotations) {
-      <app-annotation-presenter [annotations]="job.user_annotations"></app-annotation-presenter>
+      <app-annotation-presenter [annotations]="job.user_annotations" (deleteAnnotation)="handleDeleteAnnotation($event)"></app-annotation-presenter>
       <div style="position: fixed; z-index: 1030; bottom: 50px; right: 50px">
         <div class="d-flex flex-row gap-2 align-items-center">
           <div ngbDropdown placement="top-end" class="d-inline-block">
@@ -283,7 +376,6 @@
                   <button ngbDropdownItem (click)="annotationService.annotationInstrumentMenuClick(a, 'user_annotation', this.job.id)">{{a}}</button>
                 }
               }
-
             </div>
           </div>
         </div>

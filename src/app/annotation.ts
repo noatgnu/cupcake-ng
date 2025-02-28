@@ -21,6 +21,10 @@ export interface Annotation {
   metadata_columns: MetadataColumn[];
   instrument_usage: InstrumentUsage[];
   fixed: boolean;
+  user: {
+    id: number;
+    username: string;
+  }|null;
 }
 
 export interface AnnotationQuery {

@@ -1,5 +1,14 @@
-import {Component, Input, OnInit} from '@angular/core';
-import {FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
+import {AfterViewInit, Component, ElementRef, Input, OnInit, ViewChild} from '@angular/core';
+import {
+  Form,
+  FormArray,
+  FormBuilder,
+  FormControl,
+  FormGroup,
+  FormsModule,
+  ReactiveFormsModule,
+  Validators
+} from "@angular/forms";
 import {InstrumentJob} from "../../../instrument-job";
 import {WebService} from "../../../web.service";
 import {
@@ -25,6 +34,13 @@ import {
   AnnotationPresenterComponent
 } from "../../../protocol-session/annotation-presenter/annotation-presenter.component";
 import {AnnotationService} from "../../../annotation.service";
+import {
+  AnnotationTextFormComponent
+} from "../../../protocol-session/annotation-text-form/annotation-text-form.component";
+import {
+  HandwrittenAnnotationComponent
+} from "../../../protocol-session/handwritten-annotation/handwritten-annotation.component";
+import {Annotation} from "../../../annotation";
 
 @Component({
   selector: 'app-job-submission',
@@ -39,12 +55,16 @@ import {AnnotationService} from "../../../annotation.service";
     NgbDropdownMenu,
     NgbDropdownToggle,
     AnnotationPresenterComponent,
-    NgbDropdownItem
+    NgbDropdownItem,
+    AnnotationTextFormComponent,
+    HandwrittenAnnotationComponent,
+    FormsModule
   ],
   templateUrl: './job-submission.component.html',
   styleUrl: './job-submission.component.scss'
 })
-export class JobSubmissionComponent implements OnInit {
+export class JobSubmissionComponent implements OnInit, AfterViewInit {
+  initialized = false
   currentForm: FormGroup|undefined
   selectedProject: Project|undefined
   selectedProtocol: Protocol|undefined
@@ -55,67 +75,75 @@ export class JobSubmissionComponent implements OnInit {
   storedReagentSearchLoading = false
   searchMetadataLoading = false
   selectedGroup: LabGroup | undefined
-
-
+  @ViewChild('previewVideo') previewVideo?: ElementRef;
 
   @Input() set job(value: InstrumentJob|undefined) {
     this._job = value
     console.log(value)
-    if (value) {
+    if (value && this.initialized) {
       // @ts-ignore
-      this.form.patchValue({job_name: value.job_name, staff: value.staff.map(s => s.id), status: value.status})
-      this.formSampleExtraData.patchValue({
-        sample_type: value.sample_type,
-        sample_number: value.sample_number
-      })
-      if (value.service_lab_group) {
-        // @ts-ignore
-        this.labGroupForm.patchValue({name: value.service_lab_group.name, selected: value.service_lab_group.id})
-        this.web.getLabGroup(value.service_lab_group.id).subscribe((labGroup) => {
+      this.setupJob(value);
+    }
+  }
+
+  private setupJob(value: InstrumentJob) {
+    // @ts-ignore
+    this.form.patchValue({job_name: value.job_name, staff: value.staff.map(s => s.id), status: value.status})
+    this.formSampleExtraData.patchValue({
+      sample_type: value.sample_type,
+      sample_number: value.sample_number
+    })
+    if (value.service_lab_group) {
+      // @ts-ignore
+      if (this.labGroupForm.value.selected) {
+        this.web.getLabGroup(this.labGroupForm.value.selected).subscribe((labGroup) => {
+          console.log(labGroup)
           this.selectedGroup = labGroup
           if (labGroup.service_storage) {
             this.service_storage = labGroup.service_storage
           }
         })
       }
-      this.fundingForm.patchValue({
-        cost_center: value.cost_center,
-        funder: value.funder,
-      })
-      if (value.stored_reagent) {
-        // @ts-ignore
-        this.reagentForm.patchValue({id: value.stored_reagent.id,
-          name: value.stored_reagent.reagent.name,
-          current_quantity: value.stored_reagent.quantity,
-          unit: value.stored_reagent.reagent.unit
-        })
-        this.web.getStoredReagent(value.stored_reagent.id).subscribe((reagent) => {
-          this.selectedStoredReagent = reagent
-        })
-      }
-      if (value.protocol) {
-        // @ts-ignore
-        this.protocolForm.patchValue({id: value.protocol.id,
-          protocol_title: value.protocol.protocol_title,
-          protocol_description: value.protocol.protocol_description
-        })
-
-        this.web.getProtocol(value.protocol.id).subscribe((protocol) => {
-          this.selectedProtocol = protocol
-        })
-      }
-      this.web.getProject(value.project.id).subscribe((project) => {
-        this.selectedProject = project
-        // @ts-ignore
-        this.projectForm.patchValue({id: project.id,
-          project_name: project.project_name,
-          project_description: project.project_description
-        })
-      })
-      this.setMetadataFormArray('user_metadata', value.user_metadata);
-      this.setMetadataFormArray('staff_metadata', value.staff_metadata);
     }
+    this.fundingForm.patchValue({
+      cost_center: value.cost_center,
+      funder: value.funder,
+    })
+    if (value.stored_reagent) {
+      // @ts-ignore
+      this.reagentForm.patchValue({id: value.stored_reagent.id,
+        name: value.stored_reagent.reagent.name,
+        current_quantity: value.stored_reagent.quantity,
+        unit: value.stored_reagent.reagent.unit
+      })
+      this.web.getStoredReagent(value.stored_reagent.id).subscribe((reagent) => {
+        this.selectedStoredReagent = reagent
+      })
+    }
+    if (value.protocol) {
+      // @ts-ignore
+      this.protocolForm.patchValue({id: value.protocol.id,
+        protocol_title: value.protocol.protocol_title,
+        protocol_description: value.protocol.protocol_description
+      })
+
+      this.web.getProtocol(value.protocol.id).subscribe((protocol) => {
+        this.selectedProtocol = protocol
+      })
+    }
+    this.web.getProject(value.project.id).subscribe((project) => {
+      this.selectedProject = project
+      // @ts-ignore
+      this.projectForm.patchValue({id: project.id,
+        project_name: project.project_name,
+        project_description: project.project_description
+      })
+    })
+    this.setMetadataFormArray('user_metadata', value.user_metadata);
+    this.setMetadataFormArray('staff_metadata', value.staff_metadata);
+    console.log(this.metadata)
   }
+
   get job(): InstrumentJob|undefined {
     return this._job
   }
@@ -150,8 +178,20 @@ export class JobSubmissionComponent implements OnInit {
   })
 
   metadata = this.fb.group({
-    user_metadata: this.fb.array<FormGroup>([]),
-    staff_metadata: this.fb.array<FormGroup>([])
+    user_metadata: this.fb.array<FormGroup<{
+      id: FormControl<number>;
+      value: FormControl<string>;
+      name: FormControl<string>;
+      type: FormControl<string>;
+      mandatory: FormControl<boolean>;
+    }>>([]),
+    staff_metadata: this.fb.array<FormGroup<{
+      id: FormControl<number>;
+      value: FormControl<string>;
+      name: FormControl<string>;
+      type: FormControl<string>;
+      mandatory: FormControl<boolean>;
+    }>>([])
   })
 
   reagentForm = this.fb.group({
@@ -203,34 +243,13 @@ export class JobSubmissionComponent implements OnInit {
           this.job = job
         })
       }
-
     })
-    this.labGroupForm.patchValue({name: this.defaultLabGroup})
-    this.web.getLabGroups(this.defaultLabGroup).subscribe((labGroup) => {
-      this.labGroupQuery = labGroup
-      if (labGroup.results.length > 0) {
-        if (!this.labGroupForm.value.selected) {
-          // @ts-ignore
-          this.labGroupForm.patchValue({selected: labGroup.results[0].id})
-          this.service_storage = labGroup.results[0].service_storage
-          this.selectedGroup = labGroup.results[0]
-          this.web.getUsersByLabGroup(labGroup.results[0].id).subscribe((users) => {
-            this.labGroupUserQuery = users
-          })
-        }
-      }
-    })
-    this.labGroupForm.controls.selected.valueChanges.subscribe((value) => {
+    this.annotationService.moveToAnnotationCreator.asObservable().subscribe((value) => {
       if (value) {
-        this.web.getLabGroup(value).subscribe((labGroup) => {
-          this.selectedGroup = labGroup
-          if (this.service_storage) {
-            this.service_storage = labGroup.service_storage
-          }
-        })
-        this.web.getUsersByLabGroup(value, this.labUserMemberPageSize, this.labUserMemberPage).subscribe((users) => {
-          this.labGroupUserQuery = users
-        })
+        const divComponent = document.getElementById('annotationCreator')
+        if (divComponent) {
+          divComponent.scrollIntoView({behavior: 'smooth'})
+        }
       }
     })
   }
@@ -385,19 +404,68 @@ export class JobSubmissionComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.subscribeToFormArrayChanges(this.metadata.get('user_metadata') as FormArray);
-    this.subscribeToFormArrayChanges(this.metadata.get('staff_metadata') as FormArray);
+    //this.subscribeToFormArrayChanges(this.metadata.get('user_metadata') as FormArray);
+    //this.subscribeToFormArrayChanges(this.metadata.get('staff_metadata') as FormArray);
+
+  }
+
+  ngAfterViewInit() {
+    this.labGroupForm.controls.selected.valueChanges.subscribe((value) => {
+      if (value) {
+
+        this.web.getLabGroup(value).subscribe((labGroup) => {
+          this.selectedGroup = labGroup
+          if (this.service_storage) {
+            this.service_storage = labGroup.service_storage
+          }
+        })
+        this.web.getUsersByLabGroup(value, this.labUserMemberPageSize, this.labUserMemberPage).subscribe((users) => {
+          this.labGroupUserQuery = users
+        })
+      }
+    })
+    this.labGroupForm.patchValue({name: this.defaultLabGroup})
+    this.web.getLabGroups(this.defaultLabGroup).subscribe((labGroup) => {
+      this.labGroupQuery = labGroup
+      if (labGroup.results.length > 0) {
+        if (!this.labGroupForm.value.selected) {
+          // @ts-ignore
+          this.labGroupForm.patchValue({selected: labGroup.results[0].id})
+          this.service_storage = labGroup.results[0].service_storage
+          this.selectedGroup = labGroup.results[0]
+          this.web.getUsersByLabGroup(labGroup.results[0].id).subscribe((users) => {
+            this.labGroupUserQuery = users
+          })
+        }
+      }
+    })
+    this.initialized = true
+    if (this.job) {
+      this.setupJob(this.job)
+    }
   }
 
   setMetadataFormArray(arrayName: string, metadata: any[]): void {
-    const formArray = this.fb.array<FormGroup>([]);
+    const formArray: FormArray<FormGroup<{
+      id: FormControl<number>;
+      value: FormControl<string>;
+      name: FormControl<string>;
+      type: FormControl<string>;
+      mandatory: FormControl<boolean>;
+    }>> = this.fb.array<FormGroup>([]);
     for (const m of metadata) {
-      const group = this.fb.group({
-        id: m.id,
-        value: m.value,
-        name: m.name,
-        type: m.type,
-        mandatory: m.mandatory
+      const group: FormGroup<{
+        id: FormControl<number>;
+        value: FormControl<string>;
+        name: FormControl<string>;
+        type: FormControl<string>;
+        mandatory: FormControl<boolean>;
+      }> = this.fb.group({
+        id: new FormControl(m.id) ,
+        value: new FormControl(m.value),
+        name: new FormControl(m.name),
+        type: new FormControl(m.type),
+        mandatory: new FormControl(m.mandatory)
       });
       formArray.push(group);
       this.subscribeToFormGroupChanges(group);
@@ -611,5 +679,9 @@ export class JobSubmissionComponent implements OnInit {
     }).catch((error) => {
       console.log(error)
     })
+  }
+
+  handleDeleteAnnotation(annotation_id: number) {
+    this.annotationService.deleteAnnotation(annotation_id)
   }
 }
