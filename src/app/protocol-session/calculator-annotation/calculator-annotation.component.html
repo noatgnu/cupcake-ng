@@ -1,4 +1,4 @@
-<div class="d-flex flex-column gap-2" style="max-width: 290px">
+<div class="d-flex flex-column gap-2" style="max-width: 380px">
   <form [formGroup]="form">
     @if (executionMode === 'initial') {
       <div class="form-floating">
@@ -40,84 +40,84 @@
     <tbody>
     <tr>
       <td>
-        <button class="btn btn-sm btn-outline-primary" (click)="formNumber(1)" style="width: 40px">1</button>
+        <button class="btn btn-sm btn-outline-primary" (click)="formNumber(1)" style="width: 60px">1</button>
       </td>
       <td>
-        <button class="btn btn-sm btn-outline-primary" (click)="formNumber(2)" style="width: 40px">2</button>
+        <button class="btn btn-sm btn-outline-primary" (click)="formNumber(2)" style="width: 60px">2</button>
       </td>
       <td>
-        <button class="btn btn-sm btn-outline-primary" (click)="formNumber(3)" style="width: 40px">3</button>
+        <button class="btn btn-sm btn-outline-primary" (click)="formNumber(3)" style="width: 60px">3</button>
       </td>
       <td>
-        <button class="btn btn-sm btn-outline-primary" (click)="formOperation('+')" style="width: 50px"><i class="bi bi-plus"></i></button>
+        <button class="btn btn-sm btn-outline-primary" (click)="formOperation('+')" style="width: 60px"><i class="bi bi-plus"></i></button>
       </td>
       <td>
-        <button class="btn btn-sm btn-outline-primary" [disabled]="executionMode==='second'" (click)="formOperation('log2')" style="width: 50px">log2</button>
-      </td>
-    </tr>
-    <tr>
-      <td>
-        <button class="btn btn-sm btn-outline-primary" (click)="formNumber(4)" style="width: 40px">4</button>
-      </td>
-      <td>
-        <button class="btn btn-sm btn-outline-primary" (click)="formNumber(5)" style="width: 40px">5</button>
-      </td>
-      <td>
-        <button class="btn btn-sm btn-outline-primary" (click)="formNumber(6)" style="width: 40px">6</button>
-      </td>
-      <td>
-        <button class="btn btn-sm btn-outline-primary" (click)="formOperation('-')" style="width: 50px">-</button>
-      </td>
-      <td>
-        <button class="btn btn-sm btn-outline-primary" [disabled]="executionMode==='second'" (click)="formOperation('log10')" style="width: 50px">log10</button>
+        <button class="btn btn-sm btn-outline-primary" [disabled]="executionMode==='second'" (click)="formOperation('log2')" style="width: 60px">log2</button>
       </td>
     </tr>
     <tr>
       <td>
-        <button class="btn btn-sm btn-outline-primary" (click)="formNumber(7)" style="width: 40px">7</button>
+        <button class="btn btn-sm btn-outline-primary" (click)="formNumber(4)" style="width: 60px">4</button>
       </td>
       <td>
-        <button class="btn btn-sm btn-outline-primary" (click)="formNumber(8)" style="width: 40px">8</button>
+        <button class="btn btn-sm btn-outline-primary" (click)="formNumber(5)" style="width: 60px">5</button>
       </td>
       <td>
-        <button class="btn btn-sm btn-outline-primary" (click)="formNumber(9)" style="width: 40px">9</button>
+        <button class="btn btn-sm btn-outline-primary" (click)="formNumber(6)" style="width: 60px">6</button>
       </td>
       <td>
-        <button class="btn btn-sm btn-outline-primary" (click)="formOperation('/')" style="width: 50px"><i class="bi bi-slash"></i></button>
+        <button class="btn btn-sm btn-outline-primary" (click)="formOperation('-')" style="width: 60px">-</button>
       </td>
       <td>
-        <button class="btn btn-sm btn-outline-primary" [disabled]="executionMode==='second'" (click)="formOperation('sqrt')" style="width: 50px">sqrt</button>
-      </td>
-    <tr>
-      <td>
-        <button class="btn btn-sm btn-outline-primary" (click)="formNumber(0)" style="width: 40px">0</button>
-      </td>
-      <td>
-        <button class="btn btn-sm btn-outline-primary" (click)="formDecimal()" style="width: 40px">.</button>
-      </td>
-      <td>
-        <button class="btn btn-sm btn-outline-primary" (click)="formOperation('*')" style="width: 40px"><i class="bi bi-x"></i></button>
-      </td>
-      <td>
-        <button class="btn btn-sm btn-outline-primary" (click)="formOperation('^')" style="width: 50px">^</button>
-      </td>
-      <td>
-        <button class="btn btn-sm btn-outline-primary" [disabled]="executionMode==='second'" (click)="formOperation('abs')" style="width: 50px">abs</button>
+        <button class="btn btn-sm btn-outline-primary" [disabled]="executionMode==='second'" (click)="formOperation('log10')" style="width: 60px">log10</button>
       </td>
     </tr>
     <tr>
       <td>
-        <button class="btn btn-sm btn-outline-primary" (click)="formOperation('=')" style="width: 40px">=</button>
+        <button class="btn btn-sm btn-outline-primary" (click)="formNumber(7)" style="width: 60px">7</button>
       </td>
       <td>
-        <button class="btn btn-sm btn-outline-primary" (click)="formOperation('clr')" style="width: 40px">CLR</button>
+        <button class="btn btn-sm btn-outline-primary" (click)="formNumber(8)" style="width: 60px">8</button>
       </td>
       <td>
-        <button class="btn btn-sm btn-outline-primary" (click)="formDelete()" style="width: 40px">DEL</button>
+        <button class="btn btn-sm btn-outline-primary" (click)="formNumber(9)" style="width: 60px">9</button>
+      </td>
+      <td>
+        <button class="btn btn-sm btn-outline-primary" (click)="formOperation('/')" style="width: 60px"><i class="bi bi-slash"></i></button>
+      </td>
+      <td>
+        <button class="btn btn-sm btn-outline-primary" [disabled]="executionMode==='second'" (click)="formOperation('sqrt')" style="width: 60px">sqrt</button>
+      </td>
+    <tr>
+      <td>
+        <button class="btn btn-sm btn-outline-primary" (click)="formNumber(0)" style="width: 60px">0</button>
+      </td>
+      <td>
+        <button class="btn btn-sm btn-outline-primary" (click)="formDecimal()" style="width: 60px">.</button>
+      </td>
+      <td>
+        <button class="btn btn-sm btn-outline-primary" (click)="formOperation('*')" style="width: 60px"><i class="bi bi-x"></i></button>
+      </td>
+      <td>
+        <button class="btn btn-sm btn-outline-primary" (click)="formOperation('^')" style="width: 60px">^</button>
+      </td>
+      <td>
+        <button class="btn btn-sm btn-outline-primary" [disabled]="executionMode==='second'" (click)="formOperation('abs')" style="width: 60px">abs</button>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <button class="btn btn-sm btn-outline-primary" (click)="formOperation('=')" style="width: 60px">=</button>
+      </td>
+      <td>
+        <button class="btn btn-sm btn-outline-primary" (click)="formOperation('clr')" style="width: 60px">CLR</button>
+      </td>
+      <td>
+        <button class="btn btn-sm btn-outline-primary" (click)="formDelete()" style="width: 60px">DEL</button>
       </td>
       <td>
         @if (enableSave) {
-          <button class="btn btn-sm btn-outline-primary" (click)="formSave()" style="width: 50px"><i class="bi bi-save"></i></button>
+          <button class="btn btn-sm btn-outline-primary" (click)="formSave()" style="width: 60px"><i class="bi bi-save"></i></button>
         }
       </td>
       <td></td>
@@ -151,11 +151,8 @@
               }
             </div>
           </div>
-
         </div>
       }
     </div>
   }
-
 </div>
-

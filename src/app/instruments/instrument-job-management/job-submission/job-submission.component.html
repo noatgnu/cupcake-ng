@@ -3,7 +3,7 @@
   <form [formGroup]="form">
     <div class="form-group">
       <label for="jobName">Job Name</label>
-      <input id="jobName" type="text" class="form-control" formControlName="job_name" placeholder="Enter job name">
+      <input id="jobName" type="text" [ngClass]="{'dirty-control': form.controls['job_name'].dirty}" class="form-control" formControlName="job_name" placeholder="Enter job name">
     </div>
   </form>
 
@@ -190,7 +190,7 @@
           </div>
         </div>
       </form>
-      @if (job.user_annotations.length > 0) {
+      @if (job.user_metadata.length > 0) {
         <div [formGroup]="metadata">
           <div [formArrayName]="'user_metadata'" class="d-flex gap-2 flex-column">
             @for (i of metadata.controls['user_metadata'].controls; track i; let index = $index) {
@@ -208,6 +208,9 @@
                       <button class="btn btn-sm btn-danger" (click)="removeMetadata(index, 'user_metadata')"><i class="bi bi-trash2"></i></button>
                     }
                   </div>
+                  @if (i.value['name']==='Modification parameters' && i.value['value']) {
+                    <app-display-modification-parameters-metadata [value]="i.value['value']"></app-display-modification-parameters-metadata>
+                  }
                 </div>
               </form>
             }
@@ -215,10 +218,53 @@
         </div>
       }
       <hr>
+      <h5>MS Experiment Details (for staff)</h5>
+      @if (job.staff_metadata.length > 0) {
+        <div [formGroup]="metadata">
+          <div [formArrayName]="'staff_metadata'" class="d-flex gap-2 flex-column">
+            @for (i of metadata.controls['staff_metadata'].controls; track i; let index = $index) {
+              <form [formGroupName]="index" class="d-flex gap-2">
+                <div class="form-group" style="width:400px">
+                  <label>{{i.value['name']}}</label>
+                  <div class="d-flex gap-2">
+                    @if (i.value['name']==='Modification parameters') {
+                      <input readonly (focus)="setCurrentForm(i)" type="search" [ngbTypeahead]="searchValue" class="form-control" [formControl]="metadata.controls['staff_metadata'].controls[index].controls['value']">
+                      <button [disabled]="!staffModeAvailable" class="btn btn-sm btn-primary" (click)="editMetadata(index, 'staff_metadata')"><i class="bi bi-pen"></i></button>
+                    } @else {
+                      <input [readOnly]="!staffModeAvailable" (focus)="setCurrentForm(i)" type="search" [ngbTypeahead]="searchValue" class="form-control" [formControl]="metadata.controls['staff_metadata'].controls[index].controls['value']">
+                    }
+                    @if (!i.value['mandatory']) {
+                      <button class="btn btn-sm btn-danger" (click)="removeMetadata(index, 'staff_metadata')"><i class="bi bi-trash2"></i></button>
+                    }
+                  </div>
+                  @if (i.value['name']==='Modification parameters' && i.value['value']) {
+                    <app-display-modification-parameters-metadata [value]="i.value['value']"></app-display-modification-parameters-metadata>
+                  }
+                </div>
+              </form>
+            }
+          </div>
+        </div>
+      }
+      <p>
+        @if (job.injection_volume) {
+          <strong>Injection Volume:</strong> {{job.injection_volume}} {{job.injection_unit}}<br>
+        }
+        @if (job.location) {
+          <strong>Location:</strong> {{job.location}} <br>
+        }
+        @if (job.search_engine) {
+          <strong>Search Engine:</strong> {{job.search_engine}} {{job.search_engine_version}}<br>
+        }
+        @if (job.search_details) {
+          <strong>Search Details:</strong><br>
+          {{job.search_details}}
+        }
+      </p>
+      <hr>
     }
-
   }
-  <div class="d-flex gap-2 mt-2">
+  <div class="d-flex gap-2 mt-2" id="submitUpdateBar">
     @if (!job) {
       <button class="btn btn-primary" (click)="createDraftJob()">Create Job</button>
     } @else {
@@ -226,7 +272,32 @@
       <button class="btn btn-primary" (click)="update()">Update</button>
       <button class="btn btn-primary" (click)="fastaFileUpload.click()">Upload Fasta File</button>
       <input type="file" hidden #fastaFileUpload (change)="annotationService.handleFileInput($event, job.id, 'user_annotation', 'fasta file from job '+job.job_name, 'file')">
-
+      <div ngbDropdown display="dynamic" class="d-inline-black">
+        <button class="btn btn-primary" id="addMetadata" ngbDropdownToggle>
+          + User Metadata
+        </button>
+        <div ngbDropdownMenu aria-labelledby="addMetadata">
+          @for (m of metadataService.userMetadataTemplate; track m.name) {
+            <a class="dropdown-item" (click)="addMetadata(m, 'user_metadata')">
+              {{m.name}}
+            </a>
+          }
+        </div>
+      </div>
+      @if (staffModeAvailable) {
+        <div ngbDropdown display="dynamic" class="d-inline-black">
+          <button class="btn btn-warning" id="addStaffMetadata" ngbDropdownToggle>
+            + Staff Metadata
+          </button>
+          <div ngbDropdownMenu aria-labelledby="addStaffMetadata">
+            @for (m of metadataService.staffMetadataSpecific; track m) {
+              <a class="dropdown-item" (click)="addMetadata({name: m, type: 'comment'}, 'staff_metadata')">
+                {{m}}
+              </a>
+            }
+          </div>
+        </div>
+      }
     }
 
     <a class="btn btn-danger" href="/#/instruments/jobs">New Submission</a>
@@ -364,16 +435,39 @@
         </div>
       }
     </div>
-    @if (job.user_annotations) {
-      <app-annotation-presenter [annotations]="job.user_annotations" (deleteAnnotation)="handleDeleteAnnotation($event)"></app-annotation-presenter>
+    @if (job.user_annotations || job.staff_annotations) {
+      <ul ngbNav #nav="ngbNav" [(activeId)]="activeTab" class="nav-tabs"  [destroyOnHide]="false">
+        <li [ngbNavItem]="'user'">
+          <button ngbNavLink>User Annotations</button>
+          <ng-template ngbNavContent>
+            <app-annotation-presenter [annotations]="job.user_annotations" (deleteAnnotation)="handleDeleteAnnotation($event)"></app-annotation-presenter>
+          </ng-template>
+        </li>
+        <li [ngbNavItem]="'staff'">
+          <button ngbNavLink>Staff Annotations</button>
+          <ng-template ngbNavContent>
+            <app-annotation-presenter [annotations]="job.staff_annotations" (deleteAnnotation)="handleDeleteAnnotation($event)"></app-annotation-presenter>
+          </ng-template>
+        </li>
+      </ul>
+      <div [ngbNavOutlet]="nav" class="mt-2"></div>
       <div style="position: fixed; z-index: 1030; bottom: 50px; right: 50px">
         <div class="d-flex flex-row gap-2 align-items-center">
+          @if (staffModeAvailable) {
+            <button class="btn btn-warning" (click)="openStaffDataEntryPanel()">Staff</button>
+          }
           <div ngbDropdown placement="top-end" class="d-inline-block">
             <button class="btn btn-outline-success" ngbDropdownToggle><i class="bi bi-plus"></i></button>
             <div ngbDropdownMenu>
-              @if (this.job) {
-                @for (a of ['Audio', 'Text', 'Video', 'Image', 'Sketchpad', 'Counter','File', 'Checklist', 'Table', 'Alignment', 'Calculator', 'Molarity Calculator', 'Randomization', 'Large/Multiple Files']; track a) {
-                  <button ngbDropdownItem (click)="annotationService.annotationInstrumentMenuClick(a, 'user_annotation', this.job.id)">{{a}}</button>
+              @if (job) {
+                @if (staffModeAvailable) {
+                  @for (a of ['Audio', 'Text', 'Video', 'Image', 'Instrument', 'Sketchpad', 'Counter','File', 'Checklist', 'Table', 'Alignment', 'Calculator', 'Molarity Calculator', 'Randomization', 'Large/Multiple Files']; track a) {
+                    <button ngbDropdownItem (click)="annotationService.annotationInstrumentMenuClick(a, 'staff_annotation', job.id)">{{a}}</button>
+                  }
+                } @else {
+                  @for (a of ['Audio', 'Text', 'Video', 'Image', 'Sketchpad', 'Counter','File', 'Checklist', 'Table', 'Alignment', 'Calculator', 'Molarity Calculator', 'Randomization', 'Large/Multiple Files']; track a) {
+                    <button ngbDropdownItem (click)="annotationService.annotationInstrumentMenuClick(a, 'user_annotation', job.id)">{{a}}</button>
+                  }
                 }
               }
             </div>

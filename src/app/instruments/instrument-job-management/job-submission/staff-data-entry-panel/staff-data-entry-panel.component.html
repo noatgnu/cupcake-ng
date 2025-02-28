@@ -1,0 +1,46 @@
+<div class="offcanvas-header">
+  <h5 class="offcanvas-title">Staff Data Input</h5>
+
+  <button type="button" class="btn-close" aria-label="Close" (click)="close()"></button>
+</div>
+<div class="offcanvas-body">
+  <form [formGroup]="staffDataForm" class="d-flex flex-column gap-2">
+    <div class="form-group">
+      <label for="injection_volume">Injection Volume</label>
+      <input id="injection_volume" class="form-control" type="number" formControlName="injection_volume">
+    </div>
+    <div class="form-group">
+      <label for="injection_unit">Injection Unit</label>
+      <select id="injection_unit" class="form-select" formControlName="injection_unit">
+        <option value="nL">nL</option>
+        <option value="uL">uL</option>
+        <option value="mL">mL</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label for="search_engine">Search Engine</label>
+      <select id="search_engine" class="form-select" formControlName="search_engine">
+        <option value="MaxQuant">MaxQuant</option>
+        <option value="Proteome Discoverer">Proteome Discoverer</option>
+        <option value="Skyline">Skyline</option>
+        <option value="DIANN">DIANN</option>
+        <option value="MSFragger">MSFragger</option>
+        <option value="Fragpipe">Fragpipe</option>
+        <option value="Other">Other</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label for="search_engine_version">Search Engine Version</label>
+      <input id="search_engine_version" class="form-control" type="text" formControlName="search_engine_version">
+    </div>
+    <div class="form-group">
+      <label for="location">Folder Location</label>
+      <input id="location" class="form-control" type="text" formControlName="location">
+    </div>
+    <div class="form-group">
+      <label for="search_details">Search Details</label>
+      <textarea id="search_details" class="form-control" formControlName="search_details"></textarea>
+    </div>
+  </form>
+  <button type="button" class="btn btn-warning mt-2" (click)="save()">Save</button>
+</div>

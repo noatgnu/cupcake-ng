@@ -1,169 +1,132 @@
 <div class="list-group overflow-auto">
   @for (a of annotations; track a.id) {
     @if (dataService.annotationPermissions[a.id]) {
-      <hr>
-      <div class="list-group-item border-0">
-        <div class="d-flex flex-row justify-content-between flex-wrap">
-          <p>
-            @if (a.annotation_name) {
-              {{a.annotation_name}}
-            } @else {
-              Untitled Annotation
+      <div class="card mb-3">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <div>
+            <h5 class="card-title mb-0">
+              @if (a.annotation_name) {
+                {{a.annotation_name}}
+              } @else {
+                Untitled Annotation
+              }
+            </h5>
+
+            <small class="text-muted">Date: {{a.created_at | date: "short"}}</small> |
+            @if (a.user) {
+              <small class="text-muted">User: {{a.user.username}}</small>
             }
-          </p>
-          <div id="annotationControlPanel" class="d-flex flex-row gap-1">
+          </div>
+          <div class="btn-group">
             @if (dataService.annotationPermissions[a.id].edit){
-              <button class="btn btn-outline-info" ngbTooltip="Add metadata" (click)="addMetadata(a)"><i class="bi bi-database-add"></i></button>
-              <button class="btn btn-outline-danger" (click)="scratch(a)" ngbTooltip="Strike content"><i class="bi bi-type-strikethrough"></i></button>
-              <button class="btn btn-outline-primary" (click)="annotationRename(a)" ngbTooltip="Rename annotation"><i class="bi bi-input-cursor-text"></i></button>
+              <button class="btn btn-outline-info btn-sm" ngbTooltip="Add metadata" (click)="addMetadata(a)"><i class="bi bi-database-add"></i></button>
+              <button class="btn btn-outline-danger btn-sm" (click)="scratch(a)" ngbTooltip="Strike content"><i class="bi bi-type-strikethrough"></i></button>
+              <button class="btn btn-outline-primary btn-sm" (click)="annotationRename(a)" ngbTooltip="Rename annotation"><i class="bi bi-input-cursor-text"></i></button>
               @if (['audio', 'video'].includes(a.annotation_type)) {
-                <button class="btn btn-outline-primary" (click)="openTranscribeModal(a)">Re-transcribe</button>
-                <button class="btn btn-outline-primary" (click)="transcriptSummarize(a.id)" ngbTooltip="Transcribe annotation"><i class="bi bi-body-text"></i></button>
+                <button class="btn btn-outline-primary btn-sm" (click)="openTranscribeModal(a)">Re-transcribe</button>
+                <button class="btn btn-outline-primary btn-sm" (click)="transcriptSummarize(a.id)" ngbTooltip="Transcribe annotation"><i class="bi bi-body-text"></i></button>
               }
               @if (['sketch'].includes(a.annotation_type)) {
-                <button class="btn btn-outline-primary" (click)="ocrAnnotation(a)" ngbTooltip="Perform Optical Character Recognition">OCR</button>
+                <button class="btn btn-outline-primary btn-sm" (click)="ocrAnnotation(a)" ngbTooltip="Perform Optical Character Recognition">OCR</button>
               }
             }
             @if (['counter'].includes(a.annotation_type) && speech.speechRecognition) {
               @if (speech.currentAnnotation === a.id) {
-                <button class="btn btn-outline-danger" (click)="forceStop = true;speechRecognition.stop();speech.currentAnnotation=-1"><i class="bi bi-stop"></i></button>
+                <button class="btn btn-outline-danger btn-sm" (click)="forceStop = true;speechRecognition.stop();speech.currentAnnotation=-1"><i class="bi bi-stop"></i></button>
               } @else {
-                <button class="btn btn-outline-primary" (click)="startSpeechRecognition(a.id)"><i class="bi bi-record"></i></button>
+                <button class="btn btn-outline-primary btn-sm" (click)="startSpeechRecognition(a.id)"><i class="bi bi-record"></i></button>
               }
-
             }
             @if (['image', 'audio', 'video', 'sketch', 'file'].includes(a.annotation_type)) {
-              <button class="btn btn-outline-primary" (click)="download(a.id)"><i class="bi bi-download"></i></button>
+              <button class="btn btn-outline-primary btn-sm" (click)="download(a.id)"><i class="bi bi-download"></i></button>
             }
             @if (dataService.annotationPermissions[a.id].delete){
-              <button class="btn btn-outline-danger" (click)="delete(a.id)"><i class="bi bi-trash"></i></button>
+              <button class="btn btn-outline-danger btn-sm" (click)="delete(a.id)"><i class="bi bi-trash"></i></button>
             }
           </div>
-          <div id="annotationControlPanelDropdown" ngbDropdown class="d-inline-block">
-            <button class="btn btn-outline-secondary" id="annotationControlPanelDropdownButton" ngbDropdownToggle><i class="bi bi-three-dots"></i></button>
-            <div ngbDropdownMenu aria-labelledby="annotationControlPanelDropdownButton">
-
-              @if (dataService.annotationPermissions[a.id].edit){
-                <button class="dropdown-item" (click)="scratch(a)"><i class="bi bi-type-strikethrough"></i> Disable</button>
-                <button class="dropdown-item" (click)="annotationRename(a)"><i class="bi bi-input-cursor-text"></i> Rename</button>
-                @if (['counter'].includes(a.annotation_type) && speech.speechRecognition) {
-                  @if (speech.currentAnnotation === a.id) {
-                    <button  class="dropdown-item" (click)="forceStop = true;speechRecognition.stop();speech.currentAnnotation=-1"><i class="bi bi-stop"></i> Stop Voice Command</button>
-                  } @else {
-                    <button  class="dropdown-item" (click)="startSpeechRecognition(a.id)"><i class="bi bi-record"></i> Start Voice Command</button>
-                  }
-
-                }
-                @if (['audio', 'video'].includes(a.annotation_type) && dataService.serverSettings.use_whisper) {
-                  <button class="dropdown-item" (click)="openTranscribeModal(a)"><i class="bi bi-pencil"></i> Re-transcribe</button>
-                }
-                @if (['sketch'].includes(a.annotation_type) && dataService.serverSettings.use_ocr) {
-                  <button class="dropdown-item" (click)="ocrAnnotation(a)"><i class="bi bi-pencil"></i> OCR</button>
-                }
-              }
-
-              @if (['image', 'audio', 'video', 'sketch', 'file'].includes(a.annotation_type)) {
-                <button class="dropdown-item" (click)="download(a.id)"><i class="bi bi-download"></i> Download</button>
-              }
-              @if (dataService.annotationPermissions[a.id].delete){
-                <button class="dropdown-item" (click)="delete(a.id)"><i class="bi bi-trash"></i> Delete</button>
-              }
-            </div>
-
-          </div>
         </div>
-        <div class="d-flex flex-row">
-          <p>Date: {{a.created_at|date: "short"}} | Annotation Type: {{a.annotation_type}}</p>
-        </div>
-        <div class="d-flex flex-row">
-          <p>Last save: {{a.updated_at|date: "short"}}</p>
-        </div>
-        @if (a.user) {
-          <div class="d-flex flex-row">
-            <p>User: {{a.user.username}}</p>
-          </div>
-        }
-
-        @if (a.scratched) {
-          <div class="alert alert-secondary mt-2" role="alert">
-            This annotation has been disabled
-          </div>
-        } @else {
-          @if (a.annotation_type === 'text') {
-            <div [innerHTML]="a.annotation"></div>
-          } @else if (a.annotation_type === 'instrument') {
-            <div class="d-flex flex-row justify-content-center">
-              <app-instrument-booking-presenter [annotation]="a"></app-instrument-booking-presenter>
+        <div class="card-body">
+          @if (a.scratched) {
+            <div class="alert alert-secondary mt-2" role="alert">
+              This annotation has been disabled
             </div>
-          } @else if (a.annotation_type === 'image') {
-            <div class="d-flex flex-row justify-content-center">
-              <app-image-presenter [annotation]="a"></app-image-presenter>
-            </div>
-          } @else if (a.annotation_type === 'audio') {
-            <div class="d-flex flex-row justify-content-center">
-              <app-media-presenter [annotation]="a"></app-media-presenter>
-            </div>
-          } @else if (a.annotation_type === 'video') {
-            <div class="d-flex flex-row justify-content-center">
+          } @else {
+            @if (a.annotation_type === 'text') {
+              <div [innerHTML]="a.annotation"></div>
+            } @else if (a.annotation_type === 'instrument') {
+              <div class="d-flex flex-row justify-content-center">
+                <app-instrument-booking-presenter [annotation]="a"></app-instrument-booking-presenter>
+              </div>
+            } @else if (a.annotation_type === 'image') {
+              <div class="d-flex flex-row justify-content-center">
+                <app-image-presenter [annotation]="a"></app-image-presenter>
+              </div>
+            } @else if (a.annotation_type === 'audio') {
               <div class="d-flex flex-row justify-content-center">
                 <app-media-presenter [annotation]="a"></app-media-presenter>
               </div>
-            </div>
-          } @else if (a.annotation_type === 'sketch') {
-            <div class="d-flex flex-row justify-content-center">
-              <app-sketch-presenter [annotation]="a"></app-sketch-presenter>
-            </div>
-          } @else if (a.annotation_type === 'checklist') {
-            <div class="d-flex flex-row justify-content-center">
-              <app-checklist-presenter [annotation]="a" (change)="updateAnnotation($event)"></app-checklist-presenter>
-            </div>
-          } @else if (a.annotation_type === 'counter') {
-            <div class="d-flex flex-row justify-content-center">
-              <app-counter-presenter [annotation]="a" (change)="updateAnnotation($event)"></app-counter-presenter>
-            </div>
-          } @else if (a.annotation_type === 'table') {
-            <div class="d-flex flex-row justify-content-center">
-              <app-table-presenter [annotation]="a" (change)="updateAnnotation($event)"></app-table-presenter>
-            </div>
-          } @else if (a.annotation_type === 'alignment') {
-            <div class="d-flex flex-row justify-content-center">
-              <app-alignment-annotation [annotation]="a" (change)="updateAnnotation($event)"></app-alignment-annotation>
-            </div>
-          } @else if (a.annotation_type === 'calculator') {
-            <div class="d-flex flex-row justify-content-center">
-              <app-calculator-annotation [annotation]="a" [enableSave]="true" (change)="updateAnnotation($event)"></app-calculator-annotation>
-            </div>
-          } @else if (a.annotation_type === 'mcalculator') {
-            <div class="d-flex flex-row justify-content-center">
-              <app-molarity-calculator [annotation]="a" (change)="updateAnnotation($event)"></app-molarity-calculator>
-            </div>
-          } @else if (a.annotation_type === 'randomization') {
-            <div class="d-flex flex-row justify-content-center">
-              <app-randomization-presenter [annotation]="a"></app-randomization-presenter>
-            </div>
-          } @else if (a.annotation) {
-            <div>
-              <p>{{a.annotation}}</p>
-            </div>
-          }
-          @if (a.metadata_columns.length >0) {
-            <div class="d-flex flex-wrap gap-2 mt-2 mb-2">
-              @for (m of a.metadata_columns; track m.id) {
-                @if (m.type === "Characteristics") {
-                  <span class="badge bg-primary" ngbTooltip="Characteristics">{{m.name}}: {{m.value}}</span>
-                } @else if (m.type === "Comment") {
-                  <span class="badge bg-secondary" ngbTooltip="Comment">{{m.name}}: {{m.value}}</span>
-                } @else if (m.type === "Factor value") {
-                  <span class="badge bg-success" ngbTooltip="Factor value">{{m.name}}: {{m.value}}</span>
-                } @else {
-                  <span class="badge bg-danger" ngbTooltip="Other">{{m.name}}: {{m.value}}</span>
+            } @else if (a.annotation_type === 'video') {
+              <div class="d-flex flex-row justify-content-center">
+                <app-media-presenter [annotation]="a"></app-media-presenter>
+              </div>
+            } @else if (a.annotation_type === 'sketch') {
+              <div class="d-flex flex-row justify-content-center">
+                <app-sketch-presenter [annotation]="a"></app-sketch-presenter>
+              </div>
+            } @else if (a.annotation_type === 'checklist') {
+              <div class="d-flex flex-row justify-content-center">
+                <app-checklist-presenter [annotation]="a" (change)="updateAnnotation($event)"></app-checklist-presenter>
+              </div>
+            } @else if (a.annotation_type === 'counter') {
+              <div class="d-flex flex-row justify-content-center">
+                <app-counter-presenter [annotation]="a" (change)="updateAnnotation($event)"></app-counter-presenter>
+              </div>
+            } @else if (a.annotation_type === 'table') {
+              <div class="d-flex flex-row justify-content-center">
+                <app-table-presenter [annotation]="a" (change)="updateAnnotation($event)"></app-table-presenter>
+              </div>
+            } @else if (a.annotation_type === 'alignment') {
+              <div class="d-flex flex-row justify-content-center">
+                <app-alignment-annotation [annotation]="a" (change)="updateAnnotation($event)"></app-alignment-annotation>
+              </div>
+            } @else if (a.annotation_type === 'calculator') {
+              <div class="d-flex flex-row justify-content-center">
+                <app-calculator-annotation [annotation]="a" [enableSave]="true" (change)="updateAnnotation($event)"></app-calculator-annotation>
+              </div>
+            } @else if (a.annotation_type === 'mcalculator') {
+              <div class="d-flex flex-row justify-content-center">
+                <app-molarity-calculator [annotation]="a" (change)="updateAnnotation($event)"></app-molarity-calculator>
+              </div>
+            } @else if (a.annotation_type === 'randomization') {
+              <div class="d-flex flex-row justify-content-center">
+                <app-randomization-presenter [annotation]="a"></app-randomization-presenter>
+              </div>
+            } @else if (a.annotation) {
+              <div>
+                <p>{{a.annotation}}</p>
+              </div>
+            }
+            @if (a.metadata_columns.length > 0) {
+              <div class="d-flex flex-wrap gap-2 mt-2 mb-2">
+                @for (m of a.metadata_columns; track m.id) {
+                  @if (m.type === "Characteristics") {
+                    <span class="badge bg-primary" ngbTooltip="Characteristics">{{m.name}}: {{m.value}}</span>
+                  } @else if (m.type === "Comment") {
+                    <span class="badge bg-secondary" ngbTooltip="Comment">{{m.name}}: {{m.value}}</span>
+                  } @else if (m.type === "Factor value") {
+                    <span class="badge bg-success" ngbTooltip="Factor value">{{m.name}}: {{m.value}}</span>
+                  } @else {
+                    <span class="badge bg-danger" ngbTooltip="Other">{{m.name}}: {{m.value}}</span>
+                  }
                 }
-              }
-            </div>
+              </div>
+            }
           }
-        }
+          <div class="text-end">
+            <small class="text-muted">Last save: {{a.updated_at | date: "short"}}</small>
+          </div>
+        </div>
       </div>
     }
-
   }
 </div>

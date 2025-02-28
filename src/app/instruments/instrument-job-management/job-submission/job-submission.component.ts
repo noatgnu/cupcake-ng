@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, ElementRef, Input, OnInit, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, ElementRef, HostListener, Input, OnInit, ViewChild} from '@angular/core';
 import {
   Form,
   FormArray,
@@ -12,15 +12,24 @@ import {
 import {InstrumentJob} from "../../../instrument-job";
 import {WebService} from "../../../web.service";
 import {
-  NgbDropdown, NgbDropdownItem,
-  NgbDropdownMenu, NgbDropdownToggle, NgbModal,
+  NgbDropdown,
+  NgbDropdownItem,
+  NgbDropdownMenu,
+  NgbDropdownToggle,
+  NgbModal,
+  NgbNav,
+  NgbNavContent,
+  NgbNavItem,
+  NgbNavLinkButton,
+  NgbNavOutlet,
+  NgbOffcanvas,
   NgbTooltip,
   NgbTypeahead,
   NgbTypeaheadSelectItemEvent
 } from "@ng-bootstrap/ng-bootstrap";
 import {Observable, debounceTime, distinctUntilChanged, switchMap, map, catchError, of, tap} from 'rxjs';
 import {Project} from "../../../project";
-import {DatePipe} from "@angular/common";
+import {DatePipe, NgClass} from "@angular/common";
 import {Unimod} from "../../../unimod";
 import {ToastService} from "../../../toast.service";
 import {Protocol} from "../../../protocol";
@@ -41,6 +50,11 @@ import {
   HandwrittenAnnotationComponent
 } from "../../../protocol-session/handwritten-annotation/handwritten-annotation.component";
 import {Annotation} from "../../../annotation";
+import {
+  DisplayModificationParametersMetadataComponent
+} from "../../../display-modification-parameters-metadata/display-modification-parameters-metadata.component";
+import {AccountsService} from "../../../accounts/accounts.service";
+import {StaffDataEntryPanelComponent} from "./staff-data-entry-panel/staff-data-entry-panel.component";
 
 @Component({
   selector: 'app-job-submission',
@@ -58,12 +72,25 @@ import {Annotation} from "../../../annotation";
     NgbDropdownItem,
     AnnotationTextFormComponent,
     HandwrittenAnnotationComponent,
-    FormsModule
+    FormsModule,
+    DisplayModificationParametersMetadataComponent,
+    NgbNav,
+    NgbNavContent,
+    NgbNavLinkButton,
+    NgbNavItem,
+    NgbNavOutlet,
+    NgClass
   ],
   templateUrl: './job-submission.component.html',
   styleUrl: './job-submission.component.scss'
 })
 export class JobSubmissionComponent implements OnInit, AfterViewInit {
+  activeTab = 'user'
+  isPanelOpen = false;
+  staffModeAvailable = false;
+  togglePanel(): void {
+    this.isPanelOpen = !this.isPanelOpen;
+  }
   initialized = false
   currentForm: FormGroup|undefined
   selectedProject: Project|undefined
@@ -76,7 +103,6 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit {
   searchMetadataLoading = false
   selectedGroup: LabGroup | undefined
   @ViewChild('previewVideo') previewVideo?: ElementRef;
-
   @Input() set job(value: InstrumentJob|undefined) {
     this._job = value
     console.log(value)
@@ -89,6 +115,27 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit {
   private setupJob(value: InstrumentJob) {
     // @ts-ignore
     this.form.patchValue({job_name: value.job_name, staff: value.staff.map(s => s.id), status: value.status})
+    this.staffModeAvailable = false
+    if (value.staff) {
+      if (value.staff.length > 0) {
+        if (this.accountService.username) {
+          const staff = value.staff.find((s) => s.username === this.accountService.username)
+          if (staff) {
+            this.staffModeAvailable = true
+          }
+        }
+      }
+    } else {
+      if (value.service_lab_group) {
+        this.web.checkUserInLabGroup(value.service_lab_group.id).subscribe((result) => {
+          if (result.status === 200) {
+            this.staffModeAvailable = true
+          }
+        }, (error) => {
+          this.staffModeAvailable = false
+        })
+      }
+    }
     this.formSampleExtraData.patchValue({
       sample_type: value.sample_type,
       sample_number: value.sample_number
@@ -236,7 +283,7 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit {
   labUserMemberPageSize = 10
   service_storage: StorageObject|undefined|null
 
-  constructor(public annotationService: AnnotationService, private modal: NgbModal, private fb: FormBuilder, private web: WebService, private toast: ToastService, public metadataService: MetadataService) {
+  constructor(private offCanvas: NgbOffcanvas, public annotationService: AnnotationService, private modal: NgbModal, private fb: FormBuilder, private web: WebService, private toast: ToastService, public metadataService: MetadataService, private accountService: AccountsService) {
     this.annotationService.refreshAnnotation.asObservable().subscribe((value) => {
       if (this.job) {
         this.web.getInstrumentJob(this.job.id).subscribe((job) => {
@@ -525,6 +572,7 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit {
 
   async update() {
     if (this.job) {
+      const payload: any = {}
       if (!this.protocolForm.value.id) {
         // @ts-ignore
         const protocol = await this.web.createProtocol(this.protocolForm.value.protocol_title, this.protocolForm.value.protocol_description).toPromise()
@@ -532,8 +580,14 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit {
           // @ts-ignore
           this.protocolForm.patchValue({id: protocol.id, protocol_title: protocol.protocol_title, protocol_description: protocol.protocol_description})
           this.selectedProtocol = protocol
+          payload["protocol"] = protocol.id
+        }
+      } else {
+        if (this.protocolForm.dirty) {
+          payload["protocol"] = this.protocolForm.value.id
         }
       }
+      console.log(this.reagentForm.value)
       if (this.labGroupForm.valid && this.labGroupForm.value.selected) {
         const selectedLabGroup = await this.web.getLabGroup(this.labGroupForm.value.selected).toPromise()
         if (!this.reagentForm.value.id) {
@@ -546,20 +600,37 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit {
                   if (reagent) {
                     // @ts-ignore
                     this.reagentForm.patchValue({id: reagent.id, name: reagent.reagent.name, current_quantity: reagent.quantity, unit: reagent.reagent.unit})
+                    payload["stored_reagent"] = reagent.id
                   }
                 }
               }
             }
           }
         } else {
-          const selectedLabGroup = await this.web.getLabGroup(this.labGroupForm.value.selected).toPromise()
-          if (selectedLabGroup) {
-            if (selectedLabGroup.service_storage) {
-              // @ts-ignore
-              const reagent = await this.web.createStoredReagent(selectedLabGroup.service_storage.id, this.reagentForm.value.name, this.reagentForm.value.unit, this.reagentForm.value.current_quantity, `Added from job with id${this.job.id}`, null, false, false, this.projectForm.value.id, this.protocolForm.value.id).toPromise()
-              if (reagent) {
+          console.log(this.reagentForm.controls.id)
+          if (this.reagentForm.value.use_previous) {
+            if (this.reagentForm.controls.id.dirty) {
+              payload["stored_reagent"] = this.reagentForm.value.id
+            } else {
+              if (!this.job.stored_reagent) {
+                payload["stored_reagent"] = this.reagentForm.value.id
+              } else {
+                if (this.job.stored_reagent.id !== this.reagentForm.value.id) {
+                  payload["stored_reagent"] = this.reagentForm.value.id
+                }
+              }
+            }
+          } else {
+            const selectedLabGroup = await this.web.getLabGroup(this.labGroupForm.value.selected).toPromise()
+            if (selectedLabGroup) {
+              if (selectedLabGroup.service_storage) {
                 // @ts-ignore
-                this.reagentForm.patchValue({id: reagent.id, name: reagent.reagent.name, current_quantity: reagent.quantity, unit: reagent.reagent.unit})
+                const reagent = await this.web.createStoredReagent(selectedLabGroup.service_storage.id, this.reagentForm.value.name, this.reagentForm.value.unit, this.reagentForm.value.current_quantity, `Added from job with id${this.job.id}`, null, false, false, this.projectForm.value.id, this.protocolForm.value.id).toPromise()
+                if (reagent) {
+                  // @ts-ignore
+                  this.reagentForm.patchValue({id: reagent.id, name: reagent.reagent.name, current_quantity: reagent.quantity, unit: reagent.reagent.unit})
+                  payload["stored_reagent"] = reagent.id
+                }
               }
             }
           }
@@ -567,15 +638,117 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit {
       } else {
         await this.toast.show('Lab Group', 'Please select a lab group before update with reagent information');
       }
-      // @ts-ignore
-      const staffIds = this.form.value.staff.map((s) => s)
-      const userMetadata = (this.metadata.get('user_metadata') as FormArray).controls.map((c) => c.value)
-      console.log(this.labGroupForm.value.selected)
-      // @ts-ignore
-      const response = await this.web.updateInstrumentJob(this.job.id, this.form.value.job_name, this.projectForm.value.id, this.fundingForm.value.cost_center, this.fundingForm.value.funder, this.formSampleExtraData.value.sample_type, this.formSampleExtraData.value.sample_number, this.protocolForm.value.id, staffIds, this.reagentForm.value.id, userMetadata, [], this.labGroupForm.value.selected).toPromise()
-      if (response) {
-         await this.toast.show('Job', 'Job updated successfully');
-        this.job = response
+
+      if (this.form.controls.staff.dirty) {
+        // @ts-ignore
+        const staffIds = this.form.value.staff.map((s) => s)
+        payload["staff"] = staffIds
+      }
+      // check if there is any changes in user metadata form array
+      if (this.metadata.get('user_metadata')) {
+        if ((this.metadata.get('user_metadata') as FormArray).dirty) {
+          const userMetadata = (this.metadata.get('user_metadata') as FormArray).controls.map((c) => c.value)
+          payload["user_metadata"] = userMetadata
+        } else {
+          // check if any form within the form array is dirty
+          for (const control of (this.metadata.get('user_metadata') as FormArray).controls) {
+            if (control.dirty) {
+              const userMetadata = (this.metadata.get('user_metadata') as FormArray).controls.map((c) => c.value)
+              payload["user_metadata"] = userMetadata
+              break
+            }
+          }
+        }
+      }
+
+      if (this.form.controls.job_name.dirty) {
+        payload["job_name"] = this.form.value.job_name
+      }
+      if (this.projectForm.controls.id.dirty) {
+        payload["project"] = this.projectForm.value.id
+      }
+      if (this.fundingForm.controls.cost_center.dirty) {
+        payload["cost_center"] = this.fundingForm.value.cost_center
+      }
+      if (this.fundingForm.controls.funder.dirty) {
+        payload["funder"] = this.fundingForm.value.funder
+      }
+      if (this.formSampleExtraData.controls.sample_type.dirty) {
+        payload["sample_type"] = this.formSampleExtraData.value.sample_type
+      }
+      if (this.formSampleExtraData.controls.sample_number.dirty) {
+        payload["sample_number"] = this.formSampleExtraData.value.sample_number
+      }
+      if (this.labGroupForm.controls.selected.dirty) {
+        payload["service_lab_group"] = this.labGroupForm.value.selected
+      }
+      // check if payload is empty
+      if (Object.keys(payload).length === 0) {
+        await this.toast.show('Job', 'No changes detected in user data');
+      } else {
+        // @ts-ignore
+        const response = await this.web.updateInstrumentJob(this.job.id, payload).toPromise()
+        if (response) {
+          await this.toast.show('Job', 'Job updated successfully');
+          this.job = response
+        }
+      }
+    }
+    if (this.staffModeAvailable) {
+      await this.updateStaffData()
+    }
+  }
+
+  async updateStaffData() {
+    if (this.job) {
+      if (this.staffModeAvailable) {
+        const payload: any = {
+        }
+        if (this.job) {
+          if (this.job.injection_volume) {
+            payload["injection_volume"] = this.job.injection_volume
+          }
+          if (this.job.injection_unit) {
+            payload["injection_unit"] = this.job.injection_unit
+          }
+          if (this.job.search_engine) {
+            payload["search_engine"] = this.job.search_engine
+          }
+          if (this.job.search_details) {
+            payload["search_details"] = this.job.search_details
+          }
+          if (this.job.search_engine_version) {
+            payload["search_engine_version"] = this.job.search_engine_version
+          }
+          if (this.job.location) {
+            payload["location"] = this.job.location
+          }
+          if (this.metadata.get('staff_metadata')) {
+            if ((this.metadata.get('staff_metadata') as FormArray).dirty) {
+              const staffMetadata = (this.metadata.get('staff_metadata') as FormArray).controls.map((c) => c.value)
+              payload["staff_metadata"] = staffMetadata
+            } else {
+              // check if any form within the form array is dirty
+              for (const control of (this.metadata.get('staff_metadata') as FormArray).controls) {
+                if (control.dirty) {
+                  const staffMetadata = (this.metadata.get('staff_metadata') as FormArray).controls.map((c) => c.value)
+                  payload["staff_metadata"] = staffMetadata
+                  break
+                }
+              }
+            }
+          }
+          if (Object.keys(payload).length === 0) {
+            await this.toast.show('Job', 'No changes detected in staff data');
+          } else {
+            // @ts-ignore
+            const response = await this.web.instrumentJobUpdateStaffData(this.job.id, payload).toPromise()
+            if (response) {
+              await this.toast.show('Job', 'Staff data updated successfully');
+              this.job = response
+            }
+          }
+        }
       }
     }
   }
@@ -683,5 +856,23 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit {
 
   handleDeleteAnnotation(annotation_id: number) {
     this.annotationService.deleteAnnotation(annotation_id)
+  }
+
+  openStaffDataEntryPanel() {
+    if (this.staffModeAvailable) {
+      const ref = this.offCanvas.open(StaffDataEntryPanelComponent, { scroll: true, backdrop: false})
+      ref.componentInstance.job = this.job
+      ref.closed.subscribe((result) => {
+        if (result) {
+          if (this.job) {
+            this.job.injection_volume = result.injection_volume
+            this.job.injection_unit = result.injection_unit
+            this.job.search_engine = result.search_engine
+            this.job.search_details = result.search_details
+            this.job.search_engine_version = result.search_engine_version
+          }
+        }
+      })
+    }
   }
 }

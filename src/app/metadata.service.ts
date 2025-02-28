@@ -13,7 +13,7 @@ export class MetadataService {
   metadataOtherAutocomplete: string[] = ["Source name", "Material type", "Assay name", "Technology type"]
   metadataCharacteristics: string[] = ["Disease", "Tissue", "Subcellular location", "Organism", "Cell type", "Cell line", "Developmental stage", "Ancestry category", "Sex", "Age", "Biological replicate", "Enrichment process"]
   metadataComment: string[] = ["Data file", "File uri", "Technical replicate", "Fraction identifier", "Label", "Cleavage agent details", "Instrument", "Modification parameters", "Dissociation method", "Precursor mass tolerance", "Fragment mass tolerance", ""]
-
+  staffMetadataSpecific: string[] = ["Dissociation method", "Precursor mass tolerance", "Fragment mass tolerance"]
   metadataTemplate = [{
     "name": "Source name", "type": ""
   },

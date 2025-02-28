@@ -1797,57 +1797,8 @@ export class WebService {
   }
   updateInstrumentJob(
     job_id: number,
-    job_name: string|undefined,
-    project: number|undefined,
-    funder: string|undefined,
-    cost_center: string|undefined,
-    sample_type: string|undefined,
-    sample_number: number|undefined,
-    protocol: number|undefined,
-    staff: number[]|undefined,
-    stored_reagent: number|undefined,
-    user_metadata: any[]|undefined,
-    staff_metadata: any[]|undefined,
-    service_lab_group: number|undefined
+    payload: any
   ) {
-    const payload: any = {}
-    if (job_name) {
-      payload['job_name'] = job_name
-    }
-    if (project) {
-      payload['project'] = project
-    }
-    if (funder) {
-      payload['funder'] = funder
-    }
-    if (cost_center) {
-      payload['cost_center'] = cost_center
-    }
-    if (sample_type) {
-      payload['sample_type'] = sample_type
-    }
-    if (sample_number) {
-      payload['sample_number'] = sample_number
-    }
-    if (protocol) {
-      payload['protocol'] = protocol
-    }
-    if (staff) {
-      payload['staff'] = staff
-    }
-    if (stored_reagent) {
-      payload['stored_reagent'] = stored_reagent
-    }
-    if (user_metadata) {
-      payload['user_metadata'] = user_metadata
-    }
-    if (staff_metadata) {
-      payload['staff_metadata'] = staff_metadata
-    }
-    if (service_lab_group) {
-      payload['service_lab_group'] = service_lab_group
-    }
-
     return this.http.put<InstrumentJob>(
       `${this.baseURL}/api/instrument_jobs/${job_id}/`,
       payload,
@@ -1881,6 +1832,22 @@ export class WebService {
   getLabGroup(id: number) {
     return this.http.get<LabGroup>(
       `${this.baseURL}/api/lab_groups/${id}/`,
+      {responseType: 'json', observe: 'body'}
+    )
+  }
+
+  checkUserInLabGroup(lab_group_id: number) {
+    return this.http.post<any>(
+      `${this.baseURL}/api/user/check_user_in_lab_group/`,
+      {lab_group: lab_group_id},
+      {responseType: 'json', observe: 'response'}
+    )
+  }
+
+  instrumentJobUpdateStaffData(job_id: number, payload: any) {
+    return this.http.post<InstrumentJob>(
+      `${this.baseURL}/api/instrument_jobs/${job_id}/update_staff_data/`,
+      payload,
       {responseType: 'json', observe: 'body'}
     )
   }
