@@ -13,6 +13,10 @@ import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import {ToastService} from "./toast.service";
 import {Subject} from "rxjs";
 import {AnnotationQuery} from "./annotation";
+import {
+  InstrumentBookingModalComponent
+} from "./instruments/instrument-booking-modal/instrument-booking-modal.component";
+import {Instrument} from "./instrument";
 
 @Injectable({
   providedIn: 'root'
@@ -125,7 +129,15 @@ export class AnnotationService {
         this.refreshAnnotation.next(true);
       })
 
-    }else {
+    } else if (item === "Instrument") {
+      const ref = this.modal.open(InstrumentBookingModalComponent, {scrollable: true})
+      ref.closed.subscribe((data: {instrument: Instrument, selectedRange: {started: Date |undefined, ended: Date | undefined}, usageDescription: string}) => {
+        this.web.createInstrumentUsageAnnotation(null, data.instrument.id, data.selectedRange.started, data.selectedRange.ended, null, data.usageDescription, instrument_job_id, instrument_user_type).subscribe((data: any) => {
+          this.toastService.show('Annotation', 'Instrument Booking Saved Successfully')
+          this.refreshAnnotation.next(true);
+        })
+      })
+    } else {
       if (this.clickedInstrumentItem === item) {
         this.clickedInstrumentItem = "";
         return;

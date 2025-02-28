@@ -107,25 +107,33 @@ export class BookingTimeVisualizerComponent implements AfterViewInit{
   }
 
   private async prepare() {
-    this.clearCanvas()
-    const timeBlocks: Date[] = []
-    const windowStart = this.form.value.windowStart
-    const windowEnd = this.form.value.windowEnd
+    this.clearCanvas();
+    const timeBlocks: Date[] = [];
+    const windowStart = this.form.value.windowStart;
+    const windowEnd = this.form.value.windowEnd;
     if (windowStart && windowEnd) {
-      let current = windowStart
+      let current = windowStart;
       while (current <= windowEnd) {
-        timeBlocks.push(new Date(current))
-        current = new Date(current.getTime() + 60 * 60 * 1000)
+        timeBlocks.push(new Date(current));
+        current = new Date(current.getTime() + 60 * 60 * 1000); // Increment by 1 hour
       }
-      let currentMarker = new Date()
-      this.timeBlocks = timeBlocks
-      this.width = this.blockSize * timeBlocks.length
-      this.canvas.nativeElement.width = this.width
+      this.timeBlocks = timeBlocks;
 
-      const delta = windowEnd.getTime() - windowStart.getTime()
-      this.dataService.changeDPI(300, this.canvas.nativeElement)
-      // draw the time blocks above which include day before and day after the current day
-      this.drawBackground(this.timeBlocks, this.width, currentMarker, delta);
+      // Calculate the canvas width dynamically based on the time range and desired resolution
+      const hoursInRange = (windowEnd.getTime() - windowStart.getTime()) / (60 * 60 * 1000);
+      const pixelsPerHour = 20; // Adjust this value as needed
+      this.width = hoursInRange * pixelsPerHour;
+
+      // Set the canvas width property
+      this.canvas.nativeElement.width = this.width;
+      this.canvas.nativeElement.style.width = `${this.width}px`;
+
+      // Update the context after setting the canvas width
+      this.ctx = this.canvas.nativeElement.getContext('2d')!;
+
+      const delta = windowEnd.getTime() - windowStart.getTime();
+      this.dataService.changeDPI(300, this.canvas.nativeElement);
+      this.drawBackground(this.timeBlocks, this.width, new Date(), delta);
     }
   }
 
@@ -143,6 +151,9 @@ export class BookingTimeVisualizerComponent implements AfterViewInit{
     let currentStart = this.padding
 
     const graphPixelOverTime = graphWidth/windowTimeRange
+    console.log(graphWidth)
+    console.log(windowTimeRange)
+    console.log(graphPixelOverTime)
     uniqueDateFromTimeBlocks.forEach((time, index) => {
       this.ctx.textBaseline = 'top'
       this.ctx.fillStyle = 'gray'
@@ -189,11 +200,13 @@ export class BookingTimeVisualizerComponent implements AfterViewInit{
         this.ctx.stroke()
         this.ctx.closePath()
       })
+      console.log(xStart, xEnd, this.width)
       currentStart = xEnd
 
     })
-    // draw other instrument usages from the instrumentUsageQuery
+    //update size of canvas based on the final xEnd
 
+    // draw other instrument usages from the instrumentUsageQuery
     for (const usage of this.instrumentUsageQuery!.results) {
       usage.time_started = new Date(usage.time_started)
       usage.time_ended = new Date(usage.time_ended)
@@ -440,15 +453,15 @@ export class BookingTimeVisualizerComponent implements AfterViewInit{
   updateTimeWindow() {
     // update the time window to the selected date range
     if (this.fromDate && this.toDate) {
-      const start = new Date(this.fromDate.year, this.fromDate.month - 1, this.fromDate.day)
-      const end = new Date(this.toDate.year, this.toDate.month - 1, this.toDate.day)
+      const start = new Date(this.fromDate.year, this.fromDate.month - 1, this.fromDate.day);
+      const end = new Date(this.toDate.year, this.toDate.month - 1, this.toDate.day);
       // set end date to the end of the day
+      end.setHours(23, 59, 59, 999);
 
-      this.form.controls.windowStart.setValue(start)
-      this.form.controls.windowEnd.setValue(new Date(end.setHours(0, 0, 0, 0) + 24 * 60 * 60 * 1000 *2))
-      this.prepare().then()
+      this.form.controls.windowStart.setValue(start);
+      this.form.controls.windowEnd.setValue(end);
+      this.prepare().then();
     }
-
   }
 
   drawMarker(pixel: number, color: string) {

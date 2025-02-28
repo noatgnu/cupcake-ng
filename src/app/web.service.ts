@@ -1039,7 +1039,7 @@ export class WebService {
     )
   }
 
-  createInstrumentUsageAnnotation(session_id: string|undefined|null, instrument_id: number, time_started: Date|undefined, time_ended: Date|undefined, step_id: number = 0, annotation: string, instrument_job_id: number|null|undefined = undefined, instrument_user_type: null|'user_annotation'|'staff_annotation' = null) {
+  createInstrumentUsageAnnotation(session_id: string|undefined|null, instrument_id: number, time_started: Date|undefined, time_ended: Date|undefined, step_id: number|null = 0, annotation: string, instrument_job_id: number|null|undefined = undefined, instrument_user_type: null|'user_annotation'|'staff_annotation' = null) {
     const payload: any = { annotation_type: 'instrument', instrument: instrument_id, time_started: time_started, time_ended: time_ended, annotation: annotation}
     if (step_id !== 0) {
       payload['step'] = step_id
