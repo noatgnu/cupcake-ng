@@ -7,6 +7,14 @@ const routes: Routes = [
   {
     path: '',
     component: AccountsComponent,
+  },
+  {
+    path: ':section',
+    component: AccountsComponent,
+  },
+  {
+    path: ':section/:token',
+    component: AccountsComponent,
   }
   ]
 

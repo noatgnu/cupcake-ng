@@ -1851,6 +1851,30 @@ export class WebService {
       {responseType: 'json', observe: 'body'}
     )
   }
+
+  generateSignupToken(email: string, lab_group: number|null) {
+    return this.http.post<{token: string}>(
+      `${this.baseURL}/api/user/generate_signup_token/`,
+      {email: email, lab_group: lab_group},
+      {responseType: 'json', observe: 'body'}
+    )
+  }
+
+  generateSignupTokenAndSendEmail(email: string, lab_group: number|null) {
+    return this.http.post<{token: string}>(
+      `${this.baseURL}/api/user/generate_signup_token_and_send_email/`,
+      {email: email, lab_group: lab_group},
+      {responseType: 'json', observe: 'body'}
+    )
+  }
+
+  instrumentJobSubmit(job_id: number) {
+    return this.http.post<InstrumentJob>(
+      `${this.baseURL}/api/instrument_jobs/${job_id}/submit/`,
+      {},
+      {responseType: 'json', observe: 'body'}
+    )
+  }
 }
 
 interface ChunkUploadResponse {

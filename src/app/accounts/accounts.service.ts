@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import {Observable, Subject} from "rxjs";
 import {environment} from "../../environments/environment";
 import { HttpClient, HttpHeaders } from "@angular/common/http";
+import {User} from "../user";
 
 @Injectable({
   providedIn: 'root'
@@ -50,5 +51,9 @@ export class AccountsService {
 
   saveDate(date: Date) {
     localStorage.setItem("cupcakeLastVisited", JSON.stringify(date))
+  }
+
+  signUp(username: string, password: string, token: string) {
+    return this.http.post<User>(`${this.baseURL}/api/user/signup/`, {username: username, password: password, token: token})
   }
 }

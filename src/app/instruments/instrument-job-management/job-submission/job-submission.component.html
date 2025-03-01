@@ -180,6 +180,7 @@
           </div>
         }
 
+
         <div class="form-check">
           <input type="checkbox" class="form-check-input" id="use_previous" formControlName="use_previous">
           <label class="form-check-label" for="use_previous">Use previous reagent</label>
@@ -187,6 +188,22 @@
             <small class="form-text text-muted">
               If checked, the reagent will be used from the selected source and a new reagent record won't be create
             </small>
+          </div>
+        </div>
+      </form>
+      <form [formGroup]="formSampleExtraData">
+        <div class="d-flex gap-2">
+          <div class="form-group">
+            <label for="sampleNumber">Sample Number</label>
+            <input id="sampleNumber" type="number" class="form-control" formControlName="sample_number">
+          </div>
+          <div class="form-group">
+            <label for="sampleType">Sample Type</label>
+            <select id="sampleType" type="text" class="form-select" formControlName="sample_type">
+              <option value="wcl">Whole Cell Lysate</option>
+              <option value="ip">Immunoprecipitate</option>
+              <option value="other">Other</option>
+            </select>
           </div>
         </div>
       </form>
@@ -205,14 +222,54 @@
                       <input (focus)="setCurrentForm(i)" type="search" [ngbTypeahead]="searchValue" class="form-control" [formControl]="metadata.controls['user_metadata'].controls[index].controls['value']">
                     }
                     @if (!i.value['mandatory']) {
-                      <button class="btn btn-sm btn-danger" (click)="removeMetadata(index, 'user_metadata')"><i class="bi bi-trash2"></i></button>
+                      <button class="btn btn-sm btn-danger" (click)="removeMetadata(index, 'user_metadata')" ngbTooltip="Remove this metadata"><i class="bi bi-trash2"></i></button>
                     }
+                    <button class="btn btn-sm btn-info" (click)="addMetadataModifier(index, 'user_metadata')" ngbTooltip="Add modifier for different sample carrying this metadata"><i class="bi bi-signpost-split"></i></button>
                   </div>
                   @if (i.value['name']==='Modification parameters' && i.value['value']) {
                     <app-display-modification-parameters-metadata [value]="i.value['value']"></app-display-modification-parameters-metadata>
                   }
                 </div>
               </form>
+              @if (i.value['modifiers']) {
+                @if (i.value['modifiers'].length > 0) {
+                  <div>
+                    <table class="table table-striped table-hover">
+                      <thead>
+                      <tr>
+                        <th scope="col">
+                          Value
+                        </th>
+                        <th scope="col">
+                          Samples
+                        </th>
+                        <th scope="col">
+                          Actions
+                        </th>
+                      </tr>
+                      </thead>
+                      <tbody>
+                        @for (modifier of i.value['modifiers']; track $index; let indexM = $index) {
+                          <tr>
+                            <td>{{modifier['value']}}</td>
+                            <td>{{modifier['samples']}}</td>
+                            <td>
+                              <div class="d-flex gap-2">
+                                <button class="btn btn-sm btn-danger" (click)="removeMetadataModifier(index, indexM, 'user_metadata')" ngbTooltip="Remove modifier">
+                                  <i class="bi bi-trash2"></i>
+                                </button>
+                                <button class="btn btn-sm btn-primary" (click)="editMetadataModifier(index, indexM, 'user_metadata')" ngbTooltip="Edit modifier">
+                                  <i class="bi bi-pencil-fill"></i>
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        }
+                      </tbody>
+                    </table>
+                  </div>
+                }
+              }
             }
           </div>
         </div>
@@ -236,31 +293,78 @@
                     @if (!i.value['mandatory']) {
                       <button class="btn btn-sm btn-danger" (click)="removeMetadata(index, 'staff_metadata')"><i class="bi bi-trash2"></i></button>
                     }
+                    <button class="btn btn-sm btn-info" (click)="addMetadataModifier(index, 'staff_metadata')" ngbTooltip="Add modifier for different sample carrying this metadata"><i class="bi bi-signpost-split"></i></button>
                   </div>
                   @if (i.value['name']==='Modification parameters' && i.value['value']) {
                     <app-display-modification-parameters-metadata [value]="i.value['value']"></app-display-modification-parameters-metadata>
                   }
                 </div>
               </form>
+              @if (i.value['modifiers']) {
+                @if (i.value['modifiers'].length > 0) {
+                  <div>
+                    <table class="table table-striped table-hover">
+                      <thead>
+                      <tr>
+                        <th scope="col">
+                          Value
+                        </th>
+                        <th scope="col">
+                          Samples
+                        </th>
+                        <th scope="col">
+                          Actions
+                        </th>
+                      </tr>
+                      </thead>
+                      <tbody>
+                        @for (modifier of i.value['modifiers']; track $index; let indexM = $index) {
+                          <tr>
+                            <td>{{modifier['value']}}</td>
+                            <td>{{modifier['samples']}}</td>
+                            <td>
+                              <div class="d-flex gap-2">
+                                <button class="btn btn-sm btn-danger" (click)="removeMetadataModifier(index, indexM, 'staff_metadata')" ngbTooltip="Remove modifier">
+                                  <i class="bi bi-trash2"></i>
+                                </button>
+                                <button class="btn btn-sm btn-primary" (click)="editMetadataModifier(index, indexM, 'staff_metadata')" ngbTooltip="Edit modifier">
+                                  <i class="bi bi-pencil-fill"></i>
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        }
+                      </tbody>
+                    </table>
+                  </div>
+                }
+              }
             }
           </div>
         </div>
       }
-      <p>
-        @if (job.injection_volume) {
-          <strong>Injection Volume:</strong> {{job.injection_volume}} {{job.injection_unit}}<br>
-        }
-        @if (job.location) {
-          <strong>Location:</strong> {{job.location}} <br>
-        }
-        @if (job.search_engine) {
-          <strong>Search Engine:</strong> {{job.search_engine}} {{job.search_engine_version}}<br>
-        }
-        @if (job.search_details) {
-          <strong>Search Details:</strong><br>
-          {{job.search_details}}
-        }
-      </p>
+      <div>
+        <div class="card">
+          <div class="card-body">
+            <p>
+              @if (job.injection_volume) {
+                <strong>Injection Volume:</strong> {{job.injection_volume}} {{job.injection_unit}}<br>
+              }
+              @if (job.location) {
+                <strong>Location:</strong> {{job.location}} <br>
+              }
+              @if (job.search_engine) {
+                <strong>Search Engine:</strong> {{job.search_engine}} {{job.search_engine_version}}<br>
+              }
+              @if (job.search_details) {
+                <strong>Search Details:</strong><br>
+                {{job.search_details}}
+              }
+            </p>
+          </div>
+        </div>
+      </div>
+
       <hr>
     }
   }
@@ -440,13 +544,17 @@
         <li [ngbNavItem]="'user'">
           <button ngbNavLink>User Annotations</button>
           <ng-template ngbNavContent>
-            <app-annotation-presenter [annotations]="job.user_annotations" (deleteAnnotation)="handleDeleteAnnotation($event)"></app-annotation-presenter>
+            @if (activeTab === 'user') {
+              <app-annotation-presenter [annotations]="job.user_annotations" (deleteAnnotation)="handleDeleteAnnotation($event)"></app-annotation-presenter>
+            }
           </ng-template>
         </li>
         <li [ngbNavItem]="'staff'">
           <button ngbNavLink>Staff Annotations</button>
           <ng-template ngbNavContent>
-            <app-annotation-presenter [annotations]="job.staff_annotations" (deleteAnnotation)="handleDeleteAnnotation($event)"></app-annotation-presenter>
+            @if (activeTab === 'staff') {
+              <app-annotation-presenter [annotations]="job.staff_annotations" (deleteAnnotation)="handleDeleteAnnotation($event)"></app-annotation-presenter>
+            }
           </ng-template>
         </li>
       </ul>

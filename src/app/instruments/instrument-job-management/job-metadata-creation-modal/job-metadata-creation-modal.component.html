@@ -11,6 +11,13 @@
       <label for="metadataValue">Metadata Value</label>
       <input (selectItem)="onItemSelect($event)" [ngbTypeahead]="searchMetadata" [resultFormatter]="formatter" [inputFormatter]="formatter" class="form-control" id="metadataValue" formControlName="metadataValue" placeholder="Metadata Value">
     </div>
+    @if (modifier) {
+      <div class="form-group">
+        <label for="samples">Samples</label>
+        <input type="text" class="form-control" id="samples" formControlName="samples" placeholder="Samples">
+        <small id="samplesHelp" class="form-text text-muted">Comma separated list of sample numbers. If there are multiple continuous samples, they can be denoted with the starting sample "-" last sample of the continuous segment. Example: 1,3,7-10,6</small>
+      </div>
+    }
     <hr>
     @if (form.value['metadataName'] === 'Modification parameters') {
       <div class="form-group">

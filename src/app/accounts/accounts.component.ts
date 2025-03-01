@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import {Component, Input} from '@angular/core';
 import {FormBuilder, FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {ToastService} from "../toast.service";
 import {WebService} from "../web.service";
@@ -6,6 +6,8 @@ import {DataService} from "../data.service";
 import {NgbDropdown, NgbDropdownMenu, NgbDropdownToggle} from "@ng-bootstrap/ng-bootstrap";
 import {UserDataComponent} from "./user-data/user-data.component";
 import {LabGroupComponent} from "./lab-group/lab-group.component";
+import {AccountsService} from "./accounts.service";
+import {SignupComponent} from "./signup/signup.component";
 
 @Component({
   selector: 'app-accounts',
@@ -17,20 +19,29 @@ import {LabGroupComponent} from "./lab-group/lab-group.component";
     NgbDropdownToggle,
     NgbDropdownMenu,
     UserDataComponent,
-    LabGroupComponent
+    LabGroupComponent,
+    SignupComponent
   ],
   templateUrl: './accounts.component.html',
   styleUrl: './accounts.component.scss'
 })
 export class AccountsComponent {
   selectedSection = 'security'
+  @Input() set section(value: string) {
+    this.selectedSection = value
+  }
+
+  @Input() token: string = ""
 
   passwordForm = this.fb.group({
     currentPassword: [''],
     newPassword: [''],
   })
-  constructor(private fb: FormBuilder, private toastService: ToastService, private web: WebService, public dataService: DataService) {
-
+  constructor(private fb: FormBuilder, private toastService: ToastService, private web: WebService, public dataService: DataService, public accountService: AccountsService) {
+    if (!accountService.loggedIn) {
+      this.toastService.show("Accounts", "Please log in or sign up to access this page")
+      this.selectedSection = 'signup'
+    }
   }
 
   changePassword() {

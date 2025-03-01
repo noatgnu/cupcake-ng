@@ -102,11 +102,18 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit {
   storedReagentSearchLoading = false
   searchMetadataLoading = false
   selectedGroup: LabGroup | undefined
+  userCanEdit = false
+
   @ViewChild('previewVideo') previewVideo?: ElementRef;
   @Input() set job(value: InstrumentJob|undefined) {
     this._job = value
     console.log(value)
     if (value && this.initialized) {
+      if (value.status === 'submitted') {
+        this.userCanEdit = false
+      } else {
+        this.userCanEdit = true
+      }
       // @ts-ignore
       this.setupJob(value);
     }
@@ -231,6 +238,7 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit {
       name: FormControl<string>;
       type: FormControl<string>;
       mandatory: FormControl<boolean>;
+      modifiers: FormControl<{samples: string, value: string}[]>;
     }>>([]),
     staff_metadata: this.fb.array<FormGroup<{
       id: FormControl<number>;
@@ -238,6 +246,7 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit {
       name: FormControl<string>;
       type: FormControl<string>;
       mandatory: FormControl<boolean>;
+      modifiers: FormControl<{samples: string, value: string}[]>;
     }>>([])
   })
 
@@ -499,6 +508,7 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit {
       name: FormControl<string>;
       type: FormControl<string>;
       mandatory: FormControl<boolean>;
+      modifiers: FormControl<{samples: string, value: string}[]>;
     }>> = this.fb.array<FormGroup>([]);
     for (const m of metadata) {
       const group: FormGroup<{
@@ -507,12 +517,14 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit {
         name: FormControl<string>;
         type: FormControl<string>;
         mandatory: FormControl<boolean>;
+        modifiers: FormControl<{samples: string, value: string}[]>;
       }> = this.fb.group({
         id: new FormControl(m.id) ,
         value: new FormControl(m.value),
         name: new FormControl(m.name),
         type: new FormControl(m.type),
-        mandatory: new FormControl(m.mandatory)
+        mandatory: new FormControl(m.mandatory),
+        modifiers: new FormControl(m.samples)
       });
       formArray.push(group);
       this.subscribeToFormGroupChanges(group);
@@ -571,7 +583,12 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit {
   }
 
   async update() {
+
     if (this.job) {
+      if (!this.userCanEdit && !this.staffModeAvailable && this.job.status === 'submitted') {
+        await this.toast.show('Job', 'You do not have permission to edit this job. Please use annotation if there is any additional files or information needed to be uploaded.');
+        return
+      }
       const payload: any = {}
       if (!this.protocolForm.value.id) {
         // @ts-ignore
@@ -845,8 +862,6 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit {
           formArray.controls[index].patchValue({
             value: value
           })
-          console.log(formArray.controls[index].value)
-
         }
       }
     }).catch((error) => {
@@ -873,6 +888,124 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit {
           }
         }
       })
+    }
+  }
+
+  addMetadataModifier(index: number, arrayName: 'user_metadata'|'staff_metadata') {
+    const ref = this.modal.open(JobMetadataCreationModalComponent, {scrollable: true})
+    const metadata = (this.metadata.get(arrayName) as FormArray).controls[index].value
+    ref.componentInstance.name = metadata.name
+    ref.componentInstance.type = metadata.type
+    ref.componentInstance.value = metadata.value
+    ref.componentInstance.allowMultipleSpecSelection = false
+    ref.componentInstance.modifier = true
+
+    ref.result.then((result: any[]) => {
+      if (result) {
+        for (const r of result) {
+          let value = r.metadataValue
+          if (r.metadataName === "Modification parameters") {
+            if (r.metadataMT) {
+              value += `;mt=${r.metadataMT}`
+            }
+            if (r.metadataPP) {
+              value += `;pp=${r.metadataPP}`
+            }
+            if (r.metadataTA) {
+              value += `;ta=${r.metadataTA}`
+            }
+            if (r.metadataTS) {
+              value += `;ts=${r.metadataTS}`
+            }
+            if (r.metadataMM) {
+              value += `;mm=${r.metadataMM}`
+            }
+            if (r.metadataAC) {
+              value += `;ac=${r.metadataAC}`
+            }
+          }
+          const currentModifiers = (this.metadata.get(arrayName) as FormArray).controls[index].value['modifiers']
+          if (currentModifiers) {
+            currentModifiers.push({samples: r["samples"], value: value})
+            (this.metadata.get(arrayName) as FormArray).controls[index].patchValue({
+              modifiers: currentModifiers
+            })
+          } else {
+            (this.metadata.get(arrayName) as FormArray).controls[index].patchValue({
+              modifiers: [{samples: r["samples"], value: value}]
+            })
+          }
+          (this.metadata.get(arrayName) as FormArray).markAsDirty()
+        }
+      }
+    })
+  }
+
+  removeMetadataModifier(index: number, modifierIndex: number, arrayName: 'user_metadata'|'staff_metadata') {
+    const formArray = this.metadata.get(arrayName) as FormArray;
+    const modifiers = formArray.controls[index].value['modifiers']
+    modifiers.splice(modifierIndex, 1)
+    formArray.controls[index].patchValue({
+      modifiers: modifiers
+    })
+    formArray.markAsDirty()
+  }
+
+  editMetadataModifier(index: number, modifierIndex: number, arrayName: 'user_metadata'|'staff_metadata') {
+    const ref = this.modal.open(JobMetadataCreationModalComponent, {scrollable: true})
+    const metadata = (this.metadata.get(arrayName) as FormArray).controls[index].value
+    const modifier = metadata['modifiers'][modifierIndex]
+    ref.componentInstance.name = metadata.name
+    ref.componentInstance.type = metadata.type
+    ref.componentInstance.value = modifier.value
+    ref.componentInstance.allowMultipleSpecSelection = false
+    ref.componentInstance.modifier = true
+    ref.componentInstance.samples = modifier.samples
+
+    ref.result.then((result: any[]) => {
+      if (result) {
+        for (const r of result) {
+          let value = r.metadataValue
+          if (r.metadataName === "Modification parameters") {
+            if (r.metadataMT) {
+              value += `;mt=${r.metadataMT}`
+            }
+            if (r.metadataPP) {
+              value += `;pp=${r.metadataPP}`
+            }
+            if (r.metadataTA) {
+              value += `;ta=${r.metadataTA}`
+            }
+            if (r.metadataTS) {
+              value += `;ts=${r.metadataTS}`
+            }
+            if (r.metadataMM) {
+              value += `;mm=${r.metadataMM}`
+            }
+            if (r.metadataAC) {
+              value += `;ac=${r.metadataAC}`
+            }
+          }
+          const currentModifiers = (this.metadata.get(arrayName) as FormArray).controls[index].value['modifiers']
+          // @ts-ignore
+          currentModifiers[modifierIndex] = {samples: r["samples"], value: value}
+          (this.metadata.get(arrayName) as FormArray).controls[index].patchValue({
+            modifiers: currentModifiers
+          });
+
+          (this.metadata.get(arrayName) as FormArray).markAsDirty()
+        }
+      }
+    })
+  }
+
+  submit() {
+    if (this.job) {
+      if (this.job.status === 'draft') {
+        this.web.instrumentJobSubmit(this.job.id).subscribe((response) => {
+          this.job = response
+        })
+      }
     }
   }
 }

@@ -34,11 +34,16 @@ export class JobMetadataCreationModalComponent {
     this._type = value
   }
 
+  @Input() set samples(value: string) {
+    this.form.controls.samples.setValue(value)
+  }
+
   get type(): string {
     return this._type
   }
 
   @Input() allowMultipleSpecSelection: boolean = false
+  @Input() modifier: boolean = false
 
   form = this.fb.group({
     metadataName: "Tissue",
@@ -50,6 +55,7 @@ export class JobMetadataCreationModalComponent {
     metadataTS: "",
     metadataMM: 0,
     metadataAC: "",
+    samples: ""
   })
 
   private _value: string = ""

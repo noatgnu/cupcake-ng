@@ -1,4 +1,13 @@
-import {AfterViewInit, Component, ElementRef, EventEmitter, Input, Output, ViewChild} from '@angular/core';
+import {
+  AfterViewInit,
+  ChangeDetectorRef,
+  Component,
+  ElementRef,
+  EventEmitter,
+  Input,
+  Output,
+  ViewChild
+} from '@angular/core';
 import {Instrument, InstrumentUsage, InstrumentUsageQuery} from "../../instrument";
 import {FormBuilder, ReactiveFormsModule} from "@angular/forms";
 import {NgbCalendar, NgbDate, NgbDatepicker, NgbTimepicker} from "@ng-bootstrap/ng-bootstrap";
@@ -75,7 +84,7 @@ export class BookingTimeVisualizerComponent implements AfterViewInit{
   @Input() enableDelete: boolean = false;
   @Output() selectedRangeOut: EventEmitter<{ started: Date, ended: Date}> = new EventEmitter<{ started: Date, ended: Date}>();
   @Output() selectedUsageBlock: EventEmitter<InstrumentUsage> = new EventEmitter<InstrumentUsage>();
-  constructor(private fb: FormBuilder, private toastService: ToastService, private web: WebService, private dataService: DataService, private accounts: AccountsService, private instrumentService: InstrumentService) {
+  constructor(private cdr: ChangeDetectorRef, private fb: FormBuilder, private toastService: ToastService, private web: WebService, private dataService: DataService, private accounts: AccountsService, private instrumentService: InstrumentService) {
     this.instrumentService.updateTrigger.asObservable().subscribe(() => {
       if (this.instrument) {
         // @ts-ignore
@@ -88,6 +97,7 @@ export class BookingTimeVisualizerComponent implements AfterViewInit{
   }
 
   ngAfterViewInit() {
+    this.cdr.detectChanges();
     const ctx = this.canvas.nativeElement.getContext('2d')
 
     if (this.instrument) {
@@ -151,9 +161,6 @@ export class BookingTimeVisualizerComponent implements AfterViewInit{
     let currentStart = this.padding
 
     const graphPixelOverTime = graphWidth/windowTimeRange
-    console.log(graphWidth)
-    console.log(windowTimeRange)
-    console.log(graphPixelOverTime)
     uniqueDateFromTimeBlocks.forEach((time, index) => {
       this.ctx.textBaseline = 'top'
       this.ctx.fillStyle = 'gray'
@@ -200,9 +207,7 @@ export class BookingTimeVisualizerComponent implements AfterViewInit{
         this.ctx.stroke()
         this.ctx.closePath()
       })
-      console.log(xStart, xEnd, this.width)
       currentStart = xEnd
-
     })
     //update size of canvas based on the final xEnd
 
@@ -460,7 +465,12 @@ export class BookingTimeVisualizerComponent implements AfterViewInit{
 
       this.form.controls.windowStart.setValue(start);
       this.form.controls.windowEnd.setValue(end);
-      this.prepare().then();
+
+      // Retrieve the current jobs that have already been booked on the time window
+      this.web.getInstrumentUsage(this.instrument.id, start, end).subscribe((data) => {
+        this.instrumentUsageQuery = data;
+        this.prepare().then();
+      });
     }
   }
 

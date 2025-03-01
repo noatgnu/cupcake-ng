@@ -1,8 +1,11 @@
 <div class="d-flex flex-column gap-2 p-5">
-  <hr>
-
-  <hr>
   <b>Lab Groups</b>
+  <form [formGroup]="form">
+    <div class="form-group">
+      <label for="name">Name</label>
+      <input type="search" class="form-control" id="name" formControlName="name">
+    </div>
+  </form>
 
   <table class="table table-striped">
     <thead>
@@ -38,6 +41,7 @@
                   <button class="btn btn-sm btn-danger" (click)="deleteLabGroup(l)" ngbTooltip="Remove this lab group"><i class="bi bi-trash"></i></button>
                   @if (accountsService.is_staff) {
                     <button class="btn btn-sm btn-primary" (click)="openAddRemoveUserFromGroupModel(l)" ngbTooltip="Add or remove users from this lab group"><i class="bi bi-people"></i></button>
+                    <button class="btn btn-sm btn-warning" (click)="createLabGroupUser(l)" ngbTooltip="Create a new user for this lab group"><i class="bi bi-person-plus"></i></button>
                   }
                 </div>
               </td>
@@ -48,10 +52,24 @@
     }
     </tbody>
   </table>
+  @if (labGroupQuery) {
+    <ngb-pagination [rotate]="true" [boundaryLinks]="true" [collectionSize]="labGroupQuery.count" [(page)]="labGroupPage" [pageSize]="labGroupPageSize" (pageChange)="pageChanged($event)"></ngb-pagination>
+  }
+  @if (signupLink.length > 0) {
+
+    <ngb-alert type="info">
+      <strong>User Sign Up Link:</strong>
+      <span class="signup-link">{{signupLink}}</span>
+      <button class="btn btn-sm btn-secondary" (click)="copyToClipboard()"><i class="bi bi-copy"></i></button>
+    </ngb-alert>
+  }
+
+
+
   @if (accountsService.is_staff) {
     <b>Administration</b>
     <div>
-      <button class="btn btn-primary" (click)="addLabGroup()" ngbTooltip="Add a new lab group">+</button>
+      <button class="btn btn-primary" (click)="addLabGroup()" ngbTooltip="Add a new lab group"><i class="bi bi-house-add"></i></button>
     </div>
   }
 

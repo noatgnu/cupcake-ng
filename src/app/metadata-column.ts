@@ -9,6 +9,10 @@ export interface MetadataColumn {
   updated_at: Date,
   not_applicable: boolean,
   mandatory: boolean,
+  modifiers: {
+    samples: string,
+    value: string,
+  }[]
 }
 
 export interface MetadataColumnQuery {

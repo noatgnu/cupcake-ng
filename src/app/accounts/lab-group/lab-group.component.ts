@@ -3,17 +3,23 @@ import {AccountsService} from "../accounts.service";
 import {WebService} from "../../web.service";
 import {AsyncPipe} from "@angular/common";
 import {LabGroup, LabGroupQuery} from "../../lab-group";
-import {NgbModal, NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
+import {NgbAlert, NgbModal, NgbPagination, NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {EditLabGroupModalComponent} from "./edit-lab-group-modal/edit-lab-group-modal.component";
 import {
   AddRemoveUserFromGroupModalComponent
 } from "./add-remove-user-from-group-modal/add-remove-user-from-group-modal.component";
+import {FormBuilder, ReactiveFormsModule} from "@angular/forms";
+import {LabUserCreationModalComponent} from "../lab-user-creation-modal/lab-user-creation-modal.component";
+import {ToastService} from "../../toast.service";
 
 @Component({
   selector: 'app-lab-group',
   standalone: true,
   imports: [
-    NgbTooltip
+    NgbTooltip,
+    ReactiveFormsModule,
+    NgbPagination,
+    NgbAlert
   ],
   templateUrl: './lab-group.component.html',
   styleUrl: './lab-group.component.scss'
@@ -22,7 +28,39 @@ export class LabGroupComponent implements OnInit {
 
   labGroupQuery!: LabGroupQuery
 
-  constructor(public accountsService: AccountsService, private web: WebService, private modal: NgbModal) { }
+  labGroupPage = 1
+  labGroupPageSize = 10
+
+  form = this.fb.group({
+    name: "",
+  })
+
+  signupLink: string = ""
+
+  constructor(private toastService: ToastService, private fb: FormBuilder, public accountsService: AccountsService, private web: WebService, private modal: NgbModal) {
+    this.form.controls.name.valueChanges.subscribe((value) => {
+      if (value) {
+        this.web.getLabGroups(value).subscribe((data) => {
+          this.labGroupQuery = data
+        })
+      }
+    })
+  }
+
+  pageChanged(event: number) {
+    this.labGroupPage = event
+    const offset = (this.labGroupPage - 1) * this.labGroupPageSize
+    if (this.form.controls.name.value) {
+      this.web.getLabGroups(this.form.controls.name.value, this.labGroupPageSize, offset).subscribe((data) => {
+        this.labGroupQuery = data
+      })
+    } else {
+      this.web.getLabGroups(undefined, this.labGroupPageSize, offset).subscribe((data) => {
+        this.labGroupQuery = data
+      })
+    }
+
+  }
 
   ngOnInit() {
     this.web.getLabGroups().subscribe((data) => {
@@ -73,5 +111,25 @@ export class LabGroupComponent implements OnInit {
     const ref = this.modal.open(AddRemoveUserFromGroupModalComponent)
     ref.componentInstance.labGroup = labGroup
 
+  }
+
+  createLabGroupUser(lab_group: LabGroup) {
+    const ref = this.modal.open(LabUserCreationModalComponent)
+    ref.componentInstance.lab_group = lab_group
+    ref.closed.subscribe((data) => {
+      if (data) {
+        if (data['token']) {
+          this.signupLink = window.location.origin + "/#/accounts/signup/" + data['token']
+        }
+      }
+    })
+  }
+
+  copyToClipboard() {
+    navigator.clipboard.writeText(this.signupLink).then(() => {
+      this.toastService.show('Copied to clipboard', 'The sign up link has been copied to your clipboard.');
+    }).catch(err => {
+      console.error('Failed to copy: ', err);
+    });
   }
 }

@@ -73,6 +73,15 @@
           </div>
         </nav>
         <app-lab-group></app-lab-group>
+      } @else if (selectedSection === 'signup') {
+        <nav class="navbar navbar-expand-lg navbar-light d-flex flex-wrap">
+          <div class="container-fluid">
+            <a class="navbar-brand">Signup</a>
+          </div>
+        </nav>
+        @if (token) {
+          <app-signup [token]="token"></app-signup>
+        }
       }
     </div>
   </div>

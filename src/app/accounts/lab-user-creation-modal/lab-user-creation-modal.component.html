@@ -1,0 +1,21 @@
+<div class="modal-header">
+  <h5>Lab Group User Creation</h5>
+</div>
+<div class="modal-body">
+  <form [formGroup]="form">
+    <div class="form-group">
+      <label for="email">Email</label>
+      <input type="email" class="form-control" id="email" formControlName="email">
+    </div>
+  </form>
+</div>
+<div class="modal-footer">
+  <div ngbDropdown class="d-inline-block">
+    <button class="btn btn-primary" id="dropdownBasic1" ngbDropdownToggle>Create User</button>
+    <div ngbDropdownMenu aria-labelledby="dropdownBasic1">
+      <button ngbDropdownItem (click)="generateToken()">Create Registration Token</button>
+      <button ngbDropdownItem (click)="generateTokenAndSendEmail()">Create Token and Send Email</button>
+    </div>
+  </div>
+  <button type="button" class="btn btn-secondary" (click)="close()">Close</button>
+</div>
