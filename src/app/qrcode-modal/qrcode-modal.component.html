@@ -4,7 +4,7 @@
 <div class="modal-body">
   @if (config.data !== '') {
     <div class="d-flex justify-content-center">
-      <ngx-qrcode-styling [config]="config"></ngx-qrcode-styling>
+      <div id="canvas"></div>
     </div>
   } @else {
     No data to display

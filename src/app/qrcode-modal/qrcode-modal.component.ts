@@ -1,17 +1,17 @@
-import {Component, Input} from '@angular/core';
-import {NgxQrcodeStylingModule, Options} from "ngx-qrcode-styling"
+import {AfterViewInit, Component, Input} from '@angular/core';
+import QRCodeStyling from "qr-code-styling";
+import {Options} from "qr-code-styling";
 import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
 
 @Component({
   selector: 'app-qrcode-modal',
   standalone: true,
   imports: [
-    NgxQrcodeStylingModule
   ],
   templateUrl: './qrcode-modal.component.html',
   styleUrl: './qrcode-modal.component.scss'
 })
-export class QrcodeModalComponent {
+export class QrcodeModalComponent implements AfterViewInit{
   private _url: string = ""
 
   @Input() set url(value: string) {
@@ -42,11 +42,32 @@ export class QrcodeModalComponent {
     }
     //image: "assets/favicon.png",
   }
+  qrCode?: QRCodeStyling
 
   constructor(private modal: NgbActiveModal) {
   }
 
+  ngAfterViewInit() {
+    const qrCode = new QRCodeStyling(this.config);
+    const canvas = document.getElementById("canvas")
+    if (canvas) {
+      qrCode.append(canvas)
+    }
+    this.qrCode = qrCode
+  }
+
   close() {
     this.modal.dismiss()
+  }
+
+  download() {
+    if (this.qrCode) {
+      this.qrCode.download({
+        name: "qrcode",
+        extension: "svg"
+      }).then(() => {
+
+      })
+    }
   }
 }
