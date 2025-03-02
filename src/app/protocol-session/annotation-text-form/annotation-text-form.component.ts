@@ -1,12 +1,11 @@
 import {Component, EventEmitter, Output} from '@angular/core';
 import {FormBuilder, FormControl, ReactiveFormsModule, Validators} from "@angular/forms";
-import {NgxWigModule} from "ngx-wig";
+
 import {QuillEditorComponent} from "ngx-quill";
 
 @Component({
     selector: 'app-annotation-text-form',
     imports: [
-        NgxWigModule,
         ReactiveFormsModule,
         QuillEditorComponent
     ],

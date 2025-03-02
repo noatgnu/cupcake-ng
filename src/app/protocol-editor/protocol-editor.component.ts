@@ -1,6 +1,5 @@
 import {Component, Input} from '@angular/core';
 import {FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule} from "@angular/forms";
-import {NgxWigModule} from "ngx-wig";
 import {WebService} from "../web.service";
 import {Protocol, ProtocolSection, ProtocolStep} from "../protocol";
 import {DataService} from "../data.service";
@@ -33,10 +32,8 @@ import {DatePipe} from "@angular/common";
     selector: 'app-protocol-editor',
     imports: [
         ReactiveFormsModule,
-        NgxWigModule,
         FormsModule,
         TimePickerComponent,
-        QuillEditorComponent,
         NgbDropdown,
         NgbDropdownItem,
         NgbDropdownMenu,

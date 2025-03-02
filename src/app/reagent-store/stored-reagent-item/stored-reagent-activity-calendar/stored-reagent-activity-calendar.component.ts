@@ -1,4 +1,5 @@
 import {AfterViewInit, Component, ElementRef, Input, ViewChild} from '@angular/core';
+//@ts-ignore
 import CalHeatmap from "cal-heatmap";
 import {DataService} from "../../../data.service";
 import {ReagentAction, StoredReagent} from "../../../storage-object";
@@ -49,6 +50,7 @@ export class StoredReagentActivityCalendarComponent implements AfterViewInit{
   ngAfterViewInit() {
     if (this.calendar) {
       if (!this.cal) {
+        // @ts-ignore
         this.cal = new CalHeatmap()
       }
       this.drawCalendar()
