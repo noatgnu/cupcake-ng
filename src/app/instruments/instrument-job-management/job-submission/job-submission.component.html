@@ -154,7 +154,7 @@
           <div class="form-group">
             <label>Sample Name</label>
             <div class="d-flex gap-2">
-              <input (selectItem)="onStoredReagentSelected($event)" [resultTemplate]="rt" type="search" [ngbTypeahead]="searchReagent" class="form-control" [inputFormatter]="reagentFormatter" placeholder="Search or new sample name">
+              <input (selectItem)="onStoredReagentSelected($event)" [resultTemplate]="rt" type="search" [ngbTypeahead]="searchReagent" class="form-control" [inputFormatter]="reagentFormatter" placeholder="Search or new sample name" formControlName="reagent_name_search">
               @if (storedReagentSearchLoading) {
                 <div class="spinner-border spinner-border-sm" role="status">
                   <span class="visually-hidden">Loading...</span>

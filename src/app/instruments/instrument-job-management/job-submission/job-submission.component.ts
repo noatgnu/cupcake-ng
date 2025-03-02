@@ -267,6 +267,7 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit {
     current_quantity: [0,],
     unit: ['ug',],
     use_previous: [true],
+    reagent_name_search: ['']
   })
 
   editorConfig = {
@@ -400,7 +401,8 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit {
           return of([]);
         }
         if (this.labGroupForm.value.selected && this.service_storage) {
-          return this.web.getStoredReagents(undefined, 5, 0, value, this.service_storage.id, null, true).pipe(
+          return this.web.getStoredReagents(
+            undefined, 5, 0, value, this.service_storage.id, null, true).pipe(
             map((response) => {
               this.storedReagentSearchLoading = false;
               return response.results || [];
@@ -424,6 +426,7 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit {
       project_name: project.project_name,
       project_description: project.project_description
     });
+    this.projectSearchLoading = false
   }
 
   onProtocolSelected(event: NgbTypeaheadSelectItemEvent): void {
@@ -434,6 +437,7 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit {
       protocol_title: protocol.protocol_title,
       protocol_description: protocol.protocol_description
     });
+    this.protocolSearchLoading = false
   }
 
   onStoredReagentSelected(event: NgbTypeaheadSelectItemEvent): void {
@@ -450,6 +454,7 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit {
 
   createDraftJob() {
     if (this.projectForm.valid && this.form.valid) {
+      this.projectSearchLoading = false
       if (this.selectedProject) {
         // @ts-ignore
         this.web.createInstrumentJob(this.form.value.job_name, this.selectedProject.id).subscribe((response) => {
@@ -628,12 +633,19 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit {
       if (this.labGroupForm.valid && this.labGroupForm.value.selected) {
         const selectedLabGroup = await this.web.getLabGroup(this.labGroupForm.value.selected).toPromise()
         if (!this.reagentForm.value.id) {
-          if (this.reagentForm.value.name) {
+          if (this.reagentForm.value.reagent_name_search) {
+            let name = ""
+            if (typeof this.reagentForm.value.reagent_name_search === 'string') {
+              name = this.reagentForm.value.reagent_name_search
+            } else {
+              // @ts-ignore
+              name = this.reagentForm.value.reagent_name_search.reagent.name
+            }
             if (this.labGroupForm.valid && this.labGroupForm.value.selected) {
               if (selectedLabGroup) {
                 if (selectedLabGroup.service_storage) {
                   // @ts-ignore
-                  const reagent = await this.web.createStoredReagent(selectedLabGroup.service_storage.id, this.reagentForm.value.name, this.reagentForm.value.unit, this.reagentForm.value.current_quantity, `Added from job with id ${this.job.id}`, null, false, false, this.projectForm.value.id, this.protocolForm.value.id).toPromise()
+                  const reagent = await this.web.createStoredReagent(selectedLabGroup.service_storage.id, name, this.reagentForm.value.unit, this.reagentForm.value.current_quantity, `Added from job with id ${this.job.id}`, null, false, false, this.projectForm.value.id, this.protocolForm.value.id).toPromise()
                   if (reagent) {
                     // @ts-ignore
                     this.reagentForm.patchValue({id: reagent.id, name: reagent.reagent.name, current_quantity: reagent.quantity, unit: reagent.reagent.unit})

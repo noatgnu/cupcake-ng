@@ -1205,7 +1205,7 @@ export class WebService {
       .set('offset', offset.toString())
 
     if (user_owned_only) {
-      params = params.append('user_owned_only', 'true')
+      params = params.append('user_only', 'true')
     }
     if (storage_object_name) {
       params = params.append('storage_object_name', storage_object_name)
