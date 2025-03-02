@@ -13,6 +13,9 @@
         </div>
       </nav>
       <div class="list-group d-flex flex-column rounded-0 overflow-auto">
+        @if (accountService.loggedIn) {
+          <button type="button" class="list-group-item list-group-item-action" (click)="selectedSection='profile'">Profile</button>
+        }
         <button type="button" class="list-group-item list-group-item-action" (click)="selectedSection='security'">Security</button>
         <button type="button" class="list-group-item list-group-item-action" (click)="selectedSection='appearance'">Appearance</button>
         <button type="button" class="list-group-item list-group-item-action" (click)="selectedSection='user-data'">User Data</button>
@@ -82,6 +85,13 @@
         @if (token) {
           <app-signup [token]="token"></app-signup>
         }
+      } @else if (selectedSection === 'profile') {
+        <nav class="navbar navbar-expand-lg navbar-light d-flex flex-wrap">
+          <div class="container-fluid">
+            <a class="navbar-brand">Profile</a>
+          </div>
+        </nav>
+        <app-profile></app-profile>
       }
     </div>
   </div>

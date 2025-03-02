@@ -8,6 +8,7 @@ import {UserDataComponent} from "./user-data/user-data.component";
 import {LabGroupComponent} from "./lab-group/lab-group.component";
 import {AccountsService} from "./accounts.service";
 import {SignupComponent} from "./signup/signup.component";
+import {ProfileComponent} from "./profile/profile.component";
 
 @Component({
   selector: 'app-accounts',
@@ -20,7 +21,8 @@ import {SignupComponent} from "./signup/signup.component";
     NgbDropdownMenu,
     UserDataComponent,
     LabGroupComponent,
-    SignupComponent
+    SignupComponent,
+    ProfileComponent
   ],
   templateUrl: './accounts.component.html',
   styleUrl: './accounts.component.scss'

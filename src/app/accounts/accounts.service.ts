@@ -56,4 +56,12 @@ export class AccountsService {
   signUp(username: string, password: string, token: string) {
     return this.http.post<User>(`${this.baseURL}/api/user/signup/`, {username: username, password: password, token: token})
   }
+
+  getCurrentUser(): Observable<User> {
+    return this.http.get<User>(`${this.baseURL}/api/user/current/`)
+  }
+
+  updateCurrentUser(data: any): Observable<User> {
+    return this.http.put<User>(`${this.baseURL}/api/user/update_profile/`, data, {observe: 'body', responseType: 'json'})
+  }
 }

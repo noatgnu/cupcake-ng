@@ -10,10 +10,18 @@
   <form [formGroup]="projectForm" class="d-flex flex-column gap-2">
     <div class="form-group">
       <label for="projectName">Project Name</label>
-      <input id="projectName" type="search" class="form-control" formControlName="project_name"
-             (selectItem)="onProjectSelected($event)"
-             [ngbTypeahead]="searchProjects"
-             [resultFormatter]="formatter" [inputFormatter]="formatter" placeholder="Search for a project...">
+      <div class="d-flex gap-2">
+        <input id="projectName" type="search" class="form-control" formControlName="project_name"
+               (selectItem)="onProjectSelected($event)"
+               [ngbTypeahead]="searchProjects"
+               [resultFormatter]="formatter" [inputFormatter]="formatter" placeholder="Search for a project...">
+        @if (projectSearchLoading) {
+          <div class="spinner-border spinner-border-sm" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+        }
+
+      </div>
     </div>
     @if (selectedProject) {
       <div>
@@ -96,7 +104,14 @@
           <label for="protocolTitle">
             Protocol Title
           </label>
-          <input [inputFormatter]="protocolFormatter" [resultFormatter]="protocolFormatter" id="protocolTitle" style="width: 300px" type="search" [ngbTypeahead]="searchProtocol" class="form-control" formControlName="protocol_title" placeholder="Enter protocol title" (selectItem)="onProtocolSelected($event)">
+          <div class="d-flex gap-2">
+            <input [inputFormatter]="protocolFormatter" [resultFormatter]="protocolFormatter" id="protocolTitle" style="width: 300px" type="search" [ngbTypeahead]="searchProtocol" class="form-control" formControlName="protocol_title" placeholder="Enter protocol title" (selectItem)="onProtocolSelected($event)">
+            @if (protocolSearchLoading) {
+              <div class="spinner-border spinner-border-sm" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+            }
+          </div>
         </div>
       </form>
       @if (selectedProtocol) {
@@ -138,7 +153,14 @@
         } @else {
           <div class="form-group">
             <label>Sample Name</label>
-            <input (selectItem)="onStoredReagentSelected($event)" [resultTemplate]="rt" type="search" [ngbTypeahead]="searchReagent" class="form-control" [inputFormatter]="reagentFormatter" placeholder="Search or new sample name">
+            <div class="d-flex gap-2">
+              <input (selectItem)="onStoredReagentSelected($event)" [resultTemplate]="rt" type="search" [ngbTypeahead]="searchReagent" class="form-control" [inputFormatter]="reagentFormatter" placeholder="Search or new sample name">
+              @if (storedReagentSearchLoading) {
+                <div class="spinner-border spinner-border-sm" role="status">
+                  <span class="visually-hidden">Loading...</span>
+                </div>
+              }
+            </div>
             <ng-template #rt let-r="result" let-t="term">
               <div class="d-flex justify-content-between">
                 <span>{{ r.reagent.name }} ({{ r.quantity }} {{ r.reagent.unit }})</span>
@@ -372,22 +394,24 @@
     @if (!job) {
       <button class="btn btn-primary" (click)="createDraftJob()">Create Job</button>
     } @else {
-      <button class="btn btn-primary" [disabled]="job.status !== 'draft'">Submit</button>
-      <button class="btn btn-primary" (click)="update()">Update</button>
-      <button class="btn btn-primary" (click)="fastaFileUpload.click()">Upload Fasta File</button>
-      <input type="file" hidden #fastaFileUpload (change)="annotationService.handleFileInput($event, job.id, 'user_annotation', 'fasta file from job '+job.job_name, 'file')">
-      <div ngbDropdown display="dynamic" class="d-inline-black">
-        <button class="btn btn-primary" id="addMetadata" ngbDropdownToggle>
-          + User Metadata
-        </button>
-        <div ngbDropdownMenu aria-labelledby="addMetadata">
-          @for (m of metadataService.userMetadataTemplate; track m.name) {
-            <a class="dropdown-item" (click)="addMetadata(m, 'user_metadata')">
-              {{m.name}}
-            </a>
-          }
+      @if (job.status !== 'submitted' && (userCanEdit || staffModeAvailable)) {
+        <button class="btn btn-primary" [disabled]="job.status !== 'draft'">Submit</button>
+        <button class="btn btn-primary" (click)="update()">Update</button>
+        <button class="btn btn-primary" (click)="fastaFileUpload.click()">Upload Fasta File</button>
+        <input type="file" hidden #fastaFileUpload (change)="annotationService.handleFileInput($event, job.id, 'user_annotation', 'fasta file from job '+job.job_name, 'file')">
+        <div ngbDropdown display="dynamic" class="d-inline-black">
+          <button class="btn btn-primary" id="addMetadata" ngbDropdownToggle>
+            + User Metadata
+          </button>
+          <div ngbDropdownMenu aria-labelledby="addMetadata">
+            @for (m of metadataService.userMetadataTemplate; track m.name) {
+              <a class="dropdown-item" (click)="addMetadata(m, 'user_metadata')">
+                {{m.name}}
+              </a>
+            }
+          </div>
         </div>
-      </div>
+      }
       @if (staffModeAvailable) {
         <div ngbDropdown display="dynamic" class="d-inline-black">
           <button class="btn btn-warning" id="addStaffMetadata" ngbDropdownToggle>
