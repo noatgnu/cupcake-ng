@@ -16,15 +16,14 @@ import {Project} from "../project";
 import {ProjectModalComponent} from "./project-modal/project-modal.component";
 
 @Component({
-  selector: 'app-session-editor',
-  standalone: true,
-  imports: [
-    ReactiveFormsModule,
-    ProtocolListComponent,
-    NgbDatepicker
-  ],
-  templateUrl: './session-editor.component.html',
-  styleUrl: './session-editor.component.scss'
+    selector: 'app-session-editor',
+    imports: [
+        ReactiveFormsModule,
+        ProtocolListComponent,
+        NgbDatepicker
+    ],
+    templateUrl: './session-editor.component.html',
+    styleUrl: './session-editor.component.scss'
 })
 export class SessionEditorComponent {
   private _sessionID: string = '';

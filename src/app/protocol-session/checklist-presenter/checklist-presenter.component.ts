@@ -4,13 +4,12 @@ import {FormBuilder, FormsModule} from "@angular/forms";
 import {WebService} from "../../web.service";
 
 @Component({
-  selector: 'app-checklist-presenter',
-  standalone: true,
-  imports: [
-    FormsModule
-  ],
-  templateUrl: './checklist-presenter.component.html',
-  styleUrl: './checklist-presenter.component.scss'
+    selector: 'app-checklist-presenter',
+    imports: [
+        FormsModule
+    ],
+    templateUrl: './checklist-presenter.component.html',
+    styleUrl: './checklist-presenter.component.scss'
 })
 export class ChecklistPresenterComponent {
   _annotation?: Annotation

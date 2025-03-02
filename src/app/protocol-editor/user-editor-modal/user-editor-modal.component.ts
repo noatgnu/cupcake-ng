@@ -5,13 +5,12 @@ import {FormBuilder, ReactiveFormsModule, Validators} from "@angular/forms";
 import {ToastService} from "../../toast.service";
 
 @Component({
-  selector: 'app-user-editor-modal',
-  standalone: true,
-  imports: [
-    ReactiveFormsModule
-  ],
-  templateUrl: './user-editor-modal.component.html',
-  styleUrl: './user-editor-modal.component.scss'
+    selector: 'app-user-editor-modal',
+    imports: [
+        ReactiveFormsModule
+    ],
+    templateUrl: './user-editor-modal.component.html',
+    styleUrl: './user-editor-modal.component.scss'
 })
 export class UserEditorModalComponent {
   _protocolId: number = 0

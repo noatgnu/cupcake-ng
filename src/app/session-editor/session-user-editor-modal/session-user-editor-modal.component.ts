@@ -5,13 +5,12 @@ import {WebService} from "../../web.service";
 import {ToastService} from "../../toast.service";
 
 @Component({
-  selector: 'app-session-user-editor-modal',
-  standalone: true,
-  imports: [
-    ReactiveFormsModule
-  ],
-  templateUrl: './session-user-editor-modal.component.html',
-  styleUrl: './session-user-editor-modal.component.scss'
+    selector: 'app-session-user-editor-modal',
+    imports: [
+        ReactiveFormsModule
+    ],
+    templateUrl: './session-user-editor-modal.component.html',
+    styleUrl: './session-user-editor-modal.component.scss'
 })
 export class SessionUserEditorModalComponent {
   _sessionId: string = ""

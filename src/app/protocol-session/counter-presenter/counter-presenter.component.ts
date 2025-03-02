@@ -6,11 +6,10 @@ import {SpeechService} from "../../speech.service";
 import {ToastService} from "../../toast.service";
 
 @Component({
-  selector: 'app-counter-presenter',
-  standalone: true,
-  imports: [],
-  templateUrl: './counter-presenter.component.html',
-  styleUrl: './counter-presenter.component.scss'
+    selector: 'app-counter-presenter',
+    imports: [],
+    templateUrl: './counter-presenter.component.html',
+    styleUrl: './counter-presenter.component.scss'
 })
 export class CounterPresenterComponent {
   _annotation?: Annotation

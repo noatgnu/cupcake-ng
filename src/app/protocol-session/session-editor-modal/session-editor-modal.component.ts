@@ -4,13 +4,12 @@ import {FormBuilder, ReactiveFormsModule} from "@angular/forms";
 import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
 
 @Component({
-  selector: 'app-session-editor-modal',
-  standalone: true,
-  imports: [
-    ReactiveFormsModule
-  ],
-  templateUrl: './session-editor-modal.component.html',
-  styleUrl: './session-editor-modal.component.scss'
+    selector: 'app-session-editor-modal',
+    imports: [
+        ReactiveFormsModule
+    ],
+    templateUrl: './session-editor-modal.component.html',
+    styleUrl: './session-editor-modal.component.scss'
 })
 export class SessionEditorModalComponent {
   _session?: ProtocolSession

@@ -5,14 +5,13 @@ import {FormBuilder, FormsModule, ReactiveFormsModule, Validators} from "@angula
 import {ToastService} from "../../toast.service";
 
 @Component({
-  selector: 'app-user-viewer-modal',
-  standalone: true,
-  imports: [
-    FormsModule,
-    ReactiveFormsModule
-  ],
-  templateUrl: './user-viewer-modal.component.html',
-  styleUrl: './user-viewer-modal.component.scss'
+    selector: 'app-user-viewer-modal',
+    imports: [
+        FormsModule,
+        ReactiveFormsModule
+    ],
+    templateUrl: './user-viewer-modal.component.html',
+    styleUrl: './user-viewer-modal.component.scss'
 })
 export class UserViewerModalComponent {
   _protocolId: number = 0

@@ -8,14 +8,13 @@ import {
 } from "../../instruments/booking-time-visualizer/booking-time-visualizer.component";
 
 @Component({
-  selector: 'app-instrument-booking-presenter',
-  standalone: true,
-  imports: [
-    DatePipe,
-    BookingTimeVisualizerComponent
-  ],
-  templateUrl: './instrument-booking-presenter.component.html',
-  styleUrl: './instrument-booking-presenter.component.scss'
+    selector: 'app-instrument-booking-presenter',
+    imports: [
+        DatePipe,
+        BookingTimeVisualizerComponent
+    ],
+    templateUrl: './instrument-booking-presenter.component.html',
+    styleUrl: './instrument-booking-presenter.component.scss'
 })
 export class InstrumentBookingPresenterComponent {
   private _annotation?: Annotation

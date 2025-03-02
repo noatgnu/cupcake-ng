@@ -7,18 +7,17 @@ import {NgbModal, NgbNav, NgbNavContent, NgbNavItem, NgbNavLinkButton, NgbNavOut
 import {TextScriptEditorModalComponent} from "../text-scsript-editor-modal/text-script-editor-modal.component";
 
 @Component({
-  selector: 'app-media-presenter',
-  standalone: true,
-  imports: [
-    NgClass,
-    NgbNav,
-    NgbNavItem,
-    NgbNavOutlet,
-    NgbNavLinkButton,
-    NgbNavContent
-  ],
-  templateUrl: './media-presenter.component.html',
-  styleUrl: './media-presenter.component.scss'
+    selector: 'app-media-presenter',
+    imports: [
+        NgClass,
+        NgbNav,
+        NgbNavItem,
+        NgbNavOutlet,
+        NgbNavLinkButton,
+        NgbNavContent
+    ],
+    templateUrl: './media-presenter.component.html',
+    styleUrl: './media-presenter.component.scss'
 })
 export class MediaPresenterComponent {
   @ViewChild('audioControlElement') audioControlElement?: ElementRef;

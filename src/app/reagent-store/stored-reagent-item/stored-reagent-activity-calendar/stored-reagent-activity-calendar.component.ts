@@ -4,11 +4,10 @@ import {DataService} from "../../../data.service";
 import {ReagentAction, StoredReagent} from "../../../storage-object";
 import {WebService} from "../../../web.service";
 @Component({
-  selector: 'app-stored-reagent-activity-calendar',
-  standalone: true,
-  imports: [],
-  templateUrl: './stored-reagent-activity-calendar.component.html',
-  styleUrl: './stored-reagent-activity-calendar.component.scss'
+    selector: 'app-stored-reagent-activity-calendar',
+    imports: [],
+    templateUrl: './stored-reagent-activity-calendar.component.html',
+    styleUrl: './stored-reagent-activity-calendar.component.scss'
 })
 export class StoredReagentActivityCalendarComponent implements AfterViewInit{
   private _storedReagent: StoredReagent|undefined = undefined

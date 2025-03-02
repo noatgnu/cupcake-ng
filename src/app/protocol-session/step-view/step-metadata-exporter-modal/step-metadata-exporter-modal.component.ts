@@ -13,17 +13,16 @@ import {ProtocolSession} from "../../../protocol-session";
 import {Router} from "@angular/router";
 
 @Component({
-  selector: 'app-step-metadata-exporter-modal',
-  standalone: true,
-  imports: [
-    ReactiveFormsModule,
-    NgbDropdown,
-    NgbDropdownToggle,
-    NgbDropdownMenu,
-    NgbDropdownItem
-  ],
-  templateUrl: './step-metadata-exporter-modal.component.html',
-  styleUrl: './step-metadata-exporter-modal.component.scss'
+    selector: 'app-step-metadata-exporter-modal',
+    imports: [
+        ReactiveFormsModule,
+        NgbDropdown,
+        NgbDropdownToggle,
+        NgbDropdownMenu,
+        NgbDropdownItem
+    ],
+    templateUrl: './step-metadata-exporter-modal.component.html',
+    styleUrl: './step-metadata-exporter-modal.component.scss'
 })
 export class StepMetadataExporterModalComponent {
   @Input() session?: ProtocolSession

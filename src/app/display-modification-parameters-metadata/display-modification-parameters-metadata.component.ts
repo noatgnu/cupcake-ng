@@ -2,11 +2,10 @@ import {Component, Input} from '@angular/core';
 import {map} from "rxjs";
 
 @Component({
-  selector: 'app-display-modification-parameters-metadata',
-  standalone: true,
-  imports: [],
-  templateUrl: './display-modification-parameters-metadata.component.html',
-  styleUrl: './display-modification-parameters-metadata.component.scss'
+    selector: 'app-display-modification-parameters-metadata',
+    imports: [],
+    templateUrl: './display-modification-parameters-metadata.component.html',
+    styleUrl: './display-modification-parameters-metadata.component.scss'
 })
 export class DisplayModificationParametersMetadataComponent {
   private _value = ''

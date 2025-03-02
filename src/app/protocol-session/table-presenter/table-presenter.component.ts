@@ -6,14 +6,13 @@ import {ToastService} from "../../toast.service";
 import {NgClass} from "@angular/common";
 
 @Component({
-  selector: 'app-table-presenter',
-  standalone: true,
-  imports: [
-    FormsModule,
-    NgClass
-  ],
-  templateUrl: './table-presenter.component.html',
-  styleUrl: './table-presenter.component.scss'
+    selector: 'app-table-presenter',
+    imports: [
+        FormsModule,
+        NgClass
+    ],
+    templateUrl: './table-presenter.component.html',
+    styleUrl: './table-presenter.component.scss'
 })
 export class TablePresenterComponent {
   _annotation?: Annotation;

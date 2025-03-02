@@ -37,30 +37,29 @@ import {StepViewComponent} from "./step-view/step-view.component";
 import {FolderViewComponent} from "./folder-view/folder-view.component";
 
 @Component({
-  selector: 'app-protocol-session',
-  standalone: true,
-  imports: [
-    NgClass,
-    AnnotationTextFormComponent,
-    HandwrittenAnnotationComponent,
-    DatePipe,
-    NgOptimizedImage,
-    AnnotationPresenterComponent,
-    ReactiveFormsModule,
-    FormsModule,
-    NgbDropdown,
-    NgbDropdownToggle,
-    NgbDropdownMenu,
-    NgbDropdownItem,
-    AlignmentAnnotationComponent,
-    CalculatorAnnotationComponent,
-    SectionListComponent,
-    FolderListComponent,
-    StepViewComponent,
-    FolderViewComponent
-  ],
-  templateUrl: './protocol-session.component.html',
-  styleUrl: './protocol-session.component.scss'
+    selector: 'app-protocol-session',
+    imports: [
+        NgClass,
+        AnnotationTextFormComponent,
+        HandwrittenAnnotationComponent,
+        DatePipe,
+        NgOptimizedImage,
+        AnnotationPresenterComponent,
+        ReactiveFormsModule,
+        FormsModule,
+        NgbDropdown,
+        NgbDropdownToggle,
+        NgbDropdownMenu,
+        NgbDropdownItem,
+        AlignmentAnnotationComponent,
+        CalculatorAnnotationComponent,
+        SectionListComponent,
+        FolderListComponent,
+        StepViewComponent,
+        FolderViewComponent
+    ],
+    templateUrl: './protocol-session.component.html',
+    styleUrl: './protocol-session.component.scss'
 })
 export class ProtocolSessionComponent implements OnInit{
 

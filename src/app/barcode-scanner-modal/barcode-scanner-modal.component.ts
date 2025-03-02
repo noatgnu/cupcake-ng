@@ -15,19 +15,18 @@ import {StorageObject, StoredReagentQuery} from "../storage-object";
 import {WebService} from "../web.service";
 
 @Component({
-  selector: 'app-barcode-scanner-modal',
-  standalone: true,
-  imports: [
-    NgbNav,
-    NgbNavContent,
-    NgbNavLinkButton,
-    ReactiveFormsModule,
-    FormsModule,
-    NgbNavItem,
-    NgbNavOutlet
-  ],
-  templateUrl: './barcode-scanner-modal.component.html',
-  styleUrl: './barcode-scanner-modal.component.scss'
+    selector: 'app-barcode-scanner-modal',
+    imports: [
+        NgbNav,
+        NgbNavContent,
+        NgbNavLinkButton,
+        ReactiveFormsModule,
+        FormsModule,
+        NgbNavItem,
+        NgbNavOutlet
+    ],
+    templateUrl: './barcode-scanner-modal.component.html',
+    styleUrl: './barcode-scanner-modal.component.scss'
 })
 export class BarcodeScannerModalComponent implements AfterViewInit{
   videoElementPreviewID: string = '#videoElementPreview'

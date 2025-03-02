@@ -7,15 +7,14 @@ import {LabGroup, LabGroupQuery} from "../../../lab-group";
 import {NgbPagination, NgbTypeahead, NgbTypeaheadSelectItemEvent} from "@ng-bootstrap/ng-bootstrap";
 
 @Component({
-  selector: 'app-job-management',
-  standalone: true,
-  imports: [
-    ReactiveFormsModule,
-    NgbTypeahead,
-    NgbPagination
-  ],
-  templateUrl: './job-management.component.html',
-  styleUrl: './job-management.component.scss'
+    selector: 'app-job-management',
+    imports: [
+        ReactiveFormsModule,
+        NgbTypeahead,
+        NgbPagination
+    ],
+    templateUrl: './job-management.component.html',
+    styleUrl: './job-management.component.scss'
 })
 export class JobManagementComponent {
   instrumentJobQuery: InstrumentJobQuery|undefined

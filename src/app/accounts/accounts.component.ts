@@ -11,21 +11,20 @@ import {SignupComponent} from "./signup/signup.component";
 import {ProfileComponent} from "./profile/profile.component";
 
 @Component({
-  selector: 'app-accounts',
-  standalone: true,
-  imports: [
-    ReactiveFormsModule,
-    FormsModule,
-    NgbDropdown,
-    NgbDropdownToggle,
-    NgbDropdownMenu,
-    UserDataComponent,
-    LabGroupComponent,
-    SignupComponent,
-    ProfileComponent
-  ],
-  templateUrl: './accounts.component.html',
-  styleUrl: './accounts.component.scss'
+    selector: 'app-accounts',
+    imports: [
+        ReactiveFormsModule,
+        FormsModule,
+        NgbDropdown,
+        NgbDropdownToggle,
+        NgbDropdownMenu,
+        UserDataComponent,
+        LabGroupComponent,
+        SignupComponent,
+        ProfileComponent
+    ],
+    templateUrl: './accounts.component.html',
+    styleUrl: './accounts.component.scss'
 })
 export class AccountsComponent {
   selectedSection = 'security'

@@ -29,17 +29,16 @@ import {
 } from "../storage-object-access-control-modal/storage-object-access-control-modal.component";
 
 @Component({
-  selector: 'app-storage-object-view',
-  standalone: true,
-  imports: [
-    NgbPagination,
-    ReactiveFormsModule,
-    StoredReagentItemComponent,
-    BarcodeScannerModalComponent,
-    NgbTooltip
-  ],
-  templateUrl: './storage-object-view.component.html',
-  styleUrl: './storage-object-view.component.scss'
+    selector: 'app-storage-object-view',
+    imports: [
+        NgbPagination,
+        ReactiveFormsModule,
+        StoredReagentItemComponent,
+        BarcodeScannerModalComponent,
+        NgbTooltip
+    ],
+    templateUrl: './storage-object-view.component.html',
+    styleUrl: './storage-object-view.component.scss'
 })
 export class StorageObjectViewComponent {
   private _storedReagentID?: number|undefined

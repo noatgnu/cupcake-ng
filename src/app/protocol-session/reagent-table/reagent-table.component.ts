@@ -10,14 +10,13 @@ import {DataService} from "../../data.service";
 import {forkJoin} from "rxjs";
 
 @Component({
-  selector: 'app-reagent-table',
-  standalone: true,
-  imports: [
-    DatePipe,
-    NgbTooltip
-  ],
-  templateUrl: './reagent-table.component.html',
-  styleUrl: './reagent-table.component.scss'
+    selector: 'app-reagent-table',
+    imports: [
+        DatePipe,
+        NgbTooltip
+    ],
+    templateUrl: './reagent-table.component.html',
+    styleUrl: './reagent-table.component.scss'
 })
 export class ReagentTableComponent {
   selectedReagent: ProtocolStepReagent|undefined = undefined

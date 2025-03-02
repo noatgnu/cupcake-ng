@@ -12,17 +12,16 @@ import {BookingTimeVisualizerComponent} from "../booking-time-visualizer/booking
 import {InstrumentService} from "../instrument.service";
 
 @Component({
-  selector: 'app-instrument-booking',
-  standalone: true,
-  imports: [
-    ReactiveFormsModule,
-    NgbPagination,
-    NgClass,
-    NgbTooltip,
-    BookingTimeVisualizerComponent
-  ],
-  templateUrl: './instrument-booking.component.html',
-  styleUrl: './instrument-booking.component.scss'
+    selector: 'app-instrument-booking',
+    imports: [
+        ReactiveFormsModule,
+        NgbPagination,
+        NgClass,
+        NgbTooltip,
+        BookingTimeVisualizerComponent
+    ],
+    templateUrl: './instrument-booking.component.html',
+    styleUrl: './instrument-booking.component.scss'
 })
 export class InstrumentBookingComponent {
 

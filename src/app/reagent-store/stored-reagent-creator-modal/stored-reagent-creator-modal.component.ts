@@ -9,16 +9,15 @@ import {Protocol, ProtocolStep} from "../../protocol";
 import {ProtocolSession} from "../../protocol-session";
 
 @Component({
-  selector: 'app-stored-reagent-creator-modal',
-  standalone: true,
-  imports: [
-    ReactiveFormsModule,
-    NgbTypeahead,
-    NgbHighlight,
-    NgbTooltip
-  ],
-  templateUrl: './stored-reagent-creator-modal.component.html',
-  styleUrl: './stored-reagent-creator-modal.component.scss'
+    selector: 'app-stored-reagent-creator-modal',
+    imports: [
+        ReactiveFormsModule,
+        NgbTypeahead,
+        NgbHighlight,
+        NgbTooltip
+    ],
+    templateUrl: './stored-reagent-creator-modal.component.html',
+    styleUrl: './stored-reagent-creator-modal.component.scss'
 })
 export class StoredReagentCreatorModalComponent implements OnInit {
   exportedMetadata?: {metadata: {

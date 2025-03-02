@@ -7,15 +7,14 @@ import {catchError, debounceTime, distinctUntilChanged, map, Observable, of, swi
 import {User, UserQuery} from "../../../user";
 
 @Component({
-  selector: 'app-add-remove-user-from-group-modal',
-  standalone: true,
-  imports: [
-    ReactiveFormsModule,
-    NgbPagination,
-    NgbTooltip
-  ],
-  templateUrl: './add-remove-user-from-group-modal.component.html',
-  styleUrl: './add-remove-user-from-group-modal.component.scss'
+    selector: 'app-add-remove-user-from-group-modal',
+    imports: [
+        ReactiveFormsModule,
+        NgbPagination,
+        NgbTooltip
+    ],
+    templateUrl: './add-remove-user-from-group-modal.component.html',
+    styleUrl: './add-remove-user-from-group-modal.component.scss'
 })
 export class AddRemoveUserFromGroupModalComponent {
   userQuery: UserQuery|undefined

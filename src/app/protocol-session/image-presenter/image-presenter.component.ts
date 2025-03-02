@@ -4,13 +4,12 @@ import {WebService} from "../../web.service";
 import {AsyncPipe} from "@angular/common";
 
 @Component({
-  selector: 'app-image-presenter',
-  standalone: true,
-  imports: [
-    AsyncPipe
-  ],
-  templateUrl: './image-presenter.component.html',
-  styleUrl: './image-presenter.component.scss'
+    selector: 'app-image-presenter',
+    imports: [
+        AsyncPipe
+    ],
+    templateUrl: './image-presenter.component.html',
+    styleUrl: './image-presenter.component.scss'
 })
 export class ImagePresenterComponent {
   _annotation?: Annotation;

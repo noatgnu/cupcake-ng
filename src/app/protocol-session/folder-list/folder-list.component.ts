@@ -7,13 +7,12 @@ import {FolderNameModalComponent} from "./folder-name-modal/folder-name-modal.co
 import {DeleteFolderModalComponent} from "./delete-folder-modal/delete-folder-modal.component";
 
 @Component({
-  selector: 'app-folder-list',
-  standalone: true,
-  imports: [
-    DatePipe
-  ],
-  templateUrl: './folder-list.component.html',
-  styleUrl: './folder-list.component.scss'
+    selector: 'app-folder-list',
+    imports: [
+        DatePipe
+    ],
+    templateUrl: './folder-list.component.html',
+    styleUrl: './folder-list.component.scss'
 })
 export class FolderListComponent {
   private _sessionID?: string

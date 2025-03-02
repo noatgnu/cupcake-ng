@@ -4,13 +4,12 @@ import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
 import {FormBuilder, FormControl, ReactiveFormsModule, Validators} from "@angular/forms";
 
 @Component({
-  selector: 'app-storage-object-editor-modal',
-  standalone: true,
-  imports: [
-    ReactiveFormsModule
-  ],
-  templateUrl: './storage-object-editor-modal.component.html',
-  styleUrl: './storage-object-editor-modal.component.scss'
+    selector: 'app-storage-object-editor-modal',
+    imports: [
+        ReactiveFormsModule
+    ],
+    templateUrl: './storage-object-editor-modal.component.html',
+    styleUrl: './storage-object-editor-modal.component.scss'
 })
 export class StorageObjectEditorModalComponent {
   private _storageObject?: StorageObject|undefined = undefined

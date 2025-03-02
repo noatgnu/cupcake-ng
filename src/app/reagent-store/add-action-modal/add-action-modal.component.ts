@@ -4,13 +4,12 @@ import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
 import {FormBuilder, ReactiveFormsModule} from "@angular/forms";
 
 @Component({
-  selector: 'app-add-action-modal',
-  standalone: true,
-  imports: [
-    ReactiveFormsModule
-  ],
-  templateUrl: './add-action-modal.component.html',
-  styleUrl: './add-action-modal.component.scss'
+    selector: 'app-add-action-modal',
+    imports: [
+        ReactiveFormsModule
+    ],
+    templateUrl: './add-action-modal.component.html',
+    styleUrl: './add-action-modal.component.scss'
 })
 export class AddActionModalComponent {
   private _storedReagent: StoredReagent|undefined = undefined

@@ -5,13 +5,12 @@ import {NgbProgressbar} from "@ng-bootstrap/ng-bootstrap";
 import jsSHA from "jssha";
 
 @Component({
-  selector: 'app-user-data',
-  standalone: true,
-  imports: [
-    NgbProgressbar
-  ],
-  templateUrl: './user-data.component.html',
-  styleUrl: './user-data.component.scss'
+    selector: 'app-user-data',
+    imports: [
+        NgbProgressbar
+    ],
+    templateUrl: './user-data.component.html',
+    styleUrl: './user-data.component.scss'
 })
 export class UserDataComponent {
   chunkUploadProgress = 0;

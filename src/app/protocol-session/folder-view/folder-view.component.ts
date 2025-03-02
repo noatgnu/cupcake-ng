@@ -17,20 +17,19 @@ import {AccountsService} from "../../accounts/accounts.service";
 import {UploadLargeFileModalComponent} from "../../upload-large-file-modal/upload-large-file-modal.component";
 
 @Component({
-  selector: 'app-folder-view',
-  standalone: true,
-  imports: [
-    NgbDropdown,
-    NgbDropdownItem,
-    NgbDropdownMenu,
-    NgbDropdownToggle,
-    AnnotationTextFormComponent,
-    FormsModule,
-    HandwrittenAnnotationComponent,
-    AnnotationPresenterComponent
-  ],
-  templateUrl: './folder-view.component.html',
-  styleUrl: './folder-view.component.scss'
+    selector: 'app-folder-view',
+    imports: [
+        NgbDropdown,
+        NgbDropdownItem,
+        NgbDropdownMenu,
+        NgbDropdownToggle,
+        AnnotationTextFormComponent,
+        FormsModule,
+        HandwrittenAnnotationComponent,
+        AnnotationPresenterComponent
+    ],
+    templateUrl: './folder-view.component.html',
+    styleUrl: './folder-view.component.scss'
 })
 export class FolderViewComponent {
   @ViewChild('previewVideo') previewVideo?: ElementRef;

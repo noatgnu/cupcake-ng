@@ -3,11 +3,10 @@ import {ProtocolStep} from "../../protocol";
 import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
 
 @Component({
-  selector: 'app-step-description-preview-modal',
-  standalone: true,
-  imports: [],
-  templateUrl: './step-description-preview-modal.component.html',
-  styleUrl: './step-description-preview-modal.component.scss'
+    selector: 'app-step-description-preview-modal',
+    imports: [],
+    templateUrl: './step-description-preview-modal.component.html',
+    styleUrl: './step-description-preview-modal.component.scss'
 })
 export class StepDescriptionPreviewModalComponent {
   private _step?: ProtocolStep

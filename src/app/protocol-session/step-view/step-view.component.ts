@@ -33,23 +33,22 @@ import {
 } from "./step-metadata-exporter-modal/step-metadata-exporter-modal.component";
 
 @Component({
-  selector: 'app-step-view',
-  standalone: true,
-  imports: [
-    AnnotationTextFormComponent,
-    FormsModule,
-    HandwrittenAnnotationComponent,
-    AnnotationPresenterComponent,
-    NgbDropdown,
-    NgbDropdownItem,
-    NgbDropdownMenu,
-    NgbDropdownToggle,
-    NgbProgressbar,
-    ReagentTableComponent,
-    NgbTooltip
-  ],
-  templateUrl: './step-view.component.html',
-  styleUrl: './step-view.component.scss'
+    selector: 'app-step-view',
+    imports: [
+        AnnotationTextFormComponent,
+        FormsModule,
+        HandwrittenAnnotationComponent,
+        AnnotationPresenterComponent,
+        NgbDropdown,
+        NgbDropdownItem,
+        NgbDropdownMenu,
+        NgbDropdownToggle,
+        NgbProgressbar,
+        ReagentTableComponent,
+        NgbTooltip
+    ],
+    templateUrl: './step-view.component.html',
+    styleUrl: './step-view.component.scss'
 })
 export class StepViewComponent {
   @ViewChild('previewVideo') previewVideo?: ElementRef;

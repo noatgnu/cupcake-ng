@@ -19,16 +19,15 @@ import {AccountsService} from "../../accounts/accounts.service";
 import {InstrumentService} from "../instrument.service";
 
 @Component({
-  selector: 'app-booking-time-visualizer',
-  standalone: true,
-  imports: [
-    ReactiveFormsModule,
-    NgbDatepicker,
-    NgbTimepicker,
-    DatePipe
-  ],
-  templateUrl: './booking-time-visualizer.component.html',
-  styleUrl: './booking-time-visualizer.component.scss'
+    selector: 'app-booking-time-visualizer',
+    imports: [
+        ReactiveFormsModule,
+        NgbDatepicker,
+        NgbTimepicker,
+        DatePipe
+    ],
+    templateUrl: './booking-time-visualizer.component.html',
+    styleUrl: './booking-time-visualizer.component.scss'
 })
 export class BookingTimeVisualizerComponent implements AfterViewInit{
   @Input() instrument!: Instrument;

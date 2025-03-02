@@ -7,13 +7,12 @@ import {AccountsService} from "../../accounts/accounts.service";
 import {ToastService} from "../../toast.service";
 
 @Component({
-  selector: 'app-instrument-management-modal',
-  standalone: true,
-  imports: [
-    ReactiveFormsModule
-  ],
-  templateUrl: './instrument-management-modal.component.html',
-  styleUrl: './instrument-management-modal.component.scss'
+    selector: 'app-instrument-management-modal',
+    imports: [
+        ReactiveFormsModule
+    ],
+    templateUrl: './instrument-management-modal.component.html',
+    styleUrl: './instrument-management-modal.component.scss'
 })
 export class InstrumentManagementModalComponent {
   private _instrument?: Instrument

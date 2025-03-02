@@ -5,13 +5,12 @@ import {WebService} from "../web.service";
 import {ToastService} from "../toast.service";
 
 @Component({
-  selector: 'app-upload-large-file-modal',
-  standalone: true,
-  imports: [
-    NgbProgressbar
-  ],
-  templateUrl: './upload-large-file-modal.component.html',
-  styleUrl: './upload-large-file-modal.component.scss'
+    selector: 'app-upload-large-file-modal',
+    imports: [
+        NgbProgressbar
+    ],
+    templateUrl: './upload-large-file-modal.component.html',
+    styleUrl: './upload-large-file-modal.component.scss'
 })
 export class UploadLargeFileModalComponent {
   @Input() session_id: string = "";

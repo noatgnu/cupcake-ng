@@ -16,17 +16,16 @@ import {ProtocolCloneModalComponent} from "../protocol-clone-modal/protocol-clon
 import {DownloadModalComponent} from "../download-modal/download-modal.component";
 
 @Component({
-  selector: 'app-navbar',
-  standalone: true,
-  imports: [
-    NgbDropdown,
-    NgbDropdownToggle,
-    NgbDropdownMenu,
-    NgOptimizedImage,
-    NgbCollapse
-  ],
-  templateUrl: './navbar.component.html',
-  styleUrl: './navbar.component.scss'
+    selector: 'app-navbar',
+    imports: [
+        NgbDropdown,
+        NgbDropdownToggle,
+        NgbDropdownMenu,
+        NgOptimizedImage,
+        NgbCollapse
+    ],
+    templateUrl: './navbar.component.html',
+    styleUrl: './navbar.component.scss'
 })
 export class NavbarComponent {
   isMenuCollapsed = true;

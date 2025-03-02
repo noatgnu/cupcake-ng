@@ -7,16 +7,15 @@ import {FormBuilder, FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {AccountsService} from "../../accounts/accounts.service";
 
 @Component({
-  selector: 'app-storage-object-access-control-modal',
-  standalone: true,
-  imports: [
-    FormsModule,
-    NgbPagination,
-    NgbTooltip,
-    ReactiveFormsModule
-  ],
-  templateUrl: './storage-object-access-control-modal.component.html',
-  styleUrl: './storage-object-access-control-modal.component.scss'
+    selector: 'app-storage-object-access-control-modal',
+    imports: [
+        FormsModule,
+        NgbPagination,
+        NgbTooltip,
+        ReactiveFormsModule
+    ],
+    templateUrl: './storage-object-access-control-modal.component.html',
+    styleUrl: './storage-object-access-control-modal.component.scss'
 })
 export class StorageObjectAccessControlModalComponent {
   private _data: StorageObject|undefined

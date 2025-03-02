@@ -5,18 +5,17 @@ import {HandwrittenAnnotationComponent} from "../handwritten-annotation/handwrit
 import {NgbNav, NgbNavContent, NgbNavItem, NgbNavLinkButton, NgbNavOutlet} from "@ng-bootstrap/ng-bootstrap";
 
 @Component({
-  selector: 'app-sketch-presenter',
-  standalone: true,
-  imports: [
-    HandwrittenAnnotationComponent,
-    NgbNav,
-    NgbNavContent,
-    NgbNavLinkButton,
-    NgbNavItem,
-    NgbNavOutlet
-  ],
-  templateUrl: './sketch-presenter.component.html',
-  styleUrl: './sketch-presenter.component.scss'
+    selector: 'app-sketch-presenter',
+    imports: [
+        HandwrittenAnnotationComponent,
+        NgbNav,
+        NgbNavContent,
+        NgbNavLinkButton,
+        NgbNavItem,
+        NgbNavOutlet
+    ],
+    templateUrl: './sketch-presenter.component.html',
+    styleUrl: './sketch-presenter.component.scss'
 })
 export class SketchPresenterComponent {
   _annotation?: Annotation;

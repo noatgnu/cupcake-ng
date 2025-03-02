@@ -5,15 +5,14 @@ import {FormsModule} from "@angular/forms";
 import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 
 @Component({
-  selector: 'app-step-description-editor',
-  standalone: true,
-  imports: [
-    QuillEditorComponent,
-    FormsModule,
-    NgbTooltip
-  ],
-  templateUrl: './step-description-editor.component.html',
-  styleUrl: './step-description-editor.component.scss'
+    selector: 'app-step-description-editor',
+    imports: [
+        QuillEditorComponent,
+        FormsModule,
+        NgbTooltip
+    ],
+    templateUrl: './step-description-editor.component.html',
+    styleUrl: './step-description-editor.component.scss'
 })
 export class StepDescriptionEditorComponent implements AfterViewInit{
   @ViewChild("editor") quillEditor!: QuillEditorComponent

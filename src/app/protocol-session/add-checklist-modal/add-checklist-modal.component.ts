@@ -3,14 +3,13 @@ import {FormBuilder, FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
 
 @Component({
-  selector: 'app-add-checklist-modal',
-  standalone: true,
-  imports: [
-    FormsModule,
-    ReactiveFormsModule
-  ],
-  templateUrl: './add-checklist-modal.component.html',
-  styleUrl: './add-checklist-modal.component.scss'
+    selector: 'app-add-checklist-modal',
+    imports: [
+        FormsModule,
+        ReactiveFormsModule
+    ],
+    templateUrl: './add-checklist-modal.component.html',
+    styleUrl: './add-checklist-modal.component.scss'
 })
 export class AddChecklistModalComponent {
   form = this.fb.group({

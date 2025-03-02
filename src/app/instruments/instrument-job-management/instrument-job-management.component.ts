@@ -6,19 +6,18 @@ import {InstrumentJob} from "../../instrument-job";
 import {JobManagementComponent} from "./job-management/job-management.component";
 
 @Component({
-  selector: 'app-instrument-job-management',
-  standalone: true,
-  imports: [
-    NgbNavContent,
-    NgbNavLinkButton,
-    NgbNavItem,
-    NgbNav,
-    NgbNavOutlet,
-    JobSubmissionComponent,
-    JobManagementComponent
-  ],
-  templateUrl: './instrument-job-management.component.html',
-  styleUrl: './instrument-job-management.component.scss'
+    selector: 'app-instrument-job-management',
+    imports: [
+        NgbNavContent,
+        NgbNavLinkButton,
+        NgbNavItem,
+        NgbNav,
+        NgbNavOutlet,
+        JobSubmissionComponent,
+        JobManagementComponent
+    ],
+    templateUrl: './instrument-job-management.component.html',
+    styleUrl: './instrument-job-management.component.scss'
 })
 export class InstrumentJobManagementComponent {
   private _currentJob: InstrumentJob|undefined

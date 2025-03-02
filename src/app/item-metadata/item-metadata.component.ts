@@ -11,16 +11,15 @@ import {Instrument} from "../instrument";
 import { MetadataService } from '../metadata.service';
 
 @Component({
-  selector: 'app-item-metadata',
-  standalone: true,
+    selector: 'app-item-metadata',
     imports: [
         FormsModule,
         NgbTooltip,
         NgbTypeahead,
         ReactiveFormsModule
     ],
-  templateUrl: './item-metadata.component.html',
-  styleUrl: './item-metadata.component.scss'
+    templateUrl: './item-metadata.component.html',
+    styleUrl: './item-metadata.component.scss'
 })
 export class ItemMetadataComponent {
   @Input() parentType: "stored_reagent"| "annotation" | "instrument" = "stored_reagent"

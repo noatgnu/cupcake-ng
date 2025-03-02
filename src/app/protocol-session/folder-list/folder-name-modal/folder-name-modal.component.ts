@@ -3,13 +3,12 @@ import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
 import {FormBuilder, ReactiveFormsModule, Validators} from "@angular/forms";
 
 @Component({
-  selector: 'app-folder-name-modal',
-  standalone: true,
-  imports: [
-    ReactiveFormsModule
-  ],
-  templateUrl: './folder-name-modal.component.html',
-  styleUrl: './folder-name-modal.component.scss'
+    selector: 'app-folder-name-modal',
+    imports: [
+        ReactiveFormsModule
+    ],
+    templateUrl: './folder-name-modal.component.html',
+    styleUrl: './folder-name-modal.component.scss'
 })
 export class FolderNameModalComponent {
 

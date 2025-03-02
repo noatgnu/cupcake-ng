@@ -3,14 +3,13 @@ import {FormBuilder, FormControl, ReactiveFormsModule} from "@angular/forms";
 import {NgbTimepicker, NgbTimeStruct} from "@ng-bootstrap/ng-bootstrap";
 
 @Component({
-  selector: 'app-time-picker',
-  standalone: true,
-  imports: [
-    ReactiveFormsModule,
-    NgbTimepicker
-  ],
-  templateUrl: './time-picker.component.html',
-  styleUrl: './time-picker.component.scss'
+    selector: 'app-time-picker',
+    imports: [
+        ReactiveFormsModule,
+        NgbTimepicker
+    ],
+    templateUrl: './time-picker.component.html',
+    styleUrl: './time-picker.component.scss'
 })
 export class TimePickerComponent {
   form = this.fb.group({

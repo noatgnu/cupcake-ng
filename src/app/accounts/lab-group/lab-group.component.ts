@@ -13,16 +13,15 @@ import {LabUserCreationModalComponent} from "../lab-user-creation-modal/lab-user
 import {ToastService} from "../../toast.service";
 
 @Component({
-  selector: 'app-lab-group',
-  standalone: true,
-  imports: [
-    NgbTooltip,
-    ReactiveFormsModule,
-    NgbPagination,
-    NgbAlert
-  ],
-  templateUrl: './lab-group.component.html',
-  styleUrl: './lab-group.component.scss'
+    selector: 'app-lab-group',
+    imports: [
+        NgbTooltip,
+        ReactiveFormsModule,
+        NgbPagination,
+        NgbAlert
+    ],
+    templateUrl: './lab-group.component.html',
+    styleUrl: './lab-group.component.scss'
 })
 export class LabGroupComponent implements OnInit {
 

@@ -10,15 +10,14 @@ import {Location} from "@angular/common";
 import {MetadataNotificationModalComponent} from "./metadata-notification-modal/metadata-notification-modal.component";
 
 @Component({
-  selector: 'app-reagent-store',
-  standalone: true,
-  imports: [
-    NgbPagination,
-    StorageObjectViewComponent,
-    NgbTooltip
-  ],
-  templateUrl: './reagent-store.component.html',
-  styleUrl: './reagent-store.component.scss'
+    selector: 'app-reagent-store',
+    imports: [
+        NgbPagination,
+        StorageObjectViewComponent,
+        NgbTooltip
+    ],
+    templateUrl: './reagent-store.component.html',
+    styleUrl: './reagent-store.component.scss'
 })
 export class ReagentStoreComponent implements OnInit{
   search?: string

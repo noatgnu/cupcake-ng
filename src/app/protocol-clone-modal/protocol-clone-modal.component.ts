@@ -6,14 +6,13 @@ import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
 import {QuillEditorComponent} from "ngx-quill";
 
 @Component({
-  selector: 'app-protocol-clone-modal',
-  standalone: true,
-  imports: [
-    ReactiveFormsModule,
-    QuillEditorComponent
-  ],
-  templateUrl: './protocol-clone-modal.component.html',
-  styleUrl: './protocol-clone-modal.component.scss'
+    selector: 'app-protocol-clone-modal',
+    imports: [
+        ReactiveFormsModule,
+        QuillEditorComponent
+    ],
+    templateUrl: './protocol-clone-modal.component.html',
+    styleUrl: './protocol-clone-modal.component.scss'
 })
 export class ProtocolCloneModalComponent {
   private _protocol?: Protocol;

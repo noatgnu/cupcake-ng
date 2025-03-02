@@ -3,13 +3,12 @@ import {FormBuilder, ReactiveFormsModule} from "@angular/forms";
 import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
 
 @Component({
-  selector: 'app-random-annotation-modal',
-  standalone: true,
-  imports: [
-    ReactiveFormsModule
-  ],
-  templateUrl: './random-annotation-modal.component.html',
-  styleUrl: './random-annotation-modal.component.scss'
+    selector: 'app-random-annotation-modal',
+    imports: [
+        ReactiveFormsModule
+    ],
+    templateUrl: './random-annotation-modal.component.html',
+    styleUrl: './random-annotation-modal.component.scss'
 })
 export class RandomAnnotationModalComponent {
 

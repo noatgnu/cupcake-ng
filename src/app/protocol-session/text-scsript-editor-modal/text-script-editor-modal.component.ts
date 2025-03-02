@@ -3,13 +3,12 @@ import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
 import {FormsModule} from "@angular/forms";
 
 @Component({
-  selector: 'app-text-script-editor-modal',
-  standalone: true,
-  imports: [
-    FormsModule
-  ],
-  templateUrl: './text-script-editor-modal.component.html',
-  styleUrl: './text-script-editor-modal.component.scss'
+    selector: 'app-text-script-editor-modal',
+    imports: [
+        FormsModule
+    ],
+    templateUrl: './text-script-editor-modal.component.html',
+    styleUrl: './text-script-editor-modal.component.scss'
 })
 export class TextScriptEditorModalComponent {
   @Input() text: string = ''

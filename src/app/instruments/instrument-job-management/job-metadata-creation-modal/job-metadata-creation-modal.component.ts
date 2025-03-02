@@ -7,16 +7,15 @@ import {MetadataColumn} from "../../../metadata-column";
 import {WebService} from "../../../web.service";
 
 @Component({
-  selector: 'app-job-metadata-creation-modal',
-  standalone: true,
-  imports: [
-    ReactiveFormsModule,
-    NgbTypeahead,
-    FormsModule
-  ],
-  templateUrl: './job-metadata-creation-modal.component.html',
-  styleUrl: './job-metadata-creation-modal.component.scss',
-  providers: [MetadataService]
+    selector: 'app-job-metadata-creation-modal',
+    imports: [
+        ReactiveFormsModule,
+        NgbTypeahead,
+        FormsModule
+    ],
+    templateUrl: './job-metadata-creation-modal.component.html',
+    styleUrl: './job-metadata-creation-modal.component.scss',
+    providers: [MetadataService]
 })
 export class JobMetadataCreationModalComponent {
   private _name: string = ""

@@ -7,14 +7,13 @@ import {DatePipe} from "@angular/common";
 import {AccountsService} from "../../accounts/accounts.service";
 
 @Component({
-  selector: 'app-action-logs-modal',
-  standalone: true,
-  imports: [
-    NgbPagination,
-    DatePipe
-  ],
-  templateUrl: './action-logs-modal.component.html',
-  styleUrl: './action-logs-modal.component.scss'
+    selector: 'app-action-logs-modal',
+    imports: [
+        NgbPagination,
+        DatePipe
+    ],
+    templateUrl: './action-logs-modal.component.html',
+    styleUrl: './action-logs-modal.component.scss'
 })
 export class ActionLogsModalComponent {
   private _storedReagent: StoredReagent|undefined = undefined

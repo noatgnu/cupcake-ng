@@ -6,14 +6,13 @@ import {WebService} from "../../web.service";
 import {DatePipe} from "@angular/common";
 
 @Component({
-  selector: 'app-session-selection-modal',
-  standalone: true,
-  imports: [
-    ReactiveFormsModule,
-    DatePipe
-  ],
-  templateUrl: './session-selection-modal.component.html',
-  styleUrl: './session-selection-modal.component.scss'
+    selector: 'app-session-selection-modal',
+    imports: [
+        ReactiveFormsModule,
+        DatePipe
+    ],
+    templateUrl: './session-selection-modal.component.html',
+    styleUrl: './session-selection-modal.component.scss'
 })
 export class SessionSelectionModalComponent implements OnInit{
   @Input() associatedSessions: ProtocolSession[] = []

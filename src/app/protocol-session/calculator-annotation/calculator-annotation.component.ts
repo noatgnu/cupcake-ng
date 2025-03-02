@@ -4,13 +4,12 @@ import {Annotation} from "../../annotation";
 import {WebService} from "../../web.service";
 
 @Component({
-  selector: 'app-calculator-annotation',
-  standalone: true,
-  imports: [
-    ReactiveFormsModule
-  ],
-  templateUrl: './calculator-annotation.component.html',
-  styleUrl: './calculator-annotation.component.scss'
+    selector: 'app-calculator-annotation',
+    imports: [
+        ReactiveFormsModule
+    ],
+    templateUrl: './calculator-annotation.component.html',
+    styleUrl: './calculator-annotation.component.scss'
 })
 export class CalculatorAnnotationComponent {
   @Input() enableSave: boolean = false

@@ -57,32 +57,31 @@ import {AccountsService} from "../../../accounts/accounts.service";
 import {StaffDataEntryPanelComponent} from "./staff-data-entry-panel/staff-data-entry-panel.component";
 
 @Component({
-  selector: 'app-job-submission',
-  standalone: true,
-  imports: [
-    ReactiveFormsModule,
-    NgbTypeahead,
-    DatePipe,
-    NgbTooltip,
-    QuillEditorComponent,
-    NgbDropdown,
-    NgbDropdownMenu,
-    NgbDropdownToggle,
-    AnnotationPresenterComponent,
-    NgbDropdownItem,
-    AnnotationTextFormComponent,
-    HandwrittenAnnotationComponent,
-    FormsModule,
-    DisplayModificationParametersMetadataComponent,
-    NgbNav,
-    NgbNavContent,
-    NgbNavLinkButton,
-    NgbNavItem,
-    NgbNavOutlet,
-    NgClass
-  ],
-  templateUrl: './job-submission.component.html',
-  styleUrl: './job-submission.component.scss'
+    selector: 'app-job-submission',
+    imports: [
+        ReactiveFormsModule,
+        NgbTypeahead,
+        DatePipe,
+        NgbTooltip,
+        QuillEditorComponent,
+        NgbDropdown,
+        NgbDropdownMenu,
+        NgbDropdownToggle,
+        AnnotationPresenterComponent,
+        NgbDropdownItem,
+        AnnotationTextFormComponent,
+        HandwrittenAnnotationComponent,
+        FormsModule,
+        DisplayModificationParametersMetadataComponent,
+        NgbNav,
+        NgbNavContent,
+        NgbNavLinkButton,
+        NgbNavItem,
+        NgbNavOutlet,
+        NgClass
+    ],
+    templateUrl: './job-submission.component.html',
+    styleUrl: './job-submission.component.scss'
 })
 export class JobSubmissionComponent implements OnInit, AfterViewInit {
   activeTab = 'user'

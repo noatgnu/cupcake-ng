@@ -6,13 +6,12 @@ import {ProtocolSession} from "../../protocol-session";
 import {Project, ProjectQuery} from "../../project";
 
 @Component({
-  selector: 'app-project-modal',
-  standalone: true,
-  imports: [
-    ReactiveFormsModule
-  ],
-  templateUrl: './project-modal.component.html',
-  styleUrl: './project-modal.component.scss'
+    selector: 'app-project-modal',
+    imports: [
+        ReactiveFormsModule
+    ],
+    templateUrl: './project-modal.component.html',
+    styleUrl: './project-modal.component.scss'
 })
 export class ProjectModalComponent {
   @Input() session?: ProtocolSession

@@ -4,13 +4,12 @@ import {FormBuilder, ReactiveFormsModule, Validators} from "@angular/forms";
 import {ToastService} from "../../toast.service";
 
 @Component({
-  selector: 'app-profile',
-  standalone: true,
-  imports: [
-    ReactiveFormsModule
-  ],
-  templateUrl: './profile.component.html',
-  styleUrl: './profile.component.scss'
+    selector: 'app-profile',
+    imports: [
+        ReactiveFormsModule
+    ],
+    templateUrl: './profile.component.html',
+    styleUrl: './profile.component.scss'
 })
 export class ProfileComponent implements OnInit {
 

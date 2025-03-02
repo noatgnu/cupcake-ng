@@ -30,30 +30,29 @@ import {
 import {AnnotationMetadataModalComponent} from "./annotation-metadata-modal/annotation-metadata-modal.component";
 
 @Component({
-  selector: 'app-annotation-presenter',
-  standalone: true,
-  imports: [
-    DatePipe,
-    NgOptimizedImage,
-    SketchPresenterComponent,
-    AsyncPipe,
-    ImagePresenterComponent,
-    MediaPresenterComponent,
-    ChecklistPresenterComponent,
-    CounterPresenterComponent,
-    TablePresenterComponent,
-    AlignmentAnnotationComponent,
-    CalculatorAnnotationComponent,
-    MolarityCalculatorComponent,
-    NgbDropdown,
-    NgbDropdownToggle,
-    NgbDropdownMenu,
-    RandomizationPresenterComponent,
-    InstrumentBookingPresenterComponent,
-    NgbTooltip
-  ],
-  templateUrl: './annotation-presenter.component.html',
-  styleUrl: './annotation-presenter.component.scss'
+    selector: 'app-annotation-presenter',
+    imports: [
+        DatePipe,
+        NgOptimizedImage,
+        SketchPresenterComponent,
+        AsyncPipe,
+        ImagePresenterComponent,
+        MediaPresenterComponent,
+        ChecklistPresenterComponent,
+        CounterPresenterComponent,
+        TablePresenterComponent,
+        AlignmentAnnotationComponent,
+        CalculatorAnnotationComponent,
+        MolarityCalculatorComponent,
+        NgbDropdown,
+        NgbDropdownToggle,
+        NgbDropdownMenu,
+        RandomizationPresenterComponent,
+        InstrumentBookingPresenterComponent,
+        NgbTooltip
+    ],
+    templateUrl: './annotation-presenter.component.html',
+    styleUrl: './annotation-presenter.component.scss'
 })
 export class AnnotationPresenterComponent {
   private _annotations?: Annotation[]

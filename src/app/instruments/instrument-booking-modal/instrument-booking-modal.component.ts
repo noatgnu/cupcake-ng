@@ -10,17 +10,16 @@ import {InstrumentService} from "../instrument.service";
 import {DatePipe} from "@angular/common";
 
 @Component({
-  selector: 'app-instrument-booking-modal',
-  standalone: true,
-  imports: [
-    ReactiveFormsModule,
-    NgbTypeahead,
-    BookingTimeVisualizerComponent,
-    FormsModule,
-    DatePipe
-  ],
-  templateUrl: './instrument-booking-modal.component.html',
-  styleUrl: './instrument-booking-modal.component.scss'
+    selector: 'app-instrument-booking-modal',
+    imports: [
+        ReactiveFormsModule,
+        NgbTypeahead,
+        BookingTimeVisualizerComponent,
+        FormsModule,
+        DatePipe
+    ],
+    templateUrl: './instrument-booking-modal.component.html',
+    styleUrl: './instrument-booking-modal.component.scss'
 })
 export class InstrumentBookingModalComponent implements OnInit, AfterViewInit{
 

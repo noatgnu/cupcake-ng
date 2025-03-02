@@ -6,17 +6,16 @@ import {InstrumentManagementComponent} from "./instrument-management/instrument-
 import {InstrumentJobManagementComponent} from "./instrument-job-management/instrument-job-management.component";
 
 @Component({
-  selector: 'app-instruments',
-  standalone: true,
-  imports: [
-    ReactiveFormsModule,
-    UserDataComponent,
-    InstrumentBookingComponent,
-    InstrumentManagementComponent,
-    InstrumentJobManagementComponent
-  ],
-  templateUrl: './instruments.component.html',
-  styleUrl: './instruments.component.scss'
+    selector: 'app-instruments',
+    imports: [
+        ReactiveFormsModule,
+        UserDataComponent,
+        InstrumentBookingComponent,
+        InstrumentManagementComponent,
+        InstrumentJobManagementComponent
+    ],
+    templateUrl: './instruments.component.html',
+    styleUrl: './instruments.component.scss'
 })
 export class InstrumentsComponent {
   @Input('section') set section(value: string) {

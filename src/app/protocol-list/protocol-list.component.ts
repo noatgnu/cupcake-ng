@@ -6,13 +6,12 @@ import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import {RemovalAreYouSureComponent} from "./removal-are-you-sure/removal-are-you-sure.component";
 
 @Component({
-  selector: 'app-protocol-list',
-  standalone: true,
-  imports: [
-    DatePipe
-  ],
-  templateUrl: './protocol-list.component.html',
-  styleUrl: './protocol-list.component.scss'
+    selector: 'app-protocol-list',
+    imports: [
+        DatePipe
+    ],
+    templateUrl: './protocol-list.component.html',
+    styleUrl: './protocol-list.component.scss'
 })
 export class ProtocolListComponent {
   _protocols: Protocol[] = []

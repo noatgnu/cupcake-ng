@@ -5,13 +5,12 @@ import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
 import {FormBuilder, ReactiveFormsModule} from "@angular/forms";
 
 @Component({
-  selector: 'app-reserve-action-modal',
-  standalone: true,
-  imports: [
-    ReactiveFormsModule
-  ],
-  templateUrl: './reserve-action-modal.component.html',
-  styleUrl: './reserve-action-modal.component.scss'
+    selector: 'app-reserve-action-modal',
+    imports: [
+        ReactiveFormsModule
+    ],
+    templateUrl: './reserve-action-modal.component.html',
+    styleUrl: './reserve-action-modal.component.scss'
 })
 export class ReserveActionModalComponent {
   private _storedReagent: StoredReagent|undefined = undefined

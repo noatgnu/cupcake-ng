@@ -4,13 +4,12 @@ import {NgbActiveOffcanvas} from "@ng-bootstrap/ng-bootstrap";
 import {InstrumentJob} from "../../../../instrument-job";
 
 @Component({
-  selector: 'app-staff-data-entry-panel',
-  standalone: true,
-  imports: [
-    ReactiveFormsModule
-  ],
-  templateUrl: './staff-data-entry-panel.component.html',
-  styleUrl: './staff-data-entry-panel.component.scss'
+    selector: 'app-staff-data-entry-panel',
+    imports: [
+        ReactiveFormsModule
+    ],
+    templateUrl: './staff-data-entry-panel.component.html',
+    styleUrl: './staff-data-entry-panel.component.scss'
 })
 export class StaffDataEntryPanelComponent {
   private _job: InstrumentJob|undefined

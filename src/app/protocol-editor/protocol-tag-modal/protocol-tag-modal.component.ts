@@ -6,15 +6,14 @@ import {NgbActiveModal, NgbHighlight, NgbTypeahead} from "@ng-bootstrap/ng-boots
 import {ProtocolTag, ProtocolTagQuery, Tag, TagQuery} from "../../tag";
 
 @Component({
-  selector: 'app-protocol-tag-modal',
-  standalone: true,
-  imports: [
-    ReactiveFormsModule,
-    NgbTypeahead,
-    NgbHighlight
-  ],
-  templateUrl: './protocol-tag-modal.component.html',
-  styleUrl: './protocol-tag-modal.component.scss'
+    selector: 'app-protocol-tag-modal',
+    imports: [
+        ReactiveFormsModule,
+        NgbTypeahead,
+        NgbHighlight
+    ],
+    templateUrl: './protocol-tag-modal.component.html',
+    styleUrl: './protocol-tag-modal.component.scss'
 })
 export class ProtocolTagModalComponent {
   @Input() tags: ProtocolTag[] = []

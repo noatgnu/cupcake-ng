@@ -3,13 +3,12 @@ import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
 import {FormBuilder, ReactiveFormsModule} from "@angular/forms";
 
 @Component({
-  selector: 'app-add-simple-counter-modal',
-  standalone: true,
-  imports: [
-    ReactiveFormsModule
-  ],
-  templateUrl: './add-simple-counter-modal.component.html',
-  styleUrl: './add-simple-counter-modal.component.scss'
+    selector: 'app-add-simple-counter-modal',
+    imports: [
+        ReactiveFormsModule
+    ],
+    templateUrl: './add-simple-counter-modal.component.html',
+    styleUrl: './add-simple-counter-modal.component.scss'
 })
 export class AddSimpleCounterModalComponent {
   form = this.fb.group({

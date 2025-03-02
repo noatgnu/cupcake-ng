@@ -12,17 +12,16 @@ import {WebService} from "../../web.service";
 import {ToastService} from "../../toast.service";
 
 @Component({
-  selector: 'app-lab-user-creation-modal',
-  standalone: true,
-  imports: [
-    ReactiveFormsModule,
-    NgbDropdown,
-    NgbDropdownMenu,
-    NgbDropdownItem,
-    NgbDropdownToggle
-  ],
-  templateUrl: './lab-user-creation-modal.component.html',
-  styleUrl: './lab-user-creation-modal.component.scss'
+    selector: 'app-lab-user-creation-modal',
+    imports: [
+        ReactiveFormsModule,
+        NgbDropdown,
+        NgbDropdownMenu,
+        NgbDropdownItem,
+        NgbDropdownToggle
+    ],
+    templateUrl: './lab-user-creation-modal.component.html',
+    styleUrl: './lab-user-creation-modal.component.scss'
 })
 export class LabUserCreationModalComponent {
   @Input() lab_group: LabGroup|undefined

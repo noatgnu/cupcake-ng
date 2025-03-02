@@ -14,16 +14,15 @@ import {
 } from "../instrument-metadata-management-modal/instrument-metadata-management-modal.component";
 
 @Component({
-  selector: 'app-instrument-management',
-  standalone: true,
-  imports: [
-    FormsModule,
-    NgbPagination,
-    ReactiveFormsModule,
-    NgbTooltip
-  ],
-  templateUrl: './instrument-management.component.html',
-  styleUrl: './instrument-management.component.scss'
+    selector: 'app-instrument-management',
+    imports: [
+        FormsModule,
+        NgbPagination,
+        ReactiveFormsModule,
+        NgbTooltip
+    ],
+    templateUrl: './instrument-management.component.html',
+    styleUrl: './instrument-management.component.scss'
 })
 export class InstrumentManagementComponent {
 

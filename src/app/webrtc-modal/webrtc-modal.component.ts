@@ -4,13 +4,12 @@ import {FormsModule} from "@angular/forms";
 import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
 
 @Component({
-  selector: 'app-webrtc-modal',
-  standalone: true,
-  imports: [
-    FormsModule
-  ],
-  templateUrl: './webrtc-modal.component.html',
-  styleUrl: './webrtc-modal.component.scss'
+    selector: 'app-webrtc-modal',
+    imports: [
+        FormsModule
+    ],
+    templateUrl: './webrtc-modal.component.html',
+    styleUrl: './webrtc-modal.component.scss'
 })
 export class WebrtcModalComponent {
   connectionType: 'host'|'viewer' = 'viewer'

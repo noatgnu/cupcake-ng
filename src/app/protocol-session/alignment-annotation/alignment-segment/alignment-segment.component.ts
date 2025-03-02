@@ -3,11 +3,10 @@ import {SequenceAlignment} from "../../../sequence-alignment";
 import {DataService} from "../../../data.service";
 
 @Component({
-  selector: 'app-alignment-segment',
-  standalone: true,
-  imports: [],
-  templateUrl: './alignment-segment.component.html',
-  styleUrl: './alignment-segment.component.scss'
+    selector: 'app-alignment-segment',
+    imports: [],
+    templateUrl: './alignment-segment.component.html',
+    styleUrl: './alignment-segment.component.scss'
 })
 export class AlignmentSegmentComponent implements AfterViewInit {
   @Input() cellWidth: number = 20

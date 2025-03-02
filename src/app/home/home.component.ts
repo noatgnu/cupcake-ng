@@ -24,24 +24,23 @@ import {ProtocolListComponent} from "../protocol-list/protocol-list.component";
 import {Project, ProjectQuery} from "../project";
 
 @Component({
-  selector: 'app-home',
-  standalone: true,
-  imports: [
-    ReactiveFormsModule,
-    NgOptimizedImage,
-    DatePipe,
-    NgbNav,
-    NgbNavContent,
-    NgbNavLinkButton,
-    NgbNavItem,
-    NgbRating,
-    NgbNavOutlet,
-    ProtocolListComponent,
-    NgbPagination,
-    FormsModule
-  ],
-  templateUrl: './home.component.html',
-  styleUrl: './home.component.scss'
+    selector: 'app-home',
+    imports: [
+        ReactiveFormsModule,
+        NgOptimizedImage,
+        DatePipe,
+        NgbNav,
+        NgbNavContent,
+        NgbNavLinkButton,
+        NgbNavItem,
+        NgbRating,
+        NgbNavOutlet,
+        ProtocolListComponent,
+        NgbPagination,
+        FormsModule
+    ],
+    templateUrl: './home.component.html',
+    styleUrl: './home.component.scss'
 })
 export class HomeComponent implements OnInit, AfterViewInit {
   @ViewChild('logo') logo?: ElementRef;

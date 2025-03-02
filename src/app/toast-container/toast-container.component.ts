@@ -5,16 +5,15 @@ import {NgClass} from "@angular/common";
 import {ToastProgressbarComponent} from "./toast-progressbar/toast-progressbar.component";
 
 @Component({
-  selector: 'app-toast-container',
-  standalone: true,
-  imports: [
-    NgbToast,
-    NgClass,
-    NgbProgressbar,
-    ToastProgressbarComponent
-  ],
-  templateUrl: './toast-container.component.html',
-  styleUrl: './toast-container.component.scss'
+    selector: 'app-toast-container',
+    imports: [
+        NgbToast,
+        NgClass,
+        NgbProgressbar,
+        ToastProgressbarComponent
+    ],
+    templateUrl: './toast-container.component.html',
+    styleUrl: './toast-container.component.scss'
 })
 export class ToastContainerComponent {
   constructor(public toastService: ToastService) { }

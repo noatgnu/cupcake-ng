@@ -12,19 +12,18 @@ import {FormsModule} from "@angular/forms";
 import {NgOptimizedImage} from "@angular/common";
 
 @Component({
-  selector: 'app-camera-modal',
-  standalone: true,
-  imports: [
-    FormsModule,
-    NgbNav,
-    NgbNavItem,
-    NgbNavLinkButton,
-    NgbNavContent,
-    NgOptimizedImage,
-    NgbNavOutlet
-  ],
-  templateUrl: './camera-modal.component.html',
-  styleUrl: './camera-modal.component.scss'
+    selector: 'app-camera-modal',
+    imports: [
+        FormsModule,
+        NgbNav,
+        NgbNavItem,
+        NgbNavLinkButton,
+        NgbNavContent,
+        NgOptimizedImage,
+        NgbNavOutlet
+    ],
+    templateUrl: './camera-modal.component.html',
+    styleUrl: './camera-modal.component.scss'
 })
 export class CameraModalComponent implements AfterViewInit{
   @ViewChild('videoElement') videoElement?: ElementRef<HTMLVideoElement>

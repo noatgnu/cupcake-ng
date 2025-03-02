@@ -5,13 +5,12 @@ import {MODE_DRAW, MODE_ERASE, MODE_DISABLED} from 'atrament';
 import Atrament from 'atrament';
 import {FormsModule} from "@angular/forms";
 @Component({
-  selector: 'app-handwritten-annotation',
-  standalone: true,
-  imports: [
-    FormsModule
-  ],
-  templateUrl: './handwritten-annotation.component.html',
-  styleUrl: './handwritten-annotation.component.scss'
+    selector: 'app-handwritten-annotation',
+    imports: [
+        FormsModule
+    ],
+    templateUrl: './handwritten-annotation.component.html',
+    styleUrl: './handwritten-annotation.component.scss'
 })
 export class HandwrittenAnnotationComponent implements AfterViewInit{
   @ViewChild('sketchpad') handwrittenSketchpad?: ElementRef;

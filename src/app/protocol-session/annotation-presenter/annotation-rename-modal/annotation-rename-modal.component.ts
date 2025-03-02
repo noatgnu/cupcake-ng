@@ -5,13 +5,12 @@ import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
 import {Annotation} from "../../../annotation";
 
 @Component({
-  selector: 'app-annotation-rename-modal',
-  standalone: true,
-  imports: [
-    ReactiveFormsModule
-  ],
-  templateUrl: './annotation-rename-modal.component.html',
-  styleUrl: './annotation-rename-modal.component.scss'
+    selector: 'app-annotation-rename-modal',
+    imports: [
+        ReactiveFormsModule
+    ],
+    templateUrl: './annotation-rename-modal.component.html',
+    styleUrl: './annotation-rename-modal.component.scss'
 })
 export class AnnotationRenameModalComponent {
   private _annotation?: Annotation

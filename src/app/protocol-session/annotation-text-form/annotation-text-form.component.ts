@@ -4,15 +4,14 @@ import {NgxWigModule} from "ngx-wig";
 import {QuillEditorComponent} from "ngx-quill";
 
 @Component({
-  selector: 'app-annotation-text-form',
-  standalone: true,
-  imports: [
-    NgxWigModule,
-    ReactiveFormsModule,
-    QuillEditorComponent
-  ],
-  templateUrl: './annotation-text-form.component.html',
-  styleUrl: './annotation-text-form.component.scss'
+    selector: 'app-annotation-text-form',
+    imports: [
+        NgxWigModule,
+        ReactiveFormsModule,
+        QuillEditorComponent
+    ],
+    templateUrl: './annotation-text-form.component.html',
+    styleUrl: './annotation-text-form.component.scss'
 })
 export class AnnotationTextFormComponent {
   form = this.fb.group({

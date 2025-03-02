@@ -4,13 +4,12 @@ import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
 import {FormBuilder, ReactiveFormsModule} from "@angular/forms";
 
 @Component({
-  selector: 'app-transcribe-modal',
-  standalone: true,
-  imports: [
-    ReactiveFormsModule
-  ],
-  templateUrl: './transcribe-modal.component.html',
-  styleUrl: './transcribe-modal.component.scss'
+    selector: 'app-transcribe-modal',
+    imports: [
+        ReactiveFormsModule
+    ],
+    templateUrl: './transcribe-modal.component.html',
+    styleUrl: './transcribe-modal.component.scss'
 })
 export class TranscribeModalComponent {
   _annotation?: Annotation

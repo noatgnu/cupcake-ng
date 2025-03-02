@@ -4,13 +4,12 @@ import {FormBuilder, ReactiveFormsModule} from "@angular/forms";
 import {ItemMetadataComponent} from "../../item-metadata/item-metadata.component";
 
 @Component({
-  selector: 'app-instrument-create-modal',
-  standalone: true,
-  imports: [
-    ReactiveFormsModule,
-  ],
-  templateUrl: './instrument-create-modal.component.html',
-  styleUrl: './instrument-create-modal.component.scss'
+    selector: 'app-instrument-create-modal',
+    imports: [
+        ReactiveFormsModule,
+    ],
+    templateUrl: './instrument-create-modal.component.html',
+    styleUrl: './instrument-create-modal.component.scss'
 })
 export class InstrumentCreateModalComponent {
 

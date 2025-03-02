@@ -4,14 +4,13 @@ import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
 import {DatePipe, NgClass} from "@angular/common";
 
 @Component({
-  selector: 'app-calendar-session-modal',
-  standalone: true,
-  imports: [
-    DatePipe,
-    NgClass
-  ],
-  templateUrl: './calendar-session-modal.component.html',
-  styleUrl: './calendar-session-modal.component.scss'
+    selector: 'app-calendar-session-modal',
+    imports: [
+        DatePipe,
+        NgClass
+    ],
+    templateUrl: './calendar-session-modal.component.html',
+    styleUrl: './calendar-session-modal.component.scss'
 })
 export class CalendarSessionModalComponent {
   @Input() sessions: ProtocolSession[] = []

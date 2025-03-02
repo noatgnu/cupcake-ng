@@ -6,13 +6,12 @@ import {Router} from "@angular/router";
 import {CalendarSessionModalComponent} from "./calendar-session-modal/calendar-session-modal.component";
 
 @Component({
-  selector: 'app-calendar',
-  standalone: true,
-  imports: [
-    NgbDatepicker
-  ],
-  templateUrl: './calendar.component.html',
-  styleUrl: './calendar.component.scss'
+    selector: 'app-calendar',
+    imports: [
+        NgbDatepicker
+    ],
+    templateUrl: './calendar.component.html',
+    styleUrl: './calendar.component.scss'
 })
 export class CalendarComponent {
 

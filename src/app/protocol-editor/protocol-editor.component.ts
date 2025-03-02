@@ -30,24 +30,23 @@ import {
 import {DatePipe} from "@angular/common";
 
 @Component({
-  selector: 'app-protocol-editor',
-  standalone: true,
-  imports: [
-    ReactiveFormsModule,
-    NgxWigModule,
-    FormsModule,
-    TimePickerComponent,
-    QuillEditorComponent,
-    NgbDropdown,
-    NgbDropdownItem,
-    NgbDropdownMenu,
-    NgbDropdownToggle,
-    CalculatorAnnotationComponent,
-    StepDescriptionEditorComponent,
-    DatePipe
-  ],
-  templateUrl: './protocol-editor.component.html',
-  styleUrl: './protocol-editor.component.scss'
+    selector: 'app-protocol-editor',
+    imports: [
+        ReactiveFormsModule,
+        NgxWigModule,
+        FormsModule,
+        TimePickerComponent,
+        QuillEditorComponent,
+        NgbDropdown,
+        NgbDropdownItem,
+        NgbDropdownMenu,
+        NgbDropdownToggle,
+        CalculatorAnnotationComponent,
+        StepDescriptionEditorComponent,
+        DatePipe
+    ],
+    templateUrl: './protocol-editor.component.html',
+    styleUrl: './protocol-editor.component.scss'
 })
 export class ProtocolEditorComponent {
   viewTemplateTagMap: any = {}

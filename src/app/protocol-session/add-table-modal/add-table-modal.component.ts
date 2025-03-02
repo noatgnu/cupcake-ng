@@ -3,13 +3,12 @@ import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
 import {FormBuilder, ReactiveFormsModule} from "@angular/forms";
 
 @Component({
-  selector: 'app-add-table-modal',
-  standalone: true,
-  imports: [
-    ReactiveFormsModule
-  ],
-  templateUrl: './add-table-modal.component.html',
-  styleUrl: './add-table-modal.component.scss'
+    selector: 'app-add-table-modal',
+    imports: [
+        ReactiveFormsModule
+    ],
+    templateUrl: './add-table-modal.component.html',
+    styleUrl: './add-table-modal.component.scss'
 })
 export class AddTableModalComponent {
 

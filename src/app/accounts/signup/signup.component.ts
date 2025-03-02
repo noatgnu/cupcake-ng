@@ -4,13 +4,12 @@ import {ToastService} from "../../toast.service";
 import { AccountsService } from '../accounts.service';
 
 @Component({
-  selector: 'app-signup',
-  standalone: true,
-  imports: [
-    ReactiveFormsModule
-  ],
-  templateUrl: './signup.component.html',
-  styleUrl: './signup.component.scss'
+    selector: 'app-signup',
+    imports: [
+        ReactiveFormsModule
+    ],
+    templateUrl: './signup.component.html',
+    styleUrl: './signup.component.scss'
 })
 export class SignupComponent {
   @Input() token: string = ""

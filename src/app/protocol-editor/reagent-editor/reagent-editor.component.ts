@@ -6,15 +6,14 @@ import {debounceTime, map, Observable, switchMap} from "rxjs";
 import {NgbActiveModal, NgbHighlight, NgbTypeahead} from "@ng-bootstrap/ng-bootstrap";
 
 @Component({
-  selector: 'app-reagent-editor',
-  standalone: true,
-  imports: [
-    NgbTypeahead,
-    ReactiveFormsModule,
-    NgbHighlight
-  ],
-  templateUrl: './reagent-editor.component.html',
-  styleUrl: './reagent-editor.component.scss'
+    selector: 'app-reagent-editor',
+    imports: [
+        NgbTypeahead,
+        ReactiveFormsModule,
+        NgbHighlight
+    ],
+    templateUrl: './reagent-editor.component.html',
+    styleUrl: './reagent-editor.component.scss'
 })
 export class ReagentEditorComponent {
   private _reagents: ProtocolStepReagent[] = []

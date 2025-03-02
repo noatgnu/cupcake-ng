@@ -6,15 +6,14 @@ import {WebService} from "../../../web.service";
 import {StorageObject, StorageObjectQuery} from "../../../storage-object";
 
 @Component({
-  selector: 'app-edit-lab-group-modal',
-  standalone: true,
-  imports: [
-    ReactiveFormsModule,
-    NgbPagination,
-    NgbTooltip
-  ],
-  templateUrl: './edit-lab-group-modal.component.html',
-  styleUrl: './edit-lab-group-modal.component.scss'
+    selector: 'app-edit-lab-group-modal',
+    imports: [
+        ReactiveFormsModule,
+        NgbPagination,
+        NgbTooltip
+    ],
+    templateUrl: './edit-lab-group-modal.component.html',
+    styleUrl: './edit-lab-group-modal.component.scss'
 })
 export class EditLabGroupModalComponent {
   private _labGroup: LabGroup | undefined

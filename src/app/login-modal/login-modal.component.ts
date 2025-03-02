@@ -3,13 +3,12 @@ import {FormBuilder, ReactiveFormsModule, Validators} from "@angular/forms";
 import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
 
 @Component({
-  selector: 'app-login-modal',
-  standalone: true,
-  imports: [
-    ReactiveFormsModule
-  ],
-  templateUrl: './login-modal.component.html',
-  styleUrl: './login-modal.component.scss'
+    selector: 'app-login-modal',
+    imports: [
+        ReactiveFormsModule
+    ],
+    templateUrl: './login-modal.component.html',
+    styleUrl: './login-modal.component.scss'
 })
 export class LoginModalComponent {
 

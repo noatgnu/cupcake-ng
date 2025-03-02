@@ -8,13 +8,12 @@ import {AreYouSureModalComponent} from "../are-you-sure-modal/are-you-sure-modal
 import {ProtocolSession} from "../protocol-session";
 
 @Component({
-  selector: 'app-project-editor',
-  standalone: true,
-  imports: [
-    ReactiveFormsModule
-  ],
-  templateUrl: './project-editor.component.html',
-  styleUrl: './project-editor.component.scss'
+    selector: 'app-project-editor',
+    imports: [
+        ReactiveFormsModule
+    ],
+    templateUrl: './project-editor.component.html',
+    styleUrl: './project-editor.component.scss'
 })
 export class ProjectEditorComponent {
   private _projectID: number = 0

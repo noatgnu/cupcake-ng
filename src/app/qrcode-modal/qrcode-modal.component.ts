@@ -4,12 +4,10 @@ import {Options} from "qr-code-styling";
 import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
 
 @Component({
-  selector: 'app-qrcode-modal',
-  standalone: true,
-  imports: [
-  ],
-  templateUrl: './qrcode-modal.component.html',
-  styleUrl: './qrcode-modal.component.scss'
+    selector: 'app-qrcode-modal',
+    imports: [],
+    templateUrl: './qrcode-modal.component.html',
+    styleUrl: './qrcode-modal.component.scss'
 })
 export class QrcodeModalComponent implements AfterViewInit{
   private _url: string = ""

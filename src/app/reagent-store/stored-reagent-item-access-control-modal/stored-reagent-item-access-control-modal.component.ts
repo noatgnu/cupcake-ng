@@ -15,19 +15,18 @@ import {StoredReagent} from "../../storage-object";
 import {LabGroup, LabGroupQuery} from "../../lab-group";
 
 @Component({
-  selector: 'app-stored-reagent-item-access-control-modal',
-  standalone: true,
-  imports: [
-    ReactiveFormsModule,
-    NgbNavOutlet,
-    NgbNavContent,
-    NgbNavLinkButton,
-    NgbNav,
-    NgbNavItem,
-    NgbPagination
-  ],
-  templateUrl: './stored-reagent-item-access-control-modal.component.html',
-  styleUrl: './stored-reagent-item-access-control-modal.component.scss'
+    selector: 'app-stored-reagent-item-access-control-modal',
+    imports: [
+        ReactiveFormsModule,
+        NgbNavOutlet,
+        NgbNavContent,
+        NgbNavLinkButton,
+        NgbNav,
+        NgbNavItem,
+        NgbPagination
+    ],
+    templateUrl: './stored-reagent-item-access-control-modal.component.html',
+    styleUrl: './stored-reagent-item-access-control-modal.component.scss'
 })
 export class StoredReagentItemAccessControlModalComponent {
   activeID = "user"

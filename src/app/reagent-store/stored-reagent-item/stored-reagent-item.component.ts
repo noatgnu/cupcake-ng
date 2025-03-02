@@ -11,15 +11,14 @@ import {ToastService} from "../../toast.service";
 import {DatePipe} from "@angular/common";
 
 @Component({
-  selector: 'app-stored-reagent-item',
-  standalone: true,
-  imports: [
-    StoredReagentActivityCalendarComponent,
-    NgbTooltip,
-    DatePipe
-  ],
-  templateUrl: './stored-reagent-item.component.html',
-  styleUrl: './stored-reagent-item.component.scss'
+    selector: 'app-stored-reagent-item',
+    imports: [
+        StoredReagentActivityCalendarComponent,
+        NgbTooltip,
+        DatePipe
+    ],
+    templateUrl: './stored-reagent-item.component.html',
+    styleUrl: './stored-reagent-item.component.scss'
 })
 export class StoredReagentItemComponent {
   @Input() permission: {view: boolean, edit: boolean, delete: boolean} = {view: false, edit: false, delete: false}

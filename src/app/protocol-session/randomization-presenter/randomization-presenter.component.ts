@@ -2,11 +2,10 @@ import {Component, Input} from '@angular/core';
 import {Annotation} from "../../annotation";
 
 @Component({
-  selector: 'app-randomization-presenter',
-  standalone: true,
-  imports: [],
-  templateUrl: './randomization-presenter.component.html',
-  styleUrl: './randomization-presenter.component.scss'
+    selector: 'app-randomization-presenter',
+    imports: [],
+    templateUrl: './randomization-presenter.component.html',
+    styleUrl: './randomization-presenter.component.scss'
 })
 export class RandomizationPresenterComponent {
   private _annotation?: Annotation

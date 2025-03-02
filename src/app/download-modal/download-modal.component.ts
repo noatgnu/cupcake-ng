@@ -6,11 +6,10 @@ import {WebsocketService} from "../websocket.service";
 import {WebService} from "../web.service";
 
 @Component({
-  selector: 'app-download-modal',
-  standalone: true,
-  imports: [],
-  templateUrl: './download-modal.component.html',
-  styleUrl: './download-modal.component.scss'
+    selector: 'app-download-modal',
+    imports: [],
+    templateUrl: './download-modal.component.html',
+    styleUrl: './download-modal.component.scss'
 })
 export class DownloadModalComponent {
 

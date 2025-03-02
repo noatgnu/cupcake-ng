@@ -8,15 +8,14 @@ import {DataService} from "../../data.service";
 import {ToastService} from "../../toast.service";
 
 @Component({
-  selector: 'app-alignment-annotation',
-  standalone: true,
-  imports: [
-    FormsModule,
-    ReactiveFormsModule,
-    AlignmentSegmentComponent
-  ],
-  templateUrl: './alignment-annotation.component.html',
-  styleUrl: './alignment-annotation.component.scss'
+    selector: 'app-alignment-annotation',
+    imports: [
+        FormsModule,
+        ReactiveFormsModule,
+        AlignmentSegmentComponent
+    ],
+    templateUrl: './alignment-annotation.component.html',
+    styleUrl: './alignment-annotation.component.scss'
 })
 export class AlignmentAnnotationComponent implements AfterViewInit{
   _annotation?: Annotation

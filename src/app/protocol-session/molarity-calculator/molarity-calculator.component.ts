@@ -7,15 +7,14 @@ import {Annotation} from "../../annotation";
 import {NgbAlert} from "@ng-bootstrap/ng-bootstrap";
 
 @Component({
-  selector: 'app-molarity-calculator',
-  standalone: true,
-  imports: [
-    ReactiveFormsModule,
-    FormsModule,
-    NgbAlert,
-  ],
-  templateUrl: './molarity-calculator.component.html',
-  styleUrl: './molarity-calculator.component.scss'
+    selector: 'app-molarity-calculator',
+    imports: [
+        ReactiveFormsModule,
+        FormsModule,
+        NgbAlert,
+    ],
+    templateUrl: './molarity-calculator.component.html',
+    styleUrl: './molarity-calculator.component.scss'
 })
 export class MolarityCalculatorComponent {
   selectedForm: 'dynamic'|'massFromVolumeAndConcentration'| 'volumeFromMassAndConcentration'| 'concentrationFromMassAndVolume'| 'volumeFromStockVolumeAndConcentration' = 'dynamic'

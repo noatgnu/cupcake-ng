@@ -34,21 +34,20 @@ import {ItemMetadataComponent} from "../../item-metadata/item-metadata.component
 import {NgClass} from "@angular/common";
 
 @Component({
-  selector: 'app-stored-reagent-editor-modal',
-  standalone: true,
-  imports: [
-    ReactiveFormsModule,
-    NgbTypeahead,
-    NgbTooltip,
-    NgbInputDatepicker,
-    FormsModule,
-    NgbHighlight,
-    ItemMetadataComponent,
-    NgbPagination,
-    NgClass
-  ],
-  templateUrl: './stored-reagent-editor-modal.component.html',
-  styleUrl: './stored-reagent-editor-modal.component.scss'
+    selector: 'app-stored-reagent-editor-modal',
+    imports: [
+        ReactiveFormsModule,
+        NgbTypeahead,
+        NgbTooltip,
+        NgbInputDatepicker,
+        FormsModule,
+        NgbHighlight,
+        ItemMetadataComponent,
+        NgbPagination,
+        NgClass
+    ],
+    templateUrl: './stored-reagent-editor-modal.component.html',
+    styleUrl: './stored-reagent-editor-modal.component.scss'
 })
 export class StoredReagentEditorModalComponent implements AfterViewInit, OnInit{
 

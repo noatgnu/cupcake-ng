@@ -4,13 +4,12 @@ import {FormBuilder, FormControl, ReactiveFormsModule, Validators} from "@angula
 import {StorageObject} from "../../storage-object";
 
 @Component({
-  selector: 'app-storage-object-creator-modal',
-  standalone: true,
-  imports: [
-    ReactiveFormsModule
-  ],
-  templateUrl: './storage-object-creator-modal.component.html',
-  styleUrl: './storage-object-creator-modal.component.scss'
+    selector: 'app-storage-object-creator-modal',
+    imports: [
+        ReactiveFormsModule
+    ],
+    templateUrl: './storage-object-creator-modal.component.html',
+    styleUrl: './storage-object-creator-modal.component.scss'
 })
 export class StorageObjectCreatorModalComponent {
   private _stored_at: StorageObject|null = null

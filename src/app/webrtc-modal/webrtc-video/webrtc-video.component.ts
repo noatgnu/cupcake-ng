@@ -2,11 +2,10 @@ import {AfterViewInit, Component, ElementRef, Input, ViewChild} from '@angular/c
 import {WebrtcService} from "../../webrtc.service";
 
 @Component({
-  selector: 'app-webrtc-video',
-  standalone: true,
-  imports: [],
-  templateUrl: './webrtc-video.component.html',
-  styleUrl: './webrtc-video.component.scss'
+    selector: 'app-webrtc-video',
+    imports: [],
+    templateUrl: './webrtc-video.component.html',
+    styleUrl: './webrtc-video.component.scss'
 })
 export class WebrtcVideoComponent implements AfterViewInit{
   @ViewChild('webRTCVideoViewer') webRTCVideoViewer?: ElementRef;

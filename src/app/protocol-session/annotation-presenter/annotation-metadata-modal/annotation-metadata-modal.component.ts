@@ -8,13 +8,12 @@ import {Unimod} from "../../../unimod";
 import {ItemMetadataComponent} from "../../../item-metadata/item-metadata.component";
 
 @Component({
-  selector: 'app-annotation-metadata-modal',
-  standalone: true,
-  imports: [
-    ItemMetadataComponent
-  ],
-  templateUrl: './annotation-metadata-modal.component.html',
-  styleUrl: './annotation-metadata-modal.component.scss'
+    selector: 'app-annotation-metadata-modal',
+    imports: [
+        ItemMetadataComponent
+    ],
+    templateUrl: './annotation-metadata-modal.component.html',
+    styleUrl: './annotation-metadata-modal.component.scss'
 })
 export class AnnotationMetadataModalComponent {
 

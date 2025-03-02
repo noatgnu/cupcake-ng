@@ -7,16 +7,15 @@ import {WebService} from "../../web.service";
 import {DatePipe, NgClass} from "@angular/common";
 
 @Component({
-  selector: 'app-reagent-stock-search-modal',
-  standalone: true,
-  imports: [
-    ReactiveFormsModule,
-    NgbPagination,
-    NgClass,
-    DatePipe
-  ],
-  templateUrl: './reagent-stock-search-modal.component.html',
-  styleUrl: './reagent-stock-search-modal.component.scss'
+    selector: 'app-reagent-stock-search-modal',
+    imports: [
+        ReactiveFormsModule,
+        NgbPagination,
+        NgClass,
+        DatePipe
+    ],
+    templateUrl: './reagent-stock-search-modal.component.html',
+    styleUrl: './reagent-stock-search-modal.component.scss'
 })
 export class ReagentStockSearchModalComponent {
 
