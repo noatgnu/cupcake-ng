@@ -26,7 +26,7 @@
     @if (selectedProject) {
       <div>
         <p>
-          <b>{{selectedProject.project_name}}</b><br>
+          <b><a href="/#/project-editor/{{selectedProject.id}}">{{selectedProject.project_name}}</a></b><br>
           <b>Created at</b>: {{selectedProject.created_at | date: 'short'}}<br>
           <b>Description</b>: {{selectedProject.project_description}}
         </p>
@@ -115,13 +115,13 @@
         </div>
       </form>
       @if (selectedProtocol) {
-
         <div>
+          <a (click)="openProtocolBasicInfoEditor()"><b>{{selectedProtocol.protocol_title}}</b></a>
           <p>
-            <b>{{selectedProtocol.protocol_title}}</b><br>
+            <b></b><br>
             <b>Created at</b>: {{selectedProtocol.protocol_created_on | date: 'short'}}<br>
           </p>
-          <div [innerHtml]="selectedProtocol.protocol_description"></div>
+          <quill-view [content]="selectedProtocol.protocol_description"></quill-view>
           <button class="btn btn-sm btn-danger" ngbTooltip="Remove from selection" (click)="selectedProtocol = undefined; protocolForm.reset()">
             <i class="bi bi-trash"></i>
           </button>

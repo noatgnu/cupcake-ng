@@ -55,31 +55,35 @@ import {
 } from "../../../display-modification-parameters-metadata/display-modification-parameters-metadata.component";
 import {AccountsService} from "../../../accounts/accounts.service";
 import {StaffDataEntryPanelComponent} from "./staff-data-entry-panel/staff-data-entry-panel.component";
+import {
+  ProtocolBasicInfoEditorModalComponent
+} from "../../../protocol-editor/protocol-basic-info-editor-modal/protocol-basic-info-editor-modal.component";
 
 @Component({
     selector: 'app-job-submission',
-    imports: [
-        ReactiveFormsModule,
-        NgbTypeahead,
-        DatePipe,
-        NgbTooltip,
-        QuillEditorComponent,
-        NgbDropdown,
-        NgbDropdownMenu,
-        NgbDropdownToggle,
-        AnnotationPresenterComponent,
-        NgbDropdownItem,
-        AnnotationTextFormComponent,
-        HandwrittenAnnotationComponent,
-        FormsModule,
-        DisplayModificationParametersMetadataComponent,
-        NgbNav,
-        NgbNavContent,
-        NgbNavLinkButton,
-        NgbNavItem,
-        NgbNavOutlet,
-        NgClass
-    ],
+  imports: [
+    ReactiveFormsModule,
+    NgbTypeahead,
+    DatePipe,
+    NgbTooltip,
+    QuillEditorComponent,
+    NgbDropdown,
+    NgbDropdownMenu,
+    NgbDropdownToggle,
+    AnnotationPresenterComponent,
+    NgbDropdownItem,
+    AnnotationTextFormComponent,
+    HandwrittenAnnotationComponent,
+    FormsModule,
+    DisplayModificationParametersMetadataComponent,
+    NgbNav,
+    NgbNavContent,
+    NgbNavLinkButton,
+    NgbNavItem,
+    NgbNavOutlet,
+    NgClass,
+    QuillViewComponent
+  ],
     templateUrl: './job-submission.component.html',
     styleUrl: './job-submission.component.scss'
 })
@@ -1069,5 +1073,21 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit {
     );
   }
 
+  openProtocolBasicInfoEditor() {
+    const ref = this.modal.open(ProtocolBasicInfoEditorModalComponent, {scrollable: true})
+    ref.componentInstance.protocol = this.selectedProtocol
+
+    ref.result.then((result) => {
+      if (result) {
+        this.selectedProtocol = result
+        this.protocolForm.patchValue({
+          id: result.id,
+          protocol_title: result.protocol_title,
+          protocol_description: result.protocol_description
+        })
+      }
+    })
+
+  }
 
 }

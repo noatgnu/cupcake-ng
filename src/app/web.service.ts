@@ -492,10 +492,14 @@ export class WebService {
     );
   }
 
-  updateProtocol(protocol_id: number, protocol_title: string, protocol_description: string, enabled: boolean) {
+  updateProtocol(protocol_id: number, protocol_title: string, protocol_description: string, enabled: boolean|null) {
+    const payload: any = {protocol_title: protocol_title, protocol_description: protocol_description};
+    if (enabled !== null) {
+      payload["enabled"] = enabled;
+    }
     return this.http.put<Protocol>(
       `${this.baseURL}/api/protocol/${protocol_id}/`,
-      {protocol_title: protocol_title, protocol_description: protocol_description, enabled: enabled},
+      payload,
       {responseType: 'json', observe: 'body'}
     );
   }
