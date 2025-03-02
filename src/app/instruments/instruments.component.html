@@ -5,18 +5,21 @@
     </div>
   </nav>
   <div class="d-flex g-1" style="height: auto; min-height: 100vh; position:relative">
-    <div class="border-end border-1 border-black d-flex flex-column" style="width: 300px; min-height: 100%">
-      <nav class="navbar navbar-expand-lg navbar-light d-flex flex-wrap">
-        <div class="container-fluid">
-          <a class="navbar-brand">Sections</a>
+    @if (!hideSection) {
+      <div class="border-end border-1 border-black d-flex flex-column" style="width: 300px; min-height: 100%">
+        <nav class="navbar navbar-expand-lg navbar-light d-flex flex-wrap">
+          <div class="container-fluid">
+            <a class="navbar-brand">Sections</a>
+          </div>
+        </nav>
+        <div class="list-group d-flex flex-column rounded-0 overflow-auto">
+          <a type="button" class="list-group-item list-group-item-action" href="/#/instruments/jobs">Jobs</a>
+          <a type="button" class="list-group-item list-group-item-action" href="/#/instruments/bookings">Bookings</a>
+          <a type="button" class="list-group-item list-group-item-action" href="/#/instruments/management">Management</a>
         </div>
-      </nav>
-      <div class="list-group d-flex flex-column rounded-0 overflow-auto">
-        <a type="button" class="list-group-item list-group-item-action" href="/#/instruments/jobs">Jobs</a>
-        <a type="button" class="list-group-item list-group-item-action" href="/#/instruments/bookings">Bookings</a>
-        <a type="button" class="list-group-item list-group-item-action" href="/#/instruments/management">Management</a>
       </div>
-    </div>
+    }
+
     <div class="d-flex flex-column w-100">
       <nav class="navbar navbar-expand-lg navbar-light d-flex flex-wrap">
         <div class="container-fluid">

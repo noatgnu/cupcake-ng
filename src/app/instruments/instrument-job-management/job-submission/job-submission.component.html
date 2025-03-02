@@ -368,7 +368,50 @@
       <div>
         <div class="card">
           <div class="card-body">
-            <p>
+            <form [formGroup]="staffDataForm" class="d-flex flex-column gap-2">
+              <div class="d-flex gap-2">
+                <div class="form-group" style="width: 200px">
+                  <label for="injection_volume">Injection Volume</label>
+                  <input [readOnly]="staffModeAvailable" id="injection_volume" class="form-control" type="number" formControlName="injection_volume">
+                </div>
+                <div class="form-group" style="width: 200px">
+                  <label for="injection_unit">Injection Unit</label>
+                  <select id="injection_unit" class="form-select" formControlName="injection_unit">
+                    <option value="nL">nL</option>
+                    <option value="uL">uL</option>
+                    <option value="mL">mL</option>
+                  </select>
+                </div>
+              </div>
+              <div class="d-flex gap-2">
+                <div class="form-group" style="width: 200px">
+                  <label for="search_engine">Search Engine</label>
+                  <select id="search_engine" class="form-select" formControlName="search_engine">
+                    <option value="MaxQuant">MaxQuant</option>
+                    <option value="Proteome Discoverer">Proteome Discoverer</option>
+                    <option value="Skyline">Skyline</option>
+                    <option value="DIANN">DIANN</option>
+                    <option value="MSFragger">MSFragger</option>
+                    <option value="Fragpipe">Fragpipe</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+                <div class="form-group" style="width: 200px">
+                  <label for="search_engine_version">Search Engine Version</label>
+                  <input id="search_engine_version" class="form-control" type="text" formControlName="search_engine_version">
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="location">Folder Location</label>
+                <input id="location" class="form-control" type="text" formControlName="location">
+              </div>
+              <div class="form-group">
+                <label for="search_details">Search Details</label>
+                <textarea id="search_details" class="form-control" formControlName="search_details"></textarea>
+              </div>
+            </form>
+            <!--<p>
               @if (job.injection_volume) {
                 <strong>Injection Volume:</strong> {{job.injection_volume}} {{job.injection_unit}}<br>
               }
@@ -382,7 +425,7 @@
                 <strong>Search Details:</strong><br>
                 {{job.search_details}}
               }
-            </p>
+            </p>-->
           </div>
         </div>
       </div>
@@ -395,7 +438,7 @@
       <button class="btn btn-primary" (click)="createDraftJob()">Create Job</button>
     } @else {
       @if (job.status !== 'submitted' && (userCanEdit || staffModeAvailable)) {
-        <button class="btn btn-primary" [disabled]="job.status !== 'draft'">Submit</button>
+        <button class="btn btn-primary" [disabled]="job.status !== 'draft'" (click)="submit()">Submit</button>
         <button class="btn btn-primary" (click)="update()">Update</button>
         <button class="btn btn-primary" (click)="fastaFileUpload.click()">Upload Fasta File</button>
         <input type="file" hidden #fastaFileUpload (change)="annotationService.handleFileInput($event, job.id, 'user_annotation', 'fasta file from job '+job.job_name, 'file')">

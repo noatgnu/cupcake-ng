@@ -123,12 +123,14 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit {
     // @ts-ignore
     this.form.patchValue({job_name: value.job_name, staff: value.staff.map(s => s.id), status: value.status})
     this.staffModeAvailable = false
+    this.staffDataForm.disable()
     if (value.staff) {
       if (value.staff.length > 0) {
         if (this.accountService.username) {
           const staff = value.staff.find((s) => s.username === this.accountService.username)
           if (staff) {
             this.staffModeAvailable = true
+            this.staffDataForm.enable()
           }
         }
       }
@@ -137,9 +139,11 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit {
         this.web.checkUserInLabGroup(value.service_lab_group.id).subscribe((result) => {
           if (result.status === 200) {
             this.staffModeAvailable = true
+            this.staffDataForm.enable()
           }
         }, (error) => {
           this.staffModeAvailable = false
+          this.staffDataForm.disable()
         })
       }
     }
@@ -192,6 +196,14 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit {
         project_name: project.project_name,
         project_description: project.project_description
       })
+    })
+    this.staffDataForm.patchValue({
+      injection_volume: value.injection_volume,
+      injection_unit: value.injection_unit,
+      search_engine: value.search_engine,
+      search_engine_version: value.search_engine_version,
+      search_details: value.search_details,
+      location: value.location,
     })
     this.setMetadataFormArray('user_metadata', value.user_metadata);
     this.setMetadataFormArray('staff_metadata', value.staff_metadata);
@@ -283,6 +295,15 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit {
     name: [''],
     selected: [null]
   })
+
+  staffDataForm = this.fb.group({
+    injection_volume: [0],
+    injection_unit: ['uL'],
+    search_engine: ['DIANN'],
+    search_engine_version: [''],
+    search_details: [''],
+    location: [''],
+  });
 
   labGroupQuery: LabGroupQuery | undefined
   defaultLabGroup: string = 'MS Facility'
@@ -722,23 +743,25 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit {
         const payload: any = {
         }
         if (this.job) {
-          if (this.job.injection_volume) {
-            payload["injection_volume"] = this.job.injection_volume
-          }
-          if (this.job.injection_unit) {
-            payload["injection_unit"] = this.job.injection_unit
-          }
-          if (this.job.search_engine) {
-            payload["search_engine"] = this.job.search_engine
-          }
-          if (this.job.search_details) {
-            payload["search_details"] = this.job.search_details
-          }
-          if (this.job.search_engine_version) {
-            payload["search_engine_version"] = this.job.search_engine_version
-          }
-          if (this.job.location) {
-            payload["location"] = this.job.location
+          if (this.staffDataForm.dirty) {
+            if (this.staffDataForm.controls.injection_volume.dirty) {
+              payload["injection_volume"] = this.staffDataForm.value.injection_volume
+            }
+            if (this.staffDataForm.controls.injection_unit.dirty) {
+              payload["injection_unit"] = this.staffDataForm.value.injection_unit
+            }
+            if (this.staffDataForm.controls.search_engine.dirty) {
+              payload["search_engine"] = this.staffDataForm.value.search_engine
+            }
+            if (this.staffDataForm.controls.search_details.dirty) {
+              payload["search_details"] = this.staffDataForm.value.search_details
+            }
+            if (this.staffDataForm.controls.search_engine_version.dirty) {
+              payload["search_engine_version"] = this.staffDataForm.value.search_engine_version
+            }
+            if (this.staffDataForm.controls.location.dirty) {
+              payload["location"] = this.staffDataForm.value.location
+            }
           }
           if (this.metadata.get('staff_metadata')) {
             if ((this.metadata.get('staff_metadata') as FormArray).dirty) {
@@ -999,9 +1022,10 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit {
     })
   }
 
-  submit() {
+  async submit() {
     if (this.job) {
       if (this.job.status === 'draft') {
+        await this.update()
         this.web.instrumentJobSubmit(this.job.id).subscribe((response) => {
           this.job = response
         })
