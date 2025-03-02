@@ -1008,4 +1008,31 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit {
       }
     }
   }
+  currentField = ""
+  individualFieldSearchValue = (text$: Observable<string>) => {
+    return text$.pipe(
+      debounceTime(200),
+      distinctUntilChanged(),
+      switchMap(value => {
+        if (value.length < 2) {
+          return of([]);
+        }
+
+        let name = this.currentField;
+        if (!name) {
+          return of([]);
+        }
+        name = name.toLowerCase();
+        return this.web.instrumentJobIndividualFieldTypeAhead(name, value).pipe(
+          map(results => {
+            return results.results;
+          }), catchError(() => {
+            return of([]);
+          })
+        )
+      })
+    );
+  }
+
+
 }

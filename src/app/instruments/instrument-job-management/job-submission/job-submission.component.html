@@ -49,11 +49,11 @@
     <form [formGroup]="fundingForm" class="d-flex gap-2 flex-wrap">
       <div class="form-group">
         <label>Cost Center</label>
-        <input type="text" class="form-control" formControlName="cost_center">
+        <input (focus)="currentField='cost_center'" type="text" class="form-control" formControlName="cost_center" [ngbTypeahead]="individualFieldSearchValue">
       </div>
       <div class="form-group">
         <label>Funder</label>
-        <input type="text" class="form-control" formControlName="funder">
+        <input (focus)="currentField='funder'" type="text" class="form-control" formControlName="funder" [ngbTypeahead]="individualFieldSearchValue">
       </div>
     </form>
     <hr>

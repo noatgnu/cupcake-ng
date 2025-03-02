@@ -1766,13 +1766,42 @@ export class WebService {
     return this.http.post<any>(`${this.baseURL}/api/step/${step_id}/convert_metadata_to_sdrf_txt/`, data, {responseType: 'json', observe: 'body'})
   }
 
-  getInstrumentJobs(limit: number = 10, offset: number = 0, search: string = "") {
+  getInstrumentJobs(limit: number = 10, offset: number = 0, search: string = "", mode: "string"|undefined|null = undefined, lab_group: number|null|undefined = 0, status: "string"|undefined|null = undefined, funder: "string"|undefined|null = undefined, cost_center: "string"|undefined|null = undefined, search_engine: "string"|undefined|null = undefined, search_engine_version: "string"|undefined|null = undefined) {
     let params = new HttpParams()
       .set('limit', limit.toString())
       .set('offset', offset.toString())
 
     if (search !== "") {
       params = params.append('search', search);
+    }
+    if (mode) {
+      params = params.append('mode', mode)
+    }
+
+    if (status) {
+      params = params.append('status', status)
+    }
+
+    if (lab_group) {
+      if (lab_group > 0) {
+        params = params.append('lab_group', lab_group.toString())
+      }
+    }
+
+    if (funder) {
+      params = params.append('funder', funder)
+    }
+
+    if (cost_center) {
+      params = params.append('cost_center', cost_center)
+    }
+
+    if (search_engine) {
+      params = params.append('search_engine', search_engine)
+    }
+
+    if (search_engine_version) {
+      params = params.append('search_engine_version', search_engine_version)
     }
 
     return this.http.get<InstrumentJobQuery>(
@@ -1873,6 +1902,13 @@ export class WebService {
       `${this.baseURL}/api/instrument_jobs/${job_id}/submit/`,
       {},
       {responseType: 'json', observe: 'body'}
+    )
+  }
+
+  instrumentJobIndividualFieldTypeAhead(field_name: string, search: string) {
+    return this.http.get<{results: string[]}>(
+      `${this.baseURL}/api/instrument_jobs/individual_field_typeahead/`,
+      {responseType: 'json', observe: 'body', params: new HttpParams().set('field_name', field_name).set('search', search)}
     )
   }
 }

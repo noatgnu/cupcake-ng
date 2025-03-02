@@ -1,26 +1,100 @@
-<div>
-  <table class="table">
-    <thead>
-    <tr>
-      <th scope="col">
-        ID
-      </th>
-      <th scope="col">
-        Name
-      </th>
-    </tr>
-    </thead>
-    <tbody>
-    @if (instrumentJobQuery) {
-      @for (j of instrumentJobQuery.results; track j.id) {
-        <tr>
-          <td>
-            <a href="/#/instruments/jobs/{{j.id}}">{{j.id}}</a>
-          </td>
-          <td>{{j.job_name}}</td>
-        </tr>
-      }
+<div class="container d-flex flex-column gap-2 mt-2">
+  <form [formGroup]="form" class="d-flex gap-2" (ngSubmit)="search()">
+    <div class="form-floating">
+      <input id="search" class="form-control" type="search" formControlName="job_name">
+      <label for="search">Search</label>
+    </div>
+    <div class="form-floating">
+      <select id="status" class="form-control" formControlName="status">
+        <option value="">All</option>
+        <option value="draft">Draft</option>
+        <option value="submitted">Submitted</option>
+        <option value="completed">Completed</option>
+        <option value="cancelled">Cancelled</option>
+      </select>
+      <label for="status">Status</label>
+    </div>
+    <div class="form-floating">
+      <select id="mode" class="form-control" formControlName="mode">
+        <option value="lab_group">Job From Users of Specific Group</option>
+        <option value="service_lab_group">Service Group's Jobs</option>
+        <option value="staff">Direct Assigned Jobs</option>
+        <option value="">User's Jobs</option>
+      </select>
+      <label for="mode">Job Type</label>
+    </div>
+    @if (form.value['mode'] === 'lab_group' || form.value['mode'] === 'service_lab_group') {
+      <div class="form-floating">
+        <input id="searchLabGroup" class="form-control" type="search" formControlName="lab_group_search" [ngbTypeahead]="searchLabGroup" [inputFormatter]="formatter" [resultFormatter]="formatter" (selectItem)="selectLabGroup($event)">
+        <label for="searchLabGroup">Search Lab Group</label>
+      </div>
     }
-    </tbody>
-  </table>
+    <div class="form-floating">
+      <select id="searchEngine" class="form-select" formControlName="search_engine">
+        <option value="MaxQuant">MaxQuant</option>
+        <option value="Proteome Discoverer">Proteome Discoverer</option>
+        <option value="Skyline">Skyline</option>
+        <option value="DIANN">DIANN</option>
+        <option value="MSFragger">MSFragger</option>
+        <option value="Fragpipe">Fragpipe</option>
+        <option value="Other">Other</option>
+        <option value="">All</option>
+      </select>
+      <label for="searchEngine">Search Engine</label>
+    </div>
+    <div class="form-floating">
+      <input id="searchEngineVersion" class="form-control" type="search" formControlName="search_engine_version">
+      <label for="searchEngineVersion">Search Engine Version</label>
+    </div>
+    <button type="submit" class="btn btn-link"><i class="bi bi-search"></i></button>
+  </form>
+  @if (instrumentJobQuery) {
+    <table class="table">
+      <thead>
+      <tr>
+        <th scope="col">
+          ID
+        </th>
+        <th scope="col">
+          Name
+        </th>
+        <th scope="col">
+          Status
+        </th>
+        <th scope="col">
+          Search Engine
+        </th>
+        <th scope="col">
+          Search Engine Version
+        </th>
+        <th scope="col">
+          Cost Center
+        </th>
+        <th scope="col">
+          Funder
+        </th>
+      </tr>
+      </thead>
+      <tbody>
+        @if (instrumentJobQuery) {
+          @for (j of instrumentJobQuery.results; track j.id) {
+            <tr>
+              <td>
+                <a href="/#/instruments/jobs/{{j.id}}">{{j.id}}</a>
+              </td>
+              <td>{{j.job_name}}</td>
+              <td>{{j.status}}</td>
+              <td>{{j.search_engine}}</td>
+              <td>{{j.search_engine_version}}</td>
+              <td>{{j.cost_center}}</td>
+              <td>{{j.funder}}</td>
+            </tr>
+          }
+        }
+      </tbody>
+    </table>
+    <ngb-pagination (pageChange)="pageChange($event)" [collectionSize]="instrumentJobQuery.count" [(page)]="page" [pageSize]="pageSize" [maxSize]="5" [boundaryLinks]="true" [rotate]="true"></ngb-pagination>
+  }
+
+
 </div>
