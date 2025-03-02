@@ -38,6 +38,7 @@ export class InstrumentManagementComponent {
   constructor(private fb: FormBuilder, private web: WebService, public dataService: DataService, private modal: NgbModal, private toastService: ToastService, public accounts: AccountsService) {
     this.web.getInstruments().subscribe((data: any) => {
       this.instrumentQuery = data
+      this.getInstrumentPermission()
     })
     this.form.controls.searchTerm.valueChanges.subscribe((value: string| null) => {
       if (value) {

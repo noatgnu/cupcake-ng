@@ -103,6 +103,7 @@ export class BookingTimeVisualizerComponent implements AfterViewInit{
     if (this.instrument) {
       // @ts-ignore
       this.web.getInstrumentUsage(this.instrument.id, this.form.value.windowStart, this.form.value.windowEnd).subscribe((data) => {
+        console.log(data)
         this.instrumentUsageQuery = data
         if (ctx) {
           this.ctx = ctx
