@@ -7,10 +7,21 @@
       <label for="metadataName">Metadata Name</label>
       <input class="form-control" id="metadataName" formControlName="metadataName" placeholder="Metadata Name" readonly>
     </div>
-    <div class="form-group">
-      <label for="metadataValue">Metadata Value</label>
-      <input (selectItem)="onItemSelect($event)" [ngbTypeahead]="searchMetadata" [resultFormatter]="formatter" [inputFormatter]="formatter" class="form-control" id="metadataValue" formControlName="metadataValue" placeholder="Metadata Value">
-    </div>
+    @if (form.value.metadataName === 'Sample Type') {
+      <div class="form-group">
+        <label for="sampleType">Sample Type</label>
+        <select class="form-select" id="sampleType" formControlName="metadataValue">
+          <option value="wcl">Whole Cell Lysate</option>
+          <option value="ip">Immunoprecipitate</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+    } @else {
+      <div class="form-group">
+        <label for="metadataValue">Metadata Value</label>
+        <input (selectItem)="onItemSelect($event)" [ngbTypeahead]="searchMetadata" [resultFormatter]="formatter" [inputFormatter]="formatter" class="form-control" id="metadataValue" formControlName="metadataValue" placeholder="Metadata Value">
+      </div>
+    }
     @if (modifier) {
       <div class="form-group">
         <label for="samples">Samples</label>

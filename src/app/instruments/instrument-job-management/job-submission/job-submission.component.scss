@@ -3,3 +3,10 @@
   overflow-x: auto;
   word-wrap: break-word;
 }
+
+.metadata-table-container {
+  max-width: 100%;
+  max-height: 100vh;
+  overflow-x: auto;
+  overflow-y: auto;
+}

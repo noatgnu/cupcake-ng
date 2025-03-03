@@ -58,6 +58,7 @@ import {StaffDataEntryPanelComponent} from "./staff-data-entry-panel/staff-data-
 import {
   ProtocolBasicInfoEditorModalComponent
 } from "../../../protocol-editor/protocol-basic-info-editor-modal/protocol-basic-info-editor-modal.component";
+import {MetadataTableComponent} from "./metadata-table/metadata-table.component";
 
 @Component({
     selector: 'app-job-submission',
@@ -82,12 +83,14 @@ import {
     NgbNavItem,
     NgbNavOutlet,
     NgClass,
-    QuillViewComponent
+    QuillViewComponent,
+    MetadataTableComponent
   ],
     templateUrl: './job-submission.component.html',
     styleUrl: './job-submission.component.scss'
 })
 export class JobSubmissionComponent implements OnInit, AfterViewInit {
+  @ViewChild('metadataTable') metadataTable?: MetadataTableComponent;
   activeTab = 'user'
   isPanelOpen = false;
   staffModeAvailable = false;
@@ -553,7 +556,7 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit {
         name: new FormControl(m.name),
         type: new FormControl(m.type),
         mandatory: new FormControl(m.mandatory),
-        modifiers: new FormControl(m.samples)
+        modifiers: new FormControl(m.modifiers)
       });
       formArray.push(group);
       this.subscribeToFormGroupChanges(group);
@@ -660,7 +663,6 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit {
             }
           }
         } else {
-          console.log(this.reagentForm.controls.id)
           if (this.reagentForm.value.use_previous) {
             if (this.reagentForm.controls.id.dirty) {
               payload["stored_reagent"] = this.reagentForm.value.id
@@ -846,6 +848,8 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit {
           })
           formArray.push(group);
           this.subscribeToFormGroupChanges(group)
+          formArray.markAsDirty()
+          this.update().then()
         }
       }
     })
@@ -854,6 +858,7 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit {
   removeMetadata(index: number, arrayName: 'user_metadata'|'staff_metadata') {
     const formArray = this.metadata.get(arrayName) as FormArray;
     formArray.removeAt(index);
+    this.update().then()
   }
 
   checkMetadataAdd() {
@@ -1087,7 +1092,82 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit {
         })
       }
     })
+  }
 
+  handleMetadataUpdated(event: {
+    name:string,
+    value: string,
+    type: string,
+    id: number,
+    data_type: string,
+    modifiers: {samples: string, value: string}[]
+  }[]) {
+    for (const metadata of event) {
+      console.log(metadata)
+      if (metadata.data_type === "user_metadata") {
+        const formArray = this.metadata.get('user_metadata') as FormArray;
+        for (const f of formArray.controls) {
+          if (f.value.id === metadata.id) {
+            if (f.value.value !== metadata.value) {
+              f.patchValue({
+                value: metadata.value
+              })
+              formArray.markAsDirty()
+            } else {
+              if (!f.value.modifiers) {
+                f.patchValue({
+                  modifiers: metadata.modifiers
+                })
+                formArray.markAsDirty()
+              } else {
+                if (metadata.modifiers) {
+                  for (const modifier of metadata.modifiers) {
+                    if (f.value.modifiers) {
+                      const found = f.value.modifiers.find((m: any) => m.value === modifier.value)
+                      if (!found) {
+                        const newModifiers = f.value.modifiers
+                        newModifiers.push(modifier)
+                        f.patchValue({
+                          modifiers: newModifiers
+                        })
+                        formArray.markAsDirty()
+                      } else {
+                        if (found.samples !== modifier.samples) {
+                          // replace samples value with new value
+                          const newModifiers = f.value.modifiers
+                          newModifiers[newModifiers.indexOf(found)].samples = modifier.samples
+                          f.patchValue({
+                            modifiers: newModifiers
+                          })
+                          formArray.markAsDirty()
+                        }
+                      }
+                    }
+                  }
+                  for (const modifier of f.value.modifiers) {
+                    const found = metadata.modifiers.find((m: any) => m.value === modifier.value)
+                    if (!found) {
+                      const newModifiers = f.value.modifiers.filter((m: any) => m.value !== modifier.value)
+                      f.patchValue({
+                        modifiers: newModifiers
+                      })
+                      formArray.markAsDirty()
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    this.update().then()
+  }
+
+  exportTableToTSV() {
+    if (this.metadataTable) {
+      this.metadataTable.exportTableToTSV()
+    }
   }
 
 }

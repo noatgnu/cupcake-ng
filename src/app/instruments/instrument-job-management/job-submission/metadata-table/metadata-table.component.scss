@@ -1,0 +1,17 @@
+.sticky-header {
+  position: sticky;
+  top: 0;
+  //z-index: 1;
+}
+
+.sticky-header th {
+  position: sticky;
+  top: 0;
+  //z-index: 2;
+}
+
+.sticky-column {
+  position: sticky;
+  left: 0;
+  //z-index: 1;
+}

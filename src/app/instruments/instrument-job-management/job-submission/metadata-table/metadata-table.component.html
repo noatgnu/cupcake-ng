@@ -1,0 +1,41 @@
+@if (sampleNumber > 0 && userMetadata.length > 0 && staffMetadata.length > 0) {
+  <table class="table table-hover">
+    <thead  class="sticky-header">
+    <tr>
+      <th scope="col" class="sticky-column">Sample</th>
+
+      @for (col of userMetadata; track col.id) {
+        <th scope="col" class="table-primary">{{col.name}} <i ngbTooltip="Edit default value" class="bi bi-pen" (click)="editDefaultMetadataValue(col, 'user_metadata')"></i></th>
+      }
+      @for (col of staffMetadata; track col.id) {
+        <th scope="col" class="table-warning">{{col.name}} @if(staffModeActive){<i ngbTooltip="Edit default value" class="bi bi-pen" (click)="editDefaultMetadataValue(col, 'staff_metadata')"></i>}</th>
+      }
+    </tr>
+    </thead>
+    <tbody>
+      @for (row of tableData; track $index) {
+        <tr>
+          <td class="sticky-column">{{ row.sample }}</td>
+          @for (col of userMetadata; track col.id; let index = $index) {
+            @if (col.name === 'Modification parameters') {
+              <td (click)="editCell(row, col, index, 'user_metadata')">
+                {{row['col_' + index]?.split(';').join('\n')}}
+              </td>
+            } @else {
+              <td (click)="editCell(row, col, index, 'user_metadata')">
+                {{ row['col_' + index] }}
+              </td>
+            }
+          }
+          @for (col of staffMetadata; track col.id; let index = $index) {
+
+            <td (click)="editCell(row, col, (userMetadata.length+index), 'staff_metadata')">
+              {{ row['col_' + (userMetadata.length+index)] }}
+            </td>
+          }
+        </tr>
+      }
+    </tbody>
+  </table>
+}
+

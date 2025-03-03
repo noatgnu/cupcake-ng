@@ -10,33 +10,86 @@
       <b>Description: </b> {{instrument.instrument_description}}
     </p>
   </div>
-  <form [formGroup]="formUser" (ngSubmit)="getUserPermission()">
+  <form [formGroup]="formUser">
     <div class="form-floating">
       <input type="text" class="form-control" formControlName="username" id="username">
       <label for="username">Username</label>
     </div>
   </form>
 
-  @if (formPermissions) {
-    <form [formGroup]="formPermissions">
-      @if (accounts.is_staff) {
-        <div class="form-check">
-          <input type="checkbox" class="form-check-input" formControlName="can_manage" id="can_manage">
-          <label for="can_manage"><i class="bi bi-pen"></i> Can Manage</label>
-        </div>
+  <table class="table table-hover">
+    <thead>
+    <tr>
+      <th scope="col">
+        ID
+      </th>
+      <th scope="col">
+        Username
+      </th>
+      <th scope="col">
+        Permissions
+      </th>
+    </tr>
+    </thead>
+    <tbody>
+    @for (u of userList; track u.id) {
+      @if (permissionMap[u.username]) {
+        <tr (click)="getUserPermission(u.username)">
+          <td>
+            {{u.id}}
+          </td>
+          <td>
+            {{u.username}}
+          </td>
+          <td>
+            <div class="d-flex gap-2">
+              @if (permissionMap[u.username]['can_view']) {
+                <i class="bi bi-eye"></i>
+              } @else {
+                <i class="bi bi-eye text-danger"></i>
+              }
+              @if (permissionMap[u.username]['can_book']) {
+                <i class="bi bi-book"></i>
+              } @else {
+                <i class="bi bi-book text-danger"></i>
+              }
+              @if (permissionMap[u.username]['can_manage']) {
+                <i class="bi bi-pencil"></i>
+              } @else {
+                <i class="bi bi-pencil text-danger"></i>
+              }
+            </div>
+          </td>
+        </tr>
+        @if (currentUser === u) {
+          <tr>
+            <td [colSpan]="3">
+              @if (formPermissions) {
+                <form [formGroup]="formPermissions">
+                  @if (accounts.is_staff) {
+                    <div class="form-check">
+                      <input type="checkbox" class="form-check-input" formControlName="can_manage" id="can_manage">
+                      <label for="can_manage"><i class="bi bi-pen"></i> Can Manage</label>
+                    </div>
+                  }
+                  <div class="form-check">
+                    <input type="checkbox" class="form-check-input" formControlName="can_book" id="can_book">
+                    <label for="can_book"><i class="bi bi-book"></i> Can Book</label>
+                  </div>
+                  <div class="form-check">
+                    <input type="checkbox" class="form-check-input" formControlName="can_view" id="can_view">
+                    <label for="can_view"><i class="bi bi-eye"></i> Can View</label>
+                  </div>
+
+                </form>
+              }
+            </td>
+          </tr>
+        }
       }
-      <div class="form-check">
-        <input type="checkbox" class="form-check-input" formControlName="can_book" id="can_book">
-        <label for="can_book"><i class="bi bi-book"></i> Can Book</label>
-      </div>
-      <div class="form-check">
-        <input type="checkbox" class="form-check-input" formControlName="can_view" id="can_view">
-        <label for="can_view"><i class="bi bi-eye"></i> Can View</label>
-      </div>
-
-    </form>
-  }
-
+    }
+    </tbody>
+  </table>
 </div>
 <div class="modal-footer">
   <button type="button" class="btn btn-primary" (click)="submit()">Submit</button>

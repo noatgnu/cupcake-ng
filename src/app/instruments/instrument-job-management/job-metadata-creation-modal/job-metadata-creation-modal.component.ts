@@ -41,7 +41,7 @@ export class JobMetadataCreationModalComponent {
     return this._type
   }
 
-  @Input() allowMultipleSpecSelection: boolean = false
+  @Input() allowMultipleSpecSelection: boolean = true
   @Input() modifier: boolean = false
 
   form = this.fb.group({
