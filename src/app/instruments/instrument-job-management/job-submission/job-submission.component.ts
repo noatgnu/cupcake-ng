@@ -59,6 +59,7 @@ import {
   ProtocolBasicInfoEditorModalComponent
 } from "../../../protocol-editor/protocol-basic-info-editor-modal/protocol-basic-info-editor-modal.component";
 import {MetadataTableComponent} from "./metadata-table/metadata-table.component";
+import {AreYouSureModalComponent} from "../../../are-you-sure-modal/are-you-sure-modal.component";
 
 @Component({
     selector: 'app-job-submission',
@@ -1045,10 +1046,22 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit {
   async submit() {
     if (this.job) {
       if (this.job.status === 'draft') {
-        await this.update()
-        this.web.instrumentJobSubmit(this.job.id).subscribe((response) => {
-          this.job = response
+        const ref = this.modal.open(AreYouSureModalComponent)
+        ref.componentInstance.message = "Please check all details are correct before submission. Once the job has been submitted, the user will not be able to make any changes to the job besides annotations."
+        ref.result.then((result) => {
+          if (result) {
+            this.update().then(
+              () => {
+                if (this.job){
+                  this.web.instrumentJobSubmit(this.job.id).subscribe((response) => {
+                    this.job = response
+                  })
+                }
+              }
+            )
+          }
         })
+
       }
     }
   }

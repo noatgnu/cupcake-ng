@@ -237,7 +237,7 @@
               <div class="d-flex flex-column gap-2">
                 <div>
                   <button class="btn btn-primary" (click)="exportTableToTSV()">Export to TSV</button>
-                </div> 
+                </div>
                 <div class="metadata-table-container">
                   <app-metadata-table #metadataTable (metadataUpdated)="handleMetadataUpdated($event)" [sampleNumber]="job.sample_number" [userMetadata]="job.user_metadata" [staffMetadata]="job.staff_metadata" [staffModeActive]="staffModeAvailable"></app-metadata-table>
                 </div>

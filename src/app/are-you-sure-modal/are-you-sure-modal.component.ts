@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import {Component, Input} from '@angular/core';
 import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
 
 @Component({
@@ -8,6 +8,7 @@ import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
     styleUrl: './are-you-sure-modal.component.scss'
 })
 export class AreYouSureModalComponent {
+  @Input() message: string = ""
 
   constructor(private activeModal: NgbActiveModal) {
   }
