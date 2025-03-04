@@ -18,6 +18,6 @@ export class AreYouSureModalComponent {
   }
 
   ok() {
-    this.activeModal.close()
+    this.activeModal.close(true)
   }
 }

@@ -1054,6 +1054,7 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit {
         ref.componentInstance.message = "Please check all details are correct before submission. Once the job has been submitted, the user will not be able to make any changes to the job besides annotations."
         ref.result.then((result) => {
           if (result) {
+            console.log(result)
             this.update().then(
               () => {
                 if (this.job){

@@ -1903,7 +1903,7 @@ export class WebService {
 
   instrumentJobSubmit(job_id: number) {
     return this.http.post<InstrumentJob>(
-      `${this.baseURL}/api/instrument_jobs/${job_id}/submit/`,
+      `${this.baseURL}/api/instrument_jobs/${job_id}/submit_job/`,
       {},
       {responseType: 'json', observe: 'body'}
     )
