@@ -17,22 +17,16 @@ export class StaffDataEntryPanelComponent {
   @Input() set job(value: InstrumentJob) {
     this._job = value
     this.staffDataForm.patchValue({
-      injection_volume: value.injection_volume,
-      injection_unit: value.injection_unit,
-      search_engine: value.search_engine,
-      search_engine_version: value.search_engine_version,
-      search_details: value.search_details,
-      location: value.location,
+      status: value.status
     })
   }
 
+  get job(): InstrumentJob {
+    return this._job!
+  }
+
   staffDataForm = this.fb.group({
-    injection_volume: [0],
-    injection_unit: ['uL'],
-    search_engine: ['DIANN'],
-    search_engine_version: [''],
-    search_details: [''],
-    location: [''],
+    status: [''],
   });
 
   constructor(private fb: FormBuilder, private activeCanvas: NgbActiveOffcanvas) {}

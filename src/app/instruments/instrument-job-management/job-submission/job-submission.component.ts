@@ -929,11 +929,10 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit {
       ref.closed.subscribe((result) => {
         if (result) {
           if (this.job) {
-            this.job.injection_volume = result.injection_volume
-            this.job.injection_unit = result.injection_unit
-            this.job.search_engine = result.search_engine
-            this.job.search_details = result.search_details
-            this.job.search_engine_version = result.search_engine_version
+            this.web.instrumentJobUpdateStatus(this.job.id, result.status).subscribe((response) => {
+              this.job = response
+              this.toast.show('Job', 'Job status updated successfully')
+            })
           }
         }
       })

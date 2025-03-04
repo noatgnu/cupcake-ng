@@ -1915,6 +1915,14 @@ export class WebService {
       {responseType: 'json', observe: 'body', params: new HttpParams().set('field_name', field_name).set('search', search)}
     )
   }
+
+  instrumentJobUpdateStatus(job_id: number, status: string) {
+    return this.http.post<InstrumentJob>(
+      `${this.baseURL}/api/instrument_jobs/${job_id}/update_status/`,
+      {status: status},
+      {responseType: 'json', observe: 'body'}
+    )
+  }
 }
 
 interface ChunkUploadResponse {
