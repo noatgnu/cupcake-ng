@@ -147,7 +147,6 @@ export class JobMetadataCreationModalComponent {
         if (!this.name) {
           return of([]);
         }
-        console.log(value)
         const name = this.name.toLowerCase();
         return this.metadataService.metadataTypeAheadDataGetter(name, value).pipe(
           map(results => {
