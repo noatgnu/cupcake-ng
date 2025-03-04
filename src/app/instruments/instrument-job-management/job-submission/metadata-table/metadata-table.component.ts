@@ -1,24 +1,33 @@
-import {Component, EventEmitter, Input, OnChanges, Output, SimpleChanges} from '@angular/core';
+import {Component, EventEmitter, HostListener, Input, OnChanges, Output, SimpleChanges} from '@angular/core';
 import {MetadataColumn} from "../../../../metadata-column";
 import {
   DisplayModificationParametersMetadataComponent
 } from "../../../../display-modification-parameters-metadata/display-modification-parameters-metadata.component";
-import {NgbModal, NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
+import {NgbDropdown, NgbDropdownMenu, NgbDropdownToggle, NgbModal, NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {
   JobMetadataCreationModalComponent
 } from "../../job-metadata-creation-modal/job-metadata-creation-modal.component";
 import {FormArray} from "@angular/forms";
+import {NgClass} from "@angular/common";
 
 @Component({
   selector: 'app-metadata-table',
   imports: [
     DisplayModificationParametersMetadataComponent,
-    NgbTooltip
+    NgbTooltip,
+    NgbDropdown,
+    NgbDropdownMenu,
+    NgbDropdownToggle,
+    NgClass
   ],
   templateUrl: './metadata-table.component.html',
   styleUrl: './metadata-table.component.scss'
 })
 export class MetadataTableComponent implements OnChanges{
+  currentCell: { row: number, col: number }|null = null
+  selectionMode: boolean = false
+  selectionModeColIndex: number = -1
+  originCell: { row: number, col: number }|null = null
   @Input() sampleNumber: number = 0
 
   @Input() userMetadata: MetadataColumn[] = []
@@ -30,6 +39,47 @@ export class MetadataTableComponent implements OnChanges{
   tableData: any[] = []
 
   @Output() metadataUpdated: EventEmitter<any[]> = new EventEmitter<any[]>()
+
+  selectedCells: { row: number, col: number }[] = [];
+  isShiftSelecting: boolean = false;
+
+  onCellClick(event: MouseEvent, rowIndex: number, colIndex: number) {
+    if (event.shiftKey && this.selectedCells.length > 0) {
+      this.isShiftSelecting = true;
+      const lastSelectedCell = this.selectedCells[this.selectedCells.length - 1];
+      this.selectCellsInRange(lastSelectedCell.row, lastSelectedCell.col, rowIndex, colIndex);
+    } else {
+      this.isShiftSelecting = false;
+      this.selectedCells = [{ row: rowIndex, col: colIndex }];
+    }
+  }
+
+  selectCellsInRange(startRow: number, startCol: number, endRow: number, endCol: number) {
+    this.selectedCells = [];
+    for (let i = Math.min(startRow, endRow); i <= Math.max(startRow, endRow); i++) {
+      this.selectedCells.push({ row: i, col: startCol });
+    }
+  }
+
+  @HostListener('window:paste', ['$event'])
+  onPaste(event: ClipboardEvent) {
+    const clipboardData = event.clipboardData;
+    const pastedText = clipboardData?.getData('text');
+    if (pastedText && this.selectedCells.length > 0) {
+      this.pasteContentIntoSelectedCells(pastedText);
+    }
+  }
+
+
+  pasteContentIntoSelectedCells(content: string) {
+    const lines = content.split('\n');
+    for (let i = 0; i < this.selectedCells.length && i < lines.length; i++) {
+      const cell = this.selectedCells[i];
+      const row = this.tableData[cell.row];
+      const colKey = `col_${cell.col}`;
+      row[colKey] = lines[i];
+    }
+  }
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes["sampleNumber"] || changes["userMetadata"] || changes["staffMetadata"]) {
@@ -98,187 +148,192 @@ export class MetadataTableComponent implements OnChanges{
     ref.result.then((result: any[]) => {
       if (result) {
 
-        const d: any[] = []
-        for (const r of result) {
-          this.tableData[row.sample - 1][`col_${index}`] = r.metadataValue.slice()
-          let value = r.metadataValue.slice()
-          if (r.metadataName === "Modification parameters") {
-            if (r.metadataMT) {
-              value += `;mt=${r.metadataMT}`
-            }
-            if (r.metadataPP) {
-              value += `;pp=${r.metadataPP}`
-            }
-            if (r.metadataTA) {
-              value += `;ta=${r.metadataTA}`
-            }
-            if (r.metadataTS) {
-              value += `;ts=${r.metadataTS}`
-            }
-            if (r.metadataMM) {
-              value += `;mm=${r.metadataMM}`
-            }
-            if (r.metadataAC) {
-              value += `;ac=${r.metadataAC}`
-            }
-          }
-          if (metadata.value === value) {
-            // check if any of the modifiers are set with this sample and remove them from the modifiers
-            for (const m of metadata.modifiers) {
-              const data: any = {
-                name: metadata.name,
-                value: metadata.value,
-                type: metadata.type,
-                id: metadata.id,
-                data_type: data_type
-              }
-              const modifiers = [...metadata.modifiers];
-              const sampleIndices = this.parseSampleRanges(m.samples);
-              if (sampleIndices.includes(row.sample)) {
-                // remove the index from the sampleIndices
-                const newSampleIndices = sampleIndices.filter(i => i !== row.sample);
-                if (newSampleIndices.length === 0) {
-                  modifiers.splice(metadata.modifiers.indexOf(m), 1);
-                  data.modifiers = modifiers;
-                  d.push(data)
-                  break
-                }
-                // convert the sampleIndices to a similar string format as the one in the modifiers and check if any indices are continuous then use a range for those indices
-                const sortedIndices = newSampleIndices.sort((a, b) => a - b);
-                let start = sortedIndices[0];
-                let end = sortedIndices[0];
-                const ranges = [];
-                for (let i = 1; i < sortedIndices.length; i++) {
-                  if (sortedIndices[i] === end + 1) {
-                    end = sortedIndices[i];
-                  } else {
-                    if (start === end) {
-                      ranges.push(start.toString());
-                    } else {
-                      ranges.push(`${start}-${end}`);
-                    }
-                    start = sortedIndices[i];
-                    end = sortedIndices[i];
-                  }
-                }
-                if (start === end) {
-                  ranges.push(start.toString());
-                } else {
-                  ranges.push(`${start}-${end}`);
-                }
-                const mod = {
-                  samples: ranges.join(','),
-                  value: m.value
-                }
-                modifiers[modifiers.indexOf(m)] = mod;
-                data.modifiers = modifiers;
-                d.push(data)
-                metadata.modifiers = modifiers;
-              }
-            }
-          } else {
-            const data: any = {
-              name: metadata.name,
-              value: metadata.value,
-              type: metadata.type,
-              id: metadata.id,
-              data_type: data_type
-            }
-            const modifiers = [...metadata.modifiers];
-
-            let found_in_modifiers = false;
-            for (const m of metadata.modifiers) {
-              if (m.value === oldValue && m.value !== value) {
-                const sampleIndices = this.parseSampleRanges(m.samples);
-                // remove sample index from the modifier that has the same value as the old value
-                const newSampleIndices = sampleIndices.filter(i => i !== row.sample);
-                if (newSampleIndices.length === 0) {
-                  modifiers.splice(modifiers.indexOf(m), 1);
-                } else {
-                  // convert the sampleIndices to a similar string format as the one in the modifiers and check if any indices are continuous then use a range for those indices
-                  const sortedIndices = newSampleIndices.sort((a, b) => a - b);
-                  let start = sortedIndices[0];
-                  let end = sortedIndices[0];
-                  const ranges = [];
-                  for (let i = 1; i < sortedIndices.length; i++) {
-                    if (sortedIndices[i] === end + 1) {
-                      end = sortedIndices[i];
-                    } else {
-                      if (start === end) {
-                        ranges.push(start.toString());
-                      } else {
-                        ranges.push(`${start}-${end}`);
-                      }
-                      start = sortedIndices[i];
-                      end = sortedIndices[i];
-                    }
-                  }
-                  if (start === end) {
-                    ranges.push(start.toString());
-                  } else {
-                    ranges.push(`${start}-${end}`);
-                  }
-                  const mod = {
-                    samples: ranges.join(','),
-                    value: m.value
-                  }
-                  modifiers[modifiers.indexOf(m)] = mod;
-                }
-              }
-              if (m.value === value) {
-                found_in_modifiers = true;
-                const sampleIndices = this.parseSampleRanges(m.samples);
-                // add sample index to the modifier that has the same value as the new value
-                sampleIndices.push(row.sample);
-                // convert the sampleIndices to a similar string format as the one in the modifiers and check if any indices are continuous then use a range for those indices
-                const sortedIndices = sampleIndices.sort((a, b) => a - b);
-                let start = sortedIndices[0];
-                let end = sortedIndices[0];
-                const ranges = [];
-                for (let i = 1; i < sortedIndices.length; i++) {
-                  if (sortedIndices[i] === end + 1) {
-                    end = sortedIndices[i];
-                  } else {
-                    if (start === end) {
-                      ranges.push(start.toString());
-                    } else {
-                      ranges.push(`${start}-${end}`);
-                    }
-                    start = sortedIndices[i];
-                    end = sortedIndices[i];
-                  }
-                }
-                if (start === end) {
-                  ranges.push(start.toString());
-                } else {
-                  ranges.push(`${start}-${end}`);
-                }
-                const mod = {
-                  samples: ranges.join(','),
-                  value: m.value
-                }
-                modifiers[modifiers.indexOf(m)] = mod;
-                data.modifiers = modifiers;
-                d.push(data)
-              }
-            }
-            if (!found_in_modifiers) {
-              modifiers.push({
-                samples: row.sample.toString(),
-                value: value
-              })
-              data.modifiers = modifiers;
-              d.push(data)
-            }
-            metadata.modifiers = modifiers;
-          }
-        }
+        const d = this.searchAndUpdateMetadata(result, row, index, metadata, data_type, oldValue);
         this.metadataUpdated.emit(d)
       }
     }).catch((error) => {
       console.log(error)
     })
 
+  }
+
+  private searchAndUpdateMetadata(result: any[], row: any, index: number, metadata: MetadataColumn, data_type: "user_metadata" | "staff_metadata", oldValue: string) {
+    const d: any[] = []
+    for (const r of result) {
+      this.tableData[row.sample - 1][`col_${index}`] = r.metadataValue.slice()
+      let value = r.metadataValue.slice()
+      if (r.metadataName === "Modification parameters") {
+        if (r.metadataMT) {
+          value += `;mt=${r.metadataMT}`
+        }
+        if (r.metadataPP) {
+          value += `;pp=${r.metadataPP}`
+        }
+        if (r.metadataTA) {
+          value += `;ta=${r.metadataTA}`
+        }
+        if (r.metadataTS) {
+          value += `;ts=${r.metadataTS}`
+        }
+        if (r.metadataMM) {
+          value += `;mm=${r.metadataMM}`
+        }
+        if (r.metadataAC) {
+          value += `;ac=${r.metadataAC}`
+        }
+      }
+      if (metadata.value === value) {
+        // check if any of the modifiers are set with this sample and remove them from the modifiers
+        for (const m of metadata.modifiers) {
+          const data: any = {
+            name: metadata.name,
+            value: metadata.value,
+            type: metadata.type,
+            id: metadata.id,
+            data_type: data_type
+          }
+          const modifiers = [...metadata.modifiers];
+          const sampleIndices = this.parseSampleRanges(m.samples);
+          if (sampleIndices.includes(row.sample)) {
+            // remove the index from the sampleIndices
+            const newSampleIndices = sampleIndices.filter(i => i !== row.sample);
+            if (newSampleIndices.length === 0) {
+              modifiers.splice(metadata.modifiers.indexOf(m), 1);
+              data.modifiers = modifiers;
+              d.push(data)
+              break
+            }
+            // convert the sampleIndices to a similar string format as the one in the modifiers and check if any indices are continuous then use a range for those indices
+            const sortedIndices = newSampleIndices.sort((a, b) => a - b);
+            let start = sortedIndices[0];
+            let end = sortedIndices[0];
+            const ranges = [];
+            for (let i = 1; i < sortedIndices.length; i++) {
+              if (sortedIndices[i] === end + 1) {
+                end = sortedIndices[i];
+              } else {
+                if (start === end) {
+                  ranges.push(start.toString());
+                } else {
+                  ranges.push(`${start}-${end}`);
+                }
+                start = sortedIndices[i];
+                end = sortedIndices[i];
+              }
+            }
+            if (start === end) {
+              ranges.push(start.toString());
+            } else {
+              ranges.push(`${start}-${end}`);
+            }
+            const mod = {
+              samples: ranges.join(','),
+              value: m.value
+            }
+            modifiers[modifiers.indexOf(m)] = mod;
+            data.modifiers = modifiers;
+            d.push(data)
+            metadata.modifiers = modifiers;
+          }
+        }
+      } else {
+        const data: any = {
+          name: metadata.name,
+          value: metadata.value,
+          type: metadata.type,
+          id: metadata.id,
+          data_type: data_type
+        }
+        const modifiers = [...metadata.modifiers];
+
+        let found_in_modifiers = false;
+        for (const m of metadata.modifiers) {
+          if (m.value === oldValue && m.value !== value) {
+            const sampleIndices = this.parseSampleRanges(m.samples);
+            // remove sample index from the modifier that has the same value as the old value
+            const newSampleIndices = sampleIndices.filter(i => i !== row.sample);
+            if (newSampleIndices.length === 0) {
+              modifiers.splice(modifiers.indexOf(m), 1);
+            } else {
+              // convert the sampleIndices to a similar string format as the one in the modifiers and check if any indices are continuous then use a range for those indices
+              const sortedIndices = newSampleIndices.sort((a, b) => a - b);
+              let start = sortedIndices[0];
+              let end = sortedIndices[0];
+              const ranges = [];
+              for (let i = 1; i < sortedIndices.length; i++) {
+                if (sortedIndices[i] === end + 1) {
+                  end = sortedIndices[i];
+                } else {
+                  if (start === end) {
+                    ranges.push(start.toString());
+                  } else {
+                    ranges.push(`${start}-${end}`);
+                  }
+                  start = sortedIndices[i];
+                  end = sortedIndices[i];
+                }
+              }
+              if (start === end) {
+                ranges.push(start.toString());
+              } else {
+                ranges.push(`${start}-${end}`);
+              }
+              const mod = {
+                samples: ranges.join(','),
+                value: m.value
+              }
+              modifiers[modifiers.indexOf(m)] = mod;
+            }
+          }
+          if (m.value === value) {
+            found_in_modifiers = true;
+            const sampleIndices = this.parseSampleRanges(m.samples);
+            // add sample index to the modifier that has the same value as the new value
+            sampleIndices.push(row.sample);
+            // convert the sampleIndices to a similar string format as the one in the modifiers and check if any indices are continuous then use a range for those indices
+            const sortedIndices = sampleIndices.sort((a, b) => a - b);
+            let start = sortedIndices[0];
+            let end = sortedIndices[0];
+            const ranges = [];
+            for (let i = 1; i < sortedIndices.length; i++) {
+              if (sortedIndices[i] === end + 1) {
+                end = sortedIndices[i];
+              } else {
+                if (start === end) {
+                  ranges.push(start.toString());
+                } else {
+                  ranges.push(`${start}-${end}`);
+                }
+                start = sortedIndices[i];
+                end = sortedIndices[i];
+              }
+            }
+            if (start === end) {
+              ranges.push(start.toString());
+            } else {
+              ranges.push(`${start}-${end}`);
+            }
+            const mod = {
+              samples: ranges.join(','),
+              value: m.value
+            }
+            modifiers[modifiers.indexOf(m)] = mod;
+            data.modifiers = modifiers;
+            d.push(data)
+          }
+        }
+        if (!found_in_modifiers) {
+          modifiers.push({
+            samples: row.sample.toString(),
+            value: value
+          })
+          data.modifiers = modifiers;
+          d.push(data)
+        }
+        metadata.modifiers = modifiers;
+      }
+    }
+    return d;
   }
 
   editDefaultMetadataValue(metadata: MetadataColumn, data_type: 'user_metadata' | 'staff_metadata') {
@@ -351,5 +406,65 @@ export class MetadataTableComponent implements OnChanges{
     a.click();
     document.body.removeChild(a);
     window.URL.revokeObjectURL(url);
+  }
+
+  copyAndEnableSelectionMode(row: any, metadata: MetadataColumn, index: number, data_type: 'user_metadata' | 'staff_metadata') {
+    this.currentCell = { row: row.sample - 1, col: index };
+    this.selectionMode = true;
+    this.selectionModeColIndex = index;
+    this.originCell = { row: row.sample - 1, col: index };
+  }
+
+  moveOverCell(rowIndex: number, colIndex: number) {
+    this.currentCell = { row: rowIndex, col: colIndex };
+    if (this.selectionMode) {
+      if (this.selectionModeColIndex === colIndex) {
+        // calculate the range of cells to select from the origin cell to the current cell
+        if (this.originCell) {
+          this.selectCellsInRange(this.originCell.row, this.originCell.col, rowIndex, colIndex);
+        }
+      }
+    }
+  }
+
+  isSelectedCell(rowIndex: number, colIndex: number): boolean {
+    return this.selectedCells.some(cell => cell.row === rowIndex && cell.col === colIndex);
+  }
+
+  pasteContentFromOriginToCells(metadata: MetadataColumn, data_type: "user_metadata"|"staff_metadata") {
+    if (this.originCell) {
+      const originValue = this.tableData[this.originCell.row][`col_${this.originCell.col}`];
+      let isModifier = false;
+      if (originValue !== metadata.value) {
+        isModifier = true;
+      }
+      // filter for the selected cells that does not have the same value as the origin cell
+      const selectedCells = this.selectedCells.filter(cell => {
+        return this.tableData[cell.row][`col_${cell.col}`] !== originValue;
+      });
+      let result: any = {};
+      for (const cell of selectedCells) {
+        const d = this.searchAndUpdateMetadata(
+          [{ metadataName: metadata.name, metadataValue: originValue }],
+          this.tableData[cell.row],
+          cell.col,
+          metadata,
+          data_type,
+          originValue
+        )
+        for (const i of d) {
+          if (result[i.id]) {
+            result[i.id].modifiers = result[i.id].modifiers.concat(i.modifiers)
+          } else {
+            result[i.id] = i
+          }
+        }
+      }
+      this.metadataUpdated.emit(result)
+      this.originCell = null;
+      this.selectionMode = false;
+      this.selectedCells = [];
+      this.selectionModeColIndex = -1;
+    }
   }
 }
