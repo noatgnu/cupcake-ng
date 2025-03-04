@@ -1923,6 +1923,11 @@ export class WebService {
       {responseType: 'json', observe: 'body'}
     )
   }
+
+  instrumentJobExportMetadata(job_id: number, session: string, data_type: string) {
+    const payload = {instance_id: session, data_type}
+    return this.http.post(`${this.baseURL}/api/instrument_jobs/${job_id}/export_metadata_to_tsv/`, payload, {responseType: 'json', observe: 'body'})
+  }
 }
 
 interface ChunkUploadResponse {

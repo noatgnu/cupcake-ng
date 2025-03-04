@@ -5,8 +5,14 @@
   <form [formGroup]="form" class="d-flex gap-2 flex-column">
     <div class="form-group">
       <label for="metadataName">Metadata Name</label>
-      <input class="form-control" id="metadataName" formControlName="metadataName" placeholder="Metadata Name" readonly>
+      <input class="form-control" id="metadataName" formControlName="metadataName" placeholder="Metadata Name" [readonly]="name!==''">
     </div>
+    @if (name==='') {
+      <div class="form-check">
+        <input type="checkbox" class="form-check-input" id="isCharacteristics" formControlName="characteristics">
+        <label for="isCharacteristics">Is this data an inherent characteristics of the sample</label>
+      </div>
+    }
     @if (form.value.metadataName === 'Sample type') {
       <div class="form-group">
         <label for="sampleType">Sample Type</label>

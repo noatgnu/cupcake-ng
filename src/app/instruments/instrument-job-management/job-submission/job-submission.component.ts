@@ -27,7 +27,7 @@ import {
   NgbTypeahead,
   NgbTypeaheadSelectItemEvent
 } from "@ng-bootstrap/ng-bootstrap";
-import {Observable, debounceTime, distinctUntilChanged, switchMap, map, catchError, of, tap} from 'rxjs';
+import {Observable, debounceTime, distinctUntilChanged, switchMap, map, catchError, of, tap, Subscription} from 'rxjs';
 import {Project} from "../../../project";
 import {DatePipe, NgClass} from "@angular/common";
 import {Unimod} from "../../../unimod";
@@ -60,6 +60,8 @@ import {
 } from "../../../protocol-editor/protocol-basic-info-editor-modal/protocol-basic-info-editor-modal.component";
 import {MetadataTableComponent} from "./metadata-table/metadata-table.component";
 import {AreYouSureModalComponent} from "../../../are-you-sure-modal/are-you-sure-modal.component";
+import {WebsocketService} from "../../../websocket.service";
+import {environment} from "../../../../environments/environment";
 
 @Component({
     selector: 'app-job-submission',
@@ -321,7 +323,26 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit {
   labUserMemberPageSize = 10
   service_storage: StorageObject|undefined|null
 
-  constructor(private offCanvas: NgbOffcanvas, public annotationService: AnnotationService, private modal: NgbModal, private fb: FormBuilder, private web: WebService, private toast: ToastService, public metadataService: MetadataService, private accountService: AccountsService) {
+  instrumentJobWebsocketSubscription: Subscription | undefined
+
+  constructor(private offCanvas: NgbOffcanvas, private ws: WebsocketService, public annotationService: AnnotationService, private modal: NgbModal, private fb: FormBuilder, private web: WebService, private toast: ToastService, public metadataService: MetadataService, private accountService: AccountsService) {
+    if (this.ws.instrumentJobWSConnection) {
+      this.instrumentJobWebsocketSubscription = this.ws.instrumentJobWSConnection.subscribe((message: any) => {
+        if ("signed_value" in message && "instance_id" in message) {
+          if (message['instance_id'] === this.web.cupcakeInstanceID) {
+            this.toast.show("Export File", "Downloading file...")
+            const downloadURL = environment.baseURL + "/api/protocol/download_temp_file/?token=" + message["signed_value"]
+            const link = document.createElement('a');
+            link.href = downloadURL;
+            link.download = message["signed_value"].split(":")[0]
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+          }
+        }
+      })
+    }
+
     this.annotationService.refreshAnnotation.asObservable().subscribe((value) => {
       if (this.job) {
         this.web.getInstrumentJob(this.job.id).subscribe((job) => {
@@ -845,13 +866,30 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit {
               value += `;ac=${r.metadataAC}`
             }
           }
-          const group = this.fb.group({
-            name: metadata.name,
-            type: metadata.type,
-            value: value,
-            mandatory: false,
-            id: null
-          })
+          let group: any = {}
+          if (metadata.name !== "") {
+            group = this.fb.group({
+              name: metadata.name,
+              type: metadata.type,
+              value: value,
+              mandatory: false,
+              id: null
+            })
+          } else {
+            if (r.charateristic) {
+              r.metadataType = "Characteristics"
+            } else {
+              r.metadataType = "Comment"
+            }
+            group = this.fb.group({
+              name: r.metadataName,
+              type: r.metadataType,
+              value: value,
+              mandatory: false,
+              id: null
+            })
+          }
+
           formArray.push(group);
           this.subscribeToFormGroupChanges(group)
         }
@@ -1121,6 +1159,7 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit {
     data_type: string,
     modifiers: {samples: string, value: string}[]
   }[]) {
+    console.log(event)
     for (const metadata of event) {
       console.log(metadata)
       if (metadata.data_type === "user_metadata") {
@@ -1197,9 +1236,11 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit {
     }
   }
 
-  exportTableToTSV() {
-    if (this.metadataTable) {
-      this.metadataTable.exportTableToTSV()
+  exportTableToTSV(data_type: 'user_metadata'|'staff_metadata') {
+    if (this.metadataTable && this.job) {
+      this.web.instrumentJobExportMetadata(this.job.id, this.web.cupcakeInstanceID, data_type).subscribe((response) => {
+
+      })
     }
   }
 

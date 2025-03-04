@@ -159,7 +159,7 @@ export class MetadataTableComponent implements OnChanges{
 
   }
 
-  private searchAndUpdateMetadata(result: any[], row: any, index: number, metadata: MetadataColumn, data_type: "user_metadata" | "staff_metadata", oldValue: string) {
+  private searchAndUpdateMetadata(result: any[], row: any, index: number, metadata: MetadataColumn, data_type: "user_metadata" | "staff_metadata", oldValue: string, updateMainModifier: boolean = true): any[] {
     const d: any[] = []
     for (const r of result) {
       this.tableData[row.sample - 1][`col_${index}`] = r.metadataValue.slice()
@@ -194,7 +194,7 @@ export class MetadataTableComponent implements OnChanges{
             id: metadata.id,
             data_type: data_type
           }
-          const modifiers = [...metadata.modifiers];
+          let modifiers = [...metadata.modifiers];
           const sampleIndices = this.parseSampleRanges(m.samples);
           if (sampleIndices.includes(row.sample)) {
             // remove the index from the sampleIndices
@@ -235,7 +235,9 @@ export class MetadataTableComponent implements OnChanges{
             modifiers[modifiers.indexOf(m)] = mod;
             data.modifiers = modifiers;
             d.push(data)
-            metadata.modifiers = modifiers;
+            if (updateMainModifier) {
+              metadata.modifiers = modifiers;
+            }
           }
         }
       } else {
@@ -246,18 +248,22 @@ export class MetadataTableComponent implements OnChanges{
           id: metadata.id,
           data_type: data_type
         }
-        const modifiers = [...metadata.modifiers];
-
+        let modifiers = [...metadata.modifiers];
         let found_in_modifiers = false;
+        console.log(metadata.modifiers)
+        console.log(modifiers)
         for (const m of metadata.modifiers) {
+          console.log(m.value, oldValue, value)
           if (m.value === oldValue && m.value !== value) {
             const sampleIndices = this.parseSampleRanges(m.samples);
             // remove sample index from the modifier that has the same value as the old value
-            const newSampleIndices = sampleIndices.filter(i => i !== row.sample);
+            const newSampleIndices = sampleIndices.filter(i => i !== row.sample)
+
             if (newSampleIndices.length === 0) {
               modifiers.splice(modifiers.indexOf(m), 1);
             } else {
               // convert the sampleIndices to a similar string format as the one in the modifiers and check if any indices are continuous then use a range for those indices
+              console.log(newSampleIndices)
               const sortedIndices = newSampleIndices.sort((a, b) => a - b);
               let start = sortedIndices[0];
               let end = sortedIndices[0];
@@ -332,7 +338,9 @@ export class MetadataTableComponent implements OnChanges{
           data.modifiers = modifiers;
           d.push(data)
         }
-        metadata.modifiers = modifiers;
+        if (updateMainModifier) {
+          metadata.modifiers = modifiers;
+        }
       }
     }
     return d;
@@ -445,24 +453,38 @@ export class MetadataTableComponent implements OnChanges{
         return this.tableData[cell.row][`col_${cell.col}`] !== originValue;
       });
       let result: any = {};
-      for (const cell of selectedCells) {
-        const d = this.searchAndUpdateMetadata(
+      for (let i = 0; i < selectedCells.length; i++) {
+        const cell = selectedCells[i];
+        let d: any = [];
+        let updateMainModifier = true;
+        if (i === selectedCells.length - 1) {
+          updateMainModifier = false;
+        }
+        d = this.searchAndUpdateMetadata(
           [{ metadataName: metadata.name, metadataValue: originValue }],
           this.tableData[cell.row],
           cell.col,
           metadata,
           data_type,
-          originValue
+          originValue,
+          updateMainModifier
         )
         for (const i of d) {
           if (result[i.id]) {
-            result[i.id].modifiers = result[i.id].modifiers.concat(i.modifiers)
+            for (let i2 = 0; i2 < i.modifiers.length; i2++) {
+              const resultIndex = result[i.id].modifiers.findIndex((m: any) => m.value === i.modifiers[i2].value);
+              if (resultIndex === -1) {
+                result[i.id].modifiers.push(i.modifiers[i2])
+              } else {
+                result[i.id].modifiers[resultIndex].samples = i.modifiers[i2].samples
+              }
+            }
           } else {
             result[i.id] = i
           }
         }
       }
-      this.metadataUpdated.emit(result)
+      this.metadataUpdated.emit(Object.values(result))
       this.originCell = null;
       this.selectionMode = false;
       this.selectedCells = [];

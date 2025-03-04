@@ -13,9 +13,33 @@ export class WebsocketService {
   annotationWSConnection?: WebSocketSubject<any>
   userWSConnection?: WebSocketSubject<any>
   summaryWSConnection?: WebSocketSubject<any>
+  instrumentJobWSConnection?: WebSocketSubject<any>
   userSubject: Subject<boolean> = new Subject<boolean>()
 
   constructor(private accounts: AccountsService) { }
+  connectInstrumentJobWS(sessionID: string) {
+    console.log("Connecting to instrument job websocket")
+    console.log(`${this.baseURL}/ws/instrument-job/${sessionID}/?token=${this.accounts.token}`)
+    this.instrumentJobWSConnection = new WebSocketSubject({
+      url: `${this.baseURL}/ws/instrument_job/${sessionID}/?token=${this.accounts.token}`,
+      openObserver: {
+        next: () => {
+          console.log("Connected to instrument job websocket")
+        }
+      },
+      closeObserver: {
+        next: () => {
+          console.log("Closed connection to instrument job websocket")
+        }
+      }
+    })
+  }
+
+  closeInstrumentJobWS() {
+    if (this.instrumentJobWSConnection) {
+      this.instrumentJobWSConnection.unsubscribe()
+    }
+  }
 
   connectTimerWS(sessionID: string) {
     console.log("Connecting to timer websocket")

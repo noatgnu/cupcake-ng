@@ -60,6 +60,15 @@ export class MetadataService {
     },{
       "name": "Material type", "type": ""
     },
+    {
+      "name": "Developmental stage", "type": "Characteristics",
+    },
+    {
+      "name": "Ancestry category", "type": "Characteristics",
+    },
+    {
+      "name": "Sex", "type": "Characteristics",
+    },
     {"name": "Cleavage agent details", "type": "Comment"},
     {"name": "Modification parameters", "type": "Comment"},
     {"name": "Dissociation method", "type": "Comment"},

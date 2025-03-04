@@ -4,6 +4,8 @@ import {UserDataComponent} from "../accounts/user-data/user-data.component";
 import {InstrumentBookingComponent} from "./instrument-booking/instrument-booking.component";
 import {InstrumentManagementComponent} from "./instrument-management/instrument-management.component";
 import {InstrumentJobManagementComponent} from "./instrument-job-management/instrument-job-management.component";
+import {WebsocketService} from "../websocket.service";
+import {WebService} from "../web.service";
 
 @Component({
     selector: 'app-instruments',
@@ -28,8 +30,8 @@ export class InstrumentsComponent {
 
   selectedSection = 'jobs'
   hideSection = false
-  constructor() {
-
+  constructor(private ws: WebsocketService, private web: WebService) {
+    this.ws.connectInstrumentJobWS(this.web.cupcakeInstanceID)
   }
 
 }

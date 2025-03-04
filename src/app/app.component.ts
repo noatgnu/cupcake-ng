@@ -51,6 +51,7 @@ export class AppComponent {
         this.accounts.loadLastVisited()
         this.ws.connectUserWS()
         this.ws.connectSummaryWS()
+
         this.web.getServerSettings().subscribe((data) => {
           if (data) {
             this.dataService.serverSettings = data
@@ -82,6 +83,7 @@ export class AppComponent {
         }*/
       }
     })
+
     this.ws.summaryWSConnection?.subscribe((data) => {
       if (data) {
         if (data.target) {

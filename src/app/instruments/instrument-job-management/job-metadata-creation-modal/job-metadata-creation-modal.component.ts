@@ -54,7 +54,8 @@ export class JobMetadataCreationModalComponent {
     metadataTS: "",
     metadataMM: 0,
     metadataAC: "",
-    samples: ""
+    samples: "",
+    characteristics: false
   })
 
   private _value: string = ""
