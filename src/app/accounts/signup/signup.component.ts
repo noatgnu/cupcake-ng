@@ -32,11 +32,9 @@ export class SignupComponent {
         if (this.token) {
           if (this.form.value.username && this.form.value.password) {
             this.accountsService.signUp(this.form.value.username, this.form.value.password, this.token).subscribe((data: any) => {
-              if (data.success) {
-                this.toastService.show('Accounts', 'Account created successfully, please log in.');
-              } else {
-                this.toastService.show('Error', data.message);
-              }
+              this.toastService.show('Accounts', 'Account created successfully, please log in.');
+            }, (error) => {
+              this.toastService.show('Error', error.error);
             });
           }
         }
