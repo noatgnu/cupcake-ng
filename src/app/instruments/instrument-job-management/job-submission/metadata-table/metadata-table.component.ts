@@ -28,6 +28,7 @@ export class MetadataTableComponent implements OnChanges{
   selectionMode: boolean = false
   selectionModeColIndex: number = -1
   originCell: { row: number, col: number }|null = null
+  @Input() userCanEdit: boolean = false
   @Input() sampleNumber: number = 0
 
   @Input() userMetadata: MetadataColumn[] = []
@@ -39,6 +40,7 @@ export class MetadataTableComponent implements OnChanges{
   tableData: any[] = []
 
   @Output() metadataUpdated: EventEmitter<any[]> = new EventEmitter<any[]>()
+  @Output() removeMetadata: EventEmitter<{ metadata: MetadataColumn, index: number, data_type: 'user_metadata'|'staff_metadata' }> = new EventEmitter<{ metadata: MetadataColumn, index: number, data_type: 'user_metadata'|'staff_metadata' }>()
 
   selectedCells: { row: number, col: number }[] = [];
   isShiftSelecting: boolean = false;
@@ -466,5 +468,9 @@ export class MetadataTableComponent implements OnChanges{
       this.selectedCells = [];
       this.selectionModeColIndex = -1;
     }
+  }
+
+  removeMetadataCol(index: number, metadata: MetadataColumn, data_type: "user_metadata" | "staff_metadata") {
+    this.removeMetadata.emit({metadata, index, data_type})
   }
 }

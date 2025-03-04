@@ -7,8 +7,11 @@
         <th scope="col" class="table-primary" (mouseover)="currentCell = {row: -1, col: index}">
           {{col.name}}
           @if (currentCell) {
-            @if (currentCell.row === -1 && currentCell.col === index) {
+            @if (currentCell.row === -1 && currentCell.col === index && (userCanEdit||staffModeActive)) {
               <i ngbTooltip="Edit default value" class="bi bi-pen" (click)="editDefaultMetadataValue(col, 'user_metadata')"></i>
+              @if (!col.mandatory) {
+                <i ngbTooltip="Remove metadata" class="bi bi-trash2" (click)="removeMetadataCol(index, col, 'user_metadata')"></i>
+              }
             }
           }
 
@@ -20,6 +23,9 @@
           @if (currentCell) {
             @if (currentCell.row === -1 && currentCell.col === (userMetadata.length+index) && staffModeActive) {
               <i ngbTooltip="Edit default value" class="bi bi-pen" (click)="editDefaultMetadataValue(col, 'staff_metadata')"></i>
+              @if (!col.mandatory) {
+                <i ngbTooltip="Remove metadata" class="bi bi-trash2" (click)="removeMetadataCol(index, col, 'staff_metadata')"></i>
+              }
             }
           }
         </th>

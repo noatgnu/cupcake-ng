@@ -863,6 +863,7 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit {
   removeMetadata(index: number, arrayName: 'user_metadata'|'staff_metadata') {
     const formArray = this.metadata.get(arrayName) as FormArray;
     formArray.removeAt(index);
+    formArray.markAsDirty()
     this.update().then()
   }
 

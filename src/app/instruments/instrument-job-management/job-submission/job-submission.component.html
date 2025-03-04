@@ -239,7 +239,7 @@
                   <button class="btn btn-primary" (click)="exportTableToTSV()">Export to TSV</button>
                 </div>
                 <div class="metadata-table-container">
-                  <app-metadata-table #metadataTable (metadataUpdated)="handleMetadataUpdated($event)" [sampleNumber]="job.sample_number" [userMetadata]="job.user_metadata" [staffMetadata]="job.staff_metadata" [staffModeActive]="staffModeAvailable"></app-metadata-table>
+                  <app-metadata-table (removeMetadata)="removeMetadata($event.index, $event.data_type)" #metadataTable (metadataUpdated)="handleMetadataUpdated($event)" [userCanEdit]="userCanEdit" [sampleNumber]="job.sample_number" [userMetadata]="job.user_metadata" [staffMetadata]="job.staff_metadata" [staffModeActive]="staffModeAvailable"></app-metadata-table>
                 </div>
               </div>
             </ng-template>
