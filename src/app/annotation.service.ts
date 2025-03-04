@@ -22,6 +22,8 @@ import {Instrument} from "./instrument";
   providedIn: 'root'
 })
 export class AnnotationService {
+  enableVideo: boolean = false;
+  enableAudio: boolean = false;
   clickedInstrumentItem: string = "";
   refreshAnnotation: Subject<boolean> = new Subject<boolean>();
   recording: boolean = false;
@@ -180,10 +182,11 @@ export class AnnotationService {
     })
   }
 
-  startRecording(audio: boolean, video: boolean, previewVideo: ElementRef) {
+  startRecording(audio: boolean, video: boolean) {
     //this.speechRecognition.start();
-    console.log('start recording')
     this.recording = true;
+    console.log('start recording')
+    const previewVideo = document.getElementById('previewVideo') as HTMLVideoElement
     this.recordingChunks = [];
     let constraints: MediaStreamConstraints = { audio: audio, video: video };
     if (video) {
@@ -207,12 +210,12 @@ export class AnnotationService {
     navigator.mediaDevices.getUserMedia(constraints).then(
       (stream) => {
         if (previewVideo) {
-          previewVideo.nativeElement.srcObject = stream;
-          previewVideo.nativeElement.oncanplaythrough = () => {
+          previewVideo.srcObject = stream;
+          previewVideo.oncanplaythrough = () => {
             // @ts-ignore
-            this.previewVideo.nativeElement.muted = true;
+            previewVideo.nativeElement.muted = true;
           }
-          previewVideo.nativeElement.play();
+          previewVideo.play();
 
         }
         if (audio) {
@@ -235,7 +238,8 @@ export class AnnotationService {
           this.recordedBlob = new Blob(this.recordingChunks, {type: 'audio/webm'});
           this.audioURL = window.URL.createObjectURL(this.recordedBlob);
           if (previewVideo) {
-            previewVideo.nativeElement.stop()
+            // @ts-ignore
+            previewVideo.stop()
           }
         }
         this.mediaRecorder.start();

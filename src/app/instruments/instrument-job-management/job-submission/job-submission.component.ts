@@ -337,6 +337,10 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit {
         }
       }
     })
+    navigator.mediaDevices.enumerateDevices().then((devices) => {
+      this.annotationService.cameraDevices = devices.filter((device) => device.kind === 'videoinput');
+      this.annotationService.audioDevices = devices.filter((device) => device.kind === 'audioinput');
+    })
   }
 
   onUserMemberPageChange(page: number) {

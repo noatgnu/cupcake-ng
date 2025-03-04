@@ -10,3 +10,25 @@
   overflow-x: auto;
   overflow-y: auto;
 }
+
+.recording-preview-card {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 600px;
+  margin: auto;
+}
+
+.recording-preview-card .card-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.recording-preview-card audio,
+.recording-preview-card video {
+  width: 100%;
+  height: auto;
+  max-height: 400px;
+}
