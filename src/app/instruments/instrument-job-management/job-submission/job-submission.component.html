@@ -490,7 +490,7 @@
             </button>
             <div ngbDropdownMenu aria-labelledby="addMetadata">
               @for (m of metadataService.userMetadataTemplate; track m.name) {
-                <a class="dropdown-item" (click)="addMetadata(m, 'user_metadata')">
+                <a class="dropdown-item" (click)="addMetadata(m, 'staff_metadata')">
                   {{m.name}}
                 </a>
               }

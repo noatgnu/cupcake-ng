@@ -72,8 +72,6 @@ export class MetadataService {
 
   metadataTypeAheadDataGetter(name: string, term: string) {
     let searchObservable: Observable<any[]>;
-    console.log(name)
-    console.log(term)
     if (name === "subcellular location") {
       searchObservable = this.web.getSubcellularLocations(undefined, 5, 0, term).pipe(
         map((response) => response.results.map((location) => location.location_identifier))

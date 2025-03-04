@@ -1125,48 +1125,53 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit {
       console.log(metadata)
       if (metadata.data_type === "user_metadata") {
         const formArray = this.metadata.get('user_metadata') as FormArray;
-        for (const f of formArray.controls) {
-          if (f.value.id === metadata.id) {
-            if (f.value.value !== metadata.value) {
-              f.patchValue({
-                value: metadata.value
-              })
-              formArray.markAsDirty()
-            } else {
-              if (!f.value.modifiers) {
-                f.patchValue({
-                  modifiers: metadata.modifiers
-                })
-                formArray.markAsDirty()
-              } else {
-                if (metadata.modifiers) {
-                  for (const modifier of metadata.modifiers) {
-                    if (f.value.modifiers) {
-                      const found = f.value.modifiers.find((m: any) => m.value === modifier.value)
-                      if (!found) {
-                        const newModifiers = f.value.modifiers
-                        newModifiers.push(modifier)
-                        f.patchValue({
-                          modifiers: newModifiers
-                        })
-                        formArray.markAsDirty()
-                      } else {
-                        if (found.samples !== modifier.samples) {
-                          // replace samples value with new value
-                          const newModifiers = f.value.modifiers
-                          newModifiers[newModifiers.indexOf(found)].samples = modifier.samples
-                          f.patchValue({
-                            modifiers: newModifiers
-                          })
-                          formArray.markAsDirty()
-                        }
-                      }
-                    }
-                  }
-                  for (const modifier of f.value.modifiers) {
-                    const found = metadata.modifiers.find((m: any) => m.value === modifier.value)
-                    if (!found) {
-                      const newModifiers = f.value.modifiers.filter((m: any) => m.value !== modifier.value)
+        this.updateMetadataFormArray(formArray, metadata);
+      } else if (metadata.data_type === "staff_metadata") {
+        const formArray = this.metadata.get('staff_metadata') as FormArray;
+        this.updateMetadataFormArray(formArray, metadata);
+      }
+    }
+    this.update().then()
+  }
+
+  private updateMetadataFormArray(formArray: FormArray<any>, metadata: {
+    name: string;
+    value: string;
+    type: string;
+    id: number;
+    data_type: string;
+    modifiers: { samples: string; value: string }[]
+  }) {
+    for (const f of formArray.controls) {
+      if (f.value.id === metadata.id) {
+        if (f.value.value !== metadata.value) {
+          f.patchValue({
+            value: metadata.value
+          })
+          formArray.markAsDirty()
+        } else {
+          if (!f.value.modifiers) {
+            f.patchValue({
+              modifiers: metadata.modifiers
+            })
+            formArray.markAsDirty()
+          } else {
+            if (metadata.modifiers) {
+              for (const modifier of metadata.modifiers) {
+                if (f.value.modifiers) {
+                  const found = f.value.modifiers.find((m: any) => m.value === modifier.value)
+                  if (!found) {
+                    const newModifiers = f.value.modifiers
+                    newModifiers.push(modifier)
+                    f.patchValue({
+                      modifiers: newModifiers
+                    })
+                    formArray.markAsDirty()
+                  } else {
+                    if (found.samples !== modifier.samples) {
+                      // replace samples value with new value
+                      const newModifiers = f.value.modifiers
+                      newModifiers[newModifiers.indexOf(found)].samples = modifier.samples
                       f.patchValue({
                         modifiers: newModifiers
                       })
@@ -1175,12 +1180,21 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit {
                   }
                 }
               }
+              for (const modifier of f.value.modifiers) {
+                const found = metadata.modifiers.find((m: any) => m.value === modifier.value)
+                if (!found) {
+                  const newModifiers = f.value.modifiers.filter((m: any) => m.value !== modifier.value)
+                  f.patchValue({
+                    modifiers: newModifiers
+                  })
+                  formArray.markAsDirty()
+                }
+              }
             }
           }
         }
       }
     }
-    this.update().then()
   }
 
   exportTableToTSV() {
