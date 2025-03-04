@@ -394,7 +394,7 @@
               <div class="d-flex gap-2">
                 <div class="form-group" style="width: 200px">
                   <label for="injection_volume">Injection Volume</label>
-                  <input [readOnly]="staffModeAvailable" id="injection_volume" class="form-control" type="number" formControlName="injection_volume">
+                  <input id="injection_volume" class="form-control" type="number" formControlName="injection_volume">
                 </div>
                 <div class="form-group" style="width: 200px">
                   <label for="injection_unit">Injection Unit</label>
@@ -482,6 +482,24 @@
         </div>
       }
       @if (staffModeAvailable) {
+        @if (job.status === 'submitted') {
+          <button class="btn btn-primary" (click)="update()">Update</button>
+          <div ngbDropdown display="dynamic" class="d-inline-black">
+            <button class="btn btn-primary" id="addMetadata" ngbDropdownToggle>
+              + User Metadata
+            </button>
+            <div ngbDropdownMenu aria-labelledby="addMetadata">
+              @for (m of metadataService.userMetadataTemplate; track m.name) {
+                <a class="dropdown-item" (click)="addMetadata(m, 'user_metadata')">
+                  {{m.name}}
+                </a>
+              }
+              <a class="dropdown-item" (click)="addMetadata({name: 'Sample type', type: 'Characteristics'}, 'user_metadata')">
+                Sample Type
+              </a>
+            </div>
+          </div>
+        }
         <div ngbDropdown display="dynamic" class="d-inline-black">
           <button class="btn btn-warning" id="addStaffMetadata" ngbDropdownToggle>
             + Staff Metadata

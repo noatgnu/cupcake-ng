@@ -179,22 +179,23 @@ export class JobMetadataCreationModalComponent {
       if (!Array.isArray(this.selectedSpecs)) {
         specs = [this.selectedSpecs]
       }
-
+      console.log(specs)
       for (const s of specs) {
         const formResult = this.form.value
+        const copied = JSON.parse(JSON.stringify(formResult))
         if (s.position) {
-          formResult['metadataPP'] = s.position
+          copied['metadataPP'] = s.position
         }
         if (s.aa) {
-          formResult['metadataTA'] = s.aa
+          copied['metadataTA'] = s.aa
         }
         if (s.mono_mass) {
-          formResult['metadataMM'] = s.mono_mass
+          copied['metadataMM'] = s.mono_mass
         }
         if (s.target_site) {
-          formResult['metadataTS'] = s.target_site
+          copied['metadataTS'] = s.target_site
         }
-        result.push(formResult)
+        result.push(copied)
       }
       console.log(result)
       this.modal.close(result)

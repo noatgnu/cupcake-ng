@@ -821,6 +821,7 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit {
     ref.componentInstance.type = metadata.type
     ref.closed.subscribe((result: any[]) => {
       if (result) {
+        console.log(result)
         const formArray = this.metadata.get(arrayName) as FormArray;
         for (const r of result) {
           let value = r.metadataValue
@@ -853,9 +854,9 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit {
           })
           formArray.push(group);
           this.subscribeToFormGroupChanges(group)
-          formArray.markAsDirty()
-          this.update().then()
         }
+        formArray.markAsDirty()
+        this.update().then()
       }
     })
   }
