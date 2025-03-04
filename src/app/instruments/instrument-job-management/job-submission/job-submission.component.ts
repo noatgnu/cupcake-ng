@@ -765,7 +765,7 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit {
         const payload: any = {
         }
         if (this.job) {
-          if (this.staffDataForm.dirty) {
+          if (this.staffDataForm) {
             if (this.staffDataForm.controls.injection_volume.dirty) {
               payload["injection_volume"] = this.staffDataForm.value.injection_volume
             }
