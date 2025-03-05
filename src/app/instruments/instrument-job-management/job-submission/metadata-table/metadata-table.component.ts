@@ -28,6 +28,20 @@ export class MetadataTableComponent implements OnChanges{
   selectionMode: boolean = false
   selectionModeColIndex: number = -1
   originCell: { row: number, col: number }|null = null
+  private _filterTableColumnName: string = ""
+  visibleColumnNames: string[] = []
+  @Input() set filterTableColumnName(value: string) {
+    this._filterTableColumnName = value
+    if (value && value.length > 0) {
+      this.visibleColumnNames = this.userMetadata.concat(this.staffMetadata).filter(col => col.name.toLowerCase().includes(value.toLowerCase())).map(col => col.name)
+    } else {
+      this.visibleColumnNames = this.userMetadata.concat(this.staffMetadata).map(col => col.name)
+    }
+  }
+  get filterTableColumnName(): string {
+    return this._filterTableColumnName
+  }
+
   @Input() userCanEdit: boolean = false
   @Input() sampleNumber: number = 0
 
@@ -113,6 +127,7 @@ export class MetadataTableComponent implements OnChanges{
     if (this.sampleNumber === 0) {
       return;
     }
+    this.visibleColumnNames = this.userMetadata.concat(this.staffMetadata).map(col => col.name)
     this.tableData = []; // Clear previous data
     for (let i = 1; i <= this.sampleNumber; i++) {
       const row: any = { sample: i };
