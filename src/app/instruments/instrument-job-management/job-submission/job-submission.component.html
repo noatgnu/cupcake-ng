@@ -229,21 +229,29 @@
           </div>-->
         </div>
       </form>
+      <div class="d-flex gap-2">
+        <div ngbDropdown class="d-flex gap-2">
+          <button class="btn btn-primary" ngbDropdownToggle>Export</button>
+          <div ngbDropdownMenu>
+            <button ngbDropdownItem (click)="exportTableToTSV('user_metadata')">Export User Metadata</button>
+            <button ngbDropdownItem (click)="exportTableToTSV('staff_metadata')">Export Staff Metadata</button>
+          </div>
+        </div>
+        <div ngbDropdown class="d-flex gap-2">
+          <button class="btn btn-primary" ngbDropdownToggle>Import</button>
+          <div ngbDropdownMenu>
+            <button ngbDropdownItem (click)="importMetadata('user_metadata')">Import User Metadata</button>
+            <button ngbDropdownItem (click)="importMetadata('staff_metadata')">Import Staff Metadata</button>
+          </div>
+        </div>
+      </div>
       @if (job.user_metadata.length > 0 && job.sample_number > 0) {
         <ul ngbNav #navMetadata="ngbNav" class="nav-tabs"  [destroyOnHide]="true">
           <li [ngbNavItem]="'table'">
             <button ngbNavLink>Table View</button>
             <ng-template ngbNavContent>
               <div class="d-flex flex-column gap-2">
-                <div>
-                  <div ngbDropdown class="d-flex gap-2">
-                    <button class="btn btn-primary" ngbDropdownToggle>Export</button>
-                    <div ngbDropdownMenu>
-                      <button ngbDropdownItem (click)="exportTableToTSV('user_metadata')">Export User Metadata</button>
-                      <button ngbDropdownItem (click)="exportTableToTSV('staff_metadata')">Export Staff Metadata</button>
-                    </div>
-                  </div>
-                </div>
+
                 <div class="form-floating">
                   <input id="searchMetadata" class="form-control" type="search" [(ngModel)]="filterTableColumnName">
                   <label for="searchMetadata">Search Metadata Column Name</label>

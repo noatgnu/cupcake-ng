@@ -1,8 +1,9 @@
-import {Component, Input} from '@angular/core';
+import {Component, ElementRef, Input, ViewChild} from '@angular/core';
 import {NgbActiveModal, NgbProgressbar} from "@ng-bootstrap/ng-bootstrap";
 import jsSHA from "jssha";
 import {WebService} from "../web.service";
 import {ToastService} from "../toast.service";
+import {Annotation} from "../annotation";
 
 @Component({
     selector: 'app-upload-large-file-modal',
@@ -13,11 +14,24 @@ import {ToastService} from "../toast.service";
     styleUrl: './upload-large-file-modal.component.scss'
 })
 export class UploadLargeFileModalComponent {
+  uploadMultiple: boolean = true;
+  @ViewChild('uploadFileInput') uploadFileInput: ElementRef | undefined;
   @Input() session_id: string = "";
   @Input() folder_id: number = 0;
   @Input() step_id: number = 0;
   @Input() instrument_job_id: number = 0;
   @Input() instrument_user_type: "user_annotation" | "staff_annotation" | null = null;
+  private _metadata_import: string = "";
+  @Input() set metadata_import(data_type: string) {
+    this._metadata_import = data_type;
+    if (data_type === "user_metadata"|| data_type === "staff_metadata") {
+      this.uploadMultiple = false;
+    }
+  }
+
+  get metadata_import(): string {
+    return this._metadata_import;
+  }
   fileProgressMap: {[key: string]: {progress: number, total: number}} = {};
   fileList: File[] = [];
 
@@ -58,6 +72,9 @@ export class UploadLargeFileModalComponent {
         if (this.instrument_job_id && this.instrument_user_type) {
           this.web.bindUploadedFile(null, result?.id, file.name, file.name, this.step_id, this.folder_id, this.instrument_job_id, this.instrument_user_type).subscribe((data) => {
             this.toastService.show(file.name, "Binding completed")
+            if (this.metadata_import === "user_metadata" || this.metadata_import === "staff_metadata") {
+              this.importMetadata(data)
+            }
           })
         } else {
           this.web.bindUploadedFile(this.session_id, result?.id, file.name, file.name, this.step_id, this.folder_id).subscribe((data) => {
@@ -95,6 +112,9 @@ export class UploadLargeFileModalComponent {
           if (this.instrument_job_id && this.instrument_user_type) {
             this.web.bindUploadedFile(null, result?.id, file.name, file.name, this.step_id, this.folder_id, this.instrument_job_id, this.instrument_user_type).subscribe((data) => {
               this.toastService.show(file.name, "Binding completed")
+              if (this.metadata_import === "user_metadata" || this.metadata_import === "staff_metadata") {
+                this.importMetadata(data)
+              }
             })
           } else {
             this.web.bindUploadedFile(this.session_id, result?.id, file.name, file.name, this.step_id, this.folder_id).subscribe((data) => {
@@ -105,5 +125,12 @@ export class UploadLargeFileModalComponent {
         }
       }
     }
+  }
+
+  importMetadata(annotation: Annotation) {
+    this.web.instrumentJobImportSDRFMetadata(this.instrument_job_id, annotation.id, this.web.cupcakeInstanceID, this.metadata_import).subscribe((data) => {
+      this.toastService.show("Metadata", "Importing metadata")
+      this.activeModal.close()
+    })
   }
 }

@@ -62,6 +62,7 @@ import {MetadataTableComponent} from "./metadata-table/metadata-table.component"
 import {AreYouSureModalComponent} from "../../../are-you-sure-modal/are-you-sure-modal.component";
 import {WebsocketService} from "../../../websocket.service";
 import {environment} from "../../../../environments/environment";
+import {UploadLargeFileModalComponent} from "../../../upload-large-file-modal/upload-large-file-modal.component";
 
 @Component({
     selector: 'app-job-submission',
@@ -341,6 +342,19 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit {
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
+          }
+        } else if ("instance_id" in message && "status" in message && "message" in message) {
+          if (message['instance_id'] === this.web.cupcakeInstanceID) {
+            if (message['status'] === 'error') {
+              this.toast.show("Export File", message['message'])
+            } else if (message['status'] === 'completed') {
+              this.toast.show("Export File", message['message'])
+              if (this.job) {
+                this.web.getInstrumentJob(this.job.id).subscribe((job) => {
+                  this.job = job
+                })
+              }
+            }
           }
         }
       })
@@ -1046,6 +1060,7 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit {
           ageString += `${r.d2}D`
         }
       }
+      value = ageString
     }
     return value;
   }
@@ -1245,6 +1260,24 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit {
 
       })
     }
+  }
+
+  importMetadata(data_type: 'user_metadata'|'staff_metadata') {
+    if (this.job) {
+      const ref = this.modal.open(UploadLargeFileModalComponent)
+      ref.componentInstance.metadata_import = data_type
+      ref.componentInstance.instrument_job_id = this.job.id
+
+      if (data_type === 'user_metadata') {
+        ref.componentInstance.instrument_user_type = 'user_annotation'
+      } else {
+        if (this.staffModeAvailable) {
+          ref.componentInstance.instrument_user_type = 'staff_annotation'
+        }
+      }
+    }
+
+
   }
 
 }

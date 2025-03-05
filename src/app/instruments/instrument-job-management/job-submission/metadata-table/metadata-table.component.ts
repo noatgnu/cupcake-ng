@@ -109,6 +109,7 @@ export class MetadataTableComponent implements OnChanges{
 
   parseSampleRanges(samples: string): number[] {
     const result: number[] = [];
+    console.log(samples)
     const ranges = samples.split(',');
     ranges.forEach(range => {
       const [start, end] = range.split('-').map(Number);

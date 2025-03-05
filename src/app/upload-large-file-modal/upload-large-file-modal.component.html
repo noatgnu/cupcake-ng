@@ -6,7 +6,7 @@
 <div class="modal-body">
   <div class="form-group">
     <label for="file">Select Files</label>
-    <input type="file" class="form-control" id="file" multiple (change)="uploadData($event)">
+    <input #uploadFileInput type="file" class="form-control" id="file" [multiple]="uploadMultiple" (change)="uploadData($event)">
   </div>
   <div class="d-flex flex-column">
     @for (file of fileList; track file) {

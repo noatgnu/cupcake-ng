@@ -919,7 +919,7 @@ export class WebService {
       payload['instrument_user_type'] = instrument_user_type
     }
 
-    return this.http.post(
+    return this.http.post<Annotation>(
       `${this.baseURL}/api/annotation/bind_uploaded_file/`,
       payload,
       {responseType: 'json', observe: 'body'}
@@ -1927,6 +1927,11 @@ export class WebService {
   instrumentJobExportMetadata(job_id: number, session: string, data_type: string) {
     const payload = {instance_id: session, data_type}
     return this.http.post(`${this.baseURL}/api/instrument_jobs/${job_id}/export_metadata_to_tsv/`, payload, {responseType: 'json', observe: 'body'})
+  }
+
+  instrumentJobImportSDRFMetadata(instrument_job_id: number, annotation_id: number, instance_id: string, data_type: string) {
+    const payload = {annotation: annotation_id, instance_id, data_type}
+    return this.http.post(`${this.baseURL}/api/instrument_jobs/${instrument_job_id}/import_sdrf_metadata/`, payload, {responseType: 'json', observe: 'body'})
   }
 }
 
