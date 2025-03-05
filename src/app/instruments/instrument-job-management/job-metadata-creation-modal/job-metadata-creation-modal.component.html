@@ -22,6 +22,148 @@
           <option value="other">Other</option>
         </select>
       </div>
+    } @else if (form.value.metadataName === 'Proteomics data acquisition method') {
+      <div class="form-group">
+        <label for="acquisitionMethodSelect">Data Acquisition Method From Database</label>
+        <select class="form-select" id="acquisitionMethodSelect" formControlName="metadataValue" [size]="4">
+          @for (method of metadataService.dataAcquisitionMethods; track method) {
+            <option value="{{method}}">{{method}}</option>
+          }
+        </select>
+      </div>
+      Or
+      <div class="form-group">
+        <label for="acquisitionMethod">Manual Data Acquisition Method Input</label>
+        <input (selectItem)="onItemSelect($event)" [ngbTypeahead]="searchMetadata" type="text" class="form-control" id="acquisitionMethod" formControlName="metadataValue" placeholder="Data Acquisition Method">
+      </div>
+    } @else if (form.value.metadataName === 'Alkylation reagent') {
+      <div class="form-group">
+        <label for="alkylationReagentSelect">Alkylation Reagent From Database</label>
+        <select class="form-select" id="alkylationReagentSelect" formControlName="metadataValue" [size]="4">
+          @for (reagent of metadataService.alkylationReagents; track reagent) {
+            <option value="{{reagent}}">{{reagent}}</option>
+          }
+        </select>
+      </div>
+      Or
+      <div class="form-group">
+        <label for="alkylationReagent">Manual Alkylation Reagent Input</label>
+        <input (selectItem)="onItemSelect($event)" [ngbTypeahead]="searchMetadata" [resultFormatter]="formatter" [inputFormatter]="formatter" type="text" class="form-control" id="alkylationReagent" formControlName="metadataValue">
+      </div>
+    } @else if (form.value.metadataName === 'Enrichment process') {
+      <div class="form-group">
+        <label for="enrichmentProcessSelect">Enrichment Process From Database</label>
+        <select class="form-select" id="enrichmentProcessSelect" formControlName="metadataValue" [size]="4">
+          @for (ep of metadataService.enrichmentProcesses; track ep) {
+            <option value="{{ep}}">{{ep}}</option>
+          }
+        </select>
+      </div>
+      Or
+      <div class="form-group">
+        <label for="enrichmentProcess">Manual Enrichment Process Reagent Input</label>
+        <input (selectItem)="onItemSelect($event)" [ngbTypeahead]="searchMetadata" [resultFormatter]="formatter" [inputFormatter]="formatter" type="text" class="form-control" id="enrichmentProcess" formControlName="metadataValue" placeholder="Enrichment Process">
+      </div>
+    } @else if (form.value.metadataName === 'Reduction reagent') {
+      <div class="form-group">
+        <label for="reductionReagentSelect">Reduction Reagent From Database</label>
+        <select class="form-select" id="reductionReagentSelect" formControlName="metadataValue" [size]="4">
+          @for (reagent of metadataService.reductionReagents; track reagent) {
+            <option value="{{reagent}}">{{reagent}}</option>
+          }
+        </select>
+      </div>
+      Or
+      <div class="form-group">
+        <label for="reductionReagent">Manual Reduction Reagent Input</label>
+        <input (selectItem)="onItemSelect($event)" [ngbTypeahead]="searchMetadata" [resultFormatter]="formatter" [inputFormatter]="formatter" type="text" class="form-control" id="reductionReagent" formControlName="metadataValue" placeholder="Reduction Reagent">
+      </div>
+    } @else if (form.value.metadataName === 'Age') {
+      <div class="form-check">
+        <input type="checkbox" class="form-check-input" id="range" formControlName="ageRange">
+        <label for="range">Age Range</label>
+      </div>
+      <div class="d-flex gap-2">
+        <div class="form-group">
+          <label for="y1">Year @if(form.value.ageRange){ Start }</label>
+          <input type="number" class="form-control" id="y1" formControlName="y1" placeholder="0">
+        </div>
+        <div class="form-group">
+          <label for="m1">Month @if(form.value.ageRange){ Start }</label>
+          <input type="number" class="form-control" id="m1" formControlName="m1" placeholder="0">
+        </div>
+        <div class="form-group">
+          <label for="d1">Day @if(form.value.ageRange){ Start }</label>
+          <input type="number" class="form-control" id="d1" formControlName="d1" placeholder="0">
+        </div>
+      </div>
+      @if (form.value.ageRange) {
+        <div class="d-flex gap-2">
+          <div class="form-group">
+            <label for="y2">Year End</label>
+            <input type="number" class="form-control" id="y2" formControlName="y2" placeholder="0">
+          </div>
+          <div class="form-group">
+            <label for="m2">Month End</label>
+            <input type="number" class="form-control" id="m2" formControlName="m2" placeholder="0">
+          </div>
+          <div class="form-group">
+            <label for="d2">Day End</label>
+            <input type="number" class="form-control" id="d2" formControlName="d2" placeholder="0">
+          </div>
+        </div>
+      }
+    } @else if (form.value.metadataName === 'Depletion') {
+      <div class="form-group">
+        <label for="depletion">Depletion Status</label>
+        <select class="form-select" id="depletion" formControlName="metadataValue">
+          <option value="depleted">depleted</option>
+          <option value="not depleted">not depleted</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="quantity">Quantity</label>
+        <input type="text" class="form-control" id="quantity" formControlName="metadataQY" placeholder="Quantity">
+        <small id="quantityHelp" class="form-text text-muted">Quantity of the sample in molar or mass examples 10 mg, 20 nmol</small>
+      </div>
+      <div class="form-group">
+        <label for="compoundType">Compound Type</label>
+        <select class="form-select" id="compoundType" formControlName="metadataCT">
+          <option value="protein">Protein</option>
+          <option value="peptide">Peptide</option>
+          <option value="mixture">Mixture</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="peptideSequence">Peptide Sequence</label>
+        <input type="text" class="form-control" id="peptideSequence" formControlName="metadataPS" placeholder="Peptide Sequence">
+      </div>
+      <div class="form-group">
+        <label for="uniprotAccession">Uniprot Accession</label>
+        <input type="text" class="form-control" id="uniprotAccession" formControlName="metadataAC" placeholder="Uniprot Accession">
+      </div>
+      <div class="form-group">
+        <label for="compoundName">Compound Name</label>
+        <input type="text" class="form-control" id="compoundName" formControlName="metadataCN" placeholder="Compound Name">
+      </div>
+      <div class="form-group">
+        <label for="compoundVendor">Compound Vendor</label>
+        <input type="text" class="form-control" id="compoundVendor" formControlName="metadataCV" placeholder="Compound Vendor">
+      </div>
+      <div class="form-group">
+        <label for="compoundSpecURI">Compound Specification URI</label>
+        <input type="text" class="form-control" id="compoundSpecURI" formControlName="metadataCS" placeholder="Compound Specification URI">
+      </div>
+      <div class="form-group">
+        <label for="compoundFormula">Compound Formula</label>
+        <input type="text" class="form-control" id="compoundFormula" formControlName="metadataCF" placeholder="Compound Formula">
+      </div>
+    } @else if (form.value.metadataName === 'Spiked compound') {
+      <div class="form-group">
+        <label for="species">Species</label>
+        <input (selectItem)="onItemSelect($event)" [ngbTypeahead]="searchMetadata" [resultFormatter]="formatter" [inputFormatter]="formatter" class="form-control" id="species" formControlName="metadataSP" placeholder="Species">
+      </div>
     } @else {
       <div class="form-group">
         <label for="metadataValue">Metadata Value</label>
@@ -36,6 +178,7 @@
       </div>
     }
     <hr>
+
     @if (form.value['metadataName'] === 'Modification parameters') {
       <div class="form-group">
         <label for="metadataMT">Modification Type</label>

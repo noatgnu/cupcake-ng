@@ -22,7 +22,35 @@ export class JobMetadataCreationModalComponent {
   @Input() set name(value: string) {
     this.form.controls.metadataName.setValue(value)
     this._name = value
+    if (value === "Proteomics data acquisition method") {
+      this.web.getMSVocab(undefined, 100, 0, undefined, value.toLowerCase()).subscribe(
+        (response) => {
+          this.metadataService.dataAcquisitionMethods = response.results.map((r) => r.name)
+        }
+      )
+    } else if (value === "Alkylation reagent") {
+      this.web.getMSVocab(undefined, 100, 0, undefined, value.toLowerCase()).subscribe(
+        (response) => {
+          this.metadataService.alkylationReagents = response.results.map((r) => r.name)
+        }
+      )
+    } else if (value === "Reduction reagent") {
+      this.web.getMSVocab(undefined, 100, 0, undefined, value.toLowerCase()).subscribe(
+        (response) => {
+          this.metadataService.reductionReagents = response.results.map((r) => r.name)
+        }
+      )
+    } else if (value === "Enrichment process") {
+      this.web.getMSVocab(undefined, 100, 0, undefined, value.toLowerCase()).subscribe(
+        (response) => {
+          this.metadataService.enrichmentProcesses = response.results.map((r) => r.name)
+        }
+      )
+    }
+
   }
+
+
 
   get name(): string {
     return this._name
@@ -32,6 +60,7 @@ export class JobMetadataCreationModalComponent {
     this.form.controls.metadataType.setValue(value)
     this._type = value
   }
+
 
   @Input() set samples(value: string) {
     this.form.controls.samples.setValue(value)
@@ -54,6 +83,21 @@ export class JobMetadataCreationModalComponent {
     metadataTS: "",
     metadataMM: 0,
     metadataAC: "",
+    metadataSP: "",
+    metadataCT: "",
+    metadataQY: "",
+    metadataPS: "",
+    metadataCN: "",
+    metadataCV: "",
+    metadataCS: "",
+    metadataCF: "",
+    y1: "0",
+    y2: "0",
+    m1: "0",
+    m2: "0",
+    d1: "0",
+    d2: "0",
+    ageRange: false,
     samples: "",
     characteristics: false
   })
@@ -65,6 +109,30 @@ export class JobMetadataCreationModalComponent {
       const subSplitted = v.split("=")
       if (subSplitted.length === 2) {
         switch (subSplitted[0].trim().toLowerCase()) {
+          case "sp":
+            this.form.controls.metadataSP.setValue(subSplitted[1].trim())
+            break
+          case "cy":
+            this.form.controls.metadataCT.setValue(subSplitted[1].trim())
+            break
+          case "qy":
+            this.form.controls.metadataQY.setValue(subSplitted[1].trim())
+            break
+          case "ps":
+            this.form.controls.metadataPS.setValue(subSplitted[1].trim())
+            break
+          case "cn":
+            this.form.controls.metadataCN.setValue(subSplitted[1].trim())
+            break
+          case "cv":
+            this.form.controls.metadataCV.setValue(subSplitted[1].trim())
+            break
+          case "cs":
+            this.form.controls.metadataCS.setValue(subSplitted[1].trim())
+            break
+          case "cf":
+            this.form.controls.metadataCF.setValue(subSplitted[1].trim())
+            break
           case "mt":
             this.form.controls.metadataMT.setValue(subSplitted[1].trim())
             break
@@ -148,7 +216,10 @@ export class JobMetadataCreationModalComponent {
         if (!this.name) {
           return of([]);
         }
-        const name = this.name.toLowerCase();
+        let name = this.name.toLowerCase();
+        if (name === "spiked compound") {
+          name = "organism"
+        }
         return this.metadataService.metadataTypeAheadDataGetter(name, value).pipe(
           map(results => {
             return results;

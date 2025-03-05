@@ -8,6 +8,10 @@ import {NgbTypeaheadSelectItemEvent} from "@ng-bootstrap/ng-bootstrap";
   providedIn: 'root'
 })
 export class MetadataService {
+  dataAcquisitionMethods: string[] = []
+  alkylationReagents: string[] = []
+  reductionReagents: string[] = []
+  enrichmentProcesses: string[] = []
   metadataTypeAutocomplete: string[] = ["Characteristics", "Comment", "Factor value", "Other"]
   metadataNameAutocomplete: string[] = ["Disease", "Tissue", "Subcellular location", "Organism", "Instrument", "Label", "Cleavage agent details", "Dissociation method", "Modification parameters", "Cell type", "Enrichment process"]
   metadataOtherAutocomplete: string[] = ["Source name", "Material type", "Assay name", "Technology type"]
@@ -21,7 +25,9 @@ export class MetadataService {
       "Fragment mass tolerance",
       "Data file",
       "File uri",
-      "Proteomics data acquisition method"
+      "Proteomics data acquisition method",
+      "Collision energy",
+      "MS1 scan range",
     ]
   metadataTemplate = [{
     "name": "Source name", "type": ""
@@ -55,6 +61,7 @@ export class MetadataService {
     {"name": "Dissociation method", "type": "Comment"},
     {"name": "Precursor mass tolerance", "type": "Comment"},
     {"name": "Fragment mass tolerance", "type": "Comment"},
+
   ]
 
   userMetadataTemplate = [
@@ -84,7 +91,11 @@ export class MetadataService {
     {"name": "Modification parameters", "type": "Comment"},
     {"name": "Dissociation method", "type": "Comment"},
     {"name": "Enrichment process", "type": "Comment"},
-
+    {"name": "Depletion", "type": "Comment"},
+    {"name": "Reduction reagent", "type": "Comment"},
+    {"name": "Alkylation reagent", "type": "Comment"},
+    {"name": "Spiked compound", "type": "Characteristics"},
+    {"name": "Mass", "type": "Characteristics"},
   ]
 
   optionsArray: Unimod[] = [];
@@ -109,7 +120,7 @@ export class MetadataService {
       searchObservable = this.web.getSpecies(undefined, 5, 0, term).pipe(
         map((response) => response.results.map((species) => species.official_name))
       );
-    } else if (["proteomics data acquisition method", "cleavage agent details", "instrument", "dissociation method", "enrichment process"].includes(name)) {
+    } else if (["alkylation reagent", "reduction reagent", "proteomics data acquisition method", "cleavage agent details", "instrument", "dissociation method", "enrichment process"].includes(name)) {
       searchObservable = this.web.getMSVocab(undefined, 5, 0, term, name).pipe(
         map((response) => response.results.map((vocab) => vocab.name))
       );

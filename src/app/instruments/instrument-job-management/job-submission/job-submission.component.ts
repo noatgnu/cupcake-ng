@@ -94,6 +94,7 @@ import {environment} from "../../../../environments/environment";
 })
 export class JobSubmissionComponent implements OnInit, AfterViewInit {
   @ViewChild('metadataTable') metadataTable?: MetadataTableComponent;
+  currentField = ""
   activeTab = 'user'
   isPanelOpen = false;
   staffModeAvailable = false;
@@ -848,26 +849,7 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit {
         const formArray = this.metadata.get(arrayName) as FormArray;
         for (const r of result) {
           let value = r.metadataValue
-          if (r.metadataName === "Modification parameters") {
-            if (r.metadataMT) {
-              value += `;mt=${r.metadataMT}`
-            }
-            if (r.metadataPP) {
-              value += `;pp=${r.metadataPP}`
-            }
-            if (r.metadataTA) {
-              value += `;ta=${r.metadataTA}`
-            }
-            if (r.metadataTS) {
-              value += `;ts=${r.metadataTS}`
-            }
-            if (r.metadataMM) {
-              value += `;mm=${r.metadataMM}`
-            }
-            if (r.metadataAC) {
-              value += `;ac=${r.metadataAC}`
-            }
-          }
+          value = this.tranformMetadataValue(r, value);
           let group: any = {}
           if (metadata.name !== "") {
             group = this.fb.group({
@@ -929,26 +911,7 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit {
         const formArray = this.metadata.get(arrayName) as FormArray;
         for (const r of result) {
           let value = r.metadataValue
-          if (r.metadataName === "Modification parameters") {
-            if (r.metadataMT) {
-              value += `;mt=${r.metadataMT}`
-            }
-            if (r.metadataPP) {
-              value += `;pp=${r.metadataPP}`
-            }
-            if (r.metadataTA) {
-              value += `;ta=${r.metadataTA}`
-            }
-            if (r.metadataTS) {
-              value += `;ts=${r.metadataTS}`
-            }
-            if (r.metadataMM) {
-              value += `;mm=${r.metadataMM}`
-            }
-            if (r.metadataAC) {
-              value += `;ac=${r.metadataAC}`
-            }
-          }
+          value = this.tranformMetadataValue(r, value);
           formArray.controls[index].patchValue({
             value: value
           })
@@ -993,26 +956,7 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit {
       if (result) {
         for (const r of result) {
           let value = r.metadataValue
-          if (r.metadataName === "Modification parameters") {
-            if (r.metadataMT) {
-              value += `;mt=${r.metadataMT}`
-            }
-            if (r.metadataPP) {
-              value += `;pp=${r.metadataPP}`
-            }
-            if (r.metadataTA) {
-              value += `;ta=${r.metadataTA}`
-            }
-            if (r.metadataTS) {
-              value += `;ts=${r.metadataTS}`
-            }
-            if (r.metadataMM) {
-              value += `;mm=${r.metadataMM}`
-            }
-            if (r.metadataAC) {
-              value += `;ac=${r.metadataAC}`
-            }
-          }
+          value = this.tranformMetadataValue(r, value);
           const currentModifiers = (this.metadata.get(arrayName) as FormArray).controls[index].value['modifiers']
           if (currentModifiers) {
             currentModifiers.push({samples: r["samples"], value: value})
@@ -1028,6 +972,82 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit {
         }
       }
     })
+  }
+
+  private tranformMetadataValue(r: any, value: string) {
+    if (r.metadataName === "Modification parameters") {
+      if (r.metadataMT) {
+        value += `;MT=${r.metadataMT}`
+      }
+      if (r.metadataPP) {
+        value += `;PP=${r.metadataPP}`
+      }
+      if (r.metadataTA) {
+        value += `;TA=${r.metadataTA}`
+      }
+      if (r.metadataTS) {
+        value += `;TS=${r.metadataTS}`
+      }
+      if (r.metadataMM) {
+        value += `;MM=${r.metadataMM}`
+      }
+      if (r.metadataAC) {
+        value += `;AC=${r.metadataAC}`
+      }
+    } else if (r.metadataName === "Spiked compound") {
+      value = ""
+      if (r.metadataSP) {
+        value += `SP=${r.metadataSP}`
+      }
+      if (r.metadataCT) {
+        value += `;CT=${r.metadataCT}`
+      }
+      if (r.metadataQY) {
+        value += `;QY=${r.metadataQY}`
+      }
+      if (r.metadataPS) {
+        value += `;PS=${r.metadataPS}`
+      }
+      if (r.metadataAC) {
+        value += `;AC=${r.metadataAC}`
+      }
+      if (r.metadataCN) {
+        value += `;CN=${r.metadataCN}`
+      }
+      if (r.metadataCV) {
+        value += `;CV=${r.metadataCV}`
+      }
+      if (r.metadataCS) {
+        value += `;CS=${r.metadataCS}`
+      }
+      if (r.metadataCF) {
+        value += `;CF=${r.metadataCF}`
+      }
+    } else if (r.metadataName === "Age") {
+      let ageString = ""
+      if (r.y1 > 0) {
+        ageString += `${r.y1}Y`
+      }
+      if (r.m1 > 0) {
+        ageString += `${r.m1}M`
+      }
+      if (r.d1 > 0) {
+        ageString += `${r.d1}D`
+      }
+      if (r.ageRange) {
+        ageString += "-"
+        if (r.y2 > 0) {
+          ageString += `${r.y2}Y`
+        }
+        if (r.m2 > 0) {
+          ageString += `${r.m2}M`
+        }
+        if (r.d2 > 0) {
+          ageString += `${r.d2}D`
+        }
+      }
+    }
+    return value;
   }
 
   removeMetadataModifier(index: number, modifierIndex: number, arrayName: 'user_metadata'|'staff_metadata') {
@@ -1055,26 +1075,7 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit {
       if (result) {
         for (const r of result) {
           let value = r.metadataValue
-          if (r.metadataName === "Modification parameters") {
-            if (r.metadataMT) {
-              value += `;mt=${r.metadataMT}`
-            }
-            if (r.metadataPP) {
-              value += `;pp=${r.metadataPP}`
-            }
-            if (r.metadataTA) {
-              value += `;ta=${r.metadataTA}`
-            }
-            if (r.metadataTS) {
-              value += `;ts=${r.metadataTS}`
-            }
-            if (r.metadataMM) {
-              value += `;mm=${r.metadataMM}`
-            }
-            if (r.metadataAC) {
-              value += `;ac=${r.metadataAC}`
-            }
-          }
+          value = this.tranformMetadataValue(r, value);
           const currentModifiers = (this.metadata.get(arrayName) as FormArray).controls[index].value['modifiers']
           // @ts-ignore
           currentModifiers[modifierIndex] = {samples: r["samples"], value: value}
@@ -1111,7 +1112,7 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit {
       }
     }
   }
-  currentField = ""
+
   individualFieldSearchValue = (text$: Observable<string>) => {
     return text$.pipe(
       debounceTime(200),
