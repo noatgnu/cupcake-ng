@@ -12,8 +12,17 @@ export class MetadataService {
   metadataNameAutocomplete: string[] = ["Disease", "Tissue", "Subcellular location", "Organism", "Instrument", "Label", "Cleavage agent details", "Dissociation method", "Modification parameters", "Cell type", "Enrichment process"]
   metadataOtherAutocomplete: string[] = ["Source name", "Material type", "Assay name", "Technology type"]
   metadataCharacteristics: string[] = ["Disease", "Tissue", "Subcellular location", "Organism", "Cell type", "Cell line", "Developmental stage", "Ancestry category", "Sex", "Age", "Biological replicate", "Enrichment process"]
-  metadataComment: string[] = ["Data file", "File uri", "Technical replicate", "Fraction identifier", "Label", "Cleavage agent details", "Instrument", "Modification parameters", "Dissociation method", "Precursor mass tolerance", "Fragment mass tolerance", ""]
-  staffMetadataSpecific: string[] = ["Dissociation method", "Precursor mass tolerance", "Fragment mass tolerance"]
+  metadataComment: string[] = ["Data file", "File URI", "Technical replicate", "Fraction identifier", "Label", "Cleavage agent details", "Instrument", "Modification parameters", "Dissociation method", "Precursor mass tolerance", "Fragment mass tolerance", ""]
+  staffMetadataSpecific: string[] =
+    [
+      "Fraction identifier",
+      "Dissociation method",
+      "Precursor mass tolerance",
+      "Fragment mass tolerance",
+      "Data file",
+      "File uri",
+      "Proteomics data acquisition method"
+    ]
   metadataTemplate = [{
     "name": "Source name", "type": ""
   },
@@ -69,10 +78,13 @@ export class MetadataService {
     {
       "name": "Sex", "type": "Characteristics",
     },
+    {"name": "Phenotype", "type": "Characteristics"},
+    {"name": "Age", "type": "Characteristics"},
     {"name": "Cleavage agent details", "type": "Comment"},
     {"name": "Modification parameters", "type": "Comment"},
     {"name": "Dissociation method", "type": "Comment"},
-    {"name": "Enrichment process", "type": "Comment"}
+    {"name": "Enrichment process", "type": "Comment"},
+
   ]
 
   optionsArray: Unimod[] = [];
@@ -97,7 +109,7 @@ export class MetadataService {
       searchObservable = this.web.getSpecies(undefined, 5, 0, term).pipe(
         map((response) => response.results.map((species) => species.official_name))
       );
-    } else if (["cleavage agent details", "instrument", "dissociation method", "enrichment process"].includes(name)) {
+    } else if (["proteomics data acquisition method", "cleavage agent details", "instrument", "dissociation method", "enrichment process"].includes(name)) {
       searchObservable = this.web.getMSVocab(undefined, 5, 0, term, name).pipe(
         map((response) => response.results.map((vocab) => vocab.name))
       );
