@@ -36,7 +36,35 @@
         <label for="acquisitionMethod">Manual Data Acquisition Method Input</label>
         <input (selectItem)="onItemSelect($event)" [ngbTypeahead]="searchMetadata" type="text" class="form-control" id="acquisitionMethod" formControlName="metadataValue" placeholder="Data Acquisition Method">
       </div>
-    } @else if (form.value.metadataName === 'Alkylation reagent') {
+    } @else if (form.value.metadataName === 'Label') {
+    <div class="form-group">
+      <label for="labelSelect">Label From Database</label>
+      <select class="form-select" id="labelSelect" formControlName="metadataValue" [size]="4">
+        @for (method of metadataService.labelTypes; track method) {
+          <option value="{{method}}">{{method}}</option>
+        }
+      </select>
+    </div>
+    Or
+    <div class="form-group">
+      <label for="labelType">Manual Label Input</label>
+      <input (selectItem)="onItemSelect($event)" [ngbTypeahead]="searchMetadata" type="text" class="form-control" id="labelType" formControlName="metadataValue" placeholder="Label Type">
+    </div>
+  } @else if (form.value.metadataName === 'MS2 analyzer type') {
+      <div class="form-group">
+        <label for="massAnalyzerSelect">Mass Analyzer Type From Database</label>
+        <select class="form-select" id="massAnalyzerSelect" formControlName="metadataValue" [size]="4">
+          @for (method of metadataService.ms2AnalyzerTypes; track method) {
+            <option value="{{method}}">{{method}}</option>
+          }
+        </select>
+      </div>
+      Or
+      <div class="form-group">
+        <label for="massAnalyzer">Manual Mass Analyzer Type Input</label>
+        <input (selectItem)="onItemSelect($event)" [ngbTypeahead]="searchMetadata" type="text" class="form-control" id="massAnalyzer" formControlName="metadataValue" placeholder="Mass Analyzer Type">
+      </div>
+  } @else if (form.value.metadataName === 'Alkylation reagent') {
       <div class="form-group">
         <label for="alkylationReagentSelect">Alkylation Reagent From Database</label>
         <select class="form-select" id="alkylationReagentSelect" formControlName="metadataValue" [size]="4">

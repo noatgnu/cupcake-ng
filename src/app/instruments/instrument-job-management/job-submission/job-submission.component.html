@@ -685,7 +685,7 @@
       }
     </div>
     @if (job.user_annotations || job.staff_annotations) {
-      <ul ngbNav #nav="ngbNav" [(activeId)]="activeTab" class="nav-tabs"  [destroyOnHide]="false">
+      <ul ngbNav #nav="ngbNav" [(activeId)]="activeTab" class="nav-tabs"  [destroyOnHide]="true">
         <li [ngbNavItem]="'user'">
           <button ngbNavLink>User Annotations</button>
           <ng-template ngbNavContent>

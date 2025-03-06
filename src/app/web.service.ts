@@ -1738,7 +1738,7 @@ export class WebService {
 
   getUnimod(url?: string, limit: number = 10, offset: number = 0, search?: string) {
     if (url) {
-      return this.http.get<any>(url, {responseType: 'json', observe: 'body'})
+      return this.http.get<UnimodQuery>(url, {responseType: 'json', observe: 'body'})
     }
     let params = new HttpParams()
     if (limit) {

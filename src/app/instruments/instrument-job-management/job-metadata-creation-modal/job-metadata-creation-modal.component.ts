@@ -46,6 +46,18 @@ export class JobMetadataCreationModalComponent {
           this.metadataService.enrichmentProcesses = response.results.map((r) => r.name)
         }
       )
+    } else if (value === "Label") {
+      this.web.getMSVocab(undefined, 100, 0, undefined, 'sample attribute').subscribe(
+        (response) => {
+          this.metadataService.labelTypes = response.results.map((r) => r.name)
+        }
+      )
+    } else if (value === "MS2 analyzer type") {
+      this.web.getMSVocab(undefined, 100, 0, undefined, 'mass analyzer type').subscribe(
+        (response) => {
+          this.metadataService.ms2AnalyzerTypes = response.results.map((r) => r.name)
+        }
+      )
     }
 
   }
@@ -104,77 +116,122 @@ export class JobMetadataCreationModalComponent {
 
   private _value: string = ""
   @Input() set value(value: string) {
-    const valueSplitted = value.split(";")
-    valueSplitted.forEach((v) => {
-      const subSplitted = v.split("=")
-      if (subSplitted.length === 2) {
-        switch (subSplitted[0].trim().toLowerCase()) {
-          case "sp":
-            this.form.controls.metadataSP.setValue(subSplitted[1].trim())
-            break
-          case "cy":
-            this.form.controls.metadataCT.setValue(subSplitted[1].trim())
-            break
-          case "qy":
-            this.form.controls.metadataQY.setValue(subSplitted[1].trim())
-            break
-          case "ps":
-            this.form.controls.metadataPS.setValue(subSplitted[1].trim())
-            break
-          case "cn":
-            this.form.controls.metadataCN.setValue(subSplitted[1].trim())
-            break
-          case "cv":
-            this.form.controls.metadataCV.setValue(subSplitted[1].trim())
-            break
-          case "cs":
-            this.form.controls.metadataCS.setValue(subSplitted[1].trim())
-            break
-          case "cf":
-            this.form.controls.metadataCF.setValue(subSplitted[1].trim())
-            break
-          case "mt":
-            this.form.controls.metadataMT.setValue(subSplitted[1].trim())
-            break
-          case "pp":
-            this.form.controls.metadataPP.setValue(subSplitted[1].trim())
-            break
-          case "ta":
-            this.form.controls.metadataTA.setValue(subSplitted[1].trim())
-            break
-          case "ts":
-            this.form.controls.metadataTS.setValue(subSplitted[1].trim())
-            break
-          case "mm":
-            this.form.controls.metadataMM.setValue(parseFloat(subSplitted[1].trim()))
-            break
-          case "ac":
-            this.form.controls.metadataAC.setValue(subSplitted[1].trim())
-            break
-          case "nt":
-            this.form.controls.metadataValue.setValue(subSplitted[1].trim())
-            if (this.form.controls.metadataName.value === "Modification parameters") {
-              this.web.getUnimod(undefined, 5, 0, subSplitted[1].trim()).pipe(
-                map((response) => {
-                  this.metadataService.optionsArray = response.results
-                  return response.results
-                })
-              ).subscribe()
-            }
-            break
+    if (this.name === "Age") {
+      const splitted = value.split("-")
+      for (let i = 0; i < splitted.length; i++) {
+        //use regex to parse YMD where Y M D are optional
+        const years = value.match(/([0-9]+)Y/)
+        const months = value.match(/([0-9]+)M/)
+        const days = value.match(/([0-9]+)D/)
+        if (years) {
+          //set value of year
+          //@ts-ignore
+          this.form.controls[`y${i + 1}`].setValue(years[1])
         }
-      } else {
-        this.form.controls.metadataValue.setValue(subSplitted[0].trim())
-        if (this.form.controls.metadataName.value === "Modification parameters") {
-          this.web.getUnimod(undefined, 5, 0, subSplitted[0].trim()).pipe(
-            map((response) => {
-              this.metadataService.optionsArray = response.results
-              return response.results
-            })
-          ).subscribe()
+        if (months) {
+          //set value of month
+          //@ts-ignore
+          this.form.controls[`m${i + 1}`].setValue(months[1])
+        }
+        if (days) {
+          //set value of day
+          //@ts-ignore
+          this.form.controls[`d${i + 1}`].setValue(days[1])
         }
       }
-    })
+
+    } else {
+      const valueSplitted = value.split(";")
+      valueSplitted.forEach((v) => {
+        const subSplitted = v.split("=")
+        if (subSplitted.length === 2) {
+          switch (subSplitted[0].trim().toLowerCase()) {
+            case "sp":
+              this.form.controls.metadataSP.setValue(subSplitted[1].trim())
+              break
+            case "cy":
+              this.form.controls.metadataCT.setValue(subSplitted[1].trim())
+              break
+            case "qy":
+              this.form.controls.metadataQY.setValue(subSplitted[1].trim())
+              break
+            case "ps":
+              this.form.controls.metadataPS.setValue(subSplitted[1].trim())
+              break
+            case "cn":
+              this.form.controls.metadataCN.setValue(subSplitted[1].trim())
+              break
+            case "cv":
+              this.form.controls.metadataCV.setValue(subSplitted[1].trim())
+              break
+            case "cs":
+              this.form.controls.metadataCS.setValue(subSplitted[1].trim())
+              break
+            case "cf":
+              this.form.controls.metadataCF.setValue(subSplitted[1].trim())
+              break
+            case "mt":
+              this.form.controls.metadataMT.setValue(subSplitted[1].trim())
+              break
+            case "pp":
+              this.form.controls.metadataPP.setValue(subSplitted[1].trim())
+              break
+            case "ta":
+              this.form.controls.metadataTA.setValue(subSplitted[1].trim())
+              break
+            case "ts":
+              this.form.controls.metadataTS.setValue(subSplitted[1].trim())
+              break
+            case "mm":
+              this.form.controls.metadataMM.setValue(parseFloat(subSplitted[1].trim()))
+              break
+            case "ac":
+              this.form.controls.metadataAC.setValue(subSplitted[1].trim())
+              break
+            case "nt":
+              this.form.controls.metadataValue.setValue(subSplitted[1].trim())
+              if (this.form.controls.metadataName.value === "Modification parameters") {
+                this.web.getUnimod(undefined, 5, 0, subSplitted[1].trim()).pipe(
+                  map((response) => {
+                    this.metadataService.optionsArray = response.results
+                    return response.results
+                  })
+                ).subscribe(
+                  (response) => {
+                    for (const i of response) {
+                      if (i.name === subSplitted[1].trim()) {
+                        // @ts-ignore
+                        this.metadataService.getSelectedData(i.name, this.form.value.metadataName)
+                      }
+                    }
+                  }
+                )
+              }
+              break
+          }
+        } else {
+          this.form.controls.metadataValue.setValue(subSplitted[0].trim())
+          if (this.form.controls.metadataName.value === "Modification parameters") {
+            this.web.getUnimod(undefined, 5, 0, subSplitted[0].trim()).pipe(
+              map((response) => {
+                this.metadataService.optionsArray = response.results
+                return response.results
+              })
+            ).subscribe(
+              (response) => {
+                for (const i of response) {
+                  if (i.name === subSplitted[0].trim()) {
+                    // @ts-ignore
+                    this.metadataService.getSelectedData(i.name, this.form.value.metadataName)
+                  }
+                }
+              }
+            )
+          }
+        }
+      })
+    }
+
   }
 
   get value(): string {

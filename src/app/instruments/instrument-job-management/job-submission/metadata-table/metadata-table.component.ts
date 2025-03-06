@@ -30,6 +30,7 @@ export class MetadataTableComponent implements OnChanges{
   originCell: { row: number, col: number }|null = null
   private _filterTableColumnName: string = ""
   visibleColumnNames: string[] = []
+
   @Input() set filterTableColumnName(value: string) {
     this._filterTableColumnName = value
     if (value && value.length > 0) {

@@ -1,11 +1,11 @@
 import { Component } from '@angular/core';
 import {WebService} from "../../web.service";
-import {Instrument, InstrumentQuery} from "../../instrument";
+import {Instrument, InstrumentQuery, InstrumentUsageQuery} from "../../instrument";
 import {FormBuilder, ReactiveFormsModule} from "@angular/forms";
 import {NgbModal, NgbPagination, NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {forkJoin, Observable} from "rxjs";
 import {DataService} from "../../data.service";
-import {NgClass} from "@angular/common";
+import {DatePipe, NgClass} from "@angular/common";
 import {InstrumentBookingModalComponent} from "../instrument-booking-modal/instrument-booking-modal.component";
 import {ToastService} from "../../toast.service";
 import {BookingTimeVisualizerComponent} from "../booking-time-visualizer/booking-time-visualizer.component";
@@ -13,13 +13,14 @@ import {InstrumentService} from "../instrument.service";
 
 @Component({
     selector: 'app-instrument-booking',
-    imports: [
-        ReactiveFormsModule,
-        NgbPagination,
-        NgClass,
-        NgbTooltip,
-        BookingTimeVisualizerComponent
-    ],
+  imports: [
+    ReactiveFormsModule,
+    NgbPagination,
+    NgClass,
+    NgbTooltip,
+    BookingTimeVisualizerComponent,
+    DatePipe
+  ],
     templateUrl: './instrument-booking.component.html',
     styleUrl: './instrument-booking.component.scss'
 })
@@ -33,19 +34,31 @@ export class InstrumentBookingComponent {
     searchTerm: ['']
   })
 
+  instrumentUsageMap: {[key: string]: InstrumentUsageQuery} = {}
+
   constructor(private web: WebService, private fb: FormBuilder, public dataService: DataService, private modal: NgbModal, private toastService: ToastService, private instrumentService: InstrumentService) {
-    this.web.getInstruments().subscribe((data: any) => {
+    this.web.getInstruments().subscribe((data: InstrumentQuery) => {
       this.instrumentQuery = data
+      this.updateInstrumentUsageMap(data.results);
       this.getInstrumentPermission()
     })
     this.form.controls.searchTerm.valueChanges.subscribe((value: string| null) => {
       if (value) {
         this.web.getInstruments(undefined, this.pageSize, 0, value).subscribe((data: InstrumentQuery) => {
           this.instrumentQuery = data
+          this.updateInstrumentUsageMap(data.results)
           this.getInstrumentPermission()
         })
       }
     })
+  }
+
+  private updateInstrumentUsageMap(results: Instrument[]) {
+    for (const instrument of results) {
+      this.getInstrumentUsageForNextPeriodOfTime(instrument, 21).subscribe((data: InstrumentUsageQuery) => {
+        this.instrumentUsageMap[instrument.id] = data
+      })
+    }
   }
 
   clickInstrument(instrument: Instrument) {
@@ -71,11 +84,13 @@ export class InstrumentBookingComponent {
     if (this.form.controls.searchTerm.value) {
       this.web.getInstruments(undefined, this.pageSize, (event.page - 1) * this.pageSize, this.form.controls.searchTerm.value).subscribe((data: InstrumentQuery) => {
         this.instrumentQuery = data
+        this.updateInstrumentUsageMap(data.results)
         this.getInstrumentPermission()
       })
     } else {
       this.web.getInstruments(undefined, this.pageSize, (event.page - 1) * this.pageSize).subscribe((data: InstrumentQuery) => {
         this.instrumentQuery = data
+        this.updateInstrumentUsageMap(data.results)
         this.getInstrumentPermission()
       })
     }
@@ -91,6 +106,10 @@ export class InstrumentBookingComponent {
 
       })
     }
+  }
+
+  getInstrumentUsageForNextPeriodOfTime(instrument: Instrument, days: number) {
+    return this.web.getInstrumentUsage(instrument.id, new Date(), new Date(Date.now() + days * 24 * 60 * 60 * 1000))
   }
 
 }

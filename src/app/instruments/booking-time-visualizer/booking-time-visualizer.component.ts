@@ -1,16 +1,24 @@
 import {
+  AfterViewChecked,
   AfterViewInit,
   ChangeDetectorRef,
   Component,
   ElementRef,
   EventEmitter,
-  Input,
+  Input, OnDestroy, OnInit,
   Output,
   ViewChild
 } from '@angular/core';
 import {Instrument, InstrumentUsage, InstrumentUsageQuery} from "../../instrument";
 import {FormBuilder, ReactiveFormsModule} from "@angular/forms";
-import {NgbCalendar, NgbDate, NgbDatepicker, NgbTimepicker} from "@ng-bootstrap/ng-bootstrap";
+import {
+  NgbCalendar,
+  NgbDate,
+  NgbDatepicker,
+  NgbDatepickerNavigateEvent,
+  NgbDateStruct,
+  NgbTimepicker
+} from "@ng-bootstrap/ng-bootstrap";
 import {DatePipe} from "@angular/common";
 import {WebService} from "../../web.service";
 import {ToastService} from "../../toast.service";
@@ -29,7 +37,7 @@ import {InstrumentService} from "../instrument.service";
     templateUrl: './booking-time-visualizer.component.html',
     styleUrl: './booking-time-visualizer.component.scss'
 })
-export class BookingTimeVisualizerComponent implements AfterViewInit{
+export class BookingTimeVisualizerComponent implements OnInit, AfterViewInit,  AfterViewChecked, OnDestroy {
   @Input() instrument!: Instrument;
   @ViewChild('canvas') canvas!: ElementRef<HTMLCanvasElement>;
   ctx!: CanvasRenderingContext2D;
@@ -40,6 +48,7 @@ export class BookingTimeVisualizerComponent implements AfterViewInit{
   padding = 0
   current = new Date().setHours(0, 0, 0, 0)
   timeBlocks: Date[] = []
+  @ViewChild('dp') dp!: NgbDatepicker
 
   private _dateBeforeCurrent = new Date(this.current - 24 * 60 * 60 * 1000)
 
@@ -73,7 +82,7 @@ export class BookingTimeVisualizerComponent implements AfterViewInit{
   height = 125
   selected = false
   instrumentUsageQuery?: InstrumentUsageQuery
-
+  calendarUsageQuery?: InstrumentUsageQuery
   hoveredDate: NgbDate | null = null;
   fromDate: NgbDate = new NgbDate(this.dateBeforeCurrent.getFullYear(), this.dateBeforeCurrent.getMonth() + 1, this.dateBeforeCurrent.getDate());
   toDate: NgbDate | null = new NgbDate(this.dateAfterCurrent.getFullYear(), this.dateAfterCurrent.getMonth() + 1, this.dateAfterCurrent.getDate());
@@ -95,10 +104,20 @@ export class BookingTimeVisualizerComponent implements AfterViewInit{
     })
   }
 
-  ngAfterViewInit() {
-    this.cdr.detectChanges();
-    const ctx = this.canvas.nativeElement.getContext('2d')
+  ngOnInit() {
+  }
 
+
+  ngAfterViewInit() {
+    if (this.dp) {
+
+    }
+    this.initializeCanvas();
+  }
+
+  private initializeCanvas() {
+    this.cdr.detectChanges();
+    const ctx = this.canvas.nativeElement.getContext('2d');
     if (this.instrument) {
       // @ts-ignore
       this.web.getInstrumentUsage(this.instrument.id, this.form.value.windowStart, this.form.value.windowEnd).subscribe((data) => {
@@ -111,9 +130,12 @@ export class BookingTimeVisualizerComponent implements AfterViewInit{
         }
       })
     }
+  }
 
-
-
+  ngAfterViewChecked() {
+    if (this.canvas && !this.ctx) {
+      this.initializeCanvas();
+    }
   }
 
   private async prepare() {
@@ -481,5 +503,56 @@ export class BookingTimeVisualizerComponent implements AfterViewInit{
     this.ctx.fillRect(pixel, 0, 1, this.height)
   }
 
+  ngOnDestroy() {
+    this.selectedTimeRange = {start: null, end: null}
+  }
 
+  handleDateNavigate(event: NgbDatepickerNavigateEvent) {
+    console.log(event)
+    if (this.dp) {
+      if (event.current) {
+        const currentDate = new Date(event.current.year, event.current.month - 1, 0)
+        const nextDate = new Date(event.next.year, event.next.month - 1, 0)
+        // check if current is less than next
+        if (currentDate.getTime() < nextDate.getTime()) {
+          this.web.getInstrumentUsage(this.instrument.id, new Date(event.current.year, event.current.month), new Date(event.next.year, event.next.month+1)).subscribe((data) => {
+            this.calendarUsageQuery = data
+          })
+        } else {
+          this.web.getInstrumentUsage(this.instrument.id, new Date(event.next.year, event.next.month - 1), new Date(event.current.year, event.current.month)).subscribe((data) => {
+            this.calendarUsageQuery = data
+          })
+        }
+
+      }
+
+
+
+    } else {
+      if (!event.current) {
+        const current = event.next
+        const startDateFromCurrent = new Date(current.year, current.month - 1, 0)
+        const endDateFromCurrent = new Date(current.year, current.month + 1, 0)
+        this.web.getInstrumentUsage(this.instrument.id, startDateFromCurrent, endDateFromCurrent).subscribe((data) => {
+          this.calendarUsageQuery = data
+        })
+      }
+    }
+  }
+
+  hasInstrumentUsage(data: NgbDate) {
+    if (this.calendarUsageQuery) {
+      for (const usage of this.calendarUsageQuery.results) {
+        if (usage.time_started && usage.time_ended) {
+          const time_started = new Date(usage.time_started).getTime()
+          const time_ended = new Date(usage.time_ended).getTime()
+          const date = new Date(data.year, data.month - 1, data.day, 12).getTime()
+          if (date >= time_started && date <= time_ended) {
+            return true
+          }
+        }
+      }
+    }
+    return false
+  }
 }

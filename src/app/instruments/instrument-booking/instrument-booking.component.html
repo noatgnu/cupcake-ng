@@ -44,6 +44,20 @@
               }
             </div>
             <app-booking-time-visualizer [instrument]="result" [enableEdit]="false"></app-booking-time-visualizer>
+
+            @if (instrumentUsageMap[result.id]) {
+              @if (instrumentUsageMap[result.id].results.length > 0) {
+                <div class="mt-2">
+                  Scheduled Usage
+                  @for (u of instrumentUsageMap[result.id].results; track u.id) {
+                    <div class="d-flex flex-row gap-1 mt-1">
+                      <span>{{u.time_started| date: 'short'}} - {{u.time_started| date: 'short'}}</span>
+                      <span class="badge bg-primary">{{u.user}}</span>
+                    </div>
+                  }
+                </div>
+              }
+            }
           </div>
         }
       </div>

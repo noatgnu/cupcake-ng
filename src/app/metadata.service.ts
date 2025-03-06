@@ -12,6 +12,8 @@ export class MetadataService {
   alkylationReagents: string[] = []
   reductionReagents: string[] = []
   enrichmentProcesses: string[] = []
+  labelTypes: string[] = []
+  ms2AnalyzerTypes: string[] = []
   metadataTypeAutocomplete: string[] = ["Characteristics", "Comment", "Factor value", "Other"]
   metadataNameAutocomplete: string[] = ["Disease", "Tissue", "Subcellular location", "Organism", "Instrument", "Label", "Cleavage agent details", "Dissociation method", "Modification parameters", "Cell type", "Enrichment process"]
   metadataOtherAutocomplete: string[] = ["Source name", "Material type", "Assay name", "Technology type"]

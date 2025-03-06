@@ -16,10 +16,15 @@
 .custom-day.faded {
   background-color: rgba(2, 117, 216, 0.5);
 }
+.custom-day.hasUsage {
+  background-color: #ff0000;
+  color: white;
+}
 :host ::ng-deep .ngb-dp-day, :host ::ng-deep .ngb-dp-weekday {
   width: 2rem !important;
   height: 2rem !important;
 }
+
 
 :host ::ng-deep .ngb-dp-day > div {
   width: 2rem !important;
