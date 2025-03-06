@@ -219,6 +219,8 @@ export class JobMetadataCreationModalComponent {
         let name = this.name.toLowerCase();
         if (name === "spiked compound") {
           name = "organism"
+        } else if (name === "ms2 analyzer type") {
+          name = "mass analyzer type"
         }
         return this.metadataService.metadataTypeAheadDataGetter(name, value).pipe(
           map(results => {

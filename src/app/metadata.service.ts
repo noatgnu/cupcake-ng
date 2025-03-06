@@ -27,7 +27,9 @@ export class MetadataService {
       "File uri",
       "Proteomics data acquisition method",
       "Collision energy",
+      "Instrument",
       "MS1 scan range",
+      "MS2 analyzer type"
     ]
   metadataTemplate = [{
     "name": "Source name", "type": ""
@@ -120,7 +122,7 @@ export class MetadataService {
       searchObservable = this.web.getSpecies(undefined, 5, 0, term).pipe(
         map((response) => response.results.map((species) => species.official_name))
       );
-    } else if (["alkylation reagent", "reduction reagent", "proteomics data acquisition method", "cleavage agent details", "instrument", "dissociation method", "enrichment process"].includes(name)) {
+    } else if (["mass analyzer type", "alkylation reagent", "reduction reagent", "proteomics data acquisition method", "cleavage agent details", "instrument", "dissociation method", "enrichment process"].includes(name)) {
       searchObservable = this.web.getMSVocab(undefined, 5, 0, term, name).pipe(
         map((response) => response.results.map((vocab) => vocab.name))
       );

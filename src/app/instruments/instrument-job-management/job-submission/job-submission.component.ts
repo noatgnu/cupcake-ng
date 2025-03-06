@@ -639,6 +639,9 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit {
           return of([]);
         }
         name = name.toLowerCase();
+        if (name === "ms2 analyzer type") {
+          name = "mass analyzer type"
+        }
         return this.metadataService.metadataTypeAheadDataGetter(name, value).pipe(
           map(results => {
             this.searchMetadataLoading = false;
