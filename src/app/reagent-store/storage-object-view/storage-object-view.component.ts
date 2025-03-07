@@ -34,7 +34,6 @@ import {
         NgbPagination,
         ReactiveFormsModule,
         StoredReagentItemComponent,
-        BarcodeScannerModalComponent,
         NgbTooltip
     ],
     templateUrl: './storage-object-view.component.html',

@@ -6,7 +6,6 @@ import {NgbTimepicker, NgbTimeStruct} from "@ng-bootstrap/ng-bootstrap";
     selector: 'app-time-picker',
     imports: [
         ReactiveFormsModule,
-        NgbTimepicker
     ],
     templateUrl: './time-picker.component.html',
     styleUrl: './time-picker.component.scss'

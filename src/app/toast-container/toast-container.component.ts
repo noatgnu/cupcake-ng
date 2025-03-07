@@ -9,7 +9,6 @@ import {ToastProgressbarComponent} from "./toast-progressbar/toast-progressbar.c
     imports: [
         NgbToast,
         NgClass,
-        NgbProgressbar,
         ToastProgressbarComponent
     ],
     templateUrl: './toast-container.component.html',

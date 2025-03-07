@@ -51,7 +51,7 @@
                   Scheduled Usage in the next 21 days:
                   @for (u of instrumentUsageMap[result.id].results; track u.id) {
                     <div class="d-flex flex-row gap-1 mt-1">
-                      <span>{{u.time_started| date: 'short'}} - {{u.time_started| date: 'short'}}</span>
+                      <span>{{u.time_started| date: 'short'}} - {{u.time_ended| date: 'short'}}</span>
                       <span class="badge bg-primary">{{u.user}}</span>
                     </div>
                   }

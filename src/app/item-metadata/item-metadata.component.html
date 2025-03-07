@@ -55,7 +55,7 @@
   </div>
   <div class="form-group">
     <label for="metadataValue">Metadata Value</label>
-    <input (selectItem)="selectAutoComplete($event)" type="text" id="metadataValue" formControlName="value" [ngbTypeahead]="searchValue" class="form-control">
+    <input (selectItem)="selectAutoComplete($event)" type="text" id="metadataValue" formControlName="value" [ngbTypeahead]="searchMetadata" class="form-control">
   </div>
   <div class="form-group">
     <label for="metadataType">Metadata Type</label>
@@ -69,7 +69,7 @@
     <div class="form-group">
       <label for="metadataSpec">Unimod Specifications</label>
       <select (change)="selectSpec($event)" id="metadataSpec" class="form-select">
-        @for (s of availableSpecs; track s) {
+        @for (s of metadataService.availableSpecs; track s) {
           <option [value]="s">{{s.name}} @if (s.classification) {({{s.classification}})}</option>
         }
       </select>

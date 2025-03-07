@@ -2,7 +2,7 @@ import {Component, Input} from '@angular/core';
 import {FormBuilder, FormControl, FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {NgbTooltip, NgbTypeahead, NgbTypeaheadSelectItemEvent} from "@ng-bootstrap/ng-bootstrap";
 import {WebService} from "../web.service";
-import {debounceTime, map, Observable, of, switchMap} from "rxjs";
+import {catchError, debounceTime, distinctUntilChanged, map, Observable, of, switchMap} from "rxjs";
 import {Unimod} from "../unimod";
 import {MetadataColumn} from "../metadata-column";
 import {StoredReagent} from "../storage-object";
@@ -67,19 +67,84 @@ export class ItemMetadataComponent {
     metadataTA: "",
     metadataTS: "",
     metadataMM: 0,
+    metadataAC: "",
+    metadataSP: "",
+    metadataCT: "",
+    metadataQY: "",
+    metadataPS: "",
+    metadataCN: "",
+    metadataCV: "",
+    metadataCS: "",
+    metadataCF: "",
+    y1: "0",
+    y2: "0",
+    m1: "0",
+    m2: "0",
+    d1: "0",
+    d2: "0",
+    ageRange: false,
+    samples: "",
+    characteristics: false
   })
 
 
-  optionsArray: Unimod[] = []
-  selectedUnimod: Unimod|undefined = undefined
-  availableSpecs: any[] = []
+  //optionsArray: Unimod[] = []
+  //selectedUnimod: Unimod|undefined = undefined
+  //availableSpecs: any[] = []
 
 
   constructor(private fb: FormBuilder, private web: WebService, public metadataService: MetadataService) {
+    this.formMetadata.controls.name.valueChanges.subscribe((value) => {
+      if (value) {
+        if (value === "Proteomics data acquisition method") {
+          this.web.getMSVocab(undefined, 100, 0, undefined, value.toLowerCase()).subscribe(
+            (response) => {
+              this.metadataService.dataAcquisitionMethods = response.results.map((r) => r.name)
+            }
+          )
+        } else if (value === "Alkylation reagent") {
+          this.web.getMSVocab(undefined, 100, 0, undefined, value.toLowerCase()).subscribe(
+            (response) => {
+              this.metadataService.alkylationReagents = response.results.map((r) => r.name)
+            }
+          )
+        } else if (value === "Reduction reagent") {
+          this.web.getMSVocab(undefined, 100, 0, undefined, value.toLowerCase()).subscribe(
+            (response) => {
+              this.metadataService.reductionReagents = response.results.map((r) => r.name)
+            }
+          )
+        } else if (value === "Enrichment process") {
+          this.web.getMSVocab(undefined, 100, 0, undefined, value.toLowerCase()).subscribe(
+            (response) => {
+              this.metadataService.enrichmentProcesses = response.results.map((r) => r.name)
+            }
+          )
+        } else if (value === "Label") {
+          this.web.getMSVocab(undefined, 100, 0, undefined, 'sample attribute').subscribe(
+            (response) => {
+              this.metadataService.labelTypes = response.results.map((r) => r.name)
+            }
+          )
+        } else if (value === "MS2 analyzer type") {
+          this.web.getMSVocab(undefined, 100, 0, undefined, 'mass analyzer type').subscribe(
+            (response) => {
+              this.metadataService.ms2AnalyzerTypes = response.results.map((r) => r.name)
+            }
+          )
+        }
+      }
+    })
   }
 
   selectAutoComplete(event: NgbTypeaheadSelectItemEvent) {
-    if (this.formMetadata.value.name?.toLowerCase() === "modification parameters") {
+    const item = event.item
+    if (this.formMetadata.value.name === "Modification parameters") {
+      const formUpdate = this.metadataService.getSelectedData(item, this.formMetadata.value.name)
+      this.formMetadata.patchValue(formUpdate)
+    }
+
+    /*if (this.formMetadata.value.name?.toLowerCase() === "modification parameters") {
       this.selectedUnimod = this.optionsArray.find((option) => option.name === event.item)
       if (this.selectedUnimod) {
         const mapData: any = {}
@@ -109,7 +174,7 @@ export class ItemMetadataComponent {
         }
         this.availableSpecs = Object.values(mapData)
       }
-    }
+    }*/
   }
 
   selectSpec(spec: any) {
@@ -124,73 +189,32 @@ export class ItemMetadataComponent {
     }
   }
 
-  searchValue = (text$: Observable<string>) => {
+  searchMetadata = (text$: Observable<string>) => {
     return text$.pipe(
       debounceTime(200),
+      distinctUntilChanged(),
       switchMap(value => {
         if (value.length < 2) {
-          return of([])
+          return of([]);
         }
-        if (!this.formMetadata.controls.name.value) {
-          return of([])
+        if (!this.formMetadata.value.name) {
+          return of([]);
         }
-        const name = this.formMetadata.controls.name.value.toLowerCase()
-        if (name === "subcellular location") {
-          return this.web.getSubcellularLocations(undefined, 5, 0, value).pipe(
-            map((response) => response.results.map((location) => {
-              return location.location_identifier
-            }))
-          )
-        } else if (name === "disease") {
-          return this.web.getHumandDiseases(undefined, 5, 0, value).pipe(
-            map((response) => response.results.map((disease) => {
-                return disease.identifier
-              })
-            ))
-        } else if (name === "tissue") {
-          return this.web.getTissues(undefined, 5, 0, value).pipe(
-            map((response) => response.results.map((tissue) => {
-              return tissue.identifier
-            }))
-          )
-        } else if (name === "organism") {
-          return this.web.getSpecies(undefined, 5, 0, value).pipe(
-            map((response) => response.results.map((species) => {
-              return species.official_name
-            }))
-          )
-        } else if (["cleavage agent details", "instrument", "dissociation method", "enrichment process"].includes(name)) {
-          return this.web.getMSVocab(undefined, 5, 0, value, name).pipe(
-            map((response) => response.results.map((vocab) => {
-              return vocab.name
-            }))
-          )
-        } else if (name === "label") {
-          return this.web.getMSVocab(undefined, 5, 0, value, "sample attribute").pipe(
-            map((response) => response.results.map((vocab) => {
-              return vocab.name
-            }))
-          )
-        } else if (name === "cell type") {
-          return this.web.getMSVocab(undefined, 5, 0, value, "cell line").pipe(
-            map((response) => response.results.map((vocab) => {
-              return vocab.name
-            }))
-          )
-        } else if (name === "modification parameters") {
-          return this.web.getUnimod(undefined, 5, 0, value).pipe(
-            map((response) => {
-              this.optionsArray = response.results
-              return response.results.map((unimod: Unimod) => {
-                return unimod.name
-              })
-            })
-          )
-        } else {
-          return of([])
+        let name = this.formMetadata.value.name.toLowerCase();
+        if (name === "spiked compound") {
+          name = "organism"
+        } else if (name === "ms2 analyzer type") {
+          name = "mass analyzer type"
         }
+        return this.metadataService.metadataTypeAheadDataGetter(name, value).pipe(
+          map(results => {
+            return results;
+          }), catchError(() => {
+            return of([]);
+          })
+        )
       })
-    )
+    );
   }
 
   removeMetadata(m: MetadataColumn) {

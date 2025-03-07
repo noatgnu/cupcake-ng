@@ -38,7 +38,6 @@ import {NgClass} from "@angular/common";
     imports: [
         ReactiveFormsModule,
         NgbTypeahead,
-        NgbTooltip,
         NgbInputDatepicker,
         FormsModule,
         NgbHighlight,

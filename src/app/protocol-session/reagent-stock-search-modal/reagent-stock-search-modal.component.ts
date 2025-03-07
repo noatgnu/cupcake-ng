@@ -12,7 +12,6 @@ import {DatePipe, NgClass} from "@angular/common";
         ReactiveFormsModule,
         NgbPagination,
         NgClass,
-        DatePipe
     ],
     templateUrl: './reagent-stock-search-modal.component.html',
     styleUrl: './reagent-stock-search-modal.component.scss'
