@@ -11,6 +11,7 @@ import {MetadataService} from "../../../metadata.service";
 import {FormBuilder, FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {WebService} from "../../../web.service";
 import {FavouriteMetadataOptionQuery} from "../../../favourite-metadata-option";
+import {LabGroup} from "../../../lab-group";
 
 @Component({
     selector: 'app-job-metadata-creation-modal',
@@ -37,12 +38,14 @@ export class JobMetadataCreationModalComponent {
   currentUserFavouriteMetadataPage = 1
   pageSize = 10
   activeID: string = "user"
+  @Input() service_lab_group_id: number = -1
 
   private _name: string = ""
   @Input() set name(value: string) {
     this.form.controls.metadataName.setValue(value)
     this._name = value
-    if (value) {
+    console.log(this.service_lab_group_id)
+    if (value && this.service_lab_group_id > 0) {
       this.getUserFavouriteMetadataOptions()
       this.getServiceLabRecommendations()
     }
@@ -359,15 +362,18 @@ export class JobMetadataCreationModalComponent {
   }
 
   getUserFavouriteMetadataOptions() {
-    this.web.getFavouriteMetadataOptions(this.pageSize, (this.currentUserFavouriteMetadataPage-1)*this.pageSize).subscribe(
-      (response) => {
-        this.user_favourite_metadata = response
-      }
-    )
+    if (this.service_lab_group_id > 0) {
+      this.web.getFavouriteMetadataOptions(this.pageSize, (this.currentUserFavouriteMetadataPage-1)*this.pageSize, undefined, undefined, undefined, this.name).subscribe(
+        (response) => {
+          this.user_favourite_metadata = response
+        }
+      )
+    }
+
   }
 
   getServiceLabRecommendations() {
-    this.web.getFavouriteMetadataOptions(this.pageSize, (this.currentServiceLabRecommendationsPage-1)*this.pageSize).subscribe(
+    this.web.getFavouriteMetadataOptions(this.pageSize, (this.currentServiceLabRecommendationsPage-1)*this.pageSize, undefined, "service_lab_group", this.service_lab_group_id, this.name).subscribe(
       (response) => {
         this.service_lab_group_recommenations = response
       }

@@ -858,8 +858,12 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit {
 
   addMetadata(metadata: {name: string, type: string}, arrayName: 'user_metadata'|'staff_metadata') {
     const ref = this.modal.open(JobMetadataCreationModalComponent, {scrollable: true})
+    if (this.job){
+      ref.componentInstance.service_lab_group_id = this.job.service_lab_group?.id
+    }
     ref.componentInstance.name = metadata.name
     ref.componentInstance.type = metadata.type
+
     ref.closed.subscribe((result: any[]) => {
       if (result) {
         console.log(result)
@@ -914,6 +918,9 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit {
   editMetadata(index: number, arrayName: 'user_metadata'|'staff_metadata') {
     const ref = this.modal.open(JobMetadataCreationModalComponent, {scrollable: true})
     const metadata = (this.metadata.get(arrayName) as FormArray).controls[index].value
+    if (this.job){
+      ref.componentInstance.service_lab_group_id = this.job.service_lab_group?.id
+    }
     ref.componentInstance.name = metadata.name
     ref.componentInstance.type = metadata.type
     if (metadata.value) {
@@ -963,11 +970,15 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit {
   addMetadataModifier(index: number, arrayName: 'user_metadata'|'staff_metadata') {
     const ref = this.modal.open(JobMetadataCreationModalComponent, {scrollable: true})
     const metadata = (this.metadata.get(arrayName) as FormArray).controls[index].value
+    if (this.job){
+      ref.componentInstance.service_lab_group_id = this.job.service_lab_group?.id
+    }
     ref.componentInstance.name = metadata.name
     ref.componentInstance.type = metadata.type
     ref.componentInstance.value = metadata.value
     ref.componentInstance.allowMultipleSpecSelection = false
     ref.componentInstance.modifier = true
+
 
     ref.result.then((result: any[]) => {
       if (result) {
@@ -1082,6 +1093,9 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit {
     const ref = this.modal.open(JobMetadataCreationModalComponent, {scrollable: true})
     const metadata = (this.metadata.get(arrayName) as FormArray).controls[index].value
     const modifier = metadata['modifiers'][modifierIndex]
+    if (this.job){
+      ref.componentInstance.service_lab_group_id = this.job.service_lab_group?.id
+    }
     ref.componentInstance.name = metadata.name
     ref.componentInstance.type = metadata.type
     ref.componentInstance.value = modifier.value

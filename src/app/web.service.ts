@@ -1965,7 +1965,7 @@ export class WebService {
     return null;
   }
 
-  getFavouriteMetadataOptions(limit: number = 10, offset: number = 0, search: string|null = "", mode: "string"|undefined|null = undefined, lab_group: number|null|undefined = 0) {
+  getFavouriteMetadataOptions(limit: number = 10, offset: number = 0, search: string|null = "", mode: string|undefined|null = undefined, lab_group: number|null|undefined = 0, name: string|undefined|null = null) {
     let params = new HttpParams()
       .set('limit', limit.toString())
       .set('offset', offset.toString())
@@ -1977,8 +1977,11 @@ export class WebService {
     }
     if (lab_group) {
       if (lab_group > 0) {
-        params = params.append('lab_group', lab_group.toString())
+        params = params.append('lab_group_id', lab_group.toString())
       }
+    }
+    if (name) {
+      params = params.append('name', name)
     }
 
     return this.http.get<FavouriteMetadataOptionQuery>(

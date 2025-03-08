@@ -31,7 +31,7 @@ export class MetadataTableComponent implements OnChanges{
   originCell: { row: number, col: number }|null = null
   private _filterTableColumnName: string = ""
   visibleColumnNames: string[] = []
-
+  @Input() service_lab_group_id: number = 0
   @Input() set filterTableColumnName(value: string) {
     this._filterTableColumnName = value
     if (value && value.length > 0) {
@@ -154,6 +154,9 @@ export class MetadataTableComponent implements OnChanges{
 
   editCell(row: any, metadata: MetadataColumn, index: number, data_type: 'user_metadata' | 'staff_metadata') {
     const ref = this.modal.open(JobMetadataCreationModalComponent)
+    if (this.service_lab_group_id > 0) {
+      ref.componentInstance.service_lab_group_id = this.service_lab_group_id
+    }
     ref.componentInstance.name = metadata.name
     ref.componentInstance.type = metadata.type
     if (metadata.value) {
@@ -366,6 +369,9 @@ export class MetadataTableComponent implements OnChanges{
 
   editDefaultMetadataValue(metadata: MetadataColumn, data_type: 'user_metadata' | 'staff_metadata') {
     const ref = this.modal.open(JobMetadataCreationModalComponent)
+    if (this.service_lab_group_id > 0) {
+      ref.componentInstance.service_lab_group_id = this.service_lab_group_id
+    }
     ref.componentInstance.name = metadata.name
     ref.componentInstance.type = metadata.type
     if (metadata.value) {
