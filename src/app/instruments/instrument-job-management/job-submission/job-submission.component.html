@@ -257,7 +257,7 @@
                   <label for="searchMetadata">Search Metadata Column Name</label>
                 </div>
                 <div class="metadata-table-container">
-                  <app-metadata-table [filterTableColumnName]="filterTableColumnName" (removeMetadata)="removeMetadata($event.index, $event.data_type)" #metadataTable (metadataUpdated)="handleMetadataUpdated($event)" [userCanEdit]="userCanEdit" [sampleNumber]="job.sample_number" [userMetadata]="job.user_metadata" [staffMetadata]="job.staff_metadata" [staffModeActive]="staffModeAvailable"></app-metadata-table>
+                  <app-metadata-table (metadataFavouriteAdded)="handleFavouriteAdded($event)" [filterTableColumnName]="filterTableColumnName" (removeMetadata)="removeMetadata($event.index, $event.data_type)" #metadataTable (metadataUpdated)="handleMetadataUpdated($event)" [userCanEdit]="userCanEdit" [sampleNumber]="job.sample_number" [userMetadata]="job.user_metadata" [staffMetadata]="job.staff_metadata" [staffModeActive]="staffModeAvailable"></app-metadata-table>
                 </div>
               </div>
             </ng-template>

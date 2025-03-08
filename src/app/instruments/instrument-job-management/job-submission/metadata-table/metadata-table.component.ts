@@ -9,6 +9,7 @@ import {
 } from "../../job-metadata-creation-modal/job-metadata-creation-modal.component";
 import {FormArray} from "@angular/forms";
 import {NgClass} from "@angular/common";
+import {AddFavouriteModalComponent} from "../../../../add-favourite-modal/add-favourite-modal.component";
 
 @Component({
   selector: 'app-metadata-table',
@@ -56,7 +57,7 @@ export class MetadataTableComponent implements OnChanges{
 
   @Output() metadataUpdated: EventEmitter<any[]> = new EventEmitter<any[]>()
   @Output() removeMetadata: EventEmitter<{ metadata: MetadataColumn, index: number, data_type: 'user_metadata'|'staff_metadata' }> = new EventEmitter<{ metadata: MetadataColumn, index: number, data_type: 'user_metadata'|'staff_metadata' }>()
-
+  @Output() metadataFavouriteAdded: EventEmitter<any> = new EventEmitter<any>()
   selectedCells: { row: number, col: number }[] = [];
   isShiftSelecting: boolean = false;
 
@@ -511,5 +512,19 @@ export class MetadataTableComponent implements OnChanges{
 
   removeMetadataCol(index: number, metadata: MetadataColumn, data_type: "user_metadata" | "staff_metadata") {
     this.removeMetadata.emit({metadata, index, data_type})
+  }
+
+  addToFavourite(row: any, col: MetadataColumn, index: number) {
+    const ref = this.modal.open(AddFavouriteModalComponent)
+    ref.componentInstance.name = col.name
+    ref.componentInstance.type = col.type
+    ref.componentInstance.value = row[`col_${index}`]
+    ref.result.then((result: any) => {
+      if (result) {
+        this.metadataFavouriteAdded.emit({name: col.name, type: col.type, value: row[`col_${index}`],...result});
+      }
+    }).catch((error) => {
+      console.log(error)
+    })
   }
 }

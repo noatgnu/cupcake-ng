@@ -1279,8 +1279,11 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit {
         }
       }
     }
-
-
   }
 
+  handleFavouriteAdded(event: any) {
+    this.metadataService.addMetadataToFavourite(event.name, event.type, event.value, event.display_name, event.mode, event.lab_group).subscribe((response) => {
+      this.toast.show("Favourite", "Favourite option added")
+    })
+  }
 }

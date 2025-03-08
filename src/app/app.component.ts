@@ -40,6 +40,7 @@ export class AppComponent {
         this.dataService.setDarkMode(true)
       }
     }
+    this.web.getCSRFToken().subscribe(resp => {})
 
     if (this.accounts.token === "") {
       const token = localStorage.getItem("cupcakeToken")

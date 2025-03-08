@@ -1,27 +1,51 @@
 import {Component, Input} from '@angular/core';
 import {catchError, debounceTime, distinctUntilChanged, map, Observable, of, switchMap, tap} from "rxjs";
-import {NgbActiveModal, NgbModal, NgbTypeahead, NgbTypeaheadSelectItemEvent} from "@ng-bootstrap/ng-bootstrap";
+import {
+  NgbActiveModal,
+  NgbNav, NgbNavContent, NgbNavItem, NgbNavLink, NgbNavLinkButton,
+  NgbNavOutlet, NgbPagination,
+  NgbTypeahead,
+  NgbTypeaheadSelectItemEvent
+} from "@ng-bootstrap/ng-bootstrap";
 import {MetadataService} from "../../../metadata.service";
 import {FormBuilder, FormsModule, ReactiveFormsModule} from "@angular/forms";
-import {MetadataColumn} from "../../../metadata-column";
 import {WebService} from "../../../web.service";
+import {FavouriteMetadataOptionQuery} from "../../../favourite-metadata-option";
 
 @Component({
     selector: 'app-job-metadata-creation-modal',
-    imports: [
-        ReactiveFormsModule,
-        NgbTypeahead,
-        FormsModule
-    ],
+  imports: [
+    ReactiveFormsModule,
+    NgbTypeahead,
+    FormsModule,
+    NgbNavLink,
+    NgbNavItem,
+    NgbNav,
+    NgbNavOutlet,
+    NgbNavContent,
+    NgbPagination,
+    NgbNavLinkButton
+  ],
     templateUrl: './job-metadata-creation-modal.component.html',
     styleUrl: './job-metadata-creation-modal.component.scss',
     providers: [MetadataService]
 })
 export class JobMetadataCreationModalComponent {
+  service_lab_group_recommenations: FavouriteMetadataOptionQuery|undefined
+  user_favourite_metadata: FavouriteMetadataOptionQuery|undefined
+  currentServiceLabRecommendationsPage = 1
+  currentUserFavouriteMetadataPage = 1
+  pageSize = 10
+  activeID: string = "user"
+
   private _name: string = ""
   @Input() set name(value: string) {
     this.form.controls.metadataName.setValue(value)
     this._name = value
+    if (value) {
+      this.getUserFavouriteMetadataOptions()
+      this.getServiceLabRecommendations()
+    }
     if (value === "Proteomics data acquisition method") {
       this.web.getMSVocab(undefined, 100, 0, undefined, value.toLowerCase()).subscribe(
         (response) => {
@@ -116,6 +140,7 @@ export class JobMetadataCreationModalComponent {
 
   private _value: string = ""
   @Input() set value(value: string) {
+
     if (this.name === "Age") {
       const splitted = value.split("-")
       for (let i = 0; i < splitted.length; i++) {
@@ -310,7 +335,6 @@ export class JobMetadataCreationModalComponent {
       if (!Array.isArray(this.selectedSpecs)) {
         specs = [this.selectedSpecs]
       }
-      console.log(specs)
       for (const s of specs) {
         const formResult = this.form.value
         const copied = JSON.parse(JSON.stringify(formResult))
@@ -328,11 +352,35 @@ export class JobMetadataCreationModalComponent {
         }
         result.push(copied)
       }
-      console.log(result)
       this.modal.close(result)
     } else {
       this.modal.close([this.form.value])
     }
   }
 
+  getUserFavouriteMetadataOptions() {
+    this.web.getFavouriteMetadataOptions(this.pageSize, (this.currentUserFavouriteMetadataPage-1)*this.pageSize).subscribe(
+      (response) => {
+        this.user_favourite_metadata = response
+      }
+    )
+  }
+
+  getServiceLabRecommendations() {
+    this.web.getFavouriteMetadataOptions(this.pageSize, (this.currentServiceLabRecommendationsPage-1)*this.pageSize).subscribe(
+      (response) => {
+        this.service_lab_group_recommenations = response
+      }
+    )
+  }
+
+  onPageChange(page: number, type: string) {
+    if (type === "user") {
+      this.currentUserFavouriteMetadataPage = page
+      this.getUserFavouriteMetadataOptions()
+    } else {
+      this.currentServiceLabRecommendationsPage = page
+      this.getServiceLabRecommendations()
+    }
+  }
 }

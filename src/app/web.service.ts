@@ -34,6 +34,8 @@ import {NgbDateStruct} from "@ng-bootstrap/ng-bootstrap";
 import {User, UserQuery} from "./user";
 import {UnimodQuery} from "./unimod";
 import {InstrumentJob, InstrumentJobQuery} from "./instrument-job";
+import {FavouriteMetadataOption, FavouriteMetadataOptionQuery} from "./favourite-metadata-option";
+import {Preset, PresetQuery} from "./preset";
 
 
 @Injectable({
@@ -1582,7 +1584,7 @@ export class WebService {
     )
   }
 
-  getLabGroups(search_term: string = "", limit: number = 10, offset: number = 0) {
+  getLabGroups(search_term: string = "", limit: number = 10, offset: number = 0, is_professional: boolean|undefined = undefined) {
     let params = new HttpParams()
     if (search_term && search_term !== "") {
       params = params.append('search', search_term)
@@ -1592,6 +1594,9 @@ export class WebService {
     }
     if (offset) {
       params = params.append('offset', offset.toString())
+    }
+    if (is_professional) {
+      params = params.append('is_professional', is_professional.toString())
     }
     return this.http.get<LabGroupQuery>(
       `${this.baseURL}/api/lab_groups/`,
@@ -1855,10 +1860,23 @@ export class WebService {
     )
   }
 
-  getUserLabGroups() {
+  getUserLabGroups(search_term: string = "", limit: number = 10, offset: number = 0, is_professional: boolean|undefined = undefined) {
+    let params = new HttpParams()
+    if (search_term && search_term !== "") {
+      params = params.append('search', search_term)
+    }
+    if (limit) {
+      params = params.append('limit', limit.toString())
+    }
+    if (offset) {
+      params = params.append('offset', offset.toString())
+    }
+    if (is_professional) {
+      params = params.append('is_professional', is_professional.toString())
+    }
     return this.http.get<LabGroupQuery>(
       `${this.baseURL}/api/user/get_user_lab_groups/`,
-      {responseType: 'json', observe: 'body'}
+      {responseType: 'json', observe: 'body', params}
     )
   }
 
@@ -1933,6 +1951,109 @@ export class WebService {
     const payload = {annotation: annotation_id, instance_id, data_type}
     return this.http.post(`${this.baseURL}/api/instrument_jobs/${instrument_job_id}/import_sdrf_metadata/`, payload, {responseType: 'json', observe: 'body'})
   }
+
+  getCSRFToken() {
+    return this.http.get(`${this.baseURL}/api/set-csrf/`, { observe: 'response'})
+  }
+
+  getCSRFTokenFromCookies(): string | null {
+    const cookies = document.cookie.split(';');
+    const csrf = cookies.find((cookie) => cookie.trim().startsWith('csrfToken='));
+    if (csrf) {
+      return csrf.split('=')[1];
+    }
+    return null;
+  }
+
+  getFavouriteMetadataOptions(limit: number = 10, offset: number = 0, search: string|null = "", mode: "string"|undefined|null = undefined, lab_group: number|null|undefined = 0) {
+    let params = new HttpParams()
+      .set('limit', limit.toString())
+      .set('offset', offset.toString())
+    if (search !== "" && search !== null) {
+      params = params.append('search', search);
+    }
+    if (mode) {
+      params = params.append('mode', mode)
+    }
+    if (lab_group) {
+      if (lab_group > 0) {
+        params = params.append('lab_group', lab_group.toString())
+      }
+    }
+
+    return this.http.get<FavouriteMetadataOptionQuery>(
+      `${this.baseURL}/api/favourite_metadata_option/`,
+      {responseType: 'json', observe: 'body', params: params}
+    )
+  }
+
+  getFavouriteMetadataOption(id: number) {
+    return this.http.get<FavouriteMetadataOption>(
+      `${this.baseURL}/api/favourite_metadata_option/${id}/`,
+      {responseType: 'json', observe: 'body'}
+    )
+  }
+
+  createFavouriteMetadataOption(payload: any) {
+    return this.http.post<FavouriteMetadataOption>(
+      `${this.baseURL}/api/favourite_metadata_option/`,
+      payload,
+      {responseType: 'json', observe: 'body'}
+    )
+  }
+
+  deleteFavouriteMetadataOption(id: number) {
+    return this.http.delete(
+      `${this.baseURL}/api/favourite_metadata_option/${id}/`,
+      {responseType: 'json', observe: 'body'}
+    )
+  }
+
+  getPresets(limit: number = 10, offset: number = 0, search: string|null = "") {
+    let params = new HttpParams()
+      .set('limit', limit.toString())
+      .set('offset', offset.toString())
+    if (search !== "" && search !== null) {
+      params = params.append('search', search);
+    }
+
+    return this.http.get<PresetQuery>(
+      `${this.baseURL}/api/preset/`,
+      {responseType: 'json', observe: 'body', params: params}
+    )
+  }
+
+  getPreset(id: number) {
+    return this.http.get<Preset>(
+      `${this.baseURL}/api/preset/${id}/`,
+      {responseType: 'json', observe: 'body'}
+    )
+  }
+
+  createPreset(payload: any) {
+    return this.http.post<Preset>(
+      `${this.baseURL}/api/preset/`,
+      payload,
+      {responseType: 'json', observe: 'body'}
+    )
+  }
+
+  updatePreset(id: number, payload: any) {
+    return this.http.put<Preset>(
+      `${this.baseURL}/api/preset/${id}/`,
+      payload,
+      {responseType: 'json', observe: 'body'}
+    )
+  }
+
+  deletePreset(id: number) {
+    return this.http.delete(
+      `${this.baseURL}/api/preset/${id}/`,
+      {responseType: 'json', observe: 'body'}
+    )
+  }
+
+
 }
 
 interface ChunkUploadResponse {

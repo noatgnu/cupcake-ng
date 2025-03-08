@@ -192,4 +192,20 @@ export class MetadataService {
     }
     return formDetails
   }
+
+  addMetadataToFavourite(name: string, type: string, value: string, display_name: string, mode: string|undefined|null, lab_group: number|undefined|null) {
+    const payload: any = {
+      name: name,
+      type: type,
+      value: value,
+      display_name: display_name
+    }
+    if (mode) {
+      payload["mode"] = mode
+    }
+    if (lab_group) {
+      payload["lab_group"] = lab_group
+    }
+    return this.web.createFavouriteMetadataOption(payload)
+  }
 }

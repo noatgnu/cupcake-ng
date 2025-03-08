@@ -13,6 +13,59 @@
         <label for="isCharacteristics">Is this data an inherent characteristics of the sample</label>
       </div>
     }
+    @if (service_lab_group_recommenations||user_favourite_metadata) {
+      <ul ngbNav #nav="ngbNav" class="nav-tabs" [(activeId)]="activeID">
+        @if (service_lab_group_recommenations) {
+          @if (service_lab_group_recommenations.count > 0) {
+            <li [ngbNavItem]="'service_lab_group'">
+              <button ngbNavLink>Facility Recommendations</button>
+              <ng-template ngbNavContent>
+                <div class="form-group">
+                  <select class="form-select" [size]="5">
+                    @for (r of service_lab_group_recommenations.results; track r.id) {
+                      @if (r.display_name) {
+                        <option (click)="value=r.value" [ngValue]="r">{{r.display_name}}</option>
+                      } @else {
+                        <option (click)="value=r.value" [ngValue]="r">{{r.value}}</option>
+                      }
+                    }
+                  </select>
+                </div>
+                <div class="mt-2">
+                  <ngb-pagination [collectionSize]="service_lab_group_recommenations.count" [rotate]="true" [(page)]="currentServiceLabRecommendationsPage" [pageSize]="pageSize" (pageChange)="onPageChange($event, 'service_lab_group')"></ngb-pagination>
+                </div>
+
+              </ng-template>
+            </li>
+          }
+        }
+        @if (user_favourite_metadata) {
+          @if (user_favourite_metadata.count > 0) {
+            <li [ngbNavItem]="'user'">
+              <button ngbNavLink>User's Favourite</button>
+              <ng-template ngbNavContent>
+                <div class="form-group">
+                  <select class="form-select" [size]="5">
+                    @for (r of user_favourite_metadata.results; track r.id) {
+                      @if (r.display_name) {
+                        <option (click)="value=r.value" [ngValue]="r">{{r.display_name}}</option>
+                      } @else {
+                        <option (click)="value=r.value" [ngValue]="r">{{r.value}}</option>
+                      }
+                    }
+                  </select>
+                </div>
+                <div class="mt-2">
+                  <ngb-pagination class="mt-2" [collectionSize]="user_favourite_metadata.count" [rotate]="true" [(page)]="currentUserFavouriteMetadataPage" [pageSize]="pageSize" (pageChange)="onPageChange($event, 'user')"></ngb-pagination>
+                </div>
+              </ng-template>
+            </li>
+          }
+        }
+      </ul>
+      <div [ngbNavOutlet]="nav" class="mt-2"></div>
+    }
+
     @if (form.value.metadataName === 'Sample type') {
       <div class="form-group">
         <label for="sampleType">Sample Type</label>

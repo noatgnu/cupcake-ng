@@ -55,6 +55,7 @@
                         <div ngbDropdownMenu aria-labelledby="metadataCellDropdownUser">
                           <button class="dropdown-item" (click)="editCell(row, col, index, 'user_metadata')">Edit</button>
                           <button class="dropdown-item" (click)="copyAndEnableSelectionMode(row, col, index, 'user_metadata')">Copy To Adjacent Cells in Column</button>
+                          <button class="dropdown-item" (click)="addToFavourite(row, col, index)">Add To Favourite</button>
                         </div>
                       </div>
                     } @else {
@@ -89,6 +90,7 @@
                         <div ngbDropdownMenu aria-labelledby="metadataCellDropdownStaff">
                           <button class="dropdown-item" (click)="editCell(row, col, (userMetadata.length+index), 'staff_metadata')">Edit</button>
                           <button class="dropdown-item" (click)="copyAndEnableSelectionMode(row, col, (userMetadata.length+index), 'staff_metadata')">Copy To Adjacent Cells in Column</button>
+                          <button class="dropdown-item" (click)="addToFavourite(row, col, (userMetadata.length+index))">Add To Favourite</button>
                         </div>
                       </div>
                     } @else {
