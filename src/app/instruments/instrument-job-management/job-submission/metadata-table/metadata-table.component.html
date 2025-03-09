@@ -1,11 +1,11 @@
-@if (sampleNumber > 0 && userMetadata.length > 0 && staffMetadata.length > 0) {
+@if (sampleNumber > 0 && (userMetadata.length > 0 || staffMetadata.length > 0)) {
   <table class="table table-hover">
     <thead  class="sticky-header">
     <tr>
       <th scope="col" class="sticky-column">Sample</th>
       @for (col of userMetadata; track col.id; let index = $index) {
         @if (visibleColumnNames.includes(col.name)) {
-          <th scope="col" class="table-danger" (mouseover)="currentCell = {row: -1, col: index}">
+          <th scope="col" class="table-primary" (mouseover)="currentCell = {row: -1, col: index}">
             {{col.name}}
             @if (currentCell) {
               @if (currentCell.row === -1 && currentCell.col === index && (userCanEdit||staffModeActive)) {
@@ -20,7 +20,7 @@
       }
       @for (col of staffMetadata; track col.id; let index = $index) {
         @if (visibleColumnNames.includes(col.name)) {
-          <th scope="col" class="table-warning" (mouseover)="currentCell = {row: -1, col: (userMetadata.length+index)}">
+          <th scope="col" [class.table-warning]="col.type != 'Factor value'" [class.table-danger]="col.type == 'Factor value'" (mouseover)="currentCell = {row: -1, col: (userMetadata.length+index)}">
             {{col.name}}
             @if (currentCell) {
               @if (currentCell.row === -1 && currentCell.col === (userMetadata.length+index) && staffModeActive) {

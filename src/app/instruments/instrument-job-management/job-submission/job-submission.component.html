@@ -235,6 +235,7 @@
           <div ngbDropdownMenu>
             <button ngbDropdownItem (click)="exportTableToTSV('user_metadata')">Export User Metadata</button>
             <button ngbDropdownItem (click)="exportTableToTSV('staff_metadata')">Export Staff Metadata</button>
+            <button ngbDropdownItem (click)="exportTableToTSV('all')">Export All Metadata</button>
           </div>
         </div>
         <div ngbDropdown class="d-flex gap-2">
@@ -244,9 +245,10 @@
             <button ngbDropdownItem (click)="importMetadata('staff_metadata')">Import Staff Metadata</button>
           </div>
         </div>
+        <button class="btn btn-warning" (click)="validateSDRFMetadata()">Validate Metadata</button>
       </div>
-      @if (job.user_metadata.length > 0 && job.sample_number > 0) {
-        <ul ngbNav #navMetadata="ngbNav" class="nav-tabs"  [destroyOnHide]="true">
+      @if ((job.user_metadata.length > 0||job.staff_metadata.length > 0) && job.sample_number > 0) {
+        <ul ngbNav #navMetadata="ngbNav" class="nav-tabs" [(activeId)]="metadataViewModeID" [destroyOnHide]="true">
           <li [ngbNavItem]="'table'">
             <button ngbNavLink>Table View</button>
             <ng-template ngbNavContent>
@@ -347,77 +349,79 @@
       <hr>
       <h5>MS Experiment Details (for staff)</h5>
       @if (job.staff_metadata.length > 0 && job.sample_number > 0) {
-        <div [formGroup]="metadata">
-          <div [formArrayName]="'staff_metadata'" class="d-flex gap-2 flex-column">
-            @for (i of metadata.controls['staff_metadata'].controls; track i; let index = $index) {
-              <form [formGroupName]="index" class="d-flex gap-2">
-                <div class="form-group" style="width:400px">
-                  <label>{{i.value['name']}}</label>
-                  <div class="d-flex gap-2">
-                    @if (i.value['name']==='Modification parameters') {
-                      <input readonly (focus)="setCurrentForm(i)" type="search" [ngbTypeahead]="searchValue" class="form-control" [formControl]="metadata.controls['staff_metadata'].controls[index].controls['value']">
-                      <button [disabled]="!staffModeAvailable" class="btn btn-sm btn-primary" (click)="editMetadata(index, 'staff_metadata')"><i class="bi bi-pen"></i></button>
-                    } @else {
-                      <input [readOnly]="!staffModeAvailable" (focus)="setCurrentForm(i)" type="search" [ngbTypeahead]="searchValue" class="form-control" [formControl]="metadata.controls['staff_metadata'].controls[index].controls['value']">
-                    }
-                    @if (!i.value['mandatory']) {
-                      <button class="btn btn-sm btn-danger" (click)="removeMetadata(index, 'staff_metadata')"><i class="bi bi-trash2"></i></button>
-                    }
-                    <button class="btn btn-sm btn-info" (click)="addMetadataModifier(index, 'staff_metadata')" ngbTooltip="Add modifier for different sample carrying this metadata"><i class="bi bi-signpost-split"></i></button>
-                    @if (i.value['name'] && i.value['type'] && i.value['value']) {
-                      <button class="btn btn-sm btn-warning" (click)="addToFavourite(i.value['name'], i.value['type'], i.value['value'])" ngbTooltip="Favourite"><i class="bi bi-star"></i></button>
+        @if (metadataViewModeID === 'list') {
+          <div [formGroup]="metadata">
+            <div [formArrayName]="'staff_metadata'" class="d-flex gap-2 flex-column">
+              @for (i of metadata.controls['staff_metadata'].controls; track i; let index = $index) {
+                <form [formGroupName]="index" class="d-flex gap-2">
+                  <div class="form-group" style="width:400px">
+                    <label>{{i.value['name']}}</label>
+                    <div class="d-flex gap-2">
+                      @if (i.value['name']==='Modification parameters') {
+                        <input readonly (focus)="setCurrentForm(i)" type="search" [ngbTypeahead]="searchValue" class="form-control" [formControl]="metadata.controls['staff_metadata'].controls[index].controls['value']">
+                        <button [disabled]="!staffModeAvailable" class="btn btn-sm btn-primary" (click)="editMetadata(index, 'staff_metadata')"><i class="bi bi-pen"></i></button>
+                      } @else {
+                        <input [readOnly]="!staffModeAvailable" (focus)="setCurrentForm(i)" type="search" [ngbTypeahead]="searchValue" class="form-control" [formControl]="metadata.controls['staff_metadata'].controls[index].controls['value']">
+                      }
+                      @if (!i.value['mandatory']) {
+                        <button class="btn btn-sm btn-danger" (click)="removeMetadata(index, 'staff_metadata')"><i class="bi bi-trash2"></i></button>
+                      }
+                      <button class="btn btn-sm btn-info" (click)="addMetadataModifier(index, 'staff_metadata')" ngbTooltip="Add modifier for different sample carrying this metadata"><i class="bi bi-signpost-split"></i></button>
+                      @if (i.value['name'] && i.value['type'] && i.value['value']) {
+                        <button class="btn btn-sm btn-warning" (click)="addToFavourite(i.value['name'], i.value['type'], i.value['value'])" ngbTooltip="Favourite"><i class="bi bi-star"></i></button>
+                      }
+                    </div>
+                    @if (i.value['name']==='Modification parameters' && i.value['value']) {
+                      <app-display-modification-parameters-metadata [value]="i.value['value']"></app-display-modification-parameters-metadata>
                     }
                   </div>
-                  @if (i.value['name']==='Modification parameters' && i.value['value']) {
-                    <app-display-modification-parameters-metadata [value]="i.value['value']"></app-display-modification-parameters-metadata>
+                </form>
+                @if (i.value['modifiers']) {
+                  @if (i.value['modifiers'].length > 0) {
+                    <div>
+                      <table class="table table-striped table-hover">
+                        <thead>
+                        <tr>
+                          <th scope="col">
+                            Value
+                          </th>
+                          <th scope="col">
+                            Samples
+                          </th>
+                          <th scope="col">
+                            Actions
+                          </th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                          @for (modifier of i.value['modifiers']; track $index; let indexM = $index) {
+                            <tr>
+                              <td>{{modifier['value']}}</td>
+                              <td>{{modifier['samples']}}</td>
+                              <td>
+                                <div class="d-flex gap-2">
+                                  <button class="btn btn-sm btn-danger" (click)="removeMetadataModifier(index, indexM, 'staff_metadata')" ngbTooltip="Remove modifier">
+                                    <i class="bi bi-trash2"></i>
+                                  </button>
+                                  <button class="btn btn-sm btn-primary" (click)="editMetadataModifier(index, indexM, 'staff_metadata')" ngbTooltip="Edit modifier">
+                                    <i class="bi bi-pencil-fill"></i>
+                                  </button>
+                                  @if (i.value['name'] && i.value['type'] && modifier['value']) {
+                                    <button class="btn btn-sm btn-warning" (click)="addToFavourite(i.value['name'], i.value['type'], modifier['value'])" ngbTooltip="Favourite"><i class="bi bi-star"></i></button>
+                                  }
+                                </div>
+                              </td>
+                            </tr>
+                          }
+                        </tbody>
+                      </table>
+                    </div>
                   }
-                </div>
-              </form>
-              @if (i.value['modifiers']) {
-                @if (i.value['modifiers'].length > 0) {
-                  <div>
-                    <table class="table table-striped table-hover">
-                      <thead>
-                      <tr>
-                        <th scope="col">
-                          Value
-                        </th>
-                        <th scope="col">
-                          Samples
-                        </th>
-                        <th scope="col">
-                          Actions
-                        </th>
-                      </tr>
-                      </thead>
-                      <tbody>
-                        @for (modifier of i.value['modifiers']; track $index; let indexM = $index) {
-                          <tr>
-                            <td>{{modifier['value']}}</td>
-                            <td>{{modifier['samples']}}</td>
-                            <td>
-                              <div class="d-flex gap-2">
-                                <button class="btn btn-sm btn-danger" (click)="removeMetadataModifier(index, indexM, 'staff_metadata')" ngbTooltip="Remove modifier">
-                                  <i class="bi bi-trash2"></i>
-                                </button>
-                                <button class="btn btn-sm btn-primary" (click)="editMetadataModifier(index, indexM, 'staff_metadata')" ngbTooltip="Edit modifier">
-                                  <i class="bi bi-pencil-fill"></i>
-                                </button>
-                                @if (i.value['name'] && i.value['type'] && modifier['value']) {
-                                  <button class="btn btn-sm btn-warning" (click)="addToFavourite(i.value['name'], i.value['type'], modifier['value'])" ngbTooltip="Favourite"><i class="bi bi-star"></i></button>
-                                }
-                              </div>
-                            </td>
-                          </tr>
-                        }
-                      </tbody>
-                    </table>
-                  </div>
                 }
               }
-            }
+            </div>
           </div>
-        </div>
+        }
       }
       <div>
         <div class="card">
@@ -544,10 +548,13 @@
           </button>
           <div ngbDropdownMenu aria-labelledby="addStaffMetadata">
             @for (m of metadataService.staffMetadataSpecific; track m) {
-              <a class="dropdown-item" (click)="addMetadata({name: m, type: 'comment'}, 'staff_metadata')">
+              <a class="dropdown-item" (click)="addMetadata({name: m, type: 'Comment'}, 'staff_metadata')">
                 {{m}}
               </a>
             }
+            <a class="dropdown-item" (click)="addMetadata({name: '', type: 'Factor value'}, 'staff_metadata')">
+              Factor Value
+            </a>
             <a class="dropdown-item" (click)="addMetadata({name: '', type: ''}, 'staff_metadata')">
               Custom Metadata
             </a>

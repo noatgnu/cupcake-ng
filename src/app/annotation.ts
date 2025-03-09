@@ -21,6 +21,7 @@ export interface Annotation {
   metadata_columns: MetadataColumn[];
   instrument_usage: InstrumentUsage[];
   fixed: boolean;
+  stored_reagent: number|null;
   user: {
     id: number;
     username: string;

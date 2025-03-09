@@ -3,14 +3,29 @@
 </div>
 <div class="modal-body">
   <form [formGroup]="form" class="d-flex gap-2 flex-column">
-    <div class="form-group">
-      <label for="metadataName">Metadata Name</label>
-      <input class="form-control" id="metadataName" formControlName="metadataName" placeholder="Metadata Name" [readonly]="name!==''">
-    </div>
-    @if (name==='') {
+    @if (type !== 'Factor value') {
+      <div class="form-group">
+        <label for="metadataName">Metadata Name</label>
+        <input class="form-control" id="metadataName" formControlName="metadataName" placeholder="Metadata Name" [readonly]="name!==''">
+      </div>
+    }
+
+    @if (name==='' && type === '') {
       <div class="form-check">
         <input type="checkbox" class="form-check-input" id="isCharacteristics" formControlName="characteristics">
         <label for="isCharacteristics">Is this data an inherent characteristics of the sample</label>
+      </div>
+    }
+
+    @if (name==='' && type === 'Factor value') {
+      <div class="form-group">
+        <label for="factorValueColumn">Factor Value Columns</label>
+        <select class="form-select" id="factorValueColumn" formControlName="metadataName">
+          @for (col of possibleColumns; track col) {
+            <option value="{{col.name}}">{{col.name}}</option>
+          }
+        </select>
+        <small id="factorValueColumnHelp" class="form-text text-muted">Select an existing column that contains the factor value</small>
       </div>
     }
     @if (service_lab_group_recommenations||user_favourite_metadata) {

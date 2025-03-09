@@ -184,7 +184,6 @@ export class MetadataService {
               }
             }
           }
-          console.log(mapData)
           this.availableSpecs = Object.values(mapData)
         }
       }

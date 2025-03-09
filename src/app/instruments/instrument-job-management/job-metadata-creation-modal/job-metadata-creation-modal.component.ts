@@ -12,6 +12,7 @@ import {FormBuilder, FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {WebService} from "../../../web.service";
 import {FavouriteMetadataOptionQuery} from "../../../favourite-metadata-option";
 import {LabGroup} from "../../../lab-group";
+import {MetadataColumn} from "../../../metadata-column";
 
 @Component({
     selector: 'app-job-metadata-creation-modal',
@@ -39,7 +40,7 @@ export class JobMetadataCreationModalComponent {
   pageSize = 10
   activeID: string = "user"
   @Input() service_lab_group_id: number = -1
-
+  @Input() possibleColumns: MetadataColumn[] = []
   private _name: string = ""
   @Input() set name(value: string) {
     this.form.controls.metadataName.setValue(value)

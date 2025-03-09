@@ -96,6 +96,7 @@ import {AddFavouriteModalComponent} from "../../../add-favourite-modal/add-favou
     styleUrl: './job-submission.component.scss'
 })
 export class JobSubmissionComponent implements OnInit, AfterViewInit {
+  metadataViewModeID: 'table' | 'list' = 'table'
   @ViewChild('metadataTable') metadataTable?: MetadataTableComponent;
   currentField = ""
   activeTab = 'user'
@@ -347,6 +348,7 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit {
           }
         } else if ("instance_id" in message && "status" in message && "message" in message) {
           if (message['instance_id'] === this.web.cupcakeInstanceID) {
+            console.log(message)
             if (message['status'] === 'error') {
               this.toast.show("Export File", message['message'])
             } else if (message['status'] === 'completed') {
@@ -862,43 +864,65 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit {
     const ref = this.modal.open(JobMetadataCreationModalComponent, {scrollable: true})
     if (this.job){
       ref.componentInstance.service_lab_group_id = this.job.service_lab_group?.id
+      if (metadata.type === "Factor value") {
+        ref.componentInstance.possibleColumns = [...this.job.user_metadata, ...this.job.staff_metadata].filter((m) => m.type !== "Factor value")
+      }
     }
     ref.componentInstance.name = metadata.name
-    ref.componentInstance.type = metadata.type
+    // capitalize first letter
+    ref.componentInstance.type = metadata.type.charAt(0).toUpperCase() + metadata.type.slice(1)
+
 
     ref.closed.subscribe((result: any[]) => {
       if (result) {
-        console.log(result)
         const formArray = this.metadata.get(arrayName) as FormArray;
-        for (const r of result) {
-          let value = r.metadataValue
-          value = this.tranformMetadataValue(r, value);
-          let group: any = {}
-          if (metadata.name !== "") {
-            group = this.fb.group({
-              name: metadata.name,
-              type: metadata.type,
-              value: value,
-              mandatory: false,
-              id: null
-            })
-          } else {
-            if (r.charateristic) {
-              r.metadataType = "Characteristics"
-            } else {
-              r.metadataType = "Comment"
-            }
-            group = this.fb.group({
-              name: r.metadataName,
-              type: r.metadataType,
-              value: value,
-              mandatory: false,
-              id: null
-            })
-          }
 
-          formArray.push(group);
-          this.subscribeToFormGroupChanges(group)
+        for (const r of result) {
+          if (r.type !== 'Factor value') {
+            let value = r.metadataValue
+            value = this.tranformMetadataValue(r, value);
+            let group: any = {}
+            if (metadata.name !== "") {
+              group = this.fb.group({
+                name: metadata.name,
+                type: metadata.type,
+                value: value,
+                mandatory: false,
+                id: null
+              })
+            } else {
+              if (r.charateristic) {
+                r.metadataType = "Characteristics"
+              } else {
+                r.metadataType = "Comment"
+              }
+              group = this.fb.group({
+                name: r.metadataName,
+                type: r.metadataType,
+                value: value,
+                mandatory: false,
+                id: null
+              })
+            }
+            formArray.push(group);
+            this.subscribeToFormGroupChanges(group)
+          } else {
+            if (this.job) {
+              const selectedFactorValueColumn = [...this.job.user_metadata, ...this.job.staff_metadata].find((c: MetadataColumn) => c.name === r.metadataValue && c.type !== "Factor value")
+              if (selectedFactorValueColumn) {
+                const group = this.fb.group({
+                  name: selectedFactorValueColumn.name,
+                  type: 'Factor value',
+                  value: selectedFactorValueColumn.value,
+                  mandatory: false,
+                  id: null,
+                  modifiers: selectedFactorValueColumn.modifiers
+                })
+                formArray.push(group);
+                this.subscribeToFormGroupChanges(group)
+              }
+            }
+          }
         }
         formArray.markAsDirty()
         this.update().then()
@@ -1273,7 +1297,7 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit {
     }
   }
 
-  exportTableToTSV(data_type: 'user_metadata'|'staff_metadata') {
+  exportTableToTSV(data_type: 'user_metadata'|'staff_metadata'|'all') {
     if (this.metadataTable && this.job) {
       this.web.instrumentJobExportMetadata(this.job.id, this.web.cupcakeInstanceID, data_type).subscribe((response) => {
 
@@ -1318,5 +1342,13 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit {
     }).catch((error) => {
       console.log(error)
     })
+  }
+
+  validateSDRFMetadata() {
+    if (this.job) {
+      this.web.validateSDRFMetadata(this.job.id, this.web.cupcakeInstanceID).subscribe((response) => {
+
+      })
+    }
   }
 }

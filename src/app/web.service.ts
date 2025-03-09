@@ -123,7 +123,7 @@ export class WebService {
     );
   }
 
-  saveAnnotationText(session_id: string|undefined|null, step_id: number = 0, text: string, instrument_job_id: number|null|undefined = null, instrument_user_type: null|'user_annotation'|'staff_annotation' = null) {
+  saveAnnotationText(session_id: string|undefined|null, step_id: number = 0, text: string, instrument_job_id: number|null|undefined = null, instrument_user_type: null|'user_annotation'|'staff_annotation' = null, stored_reagent_id: number|null = null) {
     const form = new FormData();
     form.append('annotation', text);
     form.append('annotation_type', 'text');
@@ -138,6 +138,9 @@ export class WebService {
     }
     if (instrument_user_type) {
       form.append('instrument_user_type', instrument_user_type);
+    }
+    if (stored_reagent_id) {
+      form.append('stored_reagent', stored_reagent_id.toString());
     }
     return this.http.post(
       `${this.baseURL}/api/annotation/`,
@@ -164,7 +167,7 @@ export class WebService {
     );
   }
 
-  saveAnnotationFile(session_id: string|undefined|null, step_id: number = 0, file: File, annotation_type: string = 'file', instrument_job_id: number|null|undefined = null, instrument_user_type: null|'user_annotation'|'staff_annotation' = null, annotation: string = "") {
+  saveAnnotationFile(session_id: string|undefined|null, step_id: number = 0, file: File, annotation_type: string = 'file', instrument_job_id: number|null|undefined = null, instrument_user_type: null|'user_annotation'|'staff_annotation' = null, annotation: string = "", stored_reagent_id: number|null = null) {
     const form = new FormData()
     if (annotation) {
       form.append('annotation', annotation);
@@ -184,6 +187,9 @@ export class WebService {
     if (instrument_user_type) {
       form.append('instrument_user_type', instrument_user_type);
     }
+    if (stored_reagent_id) {
+      form.append('stored_reagent', stored_reagent_id.toString());
+    }
     form.append('file', file);
     return this.http.post(
       `${this.baseURL}/api/annotation/`,
@@ -192,7 +198,7 @@ export class WebService {
     );
   }
 
-  saveSketch(session_id: string|undefined|null, step_id: number = 0, strokes: any[],  instrument_job_id: number|null|undefined = null, instrument_user_type: null|'user_annotation'|'staff_annotation' = null) {
+  saveSketch(session_id: string|undefined|null, step_id: number = 0, strokes: any[],  instrument_job_id: number|null|undefined = null, instrument_user_type: null|'user_annotation'|'staff_annotation' = null, stored_reagent_id: number|null = null) {
     const form = new FormData()
     form.append('annotation', "");
     form.append('annotation_type', 'sketch');
@@ -208,6 +214,9 @@ export class WebService {
     if (instrument_user_type) {
       form.append('instrument_user_type', instrument_user_type);
     }
+    if (stored_reagent_id) {
+      form.append('stored_reagent', stored_reagent_id.toString());
+    }
     const file = new File([JSON.stringify(strokes)], 'sketch.json', {type: 'application/json'});
     form.append('file', file);
     return this.http.post(
@@ -217,7 +226,7 @@ export class WebService {
     );
   }
 
-  saveAnnotationJSON(session_id: string|undefined|null, step_id: number = 0, json: any, annotation_type: string, instrument_job_id: number|null|undefined = null, instrument_user_type: null|'user_annotation'|'staff_annotation' = null) {
+  saveAnnotationJSON(session_id: string|undefined|null, step_id: number = 0, json: any, annotation_type: string, instrument_job_id: number|null|undefined = null, instrument_user_type: null|'user_annotation'|'staff_annotation' = null, stored_reagent_id: number|null = null) {
     const form = new FormData()
     form.append('annotation', JSON.stringify(json));
     form.append('annotation_type', annotation_type);
@@ -232,6 +241,9 @@ export class WebService {
     }
     if (instrument_user_type) {
       form.append('instrument_user_type', instrument_user_type);
+    }
+    if (stored_reagent_id) {
+      form.append('stored_reagent', stored_reagent_id.toString());
     }
     return this.http.post(
       `${this.baseURL}/api/annotation/`,
@@ -283,7 +295,7 @@ export class WebService {
     )
   }
 
-  saveMediaRecorderBlob(session_id: string|undefined|null, step_id: number|undefined|null, blob: Blob, annotation_type: string, instrument_job_id: number|null|undefined = null, instrument_user_type: null|'user_annotation'|'staff_annotation' = null) {
+  saveMediaRecorderBlob(session_id: string|undefined|null, step_id: number|undefined|null, blob: Blob, annotation_type: string, instrument_job_id: number|null|undefined = null, instrument_user_type: null|'user_annotation'|'staff_annotation' = null, stored_reagent_id: number|null = null) {
     const form = new FormData()
     form.append('annotation', "");
     form.append('annotation_type', annotation_type);
@@ -304,6 +316,9 @@ export class WebService {
       file = new File([blob], `recording${annotation_type}.webm`, {type: 'audio/webm'});
     } else {
       file = new File([blob], `recording${annotation_type}.webm`, {type: 'video/webm'});
+    }
+    if (stored_reagent_id) {
+      form.append('stored_reagent', stored_reagent_id.toString());
     }
 
     form.append('file', file);
@@ -909,7 +924,7 @@ export class WebService {
       {responseType: 'json', observe: 'body'}
     )
   }
-  bindUploadedFile(session_id: string|undefined|null, upload_id: string, file_name: string, annotation_name: string, step: number = 0, folder: number = 0, instrument_job_id: number|null|undefined = null, instrument_user_type: null|'user_annotation'|'staff_annotation' = null) {
+  bindUploadedFile(session_id: string|undefined|null, upload_id: string, file_name: string, annotation_name: string, step: number = 0, folder: number = 0, instrument_job_id: number|null|undefined = null, instrument_user_type: null|'user_annotation'|'staff_annotation' = null, stored_reagent_id: number|null = null) {
     const payload: any = {upload_id: upload_id, file_name: file_name, annotation_name: annotation_name, step: step, folder: folder}
     if (session_id) {
       payload['session'] = session_id
@@ -919,6 +934,9 @@ export class WebService {
     }
     if (instrument_user_type) {
       payload['instrument_user_type'] = instrument_user_type
+    }
+    if (stored_reagent_id) {
+      payload['stored_reagent'] = stored_reagent_id
     }
 
     return this.http.post<Annotation>(
@@ -1045,7 +1063,7 @@ export class WebService {
     )
   }
 
-  createInstrumentUsageAnnotation(session_id: string|undefined|null, instrument_id: number, time_started: Date|undefined, time_ended: Date|undefined, step_id: number|null = 0, annotation: string, instrument_job_id: number|null|undefined = undefined, instrument_user_type: null|'user_annotation'|'staff_annotation' = null) {
+  createInstrumentUsageAnnotation(session_id: string|undefined|null, instrument_id: number, time_started: Date|undefined, time_ended: Date|undefined, step_id: number|null = 0, annotation: string, instrument_job_id: number|null|undefined = undefined, instrument_user_type: null|'user_annotation'|'staff_annotation' = null, stored_reagent_id: number|null = null) {
     const payload: any = { annotation_type: 'instrument', instrument: instrument_id, time_started: time_started, time_ended: time_ended, annotation: annotation}
     if (step_id !== 0) {
       payload['step'] = step_id
@@ -1058,6 +1076,9 @@ export class WebService {
     }
     if (instrument_user_type && instrument_user_type === "staff_annotation") {
       payload['instrument_user_type'] = instrument_user_type
+    }
+    if (stored_reagent_id) {
+      payload['stored_reagent'] = stored_reagent_id
     }
     return this.http.post<Annotation>(
       `${this.baseURL}/api/annotation/`,
@@ -2054,6 +2075,10 @@ export class WebService {
       `${this.baseURL}/api/preset/${id}/`,
       {responseType: 'json', observe: 'body'}
     )
+  }
+
+  validateSDRFMetadata(instrument_job_id: number, instance_id:string) {
+    return this.http.post(`${this.baseURL}/api/instrument_jobs/${instrument_job_id}/validate_sdrf_metadata/`, {instance_id}, {responseType: 'json', observe: 'body'})
   }
 
 
