@@ -63,6 +63,8 @@ import {AreYouSureModalComponent} from "../../../are-you-sure-modal/are-you-sure
 import {WebsocketService} from "../../../websocket.service";
 import {environment} from "../../../../environments/environment";
 import {UploadLargeFileModalComponent} from "../../../upload-large-file-modal/upload-large-file-modal.component";
+import {MetadataColumn} from "../../../metadata-column";
+import {AddFavouriteModalComponent} from "../../../add-favourite-modal/add-favourite-modal.component";
 
 @Component({
     selector: 'app-job-submission',
@@ -1298,6 +1300,23 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit {
   handleFavouriteAdded(event: any) {
     this.metadataService.addMetadataToFavourite(event.name, event.type, event.value, event.display_name, event.mode, event.lab_group).subscribe((response) => {
       this.toast.show("Favourite", "Favourite option added")
+    })
+  }
+
+  addToFavourite(name: string|undefined, type: string|undefined, value: string|undefined) {
+    const ref = this.modal.open(AddFavouriteModalComponent)
+    ref.componentInstance.name = name
+    ref.componentInstance.type = type
+    ref.componentInstance.value = value
+    ref.result.then((result: any) => {
+      if (result) {
+        // @ts-ignore
+        this.metadataService.addMetadataToFavourite(name, type, value, result.display_name, result.mode, result.lab_group).subscribe((response) => {
+          this.toast.show("Favourite", "Favourite option added")
+        })
+      }
+    }).catch((error) => {
+      console.log(error)
     })
   }
 }

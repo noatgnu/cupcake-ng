@@ -53,9 +53,9 @@
                       <div ngbDropdown class="d-inline-block">
                         <button class="btn btn-sm btn-outline-primary" id="metadataCellDropdownUser" ngbDropdownToggle><i class="bi bi-pencil-fill"></i></button>
                         <div ngbDropdownMenu aria-labelledby="metadataCellDropdownUser">
-                          <button class="dropdown-item" (click)="editCell(row, col, index, 'user_metadata')">Edit</button>
-                          <button class="dropdown-item" (click)="copyAndEnableSelectionMode(row, col, index, 'user_metadata')">Copy To Adjacent Cells in Column</button>
-                          <button class="dropdown-item" (click)="addToFavourite(row, col, index)">Add To Favourite</button>
+                          <button class="dropdown-item" (click)="editCell(row, col, index, 'user_metadata')"><i class="bi bi-pen"></i> Edit</button>
+                          <button class="dropdown-item" (click)="copyAndEnableSelectionMode(row, col, index, 'user_metadata')"><i class="bi bi-copy"></i> Copy To Adjacent Cells in Column</button>
+                          <button class="dropdown-item" (click)="addToFavourite(row, col, index)"><i class="bi bi-star"></i> Favourite</button>
                         </div>
                       </div>
                     } @else {
@@ -88,9 +88,9 @@
                       <div ngbDropdown class="d-inline-block">
                         <button class="btn btn-sm btn-outline-primary" id="metadataCellDropdownStaff" ngbDropdownToggle><i class="bi bi-pencil-fill"></i></button>
                         <div ngbDropdownMenu aria-labelledby="metadataCellDropdownStaff">
-                          <button class="dropdown-item" (click)="editCell(row, col, (userMetadata.length+index), 'staff_metadata')">Edit</button>
-                          <button class="dropdown-item" (click)="copyAndEnableSelectionMode(row, col, (userMetadata.length+index), 'staff_metadata')">Copy To Adjacent Cells in Column</button>
-                          <button class="dropdown-item" (click)="addToFavourite(row, col, (userMetadata.length+index))">Add To Favourite</button>
+                          <button class="dropdown-item" (click)="editCell(row, col, (userMetadata.length+index), 'staff_metadata')"><i class="bi bi-pen"></i> Edit</button>
+                          <button class="dropdown-item" (click)="copyAndEnableSelectionMode(row, col, (userMetadata.length+index), 'staff_metadata')"><i class="bi bi-copy"></i> Copy To Adjacent Cells in Column</button>
+                          <button class="dropdown-item" (click)="addToFavourite(row, col, (userMetadata.length+index))"><i class="bi bi-star"></i> Favourite</button>
                         </div>
                       </div>
                     } @else {

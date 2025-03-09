@@ -284,6 +284,9 @@
                             <button class="btn btn-sm btn-danger" (click)="removeMetadata(index, 'user_metadata')" ngbTooltip="Remove this metadata"><i class="bi bi-trash2"></i></button>
                           }
                           <button class="btn btn-sm btn-info" (click)="addMetadataModifier(index, 'user_metadata')" ngbTooltip="Add modifier for different sample carrying this metadata"><i class="bi bi-signpost-split"></i></button>
+                          @if (i.value['name'] && i.value['type'] && i.value['value']) {
+                            <button class="btn btn-sm btn-warning" (click)="addToFavourite(i.value['name'], i.value['type'], i.value['value'])" ngbTooltip="Favourite"><i class="bi bi-star"></i></button>
+                          }
                         </div>
                         @if (i.value['name']==='Modification parameters' && i.value['value']) {
                           <app-display-modification-parameters-metadata [value]="i.value['value']"></app-display-modification-parameters-metadata>
@@ -320,6 +323,9 @@
                                       <button class="btn btn-sm btn-primary" (click)="editMetadataModifier(index, indexM, 'user_metadata')" ngbTooltip="Edit modifier">
                                         <i class="bi bi-pencil-fill"></i>
                                       </button>
+                                      @if (i.value['name'] && i.value['type'] && modifier['value']) {
+                                        <button class="btn btn-sm btn-warning" (click)="addToFavourite(i.value['name'], i.value['type'], modifier['value'])" ngbTooltip="Favourite"><i class="bi bi-star"></i></button>
+                                      }
                                     </div>
                                   </td>
                                 </tr>
@@ -358,6 +364,9 @@
                       <button class="btn btn-sm btn-danger" (click)="removeMetadata(index, 'staff_metadata')"><i class="bi bi-trash2"></i></button>
                     }
                     <button class="btn btn-sm btn-info" (click)="addMetadataModifier(index, 'staff_metadata')" ngbTooltip="Add modifier for different sample carrying this metadata"><i class="bi bi-signpost-split"></i></button>
+                    @if (i.value['name'] && i.value['type'] && i.value['value']) {
+                      <button class="btn btn-sm btn-warning" (click)="addToFavourite(i.value['name'], i.value['type'], i.value['value'])" ngbTooltip="Favourite"><i class="bi bi-star"></i></button>
+                    }
                   </div>
                   @if (i.value['name']==='Modification parameters' && i.value['value']) {
                     <app-display-modification-parameters-metadata [value]="i.value['value']"></app-display-modification-parameters-metadata>
@@ -394,6 +403,9 @@
                                 <button class="btn btn-sm btn-primary" (click)="editMetadataModifier(index, indexM, 'staff_metadata')" ngbTooltip="Edit modifier">
                                   <i class="bi bi-pencil-fill"></i>
                                 </button>
+                                @if (i.value['name'] && i.value['type'] && modifier['value']) {
+                                  <button class="btn btn-sm btn-warning" (click)="addToFavourite(i.value['name'], i.value['type'], modifier['value'])" ngbTooltip="Favourite"><i class="bi bi-star"></i></button>
+                                }
                               </div>
                             </td>
                           </tr>

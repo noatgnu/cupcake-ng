@@ -4,7 +4,7 @@ export interface FavouriteMetadataOption {
   name: string,
   type: string,
   value: string,
-  display_name: string,
+  display_value: string,
   lab_group: number|null,
   service_lab_group: number|null,
   preset: number|null,

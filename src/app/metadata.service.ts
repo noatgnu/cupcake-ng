@@ -157,7 +157,6 @@ export class MetadataService {
         if (selectedData) {
           const mapData: any = {}
           formDetails["metadataAC"] = selectedData.accession
-          console.log(selectedData)
           for (const a of selectedData.additional_data) {
             if (a["id"] === "delta_mono_mass") {
               formDetails["metadataMM"] = parseFloat(a["description"])

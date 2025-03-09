@@ -173,6 +173,7 @@ export class JobMetadataCreationModalComponent {
       valueSplitted.forEach((v) => {
         const subSplitted = v.split("=")
         if (subSplitted.length === 2) {
+
           switch (subSplitted[0].trim().toLowerCase()) {
             case "sp":
               this.form.controls.metadataSP.setValue(subSplitted[1].trim())
@@ -206,6 +207,19 @@ export class JobMetadataCreationModalComponent {
               break
             case "ta":
               this.form.controls.metadataTA.setValue(subSplitted[1].trim())
+              for (const s of this.metadataService.availableSpecs) {
+                if (s.aa === subSplitted[1].trim()) {
+                  if (!Array.isArray(this.selectedSpecs)) {
+                    this.selectedSpecs = s
+                  } else {
+                    if (!this.selectedSpecs.includes(s)) {
+                      this.selectedSpecs.push(s)
+                    }
+                  }
+                  console.log(this.selectedSpecs)
+                  break
+                }
+              }
               break
             case "ts":
               this.form.controls.metadataTS.setValue(subSplitted[1].trim())
@@ -230,6 +244,20 @@ export class JobMetadataCreationModalComponent {
                       if (i.name === subSplitted[1].trim()) {
                         // @ts-ignore
                         this.metadataService.getSelectedData(i.name, this.form.value.metadataName)
+                        for (const s of this.metadataService.availableSpecs) {
+                          if (s.aa === subSplitted[1].trim()) {
+                            if (!Array.isArray(this.selectedSpecs)) {
+                              this.selectedSpecs = s
+                            } else {
+                              if (!this.selectedSpecs.includes(s)) {
+                                this.selectedSpecs.push(s)
+                              }
+                            }
+                            console.log(this.selectedSpecs)
+                            break
+                          }
+                        }
+                        console.log(this.selectedSpecs)
                       }
                     }
                   }
@@ -251,6 +279,19 @@ export class JobMetadataCreationModalComponent {
                   if (i.name === subSplitted[0].trim()) {
                     // @ts-ignore
                     this.metadataService.getSelectedData(i.name, this.form.value.metadataName)
+                    for (const s of this.metadataService.availableSpecs) {
+                      if (s.aa === this.form.controls.metadataTA.value) {
+                        if (!Array.isArray(this.selectedSpecs)) {
+                          this.selectedSpecs = s
+                        } else {
+                          if (!this.selectedSpecs.includes(s)) {
+                            this.selectedSpecs.push(s)
+                          }
+                        }
+                        console.log(this.selectedSpecs)
+                        break
+                      }
+                    }
                   }
                 }
               }

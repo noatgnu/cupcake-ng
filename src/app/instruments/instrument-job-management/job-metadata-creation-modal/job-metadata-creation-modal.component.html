@@ -23,8 +23,8 @@
                 <div class="form-group">
                   <select class="form-select" [size]="5">
                     @for (r of service_lab_group_recommenations.results; track r.id) {
-                      @if (r.display_name) {
-                        <option (click)="value=r.value" [ngValue]="r">{{r.display_name}}</option>
+                      @if (r.display_value) {
+                        <option (click)="value=r.value" [ngValue]="r">{{r.display_value}}</option>
                       } @else {
                         <option (click)="value=r.value" [ngValue]="r">{{r.value}}</option>
                       }
@@ -47,8 +47,8 @@
                 <div class="form-group">
                   <select class="form-select" [size]="5">
                     @for (r of user_favourite_metadata.results; track r.id) {
-                      @if (r.display_name) {
-                        <option (click)="value=r.value" [ngValue]="r">{{r.display_name}}</option>
+                      @if (r.display_value) {
+                        <option (click)="value=r.value" [ngValue]="r">{{r.display_value}}</option>
                       } @else {
                         <option (click)="value=r.value" [ngValue]="r">{{r.value}}</option>
                       }
