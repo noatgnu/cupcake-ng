@@ -10,6 +10,10 @@ import {
 import {FormArray} from "@angular/forms";
 import {NgClass} from "@angular/common";
 import {AddFavouriteModalComponent} from "../../../../add-favourite-modal/add-favourite-modal.component";
+import {
+  MultipleLineInputModalComponent
+} from "../../../../multiple-line-input-modal/multiple-line-input-modal.component";
+import {MetadataService} from "../../../../metadata.service";
 
 @Component({
   selector: 'app-metadata-table',
@@ -105,7 +109,7 @@ export class MetadataTableComponent implements OnChanges{
     }
   }
 
-  constructor(private modal: NgbModal) {
+  constructor(private modal: NgbModal, private metadataService: MetadataService) {
 
   }
 
@@ -532,5 +536,19 @@ export class MetadataTableComponent implements OnChanges{
     }).catch((error) => {
       console.log(error)
     })
+  }
+
+  replaceEntireMetadataColumn(col: MetadataColumn, data_type: "user_metadata" | "staff_metadata") {
+    const ref = this.modal.open(MultipleLineInputModalComponent)
+    ref.componentInstance.sampleNumber = this.sampleNumber
+    ref.result.then((result: string|undefined|null) => {
+      if (result) {
+        const {value, modifiers} = this.metadataService.parseLinesToMetadata(result)
+        col.value = value
+        col.modifiers = modifiers
+        this.metadataUpdated.emit([{...col, data_type}])
+      }
+    })
+
   }
 }

@@ -1305,18 +1305,15 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit {
     }
   }
 
-  importMetadata(data_type: 'user_metadata'|'staff_metadata') {
+  importMetadata(data_type: 'user_metadata'|'staff_metadata'|'all') {
     if (this.job) {
       const ref = this.modal.open(UploadLargeFileModalComponent)
       ref.componentInstance.metadata_import = data_type
       ref.componentInstance.instrument_job_id = this.job.id
-
-      if (data_type === 'user_metadata') {
-        ref.componentInstance.instrument_user_type = 'user_annotation'
+      if (this.staffModeAvailable) {
+        ref.componentInstance.instrument_user_type = this.staffModeAvailable
       } else {
-        if (this.staffModeAvailable) {
-          ref.componentInstance.instrument_user_type = 'staff_annotation'
-        }
+        ref.componentInstance.instrument_user_type = 'user_annotation'
       }
     }
   }

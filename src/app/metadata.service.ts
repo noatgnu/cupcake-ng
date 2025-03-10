@@ -18,7 +18,7 @@ export class MetadataService {
   metadataNameAutocomplete: string[] = ["Disease", "Tissue", "Subcellular location", "Organism", "Instrument", "Label", "Cleavage agent details", "Dissociation method", "Modification parameters", "Cell type", "Enrichment process"]
   metadataOtherAutocomplete: string[] = ["Source name", "Material type", "Assay name", "Technology type"]
   metadataCharacteristics: string[] = ["Disease", "Tissue", "Subcellular location", "Organism", "Cell type", "Cell line", "Developmental stage", "Ancestry category", "Sex", "Age", "Biological replicate", "Enrichment process"]
-  metadataComment: string[] = ["Data file", "File URI", "Technical replicate", "Fraction identifier", "Label", "Cleavage agent details", "Instrument", "Modification parameters", "Dissociation method", "Precursor mass tolerance", "Fragment mass tolerance", ""]
+  metadataComment: string[] = ["Data file", "File URI", "Technical replicate", "Fraction identifier", "Label", "Cleavage agent details", "Instrument", "Modification parameters", "Dissociation method", "Precursor mass tolerance", "Fragment mass tolerance", "MS2 analyzer type",""]
   staffMetadataSpecific: string[] =
     [
       "Fraction identifier",
@@ -205,5 +205,23 @@ export class MetadataService {
       payload["lab_group"] = lab_group
     }
     return this.web.createFavouriteMetadataOption(payload)
+  }
+
+  parseLinesToMetadata(lines: string): any {
+    const result = lines.split('\n').map(line => line.trim() === '' ? 'not available' : line.trim());
+    const frequencyMap: { [key: string]: number } = {};
+    result.forEach(line => {
+      frequencyMap[line] = (frequencyMap[line] || 0) + 1;
+    });
+
+    const mostFrequentValue = Object.keys(frequencyMap).reduce((a, b) => frequencyMap[a] > frequencyMap[b] ? a : b);
+    const modifiers = Object.keys(frequencyMap).filter(value => value !== mostFrequentValue).map(value => ({
+      samples: result.map((line, index) => line === value ? index + 1 : null).filter(index => index !== null).join(','),
+      value: value
+    }));
+    return {
+      value: mostFrequentValue,
+      modifiers: modifiers
+    }
   }
 }

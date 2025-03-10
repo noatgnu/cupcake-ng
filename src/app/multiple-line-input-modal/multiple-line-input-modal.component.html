@@ -1,0 +1,19 @@
+<div class="modal-header">
+  <h5 class="modal-title">Multiple Line Input</h5>
+</div>
+<div class="modal-body">
+  <form [formGroup]="form">
+    <div class="form-group">
+      <label for="multiLineText" class="mb-2">Text Input</label>
+      <div class="textarea-container">
+        <div style="padding:8px;border-right: 1px solid #ddd;text-align:right; user-select:none;width:50px" class="line-numbers" id="lineNumbers"></div>
+        <textarea id="multiLineText" class="form-control" formControlName="multiLineText"></textarea>
+      </div>
+      <small class="form-text text-muted">Enter multiple lines of text @if (sampleNumber>0) {(required {{sampleNumber}} lines)}</small>
+    </div>
+  </form>
+</div>
+<div class="modal-footer">
+  <button class="btn btn-primary" (click)="close()">Close</button>
+  <button class="btn btn-primary" (click)="submit()">Submit</button>
+</div>

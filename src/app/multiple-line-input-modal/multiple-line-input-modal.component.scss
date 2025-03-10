@@ -1,0 +1,14 @@
+.textarea-container {
+  display: flex;
+  position: relative;
+}
+
+
+
+textarea {
+  flex: 1;
+  padding-left: 40px;
+  border: none;
+  outline: none;
+  resize: none;
+}

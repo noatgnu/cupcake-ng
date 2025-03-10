@@ -72,7 +72,7 @@ export class UploadLargeFileModalComponent {
         if (this.instrument_job_id && this.instrument_user_type) {
           this.web.bindUploadedFile(null, result?.id, file.name, file.name, this.step_id, this.folder_id, this.instrument_job_id, this.instrument_user_type).subscribe((data) => {
             this.toastService.show(file.name, "Binding completed")
-            if (this.metadata_import === "user_metadata" || this.metadata_import === "staff_metadata") {
+            if (this.metadata_import === "user_metadata" || this.metadata_import === "staff_metadata" || this.metadata_import === "all") {
               this.importMetadata(data)
             }
           })

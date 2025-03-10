@@ -9,10 +9,16 @@
             {{col.name}}
             @if (currentCell) {
               @if (currentCell.row === -1 && currentCell.col === index && (userCanEdit||staffModeActive)) {
-                <i ngbTooltip="Edit default value" class="bi bi-pen" (click)="editDefaultMetadataValue(col, 'user_metadata')"></i>
-                @if (!col.mandatory) {
-                  <i ngbTooltip="Remove metadata" class="bi bi-trash2" (click)="removeMetadataCol(index, col, 'user_metadata')"></i>
-                }
+                <div ngbDropdown class="d-inline-block">
+                  <button class="btn btn-sm btn-outline-primary" id="metadataColumnDropdownUser" ngbDropdownToggle><i class="bi bi-pencil-fill"></i></button>
+                  <div ngbDropdownMenu aria-labelledby="metadataColumnDropdownUser">
+                    <button class="dropdown-item" (click)="editDefaultMetadataValue(col, 'user_metadata')" ngbTooltip="Edit default value"><i  class="bi bi-pen"></i> Edit Default Value</button>
+                    <button class="dropdown-item" (click)="replaceEntireMetadataColumn(col, 'user_metadata')" ngbTooltip="Replace entire column"><i  class="bi bi-columns"></i> Replace Entire Column</button>
+                    @if (!col.mandatory) {
+                      <button class="dropdown-item" (click)="removeMetadataCol(index, col, 'user_metadata')" ngbTooltip="Remove metadata"><i class="bi bi-trash2"></i> Remove Column</button>
+                    }
+                  </div>
+                </div>
               }
             }
           </th>
@@ -24,10 +30,16 @@
             {{col.name}}
             @if (currentCell) {
               @if (currentCell.row === -1 && currentCell.col === (userMetadata.length+index) && staffModeActive) {
-                <i ngbTooltip="Edit default value" class="bi bi-pen" (click)="editDefaultMetadataValue(col, 'staff_metadata')"></i>
-                @if (!col.mandatory) {
-                  <i ngbTooltip="Remove metadata" class="bi bi-trash2" (click)="removeMetadataCol(index, col, 'staff_metadata')"></i>
-                }
+                <div ngbDropdown class="d-inline-block">
+                  <button class="btn btn-sm btn-outline-primary" id="metadataColumnDropdownStaff" ngbDropdownToggle><i class="bi bi-pencil-fill"></i></button>
+                  <div ngbDropdownMenu aria-labelledby="metadataColumnDropdownStaff">
+                    <button class="dropdown-item" (click)="editDefaultMetadataValue(col, 'staff_metadata')" ngbTooltip="Edit default value"><i  class="bi bi-pen"></i> Edit Default Value</button>
+                    <button class="dropdown-item" (click)="replaceEntireMetadataColumn(col, 'staff_metadata')" ngbTooltip="Replace entire column"><i  class="bi bi-columns"></i> Replace Entire Column</button>
+                    @if (!col.mandatory) {
+                      <button class="dropdown-item" (click)="removeMetadataCol(index, col, 'staff_metadata')" ngbTooltip="Remove metadata"><i class="bi bi-trash2"></i> Remove Column</button>
+                    }
+                  </div>
+                </div>
               }
             }
           </th>
