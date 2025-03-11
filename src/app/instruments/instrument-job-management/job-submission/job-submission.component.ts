@@ -784,9 +784,16 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit {
       if (this.formSampleExtraData.controls.sample_number.dirty) {
         payload["sample_number"] = this.formSampleExtraData.value.sample_number
       }
-      if (this.labGroupForm.controls.selected.dirty) {
-        payload["service_lab_group"] = this.labGroupForm.value.selected
+      if (this.job.service_lab_group) {
+        if (this.labGroupForm.controls.selected.dirty || this.labGroupForm.controls.selected.value !== this.job.service_lab_group.id) {
+          payload["service_lab_group"] = this.labGroupForm.value.selected
+        }
+      } else {
+        if (this.labGroupForm.controls.selected) {
+          payload["service_lab_group"] = this.labGroupForm.value.selected
+        }
       }
+
       // check if payload is empty
       if (Object.keys(payload).length === 0) {
         await this.toast.show('Job', 'No changes detected in user data');

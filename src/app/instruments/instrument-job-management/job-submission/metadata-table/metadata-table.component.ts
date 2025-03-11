@@ -546,7 +546,7 @@ export class MetadataTableComponent implements OnChanges{
         const {value, modifiers} = this.metadataService.parseLinesToMetadata(result)
         col.value = value
         col.modifiers = modifiers
-        this.metadataUpdated.emit([{...col, data_type}])
+        this.metadataUpdated.emit([{...col}, data_type])
       }
     })
 
