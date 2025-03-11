@@ -1355,4 +1355,12 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit {
       })
     }
   }
+
+  exportExcelTemplate() {
+    if (this.job) {
+      this.web.exportExcelTemplate(this.job.id, this.web.cupcakeInstanceID).subscribe((response) => {
+
+      })
+    }
+  }
 }

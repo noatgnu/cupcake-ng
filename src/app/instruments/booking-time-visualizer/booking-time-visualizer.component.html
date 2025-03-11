@@ -14,34 +14,93 @@
       <ng-template #t let-date let-focused="focused">
       <span
         class="custom-day"
+        [class.hasUsage]="hasInstrumentUsage(date)"
         [class.focused]="focused"
         [class.range]="isRange(date)"
         [class.faded]="isHovered(date) || isInside(date)"
-        [class.hasUsage]="hasInstrumentUsage(date)"
+        [ngbTooltip]="getTooltipContent(date)"
         (mouseenter)="hoveredDate = date"
         (mouseleave)="hoveredDate = null"
       >
         {{ date.day }}
       </span>
       </ng-template>
-
-      <button class="btn btn-primary mt-1" type="submit">Update Window</button>
-    </form>
-    @if (selectedStartDate) {
       <div>
         <p>
-          <b>Preview Start Date:</b> {{selectedStartDate | date: 'short'}}<br>
-          @if (selectedEndDate) {
-            <b>Preview End Date:</b> {{selectedEndDate | date: 'short'}}<br>
+          @if (fromDate) {
+            Calendar Selected Start Date: {{fromDate.year}}.{{fromDate.month}}.{{fromDate.day}}<br>
+          }
+          @if (toDate) {
+            Calendar Selected End Date: {{toDate.year}}.{{toDate.month}}.{{toDate.day}}
           }
         </p>
       </div>
-    }
+
+    </form>
+
   }
-
 </div>
-<div class="container overflow-auto mt-2" style="max-width: 100%">
-  <canvas (mousedown)="onMouseDown($event)" (mouseup)="onMouseUp($event)" (mousemove)="onMouseMove($event)" #canvas id="bookingCanvas" [height]="height"></canvas>
-</div>
+@if (enableEdit) {
+  <ul ngbNav #nav="ngbNav" (activeIdChange)="changeActiveIDTab($event)" [(activeId)]="activeTab" class="nav-tabs"  [destroyOnHide]="false">
+    <li [ngbNavItem]="'existingBookings'">
+      <button ngbNavLink>Existing Bookings</button>
+      <ng-template ngbNavContent>
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th scope="col">Start Date</th>
+              <th scope="col">End Date</th>
+              <th scope="col">User</th>
+              <th scope="col">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+          @if (instrumentUsageQuery) {
+            @for (booking of instrumentUsageQuery.results; track booking.id) {
+              <tr>
+                <td>{{booking.time_started | date: 'short'}}</td>
+                <td>{{booking.time_ended | date: 'short'}}</td>
+                <td>{{booking.user}}</td>
+                <td>
+                  @if (accounts.is_staff) {
+                    <button class="btn btn-sm btn-danger" (click)="removeBooking(booking)"><i class="bi bi-trash"></i></button>
+                  }
+                </td>
+              </tr>
+            }
+          }
+
+          </tbody>
+        </table>
+      </ng-template>
+    </li>
+    <li [ngbNavItem]="'hourBasedBookings'">
+      <button ngbNavLink>Hour Based Bookings</button>
+      <ng-template ngbNavContent>
+        @if (selectedStartDate) {
+          <div>
+            <button class="btn btn-primary mt-1" type="button" (click)="updateTimeWindow()">Update Window</button>
+            <p>
+              <b>Preview Start Date:</b> {{selectedStartDate | date: 'short'}}<br>
+              @if (selectedEndDate) {
+                <b>Preview End Date:</b> {{selectedEndDate | date: 'short'}}<br>
+              }
+            </p>
+          </div>
+        }
+        <div class="container overflow-auto mt-2" style="max-width: 100%">
+          <canvas (mousedown)="onMouseDown($event)" (mouseup)="onMouseUp($event)" (mousemove)="onMouseMove($event)" #canvas id="bookingCanvas" [height]="height"></canvas>
+        </div>
+      </ng-template>
+
+    </li>
+  </ul>
+  <div [ngbNavOutlet]="nav" class="mt-2"></div>
+}
 
 
+@if(!enableEdit) {
+  <div class="container overflow-auto mt-2" style="max-width: 100%">
+    <canvas (mousedown)="onMouseDown($event)" (mouseup)="onMouseUp($event)" (mousemove)="onMouseMove($event)" #canvas id="bookingCanvas" [height]="height"></canvas>
+  </div>
+}

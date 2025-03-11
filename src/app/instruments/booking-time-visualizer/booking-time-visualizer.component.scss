@@ -25,6 +25,13 @@
   height: 2rem !important;
 }
 
+.custom-day.focused.hasUsage,
+.custom-day.range.hasUsage,
+.custom-day.faded.hasUsage {
+  background-color: rgba(146, 9, 207, 0.63);
+  color: white;
+}
+
 
 :host ::ng-deep .ngb-dp-day > div {
   width: 2rem !important;

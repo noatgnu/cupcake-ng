@@ -230,6 +230,17 @@
         </div>
       </form>
       <div class="d-flex gap-2">
+
+        <div ngbDropdown class="d-flex gap-2">
+          <button class="btn btn-primary" ngbDropdownToggle>Excel Template</button>
+          <div ngbDropdownMenu>
+            <button ngbDropdownItem (click)="exportExcelTemplate()">Export</button>
+            @if (job.status !== 'submitted' && (userCanEdit || staffModeAvailable)) {
+              <button ngbDropdownItem>Import</button>
+            }
+
+          </div>
+        </div>
         <div ngbDropdown class="d-flex gap-2">
           <button class="btn btn-primary" ngbDropdownToggle>Export</button>
           <div ngbDropdownMenu>
@@ -238,14 +249,17 @@
             <button ngbDropdownItem (click)="exportTableToTSV('all')">Export All Metadata</button>
           </div>
         </div>
-        <div ngbDropdown class="d-flex gap-2">
-          <button class="btn btn-primary" ngbDropdownToggle>Import</button>
-          <div ngbDropdownMenu>
-            <button ngbDropdownItem (click)="importMetadata('user_metadata')">Import User Metadata</button>
-            <button ngbDropdownItem (click)="importMetadata('staff_metadata')">Import Staff Metadata</button>
-            <button ngbDropdownItem (click)="importMetadata('all')">Import All Metadata</button>
+        @if (job.status !== 'submitted' && (userCanEdit || staffModeAvailable)) {
+          <div ngbDropdown class="d-flex gap-2">
+            <button class="btn btn-primary" ngbDropdownToggle>Import</button>
+            <div ngbDropdownMenu>
+              <button ngbDropdownItem (click)="importMetadata('user_metadata')">Import User Metadata</button>
+              <button ngbDropdownItem (click)="importMetadata('staff_metadata')">Import Staff Metadata</button>
+              <button ngbDropdownItem (click)="importMetadata('all')">Import All Metadata</button>
+            </div>
           </div>
-        </div>
+        }
+
         <button class="btn btn-warning" (click)="validateSDRFMetadata()">Validate Metadata</button>
       </div>
       @if ((job.user_metadata.length > 0||job.staff_metadata.length > 0) && job.sample_number > 0) {

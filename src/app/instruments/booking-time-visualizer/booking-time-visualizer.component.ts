@@ -16,8 +16,8 @@ import {
   NgbDate,
   NgbDatepicker,
   NgbDatepickerNavigateEvent,
-  NgbDateStruct,
-  NgbTimepicker
+  NgbDateStruct, NgbNav, NgbNavContent, NgbNavItem, NgbNavLinkButton, NgbNavOutlet,
+  NgbTimepicker, NgbTooltip
 } from "@ng-bootstrap/ng-bootstrap";
 import {DatePipe} from "@angular/common";
 import {WebService} from "../../web.service";
@@ -28,18 +28,25 @@ import {InstrumentService} from "../instrument.service";
 
 @Component({
     selector: 'app-booking-time-visualizer',
-    imports: [
-        ReactiveFormsModule,
-        NgbDatepicker,
-        NgbTimepicker,
-        DatePipe
-    ],
+  imports: [
+    ReactiveFormsModule,
+    NgbDatepicker,
+    NgbTimepicker,
+    DatePipe,
+    NgbTooltip,
+    NgbNav,
+    NgbNavContent,
+    NgbNavLinkButton,
+    NgbNavItem,
+    NgbNavOutlet
+  ],
     templateUrl: './booking-time-visualizer.component.html',
     styleUrl: './booking-time-visualizer.component.scss'
 })
 export class BookingTimeVisualizerComponent implements OnInit, AfterViewInit,  AfterViewChecked, OnDestroy {
   @Input() instrument!: Instrument;
   @ViewChild('canvas') canvas!: ElementRef<HTMLCanvasElement>;
+  activeTab = "existingBookings"
   ctx!: CanvasRenderingContext2D;
   dragStart!: number|undefined;
   selectedStart!: number|undefined;
@@ -92,7 +99,7 @@ export class BookingTimeVisualizerComponent implements OnInit, AfterViewInit,  A
   @Input() enableDelete: boolean = false;
   @Output() selectedRangeOut: EventEmitter<{ started: Date, ended: Date}> = new EventEmitter<{ started: Date, ended: Date}>();
   @Output() selectedUsageBlock: EventEmitter<InstrumentUsage> = new EventEmitter<InstrumentUsage>();
-  constructor(private cdr: ChangeDetectorRef, private fb: FormBuilder, private toastService: ToastService, private web: WebService, private dataService: DataService, private accounts: AccountsService, private instrumentService: InstrumentService) {
+  constructor(private cdr: ChangeDetectorRef, private fb: FormBuilder, private toastService: ToastService, private web: WebService, private dataService: DataService, public accounts: AccountsService, private instrumentService: InstrumentService) {
     this.instrumentService.updateTrigger.asObservable().subscribe(() => {
       if (this.instrument) {
         // @ts-ignore
@@ -112,7 +119,9 @@ export class BookingTimeVisualizerComponent implements OnInit, AfterViewInit,  A
     if (this.dp) {
 
     }
-    this.initializeCanvas();
+    if (this.canvas) {
+      this.initializeCanvas();
+    }
   }
 
   private initializeCanvas() {
@@ -135,6 +144,14 @@ export class BookingTimeVisualizerComponent implements OnInit, AfterViewInit,  A
   ngAfterViewChecked() {
     if (this.canvas && !this.ctx) {
       this.initializeCanvas();
+    }
+  }
+
+  changeActiveIDTab(id: string) {
+    if (id === "hourBasedBookings") {
+      if (this.canvas && !this.ctx) {
+        this.initializeCanvas();
+      }
     }
   }
 
@@ -318,7 +335,12 @@ export class BookingTimeVisualizerComponent implements OnInit, AfterViewInit,  A
           this.toastService.show("Instrument Usage", "Selected instrument usage block")
           this.selectedUsageBlock.emit(usage)
         } else {
-          this.toastService.show("This time is already booked", "Please select another time")
+          if (!this.dataService.serverSettings.allow_overlap_bookings) {
+            this.toastService.show("This time is already booked", "Please select another time")
+          } else {
+            this.selectedUsageBlock.emit(usage)
+          }
+
 
         }
         return
@@ -456,6 +478,18 @@ export class BookingTimeVisualizerComponent implements OnInit, AfterViewInit,  A
       this.toDate = null;
       this.fromDate = date;
     }
+    if (this.fromDate && this.toDate) {
+      // get bookings between the selected date range
+      const startDate = new Date(this.fromDate.year, this.fromDate.month - 1, this.fromDate.day,0);
+      const endDate = new Date(this.toDate.year, this.toDate.month - 1, this.toDate.day, 23, 59, 59, 999);
+      this.selectedRangeOut.emit({started: startDate, ended: endDate})
+      this.web.getInstrumentUsage(this.instrument.id, startDate, endDate).subscribe((data) => {
+        this.instrumentUsageQuery = data;
+        console.log(this.instrumentUsageQuery);
+        this.prepare().then();
+      });
+    }
+    console.log(this.fromDate, this.toDate)
   }
 
   isHovered(date: NgbDate) {
@@ -508,7 +542,6 @@ export class BookingTimeVisualizerComponent implements OnInit, AfterViewInit,  A
   }
 
   handleDateNavigate(event: NgbDatepickerNavigateEvent) {
-    console.log(event)
     if (this.dp) {
       if (event.current) {
         const currentDate = new Date(event.current.year, event.current.month - 1, 0)
@@ -523,11 +556,7 @@ export class BookingTimeVisualizerComponent implements OnInit, AfterViewInit,  A
             this.calendarUsageQuery = data
           })
         }
-
       }
-
-
-
     } else {
       if (!event.current) {
         const current = event.next
@@ -540,19 +569,49 @@ export class BookingTimeVisualizerComponent implements OnInit, AfterViewInit,  A
     }
   }
 
-  hasInstrumentUsage(data: NgbDate) {
+  hasInstrumentUsage(date: NgbDate) {
     if (this.calendarUsageQuery) {
       for (const usage of this.calendarUsageQuery.results) {
         if (usage.time_started && usage.time_ended) {
-          const time_started = new Date(usage.time_started).getTime()
-          const time_ended = new Date(usage.time_ended).getTime()
-          const date = new Date(data.year, data.month - 1, data.day, 12).getTime()
-          if (date >= time_started && date <= time_ended) {
-            return true
+          const usageStart = new Date(usage.time_started).getTime();
+          const usageEnd = new Date(usage.time_ended).getTime();
+          const dateStart = new Date(date.year, date.month - 1, date.day).getTime();
+          const dateEnd = new Date(date.year, date.month - 1, date.day, 23, 59, 59, 999).getTime();
+
+          // Check if the usage overlaps with the date
+          if ((usageStart >= dateStart && usageStart <= dateEnd) || (usageEnd >= dateStart && usageEnd <= dateEnd) || (usageStart <= dateStart && usageEnd >= dateEnd)) {
+            return true;
           }
         }
       }
     }
-    return false
+    return false;
+  }
+
+  getTooltipContent(date: NgbDate) {
+    if (this.calendarUsageQuery) {
+      const bookings = this.calendarUsageQuery.results.filter(usage => {
+        const usageStart = new Date(usage.time_started).getTime();
+        const usageEnd = new Date(usage.time_ended).getTime();
+        const dateStart = new Date(date.year, date.month - 1, date.day).getTime();
+        const dateEnd = new Date(date.year, date.month - 1, date.day, 23, 59, 59, 999).getTime();
+        return (usageStart >= dateStart && usageStart <= dateEnd) || (usageEnd >= dateStart && usageEnd <= dateEnd) || (usageStart <= dateStart && usageEnd >= dateEnd);
+      });
+
+      if (bookings.length > 0) {
+        const users: string[] = [];
+        for (const booking of bookings) {
+          users.push(booking.user);
+        }
+        return Array.from(new Set(users)).join(', ');
+      }
+    }
+    return 'No bookings';
+  }
+
+  removeBooking(usage: InstrumentUsage) {
+    this.web.deleteInstrumentUsage(usage.id).subscribe((data) => {
+      this.toastService.show("Instrument Usage", "Booking removed");
+    })
   }
 }

@@ -919,7 +919,7 @@ export class WebService {
   }
 
   getServerSettings() {
-    return this.http.get<{use_ocr: boolean, use_llm: boolean, use_whisper: boolean, use_coturn: boolean}>(
+    return this.http.get<{use_ocr: boolean, use_llm: boolean, use_whisper: boolean, use_coturn: boolean, allow_overlap_bookings: boolean}>(
       `${this.baseURL}/api/user/get_server_settings/`,
       {responseType: 'json', observe: 'body'}
     )
@@ -2081,6 +2081,9 @@ export class WebService {
     return this.http.post(`${this.baseURL}/api/instrument_jobs/${instrument_job_id}/validate_sdrf_metadata/`, {instance_id}, {responseType: 'json', observe: 'body'})
   }
 
+  exportExcelTemplate(instrument_job_id: number, instance_id: string) {
+    return this.http.post(`${this.baseURL}/api/instrument_jobs/${instrument_job_id}/export_excel_template/`, {instance_id}, {responseType: 'json', observe: 'body'})
+  }
 
 }
 
