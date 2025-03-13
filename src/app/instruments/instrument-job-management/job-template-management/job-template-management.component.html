@@ -1,18 +1,32 @@
 <div class="container d-flex flex-column gap-2 mt-2">
-  @if (userLabGroupQuery) {
-    <form [formGroup]="labGroupForm">
-      <div class="form-group">
-        <label>User's Professional Lab Group</label>
-        <select class="form-select" formControlName="lab_group_id" [size]="5" style="width:400px">
-          <option [value]="0">None</option>
-          @for (l of userLabGroupQuery.results; track l.id) {
-            <option [value]="l.id">{{l.name}}</option>
-          }
-        </select>
-      </div>
-      <ngb-pagination (pageChange)="onPageChange($event)" [collectionSize]="userLabGroupQuery.count" [(page)]="labGroupPage" [pageSize]="labGroupPageSize" [maxSize]="3" [boundaryLinks]="true" [rotate]="true"></ngb-pagination>
-    </form>
-  }
+  <ul ngbNav #nav="ngbNav" [(activeId)]="activeTab" (activeIdChange)="changeActiveID($event)" class="nav-tabs"  [destroyOnHide]="false">
+    <li [ngbNavItem]="'user'">
+      <button ngbNavLink>Personal Templates</button>
+      <ng-template ngbNavContent>
+
+      </ng-template>
+    </li>
+    <li [ngbNavItem]="'service_lab_group'">
+      <button ngbNavLink>Professional Group Templates</button>
+      <ng-template ngbNavContent>
+        @if (userLabGroupQuery) {
+          <form [formGroup]="labGroupForm">
+            <div class="form-group">
+              <label>User's Professional Lab Group</label>
+              <select class="form-select" formControlName="lab_group_id" [size]="5" style="width:400px">
+                <option [value]="0">None</option>
+                @for (l of userLabGroupQuery.results; track l.id) {
+                  <option [value]="l.id">{{l.name}}</option>
+                }
+              </select>
+            </div>
+            <ngb-pagination (pageChange)="onPageChange($event)" [collectionSize]="userLabGroupQuery.count" [(page)]="labGroupPage" [pageSize]="labGroupPageSize" [maxSize]="3" [boundaryLinks]="true" [rotate]="true"></ngb-pagination>
+          </form>
+        }
+      </ng-template>
+    </li>
+  </ul>
+  <div [ngbNavOutlet]="nav"></div>
   <form [formGroup]="tableTemplateForm">
     <div class="form-group">
       <label for="tableTemplateName">Search Metadata Table Template Name</label>

@@ -241,6 +241,7 @@
         <hr>
         @if (!job.selected_template) {
           <div>
+            <b>Job Template:</b> Not selected<br>
             <ul ngbNav #templateSelectionNav="ngbNav" class="nav-tabs" [destroyOnHide]="false">
               <li [ngbNavItem]="'service_lab_group'">
                 <button ngbNavLink>Group Provided Templates</button>
@@ -257,16 +258,16 @@
             </ul>
             <div [ngbNavOutlet]="templateSelectionNav" class="mt-2"></div>
           </div>
+          <ngb-alert type="warning">
+            Please select one of the provided job templates to proceed
+          </ngb-alert>
         } @else {
           <div>
             <b>Template:</b> {{job.selected_template.name}}<br>
             <button class="btn btn-sm btn-danger" ngbTooltip="Remove selected template" (click)="removeSelectedTemplate()"><i class="bi bi-trash2"></i></button>
           </div>
         }
-
-
       }
-
       @if (job.selected_template) {
         <hr>
         <div class="d-flex gap-2">
@@ -403,9 +404,7 @@
             </li>
           </ul>
           <div [ngbNavOutlet]="navMetadata" class="mt-2"></div>
-          <ngb-alert type="warning">
-            Please select one of the provided job templates to proceed
-          </ngb-alert>
+
         }
       }
 
@@ -493,17 +492,17 @@
             <form [formGroup]="staffDataForm" class="d-flex flex-column gap-2">
               <div class="d-flex gap-2">
                 <div class="form-group" style="width: 200px">
-                  <label for="injection_volume">Injection Volume</label>
+                  <label for="injection_volume">Injection Volume ({{staffDataForm.value.injection_unit}})</label>
                   <input id="injection_volume" class="form-control" type="number" formControlName="injection_volume">
                 </div>
-                <div class="form-group" style="width: 200px">
+                <!--<div class="form-group" style="width: 200px">
                   <label for="injection_unit">Injection Unit</label>
                   <select id="injection_unit" class="form-select" formControlName="injection_unit">
                     <option value="nL">nL</option>
                     <option value="uL">uL</option>
                     <option value="mL">mL</option>
                   </select>
-                </div>
+                </div>-->
               </div>
               <div class="d-flex gap-2">
                 <div class="form-group" style="width: 200px">
@@ -559,7 +558,7 @@
       <button class="btn btn-primary" (click)="createDraftJob()">Create Job</button>
     } @else {
       @if (job.status !== 'submitted' && (userCanEdit || staffModeAvailable)) {
-        @if (job.sample_number > 0) {
+        @if (job.sample_number > 0 && job.selected_template) {
           <button class="btn btn-primary" [disabled]="job.status !== 'draft'" (click)="submit()">Submit</button>
         }
         <button class="btn btn-primary" (click)="update()">Update</button>

@@ -16,8 +16,17 @@ import {
   NgbDate,
   NgbDatepicker,
   NgbDatepickerNavigateEvent,
-  NgbDateStruct, NgbNav, NgbNavContent, NgbNavItem, NgbNavLinkButton, NgbNavOutlet,
-  NgbTimepicker, NgbTooltip
+  NgbDateStruct,
+  NgbDropdown, NgbDropdownItem,
+  NgbDropdownMenu,
+  NgbDropdownToggle,
+  NgbNav,
+  NgbNavContent,
+  NgbNavItem,
+  NgbNavLinkButton,
+  NgbNavOutlet,
+  NgbTimepicker,
+  NgbTooltip
 } from "@ng-bootstrap/ng-bootstrap";
 import {DatePipe} from "@angular/common";
 import {WebService} from "../../web.service";
@@ -38,7 +47,11 @@ import {InstrumentService} from "../instrument.service";
     NgbNavContent,
     NgbNavLinkButton,
     NgbNavItem,
-    NgbNavOutlet
+    NgbNavOutlet,
+    NgbDropdown,
+    NgbDropdownToggle,
+    NgbDropdownMenu,
+    NgbDropdownItem
   ],
     templateUrl: './booking-time-visualizer.component.html',
     styleUrl: './booking-time-visualizer.component.scss'
@@ -99,7 +112,7 @@ export class BookingTimeVisualizerComponent implements OnInit, AfterViewInit,  A
   @Input() enableDelete: boolean = false;
   @Output() selectedRangeOut: EventEmitter<{ started: Date, ended: Date}> = new EventEmitter<{ started: Date, ended: Date}>();
   @Output() selectedUsageBlock: EventEmitter<InstrumentUsage> = new EventEmitter<InstrumentUsage>();
-  constructor(private cdr: ChangeDetectorRef, private fb: FormBuilder, private toastService: ToastService, private web: WebService, private dataService: DataService, public accounts: AccountsService, private instrumentService: InstrumentService) {
+  constructor(private cdr: ChangeDetectorRef, private fb: FormBuilder, private toastService: ToastService, private web: WebService, public dataService: DataService, public accounts: AccountsService, private instrumentService: InstrumentService) {
     this.instrumentService.updateTrigger.asObservable().subscribe(() => {
       if (this.instrument) {
         // @ts-ignore
@@ -612,6 +625,27 @@ export class BookingTimeVisualizerComponent implements OnInit, AfterViewInit,  A
   removeBooking(usage: InstrumentUsage) {
     this.web.deleteInstrumentUsage(usage.id).subscribe((data) => {
       this.toastService.show("Instrument Usage", "Booking removed");
+    })
+  }
+
+  delayUsage(usage: InstrumentUsage, days: number) {
+    this.web.instrumentUsageDelayUsage(usage.id, days).subscribe((data) => {
+      if (this.calendarUsageQuery) {
+        for (const usage of this.calendarUsageQuery.results) {
+          if (usage.id === data.id) {
+            usage.time_started = data.time_started;
+            usage.time_ended = data.time_ended;
+          }
+        }
+      }
+      if (this.instrumentUsageQuery) {
+        for (const usage of this.instrumentUsageQuery.results) {
+          if (usage.id === data.id) {
+            usage.time_ended = data.time_ended;
+            usage.time_started = data.time_started;
+          }
+        }
+      }
     })
   }
 }

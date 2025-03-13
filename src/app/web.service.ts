@@ -2152,6 +2152,10 @@ export class WebService {
     }
     return this.http.post<Instrument>(`${this.baseURL}/api/instrument/${instrument_job_id}/delay_usage/`, {days, start_date}, {responseType: 'json', observe: 'body'})
   }
+
+  instrumentUsageDelayUsage(instrument_usage_id: number, days: number) {
+    return this.http.post<InstrumentUsage>(`${this.baseURL}/api/instrument_usage/${instrument_usage_id}/delay_usage/`, {days}, {responseType: 'json', observe: 'body'})
+  }
 }
 
 interface ChunkUploadResponse {

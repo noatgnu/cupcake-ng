@@ -7,7 +7,7 @@ import {
   NgbDropdown,
   NgbDropdownItem,
   NgbDropdownMenu,
-  NgbDropdownToggle, NgbModal,
+  NgbDropdownToggle, NgbModal, NgbNav, NgbNavContent, NgbNavItem, NgbNavLinkButton, NgbNavOutlet,
   NgbPagination,
   NgbTooltip
 } from "@ng-bootstrap/ng-bootstrap";
@@ -27,12 +27,18 @@ import {MetadataTableComponent} from "../job-submission/metadata-table/metadata-
     NgbDropdownToggle,
     NgbDropdownItem,
     MetadataTableComponent,
-    FormsModule
+    FormsModule,
+    NgbNav,
+    NgbNavContent,
+    NgbNavLinkButton,
+    NgbNavItem,
+    NgbNavOutlet
   ],
   templateUrl: './job-template-management.component.html',
   styleUrl: './job-template-management.component.scss'
 })
 export class JobTemplateManagementComponent {
+  activeTab = 'user'
   templateShowHidden: boolean = false
   userLabGroupQuery: LabGroupQuery|undefined;
   tableTemplateQuery: MetadataTableTemplateQuery|undefined;
@@ -98,10 +104,7 @@ export class JobTemplateManagementComponent {
           this.tableTemplateQuery = data;
         })
       }
-
     }
-
-
   }
 
   onTableTemplatePageChange(page: number) {
@@ -125,6 +128,8 @@ export class JobTemplateManagementComponent {
         this.toast.show("Template Create","Please select a lab_group")
         return
       }
+    } else {
+      this.labGroupForm.controls.lab_group_id.setValue(0)
     }
     const ref = this.modal.open(JobTemplateCreationModalComponent)
     ref.result.then(result => {
@@ -186,7 +191,17 @@ export class JobTemplateManagementComponent {
         }
       }
     }
+  }
 
-
+  changeActiveID(id: string) {
+    if (id==="user") {
+      this.labGroupForm.controls.lab_group_id.setValue(0)
+      this.tableTemplateQuery = undefined;
+      this.selectedTemplate = undefined;
+      this.getTableTemplate()
+    } else {
+      this.tableTemplateQuery = undefined;
+      this.selectedTemplate = undefined;
+    }
   }
 }
