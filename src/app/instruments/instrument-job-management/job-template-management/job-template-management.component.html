@@ -1,0 +1,74 @@
+<div class="container d-flex flex-column gap-2 mt-2">
+  @if (userLabGroupQuery) {
+    <form [formGroup]="labGroupForm">
+      <div class="form-group">
+        <label>User's Professional Lab Group</label>
+        <select class="form-select" formControlName="lab_group_id" [size]="5" style="width:400px">
+          <option [value]="0">None</option>
+          @for (l of userLabGroupQuery.results; track l.id) {
+            <option [value]="l.id">{{l.name}}</option>
+          }
+        </select>
+      </div>
+      <ngb-pagination (pageChange)="onPageChange($event)" [collectionSize]="userLabGroupQuery.count" [(page)]="labGroupPage" [pageSize]="labGroupPageSize" [maxSize]="3" [boundaryLinks]="true" [rotate]="true"></ngb-pagination>
+    </form>
+  }
+  <form [formGroup]="tableTemplateForm">
+    <div class="form-group">
+      <label for="tableTemplateName">Search Metadata Table Template Name</label>
+      <input type="search" class="form-control" formControlName="searchTerm" id="tableTemplateName">
+    </div>
+  </form>
+  <div>
+    <div ngbDropdown class="d-inline-block">
+      <button class="btn btn-primary" id="createTemplate" ngbDropdownToggle>Create New Template</button>
+      <div ngbDropdownMenu aria-labelledby="createTemplate">
+        <button ngbDropdownItem (click)="createNewTemplate('user')">Personal Template</button>
+        <button ngbDropdownItem (click)="createNewTemplate('service_lab_group')" [disabled]="labGroupForm.value.lab_group_id === 0 || !labGroupForm.value.lab_group_id">Professional Group Template</button>
+      </div>
+    </div>
+  </div>
+
+
+  @if (tableTemplateQuery) {
+    <table class="table table-hover">
+      <thead>
+      <tr>
+        <th scope="col">ID</th>
+        <th scope="col">Name</th>
+        <th scope="col">Number of user columns</th>
+        <th scope="col">Number of staff columns</th>
+        <th scope="col">Actions</th>
+      </tr>
+      </thead>
+      <tbody>
+        @for (t of tableTemplateQuery.results; track t.id) {
+          <tr>
+            <td>{{t.id}}</td>
+            <td>{{t.name}}</td>
+            <td>{{t.user_columns.length}} ({{t.hidden_user_columns}} hidden)</td>
+            <td>{{t.staff_columns.length}} ({{t.hidden_staff_columns}} hidden)</td>
+            <td>
+              <div class="d-flex gap-2">
+                <button class="btn btn-sm btn-primary" (click)="selectedTemplate=t"><i class="bi bi-pencil"></i></button>
+                <button class="btn btn-sm btn-danger" (click)="deleteTemplate(t)"><i class="bi bi-trash"></i></button>
+              </div>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+    <ngb-pagination (pageChange)="onTableTemplatePageChange($event)" [collectionSize]="tableTemplateQuery.count" [(page)]="tableTemplatePage" [pageSize]="tableTemplatePageSize" [maxSize]="5" [boundaryLinks]="true" [rotate]="true"></ngb-pagination>
+  }
+
+  @if (selectedTemplate) {
+    <div class="form-check">
+      <input type="checkbox" class="form-check-input" [(ngModel)]="templateShowHidden" id="showHidden">
+      <label class="form-check-label" for="showHidden">Show hidden columns</label>
+    </div>
+    <b>Template Preview for <span class="text-primary">{{selectedTemplate.name}}</span></b>
+    <div class="metadata-table-container">
+      <app-metadata-table [showHidden]="templateShowHidden" (metadataUpdated)="updateMetadataTemplate($event)" [templateMode]="true" [staffModeActive]="true" [sampleNumber]="5" [userMetadata]="selectedTemplate.user_columns" [staffMetadata]="selectedTemplate.staff_columns"></app-metadata-table>
+    </div>
+  }
+</div>

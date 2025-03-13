@@ -96,8 +96,13 @@
         </form>
       }
     </div>
+    @if (!job.service_lab_group) {
+      <ngb-alert type="warning">
+        Please confirm the professional group that would handle this job after submission by clicking the lab group name and optionally select the user(s) that you are submitting the job to.
+      </ngb-alert>
+    }
     <hr>
-    <div  class="d-flex gap-2 flex-column">
+    <!--<div  class="d-flex gap-2 flex-column">
       <h5>Protocol Information</h5>
       <form [formGroup]="protocolForm">
         <div class="form-group">
@@ -134,7 +139,7 @@
           </div>
         </form>
       }
-    </div>
+    </div>-->
     @if (selectedProtocol) {
       <hr>
       <h5>Sample Details</h5>
@@ -151,7 +156,7 @@
             </button>
           </div>
         } @else {
-          <div class="form-group">
+          <!--<div class="form-group">
             <label>Sample Name</label>
             <div class="d-flex gap-2">
               <input (selectItem)="onStoredReagentSelected($event)" [resultTemplate]="rt" type="search" [ngbTypeahead]="searchReagent" class="form-control" [inputFormatter]="reagentFormatter" placeholder="Search or new sample name" formControlName="reagent_name_search">
@@ -199,11 +204,9 @@
                 <option value="ea">ea</option>
               </optgroup>
             </select>
-          </div>
+          </div>-->
         }
-
-
-        <div class="form-check">
+        <!--<div class="form-check">
           <input type="checkbox" class="form-check-input" id="use_previous" formControlName="use_previous">
           <label class="form-check-label" for="use_previous">Use previous reagent</label>
           <div>
@@ -211,7 +214,7 @@
               If checked, the reagent will be used from the selected source and a new reagent record won't be create
             </small>
           </div>
-        </div>
+        </div>-->
       </form>
       <form [formGroup]="formSampleExtraData">
         <div class="d-flex gap-2">
@@ -219,6 +222,11 @@
             <label for="sampleNumber">Sample Number</label>
             <input id="sampleNumber" type="number" class="form-control" formControlName="sample_number">
           </div>
+          @if (job.sample_number === 0 || !job.sample_number) {
+            <ngb-alert type="warning">
+              Please provide a sample number greater than 0 then update the form
+            </ngb-alert>
+          }
           <!--<div class="form-group">
             <label for="sampleType">Sample Type</label>
             <select id="sampleType" type="text" class="form-select" formControlName="sample_type">
@@ -229,138 +237,177 @@
           </div>-->
         </div>
       </form>
-      <div class="d-flex gap-2">
-
-        <div ngbDropdown class="d-flex gap-2">
-          <button class="btn btn-primary" ngbDropdownToggle>Excel Template</button>
-          <div ngbDropdownMenu>
-            <button ngbDropdownItem (click)="exportExcelTemplate()">Export</button>
-            @if (job.status !== 'submitted' && (userCanEdit || staffModeAvailable)) {
-              <button ngbDropdownItem>Import</button>
-            }
-
+      @if (job.service_lab_group && job.sample_number > 0) {
+        <hr>
+        @if (!job.selected_template) {
+          <div>
+            <ul ngbNav #templateSelectionNav="ngbNav" class="nav-tabs" [destroyOnHide]="false">
+              <li [ngbNavItem]="'service_lab_group'">
+                <button ngbNavLink>Group Provided Templates</button>
+                <ng-template ngbNavContent>
+                  <app-metadata-template-selection (selected)="handleSelectedTemplate($event)" [lab_group_id]="job.service_lab_group.id"></app-metadata-template-selection>
+                </ng-template>
+              </li>
+              <li [ngbNavItem]="'user'">
+                <button ngbNavLink>Personal Templates</button>
+                <ng-template ngbNavContent>
+                  <app-metadata-template-selection (selected)="handleSelectedTemplate($event)"></app-metadata-template-selection>
+                </ng-template>
+              </li>
+            </ul>
+            <div [ngbNavOutlet]="templateSelectionNav" class="mt-2"></div>
           </div>
-        </div>
-        <div ngbDropdown class="d-flex gap-2">
-          <button class="btn btn-primary" ngbDropdownToggle>Export</button>
-          <div ngbDropdownMenu>
-            <button ngbDropdownItem (click)="exportTableToTSV('user_metadata')">Export User Metadata</button>
-            <button ngbDropdownItem (click)="exportTableToTSV('staff_metadata')">Export Staff Metadata</button>
-            <button ngbDropdownItem (click)="exportTableToTSV('all')">Export All Metadata</button>
-          </div>
-        </div>
-        @if (job.status !== 'submitted' && (userCanEdit || staffModeAvailable)) {
-          <div ngbDropdown class="d-flex gap-2">
-            <button class="btn btn-primary" ngbDropdownToggle>Import</button>
-            <div ngbDropdownMenu>
-              <button ngbDropdownItem (click)="importMetadata('user_metadata')">Import User Metadata</button>
-              <button ngbDropdownItem (click)="importMetadata('staff_metadata')">Import Staff Metadata</button>
-              <button ngbDropdownItem (click)="importMetadata('all')">Import All Metadata</button>
-            </div>
+        } @else {
+          <div>
+            <b>Template:</b> {{job.selected_template.name}}<br>
+            <button class="btn btn-sm btn-danger" ngbTooltip="Remove selected template" (click)="removeSelectedTemplate()"><i class="bi bi-trash2"></i></button>
           </div>
         }
 
-        <button class="btn btn-warning" (click)="validateSDRFMetadata()">Validate Metadata</button>
-      </div>
-      @if ((job.user_metadata.length > 0||job.staff_metadata.length > 0) && job.sample_number > 0) {
-        <ul ngbNav #navMetadata="ngbNav" class="nav-tabs" [(activeId)]="metadataViewModeID" [destroyOnHide]="true">
-          <li [ngbNavItem]="'table'">
-            <button ngbNavLink>Table View</button>
-            <ng-template ngbNavContent>
-              <div class="d-flex flex-column gap-2">
-
-                <div class="form-floating">
-                  <input id="searchMetadata" class="form-control" type="search" [(ngModel)]="filterTableColumnName">
-                  <label for="searchMetadata">Search Metadata Column Name</label>
-                </div>
-                <div class="metadata-table-container">
-                  @if (job.service_lab_group) {
-                    <app-metadata-table [service_lab_group_id]="job.service_lab_group.id" (metadataFavouriteAdded)="handleFavouriteAdded($event)" [filterTableColumnName]="filterTableColumnName" (removeMetadata)="removeMetadata($event.index, $event.data_type)" #metadataTable (metadataUpdated)="handleMetadataUpdated($event)" [userCanEdit]="userCanEdit" [sampleNumber]="job.sample_number" [userMetadata]="job.user_metadata" [staffMetadata]="job.staff_metadata" [staffModeActive]="staffModeAvailable"></app-metadata-table>
-                  }
-                </div>
-              </div>
-            </ng-template>
-          </li>
-          <li [ngbNavItem]="'list'">
-            <button ngbNavLink>List View</button>
-            <ng-template ngbNavContent>
-              <div [formGroup]="metadata">
-                <div [formArrayName]="'user_metadata'" class="d-flex gap-2 flex-column">
-                  @for (i of metadata.controls['user_metadata'].controls; track i; let index = $index) {
-                    <form [formGroupName]="index" class="d-flex gap-2">
-                      <div class="form-group" style="width:400px">
-                        <label>{{i.value['name']}}</label>
-                        <div class="d-flex gap-2">
-                          @if (i.value['name']==='Modification parameters') {
-                            <input readonly (focus)="setCurrentForm(i)" type="search" [ngbTypeahead]="searchValue" class="form-control" [formControl]="metadata.controls['user_metadata'].controls[index].controls['value']">
-                            <button class="btn btn-sm btn-primary" (click)="editMetadata(index, 'user_metadata')"><i class="bi bi-pen"></i></button>
-                          } @else {
-                            <input (focus)="setCurrentForm(i)" type="search" [ngbTypeahead]="searchValue" class="form-control" [formControl]="metadata.controls['user_metadata'].controls[index].controls['value']">
-                          }
-                          @if (!i.value['mandatory']) {
-                            <button class="btn btn-sm btn-danger" (click)="removeMetadata(index, 'user_metadata')" ngbTooltip="Remove this metadata"><i class="bi bi-trash2"></i></button>
-                          }
-                          <button class="btn btn-sm btn-info" (click)="addMetadataModifier(index, 'user_metadata')" ngbTooltip="Add modifier for different sample carrying this metadata"><i class="bi bi-signpost-split"></i></button>
-                          @if (i.value['name'] && i.value['type'] && i.value['value']) {
-                            <button class="btn btn-sm btn-warning" (click)="addToFavourite(i.value['name'], i.value['type'], i.value['value'])" ngbTooltip="Favourite"><i class="bi bi-star"></i></button>
-                          }
-                        </div>
-                        @if (i.value['name']==='Modification parameters' && i.value['value']) {
-                          <app-display-modification-parameters-metadata [value]="i.value['value']"></app-display-modification-parameters-metadata>
-                        }
-                      </div>
-                    </form>
-                    @if (i.value['modifiers']) {
-                      @if (i.value['modifiers'].length > 0) {
-                        <div>
-                          <table class="table table-striped table-hover">
-                            <thead>
-                            <tr>
-                              <th scope="col">
-                                Value
-                              </th>
-                              <th scope="col">
-                                Samples
-                              </th>
-                              <th scope="col">
-                                Actions
-                              </th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                              @for (modifier of i.value['modifiers']; track $index; let indexM = $index) {
-                                <tr>
-                                  <td>{{modifier['value']}}</td>
-                                  <td>{{modifier['samples']}}</td>
-                                  <td>
-                                    <div class="d-flex gap-2">
-                                      <button class="btn btn-sm btn-danger" (click)="removeMetadataModifier(index, indexM, 'user_metadata')" ngbTooltip="Remove modifier">
-                                        <i class="bi bi-trash2"></i>
-                                      </button>
-                                      <button class="btn btn-sm btn-primary" (click)="editMetadataModifier(index, indexM, 'user_metadata')" ngbTooltip="Edit modifier">
-                                        <i class="bi bi-pencil-fill"></i>
-                                      </button>
-                                      @if (i.value['name'] && i.value['type'] && modifier['value']) {
-                                        <button class="btn btn-sm btn-warning" (click)="addToFavourite(i.value['name'], i.value['type'], modifier['value'])" ngbTooltip="Favourite"><i class="bi bi-star"></i></button>
-                                      }
-                                    </div>
-                                  </td>
-                                </tr>
-                              }
-                            </tbody>
-                          </table>
-                        </div>
-                      }
-                    }
-                  }
-                </div>
-              </div>
-            </ng-template>
-          </li>
-        </ul>
-        <div [ngbNavOutlet]="navMetadata" class="mt-2"></div>
 
       }
+
+      @if (job.selected_template) {
+        <div class="d-flex gap-2">
+          <div ngbDropdown class="d-flex gap-2">
+            <button class="btn btn-primary" ngbDropdownToggle>Excel Template</button>
+            <div ngbDropdownMenu>
+              <button ngbDropdownItem (click)="exportExcelTemplate()">Export</button>
+              @if (job.status !== 'submitted' && (userCanEdit || staffModeAvailable)) {
+                <button ngbDropdownItem>Import</button>
+              }
+
+            </div>
+          </div>
+          <div ngbDropdown class="d-flex gap-2">
+            <button class="btn btn-primary" ngbDropdownToggle>Export</button>
+            <div ngbDropdownMenu>
+              <button ngbDropdownItem (click)="exportTableToTSV('user_metadata')">Export User Metadata</button>
+              <button ngbDropdownItem (click)="exportTableToTSV('staff_metadata')">Export Staff Metadata</button>
+              <button ngbDropdownItem (click)="exportTableToTSV('all')">Export All Metadata</button>
+            </div>
+          </div>
+          @if (job.status !== 'submitted' && (userCanEdit || staffModeAvailable)) {
+            <div ngbDropdown class="d-flex gap-2">
+              <button class="btn btn-primary" ngbDropdownToggle>Import</button>
+              <div ngbDropdownMenu>
+                <button ngbDropdownItem (click)="importMetadata('user_metadata')">Import User Metadata</button>
+                <button ngbDropdownItem (click)="importMetadata('staff_metadata')">Import Staff Metadata</button>
+                <button ngbDropdownItem (click)="importMetadata('all')">Import All Metadata</button>
+              </div>
+            </div>
+          }
+
+          <button class="btn btn-warning" (click)="validateSDRFMetadata()">Validate Metadata</button>
+        </div>
+        <div class="form-check">
+          <input type="checkbox" class="form-check-input" [(ngModel)]="showHidden" id="showHidden">
+          <label class="form-check-label" for="showHidden">Show hidden columns</label>
+        </div>
+        @if ((job.user_metadata.length > 0||job.staff_metadata.length > 0) && job.sample_number > 0) {
+          <ul ngbNav #navMetadata="ngbNav" class="nav-tabs" [(activeId)]="metadataViewModeID" [destroyOnHide]="true">
+            <li [ngbNavItem]="'table'">
+              <button ngbNavLink>Table View</button>
+              <ng-template ngbNavContent>
+                <div class="d-flex flex-column gap-2">
+
+                  <div class="form-floating">
+                    <input id="searchMetadata" class="form-control" type="search" [(ngModel)]="filterTableColumnName">
+                    <label for="searchMetadata">Search Metadata Column Name</label>
+                  </div>
+                  <div class="metadata-table-container">
+                    @if (job.service_lab_group) {
+                      <app-metadata-table [showHidden]="showHidden" [service_lab_group_id]="job.service_lab_group.id" (metadataFavouriteAdded)="handleFavouriteAdded($event)" [filterTableColumnName]="filterTableColumnName" (removeMetadata)="removeMetadata($event.index, $event.data_type)" #metadataTable (metadataUpdated)="handleMetadataUpdated($event)" [userCanEdit]="userCanEdit" [sampleNumber]="job.sample_number" [userMetadata]="job.user_metadata" [staffMetadata]="job.staff_metadata" [staffModeActive]="staffModeAvailable"></app-metadata-table>
+                    }
+                  </div>
+                </div>
+              </ng-template>
+            </li>
+            <li [ngbNavItem]="'list'">
+              <button ngbNavLink>List View</button>
+              <ng-template ngbNavContent>
+                <div [formGroup]="metadata">
+                  <div [formArrayName]="'user_metadata'" class="d-flex gap-2 flex-column">
+                    @for (i of metadata.controls['user_metadata'].controls; track i; let index = $index) {
+                      <form [formGroupName]="index" class="d-flex gap-2">
+                        <div class="form-group" style="width:400px">
+                          <label>{{i.value['name']}}</label>
+                          <div class="d-flex gap-2">
+                            @if (i.value['name']==='Modification parameters') {
+                              <input readonly (focus)="setCurrentForm(i)" type="search" [ngbTypeahead]="searchValue" class="form-control" [formControl]="metadata.controls['user_metadata'].controls[index].controls['value']">
+                              <button class="btn btn-sm btn-primary" (click)="editMetadata(index, 'user_metadata')"><i class="bi bi-pen"></i></button>
+                            } @else {
+                              <input (focus)="setCurrentForm(i)" type="search" [ngbTypeahead]="searchValue" class="form-control" [formControl]="metadata.controls['user_metadata'].controls[index].controls['value']">
+                            }
+                            @if (!i.value['mandatory']) {
+                              <button class="btn btn-sm btn-danger" (click)="removeMetadata(index, 'user_metadata')" ngbTooltip="Remove this metadata"><i class="bi bi-trash2"></i></button>
+                            }
+                            <button class="btn btn-sm btn-info" (click)="addMetadataModifier(index, 'user_metadata')" ngbTooltip="Add modifier for different sample carrying this metadata"><i class="bi bi-signpost-split"></i></button>
+                            @if (i.value['name'] && i.value['type'] && i.value['value']) {
+                              <button class="btn btn-sm btn-warning" (click)="addToFavourite(i.value['name'], i.value['type'], i.value['value'])" ngbTooltip="Favourite"><i class="bi bi-star"></i></button>
+                            }
+                          </div>
+                          @if (i.value['name']==='Modification parameters' && i.value['value']) {
+                            <app-display-modification-parameters-metadata [value]="i.value['value']"></app-display-modification-parameters-metadata>
+                          }
+                        </div>
+                      </form>
+                      @if (i.value['modifiers']) {
+                        @if (i.value['modifiers'].length > 0) {
+                          <div>
+                            <table class="table table-striped table-hover">
+                              <thead>
+                              <tr>
+                                <th scope="col">
+                                  Value
+                                </th>
+                                <th scope="col">
+                                  Samples
+                                </th>
+                                <th scope="col">
+                                  Actions
+                                </th>
+                              </tr>
+                              </thead>
+                              <tbody>
+                                @for (modifier of i.value['modifiers']; track $index; let indexM = $index) {
+                                  <tr>
+                                    <td>{{modifier['value']}}</td>
+                                    <td>{{modifier['samples']}}</td>
+                                    <td>
+                                      <div class="d-flex gap-2">
+                                        <button class="btn btn-sm btn-danger" (click)="removeMetadataModifier(index, indexM, 'user_metadata')" ngbTooltip="Remove modifier">
+                                          <i class="bi bi-trash2"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-primary" (click)="editMetadataModifier(index, indexM, 'user_metadata')" ngbTooltip="Edit modifier">
+                                          <i class="bi bi-pencil-fill"></i>
+                                        </button>
+                                        @if (i.value['name'] && i.value['type'] && modifier['value']) {
+                                          <button class="btn btn-sm btn-warning" (click)="addToFavourite(i.value['name'], i.value['type'], modifier['value'])" ngbTooltip="Favourite"><i class="bi bi-star"></i></button>
+                                        }
+                                      </div>
+                                    </td>
+                                  </tr>
+                                }
+                              </tbody>
+                            </table>
+                          </div>
+                        }
+                      }
+                    }
+                  </div>
+                </div>
+              </ng-template>
+            </li>
+          </ul>
+          <div [ngbNavOutlet]="navMetadata" class="mt-2"></div>
+          <ngb-alert type="warning">
+            Please select one of the provided job templates to proceed
+          </ngb-alert>
+        }
+      }
+
+
       <hr>
       <h5>MS Experiment Details (for staff)</h5>
       @if (job.staff_metadata.length > 0 && job.sample_number > 0) {

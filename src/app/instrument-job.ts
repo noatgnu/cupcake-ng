@@ -1,7 +1,7 @@
 import {Instrument, InstrumentUsage} from "./instrument";
 import {Annotation} from "./annotation";
 import {StoredReagent} from "./storage-object";
-import {MetadataColumn} from "./metadata-column";
+import {MetadataColumn, MetadataTableTemplate} from "./metadata-column";
 
 export interface InstrumentJob {
   id: number,
@@ -55,6 +55,7 @@ export interface InstrumentJob {
     id: number,
     name: string,
   }|null,
+  selected_template: MetadataTableTemplate | null,
 }
 
 export interface InstrumentJobQuery {

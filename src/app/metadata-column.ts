@@ -12,7 +12,10 @@ export interface MetadataColumn {
   modifiers: {
     samples: string,
     value: string,
-  }[]
+  }[],
+  hidden: boolean,
+  auto_generated: boolean,
+  readonly: boolean,
 }
 
 export interface MetadataColumnQuery {
@@ -22,3 +25,24 @@ export interface MetadataColumnQuery {
   results: MetadataColumn[];
 }
 
+export interface MetadataTableTemplate {
+  name: string,
+  user_columns: MetadataColumn[],
+  staff_columns: MetadataColumn[],
+  hidden_user_columns: number,
+  hidden_staff_columns: number,
+  id: number,
+  created_at: Date,
+  updated_at: Date,
+  service_lab_group: number,
+  lab_group: number,
+  user: number,
+  enabled: boolean,
+}
+
+export interface MetadataTableTemplateQuery {
+  count: number;
+  next: string|null;
+  previous: string|null;
+  results: MetadataTableTemplate[];
+}

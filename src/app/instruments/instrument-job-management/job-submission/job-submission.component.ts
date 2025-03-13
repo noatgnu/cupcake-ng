@@ -12,6 +12,7 @@ import {
 import {InstrumentJob} from "../../../instrument-job";
 import {WebService} from "../../../web.service";
 import {
+  NgbAlert,
   NgbDropdown,
   NgbDropdownItem,
   NgbDropdownMenu,
@@ -63,8 +64,11 @@ import {AreYouSureModalComponent} from "../../../are-you-sure-modal/are-you-sure
 import {WebsocketService} from "../../../websocket.service";
 import {environment} from "../../../../environments/environment";
 import {UploadLargeFileModalComponent} from "../../../upload-large-file-modal/upload-large-file-modal.component";
-import {MetadataColumn} from "../../../metadata-column";
+import {MetadataColumn, MetadataTableTemplate} from "../../../metadata-column";
 import {AddFavouriteModalComponent} from "../../../add-favourite-modal/add-favourite-modal.component";
+import {
+  MetadataTemplateSelectionComponent
+} from "../../../metadata-template-selection/metadata-template-selection.component";
 
 @Component({
     selector: 'app-job-submission',
@@ -90,12 +94,15 @@ import {AddFavouriteModalComponent} from "../../../add-favourite-modal/add-favou
     NgbNavOutlet,
     NgClass,
     QuillViewComponent,
-    MetadataTableComponent
+    MetadataTableComponent,
+    MetadataTemplateSelectionComponent,
+    NgbAlert
   ],
     templateUrl: './job-submission.component.html',
     styleUrl: './job-submission.component.scss'
 })
 export class JobSubmissionComponent implements OnInit, AfterViewInit {
+  showHidden: boolean = false;
   metadataViewModeID: 'table' | 'list' = 'table'
   @ViewChild('metadataTable') metadataTable?: MetadataTableComponent;
   currentField = ""
@@ -1360,6 +1367,22 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit {
     if (this.job) {
       this.web.exportExcelTemplate(this.job.id, this.web.cupcakeInstanceID).subscribe((response) => {
 
+      })
+    }
+  }
+
+  handleSelectedTemplate(template: MetadataTableTemplate) {
+    if (this.job) {
+      this.web.instrumentJobSelectedTemplate(this.job.id, template.id).subscribe((response) => {
+        this.job = response
+      })
+    }
+  }
+
+  removeSelectedTemplate() {
+    if (this.job) {
+      this.web.instrumentJobRemoveSelectedTemplate(this.job.id).subscribe((response) => {
+        this.job = response
       })
     }
   }

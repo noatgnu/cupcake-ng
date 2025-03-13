@@ -12,6 +12,7 @@ import {InstrumentManagementModalComponent} from "../instrument-management-modal
 import {
   InstrumentMetadataManagementModalComponent
 } from "../instrument-metadata-management-modal/instrument-metadata-management-modal.component";
+import {DelayUsageModalComponent} from "./delay-usage-modal/delay-usage-modal.component";
 
 @Component({
     selector: 'app-instrument-management',
@@ -106,6 +107,26 @@ export class InstrumentManagementComponent {
   manageMetadata(instrument: Instrument) {
     const ref = this.modal.open(InstrumentMetadataManagementModalComponent, {scrollable: true})
     ref.componentInstance.instrument = instrument
+  }
+
+  delayUsage(instrument: Instrument) {
+    if (this.dataService.instrumentPermissions[instrument.id].can_manage || this.accounts.is_staff) {
+      const ref = this.modal.open(DelayUsageModalComponent)
+      ref.result.then((data: any) => {
+        if (data) {
+          this.web.instrumentDelayUsage(instrument.id, data.days, data.start_date).subscribe(d => {
+            this.toastService.show("Instrument usage", "Successfully delay usages by " + data.days + " days")
+          }, error => {
+            this.toastService.show("Instrument usage", "Failed to delay usages")
+          })
+        }
+      }, (error) => {
+        this.toastService.show("Instrument usage", "Failed to delay usages")
+      })
+
+
+
+    }
 
   }
 

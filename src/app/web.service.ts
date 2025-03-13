@@ -23,7 +23,7 @@ import {
   StoredReagent,
   StoredReagentQuery
 } from "./storage-object";
-import {MetadataColumn} from "./metadata-column";
+import {MetadataColumn, MetadataTableTemplate, MetadataTableTemplateQuery} from "./metadata-column";
 import {LabGroup, LabGroupQuery} from "./lab-group";
 import {HumanDiseaseQuery} from "./human-disease";
 import {SubcellularLocation, SubcellularLocationQuery} from "./subcellular-location";
@@ -2085,6 +2085,73 @@ export class WebService {
     return this.http.post(`${this.baseURL}/api/instrument_jobs/${instrument_job_id}/export_excel_template/`, {instance_id}, {responseType: 'json', observe: 'body'})
   }
 
+  getMetadataTableTemplates(limit: number = 10, offset: number = 0, search: string|null = "", mode: string|undefined|null = 'user', lab_group_id: number|null|undefined = 0) {
+    let params = new HttpParams()
+      .set('limit', limit.toString())
+      .set('offset', offset.toString())
+    if (search !== "" && search !== null) {
+      params = params.append('search', search);
+    }
+    if (mode) {
+      params = params.append('mode', mode)
+    }
+
+    if (lab_group_id && mode === 'service_lab_group') {
+      if (lab_group_id > 0) {
+        params = params.append('lab_group_id', lab_group_id.toString())
+      }
+    }
+
+    return this.http.get<MetadataTableTemplateQuery>(
+      `${this.baseURL}/api/metadata_table_templates/`,
+      {responseType: 'json', observe: 'body', params: params}
+    )
+  }
+
+  getMetadataTableTemplate(id: number) {
+    return this.http.get<MetadataTableTemplate>(
+      `${this.baseURL}/api/metadata_table_templates/${id}/`,
+      {responseType: 'json', observe: 'body'}
+    )
+  }
+
+  updateMetadataTableTemplate(id: number, payload: any) {
+    return this.http.put<MetadataTableTemplate>(
+      `${this.baseURL}/api/metadata_table_templates/${id}/`,
+      payload,
+      {responseType: 'json', observe: 'body'}
+    )
+  }
+
+  deleteMetadataTableTemplate(id: number) {
+    return this.http.delete(
+      `${this.baseURL}/api/metadata_table_templates/${id}/`,
+      {responseType: 'json', observe: 'body'}
+    )
+  }
+
+  createMetadataTableTemplate(payload: any) {
+    return this.http.post<MetadataTableTemplate>(
+      `${this.baseURL}/api/metadata_table_templates/`,
+      payload,
+      {responseType: 'json', observe: 'body'}
+    )
+  }
+
+  instrumentJobSelectedTemplate(instrument_job_id: number, template_id: number) {
+    return this.http.post<InstrumentJob>(`${this.baseURL}/api/instrument_jobs/${instrument_job_id}/selected_template/`, {template: template_id}, {responseType: 'json', observe: 'body'})
+  }
+
+  instrumentJobRemoveSelectedTemplate(instrument_job_id: number) {
+    return this.http.post<InstrumentJob>(`${this.baseURL}/api/instrument_jobs/${instrument_job_id}/remove_selected_template/`, {}, {responseType: 'json', observe: 'body'})
+  }
+
+  instrumentDelayUsage(instrument_job_id: number, days: number, start_date: Date|undefined|null) {
+    if (!start_date) {
+      start_date = new Date()
+    }
+    return this.http.post<Instrument>(`${this.baseURL}/api/instrument/${instrument_job_id}/delay_usage/`, {days, start_date}, {responseType: 'json', observe: 'body'})
+  }
 }
 
 interface ChunkUploadResponse {

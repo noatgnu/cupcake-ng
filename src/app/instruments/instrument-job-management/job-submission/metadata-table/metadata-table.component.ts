@@ -18,7 +18,6 @@ import {MetadataService} from "../../../../metadata.service";
 @Component({
   selector: 'app-metadata-table',
   imports: [
-    DisplayModificationParametersMetadataComponent,
     NgbTooltip,
     NgbDropdown,
     NgbDropdownMenu,
@@ -35,6 +34,7 @@ export class MetadataTableComponent implements OnChanges{
   originCell: { row: number, col: number }|null = null
   private _filterTableColumnName: string = ""
   visibleColumnNames: string[] = []
+  @Input() templateMode: boolean = false
   @Input() service_lab_group_id: number = 0
   @Input() set filterTableColumnName(value: string) {
     this._filterTableColumnName = value
@@ -50,7 +50,7 @@ export class MetadataTableComponent implements OnChanges{
 
   @Input() userCanEdit: boolean = false
   @Input() sampleNumber: number = 0
-
+  @Input() showHidden: boolean = false
   @Input() userMetadata: MetadataColumn[] = []
 
   @Input() staffMetadata: MetadataColumn[] = []
@@ -158,6 +158,7 @@ export class MetadataTableComponent implements OnChanges{
 
   editCell(row: any, metadata: MetadataColumn, index: number, data_type: 'user_metadata' | 'staff_metadata') {
     const ref = this.modal.open(JobMetadataCreationModalComponent)
+    ref.componentInstance.previewMode = this.templateMode
     if (this.service_lab_group_id > 0) {
       ref.componentInstance.service_lab_group_id = this.service_lab_group_id
     }
@@ -217,7 +218,10 @@ export class MetadataTableComponent implements OnChanges{
             value: metadata.value,
             type: metadata.type,
             id: metadata.id,
-            data_type: data_type
+            data_type: data_type,
+            hidden: metadata.hidden,
+            auto_generated: metadata.auto_generated,
+            readonly: metadata.readonly
           }
           let modifiers = [...metadata.modifiers];
           const sampleIndices = this.parseSampleRanges(m.samples);
@@ -271,14 +275,14 @@ export class MetadataTableComponent implements OnChanges{
           value: metadata.value,
           type: metadata.type,
           id: metadata.id,
-          data_type: data_type
+          data_type: data_type,
+          hidden: metadata.hidden,
+          auto_generated: metadata.auto_generated,
+          readonly: metadata.readonly
         }
         let modifiers = [...metadata.modifiers];
         let found_in_modifiers = false;
-        console.log(metadata.modifiers)
-        console.log(modifiers)
         for (const m of metadata.modifiers) {
-          console.log(m.value, oldValue, value)
           if (m.value === oldValue && m.value !== value) {
             const sampleIndices = this.parseSampleRanges(m.samples);
             // remove sample index from the modifier that has the same value as the old value
@@ -288,7 +292,7 @@ export class MetadataTableComponent implements OnChanges{
               modifiers.splice(modifiers.indexOf(m), 1);
             } else {
               // convert the sampleIndices to a similar string format as the one in the modifiers and check if any indices are continuous then use a range for those indices
-              console.log(newSampleIndices)
+
               const sortedIndices = newSampleIndices.sort((a, b) => a - b);
               let start = sortedIndices[0];
               let end = sortedIndices[0];
@@ -373,6 +377,7 @@ export class MetadataTableComponent implements OnChanges{
 
   editDefaultMetadataValue(metadata: MetadataColumn, data_type: 'user_metadata' | 'staff_metadata') {
     const ref = this.modal.open(JobMetadataCreationModalComponent)
+    ref.componentInstance.previewMode = this.templateMode
     if (this.service_lab_group_id > 0) {
       ref.componentInstance.service_lab_group_id = this.service_lab_group_id
     }
@@ -415,7 +420,10 @@ export class MetadataTableComponent implements OnChanges{
             value: value,
             type: metadata.type,
             id: metadata.id,
-            data_type: data_type
+            data_type: data_type,
+            hidden: r.hidden,
+            auto_generated: r.auto_generated,
+            readonly: r.readonly
           }
           d.push(data)
         }

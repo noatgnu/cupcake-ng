@@ -1,6 +1,6 @@
-import { Component } from '@angular/core';
+import {Component, EventEmitter, Output} from '@angular/core';
 import {WebService} from "../../../web.service";
-import {InstrumentJobQuery} from "../../../instrument-job";
+import {InstrumentJob, InstrumentJobQuery} from "../../../instrument-job";
 import {FormBuilder, ReactiveFormsModule} from "@angular/forms";
 import {catchError, debounceTime, distinctUntilChanged, map, Observable, of, switchMap, tap} from "rxjs";
 import {LabGroup, LabGroupQuery} from "../../../lab-group";
@@ -17,6 +17,7 @@ import {NgbPagination, NgbTypeahead, NgbTypeaheadSelectItemEvent} from "@ng-boot
     styleUrl: './job-management.component.scss'
 })
 export class JobManagementComponent {
+  @Output() selectJob: EventEmitter<InstrumentJob> = new EventEmitter();
   instrumentJobQuery: InstrumentJobQuery|undefined
   searching = false
   form = this.fb.group({

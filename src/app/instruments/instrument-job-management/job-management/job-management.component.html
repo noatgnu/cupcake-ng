@@ -62,12 +62,6 @@
           Status
         </th>
         <th scope="col">
-          Search Engine
-        </th>
-        <th scope="col">
-          Search Engine Version
-        </th>
-        <th scope="col">
           Cost Center
         </th>
         <th scope="col">
@@ -80,12 +74,10 @@
           @for (j of instrumentJobQuery.results; track j.id) {
             <tr>
               <td>
-                <a href="/#/instruments/jobs/{{j.id}}">{{j.id}}</a>
+                <a href="/#/instruments/jobs/{{j.id}}" (click)="selectJob.emit(j)">{{j.id}}</a>
               </td>
               <td>{{j.job_name}}</td>
               <td>{{j.status}}</td>
-              <td>{{j.search_engine}}</td>
-              <td>{{j.search_engine_version}}</td>
               <td>{{j.cost_center}}</td>
               <td>{{j.funder}}</td>
             </tr>

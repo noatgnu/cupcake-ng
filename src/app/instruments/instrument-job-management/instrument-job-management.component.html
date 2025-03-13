@@ -1,15 +1,21 @@
 <div class="container">
-  <ul ngbNav #nav="ngbNav" class="nav-tabs">
-    <li ngbNavItem>
+  <ul ngbNav #nav="ngbNav" class="nav-tabs" [(activeId)]="activeTab">
+    <li [ngbNavItem]="'submission'">
       <button ngbNavLink>Job Submission</button>
       <ng-template ngbNavContent>
         <app-job-submission [job]="currentJob"></app-job-submission>
       </ng-template>
     </li>
-    <li ngbNavItem>
+    <li [ngbNavItem]="'management'">
       <button ngbNavLink>Manage Job</button>
       <ng-template ngbNavContent>
-        <app-job-management></app-job-management>
+        <app-job-management (selectJob)="handleSelectedJob($event)"></app-job-management>
+      </ng-template>
+    </li>
+    <li [ngbNavItem]="'templates'">
+      <button ngbNavLink>Table Templates</button>
+      <ng-template ngbNavContent>
+        <app-job-template-management></app-job-template-management>
       </ng-template>
     </li>
   </ul>

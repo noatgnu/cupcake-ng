@@ -39,6 +39,7 @@ export class JobMetadataCreationModalComponent {
   currentUserFavouriteMetadataPage = 1
   pageSize = 10
   activeID: string = "user"
+  @Input() previewMode: boolean = false
   @Input() service_lab_group_id: number = -1
   @Input() possibleColumns: MetadataColumn[] = []
   private _name: string = ""
@@ -139,7 +140,10 @@ export class JobMetadataCreationModalComponent {
     d2: "0",
     ageRange: false,
     samples: "",
-    characteristics: false
+    characteristics: false,
+    auto_generated: false,
+    hidden: false,
+    readonly: false,
   })
 
   private _value: string = ""

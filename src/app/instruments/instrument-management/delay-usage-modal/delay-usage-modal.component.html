@@ -1,0 +1,31 @@
+<div class="modal-header">
+  <h5 class="modal-title">
+    Delay Usage
+  </h5>
+</div>
+<div class="modal-body">
+  <form class="row row-cols-sm-auto">
+    <div class="d-flex gap-2">
+      <div class="input-group">
+        <input
+          class="form-control"
+          placeholder="yyyy-mm-dd"
+          name="dp"
+          [(ngModel)]="model"
+          ngbDatepicker
+          #d="ngbDatepicker"
+          [ngModelOptions]="{standalone: true}"
+        />
+        <button class="btn btn-outline-secondary bi bi-calendar3" (click)="d.toggle()" type="button"></button>
+      </div>
+      <div class="form-floating">
+        <input class="form-control" id="delayDays" type="number" [(ngModel)]="delay_days" [ngModelOptions]="{standalone: true}" />
+        <label for="delayDays">Delay Days</label>
+      </div>
+    </div>
+  </form>
+</div>
+<div class="modal-footer">
+  <button class="btn btn-primary" (click)="close()">Close</button>
+  <button class="btn btn-primary" (click)="save()">Submit</button>
+</div>

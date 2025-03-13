@@ -17,6 +17,17 @@
       </div>
     }
 
+    @if (previewMode) {
+      <div class="form-check">
+        <input type="checkbox" class="form-check-input" id="hidden" formControlName="hidden">
+        <label for="hidden" class="form-check-label">Hidden</label>
+      </div>
+      <div class="form-check">
+        <input type="checkbox" class="form-check-input" id="readonly" formControlName="readonly">
+        <label for="readonly" class="form-check-label">Readonly</label>
+      </div>
+    }
+
     @if (name==='' && type === 'Factor value') {
       <div class="form-group">
         <label for="factorValueColumn">Factor Value Columns</label>

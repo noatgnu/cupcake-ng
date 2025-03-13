@@ -1,25 +1,29 @@
-import {Component, Input} from '@angular/core';
+import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {NgbNav, NgbNavContent, NgbNavItem, NgbNavLinkButton, NgbNavOutlet} from "@ng-bootstrap/ng-bootstrap";
 import {JobSubmissionComponent} from "./job-submission/job-submission.component";
 import {WebService} from "../../web.service";
 import {InstrumentJob} from "../../instrument-job";
 import {JobManagementComponent} from "./job-management/job-management.component";
+import {JobTemplateManagementComponent} from "./job-template-management/job-template-management.component";
 
 @Component({
     selector: 'app-instrument-job-management',
-    imports: [
-        NgbNavContent,
-        NgbNavLinkButton,
-        NgbNavItem,
-        NgbNav,
-        NgbNavOutlet,
-        JobSubmissionComponent,
-        JobManagementComponent
-    ],
+  imports: [
+    NgbNavContent,
+    NgbNavLinkButton,
+    NgbNavItem,
+    NgbNav,
+    NgbNavOutlet,
+    JobSubmissionComponent,
+    JobManagementComponent,
+    JobTemplateManagementComponent
+  ],
     templateUrl: './instrument-job-management.component.html',
     styleUrl: './instrument-job-management.component.scss'
 })
 export class InstrumentJobManagementComponent {
+  activeTab: string = 'submission'
+
   private _currentJob: InstrumentJob|undefined
   @Input() set currentJobId(value: number) {
     if (value) {
@@ -39,5 +43,10 @@ export class InstrumentJobManagementComponent {
 
   constructor(private web: WebService) {
 
+  }
+
+  handleSelectedJob(job: InstrumentJob) {
+    this.currentJob = job
+    this.activeTab = 'submission'
   }
 }
