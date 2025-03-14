@@ -1,82 +1,96 @@
 <div class="container">
-  <form [formGroup]="form">
-    <div class="form-floating">
-      <input class="form-control" id="searchTerm" formControlName="searchTerm" placeholder="Search Term">
-      <label for="searchTerm">Instrument Search Term</label>
-    </div>
-  </form>
-  @if (instrumentQuery) {
-    @if (instrumentQuery.results.length > 0) {
-      <div class="list-group mt-2">
-        @for (result of instrumentQuery.results; track result.id) {
-          <div class="list-group-item list-group-item-action" (click)="clickInstrument(result)" >
-            <div>
-              <b>{{result.instrument_name}}</b>
-            </div>
-            <small>{{result.instrument_description}}</small>
-            <div class="d-flex flex-row">
-              @if (result.metadata_columns.length > 0) {
-                @for (m of result.metadata_columns; track m.id) {
-                  @if (m.type === "Characteristics") {
-                    <span class="badge bg-primary" ngbTooltip="Characteristics">{{m.name}}: {{m.value}}</span>
-                  } @else if (m.type === "Comment") {
-                    <span class="badge bg-secondary" ngbTooltip="Comment">{{m.name}}: {{m.value}}</span>
-                  } @else if (m.type === "Factor value") {
-                    <span class="badge bg-success" ngbTooltip="Factor value">{{m.name}}: {{m.value}}</span>
-                  } @else {
-                    <span class="badge bg-danger" ngbTooltip="Other">{{m.name}}: {{m.value}}</span>
-                  }
-                }
-              }
-            </div>
-            <div class="d-flex flex-row gap-1">
-              @if (dataService.instrumentPermissions[result.id]) {
-                @if (dataService.instrumentPermissions[result.id]['can_view']) {
-                  <i class="bi bi-eye"></i>
-                } @else {
-                  <i class="bi bi-eye text-danger"></i>
-                }
-                @if (dataService.instrumentPermissions[result.id]['can_book']) {
-                  <i class="bi bi-book"></i>
-                } @else {
-                  <i class="bi bi-book text-danger"></i>
-                }
-              }
-            </div>
-            <app-booking-time-visualizer [instrument]="result" [enableEdit]="false"></app-booking-time-visualizer>
+  <ul ngbNav #nav="ngbNav" [(activeId)]="activeID" class="nav-tabs"  [destroyOnHide]="false">
+    <li [ngbNavItem]="'Bookings'">
+      <button ngbNavLink>Bookings</button>
+      <ng-template ngbNavContent>
+        <form [formGroup]="form">
+          <div class="form-floating">
+            <input class="form-control" id="searchTerm" formControlName="searchTerm" placeholder="Search Term">
+            <label for="searchTerm">Instrument Search Term</label>
+          </div>
+        </form>
+        @if (instrumentQuery) {
+          @if (instrumentQuery.results.length > 0) {
+            <div class="list-group mt-2">
+              @for (result of instrumentQuery.results; track result.id) {
+                <div class="list-group-item list-group-item-action" (click)="clickInstrument(result)" >
+                  <div>
+                    <b>{{result.instrument_name}}</b>
+                  </div>
+                  <small>{{result.instrument_description}}</small>
+                  <div class="d-flex flex-row">
+                    @if (result.metadata_columns.length > 0) {
+                      @for (m of result.metadata_columns; track m.id) {
+                        @if (m.type === "Characteristics") {
+                          <span class="badge bg-primary" ngbTooltip="Characteristics">{{m.name}}: {{m.value}}</span>
+                        } @else if (m.type === "Comment") {
+                          <span class="badge bg-secondary" ngbTooltip="Comment">{{m.name}}: {{m.value}}</span>
+                        } @else if (m.type === "Factor value") {
+                          <span class="badge bg-success" ngbTooltip="Factor value">{{m.name}}: {{m.value}}</span>
+                        } @else {
+                          <span class="badge bg-danger" ngbTooltip="Other">{{m.name}}: {{m.value}}</span>
+                        }
+                      }
+                    }
+                  </div>
+                  <div class="d-flex flex-row gap-1">
+                    @if (dataService.instrumentPermissions[result.id]) {
+                      @if (dataService.instrumentPermissions[result.id]['can_view']) {
+                        <i class="bi bi-eye"></i>
+                      } @else {
+                        <i class="bi bi-eye text-danger"></i>
+                      }
+                      @if (dataService.instrumentPermissions[result.id]['can_book']) {
+                        <i class="bi bi-book"></i>
+                      } @else {
+                        <i class="bi bi-book text-danger"></i>
+                      }
+                    }
+                  </div>
+                  <app-booking-time-visualizer [instrument]="result" [enableEdit]="false"></app-booking-time-visualizer>
 
-            @if (instrumentUsageMap[result.id]) {
-              @if (instrumentUsageMap[result.id].results.length > 0) {
-                <div class="mt-2">
-                  Scheduled Usage in the next 21 days:
-                  @for (u of instrumentUsageMap[result.id].results; track u.id) {
-                    <div class="d-flex flex-row gap-1 mt-1">
-                      <span>{{u.time_started| date: 'short'}} - {{u.time_ended| date: 'short'}}</span>
-                      <span class="badge bg-primary">{{u.user}}</span>
-                    </div>
+                  @if (instrumentUsageMap[result.id]) {
+                    @if (instrumentUsageMap[result.id].results.length > 0) {
+                      <div class="mt-2">
+                        Scheduled Usage in the next 21 days:
+                        @for (u of instrumentUsageMap[result.id].results; track u.id) {
+                          <div class="d-flex flex-row gap-1 mt-1">
+                            <span>{{u.time_started| date: 'short'}} - {{u.time_ended| date: 'short'}}</span>
+                            <span class="badge bg-primary">{{u.user}}</span>
+                          </div>
+                        }
+                      </div>
+                    }
                   }
                 </div>
               }
-            }
-          </div>
+            </div>
+            <div class="mt-2">
+              <ngb-pagination (pageChange)="handlePageChange($event)" [collectionSize]="instrumentQuery.count" [(page)]="currentInstrumentPage" [pageSize]="pageSize" [rotate]="true" [boundaryLinks]="true" />
+            </div>
+
+            <div>
+              <b>Legend</b>
+              <div class="d-flex flex-column gap-1">
+                <small><i class="bi bi-eye"></i> View Permission (red if denied)</small>
+                <small><i class="bi bi-book"></i> Book Permission (red if denied)</small>
+              </div>
+            </div>
+
+          } @else {
+            <div class="alert-warning">
+              No instruments found.
+            </div>
+          }
         }
-      </div>
-      <div class="mt-2">
-        <ngb-pagination (pageChange)="handlePageChange($event)" [collectionSize]="instrumentQuery.count" [(page)]="currentInstrumentPage" [pageSize]="pageSize" [rotate]="true" [boundaryLinks]="true" />
-      </div>
-
-      <div>
-        <b>Legend</b>
-        <div class="d-flex flex-column gap-1">
-          <small><i class="bi bi-eye"></i> View Permission (red if denied)</small>
-          <small><i class="bi bi-book"></i> Book Permission (red if denied)</small>
-        </div>
-      </div>
-
-    } @else {
-      <div class="alert-warning">
-        No instruments found.
-      </div>
-    }
-  }
+      </ng-template>
+    </li>
+    <li [ngbNavItem]="'Logs'">
+      <button ngbNavLink>Logs</button>
+      <ng-template ngbNavContent>
+        <app-instrument-booking-logs></app-instrument-booking-logs>
+      </ng-template>
+    </li>
+  </ul>
+  <div [ngbNavOutlet]="nav"></div>
 </div>

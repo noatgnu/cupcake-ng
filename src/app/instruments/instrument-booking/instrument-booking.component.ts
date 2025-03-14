@@ -2,7 +2,15 @@ import { Component } from '@angular/core';
 import {WebService} from "../../web.service";
 import {Instrument, InstrumentQuery, InstrumentUsageQuery} from "../../instrument";
 import {FormBuilder, ReactiveFormsModule} from "@angular/forms";
-import {NgbModal, NgbPagination, NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
+import {
+  NgbModal,
+  NgbNav,
+  NgbNavContent,
+  NgbNavItem,
+  NgbNavLinkButton, NgbNavOutlet,
+  NgbPagination,
+  NgbTooltip
+} from "@ng-bootstrap/ng-bootstrap";
 import {forkJoin, Observable} from "rxjs";
 import {DataService} from "../../data.service";
 import {DatePipe, NgClass} from "@angular/common";
@@ -10,6 +18,7 @@ import {InstrumentBookingModalComponent} from "../instrument-booking-modal/instr
 import {ToastService} from "../../toast.service";
 import {BookingTimeVisualizerComponent} from "../booking-time-visualizer/booking-time-visualizer.component";
 import {InstrumentService} from "../instrument.service";
+import {InstrumentBookingLogsComponent} from "./instrument-booking-logs/instrument-booking-logs.component";
 
 @Component({
     selector: 'app-instrument-booking',
@@ -19,13 +28,19 @@ import {InstrumentService} from "../instrument.service";
     NgClass,
     NgbTooltip,
     BookingTimeVisualizerComponent,
-    DatePipe
+    DatePipe,
+    NgbNav,
+    NgbNavContent,
+    NgbNavLinkButton,
+    NgbNavItem,
+    NgbNavOutlet,
+    InstrumentBookingLogsComponent
   ],
     templateUrl: './instrument-booking.component.html',
     styleUrl: './instrument-booking.component.scss'
 })
 export class InstrumentBookingComponent {
-
+  activeID = 'Bookings'
   pageSize = 5
   currentInstrumentPage = 1
 

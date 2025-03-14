@@ -143,7 +143,6 @@ export class BookingTimeVisualizerComponent implements OnInit, AfterViewInit,  A
     if (this.instrument) {
       // @ts-ignore
       this.web.getInstrumentUsage(this.instrument.id, this.form.value.windowStart, this.form.value.windowEnd).subscribe((data) => {
-        console.log(data)
         this.instrumentUsageQuery = data
         if (ctx) {
           this.ctx = ctx
@@ -498,7 +497,6 @@ export class BookingTimeVisualizerComponent implements OnInit, AfterViewInit,  A
       this.selectedRangeOut.emit({started: startDate, ended: endDate})
       this.web.getInstrumentUsage(this.instrument.id, startDate, endDate).subscribe((data) => {
         this.instrumentUsageQuery = data;
-        console.log(this.instrumentUsageQuery);
         this.prepare().then();
       });
     }

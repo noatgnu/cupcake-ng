@@ -106,7 +106,7 @@
           }
           @for (col of staffMetadata; track col.id; let index = $index) {
             @if (visibleColumnNames.includes(col.name)) {
-              @if (!col.hidden && col.hidden) {
+              @if (!col.hidden || showHidden) {
                 <td (mouseover)="moveOverCell(rowIndex, (userMetadata.length+index))" [ngClass]="{'border border-black': selectionMode&&selectionModeColIndex===(userMetadata.length+index), 'table-danger': selectionMode&&isSelectedCell(rowIndex, (userMetadata.length+index)), 'table-secondary': col.hidden}">
                   {{ row['col_' + (userMetadata.length+index)] }}
                   @if (currentCell && !templateMode) {

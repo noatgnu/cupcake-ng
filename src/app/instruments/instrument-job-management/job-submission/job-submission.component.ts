@@ -69,6 +69,9 @@ import {AddFavouriteModalComponent} from "../../../add-favourite-modal/add-favou
 import {
   MetadataTemplateSelectionComponent
 } from "../../../metadata-template-selection/metadata-template-selection.component";
+import {
+  MethodMetadataModalComponent
+} from "./method-metadata-modal/method-metadata-modal.component";
 
 @Component({
     selector: 'app-job-submission',
@@ -145,6 +148,7 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit {
     this.form.patchValue({job_name: value.job_name, staff: value.staff.map(s => s.id), status: value.status})
     this.staffModeAvailable = false
     this.staffDataForm.disable()
+    this.protocolForm.disable()
     if (value.staff) {
       if (value.staff.length > 0) {
         if (this.accountService.username) {
@@ -152,6 +156,7 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit {
           if (staff) {
             this.staffModeAvailable = true
             this.staffDataForm.enable()
+            this.protocolForm.enable()
           }
         }
       }
@@ -161,10 +166,12 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit {
           if (result.status === 200) {
             this.staffModeAvailable = true
             this.staffDataForm.enable()
+            this.protocolForm.enable()
           }
         }, (error) => {
           this.staffModeAvailable = false
           this.staffDataForm.disable()
+          this.protocolForm.disable()
         })
       }
     }
@@ -429,7 +436,8 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit {
         if (value.length < 2) {
           return of([]);
         }
-        return this.web.getUserProtocols(undefined, 5, 0, value).pipe(
+
+        return this.web.searchProtocols(undefined, value).pipe(
           map((response) => {
             this.protocolSearchLoading = false;
             return response.results || []
@@ -679,20 +687,7 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit {
         return
       }
       const payload: any = {}
-      if (!this.protocolForm.value.id) {
-        // @ts-ignore
-        const protocol = await this.web.createProtocol(this.protocolForm.value.protocol_title, this.protocolForm.value.protocol_description).toPromise()
-        if (protocol) {
-          // @ts-ignore
-          this.protocolForm.patchValue({id: protocol.id, protocol_title: protocol.protocol_title, protocol_description: protocol.protocol_description})
-          this.selectedProtocol = protocol
-          payload["protocol"] = protocol.id
-        }
-      } else {
-        if (this.protocolForm.dirty) {
-          payload["protocol"] = this.protocolForm.value.id
-        }
-      }
+
       console.log(this.reagentForm.value)
       if (this.labGroupForm.valid && this.labGroupForm.value.selected) {
         const selectedLabGroup = await this.web.getLabGroup(this.labGroupForm.value.selected).toPromise()
@@ -824,6 +819,20 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit {
         const payload: any = {
         }
         if (this.job) {
+          if (!this.protocolForm.value.id && this.protocolForm.value.protocol_title && this.protocolForm.value.protocol_description) {
+            // @ts-ignore
+            const protocol = await this.web.createProtocol(this.protocolForm.value.protocol_title, this.protocolForm.value.protocol_description).toPromise()
+            if (protocol) {
+              // @ts-ignore
+              this.protocolForm.patchValue({id: protocol.id, protocol_title: protocol.protocol_title, protocol_description: protocol.protocol_description})
+              this.selectedProtocol = protocol
+              payload["protocol"] = protocol.id
+            }
+          } else {
+            if (this.protocolForm.dirty) {
+              payload["protocol"] = this.protocolForm.value.id
+            }
+          }
           if (this.staffDataForm) {
             if (this.staffDataForm.controls.injection_volume.dirty) {
               payload["injection_volume"] = this.staffDataForm.value.injection_volume
@@ -1384,6 +1393,58 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit {
       this.web.instrumentJobRemoveSelectedTemplate(this.job.id).subscribe((response) => {
         this.job = response
       })
+    }
+  }
+
+  importMetadataFromMethod() {
+    if (this.selectedProtocol && this.job) {
+      const ref = this.modal.open(MethodMetadataModalComponent, {scrollable: true})
+      if (this.selectedProtocol.metadata_columns) {
+        ref.componentInstance.metadata_columns = this.selectedProtocol.metadata_columns
+      }
+      ref.componentInstance.action = 'import'
+      ref.result.then((response: MetadataColumn[]) => {
+        if (response && this.selectedProtocol && this.job) {
+          if (response.length > 0) {
+            this.web.instrumentJobCopyMetadataFromProtocol(this.job.id, response.map((m) => m.id)).subscribe((response) => {
+              this.job = response
+            })
+          }
+        }
+
+      })
+    }
+  }
+
+  copyMetadataFromMethod() {
+    if (this.selectedProtocol && this.job) {
+      const ref = this.modal.open(MethodMetadataModalComponent, {scrollable: true})
+      ref.componentInstance.action = 'copy'
+      ref.componentInstance.metadata_columns = [...this.job.user_metadata, ...this.job.staff_metadata]
+      ref.result.then((response: MetadataColumn[]) => {
+        if (response && this.selectedProtocol) {
+          if (response.length > 0) {
+            this.web.copyMetadataToProtocol(this.selectedProtocol.id, response).subscribe((result) => {
+              this.selectedProtocol = result
+            })
+          }
+
+        }
+      })
+    }
+  }
+
+  deleteMetadata(metadata: MetadataColumn) {
+    if (this.selectedProtocol && this.job) {
+      if (this.staffModeAvailable) {
+        this.web.deleteMetaDataColumn(metadata.id).subscribe((response) => {
+          if (this.selectedProtocol) {
+            this.web.getProtocol(this.selectedProtocol.id).subscribe((response) => {
+              this.selectedProtocol = response
+            })
+          }
+        })
+      }
     }
   }
 }

@@ -1,5 +1,6 @@
 import {ProtocolReagent, ProtocolStepReagent} from "./reagent";
 import {ProtocolTag, StepTag} from "./tag";
+import {MetadataColumn} from "./metadata-column";
 
 export interface Protocol {
   id: number;
@@ -16,6 +17,7 @@ export interface Protocol {
   duration_rating: number;
   reagents: ProtocolReagent[];
   tags: ProtocolTag[];
+  metadata_columns: MetadataColumn[];
 }
 
 export interface ProtocolStep {

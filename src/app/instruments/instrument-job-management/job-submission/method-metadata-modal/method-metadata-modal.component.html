@@ -1,0 +1,30 @@
+<div class="modal-header">
+  <h5 class="modal-title">
+    Method Data Exchange
+  </h5>
+</div>
+<div class="modal-body">
+  @if (action === 'import') {
+    <div>
+      Select the following data from the method to import into your job:
+    </div>
+  } @else {
+    <div>
+      Select the following data from your job to copy to the method:
+    </div>
+  }
+  @if (metadata_columns.length > 0) {
+    <ul class="list-group">
+      @for (m of metadata_columns; track m.id) {
+        <li class="list-group-item" (click)="handleSelectedColumn(m)" [class.active]="selected_columns.includes(m)">
+          <p>{{m.name}}</p>
+          <small>{{m.type}}</small>
+        </li>
+      }
+    </ul>
+  }
+</div>
+<div class="modal-footer">
+  <button class="btn btn-primary" (click)="close()">Close</button>
+  <button class="btn btn-primary" (click)="save()">Submit</button>
+</div>

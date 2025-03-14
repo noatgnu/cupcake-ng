@@ -1,0 +1,29 @@
+<div class="filter-form">
+  <form [formGroup]="filterForm">
+    <div>
+      <label for="user">User:</label>
+      <input id="user" formControlName="users" type="text" class="form-control">
+    </div>
+    <div>
+      <label for="instrument">Instrument:</label>
+      <input id="instrument" formControlName="instrument" type="text" class="form-control">
+    </div>
+  </form>
+</div>
+
+<div class="timeline-container">
+  <div class="timeline">
+    @for (day of getDaysWithBookings(); track $index) {
+      <div class="day-header">{{ day.date | date: 'fullDate' }}</div>
+      <div class="timeline-event">
+        @for (booking of day.bookings; track booking.id) {
+          <div class="event-time">{{ booking.time_started | date: 'shortTime' }} - {{ booking.time_ended | date: 'shortTime' }}</div>
+          <div class="event-details">
+            <div>User: {{ booking.user }}</div>
+            <div>Instrument: {{ booking.instrument }}</div>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</div>

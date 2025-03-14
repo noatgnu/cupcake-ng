@@ -1087,15 +1087,22 @@ export class WebService {
     )
   }
 
-  getInstrumentUsage(instrument_id: number, time_started?: Date, time_ended?: Date) {
+  getInstrumentUsage(instrument_id: number|undefined|null, time_started?: Date, time_ended?: Date, users?: string[], limit: number = 50, offset: number = 0) {
     let params = new HttpParams()
-    params = params.set('instrument', instrument_id.toString())
+    if (instrument_id) {
+      params = params.set('instrument', instrument_id.toString())
+    }
     if (time_started) {
       params = params.set('time_started', time_started.toISOString())
     }
     if (time_ended) {
       params = params.set('time_ended', time_ended.toISOString())
     }
+    if (users !== undefined) {
+      params = params.set('users', users.join(','))
+    }
+    params = params.set('limit', limit.toString())
+    params = params.set('offset', offset.toString())
 
     return this.http.get<InstrumentUsageQuery>(
       `${this.baseURL}/api/instrument_usage/`,
@@ -2155,6 +2162,14 @@ export class WebService {
 
   instrumentUsageDelayUsage(instrument_usage_id: number, days: number) {
     return this.http.post<InstrumentUsage>(`${this.baseURL}/api/instrument_usage/${instrument_usage_id}/delay_usage/`, {days}, {responseType: 'json', observe: 'body'})
+  }
+
+  copyMetadataToProtocol(protocol_id: number, metadata: any[]) {
+    return this.http.post<Protocol>(`${this.baseURL}/api/protocol/${protocol_id}/add_metadata_columns/`, {metadata_columns: metadata}, {responseType: 'json', observe: 'body'})
+  }
+
+  instrumentJobCopyMetadataFromProtocol(instrument_job_id: number, metadata_ids: number[]) {
+    return this.http.post<InstrumentJob>(`${this.baseURL}/api/instrument_jobs/${instrument_job_id}/copy_metadata_from_protocol/`, {metadata_ids}, {responseType: 'json', observe: 'body'})
   }
 }
 

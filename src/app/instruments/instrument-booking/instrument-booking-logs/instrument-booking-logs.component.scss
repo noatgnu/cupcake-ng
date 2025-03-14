@@ -1,0 +1,32 @@
+.filter-form {
+  margin-bottom: 20px;
+}
+
+.timeline-container {
+  display: flex;
+}
+
+.timeline {
+  width: 100%;
+  border-left: 2px solid #ccc;
+  padding-left: 20px;
+}
+
+.day-header {
+  font-weight: bold;
+  margin-top: 20px;
+}
+
+.timeline-event {
+  display: flex;
+  margin-top: 10px;
+}
+
+.event-time {
+  width: 150px;
+  font-weight: bold;
+}
+
+.event-details {
+  margin-left: 20px;
+}
