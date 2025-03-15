@@ -34,13 +34,12 @@
     </div>
   </form>
   <div>
-    <div ngbDropdown class="d-inline-block">
-      <button class="btn btn-primary" id="createTemplate" ngbDropdownToggle>Create New Template</button>
-      <div ngbDropdownMenu aria-labelledby="createTemplate">
-        <button ngbDropdownItem (click)="createNewTemplate('user')">Personal Template</button>
-        <button ngbDropdownItem (click)="createNewTemplate('service_lab_group')" [disabled]="labGroupForm.value.lab_group_id === 0 || !labGroupForm.value.lab_group_id">Professional Group Template</button>
-      </div>
-    </div>
+    @if (activeTab === 'user') {
+      <button class="btn btn-primary" (click)="createNewTemplate('user')">Create Personal Template</button>
+    } @else {
+      <button class="btn btn-warning" (click)="createNewTemplate('service_lab_group')" [disabled]="labGroupForm.value.lab_group_id === 0 || !labGroupForm.value.lab_group_id">Create Professional Group Template</button>
+
+    }
   </div>
 
 

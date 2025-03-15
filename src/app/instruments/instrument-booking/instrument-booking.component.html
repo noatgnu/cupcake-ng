@@ -91,6 +91,12 @@
         <app-instrument-booking-logs></app-instrument-booking-logs>
       </ng-template>
     </li>
+    <li [ngbNavItem]="'Export'">
+      <button ngbNavLink>Export Bookings</button>
+      <ng-template ngbNavContent>
+        <app-export-bookings></app-export-bookings>
+      </ng-template>
+    </li>
   </ul>
   <div [ngbNavOutlet]="nav"></div>
 </div>

@@ -1087,10 +1087,14 @@ export class WebService {
     )
   }
 
-  getInstrumentUsage(instrument_id: number|undefined|null, time_started?: Date, time_ended?: Date, users?: string[], limit: number = 50, offset: number = 0) {
+  getInstrumentUsage(instrument_id: number|number[]|undefined|null, time_started?: Date, time_ended?: Date, users?: string[], limit: number = 50, offset: number = 0, search_type: string = "usage") {
     let params = new HttpParams()
-    if (instrument_id) {
+    if (!Array.isArray(instrument_id) && instrument_id !== undefined && instrument_id !== null) {
       params = params.set('instrument', instrument_id.toString())
+    } else {
+      if (instrument_id) {
+        params = params.set('instrument', instrument_id.join(','))
+      }
     }
     if (time_started) {
       params = params.set('time_started', time_started.toISOString())
@@ -1100,6 +1104,9 @@ export class WebService {
     }
     if (users !== undefined) {
       params = params.set('users', users.join(','))
+    }
+    if (search_type) {
+      params = params.set('search_type', search_type)
     }
     params = params.set('limit', limit.toString())
     params = params.set('offset', offset.toString())
@@ -2170,6 +2177,10 @@ export class WebService {
 
   instrumentJobCopyMetadataFromProtocol(instrument_job_id: number, metadata_ids: number[]) {
     return this.http.post<InstrumentJob>(`${this.baseURL}/api/instrument_jobs/${instrument_job_id}/copy_metadata_from_protocol/`, {metadata_ids}, {responseType: 'json', observe: 'body'})
+  }
+
+  exportUsage(instruments: number[], time_started: Date, time_ended: Date, lab_group: number[] = [], user: number[] = [], mode: string = "user", calculate_with_duration_cutoff: boolean = false, instance_id: string = "") {
+    return this.http.post(`${this.baseURL}/api/instrument_usage/export_usage/`, {instruments, time_started, time_ended, lab_group, user, mode, calculate_with_duration_cutoff, instance_id}, {responseType: 'json', observe: 'body'})
   }
 }
 

@@ -19,6 +19,7 @@ import {ToastService} from "../../toast.service";
 import {BookingTimeVisualizerComponent} from "../booking-time-visualizer/booking-time-visualizer.component";
 import {InstrumentService} from "../instrument.service";
 import {InstrumentBookingLogsComponent} from "./instrument-booking-logs/instrument-booking-logs.component";
+import {ExportBookingsComponent} from "./export-bookings/export-bookings.component";
 
 @Component({
     selector: 'app-instrument-booking',
@@ -34,7 +35,8 @@ import {InstrumentBookingLogsComponent} from "./instrument-booking-logs/instrume
     NgbNavLinkButton,
     NgbNavItem,
     NgbNavOutlet,
-    InstrumentBookingLogsComponent
+    InstrumentBookingLogsComponent,
+    ExportBookingsComponent
   ],
     templateUrl: './instrument-booking.component.html',
     styleUrl: './instrument-booking.component.scss'

@@ -8,7 +8,7 @@
 
 .timeline {
   width: 100%;
-  border-left: 2px solid #ccc;
+  border-left: 2px solid rgba(186, 104, 166, 0.64);
   padding-left: 20px;
 }
 
@@ -20,11 +20,15 @@
 .timeline-event {
   display: flex;
   margin-top: 10px;
+  flex-wrap: wrap;
 }
 
 .event-time {
+  border-left: 2px solid rgb(172, 110, 110);
   width: 150px;
   font-weight: bold;
+  padding-left: 10px;
+  margin-left: 10px;
 }
 
 .event-details {
