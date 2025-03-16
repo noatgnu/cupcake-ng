@@ -63,8 +63,9 @@
             <td>{{t.staff_columns.length}} ({{t.hidden_staff_columns}} hidden)</td>
             <td>
               <div class="d-flex gap-2">
-                <button class="btn btn-sm btn-primary" (click)="selectedTemplate=t"><i class="bi bi-pencil"></i></button>
-                <button class="btn btn-sm btn-danger" (click)="deleteTemplate(t)"><i class="bi bi-trash"></i></button>
+                <button class="btn btn-sm btn-primary" (click)="exportTemplateToJSON(t)" ngbTooltip="Download template file"><i class="bi bi-arrow-down"></i></button>
+                <button class="btn btn-sm btn-primary" (click)="selectedTemplate=t" ngbTooltip="Edit template"><i class="bi bi-pencil"></i></button>
+                <button class="btn btn-sm btn-danger" (click)="deleteTemplate(t)" ngbTooltip="Remove template"><i class="bi bi-trash"></i></button>
               </div>
             </td>
           </tr>
@@ -78,6 +79,45 @@
     <div class="form-check">
       <input type="checkbox" class="form-check-input" [(ngModel)]="templateShowHidden" id="showHidden">
       <label class="form-check-label" for="showHidden">Show hidden columns</label>
+    </div>
+    <div class="d-flex gap-2">
+      <button class="btn btn-warning" (click)="importFromJSON()" ngbTooltip="Import default data from json file">Import</button>
+      <div ngbDropdown display="dynamic" class="d-inline-black">
+        <button class="btn btn-primary" id="addMetadata" ngbDropdownToggle>
+          + User Metadata
+        </button>
+        <div ngbDropdownMenu aria-labelledby="addMetadata">
+          @for (m of metadataService.userMetadataTemplate; track m.name) {
+            <a class="dropdown-item" (click)="addMetadata(m, 'user_metadata')">
+              {{m.name}}
+            </a>
+          }
+          <a class="dropdown-item" (click)="addMetadata({name: 'Sample type', type: 'Characteristics'}, 'user_metadata')">
+            Sample Type
+          </a>
+          <a class="dropdown-item" (click)="addMetadata({name: '', type: ''}, 'user_metadata')">
+            Custom Metadata
+          </a>
+        </div>
+      </div>
+      <div ngbDropdown display="dynamic" class="d-inline-black">
+        <button class="btn btn-warning" id="addStaffMetadata" ngbDropdownToggle>
+          + Staff Metadata
+        </button>
+        <div ngbDropdownMenu aria-labelledby="addStaffMetadata">
+          @for (m of metadataService.staffMetadataSpecific; track m) {
+            <a class="dropdown-item" (click)="addMetadata({name: m, type: 'Comment'}, 'staff_metadata')">
+              {{m}}
+            </a>
+          }
+          <a class="dropdown-item" (click)="addMetadata({name: '', type: 'Factor value'}, 'staff_metadata')">
+            Factor Value
+          </a>
+          <a class="dropdown-item" (click)="addMetadata({name: '', type: ''}, 'staff_metadata')">
+            Custom Metadata
+          </a>
+        </div>
+      </div>
     </div>
     <b>Template Preview for <span class="text-primary">{{selectedTemplate.name}}</span></b>
     <div class="metadata-table-container">

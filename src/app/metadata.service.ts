@@ -224,4 +224,82 @@ export class MetadataService {
       modifiers: modifiers
     }
   }
+
+  tranformMetadataValue(r: any, value: string) {
+    if (r.metadataName === "Modification parameters") {
+      if (r.metadataMT) {
+        value += `;MT=${r.metadataMT}`
+      }
+      if (r.metadataPP) {
+        value += `;PP=${r.metadataPP}`
+      }
+      if (r.metadataTA) {
+        value += `;TA=${r.metadataTA}`
+      }
+      if (r.metadataTS) {
+        value += `;TS=${r.metadataTS}`
+      }
+      if (r.metadataMM) {
+        value += `;MM=${r.metadataMM}`
+      }
+      if (r.metadataAC) {
+        value += `;AC=${r.metadataAC}`
+      }
+    } else if (r.metadataName === "Spiked compound") {
+      value = ""
+      if (r.metadataSP) {
+        value += `SP=${r.metadataSP}`
+      }
+      if (r.metadataCT) {
+        value += `;CT=${r.metadataCT}`
+      }
+      if (r.metadataQY) {
+        value += `;QY=${r.metadataQY}`
+      }
+      if (r.metadataPS) {
+        value += `;PS=${r.metadataPS}`
+      }
+      if (r.metadataAC) {
+        value += `;AC=${r.metadataAC}`
+      }
+      if (r.metadataCN) {
+        value += `;CN=${r.metadataCN}`
+      }
+      if (r.metadataCV) {
+        value += `;CV=${r.metadataCV}`
+      }
+      if (r.metadataCS) {
+        value += `;CS=${r.metadataCS}`
+      }
+      if (r.metadataCF) {
+        value += `;CF=${r.metadataCF}`
+      }
+    } else if (r.metadataName === "Age") {
+      let ageString = ""
+      if (r.y1 > 0) {
+        ageString += `${r.y1}Y`
+      }
+      if (r.m1 > 0) {
+        ageString += `${r.m1}M`
+      }
+      if (r.d1 > 0) {
+        ageString += `${r.d1}D`
+      }
+      if (r.ageRange) {
+        ageString += "-"
+        if (r.y2 > 0) {
+          ageString += `${r.y2}Y`
+        }
+        if (r.m2 > 0) {
+          ageString += `${r.m2}M`
+        }
+        if (r.d2 > 0) {
+          ageString += `${r.d2}D`
+        }
+      }
+      value = ageString
+    }
+    return value;
+  }
+
 }

@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import {AccountsService} from "../../../accounts/accounts.service";
 import {LabGroupQuery} from "../../../lab-group";
 import {WebService} from "../../../web.service";
-import {FormBuilder, FormsModule, ReactiveFormsModule} from "@angular/forms";
+import {FormArray, FormBuilder, FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {
   NgbDropdown,
   NgbDropdownItem,
@@ -11,10 +11,12 @@ import {
   NgbPagination,
   NgbTooltip
 } from "@ng-bootstrap/ng-bootstrap";
-import {MetadataTableTemplate, MetadataTableTemplateQuery} from "../../../metadata-column";
+import {MetadataColumn, MetadataTableTemplate, MetadataTableTemplateQuery} from "../../../metadata-column";
 import {ToastService} from "../../../toast.service";
 import {JobTemplateCreationModalComponent} from "./job-template-creation-modal/job-template-creation-modal.component";
 import {MetadataTableComponent} from "../job-submission/metadata-table/metadata-table.component";
+import {MetadataService} from "../../../metadata.service";
+import {JobMetadataCreationModalComponent} from "../job-metadata-creation-modal/job-metadata-creation-modal.component";
 
 @Component({
   selector: 'app-job-template-management',
@@ -27,7 +29,11 @@ import {MetadataTableComponent} from "../job-submission/metadata-table/metadata-
     NgbNavContent,
     NgbNavLinkButton,
     NgbNavItem,
-    NgbNavOutlet
+    NgbNavOutlet,
+    NgbDropdown,
+    NgbDropdownMenu,
+    NgbDropdownToggle,
+    NgbTooltip
   ],
   templateUrl: './job-template-management.component.html',
   styleUrl: './job-template-management.component.scss'
@@ -51,7 +57,7 @@ export class JobTemplateManagementComponent {
 
   selectedTemplate: MetadataTableTemplate | undefined
 
-  constructor(private accounts: AccountsService, private web: WebService, private fb: FormBuilder, private toast: ToastService, private modal: NgbModal) { }
+  constructor(public metadataService: MetadataService, private accounts: AccountsService, private web: WebService, private fb: FormBuilder, private toast: ToastService, private modal: NgbModal) { }
 
   ngOnInit() {
     this.web.getUserLabGroups(undefined, this.labGroupPageSize, 0, true).subscribe(data => {
@@ -198,5 +204,142 @@ export class JobTemplateManagementComponent {
       this.tableTemplateQuery = undefined;
       this.selectedTemplate = undefined;
     }
+  }
+
+  addMetadata(metadata: {name: string, type: string}, arrayName: 'user_metadata'|'staff_metadata') {
+    const ref = this.modal.open(JobMetadataCreationModalComponent, {scrollable: true})
+    if (this.selectedTemplate) {
+      if (metadata.type === "Factor value") {
+        ref.componentInstance.possibleColumns = [...this.selectedTemplate.user_columns, ...this.selectedTemplate.staff_columns].filter((m) => m.type !== "Factor value")
+      }
+    }
+    ref.componentInstance.name = metadata.name
+    // capitalize first letter
+    ref.componentInstance.type = metadata.type.charAt(0).toUpperCase() + metadata.type.slice(1)
+
+
+    ref.closed.subscribe((result: any[]) => {
+      if (result) {
+        const payload: any[] = []
+        for (const r of result) {
+          if (r.type !== 'Factor value') {
+            if (r.charateristic) {
+              r.metadataType = "Characteristics"
+            } else {
+              r.metadataType = "Comment"
+            }
+
+            let group: any = {
+              name: r.metadataName,
+              type: r.metadataType,
+              value: r.metadataValue,
+              mandatory: false,
+              id: null,
+              readonly: r.readonly,
+              auto_generated: r.auto_generated,
+              modifiers: [],
+              hidden: r.hidden,
+            }
+            group.value = this.metadataService.tranformMetadataValue(r, r.metadataValue);
+            payload.push(group)
+          } else {
+            if (this.selectedTemplate) {
+              const selectedFactorValueColumn = [...this.selectedTemplate.user_columns, ...this.selectedTemplate.staff_columns].find((c: MetadataColumn) => c.name === r.metadataValue && c.type !== "Factor value")
+              if (selectedFactorValueColumn) {
+                let group: any = {
+                  name: selectedFactorValueColumn.name,
+                  type: 'Factor value',
+                  value: selectedFactorValueColumn.value,
+                  mandatory: false,
+                  id: null,
+                  modifiers: selectedFactorValueColumn.modifiers,
+                  readonly: r.readonly,
+                  auto_generated: r.auto_generated,
+                  hidden: r.hidden,
+                }
+                group.value = this.metadataService.tranformMetadataValue(r, selectedFactorValueColumn.value);
+                payload.push(group)
+              }
+            }
+          }
+        }
+        console.log(payload)
+        if (payload.length > 0) {
+          if (this.selectedTemplate) {
+            if (arrayName === 'user_metadata') {
+              this.selectedTemplate.user_columns = [...this.selectedTemplate.user_columns, ...payload]
+            } else {
+              this.selectedTemplate.staff_columns = [...this.selectedTemplate.staff_columns, ...payload]
+            }
+            this.web.updateMetadataTableTemplate(this.selectedTemplate.id, this.selectedTemplate).subscribe(data => {
+              this.selectedTemplate = data;
+              if (this.tableTemplateQuery && this.selectedTemplate) {
+                // @ts-ignore
+                const d = this.tableTemplateQuery.results.findIndex((c) => c.id === this.selectedTemplate.id)
+                if (d >= 0) {
+                  this.tableTemplateQuery.results[d] = this.selectedTemplate
+                }
+              }
+            })
+          }
+
+        }
+      }
+    })
+  }
+
+  exportTemplateToJSON(metadataTemplate: MetadataTableTemplate) {
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(metadataTemplate));
+    const downloadAnchorNode = document.createElement('a');
+    downloadAnchorNode.setAttribute("href", dataStr);
+    downloadAnchorNode.setAttribute("download", metadataTemplate.name + ".json");
+    document.body.appendChild(downloadAnchorNode); // required for firefox
+    downloadAnchorNode.click();
+    downloadAnchorNode.remove();
+  }
+
+  importFromJSON() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+    input.onchange = (event) => {
+      const target = event.target as HTMLInputElement;
+      const file: File = (target.files as FileList)[0];
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        if (!e.target) {
+          return;
+        }
+        const contents = e.target.result;
+        if (contents) {
+          const data = JSON.parse(contents as string);
+          const user_columns = data.user_columns.map((c: any) => {
+            c.id = null
+            return c
+          });
+          const staff_columns = data.staff_columns.map((c: any) => {
+            c.id = null
+            return c
+          });
+          if (this.selectedTemplate) {
+            this.selectedTemplate.user_columns = user_columns;
+            this.selectedTemplate.staff_columns = staff_columns;
+            this.web.updateMetadataTableTemplate(this.selectedTemplate.id, this.selectedTemplate).subscribe(data => {
+              this.selectedTemplate = data;
+              if (this.tableTemplateQuery && this.selectedTemplate) {
+                // @ts-ignore
+                const d = this.tableTemplateQuery.results.findIndex((c) => c.id === this.selectedTemplate.id)
+                if (d >= 0) {
+                  this.tableTemplateQuery.results[d] = this.selectedTemplate
+                }
+              }
+            })
+          }
+
+        }
+      }
+      reader.readAsText(file);
+    }
+    input.click();
   }
 }
