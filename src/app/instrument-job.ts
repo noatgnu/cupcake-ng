@@ -56,6 +56,8 @@ export interface InstrumentJob {
     name: string,
   }|null,
   selected_template: MetadataTableTemplate | null,
+  submitted_at: Date|null,
+  completed_at: Date|null,
 }
 
 export interface InstrumentJobQuery {

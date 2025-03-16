@@ -32,25 +32,28 @@
       @for (col of staffMetadata; track col.id; let index = $index) {
         @if (visibleColumnNames.includes(col.name)) {
           @if (!col.hidden || showHidden) {
-            <th scope="col" [class.table-warning]="col.type != 'Factor value'" [class.table-danger]="col.type == 'Factor value'" (mouseover)="currentCell = {row: -1, col: (userMetadata.length+index)}">
-              {{col.name}}
-              @if (currentCell) {
-                @if (currentCell.row === -1 && currentCell.col === (userMetadata.length+index) && staffModeActive) {
-                  <div ngbDropdown class="d-inline-block">
-                    <button class="btn btn-sm btn-outline-primary" id="metadataColumnDropdownStaff" ngbDropdownToggle><i class="bi bi-pencil-fill"></i></button>
-                    <div ngbDropdownMenu aria-labelledby="metadataColumnDropdownStaff">
-                      <button class="dropdown-item" (click)="editDefaultMetadataValue(col, 'staff_metadata')" ngbTooltip="Edit default value"><i  class="bi bi-pen"></i> Edit Default Value</button>
-                      @if (!templateMode) {
-                        <button class="dropdown-item" (click)="replaceEntireMetadataColumn(col, 'staff_metadata')" ngbTooltip="Replace entire column"><i  class="bi bi-columns"></i> Replace Entire Column</button>
-                      }
-                      @if (!col.mandatory) {
-                        <button class="dropdown-item" (click)="removeMetadataCol(index, col, 'staff_metadata')" ngbTooltip="Remove metadata"><i class="bi bi-trash2"></i> Remove Column</button>
-                      }
+            @if (!templateMode || staffModeActive) {
+              <th scope="col" [class.table-warning]="col.type != 'Factor value'" [class.table-danger]="col.type == 'Factor value'" (mouseover)="currentCell = {row: -1, col: (userMetadata.length+index)}">
+                {{col.name}}
+                @if (currentCell) {
+                  @if (currentCell.row === -1 && currentCell.col === (userMetadata.length+index) && staffModeActive) {
+                    <div ngbDropdown class="d-inline-block">
+                      <button class="btn btn-sm btn-outline-primary" id="metadataColumnDropdownStaff" ngbDropdownToggle><i class="bi bi-pencil-fill"></i></button>
+                      <div ngbDropdownMenu aria-labelledby="metadataColumnDropdownStaff">
+                        <button class="dropdown-item" (click)="editDefaultMetadataValue(col, 'staff_metadata')" ngbTooltip="Edit default value"><i  class="bi bi-pen"></i> Edit Default Value</button>
+                        @if (!templateMode) {
+                          <button class="dropdown-item" (click)="replaceEntireMetadataColumn(col, 'staff_metadata')" ngbTooltip="Replace entire column"><i  class="bi bi-columns"></i> Replace Entire Column</button>
+                        }
+                        @if (!col.mandatory) {
+                          <button class="dropdown-item" (click)="removeMetadataCol(index, col, 'staff_metadata')" ngbTooltip="Remove metadata"><i class="bi bi-trash2"></i> Remove Column</button>
+                        }
+                      </div>
                     </div>
-                  </div>
+                  }
                 }
-              }
-            </th>
+              </th>
+            }
+
           }
 
         }
@@ -107,35 +110,37 @@
           @for (col of staffMetadata; track col.id; let index = $index) {
             @if (visibleColumnNames.includes(col.name)) {
               @if (!col.hidden || showHidden) {
-                <td (mouseover)="moveOverCell(rowIndex, (userMetadata.length+index))" [ngClass]="{'border border-black': selectionMode&&selectionModeColIndex===(userMetadata.length+index), 'table-danger': selectionMode&&isSelectedCell(rowIndex, (userMetadata.length+index)), 'table-secondary': col.hidden}">
-                  {{ row['col_' + (userMetadata.length+index)] }}
-                  @if (currentCell && !templateMode) {
-                    @if (currentCell.row === rowIndex && currentCell.col === (userMetadata.length+index)) {
-                      @if (!selectionMode) {
-                        <div ngbDropdown class="d-inline-block">
-                          <button class="btn btn-sm btn-outline-primary" id="metadataCellDropdownStaff" ngbDropdownToggle><i class="bi bi-pencil-fill"></i></button>
-                          <div ngbDropdownMenu aria-labelledby="metadataCellDropdownStaff">
-                            <button class="dropdown-item" (click)="editCell(row, col, (userMetadata.length+index), 'staff_metadata')"><i class="bi bi-pen"></i> Edit</button>
-                            <button class="dropdown-item" (click)="copyAndEnableSelectionMode(row, col, (userMetadata.length+index), 'staff_metadata')"><i class="bi bi-copy"></i> Copy To Adjacent Cells in Column</button>
-                            <button class="dropdown-item" (click)="addToFavourite(row, col, (userMetadata.length+index))"><i class="bi bi-star"></i> Favourite</button>
+                @if (!templateMode || staffModeActive) {
+                  <td (mouseover)="moveOverCell(rowIndex, (userMetadata.length+index))" [ngClass]="{'border border-black': selectionMode&&selectionModeColIndex===(userMetadata.length+index), 'table-danger': selectionMode&&isSelectedCell(rowIndex, (userMetadata.length+index)), 'table-secondary': col.hidden}">
+                    {{ row['col_' + (userMetadata.length+index)] }}
+                    @if (currentCell && !templateMode) {
+                      @if (currentCell.row === rowIndex && currentCell.col === (userMetadata.length+index)) {
+                        @if (!selectionMode) {
+                          <div ngbDropdown class="d-inline-block">
+                            <button class="btn btn-sm btn-outline-primary" id="metadataCellDropdownStaff" ngbDropdownToggle><i class="bi bi-pencil-fill"></i></button>
+                            <div ngbDropdownMenu aria-labelledby="metadataCellDropdownStaff">
+                              <button class="dropdown-item" (click)="editCell(row, col, (userMetadata.length+index), 'staff_metadata')"><i class="bi bi-pen"></i> Edit</button>
+                              <button class="dropdown-item" (click)="copyAndEnableSelectionMode(row, col, (userMetadata.length+index), 'staff_metadata')"><i class="bi bi-copy"></i> Copy To Adjacent Cells in Column</button>
+                              <button class="dropdown-item" (click)="addToFavourite(row, col, (userMetadata.length+index))"><i class="bi bi-star"></i> Favourite</button>
+                            </div>
                           </div>
-                        </div>
-                      } @else {
-                        <button class="btn btn-sm btn-outline-danger" (click)="pasteContentFromOriginToCells(col, 'staff_metadata')"><i class="bi bi-clipboard"></i></button>
+                        } @else {
+                          <button class="btn btn-sm btn-outline-danger" (click)="pasteContentFromOriginToCells(col, 'staff_metadata')"><i class="bi bi-clipboard"></i></button>
+                        }
+                      }
+                      @if (originCell && !templateMode) {
+                        @if (originCell.row === rowIndex && originCell.col === (userMetadata.length+index)) {
+                          <div ngbDropdown class="d-inline-block">
+                            <button class="btn btn-sm btn-outline-primary" id="metadataCellDropdownStaff" ngbDropdownToggle><i class="bi bi-pencil-fill"></i></button>
+                            <div ngbDropdownMenu aria-labelledby="metadataCellDropdownStaff">
+                              <button class="dropdown-item" (click)="originCell=null;selectedCells=[];selectionMode=false;selectionModeColIndex=-1">Exit Mode</button>
+                            </div>
+                          </div>
+                        }
                       }
                     }
-                    @if (originCell && !templateMode) {
-                      @if (originCell.row === rowIndex && originCell.col === (userMetadata.length+index)) {
-                        <div ngbDropdown class="d-inline-block">
-                          <button class="btn btn-sm btn-outline-primary" id="metadataCellDropdownStaff" ngbDropdownToggle><i class="bi bi-pencil-fill"></i></button>
-                          <div ngbDropdownMenu aria-labelledby="metadataCellDropdownStaff">
-                            <button class="dropdown-item" (click)="originCell=null;selectedCells=[];selectionMode=false;selectionModeColIndex=-1">Exit Mode</button>
-                          </div>
-                        </div>
-                      }
-                    }
-                  }
-                </td>
+                  </td>
+                }
               }
             }
 

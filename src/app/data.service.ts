@@ -3,12 +3,14 @@ import {Protocol} from "./protocol";
 import {ProtocolSession} from "./protocol-session";
 import {AccountsService} from "./accounts/accounts.service";
 import {WebService} from "./web.service";
-import {Subject} from "rxjs";
+import {BehaviorSubject, Subject} from "rxjs";
 
 @Injectable({
   providedIn: 'root'
 })
 export class DataService {
+  private activeVisualizerSubject = new BehaviorSubject<string>('canvas')
+  activeVisualizer = this.activeVisualizerSubject.asObservable();
   _protocol: Protocol|null = null;
   darkMode: boolean = false;
   systemTheme: boolean = false;
@@ -154,5 +156,9 @@ export class DataService {
     if (ctx) {
       ctx.scale(scaleFactor, scaleFactor);
     }
+  }
+
+  setActiveVisualizer(value: string) {
+    this.activeVisualizerSubject.next(value);
   }
 }

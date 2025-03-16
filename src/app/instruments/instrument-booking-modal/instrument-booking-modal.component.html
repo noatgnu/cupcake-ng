@@ -93,7 +93,7 @@
 
       </div>
     } @else {
-      <app-booking-time-visualizer [enableDelete]="true" (selectedUsageBlock)="handleSelectedInstrumentUsage($event)" (selectedRangeOut)="handleSelectedRange($event)" [instrument]="selectedInstrument"></app-booking-time-visualizer>
+      <app-booking-time-visualizer [enableDelete]="true" (selectedUsageBlock)="handleSelectedInstrumentUsage($event)" (selectedRangeOut)="handleSelectedRange($event)" [instrument]="selectedInstrument" [enableEdit]="true"></app-booking-time-visualizer>
 
       <div class="container">
         <div class="form-group mt-2">

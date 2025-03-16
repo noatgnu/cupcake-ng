@@ -1,4 +1,4 @@
-import {Component, Input} from '@angular/core';
+import {AfterViewInit, Component, Input} from '@angular/core';
 import {Annotation} from "../../annotation";
 import {WebService} from "../../web.service";
 import {Instrument, InstrumentUsage} from "../../instrument";
@@ -6,6 +6,7 @@ import {DatePipe} from "@angular/common";
 import {
   BookingTimeVisualizerComponent
 } from "../../instruments/booking-time-visualizer/booking-time-visualizer.component";
+import {DataService} from "../../data.service";
 
 @Component({
     selector: 'app-instrument-booking-presenter',
@@ -16,7 +17,7 @@ import {
     templateUrl: './instrument-booking-presenter.component.html',
     styleUrl: './instrument-booking-presenter.component.scss'
 })
-export class InstrumentBookingPresenterComponent {
+export class InstrumentBookingPresenterComponent implements AfterViewInit {
   private _annotation?: Annotation
 
   instrumentUsage: {usage: InstrumentUsage, instrument: Instrument, windowStart: Date|undefined, windowEnd: Date|undefined}[] = []
@@ -41,7 +42,12 @@ export class InstrumentBookingPresenterComponent {
     return this._annotation!
   }
 
-  constructor(private web: WebService) {
+  constructor(private web: WebService, private dateService: DataService) {
 
   }
+
+  ngAfterViewInit() {
+    this.dateService.setActiveVisualizer('canvas')
+  }
+
 }

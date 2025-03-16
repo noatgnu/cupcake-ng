@@ -5,8 +5,8 @@ import {
   Component,
   ElementRef,
   EventEmitter,
-  Input, OnDestroy, OnInit,
-  Output,
+  Input, OnChanges, OnDestroy, OnInit,
+  Output, SimpleChanges,
   ViewChild
 } from '@angular/core';
 import {Instrument, InstrumentUsage, InstrumentUsageQuery} from "../../instrument";
@@ -58,7 +58,8 @@ import {InstrumentService} from "../instrument.service";
 })
 export class BookingTimeVisualizerComponent implements OnInit, AfterViewInit,  AfterViewChecked, OnDestroy {
   @Input() instrument!: Instrument;
-  @ViewChild('canvas') canvas!: ElementRef<HTMLCanvasElement>;
+  @ViewChild('canvasEdit') canvasEdit!: ElementRef<HTMLCanvasElement>;
+  @ViewChild('canvasNonEdit') canvasNonEdit!: ElementRef<HTMLCanvasElement>;
   activeTab = "existingBookings"
   ctx!: CanvasRenderingContext2D;
   dragStart!: number|undefined;
@@ -92,6 +93,7 @@ export class BookingTimeVisualizerComponent implements OnInit, AfterViewInit,  A
     return this._dateAfterCurrent
   }
 
+
   form = this.fb.group({
     windowStart: [this.dateBeforeCurrent],
     windowEnd: [this.dateAfterCurrent]
@@ -106,7 +108,7 @@ export class BookingTimeVisualizerComponent implements OnInit, AfterViewInit,  A
   hoveredDate: NgbDate | null = null;
   fromDate: NgbDate = new NgbDate(this.dateBeforeCurrent.getFullYear(), this.dateBeforeCurrent.getMonth() + 1, this.dateBeforeCurrent.getDate());
   toDate: NgbDate | null = new NgbDate(this.dateAfterCurrent.getFullYear(), this.dateAfterCurrent.getMonth() + 1, this.dateAfterCurrent.getDate());
-  @Input() enableEdit = true;
+  @Input() enableEdit = false;
   @Input() selectedStartDate!: Date|undefined;
   @Input() selectedEndDate!: Date|undefined;
   @Input() enableDelete: boolean = false;
@@ -118,56 +120,98 @@ export class BookingTimeVisualizerComponent implements OnInit, AfterViewInit,  A
         // @ts-ignore
         this.web.getInstrumentUsage(this.instrument.id, this.form.value.windowStart, this.form.value.windowEnd).subscribe((data) => {
           this.instrumentUsageQuery = data
-          this.prepare().then();
+          if (this.enableEdit) {
+            this.prepare(this.canvasEdit).then();
+          } else {
+            this.prepare(this.canvasNonEdit).then();
+          }
+
         })
       }
     })
   }
 
   ngOnInit() {
+
   }
 
 
   ngAfterViewInit() {
+
     if (this.dp) {
 
     }
-    if (this.canvas) {
-      this.initializeCanvas();
+    if (this.enableEdit) {
+      if (this.canvasEdit) {
+        this.dataService.activeVisualizer.subscribe(visualizer => {
+          if (visualizer) {
+            this.initializeCanvas(this.canvasEdit);
+          }
+        })
+        //this.initializeCanvas();
+      }
+    } else {
+      if (this.canvasNonEdit) {
+        this.dataService.activeVisualizer.subscribe(visualizer => {
+          if (visualizer) {
+            this.initializeCanvas(this.canvasNonEdit);
+          }
+        })
+        //this.initializeCanvas();
+      }
     }
+
   }
 
-  private initializeCanvas() {
-    this.cdr.detectChanges();
-    const ctx = this.canvas.nativeElement.getContext('2d');
-    if (this.instrument) {
-      // @ts-ignore
-      this.web.getInstrumentUsage(this.instrument.id, this.form.value.windowStart, this.form.value.windowEnd).subscribe((data) => {
-        this.instrumentUsageQuery = data
-        if (ctx) {
-          this.ctx = ctx
-          // draw time blocks from the start of the day before the current time to the end of the day after the current time
-          this.prepare().then();
-        }
-      })
-    }
+  initializeCanvas(canvas: ElementRef<HTMLCanvasElement>) {
+    setTimeout(() => {
+      const ctx = canvas.nativeElement.getContext('2d');
+      if (this.instrument) {
+        // @ts-ignore
+        this.web.getInstrumentUsage(this.instrument.id, this.form.value.windowStart, this.form.value.windowEnd).subscribe((data) => {
+          this.instrumentUsageQuery = data
+          console.log(ctx)
+          if (ctx) {
+            this.ctx = ctx
+            console.log(this.instrumentUsageQuery)
+            // draw time blocks from the start of the day before the current time to the end of the day after the current time
+            this.prepare(canvas).then();
+          }
+        })
+      }
+    }, 2000)
   }
 
   ngAfterViewChecked() {
-    if (this.canvas && !this.ctx) {
-      this.initializeCanvas();
+    if (this.enableEdit) {
+      if (this.canvasEdit && !this.ctx) {
+        console.log(this.canvasEdit)
+        console.log(this.ctx)
+        console.log("Canvas is not initialized")
+        this.initializeCanvas(this.canvasEdit);
+      }
+    } else {
+      if (this.canvasNonEdit && !this.ctx) {
+        console.log(this.canvasNonEdit)
+        console.log(this.ctx)
+        console.log("Canvas is not initialized")
+        this.initializeCanvas(this.canvasNonEdit);
+      }
     }
+
   }
 
   changeActiveIDTab(id: string) {
     if (id === "hourBasedBookings") {
-      if (this.canvas && !this.ctx) {
-        this.initializeCanvas();
+      if (this.canvasEdit && !this.ctx) {
+        this.initializeCanvas(this.canvasEdit);
+      } else if (this.canvasNonEdit && !this.ctx) {
+        this.initializeCanvas(this.canvasNonEdit);
       }
     }
   }
 
-  private async prepare() {
+  private async prepare(canvas: ElementRef<HTMLCanvasElement>) {
     this.clearCanvas();
     const timeBlocks: Date[] = [];
     const windowStart = this.form.value.windowStart;
@@ -186,14 +230,15 @@ export class BookingTimeVisualizerComponent implements OnInit, AfterViewInit,  A
       this.width = hoursInRange * pixelsPerHour;
 
       // Set the canvas width property
-      this.canvas.nativeElement.width = this.width;
-      this.canvas.nativeElement.style.width = `${this.width}px`;
+      canvas.nativeElement.width = this.width;
+      canvas.nativeElement.style.width = `${this.width}px`;
 
       // Update the context after setting the canvas width
-      this.ctx = this.canvas.nativeElement.getContext('2d')!;
+      this.ctx = canvas.nativeElement.getContext('2d')!;
 
       const delta = windowEnd.getTime() - windowStart.getTime();
-      this.dataService.changeDPI(300, this.canvas.nativeElement);
+
+      this.dataService.changeDPI(300, canvas.nativeElement);
       this.drawBackground(this.timeBlocks, this.width, new Date(), delta);
     }
   }
@@ -307,10 +352,16 @@ export class BookingTimeVisualizerComponent implements OnInit, AfterViewInit,  A
     const deltaTime = currentMarker.getTime() - this.form.value.windowStart.getTime()
     const x = this.padding + deltaTime * graphPixelOverTime
     this.ctx.fillRect(x, 0, 2, this.height)
+    console.log(this.ctx)
   }
 
   clearCanvas() {
-    this.ctx.clearRect(0, 0, this.canvas.nativeElement.width, this.canvas.nativeElement.height)
+    if (this.enableEdit) {
+      this.ctx.clearRect(0, 0, this.canvasEdit.nativeElement.width, this.canvasEdit.nativeElement.height)
+    } else {
+      this.ctx.clearRect(0, 0, this.canvasNonEdit.nativeElement.width, this.canvasNonEdit.nativeElement.height)
+    }
+
   }
 
   draw() {
@@ -497,7 +548,12 @@ export class BookingTimeVisualizerComponent implements OnInit, AfterViewInit,  A
       this.selectedRangeOut.emit({started: startDate, ended: endDate})
       this.web.getInstrumentUsage(this.instrument.id, startDate, endDate).subscribe((data) => {
         this.instrumentUsageQuery = data;
-        this.prepare().then();
+        console.log(this.instrumentUsageQuery);
+        if (this.enableEdit) {
+          this.prepare(this.canvasEdit).then();
+        } else {
+          this.prepare(this.canvasNonEdit).then();
+        }
       });
     }
     console.log(this.fromDate, this.toDate)
@@ -536,7 +592,11 @@ export class BookingTimeVisualizerComponent implements OnInit, AfterViewInit,  A
       // Retrieve the current jobs that have already been booked on the time window
       this.web.getInstrumentUsage(this.instrument.id, start, end).subscribe((data) => {
         this.instrumentUsageQuery = data;
-        this.prepare().then();
+        if (this.enableEdit) {
+          this.prepare(this.canvasEdit).then();
+        } else {
+          this.prepare(this.canvasNonEdit).then();
+        }
       });
     }
   }
@@ -550,6 +610,7 @@ export class BookingTimeVisualizerComponent implements OnInit, AfterViewInit,  A
 
   ngOnDestroy() {
     this.selectedTimeRange = {start: null, end: null}
+
   }
 
   handleDateNavigate(event: NgbDatepickerNavigateEvent) {
@@ -645,5 +706,13 @@ export class BookingTimeVisualizerComponent implements OnInit, AfterViewInit,  A
         }
       }
     })
+  }
+
+  restartCanvas() {
+    if (this.enableEdit) {
+      this.initializeCanvas(this.canvasEdit);
+    } else {
+      this.initializeCanvas(this.canvasNonEdit);
+    }
   }
 }

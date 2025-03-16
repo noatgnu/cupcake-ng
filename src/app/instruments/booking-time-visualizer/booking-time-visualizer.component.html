@@ -102,7 +102,7 @@
           </div>
         }
         <div class="container overflow-auto mt-2" style="max-width: 100%">
-          <canvas (mousedown)="onMouseDown($event)" (mouseup)="onMouseUp($event)" (mousemove)="onMouseMove($event)" #canvas id="bookingCanvas" [height]="height"></canvas>
+          <canvas (mousedown)="onMouseDown($event)" (mouseup)="onMouseUp($event)" (mousemove)="onMouseMove($event)" #canvasEdit [height]="height"></canvas>
         </div>
       </ng-template>
 
@@ -114,6 +114,6 @@
 
 @if(!enableEdit) {
   <div class="container overflow-auto mt-2" style="max-width: 100%">
-    <canvas (mousedown)="onMouseDown($event)" (mouseup)="onMouseUp($event)" (mousemove)="onMouseMove($event)" #canvas id="bookingCanvas" [height]="height"></canvas>
+    <canvas (mousedown)="onMouseDown($event)" (mouseup)="onMouseUp($event)" (mousemove)="onMouseMove($event)" #canvasNonEdit  [height]="height"></canvas>
   </div>
 }

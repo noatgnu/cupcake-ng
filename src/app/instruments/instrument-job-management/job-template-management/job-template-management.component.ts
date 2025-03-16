@@ -21,11 +21,6 @@ import {MetadataTableComponent} from "../job-submission/metadata-table/metadata-
   imports: [
     ReactiveFormsModule,
     NgbPagination,
-    NgbTooltip,
-    NgbDropdown,
-    NgbDropdownMenu,
-    NgbDropdownToggle,
-    NgbDropdownItem,
     MetadataTableComponent,
     FormsModule,
     NgbNav,

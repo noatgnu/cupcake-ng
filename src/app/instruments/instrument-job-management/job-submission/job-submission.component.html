@@ -6,6 +6,7 @@
       <input id="jobName" type="text" [ngClass]="{'dirty-control': form.controls['job_name'].dirty}" class="form-control" formControlName="job_name" placeholder="Enter job name">
     </div>
   </form>
+  
 
   <form [formGroup]="projectForm" class="d-flex flex-column gap-2">
     <div class="form-group">
@@ -806,14 +807,15 @@
             }
           </ng-template>
         </li>
-        <li [ngbNavItem]="'staff'">
-          <button ngbNavLink>Staff Annotations</button>
-          <ng-template ngbNavContent>
-            @if (activeTab === 'staff') {
+        @if (staffModeAvailable) {
+          <li [ngbNavItem]="'staff'">
+            <button ngbNavLink>Staff Annotations</button>
+            <ng-template ngbNavContent>
               <app-annotation-presenter [annotations]="job.staff_annotations" (deleteAnnotation)="handleDeleteAnnotation($event)"></app-annotation-presenter>
-            }
-          </ng-template>
-        </li>
+            </ng-template>
+          </li>
+        }
+
       </ul>
       <div [ngbNavOutlet]="nav" class="mt-2"></div>
       <div style="position: fixed; z-index: 1030; bottom: 50px; right: 50px">

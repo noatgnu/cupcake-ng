@@ -33,9 +33,7 @@ import {AnnotationMetadataModalComponent} from "./annotation-metadata-modal/anno
     selector: 'app-annotation-presenter',
     imports: [
         DatePipe,
-        NgOptimizedImage,
         SketchPresenterComponent,
-        AsyncPipe,
         ImagePresenterComponent,
         MediaPresenterComponent,
         ChecklistPresenterComponent,
@@ -44,9 +42,6 @@ import {AnnotationMetadataModalComponent} from "./annotation-metadata-modal/anno
         AlignmentAnnotationComponent,
         CalculatorAnnotationComponent,
         MolarityCalculatorComponent,
-        NgbDropdown,
-        NgbDropdownToggle,
-        NgbDropdownMenu,
         RandomizationPresenterComponent,
         InstrumentBookingPresenterComponent,
         NgbTooltip

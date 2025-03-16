@@ -3,7 +3,7 @@ import {AccountsService} from "../../../accounts/accounts.service";
 import {ToastService} from "../../../toast.service";
 import {WebService} from "../../../web.service";
 import {FormBuilder, ReactiveFormsModule} from "@angular/forms";
-import {NgbDate, NgbDatepicker, NgbTypeahead} from "@ng-bootstrap/ng-bootstrap";
+import {NgbAlert, NgbDate, NgbDatepicker, NgbTypeahead} from "@ng-bootstrap/ng-bootstrap";
 import {debounceTime, distinctUntilChanged, map, Observable, OperatorFunction, Subscription, switchMap} from "rxjs";
 import {LabGroup} from "../../../lab-group";
 import {User} from "../../../user";
@@ -16,7 +16,8 @@ import {WebsocketService} from "../../../websocket.service";
   imports: [
     ReactiveFormsModule,
     NgbTypeahead,
-    NgbDatepicker
+    NgbDatepicker,
+    NgbAlert
   ],
   templateUrl: './export-bookings.component.html',
   styleUrl: './export-bookings.component.scss'
@@ -32,6 +33,7 @@ export class ExportBookingsComponent {
     mode: ['user'],
     dataSearch: [''],
     splitted_boundaries_calculation: [false],
+    file_format: ['xlsx']
   })
 
   selectedList: any[] = []
@@ -168,18 +170,18 @@ export class ExportBookingsComponent {
   exportData() {
     console.log(this.fromDate);
     console.log(this.toDate);
-    const fromDate = new Date(this.fromDate.year, this.fromDate.month, this.fromDate.day);
+    const fromDate = new Date(this.fromDate.year, this.fromDate.month-1, this.fromDate.day);
     if (this.toDate) {
-      const toDate = new Date(this.toDate.year, this.toDate.month, this.toDate.day);
+      const toDate = new Date(this.toDate.year, this.toDate.month-1, this.toDate.day);
       if (this.selectedList.length > 0) {
         if (this.form.value.mode === 'user') {
           // @ts-ignore
-          this.web.exportUsage(this.instrumentList.map((i) => i.id), fromDate, toDate, [], this.selectedList.map((s) =>s.id), this.form.value.mode, this.form.value.splitted_boundaries_calculation, this.web.cupcakeInstanceID).subscribe(() => {
+          this.web.exportUsage(this.instrumentList.map((i) => i.id), fromDate, toDate, [], this.selectedList.map((s) =>s.id), this.form.value.mode, this.form.value.splitted_boundaries_calculation, this.web.cupcakeInstanceID, this.form.value.file_format).subscribe(() => {
 
           });
         } else {
           // @ts-ignore
-          this.web.exportUsage(this.instrumentList.map((i) => i.id), fromDate, toDate, this.selectedList.map((s) =>s.id), [], this.form.value.mode, this.form.value.splitted_boundaries_calculation, this.web.cupcakeInstanceID).subscribe(() => {
+          this.web.exportUsage(this.instrumentList.map((i) => i.id), fromDate, toDate, this.selectedList.map((s) =>s.id), [], this.form.value.mode, this.form.value.splitted_boundaries_calculation, this.web.cupcakeInstanceID, this.form.value.file_format).subscribe(() => {
 
           });
         }
