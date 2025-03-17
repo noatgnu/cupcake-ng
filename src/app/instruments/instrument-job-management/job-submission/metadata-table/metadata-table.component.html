@@ -32,7 +32,7 @@
       @for (col of staffMetadata; track col.id; let index = $index) {
         @if (visibleColumnNames.includes(col.name)) {
           @if (!col.hidden || showHidden) {
-            @if (!templateMode || staffModeActive) {
+            @if (templateMode || staffModeActive) {
               <th scope="col" [class.table-warning]="col.type != 'Factor value'" [class.table-danger]="col.type == 'Factor value'" (mouseover)="currentCell = {row: -1, col: (userMetadata.length+index)}">
                 {{col.name}}
                 @if (currentCell) {
@@ -110,7 +110,7 @@
           @for (col of staffMetadata; track col.id; let index = $index) {
             @if (visibleColumnNames.includes(col.name)) {
               @if (!col.hidden || showHidden) {
-                @if (!templateMode || staffModeActive) {
+                @if (templateMode || staffModeActive) {
                   <td (mouseover)="moveOverCell(rowIndex, (userMetadata.length+index))" [ngClass]="{'border border-black': selectionMode&&selectionModeColIndex===(userMetadata.length+index), 'table-danger': selectionMode&&isSelectedCell(rowIndex, (userMetadata.length+index)), 'table-secondary': col.hidden}">
                     {{ row['col_' + (userMetadata.length+index)] }}
                     @if (currentCell && !templateMode) {

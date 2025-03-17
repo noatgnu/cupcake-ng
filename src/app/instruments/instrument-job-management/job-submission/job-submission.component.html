@@ -240,7 +240,7 @@
             <div ngbDropdownMenu>
               <button ngbDropdownItem (click)="exportExcelTemplate()">Export</button>
               @if (job.status !== 'submitted' && (userCanEdit || staffModeAvailable)) {
-                <button ngbDropdownItem>Import</button>
+                <button ngbDropdownItem (click)="importExcelTemplate()">Import</button>
               }
 
             </div>

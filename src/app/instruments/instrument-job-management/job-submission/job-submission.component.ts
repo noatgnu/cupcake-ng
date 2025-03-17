@@ -159,6 +159,20 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit {
             this.protocolForm.enable()
           }
         }
+      } else {
+        if (value.service_lab_group) {
+          this.web.checkUserInLabGroup(value.service_lab_group.id).subscribe((result) => {
+            if (result.status === 200) {
+              this.staffModeAvailable = true
+              this.staffDataForm.enable()
+              this.protocolForm.enable()
+            }
+          }, (error) => {
+            this.staffModeAvailable = false
+            this.staffDataForm.disable()
+            this.protocolForm.disable()
+          })
+        }
       }
     } else {
       if (value.service_lab_group) {
@@ -1305,6 +1319,24 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit {
       this.web.exportExcelTemplate(this.job.id, this.web.cupcakeInstanceID, export_type).subscribe((response) => {
 
       })
+    }
+  }
+
+  importExcelTemplate() {
+    if (this.job) {
+      const ref = this.modal.open(UploadLargeFileModalComponent)
+      let metadata_import: 'user_metadata_excel'|'staff_metadata_excel'|'all_excel' = 'user_metadata_excel'
+      if (this.staffModeAvailable) {
+        metadata_import = 'all_excel'
+      }
+      ref.componentInstance.metadata_import = metadata_import
+      console.log(metadata_import)
+      ref.componentInstance.instrument_job_id = this.job.id
+      if (this.staffModeAvailable) {
+        ref.componentInstance.instrument_user_type = this.staffModeAvailable
+      } else {
+        ref.componentInstance.instrument_user_type = 'user_annotation'
+      }
     }
   }
 
