@@ -2095,8 +2095,8 @@ export class WebService {
     return this.http.post(`${this.baseURL}/api/instrument_jobs/${instrument_job_id}/validate_sdrf_metadata/`, {instance_id}, {responseType: 'json', observe: 'body'})
   }
 
-  exportExcelTemplate(instrument_job_id: number, instance_id: string) {
-    return this.http.post(`${this.baseURL}/api/instrument_jobs/${instrument_job_id}/export_excel_template/`, {instance_id}, {responseType: 'json', observe: 'body'})
+  exportExcelTemplate(instrument_job_id: number, instance_id: string, export_type: "user_metadata"|"staff_metadata"|"all") {
+    return this.http.post(`${this.baseURL}/api/instrument_jobs/${instrument_job_id}/export_excel_template/`, {instance_id, export_type}, {responseType: 'json', observe: 'body'})
   }
 
   getMetadataTableTemplates(limit: number = 10, offset: number = 0, search: string|null = "", mode: string|undefined|null = 'user', lab_group_id: number|null|undefined = 0) {

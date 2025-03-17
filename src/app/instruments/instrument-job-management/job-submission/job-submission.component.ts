@@ -1298,7 +1298,11 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit {
 
   exportExcelTemplate() {
     if (this.job) {
-      this.web.exportExcelTemplate(this.job.id, this.web.cupcakeInstanceID).subscribe((response) => {
+      let export_type: 'user_metadata'|'staff_metadata'|'all' = 'user_metadata'
+      if (this.staffModeAvailable) {
+        export_type = 'all'
+      }
+      this.web.exportExcelTemplate(this.job.id, this.web.cupcakeInstanceID, export_type).subscribe((response) => {
 
       })
     }

@@ -368,11 +368,8 @@
             </li>
           </ul>
           <div [ngbNavOutlet]="navMetadata" class="mt-2"></div>
-
         }
       }
-
-
       <hr>
       <h5>MS Experiment Details (for staff)</h5>
       @if (job.staff_metadata.length > 0 && job.sample_number > 0) {
@@ -595,7 +592,7 @@
         <input type="file" hidden #fastaFileUpload (change)="annotationService.handleFileInput($event, job.id, 'user_annotation', 'fasta file from job '+job.job_name, 'file')">
         <div ngbDropdown display="dynamic" class="d-inline-black">
           <button class="btn btn-primary" id="addMetadata" ngbDropdownToggle>
-            + User Metadata
+            + User Column
           </button>
           <div ngbDropdownMenu aria-labelledby="addMetadata">
             @for (m of metadataService.userMetadataTemplate; track m.name) {
@@ -617,7 +614,7 @@
           <button class="btn btn-primary" (click)="update()">Update</button>
           <div ngbDropdown display="dynamic" class="d-inline-black">
             <button class="btn btn-primary" id="addMetadataStaff" ngbDropdownToggle>
-              + User Metadata
+              + User Column
             </button>
             <div ngbDropdownMenu aria-labelledby="addMetadata">
               @for (m of metadataService.userMetadataTemplate; track m.name) {
