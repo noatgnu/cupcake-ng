@@ -170,10 +170,8 @@ export class BookingTimeVisualizerComponent implements OnInit, AfterViewInit,  A
         // @ts-ignore
         this.web.getInstrumentUsage(this.instrument.id, this.form.value.windowStart, this.form.value.windowEnd).subscribe((data) => {
           this.instrumentUsageQuery = data
-          console.log(ctx)
           if (ctx) {
             this.ctx = ctx
-            console.log(this.instrumentUsageQuery)
             // draw time blocks from the start of the day before the current time to the end of the day after the current time
             this.prepare(canvas).then();
           }
