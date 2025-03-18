@@ -109,7 +109,7 @@ export class MetadataTableComponent implements OnChanges{
     }
   }
 
-  constructor(private modal: NgbModal, private metadataService: MetadataService) {
+  constructor(private modal: NgbModal, public metadataService: MetadataService) {
 
   }
 
