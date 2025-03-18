@@ -179,7 +179,7 @@ export class BookingTimeVisualizerComponent implements OnInit, AfterViewInit,  A
           }
         })
       }
-    }, 2000)
+    }, 1000)
   }
 
   ngAfterViewChecked() {
