@@ -1,12 +1,10 @@
-import {Component, ViewChild} from '@angular/core';
+import {Component, OnDestroy, ViewChild} from '@angular/core';
 import {AccountsService} from "../../../accounts/accounts.service";
 import {ToastService} from "../../../toast.service";
 import {WebService} from "../../../web.service";
 import {FormBuilder, ReactiveFormsModule} from "@angular/forms";
 import {NgbAlert, NgbDate, NgbDatepicker, NgbTypeahead} from "@ng-bootstrap/ng-bootstrap";
 import {debounceTime, distinctUntilChanged, map, Observable, OperatorFunction, Subscription, switchMap} from "rxjs";
-import {LabGroup} from "../../../lab-group";
-import {User} from "../../../user";
 import {Instrument} from "../../../instrument";
 import {environment} from "../../../../environments/environment";
 import {WebsocketService} from "../../../websocket.service";
@@ -22,7 +20,7 @@ import {WebsocketService} from "../../../websocket.service";
   templateUrl: './export-bookings.component.html',
   styleUrl: './export-bookings.component.scss'
 })
-export class ExportBookingsComponent {
+export class ExportBookingsComponent implements OnDestroy {
   hoveredDate: NgbDate | null = null;
   dateBeforeCurrent: Date = new Date();
   dateAfterCurrent: Date = new Date();
@@ -40,6 +38,12 @@ export class ExportBookingsComponent {
   instrumentList: Instrument[] = []
 
   instrumentJobWebsocketSubscription: Subscription|undefined;
+
+  ngOnDestroy() {
+    if (this.instrumentJobWebsocketSubscription) {
+      this.instrumentJobWebsocketSubscription.unsubscribe();
+    }
+  }
 
   constructor(private toast: ToastService, private ws: WebsocketService, private accounts: AccountsService, private web: WebService, private toastService: ToastService, private fb: FormBuilder) {
     if (this.ws.instrumentJobWSConnection) {

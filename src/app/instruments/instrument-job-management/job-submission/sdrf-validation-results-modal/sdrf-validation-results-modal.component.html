@@ -1,0 +1,15 @@
+<div class="modal-header">
+  <h5 class="modal-title">
+    SDRF Validation Errors
+  </h5>
+</div>
+<div class="modal-body">
+  @for (e of errors; track $index) {
+    <ngb-alert type="danger">
+      {{ e }}
+    </ngb-alert>
+  }
+</div>
+<div class="modal-footer">
+  <button class="btn btn-primary" (click)="close()">Close</button>
+</div>

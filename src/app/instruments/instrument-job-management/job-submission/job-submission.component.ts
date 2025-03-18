@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, ElementRef, HostListener, Input, OnInit, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, ElementRef, HostListener, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {
   Form,
   FormArray,
@@ -72,6 +72,9 @@ import {
 import {
   MethodMetadataModalComponent
 } from "./method-metadata-modal/method-metadata-modal.component";
+import {
+  SdrfValidationResultsModalComponent
+} from "./sdrf-validation-results-modal/sdrf-validation-results-modal.component";
 
 @Component({
     selector: 'app-job-submission',
@@ -104,7 +107,7 @@ import {
     templateUrl: './job-submission.component.html',
     styleUrl: './job-submission.component.scss'
 })
-export class JobSubmissionComponent implements OnInit, AfterViewInit {
+export class JobSubmissionComponent implements OnInit, AfterViewInit, OnDestroy {
   showHidden: boolean = false;
   metadataViewModeID: 'table' | 'list' = 'table'
   @ViewChild('metadataTable') metadataTable?: MetadataTableComponent;
@@ -115,6 +118,7 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit {
   togglePanel(): void {
     this.isPanelOpen = !this.isPanelOpen;
   }
+
   initialized = false
   currentForm: FormGroup|undefined
   selectedProject: Project|undefined
@@ -358,6 +362,12 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit {
 
   instrumentJobWebsocketSubscription: Subscription | undefined
 
+  ngOnDestroy() {
+    if (this.instrumentJobWebsocketSubscription) {
+      this.instrumentJobWebsocketSubscription.unsubscribe();
+    }
+  }
+
   filterTableColumnName: string = ''
 
   constructor(private offCanvas: NgbOffcanvas, private ws: WebsocketService, public annotationService: AnnotationService, private modal: NgbModal, private fb: FormBuilder, private web: WebService, private toast: ToastService, public metadataService: MetadataService, private accountService: AccountsService) {
@@ -378,13 +388,25 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit {
           if (message['instance_id'] === this.web.cupcakeInstanceID) {
             console.log(message)
             if (message['status'] === 'error') {
-              this.toast.show("Export File", message['message'])
+              if (message['message'] === 'Validation failed') {
+                this.toast.show("SDRF Validation", "Validation failed. Please check the errors.")
+                const errors: string[] = message['errors']
+                const ref = this.modal.open(SdrfValidationResultsModalComponent, {scrollable: true})
+                ref.componentInstance.errors = errors
+
+              } else {
+                this.toast.show("Export File", message['message'])
+              }
             } else if (message['status'] === 'completed') {
-              this.toast.show("Export File", message['message'])
-              if (this.job) {
-                this.web.getInstrumentJob(this.job.id).subscribe((job) => {
-                  this.job = job
-                })
+              if (message['message'] === "Validation successful") {
+                this.toast.show("SDRF Validation", "Validation successful.")
+              } else {
+                this.toast.show("Export File", message['message'])
+                if (this.job) {
+                  this.web.getInstrumentJob(this.job.id).subscribe((job) => {
+                    this.job = job
+                  })
+                }
               }
             }
           }
