@@ -44,7 +44,7 @@
               <div>User: {{ booking.user }}</div>
               <div>Instrument: {{ instrumentMap[booking.instrument].instrument_name }}</div>
               @if (dataService.instrumentPermissions[booking.instrument]) {
-                @if (dataService.instrumentPermissions[booking.instrument]['can_manage']) {
+                @if (dataService.instrumentPermissions[booking.instrument]['can_manage'] || accountService.is_staff) {
                   <div>@if(booking.approved) {<i ngbTooltip="Approved" class="bi bi-check-circle text-success" (click)="toggleApproval(booking)"></i>} @else {<i ngbTooltip="Not approved" class="bi bi-x-circle text-danger" (click)="toggleApproval(booking)"></i>}</div>
                 } @else {
                   <div>@if(booking.approved) {<i ngbTooltip="Approved" class="bi bi-check-circle text-success"></i>} @else {<i ngbTooltip="Not approved" class="bi bi-x-circle text-danger"></i>}</div>

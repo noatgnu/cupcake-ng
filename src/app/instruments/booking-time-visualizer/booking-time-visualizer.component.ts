@@ -713,4 +713,17 @@ export class BookingTimeVisualizerComponent implements OnInit, AfterViewInit,  A
       this.initializeCanvas(this.canvasNonEdit);
     }
   }
+
+  toggleApproval(booking: InstrumentUsage): void {
+    this.web.approveUsageToggle(booking.id).subscribe((result) => {
+      if (this.instrumentUsageQuery) {
+        this.instrumentUsageQuery.results = this.instrumentUsageQuery.results.map((b) => {
+          if (b.id === booking.id) {
+            b.approved = !b.approved;
+          }
+          return b;
+        });
+      }
+    })
+  }
 }

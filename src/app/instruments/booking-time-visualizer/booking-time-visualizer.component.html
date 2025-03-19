@@ -51,6 +51,7 @@
               <th scope="col">Start Date</th>
               <th scope="col">End Date</th>
               <th scope="col">User</th>
+              <th scope="col">Approved</th>
               <th scope="col">Actions</th>
             </tr>
           </thead>
@@ -62,7 +63,23 @@
                 <td>{{booking.time_ended | date: 'short'}}</td>
                 <td>{{booking.user}}</td>
                 <td>
-                  @if (booking.user === accounts.username || accounts.is_staff || dataService.instrumentPermissions[instrument.id]['can_manage']) {
+                  @if (accounts.is_staff || dataService.instrumentPermissions[instrument.id]['can_manage']) {
+                    @if (booking.approved) {
+                      <i class="bi bi-check-circle text-success" (click)="toggleApproval(booking)"></i>
+                    } @else {
+                      <i class="bi bi-x-circle text-danger" (click)="toggleApproval(booking)"></i>
+                    }
+                  } @else {
+                    @if (booking.approved) {
+                      <i class="bi bi-check-circle text-success"></i>
+                    } @else {
+                      <i class="bi bi-x-circle text-danger"></i>
+                    }
+                  }
+
+                </td>
+                <td>
+                  @if (accounts.is_staff || dataService.instrumentPermissions[instrument.id]['can_manage']) {
                     <div ngbDropdown class="d-inline-block">
                       <button class="btn btn-sm btn-warning" id="bookingDropdownDelay" ngbDropdownToggle><i class="bi bi-clock-history"></i></button>
                       <div ngbDropdownMenu aria-labelledby="bookingDropdownDelay">
@@ -73,7 +90,6 @@
                     </div>
 
                   }
-
                   @if (accounts.is_staff) {
 
                     <button class="btn btn-sm btn-danger" (click)="removeBooking(booking)"><i class="bi bi-trash"></i></button>
