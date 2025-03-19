@@ -13,6 +13,7 @@ import {
   InstrumentMetadataManagementModalComponent
 } from "../instrument-metadata-management-modal/instrument-metadata-management-modal.component";
 import {DelayUsageModalComponent} from "./delay-usage-modal/delay-usage-modal.component";
+import {InstrumentEditorModalComponent} from "./instrument-editor-modal/instrument-editor-modal.component";
 
 @Component({
     selector: 'app-instrument-management',
@@ -123,11 +124,25 @@ export class InstrumentManagementComponent {
       }, (error) => {
         this.toastService.show("Instrument usage", "Failed to delay usages")
       })
-
-
-
     }
+  }
 
+  editInstrument(instrument: Instrument) {
+    const ref = this.modal.open(InstrumentEditorModalComponent)
+    ref.componentInstance.instrument = instrument
+    ref.result.then((data: any) => {
+      this.web.updateInstrument(instrument.id, data.name, data.description, data.max_days_ahead, data.max_duration).subscribe((data) => {
+        this.toastService.show("Instrument", "Successfully edited instrument")
+        if (this.instrumentQuery) {
+          const index = this.instrumentQuery.results.findIndex((i) => i.id === instrument.id)
+          if (index !== -1) {
+            this.instrumentQuery.results[index] = data
+          }
+        }
+      }, (error) => {
+        this.toastService.show("Instrument", "Failed to edit instrument")
+      })
+    })
   }
 
 }

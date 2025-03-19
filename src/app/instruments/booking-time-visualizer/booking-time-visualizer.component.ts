@@ -186,14 +186,14 @@ export class BookingTimeVisualizerComponent implements OnInit, AfterViewInit,  A
         console.log(this.canvasEdit)
         console.log(this.ctx)
         console.log("Canvas is not initialized")
-        this.initializeCanvas(this.canvasEdit);
+        //this.initializeCanvas(this.canvasEdit);
       }
     } else {
       if (this.canvasNonEdit && !this.ctx) {
         console.log(this.canvasNonEdit)
         console.log(this.ctx)
         console.log("Canvas is not initialized")
-        this.initializeCanvas(this.canvasNonEdit);
+        //this.initializeCanvas(this.canvasNonEdit);
       }
     }
 

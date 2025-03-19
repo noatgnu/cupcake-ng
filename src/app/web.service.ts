@@ -1048,7 +1048,14 @@ export class WebService {
     )
   }
 
-  updateInstrument(instrument_id: number, instrument_name: string, instrument_description: string) {
+  updateInstrument(instrument_id: number, instrument_name: string, instrument_description: string, max_days_ahead: number|undefined|null, max_duration: number|undefined|null) {
+    const payload: any = {name: instrument_name, description: instrument_description}
+    if (max_days_ahead) {
+      payload['max_days_ahead_pre_approval'] = max_days_ahead
+    }
+    if (max_duration) {
+      payload['max_days_within_usage_pre_approval'] = max_duration
+    }
     return this.http.put<Instrument>(
       `${this.baseURL}/api/instrument/${instrument_id}/`,
       {name: instrument_name, description: instrument_description},
@@ -2181,6 +2188,10 @@ export class WebService {
 
   exportUsage(instruments: number[], time_started: Date, time_ended: Date, lab_group: number[] = [], user: number[] = [], mode: string = "user", calculate_with_duration_cutoff: boolean = false, instance_id: string = "", file_format: string = "xlsx") {
     return this.http.post(`${this.baseURL}/api/instrument_usage/export_usage/`, {instruments, time_started, time_ended, lab_group, user, mode, calculate_with_duration_cutoff, instance_id, file_format}, {responseType: 'json', observe: 'body'})
+  }
+
+  approveUsageToggle(instrument_usage_id: number) {
+    return this.http.post<InstrumentUsage>(`${this.baseURL}/api/instrument_usage/${instrument_usage_id}/approve_usage_toggle/`, {}, {responseType: 'json', observe: 'body'})
   }
 }
 

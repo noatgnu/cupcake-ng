@@ -8,6 +8,8 @@ export interface Instrument {
   updated_at: Date;
   enabled: boolean;
   metadata_columns: MetadataColumn[];
+  max_days_within_usage_pre_approval: number;
+  max_days_ahead_pre_approval: number;
 }
 
 export interface InstrumentQuery {
@@ -26,6 +28,7 @@ export interface InstrumentUsage {
   time_started: Date;
   time_ended: Date;
   user: string;
+  approved: boolean;
 }
 
 export interface InstrumentUsageQuery {

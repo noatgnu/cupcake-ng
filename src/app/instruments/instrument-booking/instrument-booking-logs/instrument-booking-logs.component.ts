@@ -5,14 +5,17 @@ import {WebService} from "../../../web.service";
 import {User} from "../../../user";
 import {DatePipe} from "@angular/common";
 import {debounceTime, distinctUntilChanged, map, Observable, OperatorFunction, switchMap} from 'rxjs';
-import {NgbTypeahead} from "@ng-bootstrap/ng-bootstrap";
+import {NgbTooltip, NgbTypeahead} from "@ng-bootstrap/ng-bootstrap";
+import {DataService} from "../../../data.service";
+import {AccountsService} from "../../../accounts/accounts.service";
 
 @Component({
   selector: 'app-instrument-booking-logs',
   imports: [
     ReactiveFormsModule,
     DatePipe,
-    NgbTypeahead
+    NgbTypeahead,
+    NgbTooltip
   ],
   templateUrl: './instrument-booking-logs.component.html',
   styleUrl: './instrument-booking-logs.component.scss'
@@ -26,7 +29,7 @@ export class InstrumentBookingLogsComponent implements OnInit {
   userModel: string = "";
   timeStarted: number = 30;
 
-  constructor(private web: WebService, private fb: FormBuilder) {
+  constructor(private web: WebService, private fb: FormBuilder, public dataService: DataService, public accountService: AccountsService) {
     this.filterForm = this.fb.group({
       users: [[]],
       instrument: [[]],
@@ -81,6 +84,9 @@ export class InstrumentBookingLogsComponent implements OnInit {
         const bookingDate = new Date(booking.created_at);
         bookingDate.setHours(0, 0, 0, 0);
         if (!this.instrumentMap[booking.instrument]) {
+          this.web.getInstrumentPermission(booking.instrument).subscribe(usage => {
+            this.dataService.instrumentPermissions[booking.instrument] = usage
+          })
           this.instrumentMap[booking.instrument] = {} as Instrument;
           this.web.getInstrument(booking.instrument).subscribe((instrument: Instrument) => {
             this.instrumentMap[booking.instrument] = instrument;
@@ -137,4 +143,17 @@ export class InstrumentBookingLogsComponent implements OnInit {
   }
 
   formatterInstrument = (instrument: Instrument) => instrument.instrument_name;
+
+  toggleApproval(booking: InstrumentUsage): void {
+    this.web.approveUsageToggle(booking.id).subscribe((result) => {
+      if (this.bookings) {
+        this.bookings.results = this.bookings.results.map((b) => {
+          if (b.id === booking.id) {
+            b.approved = !b.approved;
+          }
+          return b;
+        });
+      }
+    })
+  }
 }
