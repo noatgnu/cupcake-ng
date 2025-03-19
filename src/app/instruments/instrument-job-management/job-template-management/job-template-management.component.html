@@ -76,7 +76,7 @@
   }
 
   @if (selectedTemplate) {
-    @if (missingColumns > 0) {
+    @if (missingColumns.length > 0) {
       <ngb-alert type="danger">
         <p>
           The following required columns are missing from the template:
