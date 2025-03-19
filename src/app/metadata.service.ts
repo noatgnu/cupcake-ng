@@ -133,8 +133,22 @@ export class MetadataService {
     "Phenotype": "Samples from healthy patients or individuals normally appear in manuscripts and annotations as healthy or normal. It is recommended to use “normal” for description of the typical healthy and normal phenotype.",
     "MS1 scan range": "example 400m/z - 1200m/z",
     "Age": "Should be written in the format of 0Y-0M-0D or 0Y for just years, 0M for just months, 0D for just days. Can also be a range like 0Y-0M-0D to 0Y-0M-1D",
-
   }
+
+  requiredColumnNames = [
+    "Source name",
+    "Organism",
+    "Disease",
+    "Tissue",
+    "Cell type",
+    "Assay name",
+    "Fraction identifier",
+    "Label",
+    "Instrument",
+    "Technical replicate",
+    "Biological replicate",
+    "Cleavage agent details",
+  ]
 
   optionsArray: Unimod[] = [];
   availableSpecs: any[] = []

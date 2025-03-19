@@ -76,6 +76,18 @@
   }
 
   @if (selectedTemplate) {
+    @if (missingColumns > 0) {
+      <ngb-alert type="danger">
+        <p>
+          The following required columns are missing from the template:
+        </p>
+        <ul>
+          @for (c of missingColumns; track c) {
+            <li>{{c}}</li>
+          }
+        </ul>
+      </ngb-alert>
+    }
     <div class="form-check">
       <input type="checkbox" class="form-check-input" [(ngModel)]="templateShowHidden" id="showHidden">
       <label class="form-check-label" for="showHidden">Show hidden columns</label>

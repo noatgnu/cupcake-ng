@@ -9,7 +9,8 @@ export interface FavouriteMetadataOption {
   service_lab_group: number|null,
   preset: number|null,
   created_at: Date,
-  updated_at: Date
+  updated_at: Date,
+  is_global: boolean,
 }
 
 export interface FavouriteMetadataOptionQuery {

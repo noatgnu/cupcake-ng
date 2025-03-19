@@ -4,6 +4,7 @@ import {LabGroupQuery} from "../../../lab-group";
 import {WebService} from "../../../web.service";
 import {FormArray, FormBuilder, FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {
+  NgbAlert,
   NgbDropdown,
   NgbDropdownItem,
   NgbDropdownMenu,
@@ -33,7 +34,8 @@ import {JobMetadataCreationModalComponent} from "../job-metadata-creation-modal/
     NgbDropdown,
     NgbDropdownMenu,
     NgbDropdownToggle,
-    NgbTooltip
+    NgbTooltip,
+    NgbAlert
   ],
   templateUrl: './job-template-management.component.html',
   styleUrl: './job-template-management.component.scss'
@@ -55,7 +57,28 @@ export class JobTemplateManagementComponent {
   tableTemplatePageSize: number = 5
   tableTemplatePage: number = 1
 
-  selectedTemplate: MetadataTableTemplate | undefined
+  missingColumns: string[] = []
+
+  private _selectedTemplate: MetadataTableTemplate|undefined
+
+  set selectedTemplate(value: MetadataTableTemplate|undefined) {
+    this._selectedTemplate = value
+    this.missingColumns = []
+    if (value) {
+      const userColumnNames = value.user_columns.map(column => column.name)
+      const staffColumnNames = value.staff_columns.map(column => column.name)
+      for (const n of this.metadataService.requiredColumnNames) {
+        if (!userColumnNames.includes(n) && !staffColumnNames.includes(n)) {
+          this.missingColumns.push(n)
+        }
+      }
+    }
+
+  }
+
+  get selectedTemplate(): MetadataTableTemplate {
+    return this._selectedTemplate!
+  }
 
   constructor(public metadataService: MetadataService, private accounts: AccountsService, private web: WebService, private fb: FormBuilder, private toast: ToastService, private modal: NgbModal) { }
 
