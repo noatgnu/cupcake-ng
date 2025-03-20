@@ -1,6 +1,18 @@
 <div class="d-flex flex-column gap-1">
   @if (enableEdit) {
     <div>
+      @if (instrument.max_days_within_usage_pre_approval && instrument.max_days_within_usage_pre_approval > 0) {
+        <div>
+          <small>Max booking duration for auto-approval: {{instrument.max_days_within_usage_pre_approval}} days</small>
+        </div>
+      }
+      @if (instrument.max_days_ahead_pre_approval && instrument.max_days_ahead_pre_approval > 0) {
+        <div>
+          <small>Max amount of days the instrument can be booked ahead of time for auto-approval: {{instrument.max_days_ahead_pre_approval}} days</small>
+        </div>
+      }
+    </div>
+    <div>
       <b>
         Date Window
       </b>
@@ -48,10 +60,11 @@
         <table class="table table-hover">
           <thead>
             <tr>
+              <th scope="col">Submission Date</th>
               <th scope="col">Start Date</th>
               <th scope="col">End Date</th>
               <th scope="col">User</th>
-              <th scope="col">Approved</th>
+              <th scope="col">Approval</th>
               <th scope="col">Actions</th>
             </tr>
           </thead>
@@ -59,6 +72,7 @@
           @if (instrumentUsageQuery) {
             @for (booking of instrumentUsageQuery.results; track booking.id) {
               <tr>
+                <td>{{booking.created_at | date: 'short'}}</td>
                 <td>{{booking.time_started | date: 'short'}}</td>
                 <td>{{booking.time_ended | date: 'short'}}</td>
                 <td>{{booking.user}}</td>
@@ -78,7 +92,7 @@
                   }
 
                 </td>
-                <td>
+                <td class="d-flex gap-2">
                   @if (accounts.is_staff || dataService.instrumentPermissions[instrument.id]['can_manage']) {
                     <div ngbDropdown class="d-inline-block">
                       <button class="btn btn-sm btn-warning" id="bookingDropdownDelay" ngbDropdownToggle><i class="bi bi-clock-history"></i></button>
