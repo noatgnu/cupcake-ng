@@ -6,7 +6,7 @@
       @for (col of userMetadata; track col.id; let index = $index) {
         @if (visibleColumnNames.includes(col.name)) {
           @if (!col.hidden || showHidden) {
-            <th [ngbTooltip]="metadataService.helpData[col.name]" scope="col" class="table-primary" (mouseover)="currentCell = {row: -1, col: index}">
+            <th [ngbTooltip]="metadataService.helpData[col.name]" placement="top" container="body" scope="col" class="table-primary" (mouseover)="currentCell = {row: -1, col: index}">
               {{col.name}}
               @if (currentCell) {
                 @if (currentCell.row === -1 && currentCell.col === index && (userCanEdit||staffModeActive)) {
