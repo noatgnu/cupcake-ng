@@ -1,18 +1,6 @@
 <div class="d-flex flex-column gap-1">
   @if (enableEdit) {
     <div>
-      @if (instrument.max_days_within_usage_pre_approval && instrument.max_days_within_usage_pre_approval > 0) {
-        <div>
-          <small>Max booking duration for auto-approval: {{instrument.max_days_within_usage_pre_approval}} days</small>
-        </div>
-      }
-      @if (instrument.max_days_ahead_pre_approval && instrument.max_days_ahead_pre_approval > 0) {
-        <div>
-          <small>Max amount of days the instrument can be booked ahead of time for auto-approval: {{instrument.max_days_ahead_pre_approval}} days</small>
-        </div>
-      }
-    </div>
-    <div>
       <b>
         Date Window
       </b>

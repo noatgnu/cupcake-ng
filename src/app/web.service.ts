@@ -1058,7 +1058,7 @@ export class WebService {
     }
     return this.http.put<Instrument>(
       `${this.baseURL}/api/instrument/${instrument_id}/`,
-      {name: instrument_name, description: instrument_description},
+      payload,
       {responseType: 'json', observe: 'body'}
     )
   }

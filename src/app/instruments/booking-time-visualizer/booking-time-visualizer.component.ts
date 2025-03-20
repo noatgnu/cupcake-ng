@@ -81,7 +81,6 @@ export class BookingTimeVisualizerComponent implements OnInit, AfterViewInit,  A
   get dateBeforeCurrent(): Date {
     return this._dateBeforeCurrent
   }
-
   private _dateAfterCurrent = new Date(this.current + 48 * 60 * 60 * 1000)
 
   @Input() set dateAfterCurrent(value: Date) {
@@ -160,6 +159,7 @@ export class BookingTimeVisualizerComponent implements OnInit, AfterViewInit,  A
         //this.initializeCanvas();
       }
     }
+    this.selectedRangeOut.emit({started: this.dateBeforeCurrent, ended: this.dateAfterCurrent})
 
   }
 
@@ -554,7 +554,6 @@ export class BookingTimeVisualizerComponent implements OnInit, AfterViewInit,  A
         }
       });
     }
-    console.log(this.fromDate, this.toDate)
   }
 
   isHovered(date: NgbDate) {
@@ -608,7 +607,6 @@ export class BookingTimeVisualizerComponent implements OnInit, AfterViewInit,  A
 
   ngOnDestroy() {
     this.selectedTimeRange = {start: null, end: null}
-
   }
 
   handleDateNavigate(event: NgbDatepickerNavigateEvent) {

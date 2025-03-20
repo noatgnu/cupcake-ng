@@ -98,6 +98,7 @@ export class InstrumentBookingModalComponent implements OnInit, AfterViewInit{
 
   handleSelectedRange(range: {started: Date, ended: Date}) {
     this.selectedRange = range
+    console.log(this.selectedRange)
   }
 
 
