@@ -15,6 +15,11 @@ export class WebsocketService {
   summaryWSConnection?: WebSocketSubject<any>
   instrumentJobWSConnection?: WebSocketSubject<any>
   userSubject: Subject<boolean> = new Subject<boolean>()
+  timerConnected: boolean = false
+  annotationConnected: boolean = false
+  userConnected: boolean = false
+  summaryConnected: boolean = false
+  instrumentJobConnected: boolean = false
 
   constructor(private accounts: AccountsService) { }
   connectInstrumentJobWS(sessionID: string) {
@@ -25,11 +30,13 @@ export class WebsocketService {
       openObserver: {
         next: () => {
           console.log("Connected to instrument job websocket")
+          this.instrumentJobConnected = true;
         }
       },
       closeObserver: {
         next: () => {
           console.log("Closed connection to instrument job websocket")
+          this.instrumentJobConnected = false;
         }
       }
     })
@@ -49,11 +56,13 @@ export class WebsocketService {
       openObserver: {
         next: () => {
           console.log("Connected to timer websocket")
+          this.timerConnected = true;
         }
       },
       closeObserver: {
         next: () => {
           console.log("Closed connection to timer websocket")
+          this.timerConnected = false;
         }
       }
     })
@@ -74,11 +83,13 @@ export class WebsocketService {
       openObserver: {
         next: () => {
           console.log("Connected to annotation websocket")
+          this.annotationConnected = true;
         }
       },
       closeObserver: {
         next: () => {
           console.log("Closed connection to annotation websocket")
+          this.annotationConnected = false;
         }
       }
     })
@@ -98,11 +109,13 @@ export class WebsocketService {
       openObserver: {
         next: () => {
           console.log("Connected to user websocket")
+          this.userConnected = true;
         }
       },
       closeObserver: {
         next: () => {
           console.log("Closed connection to user websocket")
+          this.userConnected = false;
         }
       },
     })
@@ -122,11 +135,13 @@ export class WebsocketService {
       openObserver: {
         next: () => {
           console.log("Connected to summary websocket")
+          this.summaryConnected = true;
         }
       },
       closeObserver: {
         next: () => {
           console.log("Closed connection to summary websocket")
+          this.summaryConnected = false;
         }
       },
     })

@@ -1,0 +1,17 @@
+<div class="modal-header">
+  <h5 class="modal-title">
+    Connection Status
+  </h5>
+</div>
+<div class="modal-body">
+  <p>
+    Instrument Channel: <i class="bi bi-globe" [class.text-success]="ws.instrumentJobConnected" [class.text-danger]="!ws.instrumentJobConnected"></i><br>
+    Annotation Channel: <i class="bi bi-globe" [class.text-success]="ws.annotationConnected" [class.text-danger]="!ws.annotationConnected"></i><br>
+    Timer Channel: <i class="bi bi-globe" [class.text-success]="ws.timerConnected" [class.text-danger]="!ws.timerConnected"></i><br>
+    User Channel: <i class="bi bi-globe" [class.text-success]="ws.userConnected" [class.text-danger]="!ws.userConnected"></i><br>
+    Summary Channel: <i class="bi bi-globe" [class.text-success]="ws.summaryConnected" [class.text-danger]="!ws.summaryConnected"></i><br>
+  </p>
+</div>
+<div class="modal-footer">
+  <button class="btn btn-secondary" (click)="close()">Close</button>
+</div>

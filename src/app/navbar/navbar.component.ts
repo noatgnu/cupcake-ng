@@ -14,6 +14,7 @@ import {SessionEditorModalComponent} from "../protocol-session/session-editor-mo
 import {ToastService} from "../toast.service";
 import {ProtocolCloneModalComponent} from "../protocol-clone-modal/protocol-clone-modal.component";
 import {DownloadModalComponent} from "../download-modal/download-modal.component";
+import {WebsocketStatusModalComponent} from "../websocket-status-modal/websocket-status-modal.component";
 
 @Component({
     selector: 'app-navbar',
@@ -139,5 +140,11 @@ export class NavbarComponent {
     ref.closed.subscribe((data)=> {
 
     })
+  }
+
+  openWebsocketStatusModal() {
+    const ref = this.modal.open(WebsocketStatusModalComponent)
+
+
   }
 }
