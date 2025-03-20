@@ -1,0 +1,59 @@
+<div class="container">
+  <div class="d-flex flex-column gap-2">
+    @if (favouriteQuery) {
+      <table class="table table-hover">
+        <thead>
+        <tr>
+          <th scope="col">ID</th>
+          <th scope="col">Data type</th>
+          <th scope="col">Data name</th>
+          <th scope="col">Display name</th>
+          <th scope="col">Value</th>
+          <th scope="col">Lab group</th>
+          <th scope="col">User</th>
+          <th scope="col">Global</th>
+          <th scope="col">Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+          @for (f of favouriteQuery.results; track f.id) {
+            <tr>
+              <td>
+                {{f.id}}
+              </td>
+              <td>{{f.type}}</td>
+              <td>{{f.name}}</td>
+              <td>
+                {{f.display_value}}
+              </td>
+              <td>
+                {{f.value}}
+              </td>
+              <td>
+                @if (f.lab_group) {
+                  @if (labGroupMap[f.lab_group]) {
+                    {{labGroupMap[f.lab_group].name}}
+                  }
+                }
+              </td>
+              <td>
+                @if (f.user) {
+                  @if (userMap[f.user]) {
+                    {{userMap[f.user].username}}
+                  }
+                }
+              </td>
+              <td>
+                {{f.is_global}}
+              </td>
+              <td>
+
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+      <ngb-pagination (pageChange)="onPageChange($event)" [collectionSize]="favouriteQuery.count" [(page)]="page" [pageSize]="pageSize" [maxSize]="5" [boundaryLinks]="true" [rotate]="true"></ngb-pagination>
+    }
+  </div>
+</div>

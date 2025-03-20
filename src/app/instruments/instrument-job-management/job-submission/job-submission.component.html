@@ -239,31 +239,31 @@
             <button class="btn btn-primary" ngbDropdownToggle>Excel Template</button>
             <div ngbDropdownMenu>
               <button ngbDropdownItem (click)="exportExcelTemplate()">Export</button>
-              @if (job.status !== 'submitted' && (userCanEdit || staffModeAvailable)) {
+              @if (job.status !== 'submitted' || (userCanEdit || staffModeAvailable)) {
                 <button ngbDropdownItem (click)="importExcelTemplate()">Import</button>
               }
 
             </div>
           </div>
 
-          <!--<div ngbDropdown class="d-flex gap-2">
-            <button class="btn btn-primary" ngbDropdownToggle>Export</button>
+          <div ngbDropdown class="d-flex gap-2">
+            <button class="btn btn-primary" ngbDropdownToggle>SDRF Export</button>
             <div ngbDropdownMenu>
               <button ngbDropdownItem (click)="exportTableToTSV('user_metadata')">Export User Metadata</button>
               <button ngbDropdownItem (click)="exportTableToTSV('staff_metadata')">Export Staff Metadata</button>
               <button ngbDropdownItem (click)="exportTableToTSV('all')">Export All Metadata</button>
             </div>
           </div>
-          @if (job.status !== 'submitted' && (userCanEdit || staffModeAvailable)) {
+          @if (job.status !== 'submitted' || (userCanEdit || staffModeAvailable)) {
             <div ngbDropdown class="d-flex gap-2">
-              <button class="btn btn-primary" ngbDropdownToggle>Import</button>
+              <button class="btn btn-primary" ngbDropdownToggle>SDRF Import</button>
               <div ngbDropdownMenu>
                 <button ngbDropdownItem (click)="importMetadata('user_metadata')">Import User Metadata</button>
                 <button ngbDropdownItem (click)="importMetadata('staff_metadata')">Import Staff Metadata</button>
                 <button ngbDropdownItem (click)="importMetadata('all')">Import All Metadata</button>
               </div>
             </div>
-          }-->
+          }
 
           <button class="btn btn-warning" (click)="validateSDRFMetadata()">Validate Metadata</button>
         </div>

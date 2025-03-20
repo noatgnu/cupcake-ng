@@ -1744,7 +1744,7 @@ export class WebService {
     )
   }
 
-  getUser(id: string) {
+  getUser(id: number) {
     return this.http.get<User>(
       `${this.baseURL}/api/user/${id}/`,
       {responseType: 'json', observe: 'body'}

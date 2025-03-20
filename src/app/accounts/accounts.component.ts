@@ -9,20 +9,22 @@ import {LabGroupComponent} from "./lab-group/lab-group.component";
 import {AccountsService} from "./accounts.service";
 import {SignupComponent} from "./signup/signup.component";
 import {ProfileComponent} from "./profile/profile.component";
+import {FavouritesComponent} from "./favourites/favourites.component";
 
 @Component({
     selector: 'app-accounts',
-    imports: [
-        ReactiveFormsModule,
-        FormsModule,
-        NgbDropdown,
-        NgbDropdownToggle,
-        NgbDropdownMenu,
-        UserDataComponent,
-        LabGroupComponent,
-        SignupComponent,
-        ProfileComponent
-    ],
+  imports: [
+    ReactiveFormsModule,
+    FormsModule,
+    NgbDropdown,
+    NgbDropdownToggle,
+    NgbDropdownMenu,
+    UserDataComponent,
+    LabGroupComponent,
+    SignupComponent,
+    ProfileComponent,
+    FavouritesComponent
+  ],
     templateUrl: './accounts.component.html',
     styleUrl: './accounts.component.scss'
 })

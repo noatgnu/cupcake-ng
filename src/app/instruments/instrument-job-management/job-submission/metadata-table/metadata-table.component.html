@@ -29,6 +29,7 @@
 
         }
       }
+
       @for (col of staffMetadata; track col.id; let index = $index) {
         @if (visibleColumnNames.includes(col.name)) {
           @if (!col.hidden || showHidden) {

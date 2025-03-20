@@ -20,6 +20,7 @@
         <button type="button" class="list-group-item list-group-item-action" (click)="selectedSection='appearance'">Appearance</button>
         <button type="button" class="list-group-item list-group-item-action" (click)="selectedSection='user-data'">User Data</button>
         <button type="button" class="list-group-item list-group-item-action" (click)="selectedSection='lab-group'">Lab Group</button>
+        <button type="button" class="list-group-item list-group-item-action" (click)="selectedSection='favourite'">Favourites</button>
       </div>
     </div>
     <div class="d-flex flex-column w-100">
@@ -92,6 +93,13 @@
           </div>
         </nav>
         <app-profile></app-profile>
+      } @else if (selectedSection === 'favourite') {
+        <nav class="navbar navbar-expand-lg navbar-light d-flex flex-wrap">
+          <div class="container-fluid">
+            <a class="navbar-brand">Favourites</a>
+          </div>
+        </nav>
+        <app-favourites></app-favourites>
       }
     </div>
   </div>
