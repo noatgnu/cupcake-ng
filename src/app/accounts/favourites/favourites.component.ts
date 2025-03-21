@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import {WebService} from "../../web.service";
-import {FormArray, FormBuilder, FormsModule} from "@angular/forms";
+import {FormArray, FormBuilder, FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {FavouriteMetadataOption, FavouriteMetadataOptionQuery} from "../../favourite-metadata-option";
 import {
   NgbDropdown,
@@ -10,9 +10,9 @@ import {
   NgbPagination,
   NgbTooltip
 } from "@ng-bootstrap/ng-bootstrap";
-import {forkJoin} from "rxjs";
+import {debounceTime, distinctUntilChanged, forkJoin, map, Observable, of, switchMap, tap} from "rxjs";
 import {User} from "../../user";
-import {LabGroup} from "../../lab-group";
+import {LabGroup, LabGroupQuery} from "../../lab-group";
 import {AccountsService} from "../accounts.service";
 import {ExploreMetadataComponent} from "./explore-metadata/explore-metadata.component";
 import {
@@ -29,7 +29,8 @@ import {MetadataService} from "../../metadata.service";
     ExploreMetadataComponent,
     NgbDropdown,
     NgbDropdownMenu,
-    NgbDropdownToggle
+    NgbDropdownToggle,
+    ReactiveFormsModule
   ],
   templateUrl: './favourites.component.html',
   styleUrl: './favourites.component.scss'
@@ -52,8 +53,73 @@ export class FavouritesComponent {
   userMap: { [key: number]: User } = {}
   labGroupMap: { [key: number]: LabGroup } = {}
 
+  formFavourite = this.fb.group({
+    name: [''],
+    type: [''],
+    mode: ['']
+  })
+
+  formLabGroup = this.fb.group({
+    service_lab_group: [''],
+    search_term: ['']
+  })
+
+  searchingLabGroup = false
+  labGroupPage = 1
+  labGroupPageSize = 10
+  labGroupQuery: LabGroupQuery|undefined = undefined
   constructor(public metadata: MetadataService, private modal: NgbModal, public accountService: AccountsService, private web: WebService, private fb: FormBuilder) {
     this.getFavourites()
+    this.formFavourite.controls.name.valueChanges.subscribe((value) => {
+      if (value) {
+        if (this.metadata.staffMetadataSpecific.includes(value)) {
+          this.formFavourite.controls.type.setValue("Comment")
+        } else {
+          for (const m of this.metadata.userMetadataTemplate) {
+            if (m.name === value) {
+              this.formFavourite.controls.type.setValue(m.type)
+              return
+            }
+          }
+        }
+      }
+    })
+    this.formLabGroup.controls.search_term.valueChanges.subscribe((value) => {
+      if (value) {
+        this.web.getLabGroups(value, this.labGroupPageSize, 0, true).subscribe((data: LabGroupQuery) => {
+          this.labGroupQuery = data
+        })
+      }
+    })
+    this.getLabGroups("")
+  }
+
+  getLabGroups(value: string) {
+    const offset = (this.labGroupPage - 1) * this.labGroupPageSize
+    this.web.getLabGroups(value, this.labGroupPageSize, offset, true).subscribe((data: LabGroupQuery) => {
+      this.labGroupQuery = data
+    })
+  }
+
+  labGroupPageChange(page: number) {
+    this.labGroupPage = page
+    // @ts-ignore
+    this.getLabGroups(this.formLabGroup.controls.search_term.value)
+  }
+
+  searchLabGroup = (text$: Observable<string>) => {
+    return text$.pipe(
+      debounceTime(200),
+      tap(() => this.searchingLabGroup = true),
+      distinctUntilChanged(),
+      switchMap(term => {
+        if (term.length < 2) {
+          return of([])
+        }
+        return this.web.getLabGroups(term, this.labGroupPageSize, 0, true).pipe(map((labGroups: LabGroupQuery) => labGroups.results))
+      }),
+      tap(() => this.searchingLabGroup = false)
+    )
   }
 
   getFavourites() {
