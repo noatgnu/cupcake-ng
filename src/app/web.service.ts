@@ -2054,6 +2054,14 @@ export class WebService {
     )
   }
 
+  updateFavouriteMetadataOption(id: number, payload: any) {
+    return this.http.put<FavouriteMetadataOption>(
+      `${this.baseURL}/api/favourite_metadata_option/${id}/`,
+      payload,
+      {responseType: 'json', observe: 'body'}
+    )
+  }
+
   getPresets(limit: number = 10, offset: number = 0, search: string|null = "") {
     let params = new HttpParams()
       .set('limit', limit.toString())

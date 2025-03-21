@@ -99,7 +99,7 @@ export class AddFavouriteModalComponent implements AfterViewInit {
         this.labGroupQuery = undefined
         this.selectedLabGroup = undefined
         this.alreadyFavouritedLabGroups = []
-        this.web.getFavouriteMetadataOptions(1,0,this.value, undefined, undefined, this.name).subscribe(resp => {
+        this.web.getFavouriteMetadataOptions(1,0,this.value, 'user', undefined, this.name).subscribe(resp => {
           if (resp.results.length > 0) {
             this.userFavouriteOption = resp.results[0]
             this.form.controls.display_name.setValue(this.userFavouriteOption.display_value)
@@ -111,7 +111,7 @@ export class AddFavouriteModalComponent implements AfterViewInit {
   }
 
   ngAfterViewInit() {
-    this.web.getFavouriteMetadataOptions(1,0,this.value, undefined, undefined, this.name).subscribe(resp => {
+    this.web.getFavouriteMetadataOptions(1,0,this.value, 'user', undefined, this.name).subscribe(resp => {
       if (resp.results.length > 0) {
         this.userFavouriteOption = resp.results[0]
         this.form.controls.display_name.setValue(this.userFavouriteOption.display_value)

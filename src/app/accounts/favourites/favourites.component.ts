@@ -1,16 +1,35 @@
 import { Component } from '@angular/core';
 import {WebService} from "../../web.service";
-import {FormBuilder} from "@angular/forms";
-import {FavouriteMetadataOptionQuery} from "../../favourite-metadata-option";
-import {NgbPagination} from "@ng-bootstrap/ng-bootstrap";
+import {FormArray, FormBuilder, FormsModule} from "@angular/forms";
+import {FavouriteMetadataOption, FavouriteMetadataOptionQuery} from "../../favourite-metadata-option";
+import {
+  NgbDropdown,
+  NgbDropdownMenu,
+  NgbDropdownToggle,
+  NgbModal,
+  NgbPagination,
+  NgbTooltip
+} from "@ng-bootstrap/ng-bootstrap";
 import {forkJoin} from "rxjs";
 import {User} from "../../user";
 import {LabGroup} from "../../lab-group";
+import {AccountsService} from "../accounts.service";
+import {ExploreMetadataComponent} from "./explore-metadata/explore-metadata.component";
+import {
+  JobMetadataCreationModalComponent
+} from "../../instruments/instrument-job-management/job-metadata-creation-modal/job-metadata-creation-modal.component";
+import {MetadataService} from "../../metadata.service";
 
 @Component({
   selector: 'app-favourites',
   imports: [
-    NgbPagination
+    NgbPagination,
+    NgbTooltip,
+    FormsModule,
+    ExploreMetadataComponent,
+    NgbDropdown,
+    NgbDropdownMenu,
+    NgbDropdownToggle
   ],
   templateUrl: './favourites.component.html',
   styleUrl: './favourites.component.scss'
@@ -18,6 +37,9 @@ import {LabGroup} from "../../lab-group";
 export class FavouritesComponent {
   page = 1
   pageSize = 10;
+
+  editableCell: {row: number, col: string} | undefined = undefined;
+  currentCell: {row: number, col: string} | undefined = undefined;
 
   favouriteQuery: FavouriteMetadataOptionQuery| undefined = undefined;
 
@@ -28,7 +50,7 @@ export class FavouritesComponent {
   userMap: { [key: number]: User } = {}
   labGroupMap: { [key: number]: LabGroup } = {}
 
-  constructor(private web: WebService, private fb: FormBuilder) {
+  constructor(private metadata: MetadataService, private modal: NgbModal, public accountService: AccountsService, private web: WebService, private fb: FormBuilder) {
     this.getFavourites()
   }
 
@@ -44,9 +66,9 @@ export class FavouritesComponent {
             userIDs.push(f.user)
           }
         }
-        if (f.lab_group) {
-          if (!labGroupIDs.includes(f.lab_group)) {
-            labGroupIDs.push(f.lab_group)
+        if (f.service_lab_group) {
+          if (!labGroupIDs.includes(f.service_lab_group)) {
+            labGroupIDs.push(f.service_lab_group)
           }
         }
       }
@@ -74,5 +96,60 @@ export class FavouritesComponent {
   onPageChange(page: number) {
     this.page = page
     this.getFavourites()
+  }
+
+  removeFavourite(id: number) {
+    this.web.deleteFavouriteMetadataOption(id).subscribe(() => {
+      this.getFavourites()
+    })
+  }
+
+  toggleFavouriteGlobal(favourite: FavouriteMetadataOption) {
+    this.web.updateFavouriteMetadataOption(favourite.id, {is_global:!favourite.is_global}).subscribe((data) => {
+      const index = this.favouriteQuery!.results.findIndex((f) => f.id === favourite.id)
+      this.favouriteQuery!.results[index] = data
+    })
+  }
+
+  toggleEditableCell(rowNumber: number, col: string) {
+    this.editableCell = {row: rowNumber, col: col}
+  }
+
+  saveEditableCell(favourite: FavouriteMetadataOption, field: string) {
+    const payload: any = {}
+    // @ts-ignore
+    payload[field] = favourite[field]
+    this.web.updateFavouriteMetadataOption(favourite.id, payload).subscribe((data) => {
+      const index = this.favouriteQuery!.results.findIndex((f) => f.id === favourite.id)
+      this.favouriteQuery!.results[index] = data
+      this.editableCell = undefined
+    })
+  }
+
+  editFavoriteMetadata(favourite: FavouriteMetadataOption) {
+    const ref = this.modal.open(JobMetadataCreationModalComponent, {scrollable: true})
+    ref.componentInstance.name = favourite.name
+    ref.componentInstance.type = favourite.type
+    ref.componentInstance.value = favourite.value
+    if (favourite.name === "Modification parameters") {
+      ref.componentInstance.allowMultipleSpecSelection = false
+    }
+
+    ref.result.then((result: any[]) => {
+      if (result) {
+        for (const r of result) {
+          let value = r.metadataValue
+          value = this.metadata.tranformMetadataValue(r, value);
+          this.web.updateFavouriteMetadataOption(favourite.id, {value: value}).subscribe(
+            (data) => {
+              const index = this.favouriteQuery!.results.findIndex((f) => f.id === favourite.id)
+              this.favouriteQuery!.results[index] = data
+            }
+          )
+        }
+      }
+    }).catch((error) => {
+      console.log(error)
+    })
   }
 }

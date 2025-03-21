@@ -409,7 +409,7 @@ export class JobMetadataCreationModalComponent {
 
   getUserFavouriteMetadataOptions() {
     if (this.service_lab_group_id > 0) {
-      this.web.getFavouriteMetadataOptions(this.pageSize, (this.currentUserFavouriteMetadataPage-1)*this.pageSize, undefined, undefined, undefined, this.name).subscribe(
+      this.web.getFavouriteMetadataOptions(this.pageSize, (this.currentUserFavouriteMetadataPage-1)*this.pageSize, undefined, 'user', undefined, this.name).subscribe(
         (response) => {
           this.user_favourite_metadata = response
         }
