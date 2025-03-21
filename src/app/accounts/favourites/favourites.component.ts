@@ -43,6 +43,8 @@ export class FavouritesComponent {
 
   favouriteQuery: FavouriteMetadataOptionQuery| undefined = undefined;
 
+  justCreatedFavourite: FavouriteMetadataOption|undefined = undefined;
+
   form = this.fb.group({
     searchTerm: [""]
   })
@@ -50,7 +52,7 @@ export class FavouritesComponent {
   userMap: { [key: number]: User } = {}
   labGroupMap: { [key: number]: LabGroup } = {}
 
-  constructor(private metadata: MetadataService, private modal: NgbModal, public accountService: AccountsService, private web: WebService, private fb: FormBuilder) {
+  constructor(public metadata: MetadataService, private modal: NgbModal, public accountService: AccountsService, private web: WebService, private fb: FormBuilder) {
     this.getFavourites()
   }
 
@@ -144,6 +146,32 @@ export class FavouritesComponent {
             (data) => {
               const index = this.favouriteQuery!.results.findIndex((f) => f.id === favourite.id)
               this.favouriteQuery!.results[index] = data
+            }
+          )
+        }
+      }
+    }).catch((error) => {
+      console.log(error)
+    })
+  }
+
+  createFavourite(name: string, type: string) {
+    const ref = this.modal.open(JobMetadataCreationModalComponent, {scrollable: true})
+    ref.componentInstance.name = name
+    ref.componentInstance.type = type
+    if (name === "Modification parameters") {
+      ref.componentInstance.allowMultipleSpecSelection = false
+    }
+    ref.result.then((result: any[]) => {
+      if (result) {
+        for (const r of result) {
+          let value = r.metadataValue
+          value = this.metadata.tranformMetadataValue(r, value);
+          const payload: any = {name: name, type: type, value: value, display_name: value}
+          this.web.createFavouriteMetadataOption(payload).subscribe(
+            (data) => {
+              this.justCreatedFavourite = data
+              this.getFavourites()
             }
           )
         }

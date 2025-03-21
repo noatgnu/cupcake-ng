@@ -1,5 +1,18 @@
 <div class="container">
   <div class="d-flex flex-column gap-2">
+    <div ngbDropdown>
+      <button class="btn btn-primary" ngbDropdownToggle>
+        <i class="bi bi-plus"></i> Add Favourite
+      </button>
+      <div ngbDropdownMenu>
+        @for (f of metadata.userMetadataTemplate; track $index) {
+          <button class="dropdown-item" (click)="createFavourite(f.name, f.type)">{{f.name}}</button>
+        }
+        @for (f of metadata.staffMetadataSpecific; track $index) {
+          <button class="dropdown-item" (click)="createFavourite(f, 'Comment')">{{f}}</button>
+        }
+      </div>
+    </div>
     @if (favouriteQuery) {
       <table class="table table-hover">
         <thead>
