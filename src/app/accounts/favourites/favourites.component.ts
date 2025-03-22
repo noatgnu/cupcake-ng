@@ -3,6 +3,7 @@ import {WebService} from "../../web.service";
 import {FormArray, FormBuilder, FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {FavouriteMetadataOption, FavouriteMetadataOptionQuery} from "../../favourite-metadata-option";
 import {
+  NgbCollapse,
   NgbDropdown,
   NgbDropdownMenu,
   NgbDropdownToggle,
@@ -19,6 +20,7 @@ import {
   JobMetadataCreationModalComponent
 } from "../../instruments/instrument-job-management/job-metadata-creation-modal/job-metadata-creation-modal.component";
 import {MetadataService} from "../../metadata.service";
+import {NgClass} from "@angular/common";
 
 @Component({
   selector: 'app-favourites',
@@ -30,12 +32,16 @@ import {MetadataService} from "../../metadata.service";
     NgbDropdown,
     NgbDropdownMenu,
     NgbDropdownToggle,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    NgbCollapse,
+    NgClass
   ],
   templateUrl: './favourites.component.html',
   styleUrl: './favourites.component.scss'
 })
 export class FavouritesComponent {
+  creatorIsCollapsed = true;
+
   page = 1
   pageSize = 10;
 
@@ -56,7 +62,9 @@ export class FavouritesComponent {
   formFavourite = this.fb.group({
     name: [''],
     type: [''],
-    mode: ['']
+    mode: ['user'],
+    value: [''],
+    displayName: ['']
   })
 
   formLabGroup = this.fb.group({
@@ -221,7 +229,7 @@ export class FavouritesComponent {
     })
   }
 
-  createFavourite(name: string, type: string) {
+  favouriteValueEdit(name: string, type: string) {
     const ref = this.modal.open(JobMetadataCreationModalComponent, {scrollable: true})
     ref.componentInstance.name = name
     ref.componentInstance.type = type
@@ -233,17 +241,49 @@ export class FavouritesComponent {
         for (const r of result) {
           let value = r.metadataValue
           value = this.metadata.tranformMetadataValue(r, value);
-          const payload: any = {name: name, type: type, value: value, display_name: value}
+          this.formFavourite.controls.value.setValue(value)
+          if (!this.formFavourite.value.displayName) {
+            this.formFavourite.controls.displayName.setValue(value)
+          }
+          /*const payload: any = {name: name, type: type, value: value, display_name: value}
           this.web.createFavouriteMetadataOption(payload).subscribe(
             (data) => {
               this.justCreatedFavourite = data
               this.getFavourites()
             }
-          )
+          )*/
         }
       }
     }).catch((error) => {
       console.log(error)
     })
+  }
+
+  createFavourite() {
+    if (this.formFavourite.value.name && this.formFavourite.value.value && this.formFavourite.value.displayName) {
+      const payload: any = {
+        name: this.formFavourite.value.name,
+        type: this.formFavourite.value.type,
+        value: this.formFavourite.value.value,
+        display_name: this.formFavourite.value.displayName
+      }
+      if (this.formFavourite.value.mode === "service_lab_group") {
+        payload["service_lab_group"] = this.formLabGroup.controls.service_lab_group.value
+        this.web.createFavouriteMetadataOption(payload).subscribe(
+          (data) => {
+            this.justCreatedFavourite = data
+            this.getFavourites()
+          }
+        )
+      } else {
+        this.web.createFavouriteMetadataOption(payload).subscribe(
+          (data) => {
+            this.justCreatedFavourite = data
+            this.getFavourites()
+          }
+        )
+      }
+
+    }
   }
 }

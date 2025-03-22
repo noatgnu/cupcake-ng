@@ -1,6 +1,107 @@
 <div class="container">
   <div class="d-flex flex-column gap-2">
+    <div class="container-fluid mt-4" id="favouriteOptionCreator">
+      <div class="accordion">
+        <div class="accordion-item">
+          <h2 class="accordion-header">
+            <button [ngClass]="{'accordion-button': true, 'collapsed': creatorIsCollapsed}" type="button" (click)=" creatorIsCollapsed=!creatorIsCollapsed">
+              Favourite Option Creator
+            </button>
+          </h2>
+          <div #collapse="ngbCollapse" [(ngbCollapse)]="creatorIsCollapsed">
+            <div class="accordion-body">
+              <div class="d-flex gap-2">
+                <form [formGroup]="formFavourite" class="d-flex gap-2 flex-wrap flex-column">
+                  <div class="d-flex gap-2">
+                    <div>
+                      <div class="form-group">
+                        <label>Select A Field Name From Options Below</label>
+                        <select class="form-select" size="7" formControlName="name">
+                          @for (f of metadata.userMetadataTemplate; track $index) {
+                            <option value="{{f.name}}">{{f.name}} @if(f.type) { ({{f.type}}) }</option>
+                          }
+                          @for (f of metadata.staffMetadataSpecific; track $index) {
+                            <option value="{{f}}">{{f}} (Comment)</option>
+                          }
+                        </select>
+                      </div>
+                      <div class="form-group">
+                        <label class="fieldType">Field Type</label>
+                        <select class="form-select" formControlName="type" id="fieldType">
+                          <option value="">None</option>
+                          <option value="Characteristics">Essential Characteristics of The Sample</option>
+                          <option value="Comment">Sample Associated MS Parameters and Comment</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div>
+                      <div class="form-group">
+                        <label for="fieldName">Or Specify Field Name Manually</label>
+                        <input type="text" class="form-control" formControlName="name" id="fieldName">
+                      </div>
+                      @if (formFavourite.value.name && formFavourite.value.type) {
+                        <div class="form-group">
+                          <label for="metadataValue">Favourite Value To Be Associated With This Field</label>
+                          <input type="text" class="form-control" formControlName="value" id="metadataValue">
+                          <button class="btn btn-sm btn-primary mt-2" ngbTooltip="Use Metadata Value Editor" (click)="favouriteValueEdit(formFavourite.value.name, formFavourite.value.type)"><i class="bi bi-pen"></i></button>
+                        </div>
+                        <div class="form-group">
+                          <label for="displayValue">Display Name For This Value</label>
+                          <input type="text" class="form-control" formControlName="displayName" id="displayValue">
+                        </div>
+                      }
 
+                    </div>
+                    <div class="form-group">
+                      <label for="mode">Create Option For</label>
+                      <select class="form-select" id="mode" formControlName="mode">
+                        <option value="user">User</option>
+                        <option value="service_lab_group">Professional Lab Group</option>
+                      </select>
+                    </div>
+                  </div>
+                </form>
+                @if (formFavourite.value.mode === 'service_lab_group') {
+                  <form [formGroup]="formLabGroup" class="d-flex gap-2">
+                    <div class="form-group">
+                      <label>Search Lab Group</label>
+                      <input type="search" class="form-control" formControlName="search_term">
+                    </div>
+                    @if (labGroupQuery) {
+                      <div class="form-group">
+                        <label>Lab Group Options</label>
+                        <select class="form-select" size="5" formControlName="service_lab_group">
+                          @for (f of labGroupQuery.results; track f.id) {
+                            <option value="{{f.id}}">{{f.name}}</option>
+                          }
+                        </select>
+                        <div class="mt-2">
+                          <ngb-pagination (pageChange)="labGroupPageChange($event)" [collectionSize]="labGroupQuery.count" [(page)]="labGroupPage" [pageSize]="pageSize" [maxSize]="5" [boundaryLinks]="true" [rotate]="true"></ngb-pagination>
+                        </div>
+                      </div>
+                    }
+                  </form>
+                }
+              </div>
+              @if (formFavourite.value.name && formFavourite.value.value && formFavourite.value.displayName) {
+                @if (formFavourite.value.mode === 'user') {
+                  <div class="mt-2">
+                    <button class="btn btn-primary" (click)="createFavourite()">Create User Favourite</button>
+                  </div>
+                } @else {
+                  @if (formLabGroup.value.service_lab_group) {
+                    <div class="mt-2">
+                      <button class="btn btn-primary" (click)="createFavourite()">Create Group Recommendation</button>
+                    </div>
+                  }
+                }
+
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
     @if (favouriteQuery) {
       <table class="table table-hover">
         <thead>
@@ -88,58 +189,5 @@
       <ngb-pagination (pageChange)="onPageChange($event)" [collectionSize]="favouriteQuery.count" [(page)]="page" [pageSize]="pageSize" [maxSize]="5" [boundaryLinks]="true" [rotate]="true"></ngb-pagination>
     }
     <hr>
-    <h5>Create Favourite Option</h5>
-    <div class="d-flex gap-2">
-      <form [formGroup]="formFavourite" class="d-flex gap-2 flex-wrap">
-        <div class="form-group">
-          <label>Select field</label>
-          <select class="form-select" size="5" formControlName="name">
-            @for (f of metadata.userMetadataTemplate; track $index) {
-              <option value="{{f.name}}">{{f.name}}</option>
-            }
-            @for (f of metadata.staffMetadataSpecific; track $index) {
-              <option value="{{f}}">{{f}}</option>
-            }
-          </select>
-        </div>
-        <div class="form-group">
-          <label for="mode">Create Option For</label>
-          <select class="form-select" id="mode" formControlName="mode">
-            <option value="user">User</option>
-            <option value="service_lab_group">Professional Lab Group</option>
-          </select>
-        </div>
-      </form>
-      @if (formFavourite.value.mode === 'service_lab_group') {
-        <form [formGroup]="formLabGroup" class="d-flex gap-2">
-          <div class="form-group">
-            <label>Search Lab Group</label>
-            <input type="search" class="form-control" formControlName="search_term">
-          </div>
-          @if (labGroupQuery) {
-            <div class="form-group">
-              <label>Lab Group Options</label>
-              <select class="form-select" size="5" formControlName="service_lab_group">
-                @for (f of labGroupQuery.results; track f.id) {
-                  <option value="{{f.id}}">{{f.name}}</option>
-                }
-              </select>
-              <div class="mt-2">
-                <ngb-pagination (pageChange)="labGroupPageChange($event)" [collectionSize]="labGroupQuery.count" [(page)]="labGroupPage" [pageSize]="pageSize" [maxSize]="5" [boundaryLinks]="true" [rotate]="true"></ngb-pagination>
-              </div>
-            </div>
-          }
-        </form>
-      }
-      <div>
-        @if (formFavourite.value.mode === 'user') {
-          <button class="btn btn-primary">Create User Favourite</button>
-        } @else if (formFavourite.value.mode === 'service_lab_group') {
-          <button class="btn btn-primary">Create Group Recommendation</button>
-        }
-      </div>
-
-    </div>
-
   </div>
 </div>
