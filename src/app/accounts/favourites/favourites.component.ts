@@ -53,7 +53,9 @@ export class FavouritesComponent {
   justCreatedFavourite: FavouriteMetadataOption|undefined = undefined;
 
   form = this.fb.group({
-    searchTerm: [""]
+    searchTerm: [""],
+    searchName: [""],
+    filterBy: [""],
   })
 
   userMap: { [key: number]: User } = {}
@@ -94,12 +96,20 @@ export class FavouritesComponent {
     })
     this.formLabGroup.controls.search_term.valueChanges.subscribe((value) => {
       if (value) {
-        this.web.getLabGroups(value, this.labGroupPageSize, 0, true).subscribe((data: LabGroupQuery) => {
+        this.web.getUserLabGroups(value, this.labGroupPageSize, 0, true).subscribe((data: LabGroupQuery) => {
           this.labGroupQuery = data
         })
       }
     })
+    this.form.controls.searchTerm.valueChanges.subscribe((value) => {
+
+    })
     this.getLabGroups("")
+  }
+
+  searchFavourite() {
+    this.page = 1
+    this.getFavourites(this.form.value.searchTerm)
   }
 
   getLabGroups(value: string) {
@@ -130,9 +140,10 @@ export class FavouritesComponent {
     )
   }
 
-  getFavourites() {
+  getFavourites(searchTerm: string|null|undefined = null) {
     const offset = (this.page - 1) * this.pageSize
-    this.web.getFavouriteMetadataOptions(this.pageSize, offset, this.form.value.searchTerm).subscribe((data: FavouriteMetadataOptionQuery) => {
+    // @ts-ignore
+    this.web.getFavouriteMetadataOptions(this.pageSize, offset, searchTerm, this.form.value.filterBy, this.formLabGroup.value.service_lab_group, this.form.value.searchName).subscribe((data: FavouriteMetadataOptionQuery) => {
       this.favouriteQuery = data;
       const userIDs: number[] = []
       const labGroupIDs: number[] = []
@@ -171,12 +182,12 @@ export class FavouritesComponent {
 
   onPageChange(page: number) {
     this.page = page
-    this.getFavourites()
+    this.getFavourites(this.form.value.searchTerm)
   }
 
   removeFavourite(id: number) {
     this.web.deleteFavouriteMetadataOption(id).subscribe(() => {
-      this.getFavourites()
+      this.getFavourites(this.form.value.searchTerm)
     })
   }
 
@@ -272,14 +283,14 @@ export class FavouritesComponent {
         this.web.createFavouriteMetadataOption(payload).subscribe(
           (data) => {
             this.justCreatedFavourite = data
-            this.getFavourites()
+            this.getFavourites(this.form.value.searchTerm)
           }
         )
       } else {
         this.web.createFavouriteMetadataOption(payload).subscribe(
           (data) => {
             this.justCreatedFavourite = data
-            this.getFavourites()
+            this.getFavourites(this.form.value.searchTerm)
           }
         )
       }

@@ -42,8 +42,12 @@
                       @if (formFavourite.value.name && formFavourite.value.type) {
                         <div class="form-group">
                           <label for="metadataValue">Favourite Value To Be Associated With This Field</label>
-                          <input type="text" class="form-control" formControlName="value" id="metadataValue">
-                          <button class="btn btn-sm btn-primary mt-2" ngbTooltip="Use Metadata Value Editor" (click)="favouriteValueEdit(formFavourite.value.name, formFavourite.value.type)"><i class="bi bi-pen"></i></button>
+                          <div class="d-flex gap-2">
+                            <input type="text" class="form-control" formControlName="value" id="metadataValue">
+                            <div class="d-flex flex-column">
+                              <button class="btn btn-sm btn-primary" ngbTooltip="Use Metadata Value Editor" (click)="favouriteValueEdit(formFavourite.value.name, formFavourite.value.type)"><i class="bi bi-pen"></i></button>
+                            </div>
+                          </div>
                         </div>
                         <div class="form-group">
                           <label for="displayValue">Display Name For This Value</label>
@@ -95,13 +99,56 @@
                     </div>
                   }
                 }
-
               }
             </div>
           </div>
         </div>
       </div>
     </div>
+    <div class="d-flex gap-2">
+      <form [formGroup]="form" class="d-flex gap-2">
+        <div class="form-group">
+          <label>Search Favourite Value</label>
+          <input type="search" class="form-control" formControlName="searchTerm">
+          <div class="mt-2">
+            <button class="btn btn-primary" (click)="searchFavourite()">Search</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Filter For</label>
+          <select class="form-select" formControlName="filterBy">
+            <option value="">All</option>
+            <option value="user">Personal Only</option>
+            <option value="service_lab_group">Professional Lab Group</option>
+          </select>
+        </div>
+      </form>
+
+      @if (form.value.filterBy === 'service_lab_group') {
+        <form [formGroup]="formLabGroup" class="d-flex gap-2">
+          <div class="form-group">
+            <label>Search Lab Group</label>
+            <input type="search" class="form-control" formControlName="search_term">
+          </div>
+          @if (labGroupQuery) {
+            <div class="form-group">
+              <label>Lab Group Options</label>
+              <select class="form-select" size="5" formControlName="service_lab_group">
+                @for (f of labGroupQuery.results; track f.id) {
+                  <option value="{{f.id}}">{{f.name}}</option>
+                }
+              </select>
+              <div class="mt-2">
+                <ngb-pagination (pageChange)="labGroupPageChange($event)" [collectionSize]="labGroupQuery.count" [(page)]="labGroupPage" [pageSize]="pageSize" [maxSize]="5" [boundaryLinks]="true" [rotate]="true"></ngb-pagination>
+              </div>
+            </div>
+          }
+        </form>
+      }
+
+    </div>
+
+
     @if (favouriteQuery) {
       <table class="table table-hover">
         <thead>
