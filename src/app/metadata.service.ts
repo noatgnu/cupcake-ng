@@ -15,7 +15,7 @@ export class MetadataService {
   labelTypes: string[] = []
   ms2AnalyzerTypes: string[] = []
   metadataTypeAutocomplete: string[] = ["Characteristics", "Comment", "Factor value", "Other"]
-  metadataNameAutocomplete: string[] = ["Disease", "Tissue", "Subcellular location", "Organism", "Instrument", "Label", "Cleavage agent details", "Dissociation method", "Modification parameters", "Cell type", "Enrichment process"]
+  metadataNameAutocomplete: string[] = ["Disease", "Tissue", "Subcellular location", "Organism", "Instrument", "Reduction reagent", "Alkylation reagent", "Label", "Cleavage agent details", "Dissociation method", "Modification parameters", "Cell type", "Enrichment process", "MS2 analyzer type", "Proteomics data acquisition method"]
   metadataOtherAutocomplete: string[] = ["Source name", "Material type", "Assay name", "Technology type"]
   metadataCharacteristics: string[] = ["Disease", "Tissue", "Subcellular location", "Organism", "Cell type", "Cell line", "Developmental stage", "Ancestry category", "Sex", "Age", "Biological replicate", "Enrichment process"]
   metadataComment: string[] = ["Data file", "File URI", "Technical replicate", "Fraction identifier", "Label", "Cleavage agent details", "Instrument", "Modification parameters", "Dissociation method", "Precursor mass tolerance", "Fragment mass tolerance", "MS2 analyzer type",""]
@@ -154,38 +154,38 @@ export class MetadataService {
   availableSpecs: any[] = []
   constructor(private web: WebService) { }
 
-  metadataTypeAheadDataGetter(name: string, term: string) {
+  metadataTypeAheadDataGetter(name: string, term: string, search_type: string = "startswith") {
     let searchObservable: Observable<any[]>;
     if (name === "subcellular location") {
-      searchObservable = this.web.getSubcellularLocations(undefined, 5, 0, term).pipe(
+      searchObservable = this.web.getSubcellularLocations(undefined, 5, 0, term, search_type).pipe(
         map((response) => response.results.map((location) => location.location_identifier))
       );
     } else if (name === "disease") {
-      searchObservable = this.web.getHumandDiseases(undefined, 5, 0, term).pipe(
+      searchObservable = this.web.getHumandDiseases(undefined, 5, 0, term, search_type).pipe(
         map((response) => response.results.map((disease) => disease.identifier))
       );
     } else if (name === "tissue") {
-      searchObservable = this.web.getTissues(undefined, 5, 0, term).pipe(
+      searchObservable = this.web.getTissues(undefined, 5, 0, term, search_type).pipe(
         map((response) => response.results.map((tissue) => tissue.identifier))
       );
     } else if (name === "organism") {
-      searchObservable = this.web.getSpecies(undefined, 5, 0, term).pipe(
+      searchObservable = this.web.getSpecies(undefined, 5, 0, term, search_type).pipe(
         map((response) => response.results.map((species) => species.official_name))
       );
     } else if (["mass analyzer type", "alkylation reagent", "reduction reagent", "proteomics data acquisition method", "cleavage agent details", "instrument", "dissociation method", "enrichment process"].includes(name)) {
-      searchObservable = this.web.getMSVocab(undefined, 5, 0, term, name).pipe(
+      searchObservable = this.web.getMSVocab(undefined, 5, 0, term, name, search_type).pipe(
         map((response) => response.results.map((vocab) => vocab.name))
       );
     } else if (name === "label") {
-      searchObservable = this.web.getMSVocab(undefined, 5, 0, term, "sample attribute").pipe(
+      searchObservable = this.web.getMSVocab(undefined, 5, 0, term, "sample attribute", search_type).pipe(
         map((response) => response.results.map((vocab) => vocab.name))
       );
     } else if (name === "cell type") {
-      searchObservable = this.web.getMSVocab(undefined, 5, 0, term, "cell line").pipe(
+      searchObservable = this.web.getMSVocab(undefined, 5, 0, term, "cell line", search_type).pipe(
         map((response) => response.results.map((vocab) => vocab.name))
       );
     } else if (name === "modification parameters") {
-      searchObservable = this.web.getUnimod(undefined, 5, 0, term).pipe(
+      searchObservable = this.web.getUnimod(undefined, 5, 0, term, search_type).pipe(
         map((response) => {
           this.optionsArray = response.results;
           return response.results.map((unimod: Unimod) => unimod.name);

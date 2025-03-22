@@ -1494,7 +1494,7 @@ export class WebService {
     )
   }
 
-  getSpecies(url?: string, limit: number = 10, offset: number = 0, search?: string) {
+  getSpecies(url?: string, limit: number = 10, offset: number = 0, search?: string, search_type: string = "startswith") {
     if (url) {
       return this.http.get<SpeciesQuery>(url, {responseType: 'json', observe: 'body'})
     }
@@ -1507,6 +1507,9 @@ export class WebService {
     }
     if (search && search !== "") {
       params = params.append('search', `'${search}'`)
+    }
+    if (search_type) {
+      params = params.append('search_type', search_type)
     }
     params = params.append('ordering', 'official_name')
     return this.http.get<SpeciesQuery>(
@@ -1522,7 +1525,7 @@ export class WebService {
     )
   }
 
-  getTissues(url?: string, limit: number = 10, offset: number = 0, search?: string) {
+  getTissues(url?: string, limit: number = 10, offset: number = 0, search?: string, search_type: string = "startswith") {
     if (url) {
       return this.http.get<TissueQuery>(url, {responseType: 'json', observe: 'body'})
     }
@@ -1535,6 +1538,9 @@ export class WebService {
     }
     if (search && search !== "") {
       params = params.append('search', `'${search}'`)
+    }
+    if (search_type) {
+      params = params.append('search_type', search_type)
     }
     params = params.append('ordering', 'identifier')
     return this.http.get<TissueQuery>(
@@ -1550,7 +1556,7 @@ export class WebService {
     )
   }
 
-  getSubcellularLocations(url?: string, limit: number = 10, offset: number = 0, search?: string) {
+  getSubcellularLocations(url?: string, limit: number = 10, offset: number = 0, search?: string, search_type: string = "startswith") {
     if (url) {
       return this.http.get<SubcellularLocationQuery>(url, {responseType: 'json', observe: 'body'})
     }
@@ -1563,6 +1569,9 @@ export class WebService {
     }
     if (search && search !== "") {
       params = params.append('search', `'${search}'`)
+    }
+    if (search_type) {
+      params = params.append('search_type', search_type)
     }
     params = params.append('ordering', 'identifier')
     return this.http.get<SubcellularLocationQuery>(
@@ -1578,7 +1587,7 @@ export class WebService {
     )
   }
 
-  getHumandDiseases(url?: string, limit: number = 10, offset: number = 0, search?: string) {
+  getHumandDiseases(url?: string, limit: number = 10, offset: number = 0, search?: string, search_type: string = "startswith") {
     if (url) {
       return this.http.get<HumanDiseaseQuery>(url, {responseType: 'json', observe: 'body'})
     }
@@ -1592,6 +1601,9 @@ export class WebService {
     if (search && search !== "") {
       params = params.append('search', `'${search}'`)
     }
+    if (search_type) {
+      params = params.append('search_type', search_type)
+    }
     params = params.append('ordering', 'identifier')
     return this.http.get<HumanDiseaseQuery>(
       `${this.baseURL}/api/human_diseases/`,
@@ -1599,7 +1611,7 @@ export class WebService {
     )
   }
 
-  getMSVocab(url?: string, limit: number = 10, offset: number = 0, search?: string, term_type?: string) {
+  getMSVocab(url?: string, limit: number = 10, offset: number = 0, search?: string, term_type?: string, search_type: string = "startswith") {
     if (url) {
       return this.http.get<MsVocabQuery>(url, {responseType: 'json', observe: 'body'})
     }
@@ -1618,6 +1630,9 @@ export class WebService {
         term_type = "cleavage agent"
       }
       params = params.append('term_type', term_type)
+    }
+    if (search_type) {
+      params = params.append('search_type', search_type)
     }
     params = params.append('ordering', 'name')
     return this.http.get<MsVocabQuery>(
@@ -1783,7 +1798,7 @@ export class WebService {
     )
   }
 
-  getUnimod(url?: string, limit: number = 10, offset: number = 0, search?: string) {
+  getUnimod(url?: string, limit: number = 10, offset: number = 0, search?: string, search_type: string = "startswith") {
     if (url) {
       return this.http.get<UnimodQuery>(url, {responseType: 'json', observe: 'body'})
     }
@@ -1796,6 +1811,9 @@ export class WebService {
     }
     if (search && search !== "") {
       params = params.append('search', `'${search}'`)
+    }
+    if (search_type) {
+      params = params.append('search_type', search_type)
     }
     params = params.append('ordering', 'name')
     return this.http.get<UnimodQuery>(

@@ -370,7 +370,7 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit, OnDestroy 
 
   filterTableColumnName: string = ''
 
-  constructor(private offCanvas: NgbOffcanvas, private ws: WebsocketService, public annotationService: AnnotationService, private modal: NgbModal, private fb: FormBuilder, private web: WebService, private toast: ToastService, public metadataService: MetadataService, private accountService: AccountsService) {
+  constructor(private offCanvas: NgbOffcanvas, private ws: WebsocketService, public annotationService: AnnotationService, private modal: NgbModal, private fb: FormBuilder, private web: WebService, private toast: ToastService, public metadataService: MetadataService, public accountService: AccountsService) {
     if (this.ws.instrumentJobWSConnection) {
       this.instrumentJobWebsocketSubscription = this.ws.instrumentJobWSConnection.subscribe((message: any) => {
         if ("signed_value" in message && "instance_id" in message) {

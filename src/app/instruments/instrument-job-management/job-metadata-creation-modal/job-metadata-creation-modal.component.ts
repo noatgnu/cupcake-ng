@@ -115,6 +115,7 @@ export class JobMetadataCreationModalComponent {
   @Input() modifier: boolean = false
 
   form = this.fb.group({
+    search_type: ["startswith"],
     metadataName: "Tissue",
     metadataType: "",
     metadataValue: "",
@@ -353,7 +354,8 @@ export class JobMetadataCreationModalComponent {
         } else if (name === "ms2 analyzer type") {
           name = "mass analyzer type"
         }
-        return this.metadataService.metadataTypeAheadDataGetter(name, value).pipe(
+        // @ts-ignore
+        return this.metadataService.metadataTypeAheadDataGetter(name, value, this.form.value.search_type).pipe(
           map(results => {
             return results;
           }), catchError(() => {

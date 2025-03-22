@@ -91,6 +91,17 @@
       </ul>
       <div [ngbNavOutlet]="nav" class="mt-2"></div>
     }
+    @if (form.value.metadataName) {
+      @if (metadataService.metadataNameAutocomplete.includes(form.value.metadataName)) {
+        <div class="form-group">
+          <label>Search Type</label>
+          <select class="form-select" formControlName="search_type">
+            <option value="contains">Entries Containing</option>
+            <option value="startswith">Entries Starting With</option>
+          </select>
+        </div>
+      }
+    }
 
     @if (form.value.metadataName === 'Sample type') {
       <div class="form-group">
