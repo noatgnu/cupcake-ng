@@ -13,7 +13,9 @@
         <button type="button" class="btn btn-close" aria-label="Close" (click)="toastService.remove(toast)"></button>
       </div>
     </div>
-    <app-toast-progressbar [total]="toast.delay||5000"></app-toast-progressbar>
+    @if (toast.progress > 0) {
+      <app-toast-progressbar [total]="toast.progress"></app-toast-progressbar>
+    }
   </ngb-toast>
 
 }

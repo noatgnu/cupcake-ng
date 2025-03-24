@@ -18,6 +18,10 @@ import {
 import {
   JobMetadataCreationModalComponent
 } from "../instruments/instrument-job-management/job-metadata-creation-modal/job-metadata-creation-modal.component";
+import {
+  SdrfValidationResultsModalComponent
+} from "../instruments/instrument-job-management/job-submission/sdrf-validation-results-modal/sdrf-validation-results-modal.component";
+import {ToastService} from "../toast.service";
 
 @Component({
   selector: 'app-metadata-playground',
@@ -58,7 +62,7 @@ export class MetadataPlaygroundComponent {
   missingColumns: string[] = [];
   searchColumn: string = "";
 
-  constructor(private modal: NgbModal, private web: WebService, public metadata: MetadataService, private fb: FormBuilder) {
+  constructor(private toast: ToastService, private modal: NgbModal, private web: WebService, public metadata: MetadataService, private fb: FormBuilder) {
     this.getLabGroups()
     this.form.controls.lab_group_id.valueChanges.subscribe(
       (value) => {
@@ -280,6 +284,12 @@ export class MetadataPlaygroundComponent {
       const errors = await this.metadata.validateMetadata(this.selectedRow.user_columns, this.selectedRow.staff_columns, this.form.value.sample_number, 0, this.form.value.lab_group_id);
       if (errors) {
         console.log(errors);
+        if (errors.errors.length > 0) {
+          const ref = this.modal.open(SdrfValidationResultsModalComponent, {scrollable: true})
+          ref.componentInstance.errors = errors.errors;
+        } else {
+          await this.toast.show("Validation", "No errors found", 2000, "success")
+        }
       }
     }
   }
