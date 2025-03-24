@@ -21,6 +21,7 @@ import {
 } from "../../instruments/instrument-job-management/job-metadata-creation-modal/job-metadata-creation-modal.component";
 import {MetadataService} from "../../metadata.service";
 import {NgClass} from "@angular/common";
+import {ToastService} from "../../toast.service";
 
 @Component({
   selector: 'app-favourites',
@@ -78,7 +79,7 @@ export class FavouritesComponent {
   labGroupPage = 1
   labGroupPageSize = 10
   labGroupQuery: LabGroupQuery|undefined = undefined
-  constructor(public metadata: MetadataService, private modal: NgbModal, public accountService: AccountsService, private web: WebService, private fb: FormBuilder) {
+  constructor(private toast: ToastService, public metadata: MetadataService, private modal: NgbModal, public accountService: AccountsService, private web: WebService, private fb: FormBuilder) {
     this.getFavourites()
     this.formFavourite.controls.name.valueChanges.subscribe((value) => {
       if (value) {
@@ -195,6 +196,10 @@ export class FavouritesComponent {
     this.web.updateFavouriteMetadataOption(favourite.id, {is_global:!favourite.is_global}).subscribe((data) => {
       const index = this.favouriteQuery!.results.findIndex((f) => f.id === favourite.id)
       this.favouriteQuery!.results[index] = data
+    }, (error) => {
+      if (error.status === 409) {
+        this.toast.show("Favourite Metadata", "There is already a global favourite with this display name")
+      }
     })
   }
 
