@@ -3,6 +3,8 @@ import {map, Observable, of} from "rxjs";
 import {Unimod} from "./unimod";
 import {WebService} from "./web.service";
 import {NgbTypeaheadSelectItemEvent} from "@ng-bootstrap/ng-bootstrap";
+import {MetadataColumn} from "./metadata-column";
+import {Workbook, Column, Worksheet, CellValue} from "exceljs";
 
 @Injectable({
   providedIn: 'root'
@@ -350,4 +352,1707 @@ export class MetadataService {
     return value;
   }
 
+  parse_sample_indices_from_modifier_string(modifier: string) {
+    const samples: string[] = modifier.split(",")
+    const sample_indices = []
+    for (const sample of samples) {
+      if (sample.includes("-")) {
+        const range = sample.split("-")
+        for (let i = parseInt(range[0]); i <= parseInt(range[1]); i++) {
+          sample_indices.push(i-1)
+        }
+      } else {
+        sample_indices.push(parseInt(sample)-1)
+      }
+    }
+    // return sorted array from smallest to largest
+    return sample_indices.sort((a, b) => a - b)
+  }
+
+  async convert_metadata_column_value_to_sdrf(column_name: string, value: string, required_metadata_name: string[]) {
+    if (!value) {
+      return ""
+    }
+
+    if (column_name === "subcellular location") {
+      if (value) {
+        const v = await this.web.getSubcellularLocations(undefined, 1, 0, undefined, "startswith", value).toPromise()
+        if (v) {
+          if (v.results.length > 0) {
+            if (value.includes("AC=")) {
+              return `NT=${value}`
+            } else {
+              return `NT=${value};AC=${v.results[0].accession}`
+            }
+          } else {
+            return `${value}`
+          }
+        } else {
+          return `${value}`
+        }
+      }
+    }
+
+    if (column_name === "organism") {
+      if (value) {
+        const v = await this.web.getSpecies(undefined, 1, 0, undefined, "startswith", value).toPromise()
+        if (v) {
+          if (v.results.length > 0) {
+            return value
+          } else {
+            return value
+          }
+        } else {
+          return value
+        }
+      }
+    }
+
+    if (column_name === "label") {
+      if (value) {
+        const v = await this.web.getMSVocab(undefined, 1, 0, undefined, "sample attribute", "startswith", value).toPromise()
+        if (v) {
+          if (v.results.length > 0) {
+            if (value.includes("AC=")) {
+              return `NT=${value}`
+            } else {
+              return `NT=${value};AC=${v.results[0].accession}`
+            }
+          } else {
+            return `${value}`
+          }
+        } else {
+          return `${value}`
+        }
+      }
+    }
+
+    if (column_name === "instrument") {
+      if (value) {
+        const v = await this.web.getMSVocab(undefined, 1, 0, undefined, "instrument", "startswith", value).toPromise()
+        if (v) {
+          if (v.results.length > 0) {
+            if (value.includes("AC=")) {
+              return `NT=${value}`
+            } else {
+              return `NT=${value};AC=${v.results[0].accession}`
+            }
+          } else {
+            return `${value}`
+          }
+        } else {
+          return `${value}`
+        }
+      }
+    }
+
+    if (column_name === "dissociation method") {
+      if (value) {
+        const v = await this.web.getMSVocab(undefined, 1, 0, undefined, "dissociation method", "startswith", value).toPromise()
+        if (v) {
+          if (v.results.length > 0) {
+            if (value.includes("AC=")) {
+              return `NT=${value}`
+            } else {
+              return `NT=${value};AC=${v.results[0].accession}`
+            }
+          } else {
+            return `${value}`
+          }
+        } else {
+          return `${value}`
+        }
+      }
+    }
+
+    if (column_name === "cleavage agent details") {
+      if (value) {
+        const v = await this.web.getMSVocab(undefined, 1, 0, undefined, "cleavage agent", "startswith", value).toPromise()
+        if (v) {
+          if (v.results.length > 0) {
+            if (value.includes("AC=")) {
+              return `NT=${value}`
+            } else {
+              return `NT=${value};AC=${v.results[0].accession}`
+            }
+          } else {
+            return `${value}`
+          }
+        } else {
+          return `${value}`
+        }
+      }
+    }
+
+    if (column_name === "enrichment process") {
+      if (value) {
+        const v = await this.web.getMSVocab(undefined, 1, 0, undefined, "enrichment process", "startswith", value).toPromise()
+        if (v) {
+          if (v.results.length > 0) {
+            if (value.includes("AC=")) {
+              return `NT=${value}`
+            } else {
+              return `NT=${value};AC=${v.results[0].accession}`
+            }
+          } else {
+            return `${value}`
+          }
+        } else {
+          return `${value}`
+        }
+      }
+    }
+
+    if (column_name === "fractionation method") {
+      if (value) {
+        const v = await this.web.getMSVocab(undefined, 1, 0, undefined, "fractionation method", "startswith", value).toPromise()
+        if (v) {
+          if (v.results.length > 0) {
+            if (value.includes("AC=")) {
+              return `NT=${value}`
+            } else {
+              return `NT=${value};AC=${v.results[0].accession}`
+            }
+          } else {
+            return `${value}`
+          }
+        } else {
+          return `${value}`
+        }
+      }
+    }
+
+    if (column_name === "proteomics data acquisition method") {
+      if (value) {
+        const v = await this.web.getMSVocab(undefined, 1, 0, undefined, "proteomics data acquisition method", "startswith", value).toPromise()
+        if (v) {
+          if (v.results.length > 0) {
+            if (value.includes("AC=")) {
+              return `NT=${value}`
+            } else {
+              return `NT=${value};AC=${v.results[0].accession}`
+            }
+          } else {
+            return `${value}`
+          }
+        } else {
+          return `${value}`
+        }
+      }
+    }
+
+    if (column_name === "reduction reagent") {
+      if (value) {
+        const v = await this.web.getMSVocab(undefined, 1, 0, undefined, "reduction reagent", "startswith", value).toPromise()
+        if (v) {
+          if (v.results.length > 0) {
+            if (value.includes("AC=")) {
+              return `NT=${value}`
+            } else {
+              return `NT=${value};AC=${v.results[0].accession}`
+            }
+          } else {
+            return `${value}`
+          }
+        } else {
+          return `${value}`
+        }
+      }
+    }
+
+    if (column_name === "alkylation reagent") {
+      if (value) {
+        const v = await this.web.getMSVocab(undefined, 1, 0, undefined, "alkylation reagent", "startswith", value).toPromise()
+        if (v) {
+          if (v.results.length > 0) {
+            if (value.includes("AC=")) {
+              return `NT=${value}`
+            } else {
+              return `NT=${value};AC=${v.results[0].accession}`
+            }
+          } else {
+            return `${value}`
+          }
+        } else {
+          return `${value}`
+        }
+      }
+    }
+
+    if (column_name === "modification parameters") {
+      if (value) {
+        const parseName = value.split(";")[0]
+        const v = await this.web.getUnimod(undefined, 1, 0, undefined, "startswith", parseName).toPromise()
+        if (v) {
+          if (v.results.length > 0) {
+            if (value.toLowerCase().includes("AC=")) {
+              return `NT=${value}`
+            } else {
+              return `NT=${value};AC=${v.results[0].accession}`
+            }
+          }  else {
+            return `${value}`
+          }
+        } else {
+          return `${value}`
+        }
+      }
+    }
+
+    if (column_name === "ms2 analyzer type") {
+      if (value) {
+        const v = await this.web.getMSVocab(undefined, 1, 0, undefined, "mass analyzer type", "startswith", value).toPromise()
+        if (v) {
+          if (v.results.length > 0) {
+            if (value.includes("AC=")) {
+              return `NT=${value}`
+            } else {
+              return `NT=${value};AC=${v.results[0].accession}`
+            }
+          } else {
+            return `${value}`
+          }
+        } else {
+          return `${value}`
+        }
+      }
+    }
+
+    return value
+  }
+
+  async sort_metadata(metadata: MetadataColumn[], sample_number: number) {
+    const headers: string[] = []
+    const default_columns_list = [{
+      "name": "Source name", "type": ""
+    },
+      {
+        "name": "Organism", "type": "Characteristics"
+      }, {
+        "name": "Tissue", "type": "Characteristics"
+      }, {
+        "name": "Disease", "type": "Characteristics"
+      }, {
+        "name": "Cell type", "type": "Characteristics"
+      }, {
+        "name": "Biological replicate", "type": "Characteristics"
+      },{
+        "name": "Material type", "type": ""
+      },
+      {
+        "name": "Assay name", "type": ""
+      }, {
+        "name": "Technology type", "type": ""
+      },  {
+        "name": "Technical replicate", "type": "Comment"
+      },
+      {"name": "Label", "type": "Comment"},
+      {"name": "Fraction identifier", "type": "Comment"},
+      {"name": "Instrument", "type": "Comment"},
+      {"name": "Data file", "type": "Comment"},
+      {"name": "Cleavage agent details", "type": "Comment"},
+      {"name": "Modification parameters", "type": "Comment"},
+      {"name": "Dissociation method", "type": "Comment"},
+      {"name": "Precursor mass tolerance", "type": "Comment"},
+      {"name": "Fragment mass tolerance", "type": "Comment"},
+    ]
+    const metadata_column_map: any = {}
+    let source_name_metadata: MetadataColumn|null = null
+    let assay_name_metadata: MetadataColumn|null = null
+    let material_type_metadata: MetadataColumn|null = null
+    let technology_type_metadata: MetadataColumn|null = null
+    const factor_value_columns: MetadataColumn[] = []
+    let data: string[][] = []
+    // set up cache for convert_metadata_column_value_to_sdrf
+    const metadata_cache: any = {}
+
+    const required_metadata_name = this.requiredColumnNames.map((name) => name.toUpperCase())
+    for (const m of metadata){
+      const metad: MetadataColumn = JSON.parse(JSON.stringify(m))
+      if (!metadata_cache[m.name]) {
+        metadata_cache[m.name] = {}
+      }
+      if (!metadata_cache[m.name][m.value]) {
+        metadata_cache[m.name][m.value] = await this.convert_metadata_column_value_to_sdrf(m.name.toLowerCase(), m.value, required_metadata_name)
+      }
+      metad.value = metadata_cache[m.name][m.value]
+      for (let i = 0; i < metad.modifiers.length; ++i) {
+        if (!metadata_cache[m.name][metad.modifiers[i].value]) {
+          metadata_cache[m.name][metad.modifiers[i].value] = await this.convert_metadata_column_value_to_sdrf(m.name.toLowerCase(), metad.modifiers[i].value, required_metadata_name)
+        }
+        metad.modifiers[i].value = metadata_cache[m.name][metad.modifiers[i].value]
+      }
+
+      if (m.type !== "Factor value") {
+        if (!metadata_column_map[m.name]) {
+          metadata_column_map[m.name] = []
+        }
+        metadata_column_map[m.name].push(metad)
+      } else {
+        factor_value_columns.push(metad)
+      }
+    }
+
+    const new_metadata: MetadataColumn[] = []
+    const non_default_columns: MetadataColumn[] = []
+
+    const default_column_map: any = {}
+
+    for (const m of default_columns_list) {
+      default_column_map[m.name] = m
+      if (m.name in metadata_column_map && m.name !== "Assay name" && m.name !== "Source name" && m.name !== "Material type" && m.name !== "Technology type") {
+        new_metadata.push(...metadata_column_map[m.name])
+      }
+      if (m.name === "Assay name") {
+        if ("Assay name" in metadata_column_map) {
+          assay_name_metadata = metadata_column_map["Assay name"][0]
+        }
+      } else if (m.name === "Source name") {
+        if ("Source name" in metadata_column_map) {
+          source_name_metadata = metadata_column_map["Source name"][0]
+        }
+      } else if (m.name === "Material type") {
+        if ("Material type" in metadata_column_map) {
+          material_type_metadata = metadata_column_map["Material type"][0]
+        }
+      } else if (m.name === "Technology type") {
+        if ("Technology type" in metadata_column_map) {
+          technology_type_metadata = metadata_column_map["Technology type"][0]
+        }
+      }
+    }
+
+    for (const n in metadata_column_map) {
+      if (!default_column_map[n] && n !== "Assay name" && n !== "Source name" && n !== "Material type" && n !== "Technology type") {
+        non_default_columns.push(...metadata_column_map[n])
+      }
+    }
+
+    let col_count = new_metadata.length + non_default_columns.length
+    if (source_name_metadata){
+      col_count +=1
+    }
+    if (assay_name_metadata){
+      col_count +=1
+    }
+    if (factor_value_columns.length > 0){
+      col_count += factor_value_columns.length
+    }
+    if (material_type_metadata){
+      col_count +=1
+    }
+    if (technology_type_metadata){
+      col_count +=1
+    }
+
+    data = new Array(sample_number).fill(0).map(() => new Array(col_count).fill(""))
+
+    let last_characteristics = 0
+    if (source_name_metadata){
+      headers.push("source name")
+      if (source_name_metadata.modifiers){
+        for (const modifier of source_name_metadata.modifiers){
+          const samples = this.parse_sample_indices_from_modifier_string(modifier.samples)
+          for (const s of samples) {
+            data[s][0] = modifier.value
+          }
+        }
+      }
+      for (let i = 0; i < sample_number; i++) {
+        if (data[i][0] === "") {
+          data[i][0] = source_name_metadata.value
+        }
+      }
+      last_characteristics += 1
+    }
+
+    for (let i = 0; i < new_metadata.length; i ++) {
+      const m = new_metadata[i]
+      if (m.type === "Characteristics") {
+        if (m.name.toLowerCase() === "tissue") {
+          headers.push("characteristics[organism part]")
+        } else {
+          headers.push(`characteristics[${m.name.toLowerCase()}]`)
+        }
+        if (m.modifiers) {
+          for (const modifier of m.modifiers) {
+            const samples = this.parse_sample_indices_from_modifier_string(modifier.samples)
+            for (const s of samples) {
+              data[s][last_characteristics] = modifier.value
+            }
+          }
+        }
+        for (let j=0; j < sample_number; j++) {
+          if (data[j][last_characteristics] === "") {
+            data[j][last_characteristics] = m.value
+          }
+        }
+        last_characteristics += 1
+      }
+    }
+
+    for (let i = 0; i < non_default_columns.length; i++) {
+      const m = non_default_columns[i]
+      if (m.type === "Characteristics") {
+        headers.push(`characteristics[${m.name.toLowerCase()}]`)
+        if (m.modifiers) {
+          for (const modifier of m.modifiers) {
+            const samples = this.parse_sample_indices_from_modifier_string(modifier.samples)
+            for (const s of samples) {
+              data[s][last_characteristics] = modifier.value
+            }
+          }
+        }
+        for (let j=0; j < sample_number; j++) {
+          if (data[j][last_characteristics] === "") {
+            data[j][last_characteristics] = m.value
+          }
+        }
+        last_characteristics += 1
+      }
+    }
+
+    let last_non_type = last_characteristics
+
+    if (material_type_metadata) {
+      headers.push("material type")
+      if (material_type_metadata.modifiers) {
+        for (const modifier of material_type_metadata.modifiers) {
+          const samples = this.parse_sample_indices_from_modifier_string(modifier.samples)
+          for (const s of samples) {
+            data[s][last_characteristics] = modifier.value
+          }
+        }
+      }
+      for (let j=0; j < sample_number; j++) {
+        if (data[j][last_characteristics] === "") {
+          data[j][last_characteristics] = material_type_metadata.value
+        }
+      }
+      last_non_type += 1
+    }
+
+    if (assay_name_metadata) {
+      headers.push("assay name")
+      if (assay_name_metadata.modifiers) {
+        for (const modifier of assay_name_metadata.modifiers) {
+          const samples = this.parse_sample_indices_from_modifier_string(modifier.samples)
+          for (const s of samples) {
+            data[s][last_non_type] = modifier.value
+          }
+        }
+      }
+      for (let j=0; j < sample_number; j++) {
+        if (data[j][last_non_type] === "") {
+          data[j][last_non_type] = assay_name_metadata.value
+        }
+      }
+      last_non_type += 1
+    }
+
+    if (technology_type_metadata) {
+      headers.push("technology type")
+      if (technology_type_metadata.modifiers) {
+        for (const modifier of technology_type_metadata.modifiers) {
+          const samples = this.parse_sample_indices_from_modifier_string(modifier.samples)
+          for (const s of samples) {
+            data[s][last_non_type] = modifier.value
+          }
+        }
+      }
+      for (let j=0; j < sample_number; j++) {
+        if (data[j][last_non_type] === "") {
+          data[j][last_non_type] = technology_type_metadata.value
+        }
+      }
+      last_non_type += 1
+    }
+
+    for (let i = 0; i < new_metadata.length; i++) {
+      const m = new_metadata[i]
+      if (m.type === "") {
+        headers.push(m.name.toLowerCase())
+        if (m.modifiers) {
+          for (const modifier of m.modifiers) {
+            const samples = this.parse_sample_indices_from_modifier_string(modifier.samples)
+            for (const s of samples) {
+              data[s][last_non_type] = modifier.value
+            }
+          }
+        }
+        for (let j=0; j < sample_number; j++) {
+          if (data[j][last_non_type] === "") {
+            data[j][last_non_type] = m.value
+          }
+        }
+        last_non_type += 1
+      }
+    }
+
+    for (let i = 0; i < non_default_columns.length; i++) {
+      const m = non_default_columns[i]
+      if (m.type === "") {
+        headers.push(m.name.toLowerCase())
+        if (m.modifiers) {
+          for (const modifier of m.modifiers) {
+            const samples = this.parse_sample_indices_from_modifier_string(modifier.samples)
+            for (const s of samples) {
+              data[s][last_non_type] = modifier.value
+            }
+          }
+        }
+        for (let j=0; j < sample_number; j++) {
+          if (data[j][last_non_type] === "") {
+            data[j][last_non_type] = m.value
+          }
+        }
+        last_non_type += 1
+      }
+    }
+
+    let last_comment = last_non_type
+
+    for (let i=0; i < new_metadata.length; i++) {
+      const m = new_metadata[i]
+      if (m.type === "Comment") {
+        headers.push(`comment[${m.name.toLowerCase()}]`)
+        if (m.modifiers) {
+          for (const modifier of m.modifiers) {
+            const samples = this.parse_sample_indices_from_modifier_string(modifier.samples)
+            for (const s of samples) {
+              data[s][last_comment] = modifier.value
+            }
+          }
+        }
+        for (let j=0; j < sample_number; j++) {
+          if (data[j][last_comment] === "") {
+            data[j][last_comment] = m.value
+          }
+        }
+        last_comment += 1
+      }
+    }
+
+    for (let i=0; i < non_default_columns.length; i++) {
+      const m = non_default_columns[i]
+      if (m.type === "Comment") {
+        headers.push(`comment[${m.name.toLowerCase()}]`)
+        if (m.modifiers) {
+          for (const modifier of m.modifiers) {
+            const samples = this.parse_sample_indices_from_modifier_string(modifier.samples)
+            for (const s of samples) {
+              data[s][last_comment] = modifier.value
+            }
+          }
+        }
+        for (let j=0; j < sample_number; j++) {
+          if (data[j][last_comment] === "") {
+            data[j][last_comment] = m.value
+          }
+        }
+        last_comment += 1
+      }
+    }
+
+    for (let i=0; i < factor_value_columns.length; i++) {
+      const m = factor_value_columns[i]
+      if (m.name.toLowerCase() === "tissue") {
+        headers.push("factor value[organism part]")
+      } else {
+        headers.push(`factor value[${m.name.toLowerCase()}]`)
+      }
+      if (m.modifiers) {
+        for (const modifier of m.modifiers) {
+          const samples = this.parse_sample_indices_from_modifier_string(modifier.samples)
+          for (const s of samples) {
+            data[s][last_comment] = modifier.value
+          }
+        }
+      }
+      for (let j=0; j < sample_number; j++) {
+        if (data[j][last_comment] === "") {
+          data[j][last_comment] = m.value
+        }
+      }
+      last_comment += 1
+    }
+
+    return [headers, ...data]
+  }
+
+  async convert_sdrf_to_metadata(name: string, value: string) {
+    const data = value.split(";")
+    if (name === "subcellular location") {
+      for (const d of data) {
+        const upper_d = d.toUpperCase()
+        if (upper_d.startsWith("NT=")) {
+          const metadata_nt = d.replace("NT=", "").replace("nt=", "")
+          const v = await this.web.getSubcellularLocations(undefined, 1, 0, undefined, "startswith", metadata_nt).toPromise()
+          if (v) {
+            if (v.results.length > 0) {
+              return v.results[0].location_identifier
+            } else {
+              return metadata_nt
+            }
+          }
+        }
+        if (upper_d.startsWith("AC=")) {
+          const metadata_ac = d.replace("AC=", "").replace("ac=", "")
+          const v = await this.web.getSubcellularLocations(undefined, 1, 0, undefined, "startswith", undefined, metadata_ac).toPromise()
+          if (v) {
+            if (v.results.length > 0) {
+              return v.results[0].location_identifier
+            } else {
+              return metadata_ac
+            }
+          }
+        }
+      }
+    }
+    if (name === "organism") {
+      for (const d of data) {
+        if (d.startsWith("http")) {
+          const metadata_tx = d.split("_")[1]
+          const v = await this.web.getSpecies(undefined, 1, 0, undefined, "startswith", undefined, metadata_tx).toPromise()
+          if (v) {
+            if (v.results.length > 0) {
+              return v.results[0].official_name
+            } else {
+              return d
+            }
+          }
+        } else {
+          const v = await this.web.getSpecies(undefined, 1, 0, undefined, "startswith", d).toPromise()
+          if (v) {
+            if (v.results.length > 0) {
+              return v.results[0].official_name
+            } else {
+              return d
+            }
+          }
+        }
+      }
+    }
+    if (name === "label") {
+      for (const d of data) {
+        const upper_d = d.toUpperCase()
+        if (upper_d.startsWith("NT=")) {
+          const metadata_nt = d.replace("NT=", "").replace("nt=", "")
+          const v = await this.web.getMSVocab(undefined, 1, 0, undefined, "sample attribute", "startswith", metadata_nt).toPromise()
+          if (v) {
+            if (v.results.length > 0) {
+              return v.results[0].name
+            } else {
+              return metadata_nt
+            }
+          }
+        }
+        if (upper_d.startsWith("AC=")) {
+          const metadata_ac = d.replace("AC=", "").replace("ac=", "")
+          const v = await this.web.getMSVocab(undefined, 1, 0, undefined, "sample attribute", undefined, undefined, metadata_ac).toPromise()
+          if (v) {
+            if (v.results.length > 0) {
+              return v.results[0].name
+            } else {
+              return metadata_ac
+            }
+          }
+        }
+      }
+    }
+    if (name === "instrument") {
+      for (const d of data) {
+        const upper_d = d.toUpperCase()
+        if (upper_d.startsWith("NT=")) {
+          const metadata_nt = d.replace("NT=", "").replace("nt=", "")
+          const v = await this.web.getMSVocab(undefined, 1, 0, undefined, "instrument", "startswith", metadata_nt).toPromise()
+          if (v) {
+            if (v.results.length > 0) {
+              return v.results[0].name
+            } else {
+              return metadata_nt
+            }
+          }
+        }
+        if (upper_d.startsWith("AC=")) {
+          const metadata_ac = d.replace("AC=", "").replace("ac=", "")
+          const v = await this.web.getMSVocab(undefined, 1, 0, undefined, "instrument", undefined, undefined, metadata_ac).toPromise()
+          if (v) {
+            if (v.results.length > 0) {
+              return v.results[0].name
+            } else {
+              return metadata_ac
+            }
+          }
+        }
+      }
+    }
+    if (name === "dissociation method") {
+      for (const d of data) {
+        const upper_d = d.toUpperCase()
+        if (upper_d.startsWith("NT=")) {
+          const metadata_nt = d.replace("NT=", "").replace("nt=", "")
+          const v = await this.web.getMSVocab(undefined, 1, 0, undefined, "dissociation method", "startswith", metadata_nt).toPromise()
+          if (v) {
+            if (v.results.length > 0) {
+              return v.results[0].name
+            } else {
+              return metadata_nt
+            }
+          }
+        }
+        if (upper_d.startsWith("AC=")) {
+          const metadata_ac = d.replace("AC=", "").replace("ac=", "")
+          const v = await this.web.getMSVocab(undefined, 1, 0, undefined, "dissociation method", undefined, undefined, metadata_ac).toPromise()
+          if (v) {
+            if (v.results.length > 0) {
+              return v.results[0].name
+            } else {
+              return metadata_ac
+            }
+          }
+        }
+      }
+    }
+    if (name === "cleavage agent details") {
+      for (const d of data) {
+        const upper_d = d.toUpperCase()
+        if (upper_d.startsWith("NT=")) {
+          const metadata_nt = d.replace("NT=", "").replace("nt=", "")
+          const v = await this.web.getMSVocab(undefined, 1, 0, undefined, "cleavage agent", "startswith", metadata_nt).toPromise()
+          if (v) {
+            if (v.results.length > 0) {
+              return v.results[0].name
+            } else {
+              return metadata_nt
+            }
+          }
+        }
+        if (upper_d.startsWith("AC=")) {
+          const metadata_ac = d.replace("AC=", "").replace("ac=", "")
+          const v = await this.web.getMSVocab(undefined, 1, 0, undefined, "cleavage agent", undefined, undefined, metadata_ac).toPromise()
+          if (v) {
+            if (v.results.length > 0) {
+              return v.results[0].name
+            } else {
+              return metadata_ac
+            }
+          }
+        }
+      }
+    }
+    if (name === "enrichment process") {
+      for (const d of data) {
+        const upper_d = d.toUpperCase()
+        if (upper_d.startsWith("NT=")) {
+          const metadata_nt = d.replace("NT=", "").replace("nt=", "")
+          const v = await this.web.getMSVocab(undefined, 1, 0, undefined, "enrichment process", "startswith", metadata_nt).toPromise()
+          if (v) {
+            if (v.results.length > 0) {
+              return v.results[0].name
+            } else {
+              return metadata_nt
+            }
+          }
+        }
+        if (upper_d.startsWith("AC=")) {
+          const metadata_ac = d.replace("AC=", "").replace("ac=", "")
+          const v = await this.web.getMSVocab(undefined, 1, 0, undefined, "enrichment process", undefined, undefined, metadata_ac).toPromise()
+          if (v) {
+            if (v.results.length > 0) {
+              return v.results[0].name
+            } else {
+              return metadata_ac
+            }
+          }
+        }
+      }
+    }
+    if (name === "fractionation method") {
+      for (const d of data) {
+        const upper_d = d.toUpperCase()
+        if (upper_d.startsWith("NT=")) {
+          const metadata_nt = d.replace("NT=", "").replace("nt=", "")
+          const v = await this.web.getMSVocab(undefined, 1, 0, undefined, "fractionation method", "startswith", metadata_nt).toPromise()
+          if (v) {
+            if (v.results.length > 0) {
+              return v.results[0].name
+            } else {
+              return metadata_nt
+            }
+          }
+        }
+        if (upper_d.startsWith("AC=")) {
+          const metadata_ac = d.replace("AC=", "").replace("ac=", "")
+          const v = await this.web.getMSVocab(undefined, 1, 0, undefined, "fractionation method", undefined, undefined, metadata_ac).toPromise()
+          if (v) {
+            if (v.results.length > 0) {
+              return v.results[0].name
+            } else {
+              return metadata_ac
+            }
+          }
+        }
+      }
+    }
+    if (name === "proteomics data acquisition method") {
+      for (const d of data) {
+        const upper_d = d.toUpperCase()
+        if (upper_d.startsWith("NT=")) {
+          const metadata_nt = d.replace("NT=", "").replace("nt=", "")
+          const v = await this.web.getMSVocab(undefined, 1, 0, undefined, "proteomics data acquisition method", "startswith", metadata_nt).toPromise()
+          if (v) {
+            if (v.results.length > 0) {
+              return v.results[0].name
+            } else {
+              return metadata_nt
+            }
+          }
+        }
+        if (upper_d.startsWith("AC=")) {
+          const metadata_ac = d.replace("AC=", "").replace("ac=", "")
+          const v = await this.web.getMSVocab(undefined, 1, 0, undefined, "proteomics data acquisition method", undefined, undefined, metadata_ac).toPromise()
+          if (v) {
+            if (v.results.length > 0) {
+              return v.results[0].name
+            } else {
+              return metadata_ac
+            }
+          }
+        }
+      }
+    }
+    if (name === "reduction reagent") {
+      for (const d of data) {
+        const upper_d = d.toUpperCase()
+        if (upper_d.startsWith("NT=")) {
+          const metadata_nt = d.replace("NT=", "").replace("nt=", "")
+          const v = await this.web.getMSVocab(undefined, 1, 0, undefined, "reduction reagent", "startswith", metadata_nt).toPromise()
+          if (v) {
+            if (v.results.length > 0) {
+              return v.results[0].name
+            } else {
+              return metadata_nt
+            }
+          }
+        }
+        if (upper_d.startsWith("AC=")) {
+          const metadata_ac = d.replace("AC=", "").replace("ac=", "")
+          const v = await this.web.getMSVocab(undefined, 1, 0, undefined, "reduction reagent", undefined, undefined, metadata_ac).toPromise()
+          if (v) {
+            if (v.results.length > 0) {
+              return v.results[0].name
+            } else {
+              return metadata_ac
+            }
+          }
+        }
+      }
+    }
+    if (name === "alkylation reagent") {
+      for (const d of data) {
+        const upper_d = d.toUpperCase()
+        if (upper_d.startsWith("NT=")) {
+          const metadata_nt = d.replace("NT=", "").replace("nt=", "")
+          const v = await this.web.getMSVocab(undefined, 1, 0, undefined, "alkylation reagent", "startswith", metadata_nt).toPromise()
+          if (v) {
+            if (v.results.length > 0) {
+              return v.results[0].name
+            } else {
+              return metadata_nt
+            }
+          }
+        }
+        if (upper_d.startsWith("AC=")) {
+          const metadata_ac = d.replace("AC=", "").replace("ac=", "")
+          const v = await this.web.getMSVocab(undefined, 1, 0, undefined, "alkylation reagent", undefined, undefined, metadata_ac).toPromise()
+          if (v) {
+            if (v.results.length > 0) {
+              return v.results[0].name
+            } else {
+              return metadata_ac
+            }
+          }
+        }
+      }
+    }
+    if (name === "modification parameters") {
+      for (const d of data) {
+        const upper_d = d.toUpperCase()
+        if (upper_d.startsWith("NT=")) {
+          const metadata_nt = d.replace("NT=", "").replace("nt=", "")
+          const v = await this.web.getUnimod(undefined, 1, 0, undefined, "startswith", metadata_nt).toPromise()
+          if (v) {
+            if (v.results.length > 0) {
+              return v.results[0].name
+            } else {
+              return metadata_nt
+            }
+          }
+        }
+        if (upper_d.startsWith("AC=")) {
+          const metadata_ac = d.replace("AC=", "").replace("ac=", "")
+          const v = await this.web.getUnimod(undefined, 1, 0, undefined, undefined, undefined, metadata_ac).toPromise()
+          if (v) {
+            if (v.results.length > 0) {
+              return v.results[0].name
+            } else {
+              return metadata_ac
+            }
+          }
+        }
+      }
+    }
+    if (name === "ms2 analyzer type") {
+      for (const d of data) {
+        const upper_d = d.toUpperCase()
+        if (upper_d.startsWith("NT=")) {
+          const metadata_nt = d.replace("NT=", "").replace("nt=", "")
+          const v = await this.web.getMSVocab(undefined, 1, 0, undefined, "mass analyzer type", "startswith", metadata_nt).toPromise()
+          if (v) {
+            if (v.results.length > 0) {
+              return v.results[0].name
+            } else {
+              return metadata_nt
+            }
+          }
+        }
+        if (upper_d.startsWith("AC=")) {
+          const metadata_ac = d.replace("AC=", "").replace("ac=", "")
+          const v = await this.web.getMSVocab(undefined, 1, 0, undefined, "mass analyzer type", undefined, undefined, metadata_ac).toPromise()
+          if (v) {
+            if (v.results.length > 0) {
+              return v.results[0].name
+            } else {
+              return metadata_ac
+            }
+          }
+        }
+      }
+    }
+    if (name === "tissue" || name === "organism part") {
+      for (const d of data) {
+        const upper_d = d.toUpperCase()
+        if (upper_d.startsWith("NT=")) {
+          const metadata_nt = d.replace("NT=", "").replace("nt=", "")
+          const v = await this.web.getTissues(undefined, 1, 0, undefined, "startswith", metadata_nt).toPromise()
+          if (v) {
+            if (v.results.length > 0) {
+              return v.results[0].identifier
+            } else {
+              return metadata_nt
+            }
+          }
+        }
+        if (upper_d.startsWith("AC=")) {
+          const metadata_ac = d.replace("AC=", "").replace("ac=", "")
+          const v = await this.web.getTissues(undefined, 1, 0, undefined, undefined, undefined, metadata_ac).toPromise()
+          if (v) {
+            if (v.results.length > 0) {
+              return v.results[0].identifier
+            } else {
+              return metadata_ac
+            }
+          }
+        }
+      }
+    }
+    return value
+  }
+
+  async convert_metadata_to_excel(user_metadata: MetadataColumn[], staff_metadata: MetadataColumn[], sample_number: number, user_id: number, service_lab_group_id: number) {
+    const metadata = user_metadata.concat(staff_metadata)
+    let main_metadata = metadata.filter((m) => !m.hidden)
+    let hidden_metadata = metadata.filter((m) => m.hidden)
+    const result_main = await this.sort_metadata(main_metadata, sample_number)
+    let result_hidden: string[][] = []
+    if (hidden_metadata.length > 0) {
+      result_hidden = await this.sort_metadata(hidden_metadata, sample_number)
+    }
+    const favourites: any = {}
+    if (service_lab_group_id > 0) {
+      for (const m of main_metadata) {
+        favourites[m.name.toLowerCase()] = []
+        const response = await this.web.getFavouriteMetadataOptions(10, 0, undefined, 'service_lab_group', service_lab_group_id, m.name).toPromise()
+        if (response) {
+          for (const r of response.results) {
+            favourites[m.name.toLowerCase()].push(`${r.display_value}[**]`)
+          }
+        }
+        const global_response = await this.web.getFavouriteMetadataOptions(10, 0, undefined, undefined, undefined, m.name, undefined, true).toPromise()
+        if (global_response) {
+          for (const r of global_response.results) {
+            favourites[m.name.toLowerCase()].push(`${r.display_value}[***]`)
+          }
+        }
+      }
+    }
+    const wb = new Workbook()
+    const main_ws: Worksheet = wb.addWorksheet('main')
+    const hidden_ws: Worksheet = wb.addWorksheet('hidden')
+    const required_metadata = this.requiredColumnNames.map((name) => name.toLowerCase())
+    const fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: {argb: 'FFFF99'}
+    }
+
+    const border = {
+      top: {style: 'thin'},
+      left: {style: 'thin'},
+      bottom: {style: 'thin'},
+      right: {style: 'thin'}
+    }
+
+    main_ws.addRow(result_main[0])
+
+
+    for (const row of result_main.slice(1)) {
+      main_ws.addRow(row)
+    }
+    const rows = main_ws.getRows(1, sample_number+1)
+    if (rows) {
+      for (const row of rows) {
+        row.eachCell((cell: any) => {
+          cell.border = border
+          cell.fill = fill
+        })
+      }
+    }
+
+
+    for (const col of main_ws.columns) {
+      // define column width based on the longest cell in the column
+      let max_length = 0
+      if (col.number && col.values) {
+        for (const cell of col.values) {
+          if (typeof cell === 'string' && cell.length > max_length) {
+            max_length = cell.length;
+          }
+        }
+        if (max_length > 0) {
+          main_ws.getColumn(col.number).width = max_length
+        }
+      }
+
+    }
+
+    const note_row = sample_number + 2
+    // get last column
+    const lastColumn = main_ws.getColumn(main_ws.columnCount).letter
+    const main_ws_range = `A${note_row}:${lastColumn}${note_row}`
+    main_ws.mergeCells(main_ws_range)
+    const note_value = "Note: Cells that are empty will automatically be filled with 'not applicable' or 'no available' depending on the column when submitted."
+    const note_cell = main_ws.getCell(`A${note_row}`)
+    note_cell.value = note_value
+    note_cell.font = {bold: true}
+
+    if (result_hidden.length > 0) {
+      hidden_ws.addRow(result_hidden[0])
+      for (const row of result_hidden.slice(1)) {
+        hidden_ws.addRow(row)
+      }
+      const rows = hidden_ws.getRows(1, sample_number+1)
+      if (rows) {
+        for (const row of rows) {
+          row.eachCell((cell: any) => {
+            cell.border = border
+            cell.fill = fill
+          })
+        }
+      }
+
+      for (const col of hidden_ws.columns) {
+        if (col.number) {
+          let max_length = 0
+          if (col.values) {
+            for (const cell of col.values) {
+              if (typeof cell === 'string' && cell.length > max_length) {
+                max_length = cell.length;
+              }
+            }
+          }
+          if (max_length > 0) {
+            hidden_ws.getColumn(col.number).width = max_length
+          }
+        }
+
+      }
+    }
+
+
+    for (let i = 0; i < result_main[0].length; i++) {
+      const name_splitted = result_main[0][i].split("[")
+      let required_column = false
+      let col_name = ''
+      if (name_splitted.length > 1) {
+        col_name = name_splitted[1].replace("]", "")
+      } else {
+        col_name = name_splitted[0]
+      }
+
+      if (col_name == "organism part") {
+        col_name = "tissue"
+      }
+      if (required_metadata.includes(col_name)) {
+        required_column = true
+      }
+      let option_list: string[] = []
+      if (required_column) {
+        option_list.push("not applicable")
+      } else {
+        option_list.push("not available")
+      }
+      if (favourites[col_name.toLowerCase()]) {
+        option_list.push(...favourites[col_name.toLowerCase()])
+      }
+      const col: Column = main_ws.getColumn(i+1)
+      col.eachCell((cell: any, rowNumber: number) => {
+        if (rowNumber > 1) {
+          cell.dataValidation = {
+            type: 'list',
+            formulae: [`"${option_list.join(',')}"`],
+            allowBlank: true
+          }
+        }
+      })
+    }
+
+    if (result_hidden.length > 0) {
+      if (result_hidden[0].length > 0) {
+        for (let i = 0; i < result_hidden[0].length; i++) {
+          const name_splitted = result_hidden[0][i].split("[")
+          let required_column = false
+          let col_name = ''
+          if (name_splitted.length > 1) {
+            col_name = name_splitted[1].replace("]", "")
+          } else {
+            col_name = name_splitted[0]
+          }
+          if (col_name == "organism part") {
+            col_name = "tissue"
+          }
+          if (required_metadata.includes(col_name)) {
+            required_column = true
+          }
+          let option_list: string[] = []
+          if (required_column) {
+            option_list.push("not applicable")
+          } else {
+            option_list.push("not available")
+          }
+
+          if (favourites[col_name.toLowerCase()]) {
+            option_list.push(...favourites[col_name.toLowerCase()])
+          }
+          const col: Column = hidden_ws.getColumn(i+1)
+          if (option_list.length > 0) {
+            col.eachCell((cell: any, rowNumber: number) => {
+              if (rowNumber > 1) {
+                cell.dataValidation = {
+                  type: 'list',
+                  formulae: [`"${option_list.join(',')}"`],
+                  allowBlank: true,
+                }
+              }
+            })
+          }
+        }
+      }
+    }
+    return wb
+  }
+
+  async read_metadata_from_excel(data: ArrayBuffer, user_metadata: MetadataColumn[], staff_metadata: MetadataColumn[], sample_number: number, user_id: number, service_lab_group_id: number) {
+    const workbook = new Workbook();
+    await workbook.xlsx.load(data)
+    const main_ws = workbook.getWorksheet('main')
+    const hidden_ws = workbook.getWorksheet('hidden')
+    const user_metadata_field_map: any = {}
+    const staff_metadata_field_map: any = {}
+    for (const m of user_metadata) {
+      if (!user_metadata_field_map[m.type]) {
+        user_metadata_field_map[m.type] = {}
+      }
+      if (!user_metadata_field_map[m.type][m.name]) {
+        user_metadata_field_map[m.type][m.name] = []
+      }
+      user_metadata_field_map[m.type][m.name].push(JSON.parse(JSON.stringify(m)))
+    }
+    for (const m of staff_metadata) {
+      if (!staff_metadata_field_map[m.type]) {
+        staff_metadata_field_map[m.type] = {}
+      }
+      if (!staff_metadata_field_map[m.type][m.name]) {
+        staff_metadata_field_map[m.type][m.name] = []
+      }
+      staff_metadata_field_map[m.type][m.name].push(JSON.parse(JSON.stringify(m)))
+    }
+    let main_metadata: MetadataColumn[] = []
+    const m_headers: string[] = []
+    let currentID = 1
+    if (main_ws) {
+      const main_headers = main_ws.getRow(1).values
+      if (main_headers){
+        if (Array.isArray(main_headers)) {
+          main_headers.forEach((h: CellValue) => {
+            if (typeof h === 'string') {
+              const header = h.toLowerCase();
+              let metadata_type = "";
+              let metadata_name = "";
+              if (header.includes("[")) {
+                metadata_type = header.split("[")[0];
+                metadata_name = header.split("[")[1].replace("]", "");
+              } else {
+                metadata_name = header;
+              }
+              if (metadata_name == "organism part") {
+                metadata_name = "tissue";
+              }
+              const metadata: MetadataColumn = {
+                name: metadata_name.charAt(0).toUpperCase() + metadata_name.slice(1),
+                type: metadata_type.charAt(0).toUpperCase() + metadata_type.slice(1),
+                value: "",
+                modifiers: [],
+                hidden: false,
+                column_position: 0,
+                stored_reagent: null,
+                id: currentID,
+                created_at: new Date(),
+                updated_at: new Date(),
+                not_applicable: false,
+                mandatory: false,
+                auto_generated: false,
+                readonly: false
+              };
+              currentID++
+              main_metadata.push(metadata);
+              m_headers.push(metadata.name);
+            }
+          });
+        }
+      }
+    }
+    let hidden_metadata: MetadataColumn[] = []
+    const h_headers: string[] = []
+    if (hidden_ws) {
+      const hidden_headers = hidden_ws.getRow(1).values
+      if (hidden_headers) {
+        if (Array.isArray(hidden_headers)) {
+          hidden_headers.forEach((h: CellValue) => {
+            if (typeof h === 'string') {
+              const header = h.toLowerCase();
+              let metadata_type = "";
+              let metadata_name = "";
+              if (header.includes("[")) {
+                metadata_type = header.split("[")[0];
+                metadata_name = header.split("[")[1].replace("]", "");
+              } else {
+                metadata_name = header;
+              }
+              if (metadata_name == "organism part") {
+                metadata_name = "tissue";
+              }
+              const metadata: MetadataColumn = {
+                name: metadata_name.charAt(0).toUpperCase() + metadata_name.slice(1),
+                type: metadata_type.charAt(0).toUpperCase() + metadata_type.slice(1),
+                value: "",
+                modifiers: [],
+                hidden: true,
+                column_position: 0,
+                stored_reagent: null,
+                id: currentID,
+                created_at: new Date(),
+                updated_at: new Date(),
+                not_applicable: false,
+                mandatory: false,
+                auto_generated: false,
+                readonly: false
+              };
+              currentID++
+              hidden_metadata.push(metadata);
+              h_headers.push(metadata.name);
+            }
+          });
+        }
+      }
+    }
+    let main_data: any[] = []
+    if (main_ws) {
+      const m_rows = main_ws.getRows(2, sample_number+1)
+      if (m_rows) {
+        main_data = m_rows
+      }
+    }
+    let hidden_data: any[] = []
+    if (hidden_ws) {
+      const h_rows = hidden_ws.getRows(2, sample_number+1)
+      if (h_rows) {
+        hidden_data = h_rows
+      }
+    }
+    let headers: string[] = []
+    let fin_data: string[][] = []
+    const result: {user_metadata: MetadataColumn[], staff_metadata: MetadataColumn[]} = {
+      user_metadata: [],
+      staff_metadata: []
+    }
+
+    if (hidden_data) {
+      headers = m_headers.concat(h_headers);
+      for (let i = 0; i < sample_number; i++) {
+        fin_data[i] = [];
+        for (let j = 0; j < headers.length; j++) {
+          if (j < m_headers.length) {
+            fin_data[i][j] = main_data[i] ? main_data[i].getCell(j + 1).value : "";
+          } else {
+            fin_data[i][j] = hidden_data[i] ? hidden_data[i].getCell(j - m_headers.length + 1).value : "";
+          }
+        }
+      }
+    } else {
+      headers = m_headers;
+      for (let i = 0; i < sample_number; i++) {
+        fin_data[i] = [];
+        for (let j = 0; j < headers.length; j++) {
+          fin_data[i][j] = main_data[i] ? main_data[i].getCell(j + 1).value : "";
+        }
+      }
+    }
+    let combined_metadata: MetadataColumn[] = main_metadata.concat(hidden_metadata)
+    console.log(fin_data)
+    for (let i = 0; i< combined_metadata.length; i++ ) {
+      const metadata_value_map: any = {}
+      console.log(metadata_value_map)
+
+      for (let j = 0; j < sample_number; j++) {
+        console.log(fin_data[j][i])
+        const metadata_name = combined_metadata[i].name.toLowerCase()
+        let value = ""
+        if (!fin_data[j][i]) {
+          fin_data[j][i] = ""
+        }
+
+        if (fin_data[j][i] === "") {
+          if (metadata_name === "tissue" || this.requiredColumnNames.includes(combined_metadata[i].name)) {
+            fin_data[j][i] = "not applicable"
+          } else {
+            fin_data[j][i] = "not available"
+          }
+        }
+
+        if (fin_data[j][i] === "not applicable" || fin_data[j][i] === "not available") {
+          value = fin_data[j][i]
+        } else if (fin_data[j][i].endsWith("[**]")) {
+          value = fin_data[j][i].replace("[**]", "")
+          const value_query = await this.web.getFavouriteMetadataOptions(1, 0, undefined, 'service_lab_group', service_lab_group_id, combined_metadata[i].name, value).toPromise()
+          if (value_query) {
+            if (value_query.results.length > 0) {
+              value = value_query.results[0].value
+            }
+          }
+          value = await this.convert_sdrf_to_metadata(metadata_name, value)
+        } else if (fin_data[j][i].endsWith("[***]")) {
+          value = fin_data[j][i].replace("[***]", "")
+          const value_query = await this.web.getFavouriteMetadataOptions(1, 0, undefined, undefined, undefined, combined_metadata[i].name, value, true).toPromise()
+          if (value_query) {
+            if (value_query.results.length > 0) {
+              value = value_query.results[0].value
+            }
+          }
+          value = await this.convert_sdrf_to_metadata(metadata_name, value)
+        } else {
+          value = fin_data[j][i]
+        }
+        if (!metadata_value_map[value]) {
+          metadata_value_map[value] = []
+        }
+        metadata_value_map[value].push(j)
+      }
+      let max_count = 0
+      let max_value = null
+      for (const v in metadata_value_map) {
+        if (metadata_value_map[v].length > max_count) {
+          max_count = metadata_value_map[v].length
+          max_value = v
+        }
+      }
+      if (max_value) {
+        combined_metadata[i].value = max_value
+      }
+      const modifiers: any[] = []
+      for (const v in metadata_value_map) {
+        if (v !== max_value) {
+          const modifier: any = {
+            value: v,
+            samples: []
+          }
+          const samples = metadata_value_map[v]
+          samples.sort((a: number, b: number) => a - b)
+          let start:number = samples[0]
+          let end:number = samples[0]
+          for (let k = 1; k < samples.length; k++) {
+            if (samples[k] === end + 1) {
+              end = samples[k]
+            } else {
+              if (start === end) {
+                modifier.samples.push(`${start+1}`)
+              } else {
+                modifier.samples.push(`${start+1}-${end+1}`)
+              }
+              start = samples[k]
+              end = samples[k]
+            }
+          }
+          if (start === end) {
+            modifier.samples.push(`${start+1}`)
+          } else {
+            modifier.samples.push(`${start+1}-${end+1}`)
+          }
+          if (modifier.samples.length === 1) {
+            modifier.samples = modifier.samples[0]
+          } else {
+            modifier.samples = modifier.samples.join(",")
+          }
+          modifiers.push(modifier)
+        }
+      }
+      if (modifiers.length > 0) {
+        combined_metadata[i].modifiers = modifiers
+      }
+      if (staff_metadata_field_map[combined_metadata[i].type]) {
+        if (staff_metadata_field_map[combined_metadata[i].type][combined_metadata[i].name]) {
+          result.staff_metadata.push(combined_metadata[i])
+        } else {
+          result.user_metadata.push(combined_metadata[i])
+        }
+      } else {
+        result.user_metadata.push(combined_metadata[i])
+      }
+    }
+
+    return result
+  }
+
+  async export_metadata_to_sdrf(user_metadata: MetadataColumn[], staff_metadata: MetadataColumn[], sample_number: number, user_id: number = 0, service_lab_group_id: number = 0) {
+    const metadata = user_metadata.concat(staff_metadata)
+    const result = await this.sort_metadata(metadata, sample_number)
+    const headers = result[0]
+    const data = result.slice(1)
+    for (let i = 0; i < headers.length; i++) {
+      const capitalised = headers[i].charAt(0).toUpperCase() + headers[i].slice(1);
+      for (let j = 0; j < data.length; j++) {
+        if (!data[j][i]) {
+          if (this.requiredColumnNames.includes(capitalised) || capitalised === "Organism part") {
+            data[j][i] = "not applicable";
+          } else {
+            data[j][i] = "not available";
+          }
+        } else if (data[j][i] === "") {
+          if (this.requiredColumnNames.includes(capitalised) || capitalised === "Organism part") {
+            data[j][i] = "not applicable";
+          } else {
+            data[j][i] = "not available";
+          }
+        }
+      }
+    }
+
+    // Remove any trailing empty columns
+    for (let j = 0; j < data.length; j++) {
+      while (data[j].length > headers.length) {
+        data[j].pop();
+      }
+    }
+    return [headers, ...data]
+  }
+
+  async import_metadata_from_sdrf(data_string: string, user_metadata: MetadataColumn[], staff_metadata: MetadataColumn[], sample_number: number = 0, user_id: number = 0, service_lab_group_id: number = 0) {
+    const data = data_string.split("\n")
+    const headers = data[0].split("\t")
+    const data_values = data.slice(1)
+    let values: string[][] = []
+    for (let i = 0; i < data_values.length; i++) {
+      values.push(data_values[i].split("\t"))
+    }
+    const user_metadata_field_map: any = {}
+    const staff_metadata_field_map: any = {}
+    const user_hidden_metadata: MetadataColumn[] = []
+    for (const m of user_metadata) {
+      if (!user_metadata_field_map[m.type]) {
+        user_metadata_field_map[m.type] = {}
+      }
+      if (!user_metadata_field_map[m.type][m.name]) {
+        user_metadata_field_map[m.type][m.name] = []
+      }
+      user_metadata_field_map[m.type][m.name].push(JSON.parse(JSON.stringify(m)))
+      if (m.hidden) {
+        user_hidden_metadata.push(JSON.parse(JSON.stringify(m)))
+      }
+    }
+    const staff_hidden_metadata: MetadataColumn[] = []
+    for (const m of staff_metadata) {
+      if (!staff_metadata_field_map[m.type]) {
+        staff_metadata_field_map[m.type] = {}
+      }
+      if (!staff_metadata_field_map[m.type][m.name]) {
+        staff_metadata_field_map[m.type][m.name] = []
+      }
+      staff_metadata_field_map[m.type][m.name].push(JSON.parse(JSON.stringify(m)))
+      if (m.hidden) {
+        staff_hidden_metadata.push(JSON.parse(JSON.stringify(m)))
+      }
+    }
+
+    let user_columns: MetadataColumn[] = []
+    let staff_columns: MetadataColumn[] = []
+
+    for (let i = 0; i < headers.length; i++) {
+      let metadata_name = headers[i].toLowerCase()
+      let metadata_type = ""
+      if (metadata_name.includes("[")) {
+        metadata_type = metadata_name.split("[")[0]
+        metadata_name = metadata_name.split("[")[1].replace("]", "")
+      }
+      if (metadata_name === "organism part") {
+        metadata_name = "tissue"
+      }
+
+      const metadata: MetadataColumn = {
+        name: metadata_name.charAt(0).toUpperCase() + metadata_name.slice(1),
+        type: metadata_type.charAt(0).toUpperCase() + metadata_type.slice(1),
+        value: "",
+        modifiers: [],
+        hidden: false,
+        column_position: 0,
+        stored_reagent: null,
+        id: i+1,
+        created_at: new Date(),
+        updated_at: new Date(),
+        not_applicable: false,
+        mandatory: false,
+        auto_generated: false,
+        readonly: false
+      }
+
+      let max_count = 0
+      let max_value = null
+      const metadata_value_map: any = {}
+      for (let j = 0; j < sample_number; j++) {
+        const value = values[j][i]
+        if (!metadata_value_map[value]) {
+          metadata_value_map[value] = []
+        }
+        metadata_value_map[value].push(j)
+      }
+
+      for (const v in metadata_value_map) {
+        if (metadata_value_map[v].length > max_count) {
+          max_count = metadata_value_map[v].length
+          max_value = v
+        }
+      }
+
+      if (max_value) {
+        metadata.value = max_value
+      }
+
+      const modifiers: any[] = []
+
+      for (const v in metadata_value_map) {
+        if (v !== max_value) {
+          const modifier: any = {
+            value: v,
+            samples: []
+          }
+          const samples = metadata_value_map[v]
+          samples.sort((a: number, b: number) => a - b)
+          let start:number = samples[0]
+          let end:number = samples[0]
+          for (let k = 1; k < samples.length; k++) {
+            if (samples[k]) {
+              if (samples[k] === end + 1) {
+                end = samples[k]
+              } else {
+                if (start === end) {
+                  modifier.samples.push(`${start+1}`)
+                } else {
+                  modifier.samples.push(`${start+1}-${end+1}`)
+                }
+                start = samples[k]
+                end = samples[k]
+              }
+            }
+
+          }
+          if (start === end) {
+            modifier.samples.push(`${start+1}`)
+          } else {
+            modifier.samples.push(`${start+1}-${end+1}`)
+          }
+          if (modifier.samples.length === 1) {
+            modifier.samples = modifier.samples[0]
+          } else {
+            modifier.samples = modifier.samples.join(",")
+          }
+          modifiers.push(modifier)
+        }
+      }
+
+      if (modifiers.length > 0) {
+        metadata.modifiers = modifiers
+      } else {
+        metadata.modifiers = []
+      }
+      if ("factor value" === metadata.type.toLowerCase()) {
+        staff_columns.push(metadata)
+      } else {
+        if (staff_hidden_metadata.findIndex((v) => {
+          return v.name === metadata.name && v.type === metadata.type
+        }) > -1) {
+          metadata.hidden = true
+          staff_columns.push(metadata)
+        } else if (user_hidden_metadata.findIndex((v) => {
+          return v.name === metadata.name && v.type === metadata.type
+        }) > -1) {
+          metadata.hidden = true
+          user_columns.push(metadata)
+        } else {
+          if (staff_metadata_field_map[metadata.type]) {
+            if (staff_metadata_field_map[metadata.type][metadata.name]) {
+              staff_columns.push(metadata)
+            } else {
+              user_columns.push(metadata)
+            }
+          } else {
+            user_columns.push(metadata)
+          }
+        }
+      }
+
+    }
+    return {user_metadata: user_columns, staff_metadata: staff_columns}
+  }
+
+  async validateMetadata(user_metadata: MetadataColumn[], staff_metadata: MetadataColumn[], sample_number: number = 0, user_id: number = 0, service_lab_group_id: number = 0) {
+    const data_values = await this.export_metadata_to_sdrf(user_metadata, staff_metadata, sample_number, user_id, service_lab_group_id)
+    const errors = await this.web.validateMetadataTemplateSDRF(data_values).toPromise()
+    return errors
+  }
+
+  checkMissingColumn(userColumnNames: string[], staffColumnNames: string[]) {
+    const missingColumns: string[] = []
+    for (const n of this.requiredColumnNames) {
+      if (!userColumnNames.includes(n) && !staffColumnNames.includes(n)) {
+        missingColumns.push(n)
+      }
+    }
+    return missingColumns
+  }
+
+  checkMissingColumnMetadata(user_metadata: MetadataColumn[], staff_metadata: MetadataColumn[]) {
+    const userColumnNames = user_metadata.map((m) => m.name)
+    const staffColumnNames = staff_metadata.map((m) => m.name)
+    return this.checkMissingColumn(userColumnNames, staffColumnNames)
+  }
 }

@@ -39,6 +39,10 @@ export const routes: Routes = [
   }
   ,
   {
+    path: 'sdrf-playground',
+    loadChildren: () => import('./metadata-playground/metadata-playground.module').then(m => m.MetadataPlaygroundModule)
+  },
+  {
     path: '**',
     redirectTo: 'home'
   },

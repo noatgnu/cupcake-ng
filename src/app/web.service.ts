@@ -1494,7 +1494,7 @@ export class WebService {
     )
   }
 
-  getSpecies(url?: string, limit: number = 10, offset: number = 0, search?: string, search_type: string = "startswith") {
+  getSpecies(url?: string, limit: number = 10, offset: number = 0, search?: string, search_type: string = "startswith", official_name: string|null|undefined = null, taxon_id: string|null|undefined = null) {
     if (url) {
       return this.http.get<SpeciesQuery>(url, {responseType: 'json', observe: 'body'})
     }
@@ -1511,6 +1511,12 @@ export class WebService {
     if (search_type) {
       params = params.append('search_type', search_type)
     }
+    if (official_name) {
+      params = params.append('official_name', official_name)
+    }
+    if (taxon_id) {
+      params = params.append('taxon', taxon_id)
+    }
     params = params.append('ordering', 'official_name')
     return this.http.get<SpeciesQuery>(
       `${this.baseURL}/api/species/`,
@@ -1525,7 +1531,7 @@ export class WebService {
     )
   }
 
-  getTissues(url?: string, limit: number = 10, offset: number = 0, search?: string, search_type: string = "startswith") {
+  getTissues(url?: string, limit: number = 10, offset: number = 0, search?: string, search_type: string = "startswith", identifier: string|null|undefined = null, accession: string|null|undefined = null) {
     if (url) {
       return this.http.get<TissueQuery>(url, {responseType: 'json', observe: 'body'})
     }
@@ -1542,6 +1548,9 @@ export class WebService {
     if (search_type) {
       params = params.append('search_type', search_type)
     }
+    if (identifier) {
+      params = params.append('identifier', identifier)
+    }
     params = params.append('ordering', 'identifier')
     return this.http.get<TissueQuery>(
       `${this.baseURL}/api/tissues/`,
@@ -1556,7 +1565,7 @@ export class WebService {
     )
   }
 
-  getSubcellularLocations(url?: string, limit: number = 10, offset: number = 0, search?: string, search_type: string = "startswith") {
+  getSubcellularLocations(url?: string, limit: number = 10, offset: number = 0, search?: string, search_type: string = "startswith", location_identifier: string|null|undefined = null, accession: string|null|undefined = null) {
     if (url) {
       return this.http.get<SubcellularLocationQuery>(url, {responseType: 'json', observe: 'body'})
     }
@@ -1572,6 +1581,12 @@ export class WebService {
     }
     if (search_type) {
       params = params.append('search_type', search_type)
+    }
+    if (location_identifier) {
+      params = params.append('location_identifier', location_identifier)
+    }
+    if (accession) {
+      params = params.append('accession', accession)
     }
     params = params.append('ordering', 'identifier')
     return this.http.get<SubcellularLocationQuery>(
@@ -1611,7 +1626,7 @@ export class WebService {
     )
   }
 
-  getMSVocab(url?: string, limit: number = 10, offset: number = 0, search?: string, term_type?: string, search_type: string = "startswith") {
+  getMSVocab(url?: string, limit: number = 10, offset: number = 0, search?: string, term_type?: string, search_type: string = "startswith", name: string|null|undefined = null, accession: string|null|undefined = null) {
     if (url) {
       return this.http.get<MsVocabQuery>(url, {responseType: 'json', observe: 'body'})
     }
@@ -1633,6 +1648,12 @@ export class WebService {
     }
     if (search_type) {
       params = params.append('search_type', search_type)
+    }
+    if (name) {
+      params = params.append('name', name)
+    }
+    if (accession) {
+      params = params.append('accession', accession)
     }
     params = params.append('ordering', 'name')
     return this.http.get<MsVocabQuery>(
@@ -1798,7 +1819,7 @@ export class WebService {
     )
   }
 
-  getUnimod(url?: string, limit: number = 10, offset: number = 0, search?: string, search_type: string = "startswith") {
+  getUnimod(url?: string, limit: number = 10, offset: number = 0, search?: string, search_type: string = "startswith", name: string|null|undefined = null, accession: string|null|undefined = null) {
     if (url) {
       return this.http.get<UnimodQuery>(url, {responseType: 'json', observe: 'body'})
     }
@@ -1814,6 +1835,12 @@ export class WebService {
     }
     if (search_type) {
       params = params.append('search_type', search_type)
+    }
+    if (name) {
+      params = params.append('name', name)
+    }
+    if (accession) {
+      params = params.append('accession', accession)
     }
     params = params.append('ordering', 'name')
     return this.http.get<UnimodQuery>(
@@ -2025,7 +2052,7 @@ export class WebService {
     return null;
   }
 
-  getFavouriteMetadataOptions(limit: number = 10, offset: number = 0, search: string|null = "", mode: string|undefined|null = undefined, lab_group: number|null|undefined = 0, name: string|undefined|null = null) {
+  getFavouriteMetadataOptions(limit: number = 10, offset: number = 0, search: string|null = "", mode: string|undefined|null = undefined, lab_group: number|null|undefined = 0, name: string|undefined|null = null, display_value: string|undefined|null = null, get_global: boolean = false) {
     let params = new HttpParams()
       .set('limit', limit.toString())
       .set('offset', offset.toString())
@@ -2042,6 +2069,12 @@ export class WebService {
     }
     if (name) {
       params = params.append('name', name)
+    }
+    if (display_value) {
+      params = params.append('display_value', display_value)
+    }
+    if (get_global) {
+      params = params.append('get_global', 'true')
     }
 
     return this.http.get<FavouriteMetadataOptionQuery>(
@@ -2132,7 +2165,7 @@ export class WebService {
     return this.http.post(`${this.baseURL}/api/instrument_jobs/${instrument_job_id}/export_excel_template/`, {instance_id, export_type}, {responseType: 'json', observe: 'body'})
   }
 
-  getMetadataTableTemplates(limit: number = 10, offset: number = 0, search: string|null = "", mode: string|undefined|null = 'user', lab_group_id: number|null|undefined = 0) {
+  getMetadataTableTemplates(limit: number = 10, offset: number = 0, search: string|null = "", mode: string|undefined|null = 'user', lab_group_id: number|null|undefined = 0, self_only: boolean = true) {
     let params = new HttpParams()
       .set('limit', limit.toString())
       .set('offset', offset.toString())
@@ -2147,6 +2180,12 @@ export class WebService {
       if (lab_group_id > 0) {
         params = params.append('lab_group_id', lab_group_id.toString())
       }
+    }
+
+    if (self_only) {
+      params = params.append('self_only', 'true')
+    } else {
+      params = params.append('self_only', 'false')
     }
 
     return this.http.get<MetadataTableTemplateQuery>(
@@ -2218,6 +2257,10 @@ export class WebService {
 
   approveUsageToggle(instrument_usage_id: number) {
     return this.http.post<InstrumentUsage>(`${this.baseURL}/api/instrument_usage/${instrument_usage_id}/approve_usage_toggle/`, {}, {responseType: 'json', observe: 'body'})
+  }
+
+  validateMetadataTemplateSDRF(data: string[][]) {
+    return this.http.post<{errors: string[]}>(`${this.baseURL}/api/metadata_table_templates/validate_sdrf_metadata/`, {sdrf: data}, {responseType: 'json', observe: 'body'})
   }
 }
 

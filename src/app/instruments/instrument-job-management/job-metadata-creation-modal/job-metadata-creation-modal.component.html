@@ -39,8 +39,31 @@
         <small id="factorValueColumnHelp" class="form-text text-muted">Select an existing column that contains the factor value</small>
       </div>
     }
-    @if (service_lab_group_recommenations||user_favourite_metadata) {
+    @if (service_lab_group_recommenations||user_favourite_metadata||global_recommendations) {
       <ul ngbNav #nav="ngbNav" class="nav-tabs" [(activeId)]="activeID">
+        @if (global_recommendations) {
+          @if (global_recommendations.count > 0) {
+            <li [ngbNavItem]="'global'">
+              <button ngbNavLink>Global Recommendations</button>
+              <ng-template ngbNavContent>
+                <div class="form-group">
+                  <select class="form-select" [size]="5">
+                    @for (r of global_recommendations.results; track r.id) {
+                      @if (r.display_value) {
+                        <option (click)="value=r.value" [ngValue]="r">{{r.display_value}}</option>
+                      } @else {
+                        <option (click)="value=r.value" [ngValue]="r">{{r.value}}</option>
+                      }
+                    }
+                  </select>
+                </div>
+                <div class="mt-2">
+                  <ngb-pagination [collectionSize]="global_recommendations.count" [rotate]="true" [(page)]="currentGlobalRecommendationsPage" [pageSize]="pageSize" (pageChange)="onPageChange($event, 'global')"></ngb-pagination>
+                </div>
+              </ng-template>
+            </li>
+          }
+        }
         @if (service_lab_group_recommenations) {
           @if (service_lab_group_recommenations.count > 0) {
             <li [ngbNavItem]="'service_lab_group'">
@@ -58,9 +81,8 @@
                   </select>
                 </div>
                 <div class="mt-2">
-                  <ngb-pagination [collectionSize]="service_lab_group_recommenations.count" [rotate]="true" [(page)]="currentServiceLabRecommendationsPage" [pageSize]="pageSize" (pageChange)="onPageChange($event, 'service_lab_group')"></ngb-pagination>
+                  <ngb-pagination [collectionSize]="service_lab_group_recommenations.count" [rotate]="true" [(page)]="currentServiceLabRecommendationsPage" [pageSize]="pageSize" (pageChange)="onPageChange($event, 'group')"></ngb-pagination>
                 </div>
-
               </ng-template>
             </li>
           }

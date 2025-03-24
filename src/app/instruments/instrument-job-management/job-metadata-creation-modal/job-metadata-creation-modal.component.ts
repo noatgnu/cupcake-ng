@@ -13,6 +13,7 @@ import {WebService} from "../../../web.service";
 import {FavouriteMetadataOptionQuery} from "../../../favourite-metadata-option";
 import {LabGroup} from "../../../lab-group";
 import {MetadataColumn} from "../../../metadata-column";
+import {AccountsService} from "../../../accounts/accounts.service";
 
 @Component({
     selector: 'app-job-metadata-creation-modal',
@@ -35,8 +36,10 @@ import {MetadataColumn} from "../../../metadata-column";
 export class JobMetadataCreationModalComponent {
   service_lab_group_recommenations: FavouriteMetadataOptionQuery|undefined
   user_favourite_metadata: FavouriteMetadataOptionQuery|undefined
+  global_recommendations: FavouriteMetadataOptionQuery|undefined
   currentServiceLabRecommendationsPage = 1
   currentUserFavouriteMetadataPage = 1
+  currentGlobalRecommendationsPage = 1
   pageSize = 10
   activeID: string = "user"
   @Input() previewMode: boolean = false
@@ -48,7 +51,10 @@ export class JobMetadataCreationModalComponent {
     this._name = value
     console.log(this.service_lab_group_id)
     if (value && this.service_lab_group_id > 0) {
-      this.getUserFavouriteMetadataOptions()
+      this.getGlobalRecommendations()
+      if (this.account.loggedIn) {
+        this.getUserFavouriteMetadataOptions()
+      }
       this.getServiceLabRecommendations()
     }
     if (value === "Proteomics data acquisition method") {
@@ -315,7 +321,7 @@ export class JobMetadataCreationModalComponent {
 
   selectedSpecs: any[] = []
 
-  constructor(private web: WebService, private modal: NgbActiveModal, public metadataService: MetadataService, private fb: FormBuilder) {
+  constructor(private account: AccountsService, private web: WebService, private modal: NgbActiveModal, public metadataService: MetadataService, private fb: FormBuilder) {
 
   }
 
@@ -428,13 +434,24 @@ export class JobMetadataCreationModalComponent {
     )
   }
 
+  getGlobalRecommendations() {
+    this.web.getFavouriteMetadataOptions(this.pageSize, (this.currentGlobalRecommendationsPage-1)*this.pageSize, undefined, undefined, undefined, this.name, undefined, true).subscribe(
+      (response) => {
+        this.global_recommendations = response
+      }
+    )
+  }
+
   onPageChange(page: number, type: string) {
     if (type === "user") {
       this.currentUserFavouriteMetadataPage = page
       this.getUserFavouriteMetadataOptions()
-    } else {
+    } else if (type === "group") {
       this.currentServiceLabRecommendationsPage = page
       this.getServiceLabRecommendations()
+    } else {
+      this.currentGlobalRecommendationsPage = page
+      this.getGlobalRecommendations()
     }
   }
 }

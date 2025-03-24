@@ -1,3 +1,5 @@
+
+
 export interface MetadataColumn {
   name: string,
   type: string,
@@ -46,3 +48,6 @@ export interface MetadataTableTemplateQuery {
   previous: string|null;
   results: MetadataTableTemplate[];
 }
+
+
+

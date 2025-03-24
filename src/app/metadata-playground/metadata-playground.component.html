@@ -1,0 +1,177 @@
+<div class="container-fluid p-0" style="margin-top: 80px">
+  <nav class="navbar navbar-expand-lg navbar-light d-flex flex-wrap">
+    <div class="container-fluid d-flex flex-row justify-content-center">
+      <a class="navbar-brand">SDRF Playground</a>
+    </div>
+  </nav>
+</div>
+<div class="container d-flex flex-column gap-2">
+  <div class="d-flex justify-content-center">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="card-title">Lab Group</h5>
+      </div>
+      <div class="card-body">
+        <form [formGroup]="form" class="d-flex gap-2">
+          <div class="form-group">
+            <label>Search Lab Groups</label>
+            <input class="form-control" type="search" formControlName="searchTerm">
+          </div>
+          @if (professionalLabGroupQuery) {
+            <div class="form-group">
+              <label>Select From Lab Group Options</label>
+              <select class="form-select" formControlName="lab_group_id" size="5">
+                @for (l of professionalLabGroupQuery.results; track l.id) {
+                  <option [ngValue]="l.id">{{l.name}}</option>
+                }
+              </select>
+              <div class="mt-2">
+                <ngb-pagination [collectionSize]="professionalLabGroupQuery.count" [(page)]="professionalLabGroupPage" [pageSize]="professionalLabGroupPageSize" [maxSize]="5" [boundaryLinks]="true" [rotate]="true"></ngb-pagination>
+              </div>
+            </div>
+          }
+        </form>
+      </div>
+    </div>
+  </div>
+
+
+  @if (metadataTableTemplateQuery) {
+    <b>Select a template of interests</b>
+
+    <table class="table table-bordered table-hover">
+      <thead>
+      <tr>
+        <th scope="col">
+          Template name
+        </th>
+        <th scope="col">
+          User Column
+        </th>
+        <th scope="col">
+          Staff Column
+        </th>
+        <th scope="col">
+          Lab Group
+        </th>
+      </tr>
+      </thead>
+      <tbody>
+      @for (t of metadataTableTemplateQuery.results; track t.id) {
+        <tr [class.table-warning]="selectedRow === t" (click)="selectRow(t)">
+          <td>
+            {{t.name}}
+          </td>
+          <td>
+            {{t.user_columns.length}} ({{t.hidden_user_columns}} hidden)
+          </td>
+          <td>
+            {{t.staff_columns.length}} ({{t.hidden_staff_columns}} hidden)
+          </td>
+          <td>
+            @if (selectedLabGroup) {
+              {{selectedLabGroup.name}}
+            }
+          </td>
+        </tr>
+      }
+      </tbody>
+    </table>
+    <div class="mt-2">
+      <ngb-pagination [collectionSize]="metadataTableTemplateQuery.count" [(page)]="metadataTableTemplatePage" [pageSize]="metadataTableTemplatePageSize" [maxSize]="5" [boundaryLinks]="true" [rotate]="true"></ngb-pagination>
+    </div>
+  }
+  @if (selectedRow) {
+    @if (missingColumns.length > 0) {
+      <ngb-alert type="danger">
+        <div>
+          <ul>
+            The following required columns are missing from the table:
+            @for (c of missingColumns; track c) {
+              <li>{{c}}</li>
+            }
+          </ul>
+
+        </div>
+      </ngb-alert>
+    }
+
+    <div class="d-flex gap-2">
+      <div ngbDropdown class="d-flex gap-2">
+        <button class="btn btn-primary" ngbDropdownToggle>Excel Template</button>
+        <div ngbDropdownMenu>
+          <button ngbDropdownItem (click)="exportExcelTemplate()">Export</button>
+          <button ngbDropdownItem (click)="importExcel.click()">Import</button>
+        </div>
+      </div>
+      <div ngbDropdown class="d-flex gap-2">
+        <button class="btn btn-primary" ngbDropdownToggle>SDRF</button>
+        <div ngbDropdownMenu>
+          <button ngbDropdownItem (click)="exportMetadataSDRF()">Export</button>
+          <button ngbDropdownItem (click)="importSDRF.click()">Import</button>
+        </div>
+      </div>
+      <div ngbDropdown display="dynamic" class="d-inline-black">
+        <button class="btn btn-primary" id="addMetadata" ngbDropdownToggle>
+          + User Metadata
+        </button>
+        <div ngbDropdownMenu aria-labelledby="addMetadata">
+          @for (m of metadata.userMetadataTemplate; track m.name) {
+            <a class="dropdown-item" (click)="addMetadata(m, 'user_metadata')">
+              {{m.name}}
+            </a>
+          }
+          <a class="dropdown-item" (click)="addMetadata({name: 'Sample type', type: 'Characteristics'}, 'user_metadata')">
+            Sample Type
+          </a>
+          <a class="dropdown-item" (click)="addMetadata({name: '', type: ''}, 'user_metadata')">
+            Custom Metadata
+          </a>
+        </div>
+      </div>
+      <div ngbDropdown display="dynamic" class="d-inline-black">
+        <button class="btn btn-warning" id="addStaffMetadata" ngbDropdownToggle>
+          + Staff Metadata
+        </button>
+        <div ngbDropdownMenu aria-labelledby="addStaffMetadata">
+          @for (m of metadata.staffMetadataSpecific; track m) {
+            <a class="dropdown-item" (click)="addMetadata({name: m, type: 'Comment'}, 'staff_metadata')">
+              {{m}}
+            </a>
+          }
+          <a class="dropdown-item" (click)="addMetadata({name: '', type: 'Factor value'}, 'staff_metadata')">
+            Factor Value
+          </a>
+          <a class="dropdown-item" (click)="addMetadata({name: '', type: ''}, 'staff_metadata')">
+            Custom Metadata
+          </a>
+        </div>
+      </div>
+      <button class="btn btn-secondary" (click)="validateMetadata()">Validate</button>
+    </div>
+
+    <input type="file" hidden #importExcel accept=".xlsx" (change)="importExcelTemplate($event)">
+    <input type="file" hidden #importSDRF (change)="importSDRFFile($event)">
+
+    <form [formGroup]="form" class="d-flex gap-2">
+      <div class="form-group">
+        <label>Search Column</label>
+        <input class="form-control" type="search" [(ngModel)]="searchColumn" [ngModelOptions]="{standalone: true}">
+      </div>
+      <div class="form-group">
+        <label>Sample Number</label>
+        <input class="form-control" type="number" formControlName="sample_number">
+      </div>
+      <div class="form-check">
+        <input class="form-check-input" type="checkbox" formControlName="show_hidden">
+        <label class="form-check-label">Show Hidden Column</label>
+      </div>
+    </form>
+  }
+
+  @if (selectedRow && selectedLabGroup && form.value.show_hidden !== null && form.value.show_hidden !== undefined && form.value.sample_number !== null && form.value.sample_number !== undefined) {
+    <div class="metadata-table-container">
+      <app-metadata-table [filterTableColumnName]="searchColumn" (metadataUpdated)="handleMetadataUpdate($event)" [showHidden]="form.value.show_hidden" [sampleNumber]="form.value.sample_number" [service_lab_group_id]="selectedLabGroup.id" [staffModeActive]="true" [userMetadata]="selectedRow.user_columns" [staffMetadata]="selectedRow.staff_columns"></app-metadata-table>
+    </div>
+  }
+</div>
