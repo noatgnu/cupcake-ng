@@ -125,7 +125,7 @@ export class MetadataPlaygroundComponent {
     data_type: string,
     modifiers: {samples: string, value: string}[]
   }[], arrayName: 'user_metadata'|'staff_metadata'|undefined|null = undefined) {
-    console.log(event);
+
     let highestID = 0;
 
     if (this.selectedRow) {
@@ -140,6 +140,7 @@ export class MetadataPlaygroundComponent {
         }
       })
       for (const e of event) {
+        console.log(arrayName)
         if (arrayName) {
           let metadataColumn: MetadataColumn = {
             name: e.name,
@@ -158,10 +159,14 @@ export class MetadataPlaygroundComponent {
             readonly: false,
           }
           if (arrayName === 'user_metadata') {
-            this.selectedRow.user_columns = [...this.selectedRow.user_columns, metadataColumn]
+            this.selectedRow.user_columns.push(metadataColumn);
+            this.selectedRow.user_columns = [...this.selectedRow.user_columns];
           } else {
-            this.selectedRow.staff_columns = [...this.selectedRow.staff_columns, metadataColumn]
+            this.selectedRow.staff_columns.push(metadataColumn);
+            this.selectedRow.staff_columns = [...this.selectedRow.staff_columns];
           }
+          console.log(metadataColumn);
+          highestID++
         } else {
           const userColumn = this.selectedRow.user_columns.find((column) => column.id === e.id);
           if (userColumn) {
@@ -183,8 +188,10 @@ export class MetadataPlaygroundComponent {
             }
           }
         }
-        this.missingColumns = this.metadata.checkMissingColumnMetadata(this.selectedRow.user_columns, this.selectedRow.staff_columns)
       }
+      console.log(this.selectedRow.user_columns, this.selectedRow.staff_columns);
+      this.missingColumns = this.metadata.checkMissingColumnMetadata(this.selectedRow.user_columns, this.selectedRow.staff_columns)
+
     }
   }
 
@@ -292,9 +299,41 @@ export class MetadataPlaygroundComponent {
 
 
       ref.closed.subscribe((result: any[]) => {
-        this.handleMetadataUpdate(result, arrayName);
+        const meta: {
+          name: string,
+          value: string,
+          type: string,
+          id: number,
+          data_type: string,
+          modifiers: {samples: string, value: string}[]
+        }[] = []
+        for (const r of result) {
+          let value = r.metadataValue
+          value = this.metadata.tranformMetadataValue(r, value);
+          meta.push({
+            name: r.metadataName,
+            value: value,
+            type: r.metadataType,
+            modifiers: [],
+            data_type: arrayName,
+            id: 0
+          })
+        }
+        this.handleMetadataUpdate(meta, arrayName);
       })
     }
+  }
 
+  removeMetadata(event: { metadata: MetadataColumn, index: number, data_type: 'user_metadata'|'staff_metadata' }) {
+    if (this.selectedRow) {
+      if (event.data_type === 'user_metadata') {
+        this.selectedRow.user_columns.splice(event.index, 1);
+        this.selectedRow.user_columns = [...this.selectedRow.user_columns];
+      } else {
+        this.selectedRow.staff_columns.splice(event.index, 1);
+        this.selectedRow.staff_columns = [...this.selectedRow.staff_columns];
+      }
+      this.missingColumns = this.metadata.checkMissingColumnMetadata(this.selectedRow.user_columns, this.selectedRow.staff_columns)
+    }
   }
 }

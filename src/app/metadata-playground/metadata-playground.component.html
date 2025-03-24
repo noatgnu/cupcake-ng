@@ -171,7 +171,7 @@
 
   @if (selectedRow && selectedLabGroup && form.value.show_hidden !== null && form.value.show_hidden !== undefined && form.value.sample_number !== null && form.value.sample_number !== undefined) {
     <div class="metadata-table-container">
-      <app-metadata-table [filterTableColumnName]="searchColumn" (metadataUpdated)="handleMetadataUpdate($event)" [showHidden]="form.value.show_hidden" [sampleNumber]="form.value.sample_number" [service_lab_group_id]="selectedLabGroup.id" [staffModeActive]="true" [userMetadata]="selectedRow.user_columns" [staffMetadata]="selectedRow.staff_columns"></app-metadata-table>
+      <app-metadata-table (removeMetadata)="removeMetadata($event)" [filterTableColumnName]="searchColumn" (metadataUpdated)="handleMetadataUpdate($event)" [showHidden]="form.value.show_hidden" [sampleNumber]="form.value.sample_number" [service_lab_group_id]="selectedLabGroup.id" [staffModeActive]="true" [userMetadata]="selectedRow.user_columns" [staffMetadata]="selectedRow.staff_columns"></app-metadata-table>
     </div>
   }
 </div>
