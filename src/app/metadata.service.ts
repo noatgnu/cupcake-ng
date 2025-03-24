@@ -1820,14 +1820,18 @@ export class MetadataService {
       if (modifiers.length > 0) {
         combined_metadata[i].modifiers = modifiers
       }
-      if (staff_metadata_field_map[combined_metadata[i].type]) {
-        if (staff_metadata_field_map[combined_metadata[i].type][combined_metadata[i].name]) {
-          result.staff_metadata.push(combined_metadata[i])
+      if (combined_metadata[i].type === "Factor value") {
+        result.staff_metadata.push(combined_metadata[i])
+      } else {
+        if (staff_metadata_field_map[combined_metadata[i].type]) {
+          if (staff_metadata_field_map[combined_metadata[i].type][combined_metadata[i].name]) {
+            result.staff_metadata.push(combined_metadata[i])
+          } else {
+            result.user_metadata.push(combined_metadata[i])
+          }
         } else {
           result.user_metadata.push(combined_metadata[i])
         }
-      } else {
-        result.user_metadata.push(combined_metadata[i])
       }
     }
 
