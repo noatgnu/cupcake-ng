@@ -2,7 +2,6 @@ import { Injectable } from '@angular/core';
 import {map, Observable, of} from "rxjs";
 import {Unimod} from "./unimod";
 import {WebService} from "./web.service";
-import {NgbTypeaheadSelectItemEvent} from "@ng-bootstrap/ng-bootstrap";
 import {MetadataColumn} from "./metadata-column";
 import {Workbook, Column, Worksheet, CellValue} from "exceljs";
 
