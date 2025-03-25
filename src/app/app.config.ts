@@ -32,7 +32,7 @@ export function initializeAppFactory(loadingTracker: LoadingTrackerService) {
       // @ts-ignore
       document.body.appendChild = (element: HTMLElement) => {
         console.log(element);
-        if (element.tagName === 'SCRIPT' && (element as HTMLScriptElement).src) {
+        if ((element.tagName === 'SCRIPT' || element.tagName === 'LINK') && (element as HTMLScriptElement).src) {
           const scriptElement = element as HTMLScriptElement;
           const chunkName = scriptElement.src.split('/').pop();
           loadingTracker.setLoadingChunk(chunkName || 'unknown');
