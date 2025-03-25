@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>CupcakeNg</title>
+  <title>Cupcake</title>
   <base href="/">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon" type="image/x-icon" href="favicon.ico">
@@ -18,5 +18,32 @@
       <div class="spinner"></div>
     </div>
   </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Performance mark before loading the script
+      performance.mark('main-script-start');
+
+      // Select the script element with the dynamic hash
+      const mainScript = document.querySelector('script[src^="main"][type="module"]');
+
+      if (mainScript) {
+        console.log(mainScript);
+        // Listen for the load event
+        mainScript.onload = () => {
+          // Performance mark after the script has loaded
+          performance.mark('main-script-end');
+
+          // Measure the time taken to load the script
+          performance.measure('main-script-load-time', 'main-script-start', 'main-script-end');
+
+          // Log the measurement
+          const measure = performance.getEntriesByName('main-script-load-time')[0];
+          console.log(`Main script load time: ${measure.duration}ms`);
+        };
+      } else {
+        console.error('Main script not found');
+      }
+    });
+  </script>
 </body>
 </html>
