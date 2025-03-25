@@ -40,7 +40,7 @@ import {ToastService} from "../toast.service";
   styleUrl: './metadata-playground.component.scss'
 })
 export class MetadataPlaygroundComponent {
-
+  currentToast: any;
   professionalLabGroupQuery: LabGroupQuery|undefined = undefined;
   professionalLabGroupPage = 1
   professionalLabGroupPageSize = 5
@@ -144,7 +144,6 @@ export class MetadataPlaygroundComponent {
         }
       })
       for (const e of event) {
-        console.log(arrayName)
         if (arrayName) {
           let metadataColumn: MetadataColumn = {
             name: e.name,
@@ -195,7 +194,15 @@ export class MetadataPlaygroundComponent {
       }
       console.log(this.selectedRow.user_columns, this.selectedRow.staff_columns);
       this.missingColumns = this.metadata.checkMissingColumnMetadata(this.selectedRow.user_columns, this.selectedRow.staff_columns)
+      // calculate hidden columns
+      this.recalculateHiddenColumns()
+    }
+  }
 
+  recalculateHiddenColumns() {
+    if (this.selectedRow) {
+      this.selectedRow.hidden_staff_columns = this.selectedRow.staff_columns.reduce( (acc, column) => { return acc + (column.hidden ? 1 : 0) }, 0)
+      this.selectedRow.hidden_user_columns = this.selectedRow.user_columns.reduce( (acc, column) => { return acc + (column.hidden ? 1 : 0) }, 0)
     }
   }
 
@@ -229,6 +236,7 @@ export class MetadataPlaygroundComponent {
                 this.selectedRow.user_columns = result.user_metadata;
                 this.selectedRow.staff_columns = result.staff_metadata;
                 this.missingColumns = this.metadata.checkMissingColumnMetadata(this.selectedRow.user_columns, this.selectedRow.staff_columns);
+                this.recalculateHiddenColumns();
               }
             }
           }
@@ -254,6 +262,7 @@ export class MetadataPlaygroundComponent {
                 this.selectedRow.user_columns =result.user_metadata;
                 this.selectedRow.staff_columns = result.staff_metadata;
                 this.missingColumns = this.metadata.checkMissingColumnMetadata(this.selectedRow.user_columns, this.selectedRow.staff_columns);
+                this.recalculateHiddenColumns();
               }
             }
           }
@@ -281,16 +290,21 @@ export class MetadataPlaygroundComponent {
 
   async validateMetadata() {
     if (this.selectedRow && this.form.value.sample_number && this.form.value.lab_group_id) {
+      this.currentToast = await this.toast.show("Validation", "Validating metadata", 0, "info", 5)
       const errors = await this.metadata.validateMetadata(this.selectedRow.user_columns, this.selectedRow.staff_columns, this.form.value.sample_number, 0, this.form.value.lab_group_id);
+      this.currentToast.progress = 100;
       if (errors) {
-        console.log(errors);
         if (errors.errors.length > 0) {
           const ref = this.modal.open(SdrfValidationResultsModalComponent, {scrollable: true})
           ref.componentInstance.errors = errors.errors;
         } else {
           await this.toast.show("Validation", "No errors found", 2000, "success")
         }
+      } else {
+        await this.toast.show("Validation", "No errors found", 2000, "success")
       }
+      this.toast.remove(this.currentToast);
+      this.currentToast = undefined;
     }
   }
 
@@ -306,8 +320,6 @@ export class MetadataPlaygroundComponent {
       ref.componentInstance.name = metadata.name
       // capitalize first letter
       ref.componentInstance.type = metadata.type.charAt(0).toUpperCase() + metadata.type.slice(1)
-
-
       ref.closed.subscribe((result: any[]) => {
         const meta: {
           name: string,
@@ -344,6 +356,7 @@ export class MetadataPlaygroundComponent {
         this.selectedRow.staff_columns = [...this.selectedRow.staff_columns];
       }
       this.missingColumns = this.metadata.checkMissingColumnMetadata(this.selectedRow.user_columns, this.selectedRow.staff_columns)
+      this.recalculateHiddenColumns()
     }
   }
 }

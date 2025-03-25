@@ -150,6 +150,8 @@ export class MetadataService {
     "Technical replicate",
     "Biological replicate",
     "Cleavage agent details",
+    "Technology type",
+    "Data file"
   ]
 
   optionsArray: Unimod[] = [];
@@ -619,6 +621,164 @@ export class MetadataService {
     }
 
     return value
+  }
+
+  async sort_metadata_updated(metadata: MetadataColumn[], sample_number: number) {
+    const headers: string[] = [];
+    const default_columns_list = [
+      { "name": "Source name", "type": "" },
+      { "name": "Organism", "type": "Characteristics" },
+      { "name": "Tissue", "type": "Characteristics" },
+      { "name": "Disease", "type": "Characteristics" },
+      { "name": "Cell type", "type": "Characteristics" },
+      { "name": "Biological replicate", "type": "Characteristics" },
+      { "name": "Material type", "type": "" },
+      { "name": "Assay name", "type": "" },
+      { "name": "Technology type", "type": "" },
+      { "name": "Technical replicate", "type": "Comment" },
+      { "name": "Label", "type": "Comment" },
+      { "name": "Fraction identifier", "type": "Comment" },
+      { "name": "Instrument", "type": "Comment" },
+      { "name": "Data file", "type": "Comment" },
+      { "name": "Cleavage agent details", "type": "Comment" },
+      { "name": "Modification parameters", "type": "Comment" },
+      {"name": "Dissociation method", "type": "Comment"},
+      {"name": "Precursor mass tolerance", "type": "Comment"},
+      {"name": "Fragment mass tolerance", "type": "Comment"},
+    ];
+
+    const metadata_column_map: { [key: string]: MetadataColumn[] } = {};
+    const factor_value_columns: MetadataColumn[] = [];
+    const metadata_cache: { [key: string]: { [value: string]: string } } = {};
+
+    for (const m of metadata) {
+      const metad: MetadataColumn = { ...m };
+      if (!metadata_cache[m.name]) {
+        metadata_cache[m.name] = {};
+      }
+      if (!metadata_cache[m.name][m.value]) {
+        metadata_cache[m.name][m.value] = await this.convert_metadata_column_value_to_sdrf(m.name.toLowerCase(), m.value, this.requiredColumnNames);
+      }
+      metad.value = metadata_cache[m.name][m.value];
+      for (let i = 0; i < metad.modifiers.length; ++i) {
+        if (!metadata_cache[m.name][metad.modifiers[i].value]) {
+          metadata_cache[m.name][metad.modifiers[i].value] = await this.convert_metadata_column_value_to_sdrf(m.name.toLowerCase(), metad.modifiers[i].value, this.requiredColumnNames);
+        }
+        metad.modifiers[i].value = metadata_cache[m.name][metad.modifiers[i].value];
+      }
+
+      if (m.type !== "Factor value") {
+        if (!metadata_column_map[m.name]) {
+          metadata_column_map[m.name] = [];
+        }
+        metadata_column_map[m.name].push(metad);
+      } else {
+        factor_value_columns.push(metad);
+      }
+    }
+
+    const new_metadata: MetadataColumn[] = [];
+    const non_default_columns: MetadataColumn[] = [];
+    const default_column_map: { [key: string]: any } = {};
+
+    for (const m of default_columns_list) {
+      default_column_map[m.name] = m;
+      if (m.name in metadata_column_map && !["Assay name", "Source name", "Material type", "Technology type"].includes(m.name)) {
+        new_metadata.push(...metadata_column_map[m.name]);
+      }
+    }
+
+    for (const n in metadata_column_map) {
+      if (!default_column_map[n] && !["Assay name", "Source name", "Material type", "Technology type"].includes(n)) {
+        non_default_columns.push(...metadata_column_map[n]);
+      }
+    }
+
+    const col_count = new_metadata.length + non_default_columns.length + factor_value_columns.length + 4;
+    const data = Array.from({ length: sample_number }, () => Array(col_count).fill(""));
+
+    let last_characteristics = 0;
+    const add_metadata_to_data = (metadata: MetadataColumn, index: number) => {
+      headers.push(metadata.name.toLowerCase());
+      if (metadata.modifiers) {
+        for (const modifier of metadata.modifiers) {
+          const samples = this.parse_sample_indices_from_modifier_string(modifier.samples);
+          for (const s of samples) {
+            data[s][index] = modifier.value;
+          }
+        }
+      }
+      for (let i = 0; i < sample_number; i++) {
+        if (data[i][index] === "") {
+          data[i][index] = metadata.value;
+        }
+      }
+    };
+
+    const add_default_metadata = (metadata: MetadataColumn | null, name: string) => {
+      if (metadata) {
+        headers.push(name);
+        add_metadata_to_data(metadata, last_characteristics);
+        last_characteristics += 1;
+      }
+    };
+
+    add_default_metadata(metadata_column_map["Source name"]?.[0], "source name");
+    new_metadata.forEach((m, i) => {
+      if (m.type === "Characteristics") {
+        add_metadata_to_data(m, last_characteristics);
+        last_characteristics += 1;
+      }
+    });
+
+    non_default_columns.forEach((m, i) => {
+      if (m.type === "Characteristics") {
+        add_metadata_to_data(m, last_characteristics);
+        last_characteristics += 1;
+      }
+    });
+
+    let last_non_type = last_characteristics;
+    add_default_metadata(metadata_column_map["Material type"]?.[0], "material type");
+    add_default_metadata(metadata_column_map["Assay name"]?.[0], "assay name");
+    add_default_metadata(metadata_column_map["Technology type"]?.[0], "technology type");
+
+    new_metadata.forEach((m, i) => {
+      if (m.type === "") {
+        add_metadata_to_data(m, last_non_type);
+        last_non_type += 1;
+      }
+    });
+
+    non_default_columns.forEach((m, i) => {
+      if (m.type === "") {
+        add_metadata_to_data(m, last_non_type);
+        last_non_type += 1;
+      }
+    });
+
+    let last_comment = last_non_type;
+    new_metadata.forEach((m, i) => {
+      if (m.type === "Comment") {
+        add_metadata_to_data(m, last_comment);
+        last_comment += 1;
+      }
+    });
+
+    non_default_columns.forEach((m, i) => {
+      if (m.type === "Comment") {
+        add_metadata_to_data(m, last_comment);
+        last_comment += 1;
+      }
+    });
+
+    factor_value_columns.forEach((m, i) => {
+      headers.push(`factor value[${m.name.toLowerCase()}]`);
+      add_metadata_to_data(m, last_comment);
+      last_comment += 1;
+    });
+
+    return [headers, ...data];
   }
 
   async sort_metadata(metadata: MetadataColumn[], sample_number: number) {
