@@ -7,7 +7,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const accountService = inject(AccountsService)
   const webService = inject(WebService)
   const isLoginRequest = req.url.includes("/login") || req.url.includes("/token-auth")
-  if (accountService.loggedIn && !isLoginRequest) {
+  if (!isLoginRequest && req.url.startsWith(webService.baseURL)) {
     req = req.clone({
       withCredentials: true,
     })
