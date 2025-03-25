@@ -1,46 +1,56 @@
 import { Routes } from '@angular/router';
+import {MetadataPlaygroundModule} from "./metadata-playground/metadata-playground.module";
+import {ReagentStoreModule} from "./reagent-store/reagent-store.module";
+import {InstrumentsModule} from "./instruments/instruments.module";
+import {ProjectEditorModule} from "./project-editor/project-editor.module";
+import {CalendarModule} from "./calendar/calendar.module";
+import {SessionEditorModule} from "./session-editor/session-editor.module";
+import {AccountsModule} from "./accounts/accounts.module";
+import {ProtocolEditorModule} from "./protocol-editor/protocol-editor.module";
+import {ProtocolSessionModule} from "./protocol-session/protocol-session.module";
+import {HomeModule} from "./home/home.module";
 
 export const routes: Routes = [
   {
     path: 'home',
-    loadChildren: () => import('./home/home.module').then(m => m.HomeModule)
+    loadChildren: () => HomeModule
   },
   {
     path: 'protocol-session',
-    loadChildren: () => import('./protocol-session/protocol-session.module').then(m => m.ProtocolSessionModule)
+    loadChildren: () => ProtocolSessionModule
   },
   {
     path: 'protocol-editor',
-    loadChildren: () => import('./protocol-editor/protocol-editor.module').then(m => m.ProtocolEditorModule)
+    loadChildren: () => ProtocolEditorModule
   },
   {
     path: 'accounts',
-    loadChildren: () => import('./accounts/accounts.module').then(m => m.AccountsModule)
+    loadChildren: () => AccountsModule
   },
   {
     path: 'session-editor',
-    loadChildren: () => import('./session-editor/session-editor.module').then(m => m.SessionEditorModule)
+    loadChildren: () => SessionEditorModule
   },
   {
     path: 'calendar',
-    loadChildren: () => import('./calendar/calendar.module').then(m => m.CalendarModule)
+    loadChildren: () => CalendarModule
   },
   {
     path: 'project-editor',
-    loadChildren: () => import('./project-editor/project-editor.module').then(m => m.ProjectEditorModule)
+    loadChildren: () => ProjectEditorModule
   },
   {
     path: 'instruments',
-    loadChildren: () => import('./instruments/instruments.module').then(m => m.InstrumentsModule)
+    loadChildren: () => InstrumentsModule
   },
   {
     path: 'reagent-store',
-    loadChildren: () => import('./reagent-store/reagent-store.module').then(m => m.ReagentStoreModule)
+    loadChildren: () => ReagentStoreModule
   }
   ,
   {
     path: 'sdrf-playground',
-    loadChildren: () => import('./metadata-playground/metadata-playground.module').then(m => m.MetadataPlaygroundModule)
+    loadChildren: () => MetadataPlaygroundModule
   },
   {
     path: '**',
