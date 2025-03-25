@@ -1429,4 +1429,30 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit, OnDestroy 
       }
     }
   }
+
+  exportFile(file_type: string) {
+    if (this.job) {
+      if (file_type === "injection") {
+        let dataFileCol = this.job.user_metadata.find((m) => m.name === "Data file")
+        if (!dataFileCol) {
+          dataFileCol = this.job.staff_metadata.find((m) => m.name === "Data file")
+        }
+        let positionCol = this.job.user_metadata.find((m) => m.name === "Position")
+        if (!positionCol) {
+          positionCol = this.job.staff_metadata.find((m) => m.name === "Position")
+        }
+        if (dataFileCol && positionCol) {
+          const result = this.metadataService.convertInjectionFile(dataFileCol, positionCol, this.job.injection_volume, this.job.sample_number)
+          // download file
+          const blob = new Blob([result], { type: 'text/plain' });
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'injection_list.tsv';
+          a.click();
+          window.URL.revokeObjectURL(url);
+        }
+      }
+    }
+  }
 }

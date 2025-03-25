@@ -115,7 +115,6 @@ export class MetadataTableComponent implements OnChanges{
 
   parseSampleRanges(samples: string): number[] {
     const result: number[] = [];
-    console.log(samples)
     const ranges = samples.split(',');
     ranges.forEach(range => {
       const [start, end] = range.split('-').map(Number);
@@ -551,10 +550,13 @@ export class MetadataTableComponent implements OnChanges{
     ref.componentInstance.sampleNumber = this.sampleNumber
     ref.result.then((result: string|undefined|null) => {
       if (result) {
+        // remove trailing new lines
+        result = result.replace(/\n+$/, '')
         const {value, modifiers} = this.metadataService.parseLinesToMetadata(result)
         col.value = value
         col.modifiers = modifiers
-        this.metadataUpdated.emit([{...col}, data_type])
+
+        this.metadataUpdated.emit([{...col, data_type: data_type}])
       }
     })
 

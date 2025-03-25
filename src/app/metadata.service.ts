@@ -32,7 +32,8 @@ export class MetadataService {
       "Collision energy",
       "Instrument",
       "MS1 scan range",
-      "MS2 analyzer type"
+      "MS2 analyzer type",
+      "Position"
     ]
   metadataTemplate = [{
     "name": "Source name", "type": ""
@@ -2224,5 +2225,66 @@ export class MetadataService {
     const userColumnNames = user_metadata.map((m) => m.name)
     const staffColumnNames = staff_metadata.map((m) => m.name)
     return this.checkMissingColumn(userColumnNames, staffColumnNames)
+  }
+
+  randomizeFile(metadata: MetadataColumn[], sample_number: number) {
+    const headers = metadata.map((m) => m.name)
+    const rowData: {[key: number]: string[]} = {}
+    for (let i = 0; i < metadata.length; i++) {
+      const modifiers = metadata[i].modifiers
+      const modifierMap: any = {}
+
+      for (let j = 0; j < modifiers.length; j++) {
+        const samples = this.parseSampleRanges(modifiers[j].samples)
+        for (const s of samples) {
+          modifierMap[s] = modifiers[j].value
+        }
+      }
+      for (let j = 0; j < sample_number; j++) {
+        if (!rowData[j]) {
+          rowData[j] = []
+        }
+        if (modifierMap[j+1]) {
+          rowData[j].push(modifierMap[j+1])
+        } else {
+          rowData[j].push(metadata[i].value)
+        }
+      }
+    }
+    const data = []
+    for (let i = 0; i < sample_number; i++) {
+      data.push(rowData[i])
+    }
+
+    // randomize the rows of the metadata
+    data.sort(() => Math.random() - 0.5)
+    return [headers, ...data]
+  }
+
+  convertInjectionFile(dataFileCol: MetadataColumn, positionCol: MetadataColumn, injection_vol: number, sample_number: number) {
+    const data = this.randomizeFile([dataFileCol, positionCol], sample_number)
+    let content = "Bracket Type=4\n"
+    content += "Sample Type\tFile Name\tPosition\tInj Vol\n"
+    const result = data.slice(1)
+    for (let i = 0; i < result.length; i++) {
+      content += `Unknown\t${result[i][0]}\t${result[i][1]}\t${injection_vol}\n`
+    }
+    return content
+  }
+
+  parseSampleRanges(samples: string): number[] {
+    const result: number[] = [];
+    const ranges = samples.split(',');
+    ranges.forEach(range => {
+      const [start, end] = range.split('-').map(Number);
+      if (end !== undefined) {
+        for (let i = start; i <= end; i++) {
+          result.push(i);
+        }
+      } else {
+        result.push(start);
+      }
+    });
+    return result;
   }
 }

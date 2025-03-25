@@ -245,6 +245,16 @@
 
             </div>
           </div>
+          @if (userCanEdit||staffModeAvailable) {
+            <div ngbDropdown class="d-flex gap-2">
+              <button class="btn btn-secondary" ngbDropdownToggle>Export Instrument File</button>
+              <div ngbDropdownMenu>
+                @if (job.injection_volume && job.sample_number && job.selected_template) {
+                  <button ngbDropdownItem (click)="exportFile('injection')">Injection</button>
+                }
+              </div>
+            </div>
+          }
 
           <div ngbDropdown class="d-flex gap-2">
             <button class="btn btn-primary" ngbDropdownToggle>SDRF Export</button>

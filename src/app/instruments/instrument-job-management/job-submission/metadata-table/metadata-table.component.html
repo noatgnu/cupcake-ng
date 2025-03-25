@@ -34,7 +34,7 @@
         @if (visibleColumnNames.includes(col.name)) {
           @if (!col.hidden || showHidden) {
             @if (templateMode || staffModeActive) {
-              <th [ngbTooltip]="metadataService.helpData[col.name]" scope="col" [class.table-warning]="col.type != 'Factor value'" [class.table-danger]="col.type == 'Factor value'" (mouseover)="currentCell = {row: -1, col: (userMetadata.length+index)}">
+              <th [ngbTooltip]="metadataService.helpData[col.name]" placement="top" container="body" scope="col" [class.table-warning]="col.type != 'Factor value'" [class.table-danger]="col.type == 'Factor value'" (mouseover)="currentCell = {row: -1, col: (userMetadata.length+index)}">
                 {{col.name}}
                 @if (currentCell) {
                   @if (currentCell.row === -1 && currentCell.col === (userMetadata.length+index) && staffModeActive) {
