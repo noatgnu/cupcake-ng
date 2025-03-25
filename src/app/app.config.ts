@@ -1,5 +1,11 @@
 import {ApplicationConfig, importProvidersFrom} from '@angular/core';
-import {provideRouter, withComponentInputBinding, withHashLocation} from '@angular/router';
+import {
+  PreloadAllModules,
+  provideRouter,
+  withComponentInputBinding,
+  withHashLocation,
+  withPreloading
+} from '@angular/router';
 
 import { routes } from './app.routes';
 import { provideHttpClient, withInterceptors } from "@angular/common/http";
@@ -11,7 +17,8 @@ export const appConfig: ApplicationConfig = {
     provideRouter(
       routes,
       withHashLocation(),
-      withComponentInputBinding()
+      withComponentInputBinding(),
+      withPreloading(PreloadAllModules)
     ),
     provideHttpClient(
       withInterceptors([authInterceptor])
