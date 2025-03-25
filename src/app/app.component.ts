@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import {NavigationCancel, NavigationEnd, NavigationError, NavigationStart, Router, RouterOutlet} from '@angular/router';
 import {NavbarComponent} from "./navbar/navbar.component";
 import {AccountsService} from "./accounts/accounts.service";
 import {LoadingComponent} from "./loading/loading.component";
@@ -25,7 +25,17 @@ import {DownloadModalComponent} from "./download-modal/download-modal.component"
 export class AppComponent {
   title = 'cupcake-ng';
   ready = false;
-  constructor(private modal: NgbModal, private web: WebService, private accounts: AccountsService, private webrtc: WebrtcService, private ws: WebsocketService, private dataService: DataService, private toastService: ToastService) {
+  routerToast: any;
+  constructor(private modal: NgbModal, private router: Router, private web: WebService, private accounts: AccountsService, private webrtc: WebrtcService, private ws: WebsocketService, private dataService: DataService, private toastService: ToastService) {
+    this.router.events.subscribe(async (event )=> {
+      if (event instanceof NavigationStart) {
+        this.routerToast = await this.toastService.show("Loading", "Loading page...", 0, "info", 30)
+      } else if (event instanceof NavigationEnd || event instanceof NavigationCancel || event instanceof NavigationError) {
+        this.routerToast.progress = 100
+        this.toastService.remove(this.routerToast);
+        this.routerToast = undefined;
+      }
+    })
     const followSystemTheme = localStorage.getItem("cupcake-follow-system-theme")
     if (followSystemTheme) {
       if (followSystemTheme === "true") {
