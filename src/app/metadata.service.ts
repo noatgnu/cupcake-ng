@@ -2003,7 +2003,14 @@ export class MetadataService {
     const headers = result[0]
     const data = result.slice(1)
     for (let i = 0; i < headers.length; i++) {
-      const capitalised = headers[i].charAt(0).toUpperCase() + headers[i].slice(1);
+      let metadata_name = headers[i].toLowerCase()
+      let metadata_type = ""
+      if (metadata_name.includes("[")) {
+        metadata_type = metadata_name.split("[")[0]
+        metadata_name = metadata_name.split("[")[1].replace("]", "")
+      }
+      const capitalised = metadata_name.charAt(0).toUpperCase() + metadata_name.slice(1);
+
       for (let j = 0; j < data.length; j++) {
         if (!data[j][i]) {
           if (this.requiredColumnNames.includes(capitalised) || capitalised === "Organism part") {

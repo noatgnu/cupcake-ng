@@ -6,20 +6,20 @@
   </nav>
 </div>
 <div class="container d-flex flex-column gap-2">
-  <div class="d-flex justify-content-center">
+  <div class="d-flex gap-2">
     <div class="card">
       <div class="card-header">
         <h5 class="card-title">Lab Group</h5>
       </div>
       <div class="card-body">
-        <form [formGroup]="form" class="d-flex gap-2">
+        <form [formGroup]="form" class="d-flex flex-column gap-2">
           <div class="form-group">
             <label>Search Lab Groups</label>
             <input class="form-control" type="search" formControlName="searchTerm">
           </div>
           @if (professionalLabGroupQuery) {
             <div class="form-group">
-              <label>Select From Lab Group Options</label>
+              <label>Select Lab Group From Below To View Their Templates</label>
               <select class="form-select" formControlName="lab_group_id" size="5">
                 @for (l of professionalLabGroupQuery.results; track l.id) {
                   <option [ngValue]="l.id">{{l.name}}</option>
@@ -33,54 +33,66 @@
         </form>
       </div>
     </div>
+    <div class="card flex-grow-1">
+      <div class="card-header">
+        <h5 class="card-title">Template List</h5>
+      </div>
+      <div class="card-body">
+        @if (metadataTableTemplateQuery) {
+          <table class="table table-bordered table-hover">
+            <thead>
+            <tr>
+              <th scope="col">
+                Template name
+              </th>
+              <th scope="col">
+                User Column
+              </th>
+              <th scope="col">
+                Staff Column
+              </th>
+              <th scope="col">
+                Lab Group
+              </th>
+            </tr>
+            </thead>
+            <tbody>
+              @for (t of metadataTableTemplateQuery.results; track t.id) {
+                <tr [class.table-warning]="selectedRow === t" (click)="selectRow(t)">
+                  <td>
+                    {{t.name}}
+                  </td>
+                  <td>
+                    {{t.user_columns.length}} ({{t.hidden_user_columns}} hidden)
+                  </td>
+                  <td>
+                    {{t.staff_columns.length}} ({{t.hidden_staff_columns}} hidden)
+                  </td>
+                  <td>
+                    @if (selectedLabGroup) {
+                      {{selectedLabGroup.name}}
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+          <div class="mt-2">
+            <ngb-pagination [collectionSize]="metadataTableTemplateQuery.count" [(page)]="metadataTableTemplatePage" [pageSize]="metadataTableTemplatePageSize" [maxSize]="5" [boundaryLinks]="true" [rotate]="true"></ngb-pagination>
+          </div>
+        } @else {
+          <ngb-alert type="warning">
+            <div>
+              No templates found. Please select another lab group.
+            </div>
+          </ngb-alert>
+        }
+      </div>
+    </div>
   </div>
 
 
-  @if (metadataTableTemplateQuery) {
-    <b>Select a template of interests</b>
 
-    <table class="table table-bordered table-hover">
-      <thead>
-      <tr>
-        <th scope="col">
-          Template name
-        </th>
-        <th scope="col">
-          User Column
-        </th>
-        <th scope="col">
-          Staff Column
-        </th>
-        <th scope="col">
-          Lab Group
-        </th>
-      </tr>
-      </thead>
-      <tbody>
-      @for (t of metadataTableTemplateQuery.results; track t.id) {
-        <tr [class.table-warning]="selectedRow === t" (click)="selectRow(t)">
-          <td>
-            {{t.name}}
-          </td>
-          <td>
-            {{t.user_columns.length}} ({{t.hidden_user_columns}} hidden)
-          </td>
-          <td>
-            {{t.staff_columns.length}} ({{t.hidden_staff_columns}} hidden)
-          </td>
-          <td>
-            @if (selectedLabGroup) {
-              {{selectedLabGroup.name}}
-            }
-          </td>
-        </tr>
-      }
-      </tbody>
-    </table>
-    <div class="mt-2">
-      <ngb-pagination [collectionSize]="metadataTableTemplateQuery.count" [(page)]="metadataTableTemplatePage" [pageSize]="metadataTableTemplatePageSize" [maxSize]="5" [boundaryLinks]="true" [rotate]="true"></ngb-pagination>
-    </div>
-  }
   @if (selectedRow) {
     @if (missingColumns.length > 0) {
       <ngb-alert type="danger">
