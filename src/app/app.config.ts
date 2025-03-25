@@ -50,7 +50,6 @@ export const appConfig: ApplicationConfig = {
       routes,
       withHashLocation(),
       withComponentInputBinding(),
-      withPreloading(PreloadAllModules)
     ),
     {
       provide: APP_INITIALIZER,
