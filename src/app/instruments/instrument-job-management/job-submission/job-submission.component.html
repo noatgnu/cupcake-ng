@@ -234,6 +234,7 @@
       }
       @if (job.selected_template) {
         <hr>
+
         <div class="d-flex gap-2">
           <div ngbDropdown class="d-flex gap-2">
             <button class="btn btn-primary" ngbDropdownToggle>Excel Template</button>
@@ -242,22 +243,21 @@
               @if (job.status !== 'submitted' || (userCanEdit || staffModeAvailable)) {
                 <button ngbDropdownItem (click)="importExcelTemplate()">Import</button>
               }
-
             </div>
           </div>
           @if (userCanEdit||staffModeAvailable) {
             <div ngbDropdown class="d-flex gap-2">
-              <button class="btn btn-secondary" ngbDropdownToggle>Export Instrument File</button>
+              <button class="btn btn-secondary" ngbDropdownToggle><i class="bi bi-download"></i> Instrument File</button>
               <div ngbDropdownMenu>
                 @if (job.injection_volume && job.sample_number && job.selected_template) {
-                  <button ngbDropdownItem (click)="exportFile('injection')">Injection</button>
+                  <button ngbDropdownItem (click)="exportFile('injection')">Randomized Injection</button>
                 }
               </div>
             </div>
           }
 
           <div ngbDropdown class="d-flex gap-2">
-            <button class="btn btn-primary" ngbDropdownToggle>SDRF Export</button>
+            <button class="btn btn-primary" ngbDropdownToggle><i class="bi bi-download"></i> SDRF</button>
             <div ngbDropdownMenu>
               <button ngbDropdownItem (click)="exportTableToTSV('user_metadata')">Export User Metadata</button>
               <button ngbDropdownItem (click)="exportTableToTSV('staff_metadata')">Export Staff Metadata</button>
@@ -266,7 +266,7 @@
           </div>
           @if (job.status !== 'submitted' || (userCanEdit || staffModeAvailable)) {
             <div ngbDropdown class="d-flex gap-2">
-              <button class="btn btn-primary" ngbDropdownToggle>SDRF Import</button>
+              <button class="btn btn-primary" ngbDropdownToggle><i class="bi bi-upload"></i> SDRF</button>
               <div ngbDropdownMenu>
                 <button ngbDropdownItem (click)="importMetadata('user_metadata')">Import User Metadata</button>
                 <button ngbDropdownItem (click)="importMetadata('staff_metadata')">Import Staff Metadata</button>
@@ -275,7 +275,69 @@
             </div>
           }
 
-          <button class="btn btn-warning" (click)="validateSDRFMetadata()">Validate Metadata</button>
+          <button class="btn btn-warning" (click)="validateSDRFMetadata()">Validate</button>
+        </div>
+        <div class="d-flex gap-2 mt-2">
+          @if (userCanEdit) {
+            <div ngbDropdown display="dynamic" class="d-inline-black">
+              <button class="btn btn-primary" ngbDropdownToggle>
+                + User Column
+              </button>
+              <div ngbDropdownMenu aria-labelledby="addMetadata">
+                @for (m of metadataService.userMetadataTemplate; track m.name) {
+                  <a class="dropdown-item" (click)="addMetadata(m, 'user_metadata')">
+                    {{m.name}}
+                  </a>
+                }
+                <a class="dropdown-item" (click)="addMetadata({name: 'Sample type', type: 'Characteristics'}, 'user_metadata')">
+                  Sample Type
+                </a>
+                <a class="dropdown-item" (click)="addMetadata({name: '', type: ''}, 'user_metadata')">
+                  Custom Metadata
+                </a>
+              </div>
+            </div>
+          }
+          @if (staffModeAvailable) {
+            @if (job.status === "submitted") {
+              <div ngbDropdown display="dynamic" class="d-inline-black">
+                <button class="btn btn-primary" ngbDropdownToggle>
+                  + User Column
+                </button>
+                <div ngbDropdownMenu aria-labelledby="addMetadata">
+                  @for (m of metadataService.userMetadataTemplate; track m.name) {
+                    <a class="dropdown-item" (click)="addMetadata(m, 'user_metadata')">
+                      {{m.name}}
+                    </a>
+                  }
+                  <a class="dropdown-item" (click)="addMetadata({name: 'Sample type', type: 'Characteristics'}, 'user_metadata')">
+                    Sample Type
+                  </a>
+                  <a class="dropdown-item" (click)="addMetadata({name: '', type: ''}, 'user_metadata')">
+                    Custom Metadata
+                  </a>
+                </div>
+              </div>
+            }
+            <div ngbDropdown display="dynamic" class="d-inline-black">
+              <button class="btn btn-warning" ngbDropdownToggle>
+                + Staff Column
+              </button>
+              <div ngbDropdownMenu aria-labelledby="addStaffMetadata">
+                @for (m of metadataService.staffMetadataSpecific; track m) {
+                  <a class="dropdown-item" (click)="addMetadata({name: m, type: 'Comment'}, 'staff_metadata')">
+                    {{m}}
+                  </a>
+                }
+                <a class="dropdown-item" (click)="addMetadata({name: '', type: 'Factor value'}, 'staff_metadata')">
+                  Factor Value
+                </a>
+                <a class="dropdown-item" (click)="addMetadata({name: '', type: ''}, 'staff_metadata')">
+                  Custom Metadata
+                </a>
+              </div>
+            </div>
+          }
         </div>
         <div class="form-check">
           <input type="checkbox" class="form-check-input" [(ngModel)]="showHidden" id="showHidden">
