@@ -9,7 +9,6 @@ import { routes } from './app.routes';
 import { provideHttpClient, withInterceptors } from "@angular/common/http";
 import {authInterceptor} from "./auth.interceptor";
 import {QuillModule} from "ngx-quill";
-import {DOCUMENT} from "@angular/common";
 
 
 
@@ -20,13 +19,6 @@ export const appConfig: ApplicationConfig = {
       withHashLocation(),
       withComponentInputBinding(),
     ),
-    provideAppInitializer(() => {
-      const window: any = inject(DOCUMENT).defaultView;
-      if (window) {
-        window['_appStarted'] = true;
-      }
-    })
-    ,
     provideHttpClient(
       withInterceptors([authInterceptor])
     ),
