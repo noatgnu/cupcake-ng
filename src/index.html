@@ -16,34 +16,58 @@
     <div class="loading-content">
       <img src="assets/cupcake_logo.png" alt="Logo" class="logo">
       <div class="spinner"></div>
+      Loading...&nbsp;<span id="app-load-percent" style="width: 29px;">0</span>&nbsp;%
     </div>
   </div>
   <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      // Performance mark before loading the script
-      performance.mark('main-script-start');
-
-      // Select the script element with the dynamic hash
-      const mainScript = document.querySelector('script[src^="main"][type="module"]');
-
-      if (mainScript) {
-        console.log(mainScript);
-        // Listen for the load event
-        mainScript.onload = () => {
-          // Performance mark after the script has loaded
-          performance.mark('main-script-end');
-
-          // Measure the time taken to load the script
-          performance.measure('main-script-load-time', 'main-script-start', 'main-script-end');
-
-          // Log the measurement
-          const measure = performance.getEntriesByName('main-script-load-time')[0];
-          console.log(`Main script load time: ${measure.duration}ms`);
-        };
-      } else {
-        console.error('Main script not found');
+    (() => {
+      if (!window.PerformanceObserver) {
+        return;
       }
-    });
+
+      const loadPercent = document.querySelector('#app-load-percent');
+      const observer = new PerformanceObserver(logEntries);
+      const appStartedKey = '_appStarted';
+      let totalImports = 0;
+
+      // Initial calculation of expected imports
+      const scriptElements = document.querySelectorAll('script[src]');
+      const linkElements = document.querySelectorAll('link[rel="stylesheet"], link[rel="modulepreload"]');
+      const imgElements = document.querySelectorAll('img');
+      let expectedImportsNumber = scriptElements.length + linkElements.length + imgElements.length;
+      console.log('Initial Expected Imports Number:', expectedImportsNumber);
+
+      // Track dynamically added resources
+      const originalAppendChild = document.head.appendChild.bind(document.head);
+      document.head.appendChild = (element) => {
+        if (element.tagName === 'SCRIPT' && element.src) {
+          expectedImportsNumber++;
+        } else if (element.tagName === 'LINK' && (element.rel === 'stylesheet' || element.rel === 'modulepreload')) {
+          expectedImportsNumber++;
+        } else if (element.tagName === 'IMG' && element.src) {
+          expectedImportsNumber++;
+        }
+        console.log('Updated Expected Imports Number:', expectedImportsNumber);
+        return originalAppendChild(element);
+      };
+
+      function logEntries(entries) {
+        console.log(entries.getEntries());
+        const appStarted = window[appStartedKey];
+        if (appStarted) {
+          console.log('performance: disconnect', { totalImports });
+          delete window[appStartedKey];
+          observer.disconnect();
+          return;
+        }
+        totalImports += entries.getEntries().length;
+        console.log('Total Imports:', totalImports);
+        loadPercent.innerHTML = String(Math.round((totalImports / expectedImportsNumber) * 100 * 10) / 10);
+        console.log('Load Percent:', loadPercent.innerHTML);
+      }
+
+      observer.observe({ type: 'resource', buffered: true });
+    })();
   </script>
 </body>
 </html>

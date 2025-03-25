@@ -1,4 +1,4 @@
-import {APP_INITIALIZER, ApplicationConfig, importProvidersFrom} from '@angular/core';
+import {APP_INITIALIZER, ApplicationConfig, importProvidersFrom, inject, provideAppInitializer} from '@angular/core';
 import {
   PreloadAllModules,
   provideRouter,
@@ -12,6 +12,7 @@ import { provideHttpClient, withInterceptors } from "@angular/common/http";
 import {authInterceptor} from "./auth.interceptor";
 import {QuillModule} from "ngx-quill";
 import {LoadingTrackerService} from "./loading-tracker.service";
+import {DOCUMENT} from "@angular/common";
 
 export function initializeAppFactory(loadingTracker: LoadingTrackerService) {
   return () => {
@@ -51,6 +52,12 @@ export const appConfig: ApplicationConfig = {
       withHashLocation(),
       withComponentInputBinding(),
     ),
+    provideAppInitializer(() => {
+      const window: any = inject(DOCUMENT).defaultView;
+      if (window) {
+        window['_appStarted'] = true;
+      }
+    }),
     {
       provide: APP_INITIALIZER,
       useFactory: initializeAppFactory,
