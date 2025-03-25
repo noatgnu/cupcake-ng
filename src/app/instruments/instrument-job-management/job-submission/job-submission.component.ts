@@ -1445,12 +1445,29 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit, OnDestroy 
           const result = this.metadataService.convertInjectionFile(dataFileCol, positionCol, this.job.injection_volume, this.job.sample_number)
           // download file
           const blob = new Blob([result], { type: 'text/plain' });
+          // convert blob to file
+          const file = new File([blob], 'injection_list.tsv', { type: 'text/plain' });
+          let export_type: 'user_annotation'|'staff_annotation' = 'user_annotation'
+          if (this.staffModeAvailable) {
+            export_type = 'staff_annotation'
+          }
+          this.web.saveAnnotationFile(undefined, undefined, file, 'file', this.job.id, export_type, "Randomized Injection List").subscribe((data: any) => {
+            this.toast.show('Annotation', 'File Saved Successfully')
+            this.annotationService.refreshAnnotation.next(true);
+          })
           const url = window.URL.createObjectURL(blob);
           const a = document.createElement('a');
           a.href = url;
           a.download = 'injection_list.tsv';
           a.click();
           window.URL.revokeObjectURL(url);
+        } else {
+          if (!dataFileCol) {
+            this.toast.show("Injection List", "Data file column not found")
+          }
+          if (!positionCol) {
+            this.toast.show("Injection List", "Position column not found")
+          }
         }
       }
     }

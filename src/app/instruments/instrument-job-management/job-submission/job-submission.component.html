@@ -593,13 +593,17 @@
       @if (!job) {
         <button class="btn btn-primary" (click)="createDraftJob()">Create Job</button>
       } @else {
+        <input type="file" hidden #fastaFileUpload (change)="annotationService.handleFileInput($event, job.id, 'user_annotation', 'fasta file from job '+job.job_name, 'file')">
+
         @if (job.status !== 'submitted' && (userCanEdit || staffModeAvailable)) {
           @if (job.sample_number > 0 && job.selected_template) {
             <button class="btn btn-primary" [disabled]="job.status !== 'draft'" (click)="submit()">Submit</button>
           }
           <button class="btn btn-primary" (click)="update()">Update</button>
-          <button class="btn btn-primary" (click)="fastaFileUpload.click()">Upload Fasta File</button>
-          <input type="file" hidden #fastaFileUpload (change)="annotationService.handleFileInput($event, job.id, 'user_annotation', 'fasta file from job '+job.job_name, 'file')">
+          <div>
+            <button class="btn btn-primary" (click)="fastaFileUpload.click()"><i class="bi bi-upload"></i> Fasta File</button>
+          </div>
+
           <div ngbDropdown display="dynamic" class="d-inline-black">
             <button class="btn btn-primary" id="addMetadata" ngbDropdownToggle>
               + User Column
@@ -621,7 +625,10 @@
         }
         @if (staffModeAvailable) {
           @if (job.status === 'submitted') {
-            <button class="btn btn-primary" (click)="update()">Update</button>
+            <div>
+              <button class="btn btn-primary" (click)="fastaFileUpload.click()"><i class="bi bi-upload"></i> Fasta File</button>
+            </div>
+            <button class="btn btn-warning" (click)="update()">Update</button>
             <div ngbDropdown display="dynamic" class="d-inline-black">
               <button class="btn btn-primary" id="addMetadataStaff" ngbDropdownToggle>
                 + User Column
