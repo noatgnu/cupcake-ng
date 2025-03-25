@@ -24,7 +24,6 @@ export function initializeAppFactory(loadingTracker: LoadingTrackerService) {
         loadingTracker.setLoadingChunk(chunkName || 'unknown');
         scriptElement.onload = () => loadingTracker.clearLoadingChunk();
       }
-      console.log('Appending element', element);
       return originalAppendChild(element);
     };
   };

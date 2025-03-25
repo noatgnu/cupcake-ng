@@ -16,10 +16,12 @@ import {WebService} from "./web.service";
 import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import {DownloadModalComponent} from "./download-modal/download-modal.component";
 import {LoadingIndicatorComponent} from "./loading-indicator/loading-indicator.component";
+import {LoadingTrackerService} from "./loading-tracker.service";
+import {AsyncPipe, NgTemplateOutlet} from "@angular/common";
 
 @Component({
     selector: 'app-root',
-  imports: [RouterOutlet, NavbarComponent, LoadingComponent, ToastContainerComponent, HandwrittenAnnotationComponent, LoadingIndicatorComponent],
+  imports: [RouterOutlet, NavbarComponent, LoadingComponent, ToastContainerComponent, HandwrittenAnnotationComponent, LoadingIndicatorComponent, AsyncPipe, NgTemplateOutlet],
     templateUrl: './app.component.html',
     styleUrl: './app.component.scss'
 })
@@ -27,7 +29,9 @@ export class AppComponent {
   title = 'cupcake-ng';
   ready = false;
   routerToast: any;
-  constructor(private modal: NgbModal, private router: Router, private web: WebService, private accounts: AccountsService, private webrtc: WebrtcService, private ws: WebsocketService, private dataService: DataService, private toastService: ToastService) {
+  loadingChunk = this.loadingTracker.loading$;
+
+  constructor(private loadingTracker: LoadingTrackerService, private modal: NgbModal, private router: Router, private web: WebService, private accounts: AccountsService, private webrtc: WebrtcService, private ws: WebsocketService, private dataService: DataService, private toastService: ToastService) {
     this.router.events.subscribe(async (event )=> {
       if (event instanceof NavigationStart) {
         this.routerToast = await this.toastService.show("Loading", "Loading page...", 0, "info", 30)
