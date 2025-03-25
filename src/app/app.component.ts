@@ -15,10 +15,11 @@ import {ToastService} from "./toast.service";
 import {WebService} from "./web.service";
 import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import {DownloadModalComponent} from "./download-modal/download-modal.component";
+import {LoadingIndicatorComponent} from "./loading-indicator/loading-indicator.component";
 
 @Component({
     selector: 'app-root',
-    imports: [RouterOutlet, NavbarComponent, LoadingComponent, ToastContainerComponent, HandwrittenAnnotationComponent],
+  imports: [RouterOutlet, NavbarComponent, LoadingComponent, ToastContainerComponent, HandwrittenAnnotationComponent, LoadingIndicatorComponent],
     templateUrl: './app.component.html',
     styleUrl: './app.component.scss'
 })
