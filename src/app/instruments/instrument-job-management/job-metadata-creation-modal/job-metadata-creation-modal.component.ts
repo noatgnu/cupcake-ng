@@ -46,6 +46,12 @@ export class JobMetadataCreationModalComponent {
   @Input() service_lab_group_id: number = -1
   @Input() possibleColumns: MetadataColumn[] = []
   private _name: string = ""
+  @Input() set hidden(value: boolean) {
+    this.form.controls.hidden.setValue(value)
+  }
+  @Input() set readonly(value: boolean) {
+    this.form.controls.readonly.setValue(value)
+  }
   @Input() set name(value: string) {
     this.form.controls.metadataName.setValue(value)
     this._name = value

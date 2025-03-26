@@ -127,10 +127,12 @@ export class MetadataPlaygroundComponent {
     value: string,
     type: string,
     id: number,
+    hidden: boolean,
+    readonly : boolean,
     data_type: string,
     modifiers: {samples: string, value: string}[]
   }[], arrayName: 'user_metadata'|'staff_metadata'|undefined|null = undefined) {
-
+    console.log(event)
     let highestID = 0;
 
     if (this.selectedRow) {
@@ -158,9 +160,9 @@ export class MetadataPlaygroundComponent {
             not_applicable: false,
             mandatory: false,
             modifiers: e.modifiers,
-            hidden: false,
+            hidden: e.hidden,
             auto_generated: false,
-            readonly: false,
+            readonly: e.readonly,
           }
           if (arrayName === 'user_metadata') {
             this.selectedRow.user_columns.push(metadataColumn);
@@ -174,6 +176,8 @@ export class MetadataPlaygroundComponent {
         } else {
           const userColumn = this.selectedRow.user_columns.find((column) => column.id === e.id);
           if (userColumn) {
+            userColumn.hidden = e.hidden;
+            userColumn.readonly = e.readonly;
             userColumn.value = e.value;
             if (!e.modifiers) {
               e.modifiers = [];
@@ -183,6 +187,8 @@ export class MetadataPlaygroundComponent {
           } else {
             const staffColumn = this.selectedRow.staff_columns.find((column) => column.id === e.id);
             if (staffColumn) {
+              staffColumn.hidden = e.hidden;
+              staffColumn.readonly = e.readonly;
               staffColumn.value = e.value;
               if (!e.modifiers) {
                 e.modifiers = [];
@@ -311,6 +317,7 @@ export class MetadataPlaygroundComponent {
 
   addMetadata(metadata: {name: string, type: string}, arrayName: 'user_metadata'|'staff_metadata') {
     const ref = this.modal.open(JobMetadataCreationModalComponent, {scrollable: true})
+    ref.componentInstance.previewMode = true
     if (this.selectedRow) {
       if (this.form.value.lab_group_id){
         ref.componentInstance.service_lab_group_id = this.form.value.lab_group_id
@@ -328,6 +335,8 @@ export class MetadataPlaygroundComponent {
           type: string,
           id: number,
           data_type: string,
+          hidden: boolean,
+          readonly: boolean,
           modifiers: {samples: string, value: string}[]
         }[] = []
         for (const r of result) {
@@ -339,6 +348,8 @@ export class MetadataPlaygroundComponent {
             type: r.metadataType,
             modifiers: [],
             data_type: arrayName,
+            hidden: r.hidden,
+            readonly: r.readonly,
             id: 0
           })
         }

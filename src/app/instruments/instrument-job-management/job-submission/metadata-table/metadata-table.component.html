@@ -42,7 +42,7 @@
                       <button class="btn btn-sm btn-outline-primary" id="metadataColumnDropdownStaff" ngbDropdownToggle><i class="bi bi-pencil-fill"></i></button>
                       <div ngbDropdownMenu aria-labelledby="metadataColumnDropdownStaff">
                         <button class="dropdown-item" (click)="editDefaultMetadataValue(col, 'staff_metadata')" ngbTooltip="Edit default value"><i  class="bi bi-pen"></i> Edit Default Value</button>
-                        @if (!templateMode) {
+                        @if (!templateMode && !col.readonly) {
                           <button class="dropdown-item" (click)="replaceEntireMetadataColumn(col, 'staff_metadata')" ngbTooltip="Replace entire column"><i  class="bi bi-columns"></i> Replace Entire Column</button>
                         }
                         @if (!col.mandatory) {
@@ -54,9 +54,7 @@
                 }
               </th>
             }
-
           }
-
         }
       }
     </tr>
@@ -70,7 +68,7 @@
               @if (!col.hidden || showHidden) {
                 <td (mouseover)="moveOverCell(rowIndex, index)" [ngClass]="{
               'border border-black': selectionMode&&selectionModeColIndex===index,
-              'table-danger': selectionMode&&isSelectedCell(rowIndex, index),
+              'table-danger': selectionMode&&isSelectedCell(rowIndex, index)||col.readonly,
               'table-secondary': col.hidden
               }">
                   @if (col.name === 'Modification parameters') {
@@ -78,7 +76,7 @@
                   } @else {
                     {{ row['col_' + index] }}
                   }
-                  @if (currentCell && !templateMode) {
+                  @if (currentCell && !templateMode && !col.readonly) {
                     @if (currentCell.row === rowIndex && currentCell.col === index) {
                       @if (!selectionMode) {
                         <div ngbDropdown class="d-inline-block">
@@ -93,7 +91,7 @@
                         <button class="btn btn-sm btn-outline-danger" (click)="pasteContentFromOriginToCells(col, 'user_metadata')"><i class="bi bi-clipboard"></i></button>
                       }
                     }
-                    @if (originCell) {
+                    @if (originCell && !col.readonly) {
                       @if (originCell.row === rowIndex && originCell.col === index) {
                         <div ngbDropdown class="d-inline-block">
                           <button class="btn btn-sm btn-outline-primary" id="metadataCellDropdownUser" ngbDropdownToggle><i class="bi bi-pencil-fill"></i></button>
@@ -112,9 +110,9 @@
             @if (visibleColumnNames.includes(col.name)) {
               @if (!col.hidden || showHidden) {
                 @if (templateMode || staffModeActive) {
-                  <td (mouseover)="moveOverCell(rowIndex, (userMetadata.length+index))" [ngClass]="{'border border-black': selectionMode&&selectionModeColIndex===(userMetadata.length+index), 'table-danger': selectionMode&&isSelectedCell(rowIndex, (userMetadata.length+index)), 'table-secondary': col.hidden}">
+                  <td (mouseover)="moveOverCell(rowIndex, (userMetadata.length+index))" [ngClass]="{'border border-black': selectionMode&&selectionModeColIndex===(userMetadata.length+index), 'table-danger': (selectionMode&&isSelectedCell(rowIndex, (userMetadata.length+index)))||col.readonly, 'table-secondary': col.hidden}">
                     {{ row['col_' + (userMetadata.length+index)] }}
-                    @if (currentCell && !templateMode) {
+                    @if (currentCell && !templateMode && !col.readonly) {
                       @if (currentCell.row === rowIndex && currentCell.col === (userMetadata.length+index)) {
                         @if (!selectionMode) {
                           <div ngbDropdown class="d-inline-block">
@@ -129,7 +127,7 @@
                           <button class="btn btn-sm btn-outline-danger" (click)="pasteContentFromOriginToCells(col, 'staff_metadata')"><i class="bi bi-clipboard"></i></button>
                         }
                       }
-                      @if (originCell && !templateMode) {
+                      @if (originCell && !templateMode && !col.readonly) {
                         @if (originCell.row === rowIndex && originCell.col === (userMetadata.length+index)) {
                           <div ngbDropdown class="d-inline-block">
                             <button class="btn btn-sm btn-outline-primary" id="metadataCellDropdownStaff" ngbDropdownToggle><i class="bi bi-pencil-fill"></i></button>

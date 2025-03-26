@@ -376,7 +376,9 @@ export class MetadataTableComponent implements OnChanges{
 
   editDefaultMetadataValue(metadata: MetadataColumn, data_type: 'user_metadata' | 'staff_metadata') {
     const ref = this.modal.open(JobMetadataCreationModalComponent)
-    ref.componentInstance.previewMode = this.templateMode
+    ref.componentInstance.previewMode = this.templateMode || this.staffModeActive
+    ref.componentInstance.hidden = metadata.hidden
+    ref.componentInstance.readonly = metadata.readonly
     if (this.service_lab_group_id > 0) {
       ref.componentInstance.service_lab_group_id = this.service_lab_group_id
     }
@@ -421,8 +423,8 @@ export class MetadataTableComponent implements OnChanges{
             id: metadata.id,
             data_type: data_type,
             hidden: r.hidden,
+            readonly: r.readonly,
             auto_generated: r.auto_generated,
-            readonly: r.readonly
           }
           d.push(data)
         }

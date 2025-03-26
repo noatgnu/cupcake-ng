@@ -783,6 +783,7 @@ export class MetadataService {
 
   async sort_metadata(metadata: MetadataColumn[], sample_number: number) {
     const headers: string[] = []
+    const id_metadata_map: any = {}
     const default_columns_list = [{
       "name": "Source name", "type": ""
     },
@@ -923,6 +924,7 @@ export class MetadataService {
           data[i][0] = source_name_metadata.value
         }
       }
+      id_metadata_map[source_name_metadata.id] = {column: 0, name: "source name", type: "", hidden: source_name_metadata.hidden}
       last_characteristics += 1
     }
 
@@ -947,6 +949,7 @@ export class MetadataService {
             data[j][last_characteristics] = m.value
           }
         }
+        id_metadata_map[m.id] = {column: last_characteristics, name: headers[last_characteristics], type: "characteristics", hidden: m.hidden}
         last_characteristics += 1
       }
     }
@@ -968,6 +971,7 @@ export class MetadataService {
             data[j][last_characteristics] = m.value
           }
         }
+        id_metadata_map[m.id] = {column: last_characteristics, name: headers[last_characteristics], type: "characteristics", hidden: m.hidden};
         last_characteristics += 1
       }
     }
@@ -980,14 +984,20 @@ export class MetadataService {
         for (const modifier of material_type_metadata.modifiers) {
           const samples = this.parse_sample_indices_from_modifier_string(modifier.samples)
           for (const s of samples) {
-            data[s][last_characteristics] = modifier.value
+            data[s][last_non_type] = modifier.value
           }
         }
       }
       for (let j=0; j < sample_number; j++) {
-        if (data[j][last_characteristics] === "") {
-          data[j][last_characteristics] = material_type_metadata.value
+        if (data[j][last_non_type] === "") {
+          data[j][last_non_type] = material_type_metadata.value
         }
+      }
+      id_metadata_map[material_type_metadata.id] = {
+        column: last_non_type,
+        name: headers[last_non_type],
+        type: "",
+        hidden: material_type_metadata.hidden
       }
       last_non_type += 1
     }
@@ -1007,6 +1017,12 @@ export class MetadataService {
           data[j][last_non_type] = assay_name_metadata.value
         }
       }
+      id_metadata_map[assay_name_metadata.id] = {
+        column: last_non_type,
+        name: headers[last_non_type],
+        type: "",
+        hidden: assay_name_metadata.hidden
+      }
       last_non_type += 1
     }
 
@@ -1024,6 +1040,12 @@ export class MetadataService {
         if (data[j][last_non_type] === "") {
           data[j][last_non_type] = technology_type_metadata.value
         }
+      }
+      id_metadata_map[technology_type_metadata.id] = {
+        column: last_non_type,
+        name: headers[last_non_type],
+        type: "",
+        hidden: technology_type_metadata.hidden
       }
       last_non_type += 1
     }
@@ -1045,6 +1067,12 @@ export class MetadataService {
             data[j][last_non_type] = m.value
           }
         }
+        id_metadata_map[m.id] = {
+          column: last_non_type,
+          name: headers[last_non_type],
+          type: "",
+          hidden: m.hidden
+        }
         last_non_type += 1
       }
     }
@@ -1065,6 +1093,12 @@ export class MetadataService {
           if (data[j][last_non_type] === "") {
             data[j][last_non_type] = m.value
           }
+        }
+        id_metadata_map[m.id] = {
+          column: last_non_type,
+          name: headers[last_non_type],
+          type: "",
+          hidden: m.hidden
         }
         last_non_type += 1
       }
@@ -1089,6 +1123,12 @@ export class MetadataService {
             data[j][last_comment] = m.value
           }
         }
+        id_metadata_map[m.id] = {
+          column: last_comment,
+          name: headers[last_comment],
+          type: "comment",
+          hidden: m.hidden
+        }
         last_comment += 1
       }
     }
@@ -1109,6 +1149,12 @@ export class MetadataService {
           if (data[j][last_comment] === "") {
             data[j][last_comment] = m.value
           }
+        }
+        id_metadata_map[m.id] = {
+          column: last_comment,
+          name: headers[last_comment],
+          type: "comment",
+          hidden: m.hidden
         }
         last_comment += 1
       }
@@ -1134,10 +1180,16 @@ export class MetadataService {
           data[j][last_comment] = m.value
         }
       }
+      id_metadata_map[m.id] = {
+        column: last_comment,
+        name: headers[last_comment],
+        type: "factor value",
+        hidden: m.hidden
+      }
       last_comment += 1
     }
 
-    return [headers, ...data]
+    return [[headers, ...data], id_metadata_map]
   }
 
   async convert_sdrf_to_metadata(name: string, value: string) {
@@ -1524,10 +1576,11 @@ export class MetadataService {
     const metadata = user_metadata.concat(staff_metadata)
     let main_metadata = metadata.filter((m) => !m.hidden)
     let hidden_metadata = metadata.filter((m) => m.hidden)
-    const result_main = await this.sort_metadata(main_metadata, sample_number)
+    let [result_main, id_metadata_column_map_main] = await this.sort_metadata(main_metadata, sample_number)
     let result_hidden: string[][] = []
+    let id_metadata_column_map_hidden: any = {}
     if (hidden_metadata.length > 0) {
-      result_hidden = await this.sort_metadata(hidden_metadata, sample_number)
+      [result_hidden, id_metadata_column_map_hidden] = await this.sort_metadata(hidden_metadata, sample_number)
     }
     const favourites: any = {}
     if (service_lab_group_id > 0) {
@@ -1550,6 +1603,18 @@ export class MetadataService {
     const wb = new Workbook()
     const main_ws: Worksheet = wb.addWorksheet('main')
     const hidden_ws: Worksheet = wb.addWorksheet('hidden')
+    const id_metadata_column_map_ws = wb.addWorksheet('id_metadata_column_map')
+    id_metadata_column_map_ws.addRow(["id", "column", "name", "type", "hidden"])
+    // fill id_metadata_column_map_ws with a table of id, column, name, type, hidden
+    for (const m_id in id_metadata_column_map_main) {
+      const row = id_metadata_column_map_main[m_id]
+      id_metadata_column_map_ws.addRow([m_id, row.column, row.name, row.type, row.hidden])
+    }
+    for (const m_id in id_metadata_column_map_hidden) {
+      const row = id_metadata_column_map_hidden[m_id]
+      id_metadata_column_map_ws.addRow([m_id, row.column, row.name, row.type, row.hidden])
+    }
+
     const required_metadata = this.requiredColumnNames.map((name) => name.toLowerCase())
     const fill = {
       type: 'pattern',
@@ -1728,6 +1793,25 @@ export class MetadataService {
     await workbook.xlsx.load(data)
     const main_ws = workbook.getWorksheet('main')
     const hidden_ws = workbook.getWorksheet('hidden')
+    const id_metadata_column_map_ws = workbook.getWorksheet('id_metadata_column_map')
+    const id_metadata_column_map: any = {}
+    let id_metadata_column_map_list: any[][] = []
+    if (id_metadata_column_map_ws) {
+      // convert id_metadata_column_map_ws to id_metadata_column_map_list
+      id_metadata_column_map_ws.eachRow((row, rowNumber) => {
+        if (rowNumber > 1) { // Skip the header row
+          const id = row.getCell(1).value as string;
+          const column = row.getCell(2).value as number;
+          const name = row.getCell(3).value as string;
+          const type = row.getCell(4).value as string;
+          const hidden = row.getCell(5).value as boolean;
+          id_metadata_column_map_list.push([parseInt(id), column, name, type, hidden]);
+          id_metadata_column_map[parseInt(id)] = {column: column, name: name, type: type, hidden: hidden};
+        }
+      });
+    }
+    console.log(id_metadata_column_map_list)
+    console.log(id_metadata_column_map)
     const user_metadata_field_map: any = {}
     const staff_metadata_field_map: any = {}
     for (const m of user_metadata) {
@@ -1755,39 +1839,75 @@ export class MetadataService {
       const main_headers = main_ws.getRow(1).values
       if (main_headers){
         if (Array.isArray(main_headers)) {
-          main_headers.forEach((h: CellValue) => {
+          main_headers.forEach((h: CellValue, ind: number) => {
+            console.log(ind)
             if (typeof h === 'string') {
-              const header = h.toLowerCase();
-              let metadata_type = "";
-              let metadata_name = "";
-              if (header.includes("[")) {
-                metadata_type = header.split("[")[0];
-                metadata_name = header.split("[")[1].replace("]", "");
+              let column_id = 0
+              for (const row of id_metadata_column_map_list) {
+                if (row[1] === ind -1 && !row[4]) {
+                  column_id = row[0]
+                  break
+                }
+              }
+              if (column_id > currentID) {
+                currentID = column_id
+              }
+              if (column_id > 0) {
+                const foundCol = user_metadata.find((m) => {
+                  if (m.id === column_id) {
+                    main_metadata.push(m)
+                    m_headers.push(m.name)
+                    return true
+                  }
+                  return false
+                })
+                if (!foundCol) {
+                  const foundStaffCol = staff_metadata.find((m) => {
+                    if (m.id === column_id) {
+                      main_metadata.push(m)
+                      m_headers.push(m.name)
+                      return true
+                    }
+                    return false
+                  })
+                  if (!foundStaffCol) {
+                    console.log("Column not found in metadata", h, column_id  )
+                    console.log(user_metadata, staff_metadata)
+                  }
+                }
               } else {
-                metadata_name = header;
+                const header = h.toLowerCase();
+                let metadata_type = "";
+                let metadata_name = "";
+                if (header.includes("[")) {
+                  metadata_type = header.split("[")[0];
+                  metadata_name = header.split("[")[1].replace("]", "");
+                } else {
+                  metadata_name = header;
+                }
+                if (metadata_name == "organism part") {
+                  metadata_name = "tissue";
+                }
+                const metadata: MetadataColumn = {
+                  name: (metadata_name.charAt(0).toUpperCase() + metadata_name.slice(1)).replace("Ms1", "MS1").replace("Ms2", "MS2"),
+                  type: metadata_type.charAt(0).toUpperCase() + metadata_type.slice(1),
+                  value: "",
+                  modifiers: [],
+                  hidden: false,
+                  column_position: 0,
+                  stored_reagent: null,
+                  id: currentID,
+                  created_at: new Date(),
+                  updated_at: new Date(),
+                  not_applicable: false,
+                  mandatory: false,
+                  auto_generated: false,
+                  readonly: false
+                };
+                currentID++
+                main_metadata.push(metadata);
+                m_headers.push(metadata.name);
               }
-              if (metadata_name == "organism part") {
-                metadata_name = "tissue";
-              }
-              const metadata: MetadataColumn = {
-                name: metadata_name.charAt(0).toUpperCase() + metadata_name.slice(1),
-                type: metadata_type.charAt(0).toUpperCase() + metadata_type.slice(1),
-                value: "",
-                modifiers: [],
-                hidden: false,
-                column_position: 0,
-                stored_reagent: null,
-                id: currentID,
-                created_at: new Date(),
-                updated_at: new Date(),
-                not_applicable: false,
-                mandatory: false,
-                auto_generated: false,
-                readonly: false
-              };
-              currentID++
-              main_metadata.push(metadata);
-              m_headers.push(metadata.name);
             }
           });
         }
@@ -1799,39 +1919,71 @@ export class MetadataService {
       const hidden_headers = hidden_ws.getRow(1).values
       if (hidden_headers) {
         if (Array.isArray(hidden_headers)) {
-          hidden_headers.forEach((h: CellValue) => {
+          hidden_headers.forEach((h: CellValue, ind: number) => {
             if (typeof h === 'string') {
-              const header = h.toLowerCase();
-              let metadata_type = "";
-              let metadata_name = "";
-              if (header.includes("[")) {
-                metadata_type = header.split("[")[0];
-                metadata_name = header.split("[")[1].replace("]", "");
+              let column_id = 0
+              for (const row of id_metadata_column_map_list) {
+                if (row[1] === ind -1 && row[4]) {
+                  column_id = row[0]
+                  break
+                }
+              }
+              if (column_id > currentID) {
+                currentID = column_id
+              }
+
+              if (column_id > 0) {
+                const foundCol = user_metadata.find((m) => {
+                  if (m.id === column_id) {
+                    hidden_metadata.push(m)
+                    h_headers.push(m.name)
+                    return true
+                  }
+                  return false
+                })
+                if (!foundCol) {
+                  staff_metadata.find((m) => {
+                    if (m.id === column_id) {
+                      hidden_metadata.push(m)
+                      h_headers.push(m.name)
+                      return true
+                    }
+                    return false
+                  })
+                }
               } else {
-                metadata_name = header;
+                const header = h.toLowerCase();
+                let metadata_type = "";
+                let metadata_name = "";
+                if (header.includes("[")) {
+                  metadata_type = header.split("[")[0];
+                  metadata_name = header.split("[")[1].replace("]", "");
+                } else {
+                  metadata_name = header;
+                }
+                if (metadata_name == "organism part") {
+                  metadata_name = "tissue";
+                }
+                const metadata: MetadataColumn = {
+                  name: (metadata_name.charAt(0).toUpperCase() + metadata_name.slice(1)).replace("Ms1", "MS1").replace("Ms2", "MS2"),
+                  type: metadata_type.charAt(0).toUpperCase() + metadata_type.slice(1),
+                  value: "",
+                  modifiers: [],
+                  hidden: true,
+                  column_position: 0,
+                  stored_reagent: null,
+                  id: currentID,
+                  created_at: new Date(),
+                  updated_at: new Date(),
+                  not_applicable: false,
+                  mandatory: false,
+                  auto_generated: false,
+                  readonly: false
+                };
+                currentID++
+                hidden_metadata.push(metadata);
+                h_headers.push(metadata.name);
               }
-              if (metadata_name == "organism part") {
-                metadata_name = "tissue";
-              }
-              const metadata: MetadataColumn = {
-                name: metadata_name.charAt(0).toUpperCase() + metadata_name.slice(1),
-                type: metadata_type.charAt(0).toUpperCase() + metadata_type.slice(1),
-                value: "",
-                modifiers: [],
-                hidden: true,
-                column_position: 0,
-                stored_reagent: null,
-                id: currentID,
-                created_at: new Date(),
-                updated_at: new Date(),
-                not_applicable: false,
-                mandatory: false,
-                auto_generated: false,
-                readonly: false
-              };
-              currentID++
-              hidden_metadata.push(metadata);
-              h_headers.push(metadata.name);
             }
           });
         }
@@ -1880,13 +2032,33 @@ export class MetadataService {
       }
     }
     let combined_metadata: MetadataColumn[] = main_metadata.concat(hidden_metadata)
-    console.log(fin_data)
+
     for (let i = 0; i< combined_metadata.length; i++ ) {
       const metadata_value_map: any = {}
-      console.log(metadata_value_map)
+      if (combined_metadata[i].readonly) {
+        if (user_metadata_field_map[combined_metadata[i].type]) {
+          if (user_metadata_field_map[combined_metadata[i].type][combined_metadata[i].name]) {
+            const m = user_metadata_field_map[combined_metadata[i].type][combined_metadata[i].name].find((m: MetadataColumn) => m.id === combined_metadata[i].id)
+            if (m) {
+              user_metadata_field_map[combined_metadata[i].type][combined_metadata[i].name] = user_metadata_field_map[combined_metadata[i].type][combined_metadata[i].name].filter((m: MetadataColumn) => m.id !== combined_metadata[i].id)
+              result.user_metadata.push(combined_metadata[i])
+              continue
+            }
 
+          }
+        }
+        if (staff_metadata_field_map[combined_metadata[i].type]) {
+          if (staff_metadata_field_map[combined_metadata[i].type][combined_metadata[i].name]) {
+            const m = staff_metadata_field_map[combined_metadata[i].type][combined_metadata[i].name].find((m: MetadataColumn) => m.id === combined_metadata[i].id)
+            if (m) {
+              staff_metadata_field_map[combined_metadata[i].type][combined_metadata[i].name] = staff_metadata_field_map[combined_metadata[i].type][combined_metadata[i].name].filter((m: MetadataColumn) => m.id !== combined_metadata[i].id)
+              result.staff_metadata.push(staff_metadata[i])
+              continue
+            }
+          }
+        }
+      }
       for (let j = 0; j < sample_number; j++) {
-        console.log(fin_data[j][i])
         const metadata_name = combined_metadata[i].name.toLowerCase()
         let value = ""
         if (!fin_data[j][i]) {
@@ -2000,7 +2172,7 @@ export class MetadataService {
 
   async export_metadata_to_sdrf(user_metadata: MetadataColumn[], staff_metadata: MetadataColumn[], sample_number: number, user_id: number = 0, service_lab_group_id: number = 0) {
     const metadata = user_metadata.concat(staff_metadata)
-    const result = await this.sort_metadata(metadata, sample_number)
+    const [result, _] = await this.sort_metadata(metadata, sample_number)
     const headers = result[0]
     const data = result.slice(1)
     for (let i = 0; i < headers.length; i++) {
@@ -2090,7 +2262,7 @@ export class MetadataService {
       }
 
       const metadata: MetadataColumn = {
-        name: metadata_name.charAt(0).toUpperCase() + metadata_name.slice(1),
+        name: (metadata_name.charAt(0).toUpperCase() + metadata_name.slice(1)).replace("Ms1", "MS1").replace("Ms2", "MS2"),
         type: metadata_type.charAt(0).toUpperCase() + metadata_type.slice(1),
         value: "",
         modifiers: [],
