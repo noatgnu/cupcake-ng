@@ -362,7 +362,7 @@ export class MetadataPlaygroundComponent {
   }
 
   exportFile(file_type: string) {
-    if (this.selectedRow) {
+    if (this.selectedRow && this.form.value.sample_number) {
       if (file_type === "injection") {
 
         if (this.form.value.injection_volume) {
