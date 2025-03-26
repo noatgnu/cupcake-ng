@@ -42,7 +42,7 @@
           return entry.name
         })
         resource_count += data.length
-        loadList.innerHTML = `Loaded ${resource_count} resources`
+        loadList.innerHTML = `Loaded ${resource_count} resources...`
       }
 
       observer.observe({ type: 'resource', buffered: true });
