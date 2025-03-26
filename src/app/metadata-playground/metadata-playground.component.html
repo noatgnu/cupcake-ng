@@ -117,6 +117,12 @@
         </div>
       </div>
       <div ngbDropdown class="d-flex gap-2">
+        <button class="btn btn-secondary" ngbDropdownToggle><i class="bi bi-download"></i> Instrument File</button>
+        <div ngbDropdownMenu>
+          <button ngbDropdownItem (click)="exportFile('injection')">Randomized Injection</button>
+        </div>
+      </div>
+      <div ngbDropdown class="d-flex gap-2">
         <button class="btn btn-primary" ngbDropdownToggle>SDRF</button>
         <div ngbDropdownMenu>
           <button ngbDropdownItem (click)="exportMetadataSDRF()">Export</button>
@@ -125,7 +131,7 @@
       </div>
       <div ngbDropdown display="dynamic" class="d-inline-black">
         <button class="btn btn-primary" id="addMetadata" ngbDropdownToggle>
-          + User Metadata
+          + User Columns
         </button>
         <div ngbDropdownMenu aria-labelledby="addMetadata">
           @for (m of metadata.userMetadataTemplate; track m.name) {
@@ -143,7 +149,7 @@
       </div>
       <div ngbDropdown display="dynamic" class="d-inline-black">
         <button class="btn btn-warning" id="addStaffMetadata" ngbDropdownToggle>
-          + Staff Metadata
+          + Staff Columns
         </button>
         <div ngbDropdownMenu aria-labelledby="addStaffMetadata">
           @for (m of metadata.staffMetadataSpecific; track m) {
@@ -173,6 +179,10 @@
       <div class="form-group">
         <label>Sample Number</label>
         <input class="form-control" type="number" formControlName="sample_number">
+      </div>
+      <div class="form-group">
+        <label>Injection Volume (uL)</label>
+        <input class="form-control" type="number" formControlName="injection_volume">
       </div>
       <div class="form-check">
         <input class="form-check-input" type="checkbox" formControlName="show_hidden">

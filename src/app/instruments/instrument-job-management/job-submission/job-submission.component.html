@@ -281,7 +281,7 @@
           @if (userCanEdit) {
             <div ngbDropdown display="dynamic" class="d-inline-black">
               <button class="btn btn-primary" ngbDropdownToggle>
-                + User Column
+                + User Columns
               </button>
               <div ngbDropdownMenu aria-labelledby="addMetadata">
                 @for (m of metadataService.userMetadataTemplate; track m.name) {
@@ -302,7 +302,7 @@
             @if (job.status === "submitted") {
               <div ngbDropdown display="dynamic" class="d-inline-black">
                 <button class="btn btn-primary" ngbDropdownToggle>
-                  + User Column
+                  + User Columns
                 </button>
                 <div ngbDropdownMenu aria-labelledby="addMetadata">
                   @for (m of metadataService.userMetadataTemplate; track m.name) {
@@ -321,7 +321,7 @@
             }
             <div ngbDropdown display="dynamic" class="d-inline-black">
               <button class="btn btn-warning" ngbDropdownToggle>
-                + Staff Column
+                + Staff Columns
               </button>
               <div ngbDropdownMenu aria-labelledby="addStaffMetadata">
                 @for (m of metadataService.staffMetadataSpecific; track m) {
@@ -668,7 +668,7 @@
 
           <div ngbDropdown display="dynamic" class="d-inline-black">
             <button class="btn btn-primary" id="addMetadata" ngbDropdownToggle>
-              + User Column
+              + User Columns
             </button>
             <div ngbDropdownMenu aria-labelledby="addMetadata">
               @for (m of metadataService.userMetadataTemplate; track m.name) {
@@ -693,7 +693,7 @@
             <button class="btn btn-warning" (click)="update()">Update</button>
             <div ngbDropdown display="dynamic" class="d-inline-black">
               <button class="btn btn-primary" id="addMetadataStaff" ngbDropdownToggle>
-                + User Column
+                + User Columns
               </button>
               <div ngbDropdownMenu aria-labelledby="addMetadata">
                 @for (m of metadataService.userMetadataTemplate; track m.name) {
@@ -712,7 +712,7 @@
           }
           <div ngbDropdown display="dynamic" class="d-inline-black">
             <button class="btn btn-warning" id="addStaffMetadata" ngbDropdownToggle>
-              + Staff Metadata
+              + Staff Columns
             </button>
             <div ngbDropdownMenu aria-labelledby="addStaffMetadata">
               @for (m of metadataService.staffMetadataSpecific; track m) {

@@ -51,6 +51,7 @@ export class MetadataPlaygroundComponent {
     searchTableTerm: [""],
     sample_number: [10],
     show_hidden: this.fb.control<boolean>(false),
+    injection_volume: [0],
   })
 
   metadataTableTemplateQuery: MetadataTableTemplateQuery|undefined = undefined;
@@ -357,6 +358,41 @@ export class MetadataPlaygroundComponent {
       }
       this.missingColumns = this.metadata.checkMissingColumnMetadata(this.selectedRow.user_columns, this.selectedRow.staff_columns)
       this.recalculateHiddenColumns()
+    }
+  }
+
+  exportFile(file_type: string) {
+    if (file_type === "injection") {
+      if (this.form.value.injection_volume) {
+        let dataFileCol = this.job.user_metadata.find((m) => m.name === "Data file")
+        if (!dataFileCol) {
+          dataFileCol = this.job.staff_metadata.find((m) => m.name === "Data file")
+        }
+        let positionCol = this.job.user_metadata.find((m) => m.name === "Position")
+        if (!positionCol) {
+          positionCol = this.job.staff_metadata.find((m) => m.name === "Position")
+        }
+        if (dataFileCol && positionCol) {
+          const result = this.metadata.convertInjectionFile(dataFileCol, positionCol, this.form.value.injection_volume, this.form.value.sample_number)
+          // download file
+          const blob = new Blob([result], { type: 'text/plain' });
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'injection_list.tsv';
+          a.click();
+          window.URL.revokeObjectURL(url);
+        } else {
+          if (!dataFileCol) {
+            this.toast.show("Injection List", "Data file column not found")
+          }
+          if (!positionCol) {
+            this.toast.show("Injection List", "Position column not found")
+          }
+        }
+      } else {
+        this.toast.show("Injection List", "Injection volume not set")
+      }
     }
   }
 }
