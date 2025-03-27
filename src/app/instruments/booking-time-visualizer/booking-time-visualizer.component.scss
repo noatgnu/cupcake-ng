@@ -20,6 +20,12 @@
   background-color: #ff0000;
   color: white;
 }
+
+.custom-day.hasMaintenance {
+  background-color: rgb(236, 131, 131);
+  color: white;
+}
+
 :host ::ng-deep .ngb-dp-day, :host ::ng-deep .ngb-dp-weekday {
   width: 2rem !important;
   height: 2rem !important;
@@ -27,7 +33,10 @@
 
 .custom-day.focused.hasUsage,
 .custom-day.range.hasUsage,
-.custom-day.faded.hasUsage {
+.custom-day.faded.hasUsage,
+.custom-day.focused.hasMaintenance,
+.custom-day.range.hasMaintenance,
+.custom-day.faded.hasMaintenance {
   background-color: rgba(146, 9, 207, 0.63);
   color: white;
 }

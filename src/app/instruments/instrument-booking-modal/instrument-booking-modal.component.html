@@ -133,6 +133,11 @@
 
 </div>
 <div class="modal-footer">
-  <button type="button" class="btn btn-secondary" (click)="submit()">Submit</button>
+  @if (hasMaintenance) {
+    <ngb-alert type="danger" [dismissible]="false">
+      This booking overlaps with maintenance schedule for the instrument and can't be submitted. Please adjust the booking time.
+    </ngb-alert>
+  }
+  <button type="button" class="btn btn-secondary" (click)="submit()" [disabled]="hasMaintenance">Submit</button>
   <button type="button" class="btn btn-primary" (click)="cancel()">Close</button>
 </div>

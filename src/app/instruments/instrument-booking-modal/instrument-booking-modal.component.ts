@@ -1,6 +1,6 @@
 import {AfterViewInit, Component, Input, OnInit} from '@angular/core';
 import {Instrument, InstrumentQuery, InstrumentUsage, InstrumentUsageQuery} from "../../instrument";
-import {NgbActiveModal, NgbTypeahead} from "@ng-bootstrap/ng-bootstrap";
+import {NgbActiveModal, NgbAlert, NgbTypeahead} from "@ng-bootstrap/ng-bootstrap";
 import {WebService} from "../../web.service";
 import {FormBuilder, FormsModule, ReactiveFormsModule, Validators} from "@angular/forms";
 import {ToastService} from "../../toast.service";
@@ -12,13 +12,14 @@ import {AccountsService} from "../../accounts/accounts.service";
 
 @Component({
     selector: 'app-instrument-booking-modal',
-    imports: [
-        ReactiveFormsModule,
-        NgbTypeahead,
-        BookingTimeVisualizerComponent,
-        FormsModule,
-        DatePipe
-    ],
+  imports: [
+    ReactiveFormsModule,
+    NgbTypeahead,
+    BookingTimeVisualizerComponent,
+    FormsModule,
+    DatePipe,
+    NgbAlert
+  ],
     templateUrl: './instrument-booking-modal.component.html',
     styleUrl: './instrument-booking-modal.component.scss'
 })
@@ -45,6 +46,7 @@ export class InstrumentBookingModalComponent implements OnInit, AfterViewInit{
 
   usageDescription: string = ""
   maintenance: boolean = false
+  hasMaintenance: boolean = false
 
   constructor(private activeModal: NgbActiveModal, private web: WebService, private fb: FormBuilder, private toastService: ToastService, public dataService: DataService, private instrumentService: InstrumentService, public accounts: AccountsService) {
 
@@ -98,8 +100,9 @@ export class InstrumentBookingModalComponent implements OnInit, AfterViewInit{
 
   }
 
-  handleSelectedRange(range: {started: Date, ended: Date}) {
+  handleSelectedRange(range: {started: Date, ended: Date, hasMaintenance: boolean}) {
     this.selectedRange = range
+    this.hasMaintenance = range.hasMaintenance
     console.log(this.selectedRange)
   }
 

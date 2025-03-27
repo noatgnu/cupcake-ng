@@ -14,6 +14,7 @@
       <ng-template #t let-date let-focused="focused">
       <span
         class="custom-day"
+        [class.hasMaintenance]="hasInstrumentUsageMaintenance(date)"
         [class.hasUsage]="hasInstrumentUsage(date)"
         [class.focused]="focused"
         [class.range]="isRange(date)"
