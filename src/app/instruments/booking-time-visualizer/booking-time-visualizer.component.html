@@ -29,9 +29,15 @@
         <p>
           @if (fromDate) {
             Calendar Selected Start Date: {{fromDate.year}}.{{fromDate.month}}.{{fromDate.day}}<br>
+            @if (requiredApprovalMaxDaysAhead) {
+              <span class="text-danger">Warning: Start date is further than instrument max booking ahead. (required approval)</span><br>
+            }
           }
           @if (toDate) {
-            Calendar Selected End Date: {{toDate.year}}.{{toDate.month}}.{{toDate.day}}
+            Calendar Selected End Date: {{toDate.year}}.{{toDate.month}}.{{toDate.day}}<br>
+            @if (requiredApprovalMaxDaysDuration) {
+              <span class="text-danger">Warning: Duration is longer than instrument max days. (required approval)</span><br>
+            }
           }
         </p>
       </div>

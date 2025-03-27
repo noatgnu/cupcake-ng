@@ -69,6 +69,8 @@ export class BookingTimeVisualizerComponent implements OnInit, AfterViewInit,  A
   padding = 0
   current = new Date().setHours(0, 0, 0, 0)
   timeBlocks: Date[] = []
+  requiredApprovalMaxDaysAhead = false
+  requiredApprovalMaxDaysDuration = false
   @ViewChild('dp') dp!: NgbDatepicker
 
   private _dateBeforeCurrent = new Date(this.current - 24 * 60 * 60 * 1000)
@@ -533,11 +535,14 @@ export class BookingTimeVisualizerComponent implements OnInit, AfterViewInit,  A
   onDateSelection(date: NgbDate) {
     if (!this.fromDate && !this.toDate) {
       this.fromDate = date;
+      this.requiredApprovalMaxDaysAhead = this.checkingStartDateIfFurtherThanInstrumentMaxAhead(new Date(date.year, date.month - 1, date.day))
     } else if (this.fromDate && !this.toDate && date.after(this.fromDate)) {
       this.toDate = date;
+      this.requiredApprovalMaxDaysDuration = this.checkingIfDurationIsLongerThanInstrumentMaxDays(new Date(this.fromDate.year, this.fromDate.month - 1, this.fromDate.day), new Date(date.year, date.month - 1, date.day))
     } else {
       this.toDate = null;
       this.fromDate = date;
+      this.requiredApprovalMaxDaysAhead = this.checkingStartDateIfFurtherThanInstrumentMaxAhead(new Date(date.year, date.month - 1, date.day))
     }
     if (this.fromDate && this.toDate) {
       // get bookings between the selected date range
@@ -723,5 +728,38 @@ export class BookingTimeVisualizerComponent implements OnInit, AfterViewInit,  A
         });
       }
     })
+  }
+
+  checkingStartDateIfFurtherThanInstrumentMaxAhead(date: Date) {
+    if (this.instrument) {
+      if (this.instrument.max_days_ahead_pre_approval === 0) {
+        return false
+      }
+      const maxDaysAhead = this.instrument.max_days_ahead_pre_approval
+      // check if the date is further than the max days ahead, the calculation should be at days level
+      const currentDate = new Date()
+      const dateToCheck = new Date(date)
+      const diff = dateToCheck.getTime() - currentDate.getTime()
+      const diffInDays = diff / (1000 * 3600 * 24)
+      if (diffInDays > maxDaysAhead) {
+        return true
+      }
+    }
+    return false
+  }
+
+  checkingIfDurationIsLongerThanInstrumentMaxDays(start: Date, end: Date) {
+    if (this.instrument.max_days_within_usage_pre_approval === 0) {
+      return false
+    }
+    if (this.instrument) {
+      const maxDays = this.instrument.max_days_within_usage_pre_approval
+      const diff = end.getTime() - start.getTime()
+      const diffInDays = diff / (1000 * 3600 * 24)
+      if (diffInDays > maxDays) {
+        return true
+      }
+    }
+    return false
   }
 }
