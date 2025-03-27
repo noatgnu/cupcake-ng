@@ -87,22 +87,23 @@
                   }
 
                 </td>
-                <td class="d-flex gap-2">
-                  @if (accounts.is_staff || dataService.instrumentPermissions[instrument.id]['can_manage']) {
-                    <div ngbDropdown class="d-inline-block">
-                      <button class="btn btn-sm btn-warning" id="bookingDropdownDelay" ngbDropdownToggle><i class="bi bi-clock-history"></i></button>
-                      <div ngbDropdownMenu aria-labelledby="bookingDropdownDelay">
-                        <button ngbDropdownItem (click)="delayUsage(booking, 1)" ngbTooltip="Delay booking usage">Delay by 1 day</button>
-                        <button ngbDropdownItem (click)="delayUsage(booking, 3)" ngbTooltip="Delay booking usage">Delay by 3 day</button>
-                        <button ngbDropdownItem (click)="delayUsage(booking, 7)" ngbTooltip="Delay booking usage">Delay by 7 day</button>
+                <td>
+                  <div class="d-flex gap-2">
+                    @if (accounts.is_staff || dataService.instrumentPermissions[instrument.id]['can_manage']) {
+                      <div ngbDropdown class="d-inline-block">
+                        <button class="btn btn-sm btn-warning" id="bookingDropdownDelay" ngbDropdownToggle><i class="bi bi-clock-history"></i></button>
+                        <div ngbDropdownMenu aria-labelledby="bookingDropdownDelay">
+                          <button ngbDropdownItem (click)="delayUsage(booking, 1)" ngbTooltip="Delay booking usage">Delay by 1 day</button>
+                          <button ngbDropdownItem (click)="delayUsage(booking, 3)" ngbTooltip="Delay booking usage">Delay by 3 day</button>
+                          <button ngbDropdownItem (click)="delayUsage(booking, 7)" ngbTooltip="Delay booking usage">Delay by 7 day</button>
+                        </div>
                       </div>
-                    </div>
+                    }
+                    @if (accounts.is_staff || dataService.instrumentPermissions[instrument.id]['can_manage']) {
+                      <button class="btn btn-sm btn-danger" (click)="removeBooking(booking)"><i class="bi bi-trash"></i></button>
+                    }
+                  </div>
 
-                  }
-                  @if (accounts.is_staff) {
-
-                    <button class="btn btn-sm btn-danger" (click)="removeBooking(booking)"><i class="bi bi-trash"></i></button>
-                  }
                 </td>
               </tr>
             }
