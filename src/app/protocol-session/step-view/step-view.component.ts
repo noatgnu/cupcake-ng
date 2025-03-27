@@ -543,8 +543,8 @@ export class StepViewComponent {
 
     } else if (item === "Instrument") {
       const ref = this.modal.open(InstrumentBookingModalComponent, {scrollable: true})
-      ref.closed.subscribe((data: {instrument: Instrument, selectedRange: {started: Date |undefined, ended: Date | undefined}, usageDescription: string}) => {
-        this.web.createInstrumentUsageAnnotation(this.dataService.currentSession?.unique_id, data.instrument.id, data.selectedRange.started, data.selectedRange.ended, this._currentStep?.id, data.usageDescription).subscribe((data: any) => {
+      ref.closed.subscribe((data: {instrument: Instrument, selectedRange: {started: Date |undefined, ended: Date | undefined}, usageDescription: string, maintenance: boolean}) => {
+        this.web.createInstrumentUsageAnnotation(this.dataService.currentSession?.unique_id, data.instrument.id, data.selectedRange.started, data.selectedRange.ended, this._currentStep?.id, data.usageDescription, undefined, null, null, data.maintenance).subscribe((data: any) => {
           this.toastService.show('Annotation', 'Instrument Booking Saved Successfully')
           this.refreshAnnotations();
         })

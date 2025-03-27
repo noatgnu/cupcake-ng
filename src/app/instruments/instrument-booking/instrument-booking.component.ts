@@ -83,9 +83,9 @@ export class InstrumentBookingComponent {
       const ref = this.modal.open(InstrumentBookingModalComponent, {scrollable: true, backdrop: "static", size: "lg"})
       ref.componentInstance.selectedInstrument = instrument
       ref.componentInstance.enableSearch = false
-      ref.closed.subscribe((data: {instrument: Instrument, selectedRange: {started: Date |undefined, ended: Date | undefined}, usageDescription: string}) => {
+      ref.closed.subscribe((data: {instrument: Instrument, selectedRange: {started: Date |undefined, ended: Date | undefined}, usageDescription: string, maintenance: boolean}) => {
         // @ts-ignore
-        this.web.createInstrumentUsage(data.instrument.id, data.selectedRange.started, data.selectedRange.ended, data.usageDescription).subscribe((data) => {
+        this.web.createInstrumentUsage(data.instrument.id, data.selectedRange.started, data.selectedRange.ended, data.usageDescription, data.maintenance).subscribe((data) => {
           this.instrumentService.updateTrigger.next(true)
           this.toastService.show("Instrument booking", "Successfully booked instrument")
         }, (error) => {

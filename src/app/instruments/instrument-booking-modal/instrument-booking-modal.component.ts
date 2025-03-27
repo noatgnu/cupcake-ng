@@ -8,6 +8,7 @@ import {BookingTimeVisualizerComponent} from "../booking-time-visualizer/booking
 import {DataService} from "../../data.service";
 import {InstrumentService} from "../instrument.service";
 import {DatePipe} from "@angular/common";
+import {AccountsService} from "../../accounts/accounts.service";
 
 @Component({
     selector: 'app-instrument-booking-modal',
@@ -43,8 +44,9 @@ export class InstrumentBookingModalComponent implements OnInit, AfterViewInit{
   selectedRange: {started: Date|undefined, ended: Date|undefined} = {started: undefined, ended: undefined}
 
   usageDescription: string = ""
+  maintenance: boolean = false
 
-  constructor(private activeModal: NgbActiveModal, private web: WebService, private fb: FormBuilder, private toastService: ToastService, public dataService: DataService, private instrumentService: InstrumentService) {
+  constructor(private activeModal: NgbActiveModal, private web: WebService, private fb: FormBuilder, private toastService: ToastService, public dataService: DataService, private instrumentService: InstrumentService, public accounts: AccountsService) {
 
 
   }
@@ -106,7 +108,8 @@ export class InstrumentBookingModalComponent implements OnInit, AfterViewInit{
     this.activeModal.close({
       instrument: this.selectedInstrument,
       selectedRange: this.selectedRange,
-      usageDescription: this.usageDescription
+      usageDescription: this.usageDescription,
+      maintenance: this.maintenance
     })
   }
 

@@ -118,6 +118,14 @@
           <label for="bookingDescription">Booking Description</label>
           <textarea class="form-control" [(ngModel)]="usageDescription" id="bookingDescription" style="height: 150px"></textarea>
         </div>
+        @if (dataService.instrumentPermissions[selectedInstrument.id]) {
+          @if (accounts.is_staff|| dataService.instrumentPermissions[selectedInstrument.id].can_manage) {
+            <div class="form-check">
+              <input type="checkbox" class="form-check-input" [(ngModel)]="maintenance">
+              <label class="form-check-label">This is a booking for instrument maintenance purpose</label>
+            </div>
+          }
+        }
       </div>
     }
 

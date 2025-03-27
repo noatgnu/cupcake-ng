@@ -29,6 +29,8 @@ export interface InstrumentUsage {
   time_ended: Date;
   user: string;
   approved: boolean;
+  maintenance: boolean;
+  approved_by: number|null;
 }
 
 export interface InstrumentUsageQuery {

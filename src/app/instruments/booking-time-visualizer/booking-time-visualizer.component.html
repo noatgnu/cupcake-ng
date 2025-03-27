@@ -65,7 +65,7 @@
           <tbody>
           @if (instrumentUsageQuery) {
             @for (booking of instrumentUsageQuery.results; track booking.id) {
-              <tr>
+              <tr [class.table-danger]="booking.maintenance">
                 <td>{{booking.created_at | date: 'short'}}</td>
                 <td>{{booking.time_started | date: 'short'}}</td>
                 <td>{{booking.time_ended | date: 'short'}}</td>

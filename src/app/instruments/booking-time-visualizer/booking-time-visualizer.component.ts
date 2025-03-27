@@ -391,25 +391,30 @@ export class BookingTimeVisualizerComponent implements OnInit, AfterViewInit,  A
     const positionInTime = this.convertPixelToTime(event.offsetX)
 
     // check if the position is within an existing instrumentUsage block
-    for (const usage of this.instrumentUsageQuery!.results) {
-      if (positionInTime.getTime() >= usage.time_started.getTime() && positionInTime.getTime() <= usage.time_ended.getTime()) {
-        if (this.enableDelete && this.enableEdit && usage.user === this.accounts.username) {
-
-          this.toastService.show("Instrument Usage", "Selected instrument usage block")
-          this.selectedUsageBlock.emit(usage)
-        } else {
-          if (!this.dataService.serverSettings.allow_overlap_bookings) {
-            this.toastService.show("This time is already booked", "Please select another time")
-          } else {
-            this.selectedUsageBlock.emit(usage)
-          }
-
-
-        }
-        return
+    const overLappingUsage = this.instrumentUsageQuery!.results.filter(usage => {
+      if (usage.time_started && usage.time_ended) {
+        return positionInTime.getTime() >= usage.time_started.getTime() && positionInTime.getTime() <= usage.time_ended.getTime()
       }
+      return false
+    })
+    const hasMaintenance = overLappingUsage.filter(usage => usage.maintenance)
+    if (hasMaintenance.length > 0) {
+      this.toastService.show("Instrument Usage", "This time is blocked for maintenance")
+      return
     }
-
+    if (overLappingUsage.length > 0) {
+      if (this.enableDelete && this.enableEdit && (overLappingUsage[0].user === this.accounts.username||this.accounts.is_staff)) {
+        this.toastService.show("Instrument Usage", "Selected instrument usage block")
+        this.selectedUsageBlock.emit(overLappingUsage[0])
+      } else {
+        if (!this.dataService.serverSettings.allow_overlap_bookings) {
+          this.toastService.show("This time is already booked", "Please select another time")
+        } else {
+          this.selectedUsageBlock.emit(overLappingUsage[0])
+        }
+      }
+      return
+    }
 
     if (!this.selected) {
       this.dragStart = event.offsetX
@@ -732,34 +737,22 @@ export class BookingTimeVisualizerComponent implements OnInit, AfterViewInit,  A
 
   checkingStartDateIfFurtherThanInstrumentMaxAhead(date: Date) {
     if (this.instrument) {
-      if (this.instrument.max_days_ahead_pre_approval === 0) {
-        return false
-      }
-      const maxDaysAhead = this.instrument.max_days_ahead_pre_approval
-      // check if the date is further than the max days ahead, the calculation should be at days level
-      const currentDate = new Date()
-      const dateToCheck = new Date(date)
-      const diff = dateToCheck.getTime() - currentDate.getTime()
-      const diffInDays = diff / (1000 * 3600 * 24)
-      if (diffInDays > maxDaysAhead) {
-        return true
-      }
+      const maxDaysAhead = this.instrument.max_days_ahead_pre_approval;
+      const currentDate = new Date();
+      const diffInDays = Math.ceil((date.getTime() - currentDate.getTime()) / (1000 * 3600 * 24));
+
+      return diffInDays > maxDaysAhead && maxDaysAhead !== 0;
     }
-    return false
+    return false;
   }
 
   checkingIfDurationIsLongerThanInstrumentMaxDays(start: Date, end: Date) {
-    if (this.instrument.max_days_within_usage_pre_approval === 0) {
-      return false
-    }
     if (this.instrument) {
-      const maxDays = this.instrument.max_days_within_usage_pre_approval
-      const diff = end.getTime() - start.getTime()
-      const diffInDays = diff / (1000 * 3600 * 24)
-      if (diffInDays > maxDays) {
-        return true
-      }
+      const maxDays = this.instrument.max_days_within_usage_pre_approval;
+      const durationInDays = Math.ceil((end.getTime() - start.getTime()) / (1000 * 3600 * 24));
+
+      return durationInDays > maxDays && maxDays !== 0;
     }
-    return false
+    return false;
   }
 }

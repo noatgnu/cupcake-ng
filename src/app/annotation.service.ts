@@ -133,8 +133,8 @@ export class AnnotationService {
 
     } else if (item === "Instrument") {
       const ref = this.modal.open(InstrumentBookingModalComponent, {scrollable: true})
-      ref.closed.subscribe((data: {instrument: Instrument, selectedRange: {started: Date |undefined, ended: Date | undefined}, usageDescription: string}) => {
-        this.web.createInstrumentUsageAnnotation(null, data.instrument.id, data.selectedRange.started, data.selectedRange.ended, null, data.usageDescription, instrument_job_id, instrument_user_type).subscribe((data: any) => {
+      ref.closed.subscribe((data: {instrument: Instrument, selectedRange: {started: Date |undefined, ended: Date | undefined}, usageDescription: string, maintenance: boolean}) => {
+        this.web.createInstrumentUsageAnnotation(null, data.instrument.id, data.selectedRange.started, data.selectedRange.ended, null, data.usageDescription, instrument_job_id, instrument_user_type, null, data.maintenance).subscribe((data: any) => {
           this.toastService.show('Annotation', 'Instrument Booking Saved Successfully')
           this.refreshAnnotation.next(true);
         })
