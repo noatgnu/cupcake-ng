@@ -57,6 +57,10 @@
                           <div class="d-flex flex-row gap-1 mt-1">
                             <span>{{u.time_started| date: 'short'}} - {{u.time_ended| date: 'short'}}</span>
                             <span class="badge bg-primary">{{u.user}}</span>
+                            <span class="badge bg-secondary">{{u.approved ? 'Approved' : 'Pending'}}</span>
+                            @if (u.maintenance) {
+                              <span class="badge bg-danger">Maintenance</span>
+                            }
                           </div>
                         }
                       </div>
