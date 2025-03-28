@@ -6,13 +6,27 @@
   </h5>
 </div>
 <div class="modal-body">
-  @if (annotationQuery) {
-    @for (a of annotationQuery.results; track a.id) {
-      @if (dataService.annotationPermissions[a.id]) {
-        <app-annotation-file [annotation]="a"></app-annotation-file>
+  <div class="d-flex gap-2 flex-column">
+    @if (annotationQuery) {
+      @for (a of annotationQuery.results; track a.id) {
+        @if (dataService.annotationPermissions[a.id]) {
+          <app-annotation-file [annotation]="a"></app-annotation-file>
+        }
       }
+      <ngb-pagination
+        [collectionSize]="annotationQuery.count"
+        [(page)]="currentAnnotationPage"
+        [pageSize]="pageSize"
+        [maxSize]="5"
+        [ellipses]="false"
+        [boundaryLinks]="true"
+        (pageChange)="handlePageChange($event)"
+        [rotate]="true"
+        [disabled]="annotationQuery.count === 0"
+      ></ngb-pagination>
     }
-  }
+  </div>
+
 </div>
 <div class="modal-footer">
   <button class="btn btn-secondary" (click)="close()">Close</button>

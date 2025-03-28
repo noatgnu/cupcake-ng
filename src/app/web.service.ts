@@ -872,8 +872,10 @@ export class WebService {
     )
   }
 
-  getAnnotationInFolder(folder_id: number) {
+  getAnnotationInFolder(folder_id: number, limit: number = 5, offset: number = 0) {
     let params = new HttpParams().set('folder', folder_id.toString())
+    params = params.set('limit', limit.toString())
+    params = params.set('offset', offset.toString())
     return this.http.get<AnnotationQuery>(
       `${this.baseURL}/api/annotation/get_annotation_in_folder/`,
       {responseType: 'json', observe: 'body', params: params}
