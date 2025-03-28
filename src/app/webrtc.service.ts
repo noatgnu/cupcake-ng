@@ -78,8 +78,8 @@ export class WebrtcService {
         urls: urls,
         //username: credential?.username,
         //credential: credential?.password
-        username: "testuser",
-        credential: "testuser"
+        //username: "testuser",
+        //credential: "testuser"
       })
     }
     const configuration: RTCConfiguration = {

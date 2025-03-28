@@ -1,4 +1,5 @@
 import {MetadataColumn} from "./metadata-column";
+import {AnnotationFolder} from "./annotation";
 
 export interface Instrument {
   id: number;
@@ -10,6 +11,7 @@ export interface Instrument {
   metadata_columns: MetadataColumn[];
   max_days_within_usage_pre_approval: number;
   max_days_ahead_pre_approval: number;
+  annotation_folders: AnnotationFolder[];
 }
 
 export interface InstrumentQuery {
