@@ -925,7 +925,13 @@ export class WebService {
     )
   }
   bindUploadedFile(session_id: string|undefined|null, upload_id: string, file_name: string, annotation_name: string, step: number = 0, folder: number = 0, instrument_job_id: number|null|undefined = null, instrument_user_type: null|'user_annotation'|'staff_annotation' = null, stored_reagent_id: number|null = null) {
-    const payload: any = {upload_id: upload_id, file_name: file_name, annotation_name: annotation_name, step: step, folder: folder}
+    const payload: any = {upload_id: upload_id, file_name: file_name, annotation_name: annotation_name}
+    if (step !== 0) {
+      payload['step'] = step
+    }
+    if (folder !== 0) {
+      payload['folder'] = folder
+    }
     if (session_id) {
       payload['session'] = session_id
     }

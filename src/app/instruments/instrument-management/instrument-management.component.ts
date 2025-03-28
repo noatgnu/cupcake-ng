@@ -3,7 +3,14 @@ import {Instrument, InstrumentQuery} from "../../instrument";
 import {FormBuilder, FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {WebService} from "../../web.service";
 import {DataService} from "../../data.service";
-import {NgbModal, NgbPagination, NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
+import {
+  NgbDropdown, NgbDropdownItem,
+  NgbDropdownMenu,
+  NgbDropdownToggle,
+  NgbModal,
+  NgbPagination,
+  NgbTooltip
+} from "@ng-bootstrap/ng-bootstrap";
 import {InstrumentBookingModalComponent} from "../instrument-booking-modal/instrument-booking-modal.component";
 import {ToastService} from "../../toast.service";
 import {AccountsService} from "../../accounts/accounts.service";
@@ -14,15 +21,22 @@ import {
 } from "../instrument-metadata-management-modal/instrument-metadata-management-modal.component";
 import {DelayUsageModalComponent} from "./delay-usage-modal/delay-usage-modal.component";
 import {InstrumentEditorModalComponent} from "./instrument-editor-modal/instrument-editor-modal.component";
+import {AnnotationFolder} from "../../annotation";
+import {AnnotationFolderModalComponent} from "../../annotation-folder-modal/annotation-folder-modal.component";
+import {UploadLargeFileModalComponent} from "../../upload-large-file-modal/upload-large-file-modal.component";
 
 @Component({
     selector: 'app-instrument-management',
-    imports: [
-        FormsModule,
-        NgbPagination,
-        ReactiveFormsModule,
-        NgbTooltip
-    ],
+  imports: [
+    FormsModule,
+    NgbPagination,
+    ReactiveFormsModule,
+    NgbTooltip,
+    NgbDropdown,
+    NgbDropdownMenu,
+    NgbDropdownToggle,
+    NgbDropdownItem
+  ],
     templateUrl: './instrument-management.component.html',
     styleUrl: './instrument-management.component.scss'
 })
@@ -145,4 +159,13 @@ export class InstrumentManagementComponent {
     })
   }
 
+  openAnnotationFolder(annotation_folder: AnnotationFolder) {
+    const ref = this.modal.open(AnnotationFolderModalComponent)
+    ref.componentInstance.folder = annotation_folder
+  }
+
+  addFileToAnnotationFolder(annotation_folder: AnnotationFolder) {
+    const ref = this.modal.open(UploadLargeFileModalComponent)
+    ref.componentInstance.folder_id = annotation_folder.id
+  }
 }

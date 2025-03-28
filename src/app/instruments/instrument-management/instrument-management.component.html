@@ -32,6 +32,11 @@
             <div class="d-flex flex-row">
               <div class="d-flex flex-row flex-grow-1 gap-1">
                 @if (dataService.instrumentPermissions[result.id]) {
+                  @if (dataService.instrumentPermissions[result.id]['can_view']) {
+                    <i class="bi bi-eye"></i>
+                  } @else {
+                    <i class="bi bi-eye text-danger"></i>
+                  }
                   @if (dataService.instrumentPermissions[result.id]['can_manage']) {
                     <i class="bi bi-pencil"></i>
                   } @else {
@@ -39,13 +44,34 @@
                   }
                 }
               </div>
-              <div class="d-flex flex-grow flex-grow-0">
-                <button class="btn btn-sm btn-outline-warning" (click)="delayUsage(result)" ngbTooltip="Delay all booking usages from specific start day by a specific number of days"><i class="bi bi-clock-history"></i></button>
-                <button class="btn btn-sm btn-outline-primary" (click)="editInstrument(result)" ngbTooltip="Edit instrument information"><i class="bi bi-pencil-fill"></i></button>
-                <button class="btn btn-sm btn-outline-secondary" (click)="clickInstrument(result)" ngbTooltip="Manage instrument access"><i class="bi bi-people"></i></button>
-                <button class="btn btn-sm btn-outline-secondary" (click)="manageMetadata(result)" ngbTooltip="Manage instrument metadata"><i class="bi bi-database"></i></button>
-              </div>
-
+              @if (dataService.instrumentPermissions[result.id]) {
+                <div class="d-flex flex-grow flex-grow-0 gap-2">
+                  @if (dataService.instrumentPermissions[result.id]['can_view']||dataService.instrumentPermissions[result.id]['can_book']||dataService.instrumentPermissions[result.id]['can_manage']) {
+                    <div ngbDropdown class="d-inline-block">
+                      <button class="btn btn-sm btn-secondary" ngbTooltip="Attaching documents" ngbDropdownToggle id="{{result.id}}instrumentAttachingDoc"><i class="bi bi-file-plus"></i></button>
+                      <div ngbDropdownMenu>
+                        @for (folder of result.annotation_folders; track folder.id) {
+                          <button ngbDropdownItem (click)="addFileToAnnotationFolder(folder)">{{folder.folder_name}}</button>
+                        }
+                      </div>
+                    </div>
+                    <div ngbDropdown class="d-inline-block">
+                      <button class="btn btn-sm btn-secondary" ngbTooltip="View attached documents" ngbDropdownToggle id="{{result.id}}instrumentAttachedDoc"><i class="bi bi-paperclip"></i></button>
+                      <div ngbDropdownMenu>
+                        @for (folder of result.annotation_folders; track folder.id) {
+                          <button ngbDropdownItem (click)="openAnnotationFolder(folder)">{{folder.folder_name}}</button>
+                        }
+                      </div>
+                    </div>
+                  }
+                  @if (dataService.instrumentPermissions[result.id]['can_manage']) {
+                    <button class="btn btn-sm btn-outline-warning" (click)="delayUsage(result)" ngbTooltip="Delay all booking usages from specific start day by a specific number of days"><i class="bi bi-clock-history"></i></button>
+                    <button class="btn btn-sm btn-outline-primary" (click)="editInstrument(result)" ngbTooltip="Edit instrument information"><i class="bi bi-pencil-fill"></i></button>
+                    <button class="btn btn-sm btn-outline-secondary" (click)="clickInstrument(result)" ngbTooltip="Manage instrument access"><i class="bi bi-people"></i></button>
+                    <button class="btn btn-sm btn-outline-secondary" (click)="manageMetadata(result)" ngbTooltip="Manage instrument metadata"><i class="bi bi-database"></i></button>
+                  }
+                </div>
+              }
             </div>
           </div>
         }

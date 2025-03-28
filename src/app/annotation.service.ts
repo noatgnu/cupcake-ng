@@ -12,11 +12,18 @@ import {WebService} from "./web.service";
 import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import {ToastService} from "./toast.service";
 import {Subject} from "rxjs";
-import {AnnotationQuery} from "./annotation";
+import {Annotation, AnnotationQuery} from "./annotation";
 import {
   InstrumentBookingModalComponent
 } from "./instruments/instrument-booking-modal/instrument-booking-modal.component";
 import {Instrument} from "./instrument";
+import {
+  AnnotationMetadataModalComponent
+} from "./protocol-session/annotation-presenter/annotation-metadata-modal/annotation-metadata-modal.component";
+import {
+  AnnotationRenameModalComponent
+} from "./protocol-session/annotation-presenter/annotation-rename-modal/annotation-rename-modal.component";
+import {TranscribeModalComponent} from "./protocol-session/transcribe-modal/transcribe-modal.component";
 
 @Injectable({
   providedIn: 'root'
@@ -329,6 +336,61 @@ export class AnnotationService {
     this.web.deleteAnnotation(annotation_id).subscribe((data: any) => {
       this.toastService.show('Annotation', 'Annotation Deleted Successfully')
       this.refreshAnnotation.next(true);
+    })
+  }
+
+  addMetadata(annotation: Annotation) {
+    const ref = this.modal.open(AnnotationMetadataModalComponent)
+    ref.componentInstance.annotation = annotation
+  }
+
+  scratch(annotation: Annotation) {
+    this.web.scratchAnnotation(annotation.id).subscribe((response: Annotation) => {
+      annotation.scratched = response.scratched
+    })
+  }
+  annotationRename(annotation: Annotation) {
+    const ref = this.modal.open(AnnotationRenameModalComponent)
+    ref.componentInstance.annotation = annotation
+    ref.closed.subscribe((result: string) => {
+      if (result) {
+        this.web.annotationRename(annotation.id, result).subscribe((response: Annotation) => {
+          annotation.annotation_name = response.annotation_name
+        })
+      }
+    })
+  }
+  transcriptSummarize(annotation_id: number) {
+    this.web.transcriptSummarize(annotation_id).subscribe((response: any) => {
+      console.log(response)
+    })
+  }
+  openTranscribeModal(annotation: Annotation) {
+    const ref = this.modal.open(TranscribeModalComponent)
+    ref.componentInstance.annotation = annotation
+    ref.closed.subscribe((result: any) => {
+      if (result["language"]) {
+        this.web.postTranscribeRequest(annotation.id, result["language"], result["model"]).subscribe((response: any) => {
+
+        })
+      }
+    })
+  }
+  ocrAnnotation(annotation: Annotation) {
+    this.web.sketchOCR(annotation.id).subscribe((response: any) => {
+      console.log(response)
+    })
+  }
+
+  download(annotationID: number) {
+    this.web.getSignedURL(annotationID).subscribe((token: any) => {
+      const a = document.createElement('a');
+      a.href = `${this.web.baseURL}/api/annotation/download_signed/?token=${token["signed_token"]}`;
+      a.download = 'download';
+      a.target = '_blank';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
     })
   }
 }
