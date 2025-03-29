@@ -25,12 +25,14 @@ export class DataService {
     use_coturn: boolean,
     use_whisper: boolean,
     allow_overlap_bookings: boolean,
+    default_service_lab_group: string,
   } = {
     use_llm: false,
     use_ocr: false,
     use_coturn: false,
     use_whisper: false,
     allow_overlap_bookings: false,
+    default_service_lab_group: "",
   }
   storedReagentPermissions: {[key: string]: {edit: boolean, view: boolean, delete: boolean}} = {};
   annotationPermissions: {[key: string]: {edit: boolean, view: boolean, delete: boolean}} = {};

@@ -921,7 +921,7 @@ export class WebService {
   }
 
   getServerSettings() {
-    return this.http.get<{use_ocr: boolean, use_llm: boolean, use_whisper: boolean, use_coturn: boolean, allow_overlap_bookings: boolean}>(
+    return this.http.get<{use_ocr: boolean, use_llm: boolean, use_whisper: boolean, use_coturn: boolean, allow_overlap_bookings: boolean, default_service_lab_group: string}>(
       `${this.baseURL}/api/user/get_server_settings/`,
       {responseType: 'json', observe: 'body'}
     )
@@ -1056,13 +1056,16 @@ export class WebService {
     )
   }
 
-  updateInstrument(instrument_id: number, instrument_name: string, instrument_description: string, max_days_ahead: number|undefined|null, max_duration: number|undefined|null) {
+  updateInstrument(instrument_id: number, instrument_name: string, instrument_description: string, max_days_ahead: number|undefined|null, max_duration: number|undefined|null, image: string|undefined|null = undefined) {
     const payload: any = {name: instrument_name, description: instrument_description}
     if (max_days_ahead) {
       payload['max_days_ahead_pre_approval'] = max_days_ahead
     }
     if (max_duration) {
       payload['max_days_within_usage_pre_approval'] = max_duration
+    }
+    if (image) {
+      payload['image'] = image
     }
     return this.http.put<Instrument>(
       `${this.baseURL}/api/instrument/${instrument_id}/`,

@@ -75,6 +75,7 @@ import {
 import {
   SdrfValidationResultsModalComponent
 } from "./sdrf-validation-results-modal/sdrf-validation-results-modal.component";
+import {DataService} from "../../../data.service";
 
 @Component({
     selector: 'app-job-submission',
@@ -153,6 +154,11 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit, OnDestroy 
     this.staffModeAvailable = false
     this.staffDataForm.disable()
     this.protocolForm.disable()
+    if (value.service_lab_group) {
+      this.labGroupForm.controls.name.setValue(value.service_lab_group.name)
+      // @ts-ignore
+      this.labGroupForm.controls.selected.setValue(value.service_lab_group.id)
+    }
     if (value.staff) {
       if (value.staff.length > 0) {
         if (this.accountService.username) {
@@ -353,7 +359,7 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit, OnDestroy 
   });
 
   labGroupQuery: LabGroupQuery | undefined
-  defaultLabGroup: string = 'MS Facility'
+  defaultLabGroup: string = this.dataService.serverSettings.default_service_lab_group
   labGroupUserQuery: UserQuery | undefined
 
   labUserMemberPage = 0
@@ -370,7 +376,7 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit, OnDestroy 
 
   filterTableColumnName: string = ''
 
-  constructor(private offCanvas: NgbOffcanvas, private ws: WebsocketService, public annotationService: AnnotationService, private modal: NgbModal, private fb: FormBuilder, private web: WebService, private toast: ToastService, public metadataService: MetadataService, public accountService: AccountsService) {
+  constructor(private dataService: DataService, private offCanvas: NgbOffcanvas, private ws: WebsocketService, public annotationService: AnnotationService, private modal: NgbModal, private fb: FormBuilder, private web: WebService, private toast: ToastService, public metadataService: MetadataService, public accountService: AccountsService) {
     if (this.ws.instrumentJobWSConnection) {
       this.instrumentJobWebsocketSubscription = this.ws.instrumentJobWSConnection.subscribe((message: any) => {
         if ("signed_value" in message && "instance_id" in message) {

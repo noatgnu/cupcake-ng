@@ -1,0 +1,15 @@
+<div class="modal-header">
+  <h5 class="modal-title">Upload Instrument Image</h5>
+</div>
+<div class="modal-body">
+  <input type="file" (change)="onFileSelected($event)" accept="image/png, image/jpeg">
+  @if (imageSrc) {
+    <div class="alert alert-info mt-2">
+      <img [src]="imageSrc" alt="Instrument Image" style="max-width: 100%; margin-top: 10px;">
+    </div>
+  }
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn btn-primary" (click)="save()">Save</button>
+  <button type="button" class="btn btn-secondary" (click)="close()">Cancel</button>
+</div>

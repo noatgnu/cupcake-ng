@@ -10,27 +10,28 @@
       <div class="list-group mt-2">
         @for (result of instrumentQuery.results; track result.id) {
           <div class="list-group-item list-group-item-action">
-            <div>
-              <b>{{result.instrument_name}}</b>
-            </div>
-            <small>{{result.instrument_description}}</small>
-            <div class="d-flex flex-row">
-              @if (result.metadata_columns.length > 0) {
-                @for (m of result.metadata_columns; track m.id) {
-                  @if (m.type === "Characteristics") {
-                    <span class="badge bg-primary" ngbTooltip="Characteristics">{{m.name}}: {{m.value}}</span>
-                  } @else if (m.type === "Comment") {
-                    <span class="badge bg-secondary" ngbTooltip="Comment">{{m.name}}: {{m.value}}</span>
-                  } @else if (m.type === "Factor value") {
-                    <span class="badge bg-success" ngbTooltip="Factor value">{{m.name}}: {{m.value}}</span>
-                  } @else {
-                    <span class="badge bg-danger" ngbTooltip="Other">{{m.name}}: {{m.value}}</span>
-                  }
+            <div class="d-flex align-items-start">
+              <div class="d-flex justify-content-around">
+                @if (result.image) {
+                  <img [src]="result.image" class="img-thumbnail me-2" alt="Instrument Image" style="width: 50px; height: 50px;">
+                } @else {
                 }
-              }
+                <div class="flex-grow-1">
+                  <div>
+                    <p>
+                      <b>{{result.instrument_name}}</b><br>
+                      <small>{{result.instrument_description}}</small>
+                    </p>
+
+                  </div>
+                </div>
+              </div>
             </div>
             <div class="d-flex flex-row">
-              <div class="d-flex flex-row flex-grow-1 gap-1">
+
+            </div>
+            <div class="d-flex flex-row">
+              <div class="d-flex flex-grow-1 gap-2">
                 @if (dataService.instrumentPermissions[result.id]) {
                   @if (dataService.instrumentPermissions[result.id]['can_view']) {
                     <i class="bi bi-eye"></i>
@@ -41,6 +42,31 @@
                     <i class="bi bi-pencil"></i>
                   } @else {
                     <i class="bi bi-pencil text-danger"></i>
+                  }
+                }
+                @if (result.metadata_columns.length > 0) {
+                  @for (m of result.metadata_columns; track m.id) {
+                    @if (m.type === "Characteristics") {
+                      <div>
+                        <span class="badge bg-primary" ngbTooltip="Characteristics">{{m.name}}: {{m.value}}</span>
+                      </div>
+
+                    } @else if (m.type === "Comment") {
+                      <div>
+                        <span class="badge bg-secondary" ngbTooltip="Comment">{{m.name}}: {{m.value}}</span>
+                      </div>
+
+                    } @else if (m.type === "Factor value") {
+                      <div>
+                        <span class="badge bg-success" ngbTooltip="Factor value">{{m.name}}: {{m.value}}</span>
+                      </div>
+
+                    } @else {
+                      <div>
+                        <span class="badge bg-danger" ngbTooltip="Other">{{m.name}}: {{m.value}}</span>
+                      </div>
+
+                    }
                   }
                 }
               </div>
@@ -64,7 +90,10 @@
                       </div>
                     </div>
                   }
-                  @if (dataService.instrumentPermissions[result.id]['can_manage']) {
+                  @if (dataService.instrumentPermissions[result.id]['can_manage']||accounts.is_staff) {
+                    <button class="btn btn-sm btn-outline-secondary" (click)="openImageModal(result)" ngbTooltip="Upload instrument image">
+                      <i class="bi bi-camera"></i>
+                    </button>
                     <button class="btn btn-sm btn-outline-warning" (click)="delayUsage(result)" ngbTooltip="Delay all booking usages from specific start day by a specific number of days"><i class="bi bi-clock-history"></i></button>
                     <button class="btn btn-sm btn-outline-primary" (click)="editInstrument(result)" ngbTooltip="Edit instrument information"><i class="bi bi-pencil-fill"></i></button>
                     <button class="btn btn-sm btn-outline-secondary" (click)="clickInstrument(result)" ngbTooltip="Manage instrument access"><i class="bi bi-people"></i></button>
@@ -78,9 +107,7 @@
       </div>
       <div class="d-flex flex-row gap-2 mt-2 justify-content-between">
         <ngb-pagination (pageChange)="handlePageChange($event)" [collectionSize]="instrumentQuery.count" [(page)]="currentInstrumentPage" [pageSize]="pageSize" [rotate]="true" [boundaryLinks]="true" />
-
       </div>
-
       <div>
         <b>Legend</b>
         <div class="d-flex flex-column gap-1">

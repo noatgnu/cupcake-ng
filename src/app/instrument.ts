@@ -12,6 +12,7 @@ export interface Instrument {
   max_days_within_usage_pre_approval: number;
   max_days_ahead_pre_approval: number;
   annotation_folders: AnnotationFolder[];
+  image: string|null;
 }
 
 export interface InstrumentQuery {
