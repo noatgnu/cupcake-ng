@@ -76,7 +76,10 @@
                     <option [value]="group.id">{{group.name}}</option>
                   }
                 </select>
-                <small class="form-text text-muted">Select a group to submit the job to</small>
+                <small class="form-text text-muted">Select a group to submit the job to</small><br>
+                @if (selectedGroup) {
+                  <small><b>Currently selected {{selectedGroup.name}}</b></small>
+                }
               </div>
             }
           </div>
