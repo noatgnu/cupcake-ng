@@ -209,8 +209,8 @@
         @if (!job.selected_template) {
           <div>
             <b>Job Template:</b> Not selected<br>
-            <ul ngbNav #templateSelectionNav="ngbNav" class="nav-tabs" [destroyOnHide]="false">
-              @if (job.service_lab_group) {
+            <ul ngbNav #templateSelectionNav="ngbNav" class="nav-tabs" [destroyOnHide]="true">
+              @if (job.service_lab_group && job.service_lab_group.id) {
                 <li [ngbNavItem]="'service_lab_group'">
                   <button ngbNavLink>Group Provided Templates</button>
                   <ng-template ngbNavContent>
