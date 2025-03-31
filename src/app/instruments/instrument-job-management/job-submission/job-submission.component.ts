@@ -155,7 +155,7 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit, OnDestroy 
     this.staffDataForm.disable()
     this.protocolForm.disable()
     if (value.service_lab_group) {
-      this.labGroupForm.controls.name.setValue(value.service_lab_group.name)
+      //this.labGroupForm.controls.name.setValue(value.service_lab_group.name)
       // @ts-ignore
       this.labGroupForm.controls.selected.setValue(value.service_lab_group.id)
     }
