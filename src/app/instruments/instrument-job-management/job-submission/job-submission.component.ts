@@ -835,6 +835,10 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit, OnDestroy 
       } else {
         if (this.labGroupForm.controls.selected) {
           payload["service_lab_group"] = this.labGroupForm.value.selected
+        } else {
+          if (this.selectedGroup) {
+            payload["service_lab_group"] = this.selectedGroup.id
+          }
         }
       }
 
