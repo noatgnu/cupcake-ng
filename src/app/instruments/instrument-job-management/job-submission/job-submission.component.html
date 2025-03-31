@@ -210,14 +210,14 @@
           <div>
             <b>Job Template:</b> Not selected<br>
             <ul ngbNav #templateSelectionNav="ngbNav" class="nav-tabs" [destroyOnHide]="false">
-              <li [ngbNavItem]="'service_lab_group'">
-                <button ngbNavLink>Group Provided Templates</button>
-                <ng-template ngbNavContent>
-                  @if (job.service_lab_group) {
+              @if (job.service_lab_group) {
+                <li [ngbNavItem]="'service_lab_group'">
+                  <button ngbNavLink>Group Provided Templates</button>
+                  <ng-template ngbNavContent>
                     <app-metadata-template-selection (selected)="handleSelectedTemplate($event)" [lab_group_id]="job.service_lab_group.id"></app-metadata-template-selection>
-                  }
-                </ng-template>
-              </li>
+                  </ng-template>
+                </li>
+              }
               <li [ngbNavItem]="'user'">
                 <button ngbNavLink>Personal Templates</button>
                 <ng-template ngbNavContent>
