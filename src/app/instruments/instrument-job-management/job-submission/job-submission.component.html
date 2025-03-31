@@ -214,7 +214,6 @@
                 <li [ngbNavItem]="'service_lab_group'">
                   <button ngbNavLink>Group Provided Templates</button>
                   <ng-template ngbNavContent>
-                    group test
                     <app-metadata-template-selection (selected)="handleSelectedTemplate($event)" [lab_group_id]="job.service_lab_group.id"></app-metadata-template-selection>
                   </ng-template>
                 </li>

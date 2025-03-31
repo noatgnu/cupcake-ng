@@ -67,7 +67,9 @@ export class MetadataTemplateSelectionComponent {
       }
     } else {
       this.web.getMetadataTableTemplates(this.tableTemplatePageSize, offset, this.form.value.searchTerm, 'user').subscribe(data => {
-        this.metadataTableTemplateQuery = data
+        if (!this.lab_group_id) {
+          this.metadataTableTemplateQuery = data
+        }
       })
     }
   }
