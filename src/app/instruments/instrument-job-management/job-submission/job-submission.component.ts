@@ -1046,9 +1046,8 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit, OnDestroy 
             hidden: r.hidden,
             readonly: r.read_only,
           })
+
         }
-        formArray.markAsDirty()
-        this.update().then()
       }
     }).catch((error) => {
       console.log(error)
@@ -1225,7 +1224,9 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit, OnDestroy 
     type: string,
     id: number,
     data_type: string,
-    modifiers: {samples: string, value: string}[]
+    modifiers: {samples: string, value: string}[],
+    hidden: boolean,
+    readonly: boolean,
   }[]) {
     console.log(event)
     for (const metadata of event) {
@@ -1247,19 +1248,33 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit, OnDestroy 
     type: string;
     id: number;
     data_type: string;
-    modifiers: { samples: string; value: string }[]
+    modifiers: { samples: string; value: string }[],
+    hidden: boolean;
+    readonly: boolean;
   }) {
     for (const f of formArray.controls) {
       if (f.value.id === metadata.id) {
+        if (f.value.hidden !== metadata.hidden) {
+          f.patchValue({
+            hidden: metadata.hidden,
+          })
+          formArray.markAsDirty()
+        }
+        if (f.value.readonly !== metadata.readonly) {
+          f.patchValue({
+            readonly: metadata.readonly,
+          })
+          formArray.markAsDirty()
+        }
         if (f.value.value !== metadata.value) {
           f.patchValue({
-            value: metadata.value
+            value: metadata.value,
           })
           formArray.markAsDirty()
         } else {
           if (!f.value.modifiers) {
             f.patchValue({
-              modifiers: metadata.modifiers
+              modifiers: metadata.modifiers,
             })
             formArray.markAsDirty()
           } else {
