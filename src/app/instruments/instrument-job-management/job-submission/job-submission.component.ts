@@ -1252,6 +1252,7 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit, OnDestroy 
     hidden: boolean;
     readonly: boolean;
   }) {
+    console.log(metadata)
     for (const f of formArray.controls) {
       if (f.value.id === metadata.id) {
         if (f.value.hidden !== metadata.hidden) {
