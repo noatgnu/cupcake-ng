@@ -57,7 +57,7 @@ export class MetadataTemplateSelectionComponent {
     const offset = (this.tableTemplatePage - 1) * this.tableTemplatePageSize
     if (lab_group_id !== undefined && lab_group_id !== null) {
       if (lab_group_id > 0) {
-        this.web.getMetadataTableTemplates(this.tableTemplatePageSize, offset, this.form.value.searchTerm, 'service_lab_group', lab_group_id).subscribe(data => {
+        this.web.getMetadataTableTemplates(this.tableTemplatePageSize, offset, this.form.value.searchTerm, 'service_lab_group', lab_group_id, false).subscribe(data => {
           this.metadataTableTemplateQuery = data
         })
       } else {
