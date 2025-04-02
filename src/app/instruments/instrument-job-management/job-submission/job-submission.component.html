@@ -10,7 +10,7 @@
 
     <form [formGroup]="projectForm" class="d-flex flex-column gap-2">
       <div class="form-group">
-        <label for="projectName">Project Name</label>
+        <label for="projectName">Project Name @if (!selectedProject) {(required)}</label>
         <div class="d-flex gap-2">
           <input id="projectName" type="search" class="form-control" formControlName="project_name"
                  (selectItem)="onProjectSelected($event)"
@@ -37,7 +37,7 @@
         </div>
       } @else {
         <div class="form-group">
-          <label for="projectDescription">Project Description</label>
+          <label for="projectDescription">Project Description (required)</label>
           <textarea id="projectDescription" class="form-control" formControlName="project_description" placeholder="Enter project description"></textarea>
         </div>
       }
@@ -76,7 +76,7 @@
                     <option [value]="group.id">{{group.name}}</option>
                   }
                 </select>
-                <small class="form-text text-muted">Select a group to submit the job to</small><br>
+                <small class="form-text text-muted">Select a group to submit the job to (required)</small><br>
                 @if (selectedGroup) {
                   <small><b>Currently selected {{selectedGroup.name}}</b></small>
                 }
@@ -186,7 +186,7 @@
       <form [formGroup]="formSampleExtraData">
         <div class="d-flex gap-2">
           <div class="form-group">
-            <label for="sampleNumber">Sample Number</label>
+            <label for="sampleNumber">Sample Number (required)</label>
             <input id="sampleNumber" type="number" class="form-control" formControlName="sample_number">
           </div>
           @if (job.sample_number === 0 || !job.sample_number) {
