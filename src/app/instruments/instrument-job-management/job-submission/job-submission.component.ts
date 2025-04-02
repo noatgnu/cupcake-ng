@@ -621,7 +621,7 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit, OnDestroy 
       }
     })
     this.labGroupForm.patchValue({name: this.defaultLabGroup})
-    this.web.getLabGroups(this.defaultLabGroup).subscribe((labGroup) => {
+    this.web.getLabGroups(this.defaultLabGroup, 10, 0, true).subscribe((labGroup) => {
       this.labGroupQuery = labGroup
       if (labGroup.results.length > 0) {
         if (!this.labGroupForm.value.selected) {
@@ -1047,6 +1047,8 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit, OnDestroy 
             readonly: r.read_only,
           })
         }
+        formArray.markAsDirty()
+        this.update().then()
       }
     }).catch((error) => {
       console.log(error)
