@@ -649,6 +649,8 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit, OnDestroy 
       type: FormControl<string>;
       mandatory: FormControl<boolean>;
       modifiers: FormControl<{samples: string, value: string}[]>;
+      hidden: FormControl<boolean>;
+      readonly: FormControl<boolean>;
     }>> = this.fb.array<FormGroup>([]);
     for (const m of metadata) {
       const group: FormGroup<{
@@ -658,13 +660,17 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit, OnDestroy 
         type: FormControl<string>;
         mandatory: FormControl<boolean>;
         modifiers: FormControl<{samples: string, value: string}[]>;
+        hidden: FormControl<boolean>;
+        readonly: FormControl<boolean>;
       }> = this.fb.group({
         id: new FormControl(m.id) ,
         value: new FormControl(m.value),
         name: new FormControl(m.name),
         type: new FormControl(m.type),
         mandatory: new FormControl(m.mandatory),
-        modifiers: new FormControl(m.modifiers)
+        modifiers: new FormControl(m.modifiers),
+        hidden: new FormControl(m.hidden),
+        readonly: new FormControl(m.readonly),
       });
       formArray.push(group);
       this.subscribeToFormGroupChanges(group);
