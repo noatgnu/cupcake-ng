@@ -70,7 +70,7 @@
             </div>
             @if (labGroupQuery) {
               <div class="form-group">
-                <label>Select Group</label>
+                <label>Select Group (required)</label>
                 <select class="form-select" size="5" formControlName="selected">
                   @for (group of labGroupQuery.results; track group.id) {
                     <option [value]="group.id">{{group.name}}</option>
