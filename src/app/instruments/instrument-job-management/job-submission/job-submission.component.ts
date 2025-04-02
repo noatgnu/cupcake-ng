@@ -303,6 +303,8 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit, OnDestroy 
       type: FormControl<string>;
       mandatory: FormControl<boolean>;
       modifiers: FormControl<{samples: string, value: string}[]>;
+      hidden: FormControl<boolean>;
+      readonly: FormControl<boolean>;
     }>>([]),
     staff_metadata: this.fb.array<FormGroup<{
       id: FormControl<number>;
@@ -311,6 +313,8 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit, OnDestroy 
       type: FormControl<string>;
       mandatory: FormControl<boolean>;
       modifiers: FormControl<{samples: string, value: string}[]>;
+      hidden: FormControl<boolean>;
+      readonly: FormControl<boolean>;
     }>>([])
   })
 
@@ -957,7 +961,9 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit, OnDestroy 
                 type: metadata.type,
                 value: value,
                 mandatory: false,
-                id: null
+                id: null,
+                hidden: r.hidden,
+                readonly: r.readonly
               })
             } else {
               if (r.charateristic) {
@@ -970,7 +976,9 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit, OnDestroy 
                 type: r.metadataType,
                 value: value,
                 mandatory: false,
-                id: null
+                id: null,
+                hidden: r.hidden,
+                readonly: r.readonly
               })
             }
             formArray.push(group);
@@ -985,7 +993,9 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit, OnDestroy 
                   value: selectedFactorValueColumn.value,
                   mandatory: false,
                   id: null,
-                  modifiers: selectedFactorValueColumn.modifiers
+                  modifiers: selectedFactorValueColumn.modifiers,
+                  hidden: selectedFactorValueColumn.hidden,
+                  readonly: selectedFactorValueColumn.readonly,
                 })
                 formArray.push(group);
                 this.subscribeToFormGroupChanges(group)
@@ -1032,7 +1042,9 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit, OnDestroy 
           let value = r.metadataValue
           value = this.metadataService.tranformMetadataValue(r, value);
           formArray.controls[index].patchValue({
-            value: value
+            value: value,
+            hidden: r.hidden,
+            readonly: r.read_only,
           })
         }
       }
