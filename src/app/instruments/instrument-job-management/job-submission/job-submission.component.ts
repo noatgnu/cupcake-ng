@@ -620,6 +620,13 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit, OnDestroy 
         })
       }
     })
+    this.labGroupForm.controls.name.valueChanges.subscribe((value) => {
+      if (value) {
+        this.web.getLabGroups(value, 10, 0, true).subscribe((labGroup) => {
+          this.labGroupQuery = labGroup
+        })
+      }
+    })
     this.labGroupForm.patchValue({name: this.defaultLabGroup})
     this.web.getLabGroups(this.defaultLabGroup, 10, 0, true).subscribe((labGroup) => {
       this.labGroupQuery = labGroup
