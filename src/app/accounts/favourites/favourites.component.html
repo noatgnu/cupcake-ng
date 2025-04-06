@@ -18,7 +18,9 @@
                         <label>Select A Field Name From Options Below</label>
                         <select class="form-select" size="7" formControlName="name">
                           @for (f of metadata.userMetadataTemplate; track $index) {
-                            <option value="{{f.name}}">{{f.name}} @if(f.type) { ({{f.type}}) }</option>
+                            <option value="{{f.name}}">
+                              {{f.name}} @if(f.type) { ({{f.type}}) }
+                            </option>
                           }
                           @for (f of metadata.staffMetadataSpecific; track $index) {
                             <option value="{{f}}">{{f}} (Comment)</option>

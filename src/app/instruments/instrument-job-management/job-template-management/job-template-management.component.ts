@@ -59,6 +59,7 @@ export class JobTemplateManagementComponent {
   tableTemplatePage: number = 1
 
   missingColumns: string[] = []
+  selectedTemplateFieldMap: {[key: string]: string} = {}
 
   private _selectedTemplate: MetadataTableTemplate|undefined
 
@@ -66,6 +67,11 @@ export class JobTemplateManagementComponent {
     this._selectedTemplate = value
     this.missingColumns = []
     if (value) {
+      if (value.field_mask_mapping) {
+        for (const m of value.field_mask_mapping) {
+          this.selectedTemplateFieldMap[m.name] = m.mask
+        }
+      }
       const userColumnNames = value.user_columns.map(column => column.name)
       const staffColumnNames = value.staff_columns.map(column => column.name)
       for (const n of this.metadataService.requiredColumnNames) {
@@ -374,6 +380,10 @@ export class JobTemplateManagementComponent {
       ref.result.then((result) => {
         if (result && this.selectedTemplate) {
           this.selectedTemplate.field_mask_mapping = result
+          this.selectedTemplateFieldMap = {}
+          for (const m of result) {
+            this.selectedTemplateFieldMap[m.name] = m.mask
+          }
           this.web.updateMetadataTableTemplate(this.selectedTemplate.id, {field_mask_mapping: result}).subscribe(data => {
             this.selectedTemplate = data;
             this.toast.show("Field Mask Editor", "Field mask mapping updated successfully")

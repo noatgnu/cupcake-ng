@@ -102,7 +102,11 @@
         <div ngbDropdownMenu aria-labelledby="addMetadata">
           @for (m of metadataService.userMetadataTemplate; track m.name) {
             <a class="dropdown-item" (click)="addMetadata(m, 'user_metadata')">
-              {{m.name}}
+              @if (selectedTemplateFieldMap[m.name]) {
+                {{selectedTemplateFieldMap[m.name]}}
+              } @else {
+                {{m.name}}
+              }
             </a>
           }
           <a class="dropdown-item" (click)="addMetadata({name: 'Sample type', type: 'Characteristics'}, 'user_metadata')">
@@ -120,7 +124,11 @@
         <div ngbDropdownMenu aria-labelledby="addStaffMetadata">
           @for (m of metadataService.staffMetadataSpecific; track m) {
             <a class="dropdown-item" (click)="addMetadata({name: m, type: 'Comment'}, 'staff_metadata')">
-              {{m}}
+              @if (selectedTemplateFieldMap[m]) {
+                {{selectedTemplateFieldMap[m]}}
+              } @else {
+                {{m}}
+              }
             </a>
           }
           <a class="dropdown-item" (click)="addMetadata({name: '', type: 'Factor value'}, 'staff_metadata')">

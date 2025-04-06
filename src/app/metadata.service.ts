@@ -107,7 +107,7 @@ export class MetadataService {
   helpData: any = {
     "Source name": "Unique sample name (it can be present multiple times if the same sample is used several times in the same dataset)",
     "Organism": "The organism of the Sample of origin.",
-    "Organism part": "or Tissue. The part of organism’s anatomy or substance arising from an organism from which the biomaterial was derived, (e.g., liver)",
+    "Organism part": "Tissue or Organism part. The part of organism’s anatomy or substance arising from an organism from which the biomaterial was derived, (e.g., liver)",
     "Cell type": "A cell type is a distinct morphological or functional form of cell. Examples are epithelial, glial etc",
     "Disease": "The disease under study in the Sample.",
     "Assay name": "Examples of assay names are: “run 1”, “run_fraction_1_2”.",

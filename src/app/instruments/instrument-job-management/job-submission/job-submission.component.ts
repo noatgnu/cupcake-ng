@@ -119,6 +119,7 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit, OnDestroy 
   togglePanel(): void {
     this.isPanelOpen = !this.isPanelOpen;
   }
+  selectedTemplateFieldMap: {[key: string]: string} = {};
 
   initialized = false
   currentForm: FormGroup|undefined
@@ -240,6 +241,13 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit, OnDestroy 
       this.web.getProtocol(value.protocol.id).subscribe((protocol) => {
         this.selectedProtocol = protocol
       })
+    }
+    if (value.selected_template) {
+      if (value.selected_template.field_mask_mapping) {
+        for (const field of value.selected_template.field_mask_mapping) {
+          this.selectedTemplateFieldMap[field.name] = field.mask
+        }
+      }
     }
     this.web.getProject(value.project.id).subscribe((project) => {
       this.selectedProject = project
@@ -1418,6 +1426,7 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit, OnDestroy 
   handleSelectedTemplate(template: MetadataTableTemplate) {
     if (this.job) {
       this.web.instrumentJobSelectedTemplate(this.job.id, template.id).subscribe((response) => {
+        this.selectedTemplateFieldMap = {}
         this.job = response
       })
     }

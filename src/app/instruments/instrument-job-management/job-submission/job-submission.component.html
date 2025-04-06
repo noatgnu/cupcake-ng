@@ -291,7 +291,11 @@
               <div ngbDropdownMenu aria-labelledby="addMetadata">
                 @for (m of metadataService.userMetadataTemplate; track m.name) {
                   <a class="dropdown-item" (click)="addMetadata(m, 'user_metadata')">
-                    {{m.name}}
+                    @if (selectedTemplateFieldMap[m.name]) {
+                      {{selectedTemplateFieldMap[m.name]}}
+                    } @else {
+                      {{m.name}}
+                    }
                   </a>
                 }
                 <a class="dropdown-item" (click)="addMetadata({name: 'Sample type', type: 'Characteristics'}, 'user_metadata')">
@@ -312,7 +316,11 @@
                 <div ngbDropdownMenu aria-labelledby="addMetadata">
                   @for (m of metadataService.userMetadataTemplate; track m.name) {
                     <a class="dropdown-item" (click)="addMetadata(m, 'user_metadata')">
-                      {{m.name}}
+                      @if (selectedTemplateFieldMap[m.name]) {
+                        {{selectedTemplateFieldMap[m.name]}}
+                      } @else {
+                        {{m.name}}
+                      }
                     </a>
                   }
                   <a class="dropdown-item" (click)="addMetadata({name: 'Sample type', type: 'Characteristics'}, 'user_metadata')">
@@ -331,7 +339,11 @@
               <div ngbDropdownMenu aria-labelledby="addStaffMetadata">
                 @for (m of metadataService.staffMetadataSpecific; track m) {
                   <a class="dropdown-item" (click)="addMetadata({name: m, type: 'Comment'}, 'staff_metadata')">
-                    {{m}}
+                    @if (selectedTemplateFieldMap[m]) {
+                      {{selectedTemplateFieldMap[m]}}
+                    } @else {
+                      {{m}}
+                    }
                   </a>
                 }
                 <a class="dropdown-item" (click)="addMetadata({name: '', type: 'Factor value'}, 'staff_metadata')">
@@ -574,13 +586,18 @@
                     @if (selectedProtocol.metadata_columns.length > 0) {
                       @for (m of selectedProtocol.metadata_columns; track m.id) {
                         @if (m.type === "Characteristics") {
-                          <span class="badge bg-primary"><i class="bi bi-x-circle" (click)="deleteMetadata(m)"></i> {{m.name}}: {{m.value}}</span>
+                          <span class="badge bg-primary"><i class="bi bi-x-circle" (click)="deleteMetadata(m)"></i>
+                            @if (selectedTemplateFieldMap[m.name]){ {{selectedTemplateFieldMap[m.name]}} } @else {{{m.name}}} : {{m.value}}
+                          </span>
                         } @else if (m.type === "Comment") {
-                          <span class="badge bg-secondary"><i class="bi bi-x-circle" (click)="deleteMetadata(m)"></i>{{m.name}}: {{m.value}}</span>
+                          <span class="badge bg-secondary"><i class="bi bi-x-circle" (click)="deleteMetadata(m)"></i>
+                            @if (selectedTemplateFieldMap[m.name]){ {{selectedTemplateFieldMap[m.name]}} } @else {{{m.name}}} : {{m.value}}</span>
                         } @else if (m.type === "Factor value") {
-                          <span class="badge bg-success"><i class="bi bi-x-circle" (click)="deleteMetadata(m)"></i>{{m.name}}: {{m.value}}</span>
+                          <span class="badge bg-success"><i class="bi bi-x-circle" (click)="deleteMetadata(m)"></i>
+                            @if (selectedTemplateFieldMap[m.name]){ {{selectedTemplateFieldMap[m.name]}} } @else {{{m.name}}} : {{m.value}}</span>
                         } @else {
-                          <span class="badge bg-danger"><i class="bi bi-x-circle" (click)="deleteMetadata(m)"></i>{{m.name}}: {{m.value}}</span>
+                          <span class="badge bg-danger"><i class="bi bi-x-circle" (click)="deleteMetadata(m)"></i>
+                            @if (selectedTemplateFieldMap[m.name]){ {{selectedTemplateFieldMap[m.name]}} } @else {{{m.name}}} : {{m.value}}</span>
                         }
                       }
                     }
@@ -678,7 +695,11 @@
             <div ngbDropdownMenu aria-labelledby="addMetadata">
               @for (m of metadataService.userMetadataTemplate; track m.name) {
                 <a class="dropdown-item" (click)="addMetadata(m, 'user_metadata')">
-                  {{m.name}}
+                  @if (selectedTemplateFieldMap[m.name]) {
+                    {{selectedTemplateFieldMap[m.name]}}
+                  } @else {
+                    {{m.name}}
+                  }
                 </a>
               }
               <a class="dropdown-item" (click)="addMetadata({name: 'Sample type', type: 'Characteristics'}, 'user_metadata')">
@@ -703,7 +724,11 @@
               <div ngbDropdownMenu aria-labelledby="addMetadata">
                 @for (m of metadataService.userMetadataTemplate; track m.name) {
                   <a class="dropdown-item" (click)="addMetadata(m, 'staff_metadata')">
-                    {{m.name}}
+                    @if (selectedTemplateFieldMap[m.name]) {
+                      {{selectedTemplateFieldMap[m.name]}}
+                    } @else {
+                      {{m.name}}
+                    }
                   </a>
                 }
                 <a class="dropdown-item" (click)="addMetadata({name: 'Sample type', type: 'Characteristics'}, 'user_metadata')">
@@ -722,7 +747,11 @@
             <div ngbDropdownMenu aria-labelledby="addStaffMetadata">
               @for (m of metadataService.staffMetadataSpecific; track m) {
                 <a class="dropdown-item" (click)="addMetadata({name: m, type: 'Comment'}, 'staff_metadata')">
-                  {{m}}
+                  @if (selectedTemplateFieldMap[m]) {
+                    {{selectedTemplateFieldMap[m]}}
+                  } @else {
+                    {{m}}
+                  }
                 </a>
               }
               <a class="dropdown-item" (click)="addMetadata({name: '', type: 'Factor value'}, 'staff_metadata')">
