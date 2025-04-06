@@ -70,7 +70,13 @@ export class FieldMaskEditorModalComponent {
 
   save() {
     // Save the template
-    this.activeModal.close(this.template);
+    const data = this.formArray.filter((form) => form.value.mask !== "" && form.value.mask !== null).map((form) => {
+      return {
+        name: form.value.name,
+        mask: form.value.mask,
+      }
+    })
+    this.activeModal.close(data);
   }
 
 }

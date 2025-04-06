@@ -415,6 +415,11 @@ export class MetadataPlaygroundComponent {
     if (this.selectedRow) {
       const ref = this.modal.open(FieldMaskEditorModalComponent, {scrollable: true})
       ref.componentInstance.template = this.selectedRow
+      ref.result.then((result) => {
+        if (result && this.selectedRow) {
+          this.selectedRow.field_mask_mapping = result
+        }
+      })
     }
   }
 }

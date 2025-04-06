@@ -18,6 +18,7 @@ import {JobTemplateCreationModalComponent} from "./job-template-creation-modal/j
 import {MetadataTableComponent} from "../job-submission/metadata-table/metadata-table.component";
 import {MetadataService} from "../../../metadata.service";
 import {JobMetadataCreationModalComponent} from "../job-metadata-creation-modal/job-metadata-creation-modal.component";
+import {FieldMaskEditorModalComponent} from "../../../field-mask-editor-modal/field-mask-editor-modal.component";
 
 @Component({
   selector: 'app-job-template-management',
@@ -364,5 +365,21 @@ export class JobTemplateManagementComponent {
       reader.readAsText(file);
     }
     input.click();
+  }
+
+  openFieldMaskEditorModal() {
+    if (this.selectedTemplate) {
+      const ref = this.modal.open(FieldMaskEditorModalComponent, {scrollable: true})
+      ref.componentInstance.template = this.selectedTemplate
+      ref.result.then((result) => {
+        if (result && this.selectedTemplate) {
+          this.selectedTemplate.field_mask_mapping = result
+          this.web.updateMetadataTableTemplate(this.selectedTemplate.id, {field_mask_mapping: result}).subscribe(data => {
+            this.selectedTemplate = data;
+            this.toast.show("Field Mask Editor", "Field mask mapping updated successfully")
+          })
+        }
+      })
+    }
   }
 }

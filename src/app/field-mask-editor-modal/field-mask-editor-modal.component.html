@@ -9,7 +9,7 @@
         <div class="list-group">
           @for (g of formArray; track $index) {
             @if (g.value.type === "user") {
-              <div class="list-group-item list-group-item-action">
+              <div class="list-group-item list-group-item-action" [class.list-group-item-warning]="g.value.mask != '' && g.value.mask != null">
                 <form [formGroup]="g" class="d-flex flex-column gap-2">
                   <div>
                     <b>Column name:</b> {{g.value.name}}
@@ -31,7 +31,7 @@
         <div class="list-group">
           @for (g of formArray; track $index) {
             @if (g.value.type === "staff") {
-              <div class="list-group-item list-group-item-action">
+              <div class="list-group-item list-group-item-action" [class.list-group-item-warning]="g.value.mask != '' && g.value.mask != null">
                 <form [formGroup]="g" class="d-flex flex-column gap-2">
                   <div>
                     <b>Column name:</b> {{g.value.name}}
