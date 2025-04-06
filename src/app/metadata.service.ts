@@ -16,9 +16,9 @@ export class MetadataService {
   labelTypes: string[] = []
   ms2AnalyzerTypes: string[] = []
   metadataTypeAutocomplete: string[] = ["Characteristics", "Comment", "Factor value", "Other"]
-  metadataNameAutocomplete: string[] = ["Disease", "Tissue", "Subcellular location", "Organism", "Instrument", "Reduction reagent", "Alkylation reagent", "Label", "Cleavage agent details", "Dissociation method", "Modification parameters", "Cell type", "Enrichment process", "MS2 analyzer type", "Proteomics data acquisition method"]
+  metadataNameAutocomplete: string[] = ["Disease", "Organism part", "Subcellular location", "Organism", "Instrument", "Reduction reagent", "Alkylation reagent", "Label", "Cleavage agent details", "Dissociation method", "Modification parameters", "Cell type", "Enrichment process", "MS2 analyzer type", "Proteomics data acquisition method"]
   metadataOtherAutocomplete: string[] = ["Source name", "Material type", "Assay name", "Technology type"]
-  metadataCharacteristics: string[] = ["Disease", "Tissue", "Subcellular location", "Organism", "Cell type", "Cell line", "Developmental stage", "Ancestry category", "Sex", "Age", "Biological replicate", "Enrichment process"]
+  metadataCharacteristics: string[] = ["Disease", "Organism part", "Subcellular location", "Organism", "Cell type", "Cell line", "Developmental stage", "Ancestry category", "Sex", "Age", "Biological replicate", "Enrichment process"]
   metadataComment: string[] = ["Data file", "File URI", "Technical replicate", "Fraction identifier", "Label", "Cleavage agent details", "Instrument", "Modification parameters", "Dissociation method", "Precursor mass tolerance", "Fragment mass tolerance", "MS2 analyzer type",""]
   staffMetadataSpecific: string[] =
     [
@@ -41,7 +41,7 @@ export class MetadataService {
     {
       "name": "Organism", "type": "Characteristics"
     }, {
-      "name": "Tissue", "type": "Characteristics"
+      "name": "Organism part", "type": "Characteristics"
     }, {
       "name": "Disease", "type": "Characteristics"
     }, {
@@ -74,7 +74,7 @@ export class MetadataService {
     {
       "name": "Organism", "type": "Characteristics"
     }, {
-      "name": "Tissue", "type": "Characteristics"
+      "name": "Organism part", "type": "Characteristics"
     }, {
       "name": "Disease", "type": "Characteristics"
     }, {
@@ -107,7 +107,7 @@ export class MetadataService {
   helpData: any = {
     "Source name": "Unique sample name (it can be present multiple times if the same sample is used several times in the same dataset)",
     "Organism": "The organism of the Sample of origin.",
-    "Tissue": "or Organism part. The part of organism’s anatomy or substance arising from an organism from which the biomaterial was derived, (e.g., liver)",
+    "Organism part": "or Tissue. The part of organism’s anatomy or substance arising from an organism from which the biomaterial was derived, (e.g., liver)",
     "Cell type": "A cell type is a distinct morphological or functional form of cell. Examples are epithelial, glial etc",
     "Disease": "The disease under study in the Sample.",
     "Assay name": "Examples of assay names are: “run 1”, “run_fraction_1_2”.",
@@ -141,7 +141,7 @@ export class MetadataService {
     "Source name",
     "Organism",
     "Disease",
-    "Tissue",
+    "Organism part",
     "Cell type",
     "Assay name",
     "Fraction identifier",
@@ -168,7 +168,7 @@ export class MetadataService {
       searchObservable = this.web.getHumandDiseases(undefined, 5, 0, term, search_type).pipe(
         map((response) => response.results.map((disease) => disease.identifier))
       );
-    } else if (name === "tissue") {
+    } else if ((name === "tissue")||(name === "organism part")) {
       searchObservable = this.web.getTissues(undefined, 5, 0, term, search_type).pipe(
         map((response) => response.results.map((tissue) => tissue.identifier))
       );
@@ -628,7 +628,7 @@ export class MetadataService {
     const default_columns_list = [
       { "name": "Source name", "type": "" },
       { "name": "Organism", "type": "Characteristics" },
-      { "name": "Tissue", "type": "Characteristics" },
+      { "name": "Organism part", "type": "Characteristics" },
       { "name": "Disease", "type": "Characteristics" },
       { "name": "Cell type", "type": "Characteristics" },
       { "name": "Biological replicate", "type": "Characteristics" },
@@ -790,7 +790,7 @@ export class MetadataService {
       {
         "name": "Organism", "type": "Characteristics"
       }, {
-        "name": "Tissue", "type": "Characteristics"
+        "name": "Organism part", "type": "Characteristics"
       }, {
         "name": "Disease", "type": "Characteristics"
       }, {
@@ -931,7 +931,7 @@ export class MetadataService {
     for (let i = 0; i < new_metadata.length; i ++) {
       const m = new_metadata[i]
       if (m.type === "Characteristics") {
-        if (m.name.toLowerCase() === "tissue") {
+        if (m.name.toLowerCase() === "tissue"|| m.name.toLowerCase() === "organism part") {
           headers.push("characteristics[organism part]")
         } else {
           headers.push(`characteristics[${m.name.toLowerCase()}]`)
@@ -1162,7 +1162,7 @@ export class MetadataService {
 
     for (let i=0; i < factor_value_columns.length; i++) {
       const m = factor_value_columns[i]
-      if (m.name.toLowerCase() === "tissue") {
+      if (m.name.toLowerCase() === "tissue"|| m.name.toLowerCase() === "organism part") {
         headers.push("factor value[organism part]")
       } else {
         headers.push(`factor value[${m.name.toLowerCase()}]`)
@@ -1572,13 +1572,17 @@ export class MetadataService {
     return value
   }
 
-  async convert_metadata_to_excel(user_metadata: MetadataColumn[], staff_metadata: MetadataColumn[], sample_number: number, user_id: number, service_lab_group_id: number) {
+  async convert_metadata_to_excel(user_metadata: MetadataColumn[], staff_metadata: MetadataColumn[], sample_number: number, user_id: number, service_lab_group_id: number, field_masks: {name: string, mask: string}[] = []) {
     const metadata = user_metadata.concat(staff_metadata)
     let main_metadata = metadata.filter((m) => !m.hidden)
     let hidden_metadata = metadata.filter((m) => m.hidden)
     let [result_main, id_metadata_column_map_main] = await this.sort_metadata(main_metadata, sample_number)
     let result_hidden: string[][] = []
     let id_metadata_column_map_hidden: any = {}
+    let field_mask_map: {[key: string]: string} = {}
+    for (const field_mask of field_masks) {
+      field_mask_map[field_mask.name] = field_mask.mask
+    }
     if (hidden_metadata.length > 0) {
       [result_hidden, id_metadata_column_map_hidden] = await this.sort_metadata(hidden_metadata, sample_number)
     }
@@ -1661,16 +1665,22 @@ export class MetadataService {
       }
 
     }
+    note_texts = [
+      "Note: Cells that are empty will automatically be filled with 'not applicable' or 'no available' depending on the column when submitted.",
+      "[*] User-specific favourite options.",
+      "[**] Facility-recommended options.",
+      "[***] Global recommendations."
+    ]
 
-    const note_row = sample_number + 2
-    // get last column
-    const lastColumn = main_ws.getColumn(main_ws.columnCount).letter
-    const main_ws_range = `A${note_row}:${lastColumn}${note_row}`
-    main_ws.mergeCells(main_ws_range)
-    const note_value = "Note: Cells that are empty will automatically be filled with 'not applicable' or 'no available' depending on the column when submitted."
-    const note_cell = main_ws.getCell(`A${note_row}`)
-    note_cell.value = note_value
-    note_cell.font = {bold: true}
+    let start_row = sample_number + 2
+    for (let i = 0; i < note_texts.length; i++) {
+      const lastColumn = main_ws.getColumn(main_ws.columnCount).letter
+      const main_ws_range = `A${start_row}:${lastColumn}${start_row}`
+      main_ws.mergeCells(main_ws_range)
+      const note_cell = main_ws.getCell(`A${start_row}`)
+      note_cell.value = note_texts[i]
+      note_cell.font = {bold: true}
+    }
 
     if (result_hidden.length > 0) {
       hidden_ws.addRow(result_hidden[0])
@@ -1715,9 +1725,17 @@ export class MetadataService {
       } else {
         col_name = name_splitted[0]
       }
-
-      if (col_name == "organism part") {
-        col_name = "tissue"
+      const col_name_capitalized = (col_name.charAt(0).toUpperCase() + col_name.slice(1)).replace("Ms1", "MS1").replace("Ms2", "MS2")
+      if (field_mask_map[col_name_capitalized]) {
+        col_name = field_mask_map[col_name_capitalized]
+        let new_header_name = col_name_capitalized
+        if (name_splitted.length > 1) {
+          new_header_name = result_main[0][i].replace(name_splitted[1].replace("]", ""), col_name.toLowerCase())
+        } else {
+          new_header_name = col_name.toLowerCase()
+        }
+        // replace the header row at index 0 with the new header name at index i in the worksheet
+        main_ws.getRow(1).getCell(i+1).value = new_header_name
       }
       if (required_metadata.includes(col_name)) {
         required_column = true
@@ -1754,8 +1772,16 @@ export class MetadataService {
           } else {
             col_name = name_splitted[0]
           }
-          if (col_name == "organism part") {
-            col_name = "tissue"
+          const col_name_capitalized = (col_name.charAt(0).toUpperCase() + col_name.slice(1)).replace("Ms1", "MS1").replace("Ms2", "MS2")
+          if (field_mask_map[col_name_capitalized]) {
+            col_name = field_mask_map[col_name_capitalized]
+            let new_header_name = col_name_capitalized
+            if (name_splitted.length > 1) {
+              new_header_name = result_hidden[0][i].replace(name_splitted[1].replace("]", ""), col_name.toLowerCase())
+            } else {
+              new_header_name = col_name.toLowerCase()
+            }
+            hidden_ws.getRow(1).getCell(i+1).value = new_header_name
           }
           if (required_metadata.includes(col_name)) {
             required_column = true
@@ -1788,7 +1814,7 @@ export class MetadataService {
     return wb
   }
 
-  async read_metadata_from_excel(data: ArrayBuffer, user_metadata: MetadataColumn[], staff_metadata: MetadataColumn[], sample_number: number, user_id: number, service_lab_group_id: number) {
+  async read_metadata_from_excel(data: ArrayBuffer, user_metadata: MetadataColumn[], staff_metadata: MetadataColumn[], sample_number: number, user_id: number, service_lab_group_id: number, field_masks: {name: string, mask: string}[] = []) {
     const workbook = new Workbook();
     await workbook.xlsx.load(data)
     const main_ws = workbook.getWorksheet('main')
@@ -1796,6 +1822,10 @@ export class MetadataService {
     const id_metadata_column_map_ws = workbook.getWorksheet('id_metadata_column_map')
     const id_metadata_column_map: any = {}
     let id_metadata_column_map_list: any[][] = []
+    let field_mask_map: {[key: string]: string} = {}
+    for (const field_mask of field_masks) {
+      field_mask_map[field_mask.mask] = field_mask.name
+    }
     if (id_metadata_column_map_ws) {
       // convert id_metadata_column_map_ws to id_metadata_column_map_list
       id_metadata_column_map_ws.eachRow((row, rowNumber) => {
@@ -1810,8 +1840,6 @@ export class MetadataService {
         }
       });
     }
-    console.log(id_metadata_column_map_list)
-    console.log(id_metadata_column_map)
     const user_metadata_field_map: any = {}
     const staff_metadata_field_map: any = {}
     for (const m of user_metadata) {
@@ -1885,11 +1913,12 @@ export class MetadataService {
                 } else {
                   metadata_name = header;
                 }
-                if (metadata_name == "organism part") {
-                  metadata_name = "tissue";
+                const metadata_name_capitalized = (metadata_name.charAt(0).toUpperCase() + metadata_name.slice(1)).replace("Ms1", "MS1").replace("Ms2", "MS2")
+                if (field_mask_map[metadata_name_capitalized]) {
+                  metadata_name = field_mask_map[metadata_name_capitalized]
                 }
                 const metadata: MetadataColumn = {
-                  name: (metadata_name.charAt(0).toUpperCase() + metadata_name.slice(1)).replace("Ms1", "MS1").replace("Ms2", "MS2"),
+                  name: metadata_name,
                   type: metadata_type.charAt(0).toUpperCase() + metadata_type.slice(1),
                   value: "",
                   modifiers: [],
@@ -1961,11 +1990,12 @@ export class MetadataService {
                 } else {
                   metadata_name = header;
                 }
-                if (metadata_name == "organism part") {
-                  metadata_name = "tissue";
+                const metadata_name_capitalized = (metadata_name.charAt(0).toUpperCase() + metadata_name.slice(1)).replace("Ms1", "MS1").replace("Ms2", "MS2")
+                if (field_mask_map[metadata_name_capitalized]) {
+                  metadata_name = field_mask_map[metadata_name_capitalized]
                 }
                 const metadata: MetadataColumn = {
-                  name: (metadata_name.charAt(0).toUpperCase() + metadata_name.slice(1)).replace("Ms1", "MS1").replace("Ms2", "MS2"),
+                  name: metadata_name,
                   type: metadata_type.charAt(0).toUpperCase() + metadata_type.slice(1),
                   value: "",
                   modifiers: [],

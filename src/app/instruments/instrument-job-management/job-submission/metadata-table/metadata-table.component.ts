@@ -1,5 +1,5 @@
 import {Component, EventEmitter, HostListener, Input, OnChanges, Output, SimpleChanges} from '@angular/core';
-import {MetadataColumn} from "../../../../metadata-column";
+import {MetadataColumn, MetadataTableTemplate} from "../../../../metadata-column";
 import {
   DisplayModificationParametersMetadataComponent
 } from "../../../../display-modification-parameters-metadata/display-modification-parameters-metadata.component";
@@ -64,6 +64,23 @@ export class MetadataTableComponent implements OnChanges{
   @Output() metadataFavouriteAdded: EventEmitter<any> = new EventEmitter<any>()
   selectedCells: { row: number, col: number }[] = [];
   isShiftSelecting: boolean = false;
+
+  field_mask: {[key: string]: string} = {}
+  private _template: MetadataTableTemplate|undefined|null
+
+  @Input() set template(template: MetadataTableTemplate|undefined|null) {
+    this._template = template
+    this.field_mask = {}
+    if (template) {
+      for (const col of template.field_mask_mapping) {
+        this.field_mask[col.name] = col.mask
+      }
+    }
+  }
+
+  get template(): MetadataTableTemplate|undefined|null {
+    return this._template
+  }
 
   onCellClick(event: MouseEvent, rowIndex: number, colIndex: number) {
     if (event.shiftKey && this.selectedCells.length > 0) {

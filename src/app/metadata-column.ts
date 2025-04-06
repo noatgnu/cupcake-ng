@@ -40,6 +40,7 @@ export interface MetadataTableTemplate {
   lab_group: number,
   user: number,
   enabled: boolean,
+  field_mask_mapping: {name: string, mask: string}[],
 }
 
 export interface MetadataTableTemplateQuery {

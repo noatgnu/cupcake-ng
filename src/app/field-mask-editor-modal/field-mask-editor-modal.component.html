@@ -1,0 +1,56 @@
+<div class="modal-header">
+  <h5 class="modal-title">Field Mask Editor</h5>
+</div>
+<div class="modal-body">
+  <ul ngbNav #nav="ngbNav" class="nav-tabs"  [destroyOnHide]="false">
+    <li [ngbNavItem]="'user'">
+      <button ngbNavLink>User columns</button>
+      <ng-template ngbNavContent>
+        <div class="list-group">
+          @for (g of formArray; track $index) {
+            @if (g.value.type === "user") {
+              <div class="list-group-item list-group-item-action">
+                <form [formGroup]="g" class="d-flex flex-column gap-2">
+                  <div>
+                    <b>Column name:</b> {{g.value.name}}
+                  </div>
+                  <div class="form-group">
+                    <label>Mask</label>
+                    <input class="form-control" type="text" formControlName="mask">
+                  </div>
+                </form>
+              </div>
+            }
+          }
+        </div>
+      </ng-template>
+    </li>
+    <li [ngbNavItem]="'staff'">
+      <button ngbNavLink>Staff columns</button>
+      <ng-template ngbNavContent>
+        <div class="list-group">
+          @for (g of formArray; track $index) {
+            @if (g.value.type === "staff") {
+              <div class="list-group-item list-group-item-action">
+                <form [formGroup]="g" class="d-flex flex-column gap-2">
+                  <div>
+                    <b>Column name:</b> {{g.value.name}}
+                  </div>
+                  <div class="form-group">
+                    <label>Mask</label>
+                    <input class="form-control" type="text" formControlName="mask">
+                  </div>
+                </form>
+              </div>
+            }
+          }
+        </div>
+      </ng-template>
+    </li>
+  </ul>
+  <div [ngbNavOutlet]="nav"></div>
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn btn-primary" (click)="save()">Save</button>
+  <button type="button" class="btn btn-secondary" (click)="close()">Cancel</button>
+</div>

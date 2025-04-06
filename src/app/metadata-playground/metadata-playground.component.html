@@ -52,6 +52,9 @@
                 Staff Column
               </th>
               <th scope="col">
+                # of Field Masks
+              </th>
+              <th scope="col">
                 Lab Group
               </th>
             </tr>
@@ -67,6 +70,9 @@
                   </td>
                   <td>
                     {{t.staff_columns.length}} ({{t.hidden_staff_columns}} hidden)
+                  </td>
+                  <td>
+                    {{t.field_mask_mapping.length}}
                   </td>
                   <td>
                     @if (selectedLabGroup) {
@@ -129,6 +135,7 @@
           <button ngbDropdownItem (click)="importSDRF.click()">Import</button>
         </div>
       </div>
+      <button class="btn btn-primary" (click)="openFieldMaskEditorModal()">Field Masks ({{selectedRow.field_mask_mapping.length}})</button>
       <div ngbDropdown display="dynamic" class="d-inline-black">
         <button class="btn btn-primary" id="addMetadata" ngbDropdownToggle>
           + User Columns
@@ -147,6 +154,7 @@
           </a>
         </div>
       </div>
+
       <div ngbDropdown display="dynamic" class="d-inline-black">
         <button class="btn btn-warning" id="addStaffMetadata" ngbDropdownToggle>
           + Staff Columns
@@ -193,7 +201,7 @@
 
   @if (selectedRow && selectedLabGroup && form.value.show_hidden !== null && form.value.show_hidden !== undefined && form.value.sample_number !== null && form.value.sample_number !== undefined) {
     <div class="metadata-table-container">
-      <app-metadata-table (removeMetadata)="removeMetadata($event)" [filterTableColumnName]="searchColumn" (metadataUpdated)="handleMetadataUpdate($event)" [showHidden]="form.value.show_hidden" [sampleNumber]="form.value.sample_number" [service_lab_group_id]="selectedLabGroup.id" [staffModeActive]="true" [userMetadata]="selectedRow.user_columns" [staffMetadata]="selectedRow.staff_columns"></app-metadata-table>
+      <app-metadata-table [template]="selectedRow" (removeMetadata)="removeMetadata($event)" [filterTableColumnName]="searchColumn" (metadataUpdated)="handleMetadataUpdate($event)" [showHidden]="form.value.show_hidden" [sampleNumber]="form.value.sample_number" [service_lab_group_id]="selectedLabGroup.id" [staffModeActive]="true" [userMetadata]="selectedRow.user_columns" [staffMetadata]="selectedRow.staff_columns"></app-metadata-table>
     </div>
   }
 </div>

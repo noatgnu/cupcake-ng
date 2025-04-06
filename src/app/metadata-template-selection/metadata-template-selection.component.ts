@@ -50,7 +50,7 @@ export class MetadataTemplateSelectionComponent {
   })
 
   constructor(private web: WebService, private fb :FormBuilder) {
-    this.getTableTemplates(0)
+    //this.getTableTemplates(0)
   }
 
   getTableTemplates(lab_group_id: number|null|undefined) {

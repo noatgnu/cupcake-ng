@@ -22,6 +22,7 @@ import {
   SdrfValidationResultsModalComponent
 } from "../instruments/instrument-job-management/job-submission/sdrf-validation-results-modal/sdrf-validation-results-modal.component";
 import {ToastService} from "../toast.service";
+import {FieldMaskEditorModalComponent} from "../field-mask-editor-modal/field-mask-editor-modal.component";
 
 @Component({
   selector: 'app-metadata-playground',
@@ -215,7 +216,7 @@ export class MetadataPlaygroundComponent {
 
   async exportExcelTemplate() {
     if (this.selectedRow && this.form.value.sample_number && this.form.value.lab_group_id) {
-      const wb = await this.metadata.convert_metadata_to_excel(this.selectedRow.user_columns, this.selectedRow.staff_columns, this.form.value.sample_number, 0, this.form.value.lab_group_id)
+      const wb = await this.metadata.convert_metadata_to_excel(this.selectedRow.user_columns, this.selectedRow.staff_columns, this.form.value.sample_number, 0, this.form.value.lab_group_id, this.selectedRow.field_mask_mapping)
       const buffer = await wb.xlsx.writeBuffer();
       const blob = new Blob([buffer], {type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
       const url = window.URL.createObjectURL(blob);
@@ -265,7 +266,7 @@ export class MetadataPlaygroundComponent {
               const data = e.target.result;
               if (this.selectedRow) {
                 // @ts-ignore
-                const result = await this.metadata.read_metadata_from_excel(data as ArrayBuffer, this.selectedRow.user_columns, this.selectedRow.staff_columns, this.form.value.sample_number, 0, this.form.value.lab_group_id);
+                const result = await this.metadata.read_metadata_from_excel(data as ArrayBuffer, this.selectedRow.user_columns, this.selectedRow.staff_columns, this.form.value.sample_number, 0, this.form.value.lab_group_id, this.selectedRow.field_mask_mapping);
                 this.selectedRow.user_columns =result.user_metadata;
                 this.selectedRow.staff_columns = result.staff_metadata;
                 this.missingColumns = this.metadata.checkMissingColumnMetadata(this.selectedRow.user_columns, this.selectedRow.staff_columns);
@@ -409,5 +410,11 @@ export class MetadataPlaygroundComponent {
       }
     }
 
+  }
+  openFieldMaskEditorModal() {
+    if (this.selectedRow) {
+      const ref = this.modal.open(FieldMaskEditorModalComponent, {scrollable: true})
+      ref.componentInstance.template = this.selectedRow
+    }
   }
 }

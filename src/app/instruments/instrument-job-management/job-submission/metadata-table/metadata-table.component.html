@@ -7,7 +7,11 @@
         @if (visibleColumnNames.includes(col.name)) {
           @if (!col.hidden || showHidden) {
             <th [ngbTooltip]="metadataService.helpData[col.name]" placement="top" container="body" scope="col" class="table-primary" (mouseover)="currentCell = {row: -1, col: index}">
-              {{col.name}}
+              @if (field_mask[col.name]) {
+                {{field_mask[col.name]}}
+              } @else {
+                {{col.name}}
+              }
               @if (currentCell) {
                 @if (currentCell.row === -1 && currentCell.col === index && (userCanEdit||staffModeActive)) {
                   <div ngbDropdown class="d-inline-block">
@@ -35,7 +39,11 @@
           @if (!col.hidden || showHidden) {
             @if (templateMode || staffModeActive) {
               <th [ngbTooltip]="metadataService.helpData[col.name]" placement="top" container="body" scope="col" [class.table-warning]="col.type != 'Factor value'" [class.table-danger]="col.type == 'Factor value'" (mouseover)="currentCell = {row: -1, col: (userMetadata.length+index)}">
-                {{col.name}}
+                @if (field_mask[col.name]) {
+                  {{field_mask[col.name]}}
+                } @else {
+                  {{col.name}}
+                }
                 @if (currentCell) {
                   @if (currentCell.row === -1 && currentCell.col === (userMetadata.length+index) && staffModeActive) {
                     <div ngbDropdown class="d-inline-block">
