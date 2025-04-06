@@ -1665,7 +1665,7 @@ export class MetadataService {
       }
 
     }
-    note_texts = [
+    const note_texts = [
       "Note: Cells that are empty will automatically be filled with 'not applicable' or 'no available' depending on the column when submitted.",
       "[*] User-specific favourite options.",
       "[**] Facility-recommended options.",
