@@ -97,7 +97,7 @@
       <button class="btn btn-warning" (click)="importFromJSON()" ngbTooltip="Import default data from json file">Import</button>
       <div ngbDropdown display="dynamic" class="d-inline-black">
         <button class="btn btn-primary" id="addMetadata" ngbDropdownToggle>
-          + User Metadata
+          + User Columns
         </button>
         <div ngbDropdownMenu aria-labelledby="addMetadata">
           @for (m of metadataService.userMetadataTemplate; track m.name) {
@@ -119,7 +119,7 @@
       </div>
       <div ngbDropdown display="dynamic" class="d-inline-black">
         <button class="btn btn-warning" id="addStaffMetadata" ngbDropdownToggle>
-          + Staff Metadata
+          + Staff Columns
         </button>
         <div ngbDropdownMenu aria-labelledby="addStaffMetadata">
           @for (m of metadataService.staffMetadataSpecific; track m) {
@@ -142,7 +142,7 @@
     </div>
     <b>Template Preview for <span class="text-primary">{{selectedTemplate.name}}</span></b>
     <div class="metadata-table-container">
-      <app-metadata-table [showHidden]="templateShowHidden" (metadataUpdated)="updateMetadataTemplate($event)" [templateMode]="true" [staffModeActive]="true" [sampleNumber]="5" [userMetadata]="selectedTemplate.user_columns" [staffMetadata]="selectedTemplate.staff_columns"></app-metadata-table>
+      <app-metadata-table [template]="selectedTemplate" [showHidden]="templateShowHidden" (metadataUpdated)="updateMetadataTemplate($event)" [templateMode]="true" [staffModeActive]="true" [sampleNumber]="5" [userMetadata]="selectedTemplate.user_columns" [staffMetadata]="selectedTemplate.staff_columns"></app-metadata-table>
     </div>
   }
 </div>
