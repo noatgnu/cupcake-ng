@@ -1166,7 +1166,7 @@ export class WebService {
     }
     return this.http.post<InstrumentUsage>(
       `${this.baseURL}/api/instrument_usage/`,
-      {time_started: time_start, time_ended: time_end, instrument: instrument_id, description: description, maintenance},
+      data,
       {responseType: 'json', observe: 'body'}
     )
   }

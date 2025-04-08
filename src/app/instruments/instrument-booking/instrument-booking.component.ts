@@ -85,6 +85,7 @@ export class InstrumentBookingComponent {
       ref.componentInstance.selectedInstrument = instrument
       ref.componentInstance.enableSearch = false
       ref.closed.subscribe((data: {instrument: Instrument, selectedRange: {started: Date |undefined, ended: Date | undefined}, usageDescription: string, maintenance: boolean, repeat: number, repeatUntil: NgbDateStruct|undefined}) => {
+        console.log(data)
         // @ts-ignore
         this.web.createInstrumentUsage(data.instrument.id, data.selectedRange.started, data.selectedRange.ended, data.usageDescription, data.maintenance, data.repeat, data.repeatUntil).subscribe((data) => {
           this.instrumentService.updateTrigger.next(true)

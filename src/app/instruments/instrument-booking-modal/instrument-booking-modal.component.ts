@@ -93,7 +93,7 @@ export class InstrumentBookingModalComponent implements OnInit, AfterViewInit{
 
   clickInstrument(instrument: Instrument) {
     if (this.dataService.instrumentPermissions[instrument.id].can_book) {
-      this.web.getInstrumentUsage(instrument.id).subscribe(instrumentUsageQuery => {
+      this.web.getInstrumentUsage(instrument.id, undefined, undefined, undefined, 100).subscribe(instrumentUsageQuery => {
         this.instrumentUsageQuery = instrumentUsageQuery
         this.selectedInstrument = instrument
       })
