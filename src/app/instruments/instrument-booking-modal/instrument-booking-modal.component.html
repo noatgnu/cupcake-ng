@@ -124,6 +124,26 @@
               <input type="checkbox" class="form-check-input" [(ngModel)]="maintenance">
               <label class="form-check-label">This is a booking for instrument maintenance purpose</label>
             </div>
+            @if (maintenance) {
+              <div class="d-flex flex-column gap-2">
+                <div class="form-group mt-2">
+                  <label for="repeatDays">Repeat every (days)</label>
+                  <input type="number" class="form-control" [(ngModel)]="repeat" id="repeatDays" min="0" placeholder="Enter number of days">
+                </div>
+                <div class="input-group mt-2">
+                  <input
+                    class="form-control"
+                    placeholder="yyyy-mm-dd"
+                    name="dp"
+                    ngbDatepicker
+                    #d="ngbDatepicker"
+                    [(ngModel)]="repeatUntil"
+                  />
+                  <button class="btn btn-outline-secondary bi bi-calendar3" (click)="d.toggle()" type="button"></button>
+                </div>
+              </div>
+
+            }
           }
         }
       </div>

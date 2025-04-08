@@ -4,6 +4,7 @@ import {FormsModule} from "@angular/forms";
 import {HandwrittenAnnotationComponent} from "../handwritten-annotation/handwritten-annotation.component";
 import {AnnotationPresenterComponent} from "../annotation-presenter/annotation-presenter.component";
 import {
+  NgbDateStruct,
   NgbDropdown,
   NgbDropdownItem,
   NgbDropdownMenu,
@@ -543,8 +544,8 @@ export class StepViewComponent {
 
     } else if (item === "Instrument") {
       const ref = this.modal.open(InstrumentBookingModalComponent, {scrollable: true})
-      ref.closed.subscribe((data: {instrument: Instrument, selectedRange: {started: Date |undefined, ended: Date | undefined}, usageDescription: string, maintenance: boolean}) => {
-        this.web.createInstrumentUsageAnnotation(this.dataService.currentSession?.unique_id, data.instrument.id, data.selectedRange.started, data.selectedRange.ended, this._currentStep?.id, data.usageDescription, undefined, null, null, data.maintenance).subscribe((data: any) => {
+      ref.closed.subscribe((data: {instrument: Instrument, selectedRange: {started: Date |undefined, ended: Date | undefined}, usageDescription: string, maintenance: boolean, repeat: number, repeatUntil: NgbDateStruct|undefined}) => {
+        this.web.createInstrumentUsageAnnotation(this.dataService.currentSession?.unique_id, data.instrument.id, data.selectedRange.started, data.selectedRange.ended, this._currentStep?.id, data.usageDescription, undefined, null, null, data.maintenance, data.repeat, data.repeatUntil).subscribe((data: any) => {
           this.toastService.show('Annotation', 'Instrument Booking Saved Successfully')
           this.refreshAnnotations();
         })

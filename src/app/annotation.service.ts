@@ -9,7 +9,7 @@ import {
 } from "./protocol-session/random-annotation-modal/random-annotation-modal.component";
 import {UploadLargeFileModalComponent} from "./upload-large-file-modal/upload-large-file-modal.component";
 import {WebService} from "./web.service";
-import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
+import {NgbDateStruct, NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import {ToastService} from "./toast.service";
 import {Subject} from "rxjs";
 import {Annotation, AnnotationQuery} from "./annotation";
@@ -140,8 +140,8 @@ export class AnnotationService {
 
     } else if (item === "Instrument") {
       const ref = this.modal.open(InstrumentBookingModalComponent, {scrollable: true})
-      ref.closed.subscribe((data: {instrument: Instrument, selectedRange: {started: Date |undefined, ended: Date | undefined}, usageDescription: string, maintenance: boolean}) => {
-        this.web.createInstrumentUsageAnnotation(null, data.instrument.id, data.selectedRange.started, data.selectedRange.ended, null, data.usageDescription, instrument_job_id, instrument_user_type, null, data.maintenance).subscribe((data: any) => {
+      ref.closed.subscribe((data: {instrument: Instrument, selectedRange: {started: Date |undefined, ended: Date | undefined}, usageDescription: string, maintenance: boolean, repeat: number, repeatUntil: NgbDateStruct|undefined}) => {
+        this.web.createInstrumentUsageAnnotation(null, data.instrument.id, data.selectedRange.started, data.selectedRange.ended, null, data.usageDescription, instrument_job_id, instrument_user_type, null, data.maintenance, data.repeat, data.repeatUntil).subscribe((data: any) => {
           this.toastService.show('Annotation', 'Instrument Booking Saved Successfully')
           this.refreshAnnotation.next(true);
         })

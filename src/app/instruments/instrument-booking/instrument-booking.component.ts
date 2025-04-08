@@ -3,6 +3,7 @@ import {WebService} from "../../web.service";
 import {Instrument, InstrumentQuery, InstrumentUsageQuery} from "../../instrument";
 import {FormBuilder, ReactiveFormsModule} from "@angular/forms";
 import {
+  NgbDateStruct,
   NgbModal,
   NgbNav,
   NgbNavContent,
@@ -83,9 +84,9 @@ export class InstrumentBookingComponent {
       const ref = this.modal.open(InstrumentBookingModalComponent, {scrollable: true, backdrop: "static", size: "lg"})
       ref.componentInstance.selectedInstrument = instrument
       ref.componentInstance.enableSearch = false
-      ref.closed.subscribe((data: {instrument: Instrument, selectedRange: {started: Date |undefined, ended: Date | undefined}, usageDescription: string, maintenance: boolean}) => {
+      ref.closed.subscribe((data: {instrument: Instrument, selectedRange: {started: Date |undefined, ended: Date | undefined}, usageDescription: string, maintenance: boolean, repeat: number, repeatUntil: NgbDateStruct|undefined}) => {
         // @ts-ignore
-        this.web.createInstrumentUsage(data.instrument.id, data.selectedRange.started, data.selectedRange.ended, data.usageDescription, data.maintenance).subscribe((data) => {
+        this.web.createInstrumentUsage(data.instrument.id, data.selectedRange.started, data.selectedRange.ended, data.usageDescription, data.maintenance, data.repeat, data.repeatUntil).subscribe((data) => {
           this.instrumentService.updateTrigger.next(true)
           this.toastService.show("Instrument booking", "Successfully booked instrument")
         }, (error) => {

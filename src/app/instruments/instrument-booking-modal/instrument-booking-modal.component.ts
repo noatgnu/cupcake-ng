@@ -1,6 +1,6 @@
 import {AfterViewInit, Component, Input, OnInit} from '@angular/core';
 import {Instrument, InstrumentQuery, InstrumentUsage, InstrumentUsageQuery} from "../../instrument";
-import {NgbActiveModal, NgbAlert, NgbTypeahead} from "@ng-bootstrap/ng-bootstrap";
+import {NgbActiveModal, NgbAlert, NgbDateStruct, NgbInputDatepicker, NgbTypeahead} from "@ng-bootstrap/ng-bootstrap";
 import {WebService} from "../../web.service";
 import {FormBuilder, FormsModule, ReactiveFormsModule, Validators} from "@angular/forms";
 import {ToastService} from "../../toast.service";
@@ -18,7 +18,8 @@ import {AccountsService} from "../../accounts/accounts.service";
     BookingTimeVisualizerComponent,
     FormsModule,
     DatePipe,
-    NgbAlert
+    NgbAlert,
+    NgbInputDatepicker
   ],
     templateUrl: './instrument-booking-modal.component.html',
     styleUrl: './instrument-booking-modal.component.scss'
@@ -32,6 +33,8 @@ export class InstrumentBookingModalComponent implements OnInit, AfterViewInit{
   @Input() selectedInstrument!: Instrument
   @Input() enableSearch: boolean = true
   selectedInstrumentUsage!: InstrumentUsage|undefined
+  repeat: number = 0
+  repeatUntil: NgbDateStruct|undefined = undefined
 
   searchForm = this.fb.group({
     instrument: [""]
@@ -112,7 +115,9 @@ export class InstrumentBookingModalComponent implements OnInit, AfterViewInit{
       instrument: this.selectedInstrument,
       selectedRange: this.selectedRange,
       usageDescription: this.usageDescription,
-      maintenance: this.maintenance
+      maintenance: this.maintenance,
+      repeat: this.repeat,
+      repeatUntil: this.repeatUntil,
     })
   }
 

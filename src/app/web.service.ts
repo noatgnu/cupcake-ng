@@ -1081,7 +1081,7 @@ export class WebService {
     )
   }
 
-  createInstrumentUsageAnnotation(session_id: string|undefined|null, instrument_id: number, time_started: Date|undefined, time_ended: Date|undefined, step_id: number|null = 0, annotation: string, instrument_job_id: number|null|undefined = undefined, instrument_user_type: null|'user_annotation'|'staff_annotation' = null, stored_reagent_id: number|null = null, maintenance: boolean = false) {
+  createInstrumentUsageAnnotation(session_id: string|undefined|null, instrument_id: number, time_started: Date|undefined, time_ended: Date|undefined, step_id: number|null = 0, annotation: string, instrument_job_id: number|null|undefined = undefined, instrument_user_type: null|'user_annotation'|'staff_annotation' = null, stored_reagent_id: number|null = null, maintenance: boolean = false, repeat: number = 0, repeatUntil: NgbDateStruct|undefined = undefined) {
     const payload: any = { annotation_type: 'instrument', instrument: instrument_id, time_started: time_started, time_ended: time_ended, annotation: annotation, maintenance}
     if (step_id !== 0) {
       payload['step'] = step_id
@@ -1098,6 +1098,14 @@ export class WebService {
     if (stored_reagent_id) {
       payload['stored_reagent'] = stored_reagent_id
     }
+    if (repeatUntil) {
+      const newDate = new Date(repeatUntil.year, repeatUntil.month - 1, repeatUntil.day)
+      payload['repeat_until'] = newDate
+    }
+    if (repeat) {
+      payload['repeat'] = repeat
+    }
+
     return this.http.post<Annotation>(
       `${this.baseURL}/api/annotation/`,
       payload,
@@ -1150,7 +1158,12 @@ export class WebService {
     )
   }
 
-  createInstrumentUsage(instrument_id: number, time_start: Date, time_end: Date, description: string, maintenance: boolean = false) {
+  createInstrumentUsage(instrument_id: number, time_start: Date, time_end: Date, description: string, maintenance: boolean = false, repeat: number = 0, repeatUntil: NgbDateStruct|undefined = undefined) {
+    const data: any = {time_started: time_start, time_ended: time_end, instrument: instrument_id, description: description, maintenance, repeat: repeat}
+    if (repeatUntil) {
+      const newDate = new Date(repeatUntil.year, repeatUntil.month - 1, repeatUntil.day)
+      data['repeat_until'] = newDate
+    }
     return this.http.post<InstrumentUsage>(
       `${this.baseURL}/api/instrument_usage/`,
       {time_started: time_start, time_ended: time_end, instrument: instrument_id, description: description, maintenance},

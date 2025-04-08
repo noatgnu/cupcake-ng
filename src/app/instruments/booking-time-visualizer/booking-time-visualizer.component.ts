@@ -773,7 +773,8 @@ export class BookingTimeVisualizerComponent implements OnInit, AfterViewInit,  A
       const currentDate = new Date();
       const diffInDays = Math.ceil((date.getTime() - currentDate.getTime()) / (1000 * 3600 * 24));
 
-      return diffInDays > maxDaysAhead && maxDaysAhead !== 0;
+      return diffInDays > maxDaysAhead
+        //&& maxDaysAhead !== 0;
     }
     return false;
   }
@@ -783,7 +784,8 @@ export class BookingTimeVisualizerComponent implements OnInit, AfterViewInit,  A
       const maxDays = this.instrument.max_days_within_usage_pre_approval;
       const durationInDays = Math.ceil((end.getTime() - start.getTime()) / (1000 * 3600 * 24));
 
-      return durationInDays > maxDays && maxDays !== 0;
+      return durationInDays > maxDays
+        //&& maxDays !== 0;
     }
     return false;
   }
