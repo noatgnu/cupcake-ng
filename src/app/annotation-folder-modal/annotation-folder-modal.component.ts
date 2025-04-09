@@ -5,6 +5,7 @@ import {WebService} from "../web.service";
 import {AnnotationFileComponent} from "../annotation/annotation-file/annotation-file.component";
 import {DataService} from "../data.service";
 import {FormBuilder} from "@angular/forms";
+import {AnnotationService} from "../annotation.service";
 
 @Component({
   selector: 'app-annotation-folder-modal',
@@ -36,7 +37,12 @@ export class AnnotationFolderModalComponent {
     searchTerm: ['']
   })
 
-  constructor(private activeModal: NgbActiveModal, private web: WebService, public dataService: DataService, private fb: FormBuilder) {
+  constructor(private activeModal: NgbActiveModal, private web: WebService, public dataService: DataService, private fb: FormBuilder, private annotationService: AnnotationService) {
+    this.annotationService.refreshAnnotation.asObservable().subscribe(
+      () => {
+        this.getAnnotation()
+      }
+    )
   }
 
   close() {

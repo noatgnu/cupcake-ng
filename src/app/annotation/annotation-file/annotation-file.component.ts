@@ -30,4 +30,10 @@ export class AnnotationFileComponent {
 
   }
 
+  deleteAnnotation() {
+    if (this.annotation) {
+      this.annotationService.deleteAnnotation(this.annotation.id)
+    }
+  }
+
 }
