@@ -2275,8 +2275,8 @@ export class WebService {
     return this.http.post<InstrumentJob>(`${this.baseURL}/api/instrument_jobs/${instrument_job_id}/copy_metadata_from_protocol/`, {metadata_ids}, {responseType: 'json', observe: 'body'})
   }
 
-  exportUsage(instruments: number[], time_started: Date, time_ended: Date, lab_group: number[] = [], user: number[] = [], mode: string = "user", calculate_with_duration_cutoff: boolean = false, instance_id: string = "", file_format: string = "xlsx") {
-    return this.http.post(`${this.baseURL}/api/instrument_usage/export_usage/`, {instruments, time_started, time_ended, lab_group, user, mode, calculate_with_duration_cutoff, instance_id, file_format}, {responseType: 'json', observe: 'body'})
+  exportUsage(instruments: number[], time_started: Date, time_ended: Date, lab_group: number[] = [], user: number[] = [], mode: string = "user", calculate_with_duration_cutoff: boolean = false, instance_id: string = "", file_format: string = "xlsx", includes_maintenance: boolean = false, approved_only: boolean = true) {
+    return this.http.post(`${this.baseURL}/api/instrument_usage/export_usage/`, {instruments, time_started, time_ended, lab_group, user, mode, calculate_with_duration_cutoff, instance_id, file_format, includes_maintenance, approved_only}, {responseType: 'json', observe: 'body'})
   }
 
   approveUsageToggle(instrument_usage_id: number) {

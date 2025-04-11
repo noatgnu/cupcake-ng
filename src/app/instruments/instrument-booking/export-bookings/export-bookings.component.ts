@@ -31,7 +31,9 @@ export class ExportBookingsComponent implements OnDestroy {
     mode: ['user'],
     dataSearch: [''],
     splitted_boundaries_calculation: [false],
-    file_format: ['xlsx']
+    file_format: ['xlsx'],
+    include_maintenance: [false],
+    approved_only: [true],
   })
 
   selectedList: any[] = []
@@ -180,12 +182,12 @@ export class ExportBookingsComponent implements OnDestroy {
       if (this.selectedList.length > 0) {
         if (this.form.value.mode === 'user') {
           // @ts-ignore
-          this.web.exportUsage(this.instrumentList.map((i) => i.id), fromDate, toDate, [], this.selectedList.map((s) =>s.id), this.form.value.mode, this.form.value.splitted_boundaries_calculation, this.web.cupcakeInstanceID, this.form.value.file_format).subscribe(() => {
+          this.web.exportUsage(this.instrumentList.map((i) => i.id), fromDate, toDate, [], this.selectedList.map((s) =>s.id), this.form.value.mode, this.form.value.splitted_boundaries_calculation, this.web.cupcakeInstanceID, this.form.value.file_format, this.form.value.include_maintenance, this.form.value.approved_only).subscribe(() => {
 
           });
         } else {
           // @ts-ignore
-          this.web.exportUsage(this.instrumentList.map((i) => i.id), fromDate, toDate, this.selectedList.map((s) =>s.id), [], this.form.value.mode, this.form.value.splitted_boundaries_calculation, this.web.cupcakeInstanceID, this.form.value.file_format).subscribe(() => {
+          this.web.exportUsage(this.instrumentList.map((i) => i.id), fromDate, toDate, this.selectedList.map((s) =>s.id), [], this.form.value.mode, this.form.value.splitted_boundaries_calculation, this.web.cupcakeInstanceID, this.form.value.file_format, this.form.value.include_maintenance, this.form.value.approved_only).subscribe(() => {
 
           });
         }
