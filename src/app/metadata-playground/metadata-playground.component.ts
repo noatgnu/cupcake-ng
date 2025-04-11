@@ -10,7 +10,7 @@ import {
   NgbDropdownItem,
   NgbDropdownMenu,
   NgbDropdownToggle, NgbModal,
-  NgbPagination
+  NgbPagination, NgbTooltip
 } from "@ng-bootstrap/ng-bootstrap";
 import {
   MetadataTableComponent
@@ -35,7 +35,8 @@ import {FieldMaskEditorModalComponent} from "../field-mask-editor-modal/field-ma
     NgbDropdownItem,
     NgbDropdownMenu,
     NgbDropdownToggle,
-    NgbAlert
+    NgbAlert,
+    NgbTooltip
   ],
   templateUrl: './metadata-playground.component.html',
   styleUrl: './metadata-playground.component.scss'

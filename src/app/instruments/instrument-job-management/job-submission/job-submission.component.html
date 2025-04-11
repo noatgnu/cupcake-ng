@@ -49,7 +49,7 @@
       </p>
       <form [formGroup]="fundingForm" class="d-flex gap-2 flex-wrap">
         <div class="form-group">
-          <label>Cost Center</label>
+          <label>Cost Centre</label>
           <input (focus)="currentField='cost_center'" type="text" class="form-control" formControlName="cost_center" [ngbTypeahead]="individualFieldSearchValue">
         </div>
         <div class="form-group">
@@ -254,9 +254,9 @@
             <div ngbDropdown class="d-flex gap-2">
               <button class="btn btn-secondary" ngbDropdownToggle><i class="bi bi-download"></i> Instrument File</button>
               <div ngbDropdownMenu>
-                @if (job.injection_volume && job.sample_number && job.selected_template) {
-                  <button ngbDropdownItem (click)="exportFile('injection')">Randomized Injection</button>
-                }
+                <button ngbDropdownItem ngbTooltip="Requires injection volume, sample number, data file column and position column" (click)="exportFile('injection')" [disabled]="!(job.injection_volume && job.sample_number && job.selected_template)">
+                  Randomized Injection
+                </button>
               </div>
             </div>
           }
