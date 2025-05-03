@@ -1,92 +1,222 @@
-<div class="container d-flex flex-column gap-2 mt-2">
-  <form [formGroup]="form" class="d-flex gap-2" (ngSubmit)="search()">
-    <div class="form-floating">
-      <input id="search" class="form-control" type="search" formControlName="job_name">
-      <label for="search">Search</label>
+<div class="container-fluid mt-3">
+  <!-- Search and Filter Panel -->
+  <div class="card mb-3 shadow-sm">
+    <div class="card-header">
+      <div class="d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">
+          <i class="bi bi-funnel me-2"></i> Job Filters
+        </h5>
+        <button type="button" class="btn btn-sm btn-outline-secondary"
+                data-bs-toggle="collapse" data-bs-target="#filterCollapse"
+                aria-expanded="true" aria-controls="filterCollapse">
+          <i class="bi bi-chevron-up"></i>
+        </button>
+      </div>
     </div>
-    <div class="form-floating">
-      <select id="status" class="form-control" formControlName="status">
-        <option value="">All</option>
-        <option value="draft">Draft</option>
-        <option value="submitted">Submitted</option>
-        <option value="completed">Completed</option>
-        <option value="cancelled">Cancelled</option>
-      </select>
-      <label for="status">Status</label>
+    <div class="collapse show" id="filterCollapse">
+      <div class="card-body">
+        <form [formGroup]="form" (ngSubmit)="search()" class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-3">
+          <div class="col">
+            <div class="form-floating">
+              <input id="search" class="form-control" type="search" formControlName="job_name">
+              <label for="search"><i class="bi bi-search me-1"></i> Job Name</label>
+            </div>
+          </div>
+
+          <div class="col">
+            <div class="form-floating">
+              <select id="status" class="form-select" formControlName="status">
+                <option value="">All</option>
+                <option value="draft">Draft</option>
+                <option value="submitted">Submitted</option>
+                <option value="completed">Completed</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
+              <label for="status"><i class="bi bi-flag me-1"></i> Status</label>
+            </div>
+          </div>
+
+          <div class="col">
+            <div class="form-floating">
+              <select id="mode" class="form-select" formControlName="mode">
+                <option value="">User's Jobs</option>
+                <option value="lab_group">Job From Users of Specific Group</option>
+                <option value="service_lab_group">Service Group's Jobs</option>
+                <option value="staff">Direct Assigned Jobs</option>
+              </select>
+              <label for="mode"><i class="bi bi-person-badge me-1"></i> Job Type</label>
+            </div>
+          </div>
+
+          @if (form.value['mode'] === 'lab_group' || form.value['mode'] === 'service_lab_group') {
+            <div class="col">
+              <div class="form-floating">
+                <input id="searchLabGroup" class="form-control" type="search"
+                       formControlName="lab_group_search"
+                       [ngbTypeahead]="searchLabGroup"
+                       [inputFormatter]="formatter"
+                       [resultFormatter]="formatter"
+                       (selectItem)="selectLabGroup($event)"
+                       placeholder="Search lab group">
+                <label for="searchLabGroup"><i class="bi bi-building me-1"></i> Lab Group</label>
+                @if (searching) {
+                  <div class="spinner-border spinner-border-sm text-primary position-absolute end-0 me-3 top-50 translate-middle-y" role="status">
+                    <span class="visually-hidden">Searching...</span>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+
+          <div class="col">
+            <div class="form-floating">
+              <select id="searchEngine" class="form-select" formControlName="search_engine">
+                <option value="">All</option>
+                <option value="MaxQuant">MaxQuant</option>
+                <option value="Proteome Discoverer">Proteome Discoverer</option>
+                <option value="Skyline">Skyline</option>
+                <option value="DIANN">DIANN</option>
+                <option value="MSFragger">MSFragger</option>
+                <option value="Fragpipe">Fragpipe</option>
+                <option value="Other">Other</option>
+              </select>
+              <label for="searchEngine"><i class="bi bi-gear me-1"></i> Search Engine</label>
+            </div>
+          </div>
+
+          <div class="col">
+            <div class="form-floating">
+              <input id="searchEngineVersion" class="form-control" type="search" formControlName="search_engine_version">
+              <label for="searchEngineVersion"><i class="bi bi-tag me-1"></i> Engine Version</label>
+            </div>
+          </div>
+
+          <div class="col">
+            <div class="form-floating">
+              <input type="text" id="funder" class="form-control" formControlName="funder"
+                     [ngbTypeahead]="individualFieldSearchValue"
+                     (focus)="currentField = 'funder'"
+                     (click)="currentField = 'funder'">
+              <label for="funder"><i class="bi bi-cash-coin me-1"></i> Funder</label>
+            </div>
+          </div>
+
+          <div class="col">
+            <div class="form-floating">
+              <input type="text" id="costCenter" class="form-control" formControlName="cost_center"
+                     [ngbTypeahead]="individualFieldSearchValue"
+                     (focus)="currentField = 'cost_center'"
+                     (click)="currentField = 'cost_center'">
+              <label for="costCenter"><i class="bi bi-briefcase me-1"></i> Cost Center</label>
+            </div>
+          </div>
+
+          <div class="col-12">
+            <div class="d-flex gap-2">
+              <button type="submit" class="btn btn-primary">
+                <i class="bi bi-search me-2"></i> Search
+              </button>
+              <button type="reset" class="btn btn-outline-secondary">
+                <i class="bi bi-x-circle me-2"></i> Clear
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
     </div>
-    <div class="form-floating">
-      <select id="mode" class="form-control" formControlName="mode">
-        <option value="lab_group">Job From Users of Specific Group</option>
-        <option value="service_lab_group">Service Group's Jobs</option>
-        <option value="staff">Direct Assigned Jobs</option>
-        <option value="">User's Jobs</option>
-      </select>
-      <label for="mode">Job Type</label>
-    </div>
-    @if (form.value['mode'] === 'lab_group' || form.value['mode'] === 'service_lab_group') {
-      <div class="form-floating">
-        <input id="searchLabGroup" class="form-control" type="search" formControlName="lab_group_search" [ngbTypeahead]="searchLabGroup" [inputFormatter]="formatter" [resultFormatter]="formatter" (selectItem)="selectLabGroup($event)">
-        <label for="searchLabGroup">Search Lab Group</label>
+  </div>
+
+  @if (instrumentJobQuery) {
+    @if (instrumentJobQuery.results.length > 0) {
+      <div class="card shadow-sm">
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover table-striped mb-0">
+              <thead class="table-primary">
+              <tr>
+                <th scope="col" class="text-center" style="width: 80px">ID</th>
+                <th scope="col">Name</th>
+                <th scope="col" style="width: 150px">Status</th>
+                <th scope="col" style="width: 180px">Cost Centre</th>
+                <th scope="col" style="width: 180px">Funder</th>
+                <th scope="col" class="text-center" style="width: 100px">Actions</th>
+              </tr>
+              </thead>
+              <tbody>
+                @for (job of instrumentJobQuery.results; track job.id) {
+                  <tr>
+                    <td class="text-center fw-bold">
+                      <a href="/#/instruments/jobs/{{job.id}}" class="text-decoration-none" (click)="selectJob.emit(job)">{{job.id}}</a>
+                    </td>
+                    <td class="text-nowrap text-truncate" style="max-width: 300px;" [title]="job.job_name">{{job.job_name}}</td>
+                    <td>
+                      <span class="badge rounded-pill"
+                            [ngClass]="{
+                              'bg-warning text-dark': job.status === 'draft',
+                              'bg-primary': job.status === 'submitted',
+                              'bg-success': job.status === 'completed',
+                              'bg-secondary': job.status === 'cancelled'
+                            }">
+                        <i class="bi"
+                           [ngClass]="{
+                            'bi-file-earmark': job.status === 'draft',
+                            'bi-hourglass-split': job.status === 'submitted',
+                            'bi-check-circle': job.status === 'completed',
+                            'bi-x-circle': job.status === 'cancelled'
+                          }"></i>
+                        {{job.status}}
+                      </span>
+                    </td>
+                    <td class="text-truncate" [title]="job.cost_center">{{job.cost_center || '-'}}</td>
+                    <td class="text-truncate" [title]="job.funder">{{job.funder || '-'}}</td>
+                    <td>
+                      <div class="d-flex justify-content-center gap-1">
+                        <a href="/#/instruments/jobs/{{job.id}}" class="btn btn-sm btn-outline-primary" title="View details"
+                           (click)="selectJob.emit(job)">
+                          <i class="bi bi-eye"></i>
+                        </a>
+                        <button type="button" class="btn btn-sm btn-outline-secondary" title="More actions">
+                          <i class="bi bi-three-dots-vertical"></i>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="card-footer">
+          <div class="d-flex justify-content-between align-items-center">
+            <ngb-pagination
+              (pageChange)="pageChange($event)"
+              [collectionSize]="instrumentJobQuery.count"
+              [(page)]="page"
+              [pageSize]="pageSize"
+              [maxSize]="5"
+              [boundaryLinks]="true"
+              [rotate]="true"
+              aria-label="Job pagination"
+              class="mb-0">
+            </ngb-pagination>
+          </div>
+        </div>
+      </div>
+    } @else {
+      <div class="card shadow-sm">
+        <div class="card-body text-center py-5">
+          <i class="bi bi-inbox fs-1 text-muted mb-3 d-block"></i>
+          <h5 class="mb-2">No Jobs Found</h5>
+          <p class="text-muted">Try adjusting your search filters or create a new job</p>
+        </div>
       </div>
     }
-    <div class="form-floating">
-      <select id="searchEngine" class="form-select" formControlName="search_engine">
-        <option value="MaxQuant">MaxQuant</option>
-        <option value="Proteome Discoverer">Proteome Discoverer</option>
-        <option value="Skyline">Skyline</option>
-        <option value="DIANN">DIANN</option>
-        <option value="MSFragger">MSFragger</option>
-        <option value="Fragpipe">Fragpipe</option>
-        <option value="Other">Other</option>
-        <option value="">All</option>
-      </select>
-      <label for="searchEngine">Search Engine</label>
+  } @else {
+    <div class="card shadow-sm">
+      <div class="card-body text-center py-5">
+        <div class="spinner-border text-primary mb-3" role="status"></div>
+        <p class="text-muted">Loading jobs...</p>
+      </div>
     </div>
-    <div class="form-floating">
-      <input id="searchEngineVersion" class="form-control" type="search" formControlName="search_engine_version">
-      <label for="searchEngineVersion">Search Engine Version</label>
-    </div>
-    <button type="submit" class="btn btn-link"><i class="bi bi-search"></i></button>
-  </form>
-  @if (instrumentJobQuery) {
-    <table class="table">
-      <thead>
-      <tr>
-        <th scope="col">
-          ID
-        </th>
-        <th scope="col">
-          Name
-        </th>
-        <th scope="col">
-          Status
-        </th>
-        <th scope="col">
-          Cost Centre
-        </th>
-        <th scope="col">
-          Funder
-        </th>
-      </tr>
-      </thead>
-      <tbody>
-        @if (instrumentJobQuery) {
-          @for (j of instrumentJobQuery.results; track j.id) {
-            <tr>
-              <td>
-                <a href="/#/instruments/jobs/{{j.id}}" (click)="selectJob.emit(j)">{{j.id}}</a>
-              </td>
-              <td>{{j.job_name}}</td>
-              <td>{{j.status}}</td>
-              <td>{{j.cost_center}}</td>
-              <td>{{j.funder}}</td>
-            </tr>
-          }
-        }
-      </tbody>
-    </table>
-    <ngb-pagination (pageChange)="pageChange($event)" [collectionSize]="instrumentJobQuery.count" [(page)]="page" [pageSize]="pageSize" [maxSize]="5" [boundaryLinks]="true" [rotate]="true"></ngb-pagination>
   }
-
-
 </div>

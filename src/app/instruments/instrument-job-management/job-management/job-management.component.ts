@@ -5,14 +5,16 @@ import {FormBuilder, ReactiveFormsModule} from "@angular/forms";
 import {catchError, debounceTime, distinctUntilChanged, map, Observable, of, switchMap, tap} from "rxjs";
 import {LabGroup, LabGroupQuery} from "../../../lab-group";
 import {NgbPagination, NgbTypeahead, NgbTypeaheadSelectItemEvent} from "@ng-bootstrap/ng-bootstrap";
+import {NgClass} from "@angular/common";
 
 @Component({
     selector: 'app-job-management',
-    imports: [
-        ReactiveFormsModule,
-        NgbTypeahead,
-        NgbPagination
-    ],
+  imports: [
+    ReactiveFormsModule,
+    NgbTypeahead,
+    NgbPagination,
+    NgClass
+  ],
     templateUrl: './job-management.component.html',
     styleUrl: './job-management.component.scss'
 })

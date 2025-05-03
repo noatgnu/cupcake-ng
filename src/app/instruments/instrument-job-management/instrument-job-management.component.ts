@@ -1,10 +1,18 @@
 import {Component, EventEmitter, Input, Output} from '@angular/core';
-import {NgbNav, NgbNavContent, NgbNavItem, NgbNavLinkButton, NgbNavOutlet} from "@ng-bootstrap/ng-bootstrap";
+import {
+  NgbNav,
+  NgbNavContent,
+  NgbNavItem,
+  NgbNavLinkButton,
+  NgbNavOutlet,
+  NgbPagination
+} from "@ng-bootstrap/ng-bootstrap";
 import {JobSubmissionComponent} from "./job-submission/job-submission.component";
 import {WebService} from "../../web.service";
 import {InstrumentJob} from "../../instrument-job";
 import {JobManagementComponent} from "./job-management/job-management.component";
 import {JobTemplateManagementComponent} from "./job-template-management/job-template-management.component";
+import {NgClass} from "@angular/common";
 
 @Component({
     selector: 'app-instrument-job-management',
@@ -16,7 +24,9 @@ import {JobTemplateManagementComponent} from "./job-template-management/job-temp
     NgbNavOutlet,
     JobSubmissionComponent,
     JobManagementComponent,
-    JobTemplateManagementComponent
+    JobTemplateManagementComponent,
+    NgbPagination,
+    NgClass
   ],
     templateUrl: './instrument-job-management.component.html',
     styleUrl: './instrument-job-management.component.scss'
@@ -24,7 +34,9 @@ import {JobTemplateManagementComponent} from "./job-template-management/job-temp
 export class InstrumentJobManagementComponent {
   activeTab: string = 'submission'
 
-  private _currentJob: InstrumentJob|undefined
+
+  private _currentJob: InstrumentJob | undefined
+
   @Input() set currentJobId(value: number) {
     if (value) {
       this.web.getInstrumentJob(value).subscribe((data) => {
@@ -33,11 +45,11 @@ export class InstrumentJobManagementComponent {
     }
   }
 
-  set currentJob(value: InstrumentJob|undefined) {
+  set currentJob(value: InstrumentJob | undefined) {
     this._currentJob = value
   }
 
-  get currentJob(): InstrumentJob|undefined {
+  get currentJob(): InstrumentJob | undefined {
     return this._currentJob
   }
 

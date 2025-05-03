@@ -1,364 +1,459 @@
 <div class="container d-flex flex-column gap-2">
   @if (accountService.loggedIn) {
-    <form [formGroup]="form">
+    <form [formGroup]="form" class="d-flex flex-column gap-3 mb-3">
       <div class="form-group">
-        <label for="jobName">Job Name</label>
-        <input id="jobName" type="text" [ngClass]="{'dirty-control': form.controls['job_name'].dirty}" class="form-control" formControlName="job_name" placeholder="Enter job name">
+        <label for="jobName" class="form-label">Job Name <span class="text-danger">*</span></label>
+        <input
+          id="jobName"
+          type="text"
+          class="form-control"
+          [ngClass]="{'is-invalid': form.controls['job_name'].invalid && form.controls['job_name'].touched}"
+          formControlName="job_name"
+          placeholder="Enter job name">
+        @if (form.controls['job_name'].invalid && form.controls['job_name'].touched) {
+          <div class="invalid-feedback">
+            Job name is required
+          </div>
+        }
       </div>
     </form>
 
-
-    <form [formGroup]="projectForm" class="d-flex flex-column gap-2">
+    <form [formGroup]="projectForm" class="d-flex flex-column gap-3">
       <div class="form-group">
-        <label for="projectName">Project Name @if (!selectedProject) {(required)}</label>
-        <div class="d-flex gap-2">
-          <input id="projectName" type="search" class="form-control" formControlName="project_name"
-                 (selectItem)="onProjectSelected($event)"
-                 [ngbTypeahead]="searchProjects"
-                 [resultFormatter]="formatter" [inputFormatter]="formatter" placeholder="Search for a project...">
-          @if (projectSearchLoading) {
-            <div class="spinner-border spinner-border-sm" role="status">
-              <span class="visually-hidden">Loading...</span>
-            </div>
-          }
-
+        @if (!selectedProject) {
+          <label for="projectName" class="form-label">Project Name <span class="text-danger">*</span></label>
+        } @else {
+          <label for="projectName" class="form-label">Project Name</label>
+        }
+        <div class="input-group">
+          <input
+            id="projectName"
+            type="search"
+            class="form-control"
+            [ngClass]="{'is-invalid': !selectedProject && projectForm.controls['project_name'].invalid && projectForm.controls['project_name'].touched}"
+            formControlName="project_name"
+            (selectItem)="onProjectSelected($event)"
+            [ngbTypeahead]="searchProjects"
+            [resultFormatter]="formatter"
+            [inputFormatter]="formatter"
+            placeholder="Search for a project...">
+          <span class="input-group-text" *ngIf="projectSearchLoading">
+        <div class="spinner-border spinner-border-sm" role="status">
+          <span class="visually-hidden">Loading projects...</span>
+        </div>
+      </span>
+          <div class="invalid-feedback" *ngIf="!selectedProject && projectForm.controls['project_name'].invalid && projectForm.controls['project_name'].touched">
+            Project name is required
+          </div>
         </div>
       </div>
+
       @if (selectedProject) {
-        <div>
-          <p>
-            <b><a href="/#/project-editor/{{selectedProject.id}}">{{selectedProject.project_name}}</a></b><br>
-            <b>Created at</b>: {{selectedProject.created_at | date: 'short'}}<br>
-            <b>Description</b>: {{selectedProject.project_description}}
-          </p>
-          <button class="btn btn-sm btn-danger" ngbTooltip="Remove from selection" (click)="selectedProject = undefined; projectForm.reset()">
-            <i class="bi bi-trash"></i>
-          </button>
+        <div class="card">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start">
+              <div>
+                <h5 class="card-title">
+                  <a href="/#/project-editor/{{selectedProject.id}}">{{selectedProject.project_name}}</a>
+                </h5>
+                <p class="card-text mb-1"><strong>Created at:</strong> {{selectedProject.created_at | date: 'short'}}</p>
+                <p class="card-text"><strong>Description:</strong> {{selectedProject.project_description}}</p>
+              </div>
+              <button
+                class="btn btn-sm btn-danger"
+                ngbTooltip="Remove from selection"
+                (click)="selectedProject = undefined; projectForm.reset()">
+                <i class="bi bi-trash"></i>
+              </button>
+            </div>
+          </div>
         </div>
       } @else {
         <div class="form-group">
-          <label for="projectDescription">Project Description (required)</label>
-          <textarea id="projectDescription" class="form-control" formControlName="project_description" placeholder="Enter project description"></textarea>
+          <label for="projectDescription" class="form-label">
+            Project Description <span class="text-danger">*</span>
+          </label>
+          <textarea
+            id="projectDescription"
+            class="form-control"
+            [ngClass]="{'is-invalid': projectForm.controls['project_description'].invalid && projectForm.controls['project_description'].touched}"
+            formControlName="project_description"
+            placeholder="Enter project description"
+            rows="3"></textarea>
+          @if (projectForm.controls['project_description'].invalid && projectForm.controls['project_description'].touched) {
+            <div class="invalid-feedback">
+              Project description is required
+            </div>
+          }
         </div>
       }
     </form>
     @if (job) {
-      <p>
-        <b>Current status:</b> {{job.status}}<br>
-        <b>Owner:</b> {{job.user.username}}<br>
-      </p>
-      <form [formGroup]="fundingForm" class="d-flex gap-2 flex-wrap">
-        <div class="form-group">
-          <label>Cost Centre</label>
-          <input (focus)="currentField='cost_center'" type="text" class="form-control" formControlName="cost_center" [ngbTypeahead]="individualFieldSearchValue">
-        </div>
-        <div class="form-group">
-          <label>Funder</label>
-          <input (focus)="currentField='funder'" type="text" class="form-control" formControlName="funder" [ngbTypeahead]="individualFieldSearchValue">
-        </div>
-      </form>
-      <hr>
-      <div>
-        <h5>Job Submission To</h5>
-        <form [formGroup]="labGroupForm">
-          <b>Facility Group</b>
-          <div class="d-flex gap-2">
+      <div class="card mb-3">
+        <div class="card-body">
+          <h5 class="card-title">Job Information</h5>
+          <p>
+            <b>Current status:</b> {{job?.status || 'N/A'}}<br>
+            <b>Owner:</b> {{job?.user?.username || 'N/A'}}
+          </p>
+
+          <form [formGroup]="fundingForm" class="d-flex gap-2 flex-wrap">
             <div class="form-group">
-              <label>Group Name Search</label>
-              <input formControlName="name" class="form-control" type="search">
-              <small class="form-text text-muted">Search for a group name default to "MS Facility"</small>
+              <label for="costCenter">Cost Centre</label>
+              <input id="costCenter" (focus)="currentField='cost_center'" type="text"
+                     class="form-control" formControlName="cost_center"
+                     [ngbTypeahead]="individualFieldSearchValue">
             </div>
-            @if (labGroupQuery) {
-              <div class="form-group">
-                <label>Select Group (required)</label>
-                <select class="form-select" size="5" formControlName="selected">
-                  @for (group of labGroupQuery.results; track group.id) {
-                    <option [value]="group.id">{{group.name}}</option>
-                  }
-                </select>
-                <small class="form-text text-muted">Select a group to submit the job to (required)</small><br>
-                @if (selectedGroup) {
-                  <small><b>Currently selected {{selectedGroup.name}}</b></small>
-                }
-              </div>
-            }
-          </div>
-        </form>
-        @if (labGroupUserQuery) {
-          <form [formGroup]="form">
-            <div class="d-flex gap-2">
-              <div class="form-group">
-                <label>Facility staff</label>
-                <select class="form-select" multiple formControlName="staff">
-                  @for (user of labGroupUserQuery.results; track user.id) {
-                    <option [value]="user.id">{{user.username}}</option>
-                  }
-                </select>
-                <small class="form-text text-muted">Select the staff members to notify</small>
-              </div>
+            <div class="form-group">
+              <label for="funder">Funder</label>
+              <input id="funder" (focus)="currentField='funder'" type="text"
+                     class="form-control" formControlName="funder"
+                     [ngbTypeahead]="individualFieldSearchValue">
             </div>
           </form>
-        }
+        </div>
       </div>
-      @if (!job.service_lab_group) {
-        <ngb-alert type="warning">
-          Please confirm the professional group that would handle this job after submission by clicking the lab group name and optionally select the user(s) that you are submitting the job to.
-        </ngb-alert>
-      }
-      <hr>
 
-
-      <hr>
-      <h5>Sample Details</h5>
-      <form [formGroup]="reagentForm" class="d-flex gap-2">
-        @if (selectedStoredReagent) {
-          <div>
-            <p>
-              <b>{{selectedStoredReagent.reagent.name}}</b><br>
-              <b>Quantity</b>: {{selectedStoredReagent.quantity}} {{selectedStoredReagent.reagent.unit}}<br>
-              <b>Note</b>: {{selectedStoredReagent.notes}}
-            </p>
-            <button class="btn btn-sm btn-danger" ngbTooltip="Remove from selection" (click)="selectedStoredReagent = undefined; reagentForm.reset()">
-              <i class="bi bi-trash"></i>
-            </button>
-          </div>
-        } @else {
-          <!--<div class="form-group">
-            <label>Sample Name</label>
-            <div class="d-flex gap-2">
-              <input (selectItem)="onStoredReagentSelected($event)" [resultTemplate]="rt" type="search" [ngbTypeahead]="searchReagent" class="form-control" [inputFormatter]="reagentFormatter" placeholder="Search or new sample name" formControlName="reagent_name_search">
-              @if (storedReagentSearchLoading) {
-                <div class="spinner-border spinner-border-sm" role="status">
-                  <span class="visually-hidden">Loading...</span>
+      <div class="card mb-3">
+        <div class="card-body">
+          <h5 class="card-title">Job Submission To</h5>
+          <form [formGroup]="labGroupForm">
+            <fieldset>
+              <legend class="h6">Facility Group</legend>
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label for="groupSearch">Group Name Search</label>
+                    <input id="groupSearch" formControlName="name" class="form-control" type="search"
+                           aria-describedby="groupSearchHelp">
+                    <small id="groupSearchHelp" class="form-text text-muted">Search for a group name (defaults to "MS Facility")</small>
+                  </div>
                 </div>
-              }
-            </div>
-            <ng-template #rt let-r="result" let-t="term">
-              <div class="d-flex justify-content-between">
-                <span>{{ r.reagent.name }} ({{ r.quantity }} {{ r.reagent.unit }})</span>
-                <small class="text-muted">{{ r.reagent.note }}</small>
-              </div>
-            </ng-template>
 
-          </div>
-          <div class="form-group">
-            <label>Amount</label>
-            <input type="number" class="form-control" formControlName="current_quantity">
-          </div>
-          <div class="form-group" style="width:150px">
-            <label for="reagentUnit">Unit</label>
-            <select id="reagentUnit" class="form-select" formControlName="unit">
-              <optgroup label="Volume">
-                <option value="nL">nL</option>
-                <option value="uL">uL</option>
-                <option value="mL">mL</option>
-                <option value="L">L</option>
-              </optgroup>
-              <optgroup label="Mass">
-                <option value="ng">ng</option>
-                <option value="ug">ug</option>
-                <option value="mg">mg</option>
-                <option value="g">g</option>
-                <option value="kg">kg</option>
-              </optgroup>
-              <optgroup label="Mole">
-                <option value="nM">nM</option>
-                <option value="uM">uM</option>
-                <option value="mM">mM</option>
-                <option value="M">M</option>
-              </optgroup>
-              <optgroup label="Count">
-                <option value="ea">ea</option>
-              </optgroup>
-            </select>
-          </div>-->
-        }
-        <!--<div class="form-check">
-          <input type="checkbox" class="form-check-input" id="use_previous" formControlName="use_previous">
-          <label class="form-check-label" for="use_previous">Use previous reagent</label>
-          <div>
-            <small class="form-text text-muted">
-              If checked, the reagent will be used from the selected source and a new reagent record won't be create
-            </small>
-          </div>
-        </div>-->
-      </form>
-      <form [formGroup]="formSampleExtraData">
-        <div class="d-flex gap-2">
-          <div class="form-group">
-            <label for="sampleNumber">Sample Number (required)</label>
-            <input id="sampleNumber" type="number" class="form-control" formControlName="sample_number">
-          </div>
-          @if (job.sample_number === 0 || !job.sample_number) {
-            <ngb-alert type="warning">
-              Please provide a sample number greater than 0 then update the form
+                @if (labGroupQuery) {
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label for="groupSelect">Select Group <span class="text-danger">*</span></label>
+                      <select id="groupSelect" class="form-select" size="5" formControlName="selected"
+                              [ngClass]="{'is-invalid': !job?.service_lab_group}"
+                              aria-describedby="groupSelectHelp">
+                        @for (group of labGroupQuery.results; track group.id) {
+                          <option [value]="group.id">{{group.name}}</option>
+                        }
+                      </select>
+                      <small id="groupSelectHelp" class="form-text text-muted">Select a group to submit the job to (required)</small>
+                      @if (selectedGroup) {
+                        <div class="mt-2 text-success">
+                          <i class="bi bi-check-circle-fill me-1"></i> <b>Currently selected: {{selectedGroup.name}}</b>
+                        </div>
+                      }
+                    </div>
+                  </div>
+                }
+              </div>
+            </fieldset>
+          </form>
+
+          @if (labGroupUserQuery) {
+            <form [formGroup]="form" class="mt-3">
+              <fieldset>
+                <legend class="h6">Facility Staff</legend>
+                <div class="form-group">
+                  <label for="staffSelect">Select Staff Members</label>
+                  <select id="staffSelect" class="form-select" multiple formControlName="staff"
+                          aria-describedby="staffSelectHelp">
+                    @for (user of labGroupUserQuery.results; track user.id) {
+                      <option [value]="user.id">{{user.username}}</option>
+                    }
+                  </select>
+                  <small id="staffSelectHelp" class="form-text text-muted">Select the staff members to notify</small>
+                </div>
+              </fieldset>
+            </form>
+          }
+
+          @if (job && !job.service_lab_group) {
+            <ngb-alert type="warning" class="mt-3">
+              <i class="bi bi-exclamation-triangle-fill me-2"></i>
+              Please confirm the professional group that would handle this job after submission by selecting a lab group
+              and optionally select the user(s) that you are submitting the job to.
             </ngb-alert>
           }
-          <!--<div class="form-group">
-            <label for="sampleType">Sample Type</label>
-            <select id="sampleType" type="text" class="form-select" formControlName="sample_type">
-              <option value="wcl">Whole Cell Lysate</option>
-              <option value="ip">Immunoprecipitate</option>
-              <option value="other">Other</option>
-            </select>
-          </div>-->
         </div>
-      </form>
-      @if (job.service_lab_group && job.sample_number > 0) {
-        <hr>
-        @if (!job.selected_template) {
-          <div>
-            <b>Job Template:</b> Not selected<br>
-            <ul ngbNav #templateSelectionNav="ngbNav" class="nav-tabs" [destroyOnHide]="true">
-              @if (job.service_lab_group) {
-                <li [ngbNavItem]="'service_lab_group'">
-                  <button ngbNavLink>Group Provided Templates</button>
-                  <ng-template ngbNavContent>
-                    <app-metadata-template-selection (selected)="handleSelectedTemplate($event)" [lab_group_id]="job.service_lab_group.id"></app-metadata-template-selection>
-                  </ng-template>
-                </li>
-              }
-              <li [ngbNavItem]="'user'">
-                <button ngbNavLink>Personal Templates</button>
-                <ng-template ngbNavContent>
-                  <app-metadata-template-selection (selected)="handleSelectedTemplate($event)" [lab_group_id]="0"></app-metadata-template-selection>
-                </ng-template>
-              </li>
-            </ul>
-            <div [ngbNavOutlet]="templateSelectionNav" class="mt-2"></div>
-          </div>
-          <ngb-alert type="warning">
-            Please select one of the provided job templates to proceed
-          </ngb-alert>
-        } @else {
-          <div>
-            <b>Template:</b> {{job.selected_template.name}}<br>
-            <button class="btn btn-sm btn-danger" ngbTooltip="Remove selected template" (click)="removeSelectedTemplate()"><i class="bi bi-trash2"></i></button>
-          </div>
-        }
-      }
-      @if (job.selected_template) {
-        <hr>
+      </div>
 
-        <div class="d-flex gap-2">
-          <div ngbDropdown class="d-flex gap-2">
-            <button class="btn btn-primary" ngbDropdownToggle>Excel Template</button>
+      <div class="card mb-3">
+        <div class="card-header">
+          <h5 class="mb-0">Sample Details</h5>
+        </div>
+        <div class="card-body">
+          <!-- Reagent information -->
+          <form [formGroup]="reagentForm" class="mb-3">
+            @if (selectedStoredReagent) {
+              <div class="card border-light">
+                <div class="card-body py-2">
+                  <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                      <h6 class="fw-bold mb-1">{{selectedStoredReagent.reagent.name}}</h6>
+                      <p class="mb-1"><span class="fw-medium">Quantity:</span> {{selectedStoredReagent.quantity}} {{selectedStoredReagent.reagent.unit}}</p>
+                      <p class="mb-0"><span class="fw-medium">Note:</span> {{selectedStoredReagent.notes || 'No notes provided'}}</p>
+                    </div>
+                    <button class="btn btn-sm btn-outline-danger" ngbTooltip="Remove from selection" (click)="selectedStoredReagent = undefined; reagentForm.reset()">
+                      <i class="bi bi-trash"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            }
+          </form>
+
+          <!-- Sample number input -->
+          <form [formGroup]="formSampleExtraData" class="mb-3">
+            <div class="d-flex gap-3 align-items-start">
+              <div class="form-group flex-grow-1" style="max-width: 250px">
+                <label for="sampleNumber" class="form-label">Sample Number <span class="text-danger">*</span></label>
+                <input
+                  id="sampleNumber"
+                  type="number"
+                  class="form-control"
+                  formControlName="sample_number"
+                  aria-describedby="sampleNumberHelp"
+                  min="1">
+                <small id="sampleNumberHelp" class="form-text text-muted">Number of samples to process</small>
+              </div>
+              @if (job.sample_number === 0 || !job.sample_number) {
+                <ngb-alert type="warning" class="mb-0 flex-grow-1">
+                  <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                  Please provide a sample number greater than 0 then update the form
+                </ngb-alert>
+              }
+            </div>
+          </form>
+
+          <!-- Template selection -->
+          @if (job.service_lab_group && job.sample_number > 0) {
+            <hr>
+            @if (!job.selected_template) {
+              <div class="mb-3">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <h6 class="mb-0"><span class="badge bg-secondary me-2">Required</span> Job Template</h6>
+                  <span class="text-danger">Not selected</span>
+                </div>
+
+                <ul ngbNav #templateSelectionNav="ngbNav" class="nav-tabs" [destroyOnHide]="true">
+                  @if (job.service_lab_group) {
+                    <li [ngbNavItem]="'service_lab_group'">
+                      <button ngbNavLink>
+                        <i class="bi bi-collection me-1"></i> Group Templates
+                      </button>
+                      <ng-template ngbNavContent>
+                        @if (job.service_lab_group.id) {
+                          <app-metadata-template-selection
+                            (selected)="handleSelectedTemplate($event)"
+                            [lab_group_id]="job.service_lab_group.id">
+                          </app-metadata-template-selection>
+                        }
+                      </ng-template>
+                    </li>
+                  }
+                  <li [ngbNavItem]="'user'">
+                    <button ngbNavLink>
+                      <i class="bi bi-person-circle me-1"></i> Personal Templates
+                    </button>
+                    <ng-template ngbNavContent>
+                      <app-metadata-template-selection
+                        (selected)="handleSelectedTemplate($event)"
+                        [lab_group_id]="0">
+                      </app-metadata-template-selection>
+                    </ng-template>
+                  </li>
+                </ul>
+                <div [ngbNavOutlet]="templateSelectionNav" class="mt-3"></div>
+
+                <ngb-alert type="warning" class="mt-3">
+                  <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                  Please select one of the provided job templates to proceed
+                </ngb-alert>
+              </div>
+            } @else {
+
+              <div class="d-flex align-items-center gap-2">
+                <span class="fw-medium">Template:</span>
+                @if (job.selected_template) {
+                  <span>{{job.selected_template.name}}</span>
+                } @else {
+                  <span>Not selected</span>
+                }
+                <button
+                  class="btn btn-sm btn-outline-danger ms-2"
+                  ngbTooltip="Remove selected template"
+                  (click)="removeSelectedTemplate()">
+                  <i class="bi bi-trash2"></i>
+                </button>
+              </div>
+            }
+          }
+        </div>
+      </div>
+      @if (job.selected_template) {
+
+        <div class="d-flex flex-wrap gap-2">
+          <!-- Excel Template Controls -->
+          <div ngbDropdown class="d-inline-block">
+            <button class="btn btn-outline-primary" ngbDropdownToggle>
+              <i class="bi bi-file-earmark-excel me-1"></i> Excel Template
+            </button>
             <div ngbDropdownMenu>
-              <button ngbDropdownItem (click)="exportExcelTemplate()">Export</button>
-              @if (job.status !== 'submitted' || (userCanEdit || staffModeAvailable)) {
-                <button ngbDropdownItem (click)="importExcelTemplate()">Import</button>
+              <button ngbDropdownItem (click)="exportExcelTemplate()">
+                <i class="bi bi-download me-2"></i> Export Template
+              </button>
+              @if (job?.status !== 'submitted' || (userCanEdit || staffModeAvailable)) {
+                <button ngbDropdownItem (click)="importExcelTemplate()">
+                  <i class="bi bi-upload me-2"></i> Import Data
+                </button>
               }
             </div>
           </div>
-          @if (userCanEdit||staffModeAvailable) {
-            <div ngbDropdown class="d-flex gap-2">
-              <button class="btn btn-secondary" ngbDropdownToggle><i class="bi bi-download"></i> Instrument File</button>
+
+          <!-- Instrument File Controls -->
+          @if (userCanEdit || staffModeAvailable) {
+            <div ngbDropdown class="d-inline-block">
+              <button class="btn btn-outline-secondary" ngbDropdownToggle>
+                <i class="bi bi-file-earmark-binary me-1"></i> Instrument Files
+              </button>
               <div ngbDropdownMenu>
-                <button ngbDropdownItem ngbTooltip="Requires injection volume, sample number, data file column and position column" (click)="exportFile('injection')" [disabled]="!(job.injection_volume && job.sample_number && job.selected_template)">
-                  Randomized Injection
+                <button
+                  ngbDropdownItem
+                  (click)="exportFile('injection')"
+                  [disabled]="!(job?.injection_volume && job?.sample_number && job?.selected_template)"
+                  ngbTooltip="Generate randomized injection sequence">
+                  <i class="bi bi-shuffle me-2"></i> Randomized Injection
                 </button>
               </div>
             </div>
           }
 
-          <div ngbDropdown class="d-flex gap-2">
-            <button class="btn btn-primary" ngbDropdownToggle><i class="bi bi-download"></i> SDRF</button>
+          <!-- SDRF Export Controls -->
+          <div ngbDropdown class="d-inline-block">
+            <button class="btn btn-outline-success" ngbDropdownToggle>
+              <i class="bi bi-download me-1"></i> Export SDRF
+            </button>
             <div ngbDropdownMenu>
-              <button ngbDropdownItem (click)="exportTableToTSV('user_metadata')">Export User Metadata</button>
-              <button ngbDropdownItem (click)="exportTableToTSV('staff_metadata')">Export Staff Metadata</button>
-              <button ngbDropdownItem (click)="exportTableToTSV('all')">Export All Metadata</button>
+              <button ngbDropdownItem (click)="exportTableToTSV('user_metadata')">
+                <i class="bi bi-person me-2"></i> User Metadata
+              </button>
+              <button ngbDropdownItem (click)="exportTableToTSV('staff_metadata')">
+                <i class="bi bi-people me-2"></i> Staff Metadata
+              </button>
+              <button ngbDropdownItem (click)="exportTableToTSV('all')">
+                <i class="bi bi-files me-2"></i> All Metadata
+              </button>
             </div>
           </div>
-          @if (job.status !== 'submitted' || (userCanEdit || staffModeAvailable)) {
-            <div ngbDropdown class="d-flex gap-2">
-              <button class="btn btn-primary" ngbDropdownToggle><i class="bi bi-upload"></i> SDRF</button>
+
+          <!-- SDRF Import Controls -->
+          @if (job?.status !== 'submitted' || (userCanEdit || staffModeAvailable)) {
+            <div ngbDropdown class="d-inline-block">
+              <button class="btn btn-outline-success" ngbDropdownToggle>
+                <i class="bi bi-upload me-1"></i> Import SDRF
+              </button>
               <div ngbDropdownMenu>
-                <button ngbDropdownItem (click)="importMetadata('user_metadata')">Import User Metadata</button>
-                <button ngbDropdownItem (click)="importMetadata('staff_metadata')">Import Staff Metadata</button>
-                <button ngbDropdownItem (click)="importMetadata('all')">Import All Metadata</button>
+                <button ngbDropdownItem (click)="importMetadata('user_metadata')">
+                  <i class="bi bi-person me-2"></i> User Metadata
+                </button>
+                <button ngbDropdownItem (click)="importMetadata('staff_metadata')">
+                  <i class="bi bi-people me-2"></i> Staff Metadata
+                </button>
+                <button ngbDropdownItem (click)="importMetadata('all')">
+                  <i class="bi bi-files me-2"></i> All Metadata
+                </button>
               </div>
             </div>
           }
 
-          <button class="btn btn-warning" (click)="validateSDRFMetadata()">Validate</button>
+          <!-- Validation Button -->
+          <button class="btn btn-outline-warning" (click)="validateSDRFMetadata()">
+            <i class="bi bi-check-circle me-1"></i> Validate Metadata
+          </button>
         </div>
-        <div class="d-flex gap-2 mt-2">
+        <div class="d-flex flex-wrap gap-2 mt-2">
+          <!-- User can edit - User columns dropdown -->
           @if (userCanEdit) {
-            <div ngbDropdown display="dynamic" class="d-inline-black">
+            <div ngbDropdown display="dynamic" class="d-inline-block">
               <button class="btn btn-primary" ngbDropdownToggle>
-                + User Columns
+                <i class="bi bi-plus-circle me-1"></i> User Columns
               </button>
               <div ngbDropdownMenu aria-labelledby="addMetadata">
                 @for (m of metadataService.userMetadataTemplate; track m.name) {
                   <a class="dropdown-item" (click)="addMetadata(m, 'user_metadata')">
-                    @if (selectedTemplateFieldMap[m.name]) {
-                      {{selectedTemplateFieldMap[m.name]}}
-                    } @else {
-                      {{m.name}}
-                    }
+                    {{selectedTemplateFieldMap[m.name] || m.name}}
                   </a>
                 }
+                <div class="dropdown-divider"></div>
                 <a class="dropdown-item" (click)="addMetadata({name: 'Sample type', type: 'Characteristics'}, 'user_metadata')">
-                  Sample Type
+                  <i class="bi bi-tag me-1"></i> Sample Type
                 </a>
                 <a class="dropdown-item" (click)="addMetadata({name: '', type: ''}, 'user_metadata')">
-                  Custom Metadata
+                  <i class="bi bi-plus-square me-1"></i> Custom Metadata
                 </a>
               </div>
             </div>
           }
+
+          <!-- Staff mode - Additional controls -->
           @if (staffModeAvailable) {
-            @if (job.status === "submitted") {
-              <div ngbDropdown display="dynamic" class="d-inline-black">
+            <!-- Only show this dropdown if job is submitted -->
+            @if (job?.status === "submitted") {
+              <div ngbDropdown display="dynamic" class="d-inline-block">
                 <button class="btn btn-primary" ngbDropdownToggle>
-                  + User Columns
+                  <i class="bi bi-plus-circle me-1"></i> User Columns
                 </button>
                 <div ngbDropdownMenu aria-labelledby="addMetadata">
                   @for (m of metadataService.userMetadataTemplate; track m.name) {
                     <a class="dropdown-item" (click)="addMetadata(m, 'user_metadata')">
-                      @if (selectedTemplateFieldMap[m.name]) {
-                        {{selectedTemplateFieldMap[m.name]}}
-                      } @else {
-                        {{m.name}}
-                      }
+                      {{selectedTemplateFieldMap[m.name] || m.name}}
                     </a>
                   }
+                  <div class="dropdown-divider"></div>
                   <a class="dropdown-item" (click)="addMetadata({name: 'Sample type', type: 'Characteristics'}, 'user_metadata')">
-                    Sample Type
+                    <i class="bi bi-tag me-1"></i> Sample Type
                   </a>
                   <a class="dropdown-item" (click)="addMetadata({name: '', type: ''}, 'user_metadata')">
-                    Custom Metadata
+                    <i class="bi bi-plus-square me-1"></i> Custom Metadata
                   </a>
                 </div>
               </div>
             }
-            <div ngbDropdown display="dynamic" class="d-inline-black">
+
+            <!-- Staff columns dropdown - always available in staff mode -->
+            <div ngbDropdown display="dynamic" class="d-inline-block">
               <button class="btn btn-warning" ngbDropdownToggle>
-                + Staff Columns
+                <i class="bi bi-plus-circle me-1"></i> Staff Columns
               </button>
               <div ngbDropdownMenu aria-labelledby="addStaffMetadata">
                 @for (m of metadataService.staffMetadataSpecific; track m) {
                   <a class="dropdown-item" (click)="addMetadata({name: m, type: 'Comment'}, 'staff_metadata')">
-                    @if (selectedTemplateFieldMap[m]) {
-                      {{selectedTemplateFieldMap[m]}}
-                    } @else {
-                      {{m}}
-                    }
+                    {{selectedTemplateFieldMap[m] || m}}
                   </a>
                 }
+                <div class="dropdown-divider"></div>
                 <a class="dropdown-item" (click)="addMetadata({name: '', type: 'Factor value'}, 'staff_metadata')">
-                  Factor Value
+                  <i class="bi bi-diagram-3 me-1"></i> Factor Value
                 </a>
                 <a class="dropdown-item" (click)="addMetadata({name: '', type: ''}, 'staff_metadata')">
-                  Custom Metadata
+                  <i class="bi bi-plus-square me-1"></i> Custom Metadata
                 </a>
               </div>
             </div>
           }
         </div>
-        <div class="form-check">
+
+        <!-- Show/hide columns toggle -->
+        <div class="form-check mt-2">
           <input type="checkbox" class="form-check-input" [(ngModel)]="showHidden" id="showHidden">
-          <label class="form-check-label" for="showHidden">Show hidden columns</label>
+          <label class="form-check-label" for="showHidden">
+            <i class="bi bi-eye me-1"></i> Show hidden columns
+          </label>
         </div>
         @if ((job.user_metadata.length > 0||job.staff_metadata.length > 0) && job.sample_number > 0) {
           <ul ngbNav #navMetadata="ngbNav" class="nav-tabs" [(activeId)]="metadataViewModeID" [destroyOnHide]="true">
