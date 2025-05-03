@@ -67,7 +67,7 @@ export class HomeComponent implements OnInit, AfterViewInit {
   rating = 0;
   searchTerm = '';
 
-  constructor(private accounts: AccountsService, private router: Router, private fb: FormBuilder, private web: WebService, private dataService: DataService, private toastService: ToastService) {
+  constructor(public accounts: AccountsService, private router: Router, private fb: FormBuilder, private web: WebService, private dataService: DataService, private toastService: ToastService) {
     this.dataService.triggerReload.subscribe((data) => {
       this.currentSessionPage = 1;
       this.currentProtocolPage = 1;

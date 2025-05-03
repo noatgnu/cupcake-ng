@@ -1,23 +1,41 @@
 <div class="modal-header">
   <h5 class="modal-title">Login</h5>
+  <button type="button" class="btn-close" aria-label="Close" (click)="close()"></button>
 </div>
 <div class="modal-body">
-  <form [formGroup]="form" class="d-flex flex-column gap-2" (ngSubmit)="login()" id="loginform">
+  <form [formGroup]="form" class="d-flex flex-column gap-3" (ngSubmit)="login()" id="loginform">
     <div class="form-floating">
-      <input class="form-control" type="text" id="username" formControlName="username">
+      <input class="form-control" type="text" id="username" formControlName="username" autocomplete="username" autofocus>
       <label for="username">Username</label>
+      <div class="invalid-feedback d-block" *ngIf="form.get('username')?.invalid && form.get('username')?.touched">
+        Please enter your username
+      </div>
     </div>
-    <div class="form-floating">
-      <input class="form-control" type="password" id="password" formControlName="password">
+    <div class="form-floating password-field">
+      <input class="form-control" [type]="hidePassword ? 'password' : 'text'" id="password" formControlName="password" autocomplete="current-password">
       <label for="password">Password</label>
+      <button type="button" class="btn btn-outline-secondary password-toggle" (click)="hidePassword = !hidePassword" tabindex="-1">
+        <i class="bi" [ngClass]="hidePassword ? 'bi-eye-slash' : 'bi-eye'"></i>
+      </button>
+      @if (form.get('password')?.invalid && form.get('password')?.touched) {
+        <div class="invalid-feedback d-block">
+          Please enter your password
+        </div>
+      }
     </div>
-<!--    <div class="form-check">
-      <input class="form-check-input" type="checkbox" id="remember" formControlName="remember">
-      <label class="form-check-label" for="remember">Remember me</label>
-    </div>-->
+    @if (loginError) {
+      <ngb-alert type="danger" [dismissible]="true" (close)="loginError = null">
+        {{ loginError }}
+      </ngb-alert>
+    }
   </form>
 </div>
 <div class="modal-footer">
-  <button class="btn btn-primary" (click)="login()">Login</button>
-  <button class="btn btn-secondary" type="button" (click)="close()">Close</button>
+  <button class="btn btn-secondary" type="button" (click)="close()">Cancel</button>
+  <button class="btn btn-primary" [disabled]="form.invalid || isLoading" (click)="login()">
+    @if (isLoading) {
+      <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+    }
+    Login
+  </button>
 </div>

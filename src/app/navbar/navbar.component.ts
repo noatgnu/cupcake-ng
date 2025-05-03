@@ -3,7 +3,7 @@ import {DataService} from "../data.service";
 import {NgbCollapse, NgbDropdown, NgbDropdownMenu, NgbDropdownToggle, NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import {LoginModalComponent} from "../login-modal/login-modal.component";
 import {AccountsService} from "../accounts/accounts.service";
-import {NgOptimizedImage} from "@angular/common";
+import {NgOptimizedImage, SlicePipe} from "@angular/common";
 import {Router} from "@angular/router";
 import {QrcodeModalComponent} from "../qrcode-modal/qrcode-modal.component";
 import {WebsocketService} from "../websocket.service";
@@ -23,7 +23,8 @@ import {WebsocketStatusModalComponent} from "../websocket-status-modal/websocket
         NgbDropdownToggle,
         NgbDropdownMenu,
         NgOptimizedImage,
-        NgbCollapse
+        NgbCollapse,
+      SlicePipe
     ],
     templateUrl: './navbar.component.html',
     styleUrl: './navbar.component.scss'
