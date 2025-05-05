@@ -1,53 +1,69 @@
-<div class="container-fluid p-0" style="margin-top: 80px">
-  <nav class="navbar navbar-expand-lg navbar-light d-flex flex-wrap">
-    <div class="container-fluid d-flex flex-row justify-content-center">
-      <a class="navbar-brand">Instrument & Job Submission</a>
+<div class="container-fluid p-0 d-flex flex-column vh-100">
+  <!-- Main header -->
+  <header class="border-bottom shadow-sm py-3 px-4">
+    <div class="d-flex align-items-center justify-content-center">
+      <h4 class="m-0 text-primary fw-bold">Instrument & Job Submission</h4>
     </div>
-  </nav>
-  <div class="d-flex g-1" style="height: auto; min-height: 100vh; position:relative">
-    @if (!hideSection) {
-      <div class="border-end border-1 border-black d-flex flex-column" style="width: 300px; min-height: 100%">
-        <nav class="navbar navbar-expand-lg navbar-light d-flex flex-wrap">
-          <div class="container-fluid">
-            <a class="navbar-brand">Sections</a>
-          </div>
-        </nav>
-        <div class="list-group d-flex flex-column rounded-0 overflow-auto">
-          <a type="button" class="list-group-item list-group-item-action" href="/#/instruments/jobs">Jobs</a>
-          <a type="button" class="list-group-item list-group-item-action" href="/#/instruments/bookings">Bookings</a>
-          <a type="button" class="list-group-item list-group-item-action" href="/#/instruments/management">Management</a>
+  </header>
+
+  <div class="flex-grow-1 d-flex">
+    <!-- Sidebar -->
+    <div class="sidebar" [ngClass]="{'sidebar-collapsed': hideSection}">
+      <div class="sidebar-header border-bottom p-3">
+        <div class="d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">Sections</h5>
+          <button type="button" class="btn-close d-md-none" aria-label="Close sidebar" (click)="hideSection = true"></button>
         </div>
       </div>
-    }
+      <div class="list-group list-group-flush">
+        <a class="list-group-item list-group-item-action py-3 d-flex align-items-center"
+           href="/#/instruments/jobs"
+           [ngClass]="{'active': selectedSection === 'jobs'}">
+          <i class="bi bi-briefcase me-2"></i> Jobs
+        </a>
+        <a class="list-group-item list-group-item-action py-3 d-flex align-items-center"
+           href="/#/instruments/bookings"
+           [ngClass]="{'active': selectedSection === 'bookings'}">
+          <i class="bi bi-calendar-check me-2"></i> Bookings
+        </a>
+        <a class="list-group-item list-group-item-action py-3 d-flex align-items-center"
+           href="/#/instruments/management"
+           [ngClass]="{'active': selectedSection === 'management'}">
+          <i class="bi bi-gear me-2"></i> Management
+        </a>
+      </div>
+    </div>
 
-    <div class="d-flex flex-column w-100">
-      <nav class="navbar navbar-expand-lg navbar-light d-flex flex-wrap">
-        <div class="container-fluid">
-          <button type="button" class="btn btn-outline-primary" (click)="hideSection=!hideSection"><i class="bi bi-menu-app"></i></button>
-          <a class="navbar-brand">
-            @if (selectedSection === 'management') {
-              Instrument Management
-            } @else if (selectedSection === 'bookings') {
-              Instrument Bookings
-            } @else if (selectedSection === 'jobs') {
-              Instrument Jobs
-            }
-          </a>
-        </div>
-      </nav>
-      @if (selectedSection === 'bookings') {
-        <div class="d-flex flex-column p-2">
+    <!-- Main content area -->
+    <div class="content-wrapper" [ngClass]="{'content-expanded': hideSection}">
+      <!-- Section header -->
+      <div class="content-header border-bottom p-3 d-flex align-items-center shadow-sm">
+        <button type="button" class="btn btn-outline-primary sidebar-toggle me-3"
+                (click)="hideSection = !hideSection"
+                aria-label="Toggle sidebar">
+          <i class="bi" [ngClass]="hideSection ? 'bi-layout-sidebar-inset' : 'bi-layout-sidebar'"></i>
+        </button>
+        <h5 class="mb-0">
+          @if (selectedSection === 'management') {
+            <i class="bi bi-gear me-2"></i> Instrument Management
+          } @else if (selectedSection === 'bookings') {
+            <i class="bi bi-calendar-check me-2"></i> Instrument Bookings
+          } @else if (selectedSection === 'jobs') {
+            <i class="bi bi-briefcase me-2"></i> Instrument Jobs
+          }
+        </h5>
+      </div>
+
+      <!-- Component content -->
+      <div class="content-body p-3 overflow-auto">
+        @if (selectedSection === 'bookings') {
           <app-instrument-booking></app-instrument-booking>
-        </div>
-      } @else if (selectedSection === 'management') {
-        <div class="d-flex flex-column p-2">
+        } @else if (selectedSection === 'management') {
           <app-instrument-management></app-instrument-management>
-        </div>
-      } @else if (selectedSection === 'jobs') {
-        <div class="d-flex flex-column p-2">
+        } @else if (selectedSection === 'jobs') {
           <app-instrument-job-management [currentJobId]="currentJob"></app-instrument-job-management>
-        </div>
-      }
+        }
+      </div>
     </div>
   </div>
 </div>

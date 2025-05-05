@@ -1,0 +1,103 @@
+<div class="modal-header">
+  <h4 class="modal-title">
+    @if (mode === 'create') {
+      Create Maintenance Log
+    } @else if (mode === 'edit') {
+      Edit Maintenance Log
+    } @else if (mode === 'view') {
+      Maintenance Log Details
+    }
+  </h4>
+  <button type="button" class="btn-close" aria-label="Close" (click)="activeModal.dismiss('Cross click')"></button>
+</div>
+
+<div class="modal-body">
+  @if (isLoading) {
+    <div class="d-flex justify-content-center">
+      <div class="spinner-border" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+    </div>
+  }
+
+  @if (error) {
+    <div class="alert alert-danger">{{ error }}</div>
+  }
+
+  @if (!isLoading) {
+    <form [formGroup]="maintenanceForm">
+      <div class="mb-3">
+        <label for="maintenance_type" class="form-label">Maintenance Type</label>
+        <select class="form-select" id="maintenance_type" formControlName="maintenance_type">
+          @for (type of maintenanceTypes; track type.value) {
+            <option [value]="type.value">{{ type.label }}</option>
+          }
+        </select>
+        @if (maintenanceForm.get('maintenance_type')?.invalid && maintenanceForm.get('maintenance_type')?.touched) {
+          <div class="text-danger">
+            Maintenance type is required
+          </div>
+        }
+      </div>
+
+      <div class="mb-3">
+        <label for="maintenance_description" class="form-label">Description</label>
+        <textarea class="form-control" id="maintenance_description" rows="3" formControlName="maintenance_description"></textarea>
+        @if (maintenanceForm.get('maintenance_description')?.invalid && maintenanceForm.get('maintenance_description')?.touched) {
+          <div class="text-danger">
+            Description is required
+          </div>
+        }
+      </div>
+
+      <div class="mb-3">
+        <label for="maintenance_notes" class="form-label">Notes</label>
+        <textarea class="form-control" id="maintenance_notes" rows="3" formControlName="maintenance_notes"></textarea>
+      </div>
+
+      <div class="mb-3">
+        <label for="status" class="form-label">Status</label>
+        <select class="form-select" id="status" formControlName="status">
+          @for (status of statusTypes; track status.value) {
+            <option [value]="status.value">{{ status.label }}</option>
+          }
+        </select>
+        @if (maintenanceForm.get('status')?.invalid && maintenanceForm.get('status')?.touched) {
+          <div class="text-danger">
+            Status is required
+          </div>
+        }
+      </div>
+
+      @if (maintenanceLog && mode === 'view') {
+        <div class="mb-3">
+          <label class="form-label">Maintenance Date</label>
+          <p>{{ maintenanceLog?.maintenance_date | date:'medium' }}</p>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Last Updated</label>
+          <p>{{ maintenanceLog?.updated_at | date:'medium' }}</p>
+        </div>
+      }
+    </form>
+  }
+</div>
+
+<div class="modal-footer">
+  <!-- View mode buttons -->
+  @if (mode === 'view') {
+    <button type="button" class="btn btn-secondary" (click)="activeModal.dismiss('cancel')">Close</button>
+    <button type="button" class="btn btn-primary" (click)="switchToEditMode()">Edit</button>
+    <button type="button" class="btn btn-danger" (click)="delete()">Delete</button>
+  }
+
+  <!-- Edit/Create mode buttons -->
+  @if (mode === 'edit' || mode === 'create') {
+    <button type="button" class="btn btn-secondary" (click)="cancel()">Cancel</button>
+    @if (mode === 'edit') {
+      <button type="button" class="btn btn-danger me-2" (click)="delete()">Delete</button>
+    }
+    <button type="button" class="btn btn-primary" (click)="save()" [disabled]="maintenanceForm.invalid">Save</button>
+  }
+</div>

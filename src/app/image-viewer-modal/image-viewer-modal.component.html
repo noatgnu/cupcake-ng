@@ -1,0 +1,12 @@
+<div class="modal-header">
+  <h5 class="modal-title">{{ title }}</h5>
+  <button type="button" class="btn-close" aria-label="Close" (click)="close()"></button>
+</div>
+<div class="modal-body text-center p-0">
+  <img [src]="imageSrc" alt="Instrument Image" class="img-fluid"
+       [ngStyle]="{'max-height': '80vh'}">
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn btn-secondary" (click)="close()">Close</button>
+  <a [href]="imageSrc" class="btn btn-primary" target="_blank" download>Download</a>
+</div>

@@ -1,19 +1,60 @@
 <div class="modal-header">
-  <h5 class="modal-title">Object Editor</h5>
+  <h5 class="modal-title">
+    <i class="bi bi-box me-2"></i>
+    {{ storageObject?.id ? 'Edit' : 'Create' }} Storage Object
+  </h5>
+  <button type="button" class="btn-close" aria-label="Close" (click)="close()"></button>
 </div>
+
 <div class="modal-body">
-  <form [formGroup]="form" class="d-flex flex-column gap-2">
+  <form [formGroup]="form" class="d-flex flex-column gap-3">
+    <!-- Name field with validation feedback -->
     <div class="form-floating">
-      <input type="text" class="form-control" id="object_name" formControlName="object_name" placeholder="Object Name">
-      <label for="object_name">Object Name</label>
+      <input
+        type="text"
+        class="form-control"
+        [class.is-invalid]="form.controls.object_name.invalid && form.controls.object_name.touched"
+        id="object_name"
+        formControlName="object_name"
+        placeholder="Object Name">
+      <label for="object_name">Object Name *</label>
+      @if (form.controls.object_name.invalid && form.controls.object_name.touched) {
+        <div class="invalid-feedback">
+          Storage object name is required
+        </div>
+      }
     </div>
+
+    <!-- Description field with improved appearance -->
     <div class="form-floating">
-      <textarea id="object_description" class="form-control" formControlName="object_description" placeholder="Object Description"></textarea>
+      <textarea
+        id="object_description"
+        class="form-control"
+        formControlName="object_description"
+        placeholder="Object Description"
+        style="min-height: 120px"></textarea>
       <label for="object_description">Object Description</label>
     </div>
   </form>
 </div>
+
 <div class="modal-footer">
-  <button class="btn btn-primary" (click)="submit()">Submit</button>
-  <button class="btn btn-secondary" (click)="close()">Close</button>
+  <div class="d-flex justify-content-between w-100">
+    <div>
+      @if (storageObject?.id) {
+        <button class="btn btn-outline-danger" (click)="close()">
+          <i class="bi bi-trash me-1"></i> Delete
+        </button>
+      }
+    </div>
+    <div>
+      <button class="btn btn-outline-secondary me-2" (click)="close()">Cancel</button>
+      <button
+        class="btn btn-primary"
+        [disabled]="form.invalid"
+        (click)="submit()">
+        <i class="bi bi-save me-1"></i> Save
+      </button>
+    </div>
+  </div>
 </div>

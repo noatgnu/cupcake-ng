@@ -8,14 +8,15 @@ import {
 import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {ActivatedRoute} from "@angular/router";
 import {ToastService} from "../../toast.service";
-import {DatePipe} from "@angular/common";
+import {DatePipe, NgClass} from "@angular/common";
 
 @Component({
     selector: 'app-stored-reagent-item',
     imports: [
         StoredReagentActivityCalendarComponent,
         NgbTooltip,
-        DatePipe
+        DatePipe,
+      NgClass
     ],
     templateUrl: './stored-reagent-item.component.html',
     styleUrl: './stored-reagent-item.component.scss'

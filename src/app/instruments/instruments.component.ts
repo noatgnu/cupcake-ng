@@ -6,15 +6,17 @@ import {InstrumentManagementComponent} from "./instrument-management/instrument-
 import {InstrumentJobManagementComponent} from "./instrument-job-management/instrument-job-management.component";
 import {WebsocketService} from "../websocket.service";
 import {WebService} from "../web.service";
+import {NgClass} from "@angular/common";
 
 @Component({
     selector: 'app-instruments',
     imports: [
-        ReactiveFormsModule,
-        UserDataComponent,
-        InstrumentBookingComponent,
-        InstrumentManagementComponent,
-        InstrumentJobManagementComponent
+      ReactiveFormsModule,
+      UserDataComponent,
+      InstrumentBookingComponent,
+      InstrumentManagementComponent,
+      InstrumentJobManagementComponent,
+      NgClass
     ],
     templateUrl: './instruments.component.html',
     styleUrl: './instruments.component.scss'

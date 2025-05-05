@@ -1,0 +1,294 @@
+<div class="modal-header">
+  <h4 class="modal-title">{{ supportInfoId ? 'Edit Support Information' : 'Create Support Information' }}</h4>
+  <button type="button" class="btn-close" aria-label="Close" (click)="dismiss()"></button>
+</div>
+
+<div class="modal-body">
+  @if (loading) {
+    <div class="d-flex justify-content-center p-4">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+    </div>
+  } @else {
+    <form [formGroup]="supportInfoForm">
+      <!-- Replace tab system with NgbNav -->
+      <ul ngbNav #nav="ngbNav" [(activeId)]="active" class="nav-tabs nav-fill mb-4">
+        <li [ngbNavItem]="1" class="nav-item">
+          <a ngbNavLink class="d-flex align-items-center">
+            <i class="bi bi-info-circle me-2"></i>Basic Information
+          </a>
+          <ng-template ngbNavContent>
+            <div class="mb-3">
+              <label for="vendor_name" class="form-label">Vendor Name *</label>
+              <input type="text" class="form-control" id="vendor_name" formControlName="vendor_name" required>
+            </div>
+
+            <div class="mb-3">
+              <label for="manufacturer_name" class="form-label">Manufacturer Name *</label>
+              <input type="text" class="form-control" id="manufacturer_name" formControlName="manufacturer_name" required>
+            </div>
+
+            <div class="mb-3">
+              <label for="serial_number" class="form-label">Serial Number</label>
+              <input type="text" class="form-control" id="serial_number" formControlName="serial_number">
+            </div>
+
+            <div class="mb-3">
+              <label for="maintenance_frequency_days" class="form-label">Maintenance Frequency (days)</label>
+              <input type="number" class="form-control" id="maintenance_frequency_days" formControlName="maintenance_frequency_days">
+              <div class="form-text">Number of days between regular maintenance</div>
+            </div>
+
+            <div class="mb-3">
+              <label for="location" class="form-label">Location</label>
+              <div class="input-group">
+                <input
+                  id="location"
+                  type="text"
+                  class="form-control"
+                  [class.is-invalid]="searchFailed"
+                  [ngbTypeahead]="search"
+                  [inputFormatter]="formatter"
+                  [resultFormatter]="formatter"
+                  placeholder="Search for locations..."
+                  (selectItem)="onLocationSelect($event)"
+                  [value]="selectedLocation?.object_name || ''"
+                />
+                <input type="hidden" formControlName="location_id">
+                @if (searching) {
+                  <div class="spinner-border spinner-border-sm" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                  </div>
+                }
+              </div>
+              @if (searchFailed) {
+                <div class="invalid-feedback">
+                  Sorry, locations could not be loaded.
+                </div>
+              }
+              @if (selectedLocation) {
+                <div class="form-text">
+                  Selected: {{ selectedLocation.object_name }} ({{ selectedLocation.object_type || 'location' }})
+                </div>
+              }
+            </div>
+
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label for="warranty_start_date" class="form-label">Warranty Start Date</label>
+                <input type="date" class="form-control" id="warranty_start_date" formControlName="warranty_start_date">
+              </div>
+
+              <div class="col-md-6 mb-3">
+                <label for="warranty_end_date" class="form-label">Warranty End Date</label>
+                <input type="date" class="form-control" id="warranty_end_date" formControlName="warranty_end_date">
+              </div>
+            </div>
+
+            @if (supportInfo?.created_at) {
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Created</label>
+                  <p class="form-control-plaintext">{{ supportInfo?.created_at | date:'medium' }}</p>
+                </div>
+                @if (supportInfo?.updated_at) {
+                  <div class="col-md-6 mb-3">
+                    <label class="form-label">Last Updated</label>
+                    <p class="form-control-plaintext">{{ supportInfo?.updated_at | date:'medium' }}</p>
+                  </div>
+                }
+              </div>
+            }
+
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+              <button type="button" class="btn btn-primary" (click)="saveBasicInfo()">Save</button>
+            </div>
+          </ng-template>
+        </li>
+
+        <li [ngbNavItem]="2" class="nav-item">
+          <a ngbNavLink class="d-flex align-items-center">
+            <i class="bi bi-building me-2"></i>Vendor Contacts
+          </a>
+          <ng-template ngbNavContent>
+            <div class="mb-4">
+              <button type="button" class="btn btn-success" (click)="addVendorContact()">
+                <i class="bi bi-plus me-1"></i> Add Contact
+              </button>
+            </div>
+
+            @if (vendorContacts.length === 0) {
+              <div class="alert alert-info d-flex align-items-center">
+                <i class="bi bi-info-circle me-2"></i> No vendor contacts added yet.
+              </div>
+            }
+
+            @for (contactForm of vendorContacts.controls; track contactForm; let i = $index) {
+              <div class="card mb-4 border-info">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                  <h5 class="mb-0">Contact #{{ i + 1 }}</h5>
+                  <button type="button" class="btn btn-danger btn-sm" (click)="removeVendorContact(i)" aria-label="Remove contact">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </div>
+                <div class="card-body" [formGroup]="asFormGroup(contactForm)">
+                  <div class="mb-3">
+                    <label class="form-label">Contact Name</label>
+                    <input type="text" class="form-control" formControlName="contact_name"
+                           [class.is-invalid]="asFormGroup(contactForm).get('contact_name')?.invalid && asFormGroup(contactForm).get('contact_name')?.touched">
+                  </div>
+
+                  <div class="mt-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                      <h6 class="mb-0">Contact Details</h6>
+                      <button type="button" class="btn btn-outline-primary btn-sm" (click)="addContactDetail(contactForm)">
+                        <i class="bi bi-plus me-1"></i> Add Detail
+                      </button>
+                    </div>
+
+                    @if (getContactDetails(contactForm).length === 0) {
+                      <div class="alert alert-info py-2 d-flex align-items-center">
+                        <i class="bi bi-info-circle me-2"></i> No contact details added yet.
+                      </div>
+                    }
+
+                    @for (detailForm of getContactDetails(contactForm).controls; track detailForm; let j = $index) {
+                      <div class="card mb-2 shadow-sm" [formGroup]="asFormGroup(detailForm)">
+                        <div class="card-body py-3">
+                          <div class="row g-2">
+                            <div class="col-md-3">
+                              <label class="form-label small">Label</label>
+                              <input type="text" class="form-control" formControlName="contact_method_alt_name">
+                            </div>
+                            <div class="col-md-3">
+                              <label class="form-label small">Type</label>
+                              <select class="form-select" formControlName="contact_type">
+                                @for (type of contactTypes; track type) {
+                                  <option [value]="type">{{ type }}</option>
+                                }
+                              </select>
+                            </div>
+                            <div class="col-md-5">
+                              <label class="form-label small">Value</label>
+                              <input type="text" class="form-control" formControlName="contact_value">
+                            </div>
+                            <div class="col-md-1 d-flex align-items-end">
+                              <button type="button" class="btn btn-outline-danger btn-sm" (click)="removeContactDetail(contactForm, j)" aria-label="Remove detail">
+                                <i class="bi bi-trash2"></i>
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    }
+                  </div>
+
+                  <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-3">
+                    <button type="button" class="btn btn-primary" (click)="saveVendorContact(i)">
+                      <i class="bi bi-save me-1"></i> Save Contact
+                    </button>
+                  </div>
+                </div>
+              </div>
+            }
+          </ng-template>
+        </li>
+
+        <li [ngbNavItem]="3" class="nav-item">
+          <a ngbNavLink class="d-flex align-items-center">
+            <i class="bi bi-house me-2"></i>Manufacturer Contacts
+          </a>
+          <ng-template ngbNavContent>
+            <div class="mb-4">
+              <button type="button" class="btn btn-success" (click)="addManufacturerContact()">
+                <i class="bi bi-plus me-1"></i> Add Contact
+              </button>
+            </div>
+
+            @if (manufacturerContacts.length === 0) {
+              <div class="alert alert-info d-flex align-items-center">
+                <i class="bi bi-info-circle me-2"></i> No manufacturer contacts added yet.
+              </div>
+            }
+
+            @for (contactForm of manufacturerContacts.controls; track contactForm; let i = $index) {
+              <div class="card mb-4 border-primary">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                  <h5 class="mb-0">Contact #{{ i + 1 }}</h5>
+                  <button type="button" class="btn btn-danger btn-sm" (click)="removeManufacturerContact(i)" aria-label="Remove contact">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </div>
+                <div class="card-body" [formGroup]="asFormGroup(contactForm)">
+                  <div class="mb-3">
+                    <label class="form-label">Contact Name</label>
+                    <input type="text" class="form-control" formControlName="contact_name"
+                           [class.is-invalid]="asFormGroup(contactForm).get('contact_name')?.invalid && asFormGroup(contactForm).get('contact_name')?.touched">
+                  </div>
+
+                  <div class="mt-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                      <h6 class="mb-0">Contact Details</h6>
+                      <button type="button" class="btn btn-outline-primary btn-sm" (click)="addContactDetail(contactForm)">
+                        <i class="bi bi-plus me-1"></i> Add Detail
+                      </button>
+                    </div>
+
+                    @if (getContactDetails(contactForm).length === 0) {
+                      <div class="alert alert-info py-2 d-flex align-items-center">
+                        <i class="bi bi-info-circle me-2"></i> No contact details added yet.
+                      </div>
+                    }
+
+                    @for (detailForm of getContactDetails(contactForm).controls; track detailForm; let j = $index) {
+                      <div class="card mb-2 shadow-sm" [formGroup]="asFormGroup(detailForm)">
+                        <div class="card-body py-3">
+                          <div class="row g-2">
+                            <div class="col-md-3">
+                              <label class="form-label small">Label</label>
+                              <input type="text" class="form-control" formControlName="contact_method_alt_name">
+                            </div>
+                            <div class="col-md-3">
+                              <label class="form-label small">Type</label>
+                              <select class="form-select" formControlName="contact_type">
+                                @for (type of contactTypes; track type) {
+                                  <option [value]="type">{{ type }}</option>
+                                }
+                              </select>
+                            </div>
+                            <div class="col-md-5">
+                              <label class="form-label small">Value</label>
+                              <input type="text" class="form-control" formControlName="contact_value">
+                            </div>
+                            <div class="col-md-1 d-flex align-items-end">
+                              <button type="button" class="btn btn-outline-danger btn-sm" (click)="removeContactDetail(contactForm, j)" aria-label="Remove detail">
+                                <i class="bi bi-trash2"></i>
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    }
+                  </div>
+
+                  <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-3">
+                    <button type="button" class="btn btn-primary" (click)="saveManufacturerContact(i)">
+                      <i class="bi bi-save me-1"></i> Save Contact
+                    </button>
+                  </div>
+                </div>
+              </div>
+            }
+          </ng-template>
+        </li>
+      </ul>
+
+      <div [ngbNavOutlet]="nav" class="mt-2"></div>
+    </form>
+  }
+</div>
+
+<div class="modal-footer">
+  <button type="button" class="btn btn-outline-secondary" (click)="dismiss()">Exit</button>
+</div>

@@ -6,7 +6,7 @@ import {
   StorageObjectCreatorModalComponent
 } from "./storage-object-creator-modal/storage-object-creator-modal.component";
 import {StorageObjectViewComponent} from "./storage-object-view/storage-object-view.component";
-import {Location} from "@angular/common";
+import {Location, NgClass} from "@angular/common";
 import {MetadataNotificationModalComponent} from "./metadata-notification-modal/metadata-notification-modal.component";
 
 @Component({
@@ -14,7 +14,8 @@ import {MetadataNotificationModalComponent} from "./metadata-notification-modal/
     imports: [
         NgbPagination,
         StorageObjectViewComponent,
-        NgbTooltip
+        NgbTooltip,
+      NgClass
     ],
     templateUrl: './reagent-store.component.html',
     styleUrl: './reagent-store.component.scss'

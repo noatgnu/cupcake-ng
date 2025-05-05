@@ -9,22 +9,21 @@
       <ngb-datepicker (navigate)="handleDateNavigate($event)" #dp (dateSelect)="onDateSelection($event)" [displayMonths]="2" [dayTemplate]="t" outsideDays="hidden" />
     </div>
 
-
     <form [formGroup]="form" (ngSubmit)="updateTimeWindow()">
       <ng-template #t let-date let-focused="focused">
-      <span
-        class="custom-day"
-        [class.hasMaintenance]="hasInstrumentUsageMaintenance(date)"
-        [class.hasUsage]="hasInstrumentUsage(date)"
-        [class.focused]="focused"
-        [class.range]="isRange(date)"
-        [class.faded]="isHovered(date) || isInside(date)"
-        [ngbTooltip]="getTooltipContent(date)"
-        (mouseenter)="hoveredDate = date"
-        (mouseleave)="hoveredDate = null"
-      >
-        {{ date.day }}
-      </span>
+        <span
+          class="custom-day"
+          [class.hasMaintenance]="hasInstrumentUsageMaintenance(date)"
+          [class.hasUsage]="hasInstrumentUsage(date)"
+          [class.focused]="focused"
+          [class.range]="isRange(date)"
+          [class.faded]="isHovered(date) || isInside(date)"
+          [ngbTooltip]="getTooltipContent(date)"
+          (mouseenter)="hoveredDate = date"
+          (mouseleave)="hoveredDate = null"
+        >
+          {{ date.day }}
+        </span>
       </ng-template>
       <div>
         <p>
@@ -42,72 +41,71 @@
           }
         </p>
       </div>
-
     </form>
-
   }
 </div>
+
 @if (enableEdit) {
-  <ul ngbNav #nav="ngbNav" (activeIdChange)="changeActiveIDTab($event)" [(activeId)]="activeTab" class="nav-tabs"  [destroyOnHide]="false">
+  <ul ngbNav #nav="ngbNav" (activeIdChange)="changeActiveIDTab($event)" [(activeId)]="activeTab" class="nav-tabs" [destroyOnHide]="false">
     <li [ngbNavItem]="'existingBookings'">
       <button ngbNavLink>Existing Bookings</button>
       <ng-template ngbNavContent>
         <table class="table table-hover">
           <thead>
-            <tr>
-              <th scope="col">Submission Date</th>
-              <th scope="col">Start Date</th>
-              <th scope="col">End Date</th>
-              <th scope="col">User</th>
-              <th scope="col">Approval</th>
-              <th scope="col">Actions</th>
-            </tr>
+          <tr>
+            <th scope="col">Submission Date</th>
+            <th scope="col">Start Date</th>
+            <th scope="col">End Date</th>
+            <th scope="col">User</th>
+            <th scope="col">Approval</th>
+            <th scope="col">Actions</th>
+          </tr>
           </thead>
           <tbody>
-          @if (instrumentUsageQuery) {
-            @for (booking of instrumentUsageQuery.results; track booking.id) {
-              <tr [class.table-danger]="booking.maintenance">
-                <td>{{booking.created_at | date: 'short'}}</td>
-                <td>{{booking.time_started | date: 'short'}}</td>
-                <td>{{booking.time_ended | date: 'short'}}</td>
-                <td>{{booking.user}}</td>
-                <td>
-                  @if (accounts.is_staff || dataService.instrumentPermissions[instrument.id]['can_manage']) {
-                    @if (booking.approved) {
-                      <i class="bi bi-check-circle text-success" (click)="toggleApproval(booking)"></i>
-                    } @else {
-                      <i class="bi bi-x-circle text-danger" (click)="toggleApproval(booking)"></i>
-                    }
-                  } @else {
-                    @if (booking.approved) {
-                      <i class="bi bi-check-circle text-success"></i>
-                    } @else {
-                      <i class="bi bi-x-circle text-danger"></i>
-                    }
-                  }
-
-                </td>
-                <td>
-                  <div class="d-flex gap-2">
+            @if (instrumentUsageQuery) {
+              @for (booking of instrumentUsageQuery.results; track booking.id) {
+                <tr [class.table-danger]="booking.maintenance">
+                  <td>{{booking.created_at | date: 'short'}}</td>
+                  <td>{{booking.time_started | date: 'short'}}</td>
+                  <td>{{booking.time_ended | date: 'short'}}</td>
+                  <td>{{booking.user}}</td>
+                  <td>
                     @if (accounts.is_staff || dataService.instrumentPermissions[instrument.id]['can_manage']) {
-                      <div ngbDropdown class="d-inline-block">
-                        <button class="btn btn-sm btn-warning" id="bookingDropdownDelay" ngbDropdownToggle><i class="bi bi-clock-history"></i></button>
-                        <div ngbDropdownMenu aria-labelledby="bookingDropdownDelay">
-                          <button ngbDropdownItem (click)="delayUsage(booking, 1)" ngbTooltip="Delay booking usage">Delay by 1 day</button>
-                          <button ngbDropdownItem (click)="delayUsage(booking, 3)" ngbTooltip="Delay booking usage">Delay by 3 day</button>
-                          <button ngbDropdownItem (click)="delayUsage(booking, 7)" ngbTooltip="Delay booking usage">Delay by 7 day</button>
+                      @if (booking.approved) {
+                        <i class="bi bi-check-circle text-success" (click)="toggleApproval(booking)"></i>
+                      } @else {
+                        <i class="bi bi-x-circle text-danger" (click)="toggleApproval(booking)"></i>
+                      }
+                    } @else {
+                      @if (booking.approved) {
+                        <i class="bi bi-check-circle text-success"></i>
+                      } @else {
+                        <i class="bi bi-x-circle text-danger"></i>
+                      }
+                    }
+
+                  </td>
+                  <td>
+                    <div class="d-flex gap-2">
+                      @if (accounts.is_staff || dataService.instrumentPermissions[instrument.id]['can_manage']) {
+                        <div ngbDropdown class="d-inline-block">
+                          <button class="btn btn-sm btn-warning" id="bookingDropdownDelay" ngbDropdownToggle><i class="bi bi-clock-history"></i></button>
+                          <div ngbDropdownMenu aria-labelledby="bookingDropdownDelay">
+                            <button ngbDropdownItem (click)="delayUsage(booking, 1)" ngbTooltip="Delay booking usage">Delay by 1 day</button>
+                            <button ngbDropdownItem (click)="delayUsage(booking, 3)" ngbTooltip="Delay booking usage">Delay by 3 day</button>
+                            <button ngbDropdownItem (click)="delayUsage(booking, 7)" ngbTooltip="Delay booking usage">Delay by 7 day</button>
+                          </div>
                         </div>
-                      </div>
-                    }
-                    @if (accounts.is_staff || dataService.instrumentPermissions[instrument.id]['can_manage']) {
-                      <button class="btn btn-sm btn-danger" (click)="removeBooking(booking)"><i class="bi bi-trash"></i></button>
-                    }
-                  </div>
+                      }
+                      @if (accounts.is_staff || dataService.instrumentPermissions[instrument.id]['can_manage']) {
+                        <button class="btn btn-sm btn-danger" (click)="removeBooking(booking)"><i class="bi bi-trash"></i></button>
+                      }
+                    </div>
 
-                </td>
-              </tr>
+                  </td>
+                </tr>
+              }
             }
-          }
 
           </tbody>
         </table>
@@ -116,30 +114,94 @@
     <li [ngbNavItem]="'hourBasedBookings'">
       <button ngbNavLink>Hour Based Bookings</button>
       <ng-template ngbNavContent>
-        @if (selectedStartDate) {
-          <div>
-            <button class="btn btn-primary mt-1" type="button" (click)="updateTimeWindow()">Update Window</button>
-            <p>
-              <b>Preview Start Date:</b> {{selectedStartDate | date: 'short'}}<br>
-              @if (selectedEndDate) {
-                <b>Preview End Date:</b> {{selectedEndDate | date: 'short'}}<br>
-              }
-            </p>
+        <!-- Time window controls -->
+        <div class="card mt-2">
+          <div class="card-body">
+            <div class="d-flex flex-column flex-md-row gap-3 align-items-center justify-content-between mb-3">
+
+              <!-- Time selection controls -->
+              <div class="d-flex flex-column flex-md-row gap-3">
+                <!-- Start time selection -->
+                <div class="d-flex flex-column">
+                  <label for="startTime" class="form-label">Start Time</label>
+                  <div class="d-flex align-items-center gap-2">
+                    <div class="input-group">
+                      <input
+                        id="startTime"
+                        class="form-control"
+                        [ngModel]="selectedStartDate | date:'yyyy-MM-dd'"
+                        (ngModelChange)="onTimeInputChange($event, 'start')"
+                        placeholder="yyyy-mm-dd"
+                        name="startTime"
+                      />
+                    </div>
+                    @if (showStartTimepicker) {
+                      <ngb-timepicker
+                        [(ngModel)]="startTime"
+                        [seconds]="false"
+                        (ngModelChange)="onTimePickerChange($event, 'start')"
+                        [meridian]="false"
+                        name="startTimepicker"
+                        [size]="'small'">
+                      </ngb-timepicker>
+                    }
+                  </div>
+                </div>
+
+                <!-- End time selection -->
+                <div class="d-flex flex-column">
+                  <label for="endTime" class="form-label">End Time</label>
+                  <div class="d-flex align-items-center gap-2">
+                    <div class="input-group">
+                      <input
+                        id="endTime"
+                        class="form-control"
+                        [ngModel]="selectedEndDate | date:'yyyy-MM-dd'"
+                        (ngModelChange)="onTimeInputChange($event, 'end')"
+                        placeholder="yyyy-mm-dd"
+                        name="endTime"
+                      />
+                    </div>
+                    @if (showEndTimepicker) {
+                      <ngb-timepicker
+                        [(ngModel)]="endTime"
+                        [seconds]="false"
+                        (ngModelChange)="onTimePickerChange($event, 'end')"
+                        [meridian]="false"
+                        name="endTimepicker"
+                        [size]="'small'">
+                      </ngb-timepicker>
+                    }
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Date info -->
+            @if (selectedStartDate) {
+              <div class="alert alert-info">
+                <div><b>Preview Start:</b> {{selectedStartDate | date: 'short'}}</div>
+                @if (selectedEndDate) {
+                  <div><b>Preview End:</b> {{selectedEndDate | date: 'short'}}</div>
+                  <div><b>Duration:</b> {{getDuration(selectedStartDate, selectedEndDate)}}</div>
+                }
+              </div>
+            }
           </div>
-        }
+        </div>
+
+        <!-- Canvas visualization -->
         <div class="container overflow-auto mt-2" style="max-width: 100%">
           <canvas (mousedown)="onMouseDown($event)" (mouseup)="onMouseUp($event)" (mousemove)="onMouseMove($event)" #canvasEdit [height]="height"></canvas>
         </div>
       </ng-template>
-
     </li>
   </ul>
   <div [ngbNavOutlet]="nav" class="mt-2"></div>
 }
 
-
 @if(!enableEdit) {
   <div class="container overflow-auto mt-2" style="max-width: 100%">
-    <canvas (mousedown)="onMouseDown($event)" (mouseup)="onMouseUp($event)" (mousemove)="onMouseMove($event)" #canvasNonEdit  [height]="height"></canvas>
+    <canvas (mousedown)="onMouseDown($event)" (mouseup)="onMouseUp($event)" (mousemove)="onMouseMove($event)" #canvasNonEdit [height]="height"></canvas>
   </div>
 }

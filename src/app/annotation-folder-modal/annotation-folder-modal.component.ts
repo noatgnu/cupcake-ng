@@ -4,14 +4,18 @@ import {AnnotationFolder, AnnotationQuery} from "../annotation";
 import {WebService} from "../web.service";
 import {AnnotationFileComponent} from "../annotation/annotation-file/annotation-file.component";
 import {DataService} from "../data.service";
-import {FormBuilder} from "@angular/forms";
+import {FormBuilder, ReactiveFormsModule} from "@angular/forms";
 import {AnnotationService} from "../annotation.service";
+import {DatePipe} from "@angular/common";
+
 
 @Component({
   selector: 'app-annotation-folder-modal',
   imports: [
     AnnotationFileComponent,
-    NgbPagination
+    NgbPagination,
+    DatePipe,
+    ReactiveFormsModule,
   ],
   templateUrl: './annotation-folder-modal.component.html',
   styleUrl: './annotation-folder-modal.component.scss'
@@ -51,7 +55,7 @@ export class AnnotationFolderModalComponent {
 
   getAnnotation() {
     if (this.folder) {
-      this.web.getAnnotationInFolder(this.folder.id, this.pageSize, (this.currentAnnotationPage - 1) * this.pageSize).subscribe((data: AnnotationQuery) => {
+      this.web.getAnnotationInFolder(this.folder.id, this.pageSize, (this.currentAnnotationPage - 1) * this.pageSize, this.form.value.searchTerm).subscribe((data: AnnotationQuery) => {
         this.annotationQuery = data;
         this.web.checkAnnotationPermissions(data.results.map((a) => a.id)).subscribe((response) => {
           for (const annotation of response) {
@@ -64,6 +68,10 @@ export class AnnotationFolderModalComponent {
 
   handlePageChange(page: number) {
     this.currentAnnotationPage = page;
+    this.getAnnotation()
+  }
+
+  refreshAnnotations() {
     this.getAnnotation()
   }
 }

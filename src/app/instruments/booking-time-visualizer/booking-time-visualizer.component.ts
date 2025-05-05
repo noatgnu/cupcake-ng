@@ -7,10 +7,10 @@ import {
   EventEmitter,
   Input, OnChanges, OnDestroy, OnInit,
   Output, SimpleChanges,
-  ViewChild
+  ViewChild, HostListener
 } from '@angular/core';
 import {Instrument, InstrumentUsage, InstrumentUsageQuery} from "../../instrument";
-import {FormBuilder, ReactiveFormsModule} from "@angular/forms";
+import {FormBuilder, ReactiveFormsModule, FormsModule} from "@angular/forms";
 import {
   NgbCalendar,
   NgbDate,
@@ -51,7 +51,8 @@ import {InstrumentService} from "../instrument.service";
     NgbDropdown,
     NgbDropdownToggle,
     NgbDropdownMenu,
-    NgbDropdownItem
+    NgbDropdownItem,
+    FormsModule
   ],
     templateUrl: './booking-time-visualizer.component.html',
     styleUrl: './booking-time-visualizer.component.scss'
@@ -71,6 +72,12 @@ export class BookingTimeVisualizerComponent implements OnInit, AfterViewInit,  A
   timeBlocks: Date[] = []
   requiredApprovalMaxDaysAhead = false
   requiredApprovalMaxDaysDuration = false
+  startTime: { hour: number, minute: number } = { hour: 0, minute: 0 };
+  endTime: { hour: number, minute: number } = { hour: 0, minute: 0 };
+  showStartTimepicker = true;
+  showEndTimepicker = true;
+  previewStartDate: Date | null = null;
+  previewEndDate: Date | null = null;
   @ViewChild('dp') dp!: NgbDatepicker
 
   private _dateBeforeCurrent = new Date(this.current - 24 * 60 * 60 * 1000)
@@ -132,6 +139,87 @@ export class BookingTimeVisualizerComponent implements OnInit, AfterViewInit,  A
       }
     })
   }
+  private lastMoveTime: number | undefined;
+  @HostListener('touchstart', ['$event'])
+  onTouchStart(event: TouchEvent) {
+    event.preventDefault();
+    const touch = event.touches[0];
+    const element = this.enableEdit ? this.canvasEdit.nativeElement : this.canvasNonEdit.nativeElement;
+    const rect = element.getBoundingClientRect();
+    const offsetX = touch.clientX - rect.left;
+
+    // Create a more complete synthetic mouse event
+    const mouseEvent = {
+      offsetX,
+      clientX: touch.clientX,
+      clientY: touch.clientY,
+      preventDefault: () => {},
+      stopPropagation: () => {}
+    } as MouseEvent;
+
+    this.onMouseDown(mouseEvent);
+  }
+  @HostListener('touchmove', ['$event'])
+  onTouchMove(event: TouchEvent) {
+    event.preventDefault();
+    const touch = event.touches[0];
+    const element = this.enableEdit ? this.canvasEdit.nativeElement : this.canvasNonEdit.nativeElement;
+    const rect = element.getBoundingClientRect();
+    const offsetX = touch.clientX - rect.left;
+
+    const mouseEvent = {
+      offsetX,
+      clientX: touch.clientX,
+      clientY: touch.clientY,
+      preventDefault: () => {},
+      stopPropagation: () => {}
+    } as MouseEvent;
+
+    this.onMouseMove(mouseEvent);
+  }
+  @HostListener('touchend', ['$event'])
+  onTouchEnd(event: TouchEvent) {
+    event.preventDefault();
+    const touch = event.changedTouches[0];
+    const element = this.enableEdit ? this.canvasEdit.nativeElement : this.canvasNonEdit.nativeElement;
+    const rect = element.getBoundingClientRect();
+    const offsetX = touch.clientX - rect.left;
+
+    const mouseEvent = {
+      offsetX,
+      clientX: touch.clientX,
+      clientY: touch.clientY,
+      preventDefault: () => {},
+      stopPropagation: () => {}
+    } as MouseEvent;
+
+    this.onMouseUp(mouseEvent);
+  }
+  @HostListener('window:keydown', ['$event'])
+  handleKeyDown(event: KeyboardEvent) {
+    if (!this.enableEdit || !this.selected) return;
+
+    const step = 15 * 60 * 1000; // 15 minutes in milliseconds
+    let newTime: Date | null = null;
+
+    switch (event.key) {
+      case 'ArrowLeft':
+        newTime = new Date(this.selectedTimeRange.start!.getTime() - step);
+        break;
+      case 'ArrowRight':
+        newTime = new Date(this.selectedTimeRange.start!.getTime() + step);
+        break;
+      case 'Escape':
+        this.cancelSelection();
+        return;
+    }
+
+    if (newTime) {
+      event.preventDefault();
+      // Check if new time is valid before updating
+      this.updateSelectionTime(newTime);
+    }
+  }
 
   ngOnInit() {
 
@@ -191,16 +279,12 @@ export class BookingTimeVisualizerComponent implements OnInit, AfterViewInit,  A
   ngAfterViewChecked() {
     if (this.enableEdit) {
       if (this.canvasEdit && !this.ctx) {
-        console.log(this.canvasEdit)
-        console.log(this.ctx)
-        console.log("Canvas is not initialized")
+
         //this.initializeCanvas(this.canvasEdit);
       }
     } else {
       if (this.canvasNonEdit && !this.ctx) {
-        console.log(this.canvasNonEdit)
-        console.log(this.ctx)
-        console.log("Canvas is not initialized")
+
         //this.initializeCanvas(this.canvasNonEdit);
       }
     }
@@ -209,11 +293,22 @@ export class BookingTimeVisualizerComponent implements OnInit, AfterViewInit,  A
 
   changeActiveIDTab(id: string) {
     if (id === "hourBasedBookings") {
-      if (this.canvasEdit && !this.ctx) {
+      // Always reinitialize canvas when tab becomes active
+      if (this.enableEdit && this.canvasEdit) {
         this.initializeCanvas(this.canvasEdit);
-      } else if (this.canvasNonEdit && !this.ctx) {
+      } else if (this.canvasNonEdit) {
         this.initializeCanvas(this.canvasNonEdit);
       }
+
+      // Auto-update window when switching to this tab
+      if (this.fromDate && this.toDate) {
+        this.updateTimeWindow();
+      }
+
+      // Ensure proper rendering
+      setTimeout(() => {
+        window.dispatchEvent(new Event('resize'));
+      }, 100);
     }
   }
 
@@ -302,7 +397,6 @@ export class BookingTimeVisualizerComponent implements OnInit, AfterViewInit,  A
 
         // draw dashed line for each hour
         this.ctx.beginPath()
-        //const x = (timeBlock.getHours() / 24) * (filteredTimeBlocks.length) * blockSize + xStart
         this.ctx.setLineDash([5, 15])
         this.ctx.moveTo(timeBlockPixelStart, 0)
         this.ctx.lineTo(timeBlockPixelStart, 2)
@@ -311,13 +405,14 @@ export class BookingTimeVisualizerComponent implements OnInit, AfterViewInit,  A
       })
       currentStart = xEnd
     })
-    //update size of canvas based on the final xEnd
-
-    // draw other instrument usages from the instrumentUsageQuery
+    console.log(this.instrumentUsageQuery)
     for (const usage of this.instrumentUsageQuery!.results) {
       usage.time_started = new Date(usage.time_started)
       usage.time_ended = new Date(usage.time_ended)
-      if ((usage.time_started && usage.time_ended) && (usage.time_started.getTime() !== this.selectedTimeRange.start?.getTime() && usage.time_ended.getTime() !== this.selectedTimeRange.end?.getTime())) {
+      const isSelectedBooking = this.selectedTimeRange.start && this.selectedTimeRange.end &&
+        usage.time_started.getTime() === this.selectedTimeRange.start.getTime() &&
+        usage.time_ended.getTime() === this.selectedTimeRange.end.getTime();
+      if (!isSelectedBooking) {
         const start = new Date(usage.time_started)
         const end = new Date(usage.time_ended)
         const delta = end.getTime() - start.getTime()
@@ -336,7 +431,9 @@ export class BookingTimeVisualizerComponent implements OnInit, AfterViewInit,  A
         this.ctx.fillStyle = 'white'
         this.ctx.textBaseline = 'bottom'
         this.ctx.fillText("user: "+usage.user, this.padding + deltaStartPixel+1, this.height)
+
       }
+
     }
 
     //draw selected time range accurate to seconds
@@ -358,7 +455,6 @@ export class BookingTimeVisualizerComponent implements OnInit, AfterViewInit,  A
     const deltaTime = currentMarker.getTime() - this.form.value.windowStart.getTime()
     const x = this.padding + deltaTime * graphPixelOverTime
     this.ctx.fillRect(x, 0, 2, this.height)
-    console.log(this.ctx)
   }
 
   clearCanvas() {
@@ -394,6 +490,7 @@ export class BookingTimeVisualizerComponent implements OnInit, AfterViewInit,  A
     if (!this.enableEdit) {
       return
     }
+    this.dragEnd = event.offsetX;
     const positionInTime = this.convertPixelToTime(event.offsetX)
 
     // check if the position is within an existing instrumentUsage block
@@ -474,6 +571,22 @@ export class BookingTimeVisualizerComponent implements OnInit, AfterViewInit,  A
           this.selectedEnd = temp
         }
         this.convertDragStartAndEndToExactTimeRange()
+        if (this.selectedTimeRange.start && this.selectedTimeRange.end) {
+          // Update date values
+          this.selectedStartDate = new Date(this.selectedTimeRange.start);
+          this.selectedEndDate = new Date(this.selectedTimeRange.end);
+
+          // Update time pickers
+          this.startTime = {
+            hour: this.selectedStartDate.getHours(),
+            minute: this.selectedStartDate.getMinutes()
+          };
+
+          this.endTime = {
+            hour: this.selectedEndDate.getHours(),
+            minute: this.selectedEndDate.getMinutes()
+          };
+        }
         this.selectedEnd = undefined
         this.selectedStart = undefined
         this.dragStart = undefined
@@ -481,31 +594,38 @@ export class BookingTimeVisualizerComponent implements OnInit, AfterViewInit,  A
         //this.selectedEndDate = undefined
         //this.selectedStartDate = undefined
         this.selected = false
-        this.web.getInstrumentUsage(this.instrument.id, this.selectedTimeRange.start!, this.selectedTimeRange.end!).subscribe((data) => {
-          const hasMaintenance = data.results.filter(usage => usage.maintenance)
-          this.instrumentUsageQuery = data
-          this.selectedRangeOut.emit({started: this.selectedTimeRange.start!, ended: this.selectedTimeRange.end!, hasMaintenance: hasMaintenance.length > 0})
-        })
-
-
+        this.web.getInstrumentUsage(this.instrument.id, this.selectedTimeRange.start!, this.selectedTimeRange.end!)
+          .subscribe((data) => {
+            const hasMaintenance = data.results.filter(usage => usage.maintenance)
+            // Don't replace instrumentUsageQuery, just check for maintenance
+            this.selectedRangeOut.emit({started: this.selectedTimeRange.start!, ended: this.selectedTimeRange.end!, hasMaintenance: hasMaintenance.length > 0})
+          })
       }
     }
   }
 
   onMouseMove(event: MouseEvent) {
-    // draw marker show where the mouse is
-    this.drawMarker(event.offsetX, 'black')
+    if (!this.lastMoveTime || Date.now() - this.lastMoveTime > 30) { // Keep your throttling
+      // Use your existing drawMarker which already preserves content
+      this.drawMarker(event.offsetX, 'black');
+      this.lastMoveTime = Date.now();
 
+      const currentTime = this.convertPixelToTime(event.offsetX);
 
-    if (!this.enableEdit) {
-      return
-    }
-    if (this.dragStart) {
-      this.dragEnd = event.offsetX
-      this.selectedEndDate = this.convertPixelToTime(this.dragEnd)
-      this.draw()
-    } else {
-      this.selectedStartDate = this.convertPixelToTime(event.offsetX)
+      if (this.enableEdit && this.dragStart) {
+        // During dragging operation
+        this.dragEnd = event.offsetX;
+        this.previewEndDate = currentTime;
+        // Your existing drawing method
+        this.draw();
+      } else if (this.enableEdit) {
+        // Just hover - don't update input fields
+        this.previewStartDate = currentTime;
+        // Don't update selectedStartDate here
+      }
+
+      // Draw the tooltip using your existing method
+      this.drawTimeTooltip(event.offsetX, currentTime);
     }
   }
 
@@ -551,14 +671,16 @@ export class BookingTimeVisualizerComponent implements OnInit, AfterViewInit,  A
   onDateSelection(date: NgbDate) {
     if (!this.fromDate && !this.toDate) {
       this.fromDate = date;
-      this.requiredApprovalMaxDaysAhead = this.checkingStartDateIfFurtherThanInstrumentMaxAhead(new Date(date.year, date.month - 1, date.day))
+      this.requiredApprovalMaxDaysAhead = this.checkingStartDateIfFurtherThanInstrumentMaxAhead(new Date(date.year, date.month - 1, date.day));
     } else if (this.fromDate && !this.toDate && date.after(this.fromDate)) {
       this.toDate = date;
-      this.requiredApprovalMaxDaysDuration = this.checkingIfDurationIsLongerThanInstrumentMaxDays(new Date(this.fromDate.year, this.fromDate.month - 1, this.fromDate.day), new Date(date.year, date.month - 1, date.day))
+      this.requiredApprovalMaxDaysDuration = this.checkingIfDurationIsLongerThanInstrumentMaxDays(new Date(this.fromDate.year, this.fromDate.month - 1, this.fromDate.day), new Date(date.year, date.month - 1, date.day));
+      // Auto-update when both dates are selected
+      this.updateTimeWindow();
     } else {
       this.toDate = null;
       this.fromDate = date;
-      this.requiredApprovalMaxDaysAhead = this.checkingStartDateIfFurtherThanInstrumentMaxAhead(new Date(date.year, date.month - 1, date.day))
+      this.requiredApprovalMaxDaysAhead = this.checkingStartDateIfFurtherThanInstrumentMaxAhead(new Date(date.year, date.month - 1, date.day));
     }
     if (this.fromDate && this.toDate) {
       // get bookings between the selected date range
@@ -569,7 +691,7 @@ export class BookingTimeVisualizerComponent implements OnInit, AfterViewInit,  A
         this.instrumentUsageQuery = data;
         const hasMaintenance = this.instrumentUsageQuery.results.filter(usage => usage.maintenance)
         this.selectedRangeOut.emit({started: startDate, ended: endDate, hasMaintenance: hasMaintenance.length > 0})
-        console.log(this.instrumentUsageQuery);
+
         if (this.enableEdit) {
           this.prepare(this.canvasEdit).then();
         } else {
@@ -617,6 +739,10 @@ export class BookingTimeVisualizerComponent implements OnInit, AfterViewInit,  A
         } else {
           this.prepare(this.canvasNonEdit).then();
         }
+
+        // Update selected dates display
+        this.selectedStartDate = start;
+        this.selectedEndDate = end;
       });
     }
   }
@@ -790,5 +916,258 @@ export class BookingTimeVisualizerComponent implements OnInit, AfterViewInit,  A
     return false;
   }
 
+  private drawWithAnimation() {
+    requestAnimationFrame(() => {
+      this.clearCanvas();
+      this.draw();
+    });
+  }
+
+  private drawTimeTooltip(x: number, time: Date) {
+    const formattedTime = time.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+    const formattedDate = time.toLocaleDateString([], {month: 'short', day: 'numeric'});
+
+    // Draw tooltip background
+    this.ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+    this.ctx.fillRect(x - 75, 40, 150, 40);
+
+    // Draw time text
+    this.ctx.fillStyle = 'white';
+    this.ctx.font = '12px Arial';
+    this.ctx.textAlign = 'center';
+    this.ctx.fillText(formattedTime, x, 55);
+    this.ctx.fillText(formattedDate, x, 70);
+  }
+
+  private drawBookingBlock(startX: number, width: number, type: 'own'|'others'|'selected'|'maintenance', label: string) {
+    const colors = {
+      own: { bg: 'rgba(25, 118, 210, 0.6)', text: 'white' },
+      others: { bg: 'rgba(146, 9, 207, 0.4)', text: 'white' },
+      selected: { bg: 'rgba(76, 175, 80, 0.6)', text: 'white' },
+      maintenance: { bg: 'rgba(244, 67, 54, 0.6)', text: 'white' }
+    };
+
+    // Draw gradient background for better visual distinction
+    const gradient = this.ctx.createLinearGradient(startX, 0, startX + width, 0);
+    const color = colors[type];
+
+    gradient.addColorStop(0, color.bg);
+    gradient.addColorStop(1, this.adjustColor(color.bg, 0.9));
+
+    this.ctx.fillStyle = gradient;
+    this.ctx.fillRect(startX, 0, width, this.height);
+
+    // Add booking label
+    this.ctx.fillStyle = color.text;
+    this.ctx.font = '11px Arial';
+    this.ctx.textBaseline = 'top';
+
+    // Truncate text if needed
+    const maxWidth = width - 10;
+    let displayText = label;
+    if (this.ctx.measureText(label).width > maxWidth) {
+      let truncated = label;
+      while (this.ctx.measureText(truncated + '...').width > maxWidth && truncated.length > 0) {
+        truncated = truncated.slice(0, -1);
+      }
+      displayText = truncated + '...';
+    }
+
+    this.ctx.fillText(displayText, startX + 5, 5);
+  }
+
+  private adjustColor(rgba: string, factor: number): string {
+    // Parse rgba string and adjust rgb values
+    const match = rgba.match(/rgba\((\d+),\s*(\d+),\s*(\d+),\s*([.\d]+)\)/);
+    if (match) {
+      const r = Math.min(255, Math.floor(parseInt(match[1]) * factor));
+      const g = Math.min(255, Math.floor(parseInt(match[2]) * factor));
+      const b = Math.min(255, Math.floor(parseInt(match[3]) * factor));
+      const a = parseFloat(match[4]);
+      return `rgba(${r}, ${g}, ${b}, ${a})`;
+    }
+    return rgba;
+  }
+
+  private checkForTimeConflicts(start: Date, end: Date): boolean {
+    if (!this.instrumentUsageQuery) return false;
+
+    return this.instrumentUsageQuery.results.some(usage => {
+      if (!usage.time_started || !usage.time_ended) return false;
+      const usageStart = new Date(usage.time_started).getTime();
+      const usageEnd = new Date(usage.time_ended).getTime();
+      return (start.getTime() < usageEnd && end.getTime() > usageStart);
+    });
+  }
+
+  private updateSelectionTime(newStartTime: Date) {
+    // Calculate duration of current selection
+    const duration = this.selectedTimeRange.end!.getTime() - this.selectedTimeRange.start!.getTime();
+    const newEndTime = new Date(newStartTime.getTime() + duration);
+
+    // Check for conflicts
+    const hasConflicts = this.checkForTimeConflicts(newStartTime, newEndTime);
+    if (!hasConflicts) {
+      this.selectedTimeRange = { start: newStartTime, end: newEndTime };
+      this.draw();
+    }
+  }
+
+  private cancelSelection() {
+    this.selectedTimeRange = {start: null, end: null};
+    this.selected = false;
+    this.dragStart = undefined;
+    this.dragEnd = undefined;
+    this.selectedStart = undefined;
+    this.selectedEnd = undefined;
+    this.draw();
+  }
+
+  toggleStartTimepicker(): void {
+    this.showStartTimepicker = !this.showStartTimepicker;
+    if (this.showStartTimepicker && this.selectedStartDate) {
+      this.startTime = {
+        hour: this.selectedStartDate.getHours(),
+        minute: this.selectedStartDate.getMinutes()
+      };
+    }
+  }
+
+  toggleEndTimepicker(): void {
+    this.showEndTimepicker = !this.showEndTimepicker;
+    if (this.showEndTimepicker && this.selectedEndDate) {
+      this.endTime = {
+        hour: this.selectedEndDate.getHours(),
+        minute: this.selectedEndDate.getMinutes()
+      };
+    }
+  }
+
+  onTimePickerChange(time: any, type: 'start' | 'end'): void {
+    if (type === 'start' && this.selectedStartDate) {
+      const newDate = new Date(this.selectedStartDate);
+      newDate.setHours(time.hour, time.minute);
+
+      // Only update if there's no conflict
+      if (this.selectedEndDate && this.validateTimeChange(newDate, this.selectedEndDate)) {
+        this.selectedStartDate = newDate;
+        this.updateCanvasSelection();
+      } else {
+        // Reset time picker to current value
+        this.startTime = {
+          hour: this.selectedStartDate.getHours(),
+          minute: this.selectedStartDate.getMinutes()
+        };
+      }
+    } else if (type === 'end' && this.selectedEndDate) {
+      const newDate = new Date(this.selectedEndDate);
+      newDate.setHours(time.hour, time.minute);
+
+      // Only update if there's no conflict
+      if (this.selectedStartDate && this.validateTimeChange(this.selectedStartDate, newDate)) {
+        this.selectedEndDate = newDate;
+        this.updateCanvasSelection();
+      } else {
+        // Reset time picker to current value
+        this.endTime = {
+          hour: this.selectedEndDate.getHours(),
+          minute: this.selectedEndDate.getMinutes()
+        };
+      }
+    }
+  }
+
+
+  onTimeInputChange(value: string, type: 'start' | 'end'): void {
+    try {
+      const date = new Date(value);
+      if (!isNaN(date.getTime())) {
+        if (type === 'start') {
+          // Preserve current time when changing date
+          if (this.selectedStartDate) {
+            date.setHours(this.selectedStartDate.getHours(), this.selectedStartDate.getMinutes());
+          }
+
+          // Validate before updating
+          if (this.selectedEndDate && this.validateTimeChange(date, this.selectedEndDate)) {
+            this.selectedStartDate = date;
+            this.startTime = { hour: date.getHours(), minute: date.getMinutes() };
+            this.updateCanvasSelection();
+          }
+        } else {
+          // Preserve current time when changing date
+          if (this.selectedEndDate) {
+            date.setHours(this.selectedEndDate.getHours(), this.selectedEndDate.getMinutes());
+          }
+
+          // Validate before updating
+          if (this.selectedStartDate && this.validateTimeChange(this.selectedStartDate, date)) {
+            this.selectedEndDate = date;
+            this.endTime = { hour: date.getHours(), minute: date.getMinutes() };
+            this.updateCanvasSelection();
+          }
+        }
+      }
+    } catch (e) {
+      console.error('Invalid date format');
+    }
+  }
+
+  private validateTimeChange(newStart: Date, newEnd: Date): boolean {
+    // Check for conflicts with existing bookings
+    const hasConflicts = this.checkForTimeConflicts(newStart, newEnd);
+
+    if (hasConflicts) {
+      // Alert the user about the conflict
+      this.toastService.show("Time Conflict", "The selected time range conflicts with existing bookings.");
+      return false;
+    }
+
+    return true;
+  }
+
+  updateCanvasSelection(): void {
+    if (this.selectedStartDate && this.selectedEndDate) {
+      if (!this.validateTimeChange(this.selectedStartDate, this.selectedEndDate)) {
+        return;
+      }
+
+      const startX = this.convertTimeToPixel(this.selectedStartDate);
+      const endX = this.convertTimeToPixel(this.selectedEndDate);
+
+      this.dragStart = startX;
+      this.dragEnd = endX;
+      this.selectedTimeRange = {
+        start: this.selectedStartDate,
+        end: this.selectedEndDate
+      };
+      this.drawWithAnimation();
+    }
+  }
+
+  getDuration(start: Date, end: Date): string {
+    const diff = end.getTime() - start.getTime();
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+
+    return `${hours}h ${minutes}m`;
+  }
+
+  convertTimeToPixel(time: Date): number {
+    const windowStart = this.form.value.windowStart;
+    const windowEnd = this.form.value.windowEnd;
+
+    if (windowStart && windowEnd) {
+      const delta = windowEnd.getTime() - windowStart.getTime();
+      const canvasWidth = this.width - this.padding * 2;
+      const timeOffset = time.getTime() - windowStart.getTime();
+
+      // Calculate the pixel position
+      const pixelOffset = (timeOffset / delta) * canvasWidth;
+      return pixelOffset + this.padding;
+    }
+
+    return this.padding;
+  }
 
 }

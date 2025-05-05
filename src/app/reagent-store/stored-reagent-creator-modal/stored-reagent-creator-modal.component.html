@@ -1,114 +1,160 @@
 <div class="modal-header">
   <h5 class="modal-title">
-    Expendable/Consumable/Sample Entry
+    <i class="bi bi-plus-circle me-2"></i>Expendable/Consumable/Sample Entry
   </h5>
 </div>
-<div class="modal-body">
-  <form [formGroup]="reagentSearchForm" class="d-flex flex-column gap-2">
-    <div>
-      Input entry for <b>{{stored_at?.object_name}}</b>
-    </div>
-    <div class="form-floating">
-      <input
-        [resultTemplate]="rt"
-        (selectItem)="onSearchIngredients($event)"
-        id="reagentNameSearch" type="search"
-        class="form-control" formControlName="name"
-        [ngbTypeahead]="search"
-        [inputFormatter]="formatIngredient"
-        [resultFormatter]="resultFormatter"
-      />
-      <label for="reagentNameSearch">Reagent</label>
-    </div>
-    <ng-template #rt let-r="result" let-t="term">
-      <ngb-highlight [result]="r.name + ' ' + '('+ r.unit+ ')' " [term]="t"></ngb-highlight>
-    </ng-template>
 
-    <div class="form-floating">
-      <input type="number" class="form-control" formControlName="quantity" />
-      <label>Quantity</label>
+<div class="modal-body">
+  <form [formGroup]="reagentSearchForm" class="d-flex flex-column gap-3">
+    <div class="alert alert-info d-flex align-items-center">
+      <i class="bi bi-info-circle me-2"></i>
+      <div>Input entry for <strong>{{stored_at?.object_name}}</strong></div>
     </div>
-    <div class="form-floating">
-      <select id="reagentUnit" class="form-select" formControlName="unit">
-        <optgroup label="Volume">
-          <option value="nL">nL</option>
-          <option value="uL">uL</option>
-          <option value="mL">mL</option>
-          <option value="L">L</option>
-        </optgroup>
-        <optgroup label="Mass">
-          <option value="ng">ng</option>
-          <option value="ug">ug</option>
-          <option value="mg">mg</option>
-          <option value="g">g</option>
-          <option value="kg">kg</option>
-        </optgroup>
-        <optgroup label="Mole">
-          <option value="nM">nM</option>
-          <option value="uM">uM</option>
-          <option value="mM">mM</option>
-          <option value="M">M</option>
-        </optgroup>
-        <optgroup label="Count">
-          <option value="ea">ea</option>
-        </optgroup>
-        <optgroup label="Other">
-          <option value="pieces">pieces</option>
-          <option value="other">other</option>
-        </optgroup>
-      </select>
-      <label for="reagentUnit">Unit</label>
+
+    <!-- Basic Information Section -->
+    <div class="card border-0 shadow-sm">
+      <div class="card-header border-bottom">
+        <h6 class="mb-0"><i class="bi bi-flask me-2"></i>Reagent Information</h6>
+      </div>
+      <div class="card-body">
+        <div class="mb-3">
+          <label for="reagentNameSearch" class="form-label">Reagent Name</label>
+          <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-search"></i></span>
+            <input
+              [resultTemplate]="rt"
+              (selectItem)="onSearchIngredients($event)"
+              id="reagentNameSearch"
+              type="search"
+              class="form-control"
+              formControlName="name"
+              [ngbTypeahead]="search"
+              [inputFormatter]="formatIngredient"
+              [resultFormatter]="resultFormatter"
+              placeholder="Search for reagent"
+            />
+          </div>
+          <ng-template #rt let-r="result" let-t="term">
+            <ngb-highlight [result]="r.name + ' ' + '('+ r.unit+ ')' " [term]="t"></ngb-highlight>
+          </ng-template>
+        </div>
+
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label for="reagentQuantity" class="form-label">Quantity</label>
+            <input type="number" id="reagentQuantity" class="form-control" formControlName="quantity" />
+          </div>
+
+          <div class="col-md-6">
+            <label for="reagentUnit" class="form-label">Unit</label>
+            <select id="reagentUnit" class="form-select" formControlName="unit">
+              <optgroup label="Volume">
+                <option value="nL">nL</option>
+                <option value="uL">uL</option>
+                <option value="mL">mL</option>
+                <option value="L">L</option>
+              </optgroup>
+              <optgroup label="Mass">
+                <option value="ng">ng</option>
+                <option value="ug">ug</option>
+                <option value="mg">mg</option>
+                <option value="g">g</option>
+                <option value="kg">kg</option>
+              </optgroup>
+              <optgroup label="Mole">
+                <option value="nM">nM</option>
+                <option value="uM">uM</option>
+                <option value="mM">mM</option>
+                <option value="M">M</option>
+              </optgroup>
+              <optgroup label="Count">
+                <option value="ea">ea</option>
+              </optgroup>
+              <optgroup label="Other">
+                <option value="pieces">pieces</option>
+                <option value="other">other</option>
+              </optgroup>
+            </select>
+          </div>
+        </div>
+      </div>
     </div>
-    <div class="form-floating">
-      <textarea class="form-control" formControlName="notes"></textarea>
-      <label>Notes</label>
-    </div>
-    <div class="form-check">
-      <input class="form-check-input" type="checkbox" id="shareable" formControlName="shareable" />
-      <label class="form-check-label" for="shareable">
-        Shareable
-      </label>
-    </div>
-    <div class="form-check">
-      <input class="form-check-input" type="checkbox" id="access_all" formControlName="access_all" />
-      <label class="form-check-label" for="access_all">
-        Allow Everyone to Access
-      </label>
+
+    <!-- Notes and Access Section -->
+    <div class="card border-0 shadow-sm">
+      <div class="card-header border-bottom">
+        <h6 class="mb-0"><i class="bi bi-pencil me-2"></i>Notes & Access Controls</h6>
+      </div>
+      <div class="card-body">
+        <div class="mb-3">
+          <label for="reagentNotes" class="form-label">Notes</label>
+          <textarea id="reagentNotes" class="form-control" formControlName="notes" rows="3"
+                    placeholder="Add any additional details about this item"></textarea>
+        </div>
+
+        <div class="d-flex gap-4">
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="shareable" formControlName="shareable" />
+            <label class="form-check-label" for="shareable">
+              <i class="bi bi-share me-1"></i>Shareable
+            </label>
+          </div>
+
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="access_all" formControlName="access_all" />
+            <label class="form-check-label" for="access_all">
+              <i class="bi bi-people me-1"></i>Allow Everyone to Access
+            </label>
+          </div>
+        </div>
+      </div>
     </div>
   </form>
 
+  <!-- Metadata Section (conditional) -->
   @if (exportedMetadata) {
-    <hr>
-    <div>
-      <div class="card">
-        <div class="card-header">
-          Exported Metadata
-        </div>
-        <div class="card-body">
-          <div>
-            <b>Protocol:</b> {{exportedMetadata.protocol.protocol_title}}
+    <div class="card border-0 shadow-sm mt-3">
+      <div class="card-header border-bottom">
+        <h6 class="mb-0"><i class="bi bi-tag me-2"></i>Exported Metadata</h6>
+      </div>
+      <div class="card-body">
+        <div class="d-flex flex-column gap-2">
+          <div class="d-flex gap-2">
+            <span class="fw-bold" style="width: 80px;">Protocol:</span>
+            <span>{{exportedMetadata.protocol.protocol_title}}</span>
           </div>
-          <div>
-            <b>Session:</b> {{exportedMetadata.session.unique_id}}
+
+          <div class="d-flex gap-2">
+            <span class="fw-bold" style="width: 80px;">Session:</span>
+            <span>{{exportedMetadata.session.unique_id}}</span>
           </div>
-          <div>
-            <b>Step:</b>
-            <div [innerHTML]="exportedMetadata.step.step_description">
-            </div>
+
+          <div class="d-flex gap-2">
+            <span class="fw-bold" style="width: 80px;">Step:</span>
+            <div [innerHTML]="exportedMetadata.step.step_description"></div>
           </div>
+
           @if (exportedMetadata.metadata.length > 0) {
-            <div>
-              <b>Metadata:</b>
-              <div>
+            <div class="d-flex gap-2">
+              <span class="fw-bold" style="width: 80px;">Metadata:</span>
+              <div class="d-flex flex-wrap gap-2">
                 @for (m of exportedMetadata.metadata; track m) {
                   @if (m.type === "Characteristics") {
-                    <span class="badge bg-primary" ngbTooltip="Characteristics">{{m.name}}: {{m.value}}</span>
+                    <span class="badge bg-primary rounded-pill" ngbTooltip="Characteristics">
+                      <i class="bi bi-tag-fill me-1"></i>{{m.name}}: {{m.value}}
+                    </span>
                   } @else if (m.type === "Comment") {
-                    <span class="badge bg-secondary" ngbTooltip="Comment">{{m.name}}: {{m.value}}</span>
+                    <span class="badge bg-secondary rounded-pill" ngbTooltip="Comment">
+                      <i class="bi bi-chat-fill me-1"></i>{{m.name}}: {{m.value}}
+                    </span>
                   } @else if (m.type === "Factor value") {
-                    <span class="badge bg-success" ngbTooltip="Factor value">{{m.name}}: {{m.value}}</span>
+                    <span class="badge bg-success rounded-pill" ngbTooltip="Factor value">
+                      <i class="bi bi-graph-up me-1"></i>{{m.name}}: {{m.value}}
+                    </span>
                   } @else {
-                    <span class="badge bg-danger" ngbTooltip="Other">{{m.name}}: {{m.value}}</span>
+                    <span class="badge bg-danger rounded-pill" ngbTooltip="Other">
+                      <i class="bi bi-info-circle-fill me-1"></i>{{m.name}}: {{m.value}}
+                    </span>
                   }
                 }
               </div>
@@ -116,17 +162,25 @@
           }
         </div>
       </div>
-
     </div>
   }
 </div>
-<div class="modal-footer">
-  @if (exportedMetadata) {
-    <button type="button" class="btn btn-primary" (click)="submit()">Add Without Metadata</button>
-    <button type="button" class="btn btn-primary" (click)="submit(true)">Add With Metadata</button>
-  } @else {
-    <button type="button" class="btn btn-primary" (click)="submit()">Add</button>
-  }
 
-  <button type="button" class="btn btn-secondary" (click)="close()">Close</button>
+<div class="modal-footer">
+  <button type="button" class="btn btn-secondary" (click)="close()">
+    <i class="bi bi-x-circle me-1"></i>Cancel
+  </button>
+
+  @if (exportedMetadata) {
+    <button type="button" class="btn btn-outline-primary" (click)="submit()">
+      <i class="bi bi-plus-circle me-1"></i>Add Without Metadata
+    </button>
+    <button type="button" class="btn btn-primary" (click)="submit(true)">
+      <i class="bi bi-plus-circle-fill me-1"></i>Add With Metadata
+    </button>
+  } @else {
+    <button type="button" class="btn btn-primary" (click)="submit()">
+      <i class="bi bi-plus-circle me-1"></i>Add
+    </button>
+  }
 </div>

@@ -1,163 +1,212 @@
 <div class="modal-header">
   <h5 class="modal-title">
-    Instrument Booking
+    <i class="bi bi-calendar-plus me-2"></i>Instrument Booking
   </h5>
 </div>
-<div class="modal-body">
-  <!--<form [formGroup]="instrumentForm" class="d-flex flex-column gap-2" (ngSubmit)="createInstrument()">
-    <div class="form-floating">
-      <input type="text" class="form-control" formControlName="name" id="instrumentName">
-      <label for="instrumentName">Instrument Name</label>
-    </div>
-    <div class="form-floating">
-      <textarea class="form-control" formControlName="description" id="instrumentDescription" style="height: 300px"></textarea>
-      <label for="instrumentDescription">Instrument Description</label>
-    </div>
-    <div>
-      <button type="submit" class="btn btn-primary">Create</button>
-    </div>
-  </form>-->
 
+<div class="modal-body">
+  <!-- Instrument Search Section -->
   @if (enableSearch) {
-    <form [formGroup]="searchForm" class="d-flex flex-column gap-2 mt-2">
+    <form [formGroup]="searchForm" class="mb-4">
       <div class="form-floating">
-        <input type="search" class="form-control" formControlName="instrument" id="instrumentSearch">
-        <label for="instrumentSearch">Instrument</label>
+        <input type="search" class="form-control" formControlName="instrument" id="instrumentSearch" placeholder="Search instruments">
+        <label for="instrumentSearch"><i class="bi bi-search me-1"></i>Instrument Search</label>
       </div>
       @if (instrumentQuery) {
         @if (instrumentQuery.results.length > 0) {
-          <div class="list-group">
-            @for (result of instrumentQuery.results; track result.id) {
-              <div class="list-group-item list-group-item-action" (click)="clickInstrument(result)">
-                <div>
-                  <b>{{result.instrument_name}}</b>
+          <div class="card border-0 shadow-sm mt-3">
+            <div class="list-group list-group-flush">
+              @for (result of instrumentQuery.results; track result.id) {
+                <div class="list-group-item list-group-item-action p-3" (click)="clickInstrument(result)">
+                  <div class="d-flex justify-content-between align-items-center mb-1">
+                    <h6 class="mb-0 fw-bold">{{result.instrument_name}}</h6>
+                    <div class="d-flex align-items-center gap-2">
+                      @if (dataService.instrumentPermissions[result.id]) {
+                        <span class="badge rounded-pill border"
+                              [class.text-success]="dataService.instrumentPermissions[result.id]['can_view']"
+                              [class.text-danger]="!dataService.instrumentPermissions[result.id]['can_view']">
+                        <i class="bi bi-eye-fill me-1"></i>View
+                      </span>
+                        <span class="badge rounded-pill border"
+                              [class.text-success]="dataService.instrumentPermissions[result.id]['can_book'] || dataService.instrumentPermissions[result.id]['can_manage']"
+                              [class.text-danger]="!(dataService.instrumentPermissions[result.id]['can_book'] || dataService.instrumentPermissions[result.id]['can_manage'])">
+                        <i class="bi bi-calendar-check-fill me-1"></i>Book
+                      </span>
+                      }
+                    </div>
+                  </div>
+                  <p class="text-muted small mb-0">{{result.instrument_description}}</p>
                 </div>
-                <small>{{result.instrument_description}}</small>
-                <div class="d-flex flex-row gap-1">
-                  @if (dataService.instrumentPermissions[result.id]) {
-                    @if (dataService.instrumentPermissions[result.id]['can_view']) {
-                      <i class="bi bi-eye"></i>
-                    } @else {
-                      <i class="bi bi-eye text-danger"></i>
-                    }
-                    @if (dataService.instrumentPermissions[result.id]['can_book'] || dataService.instrumentPermissions[result.id]['can_manage']) {
-                      <i class="bi bi-book"></i>
-                    } @else {
-                      <i class="bi bi-book text-danger"></i>
-                    }
-                  }
-                </div>
-              </div>
-            }
-          </div>
-          <div class="d-flex flex-row gap-2">
-            @if (instrumentQuery.previous) {
-              <div>
-                <button class="btn btn-primary" (click)="getInstruments(instrumentQuery.previous)">Previous</button>
-              </div>
-            } @else {
-              <div>
-                <button class="btn btn-primary" disabled>Previous</button>
-              </div>
-            }
-            @if (instrumentQuery.next) {
-              <div>
-                <button class="btn btn-primary" (click)="getInstruments(instrumentQuery.next)">Next</button>
-              </div>
-            } @else {
-              <div>
-                <button class="btn btn-primary" disabled>Next</button>
-              </div>
-            }
+              }
+            </div>
+            <div class="card-footer d-flex justify-content-between">
+              @if (instrumentQuery.previous) {
+                <button class="btn btn-sm btn-outline-primary" (click)="getInstruments(instrumentQuery.previous)">
+                  <i class="bi bi-chevron-left me-1"></i>Previous
+                </button>
+              }
+
+              @if (instrumentQuery.next) {
+                <button class="btn btn-sm btn-outline-primary" (click)="getInstruments(instrumentQuery.next)">
+                  Next<i class="bi bi-chevron-right ms-1"></i>
+                </button>
+              }
+
+            </div>
           </div>
         }
       }
+
     </form>
   }
+
+  <!-- Selected Instrument Section -->
   @if (selectedInstrument) {
-    <div>
-      <p><b>Selected instrument:</b> {{selectedInstrument.instrument_name}}</p>
-      @if (selectedInstrument.max_days_within_usage_pre_approval && selectedInstrument.max_days_within_usage_pre_approval > 0) {
-        <div>
-          <p>
-            <b>Highest booking duration for auto-approval</b>: <br>
-            {{selectedInstrument.max_days_within_usage_pre_approval}} days
+    <div class="card border-0 shadow-sm mb-3">
+      <div class="card-header border-bottom d-flex justify-content-between align-items-center">
+        <h6 class="mb-0"><i class="bi bi-device-hdd me-2"></i>Selected Instrument</h6>
+      </div>
+      <div class="card-body">
+        <h6 class="fw-bold mb-3">{{selectedInstrument.instrument_name}}</h6>
 
-          </p>
+        <div class="d-flex flex-column gap-2">
+          @if (selectedInstrument.max_days_within_usage_pre_approval && selectedInstrument.max_days_within_usage_pre_approval > 0) {
+            <div class="alert alert-info py-2 mb-0 d-flex align-items-center">
+              <i class="bi bi-calendar-range me-2"></i>
+              <div>Maximum booking duration for auto-approval: <strong>{{selectedInstrument.max_days_within_usage_pre_approval}} days</strong></div>
+            </div>
+          }
 
+          @if (selectedInstrument.max_days_ahead_pre_approval && selectedInstrument.max_days_ahead_pre_approval > 0) {
+            <div class="alert alert-info py-2 mb-0 d-flex align-items-center">
+              <i class="bi bi-calendar-plus me-2"></i>
+              <div>Maximum days ahead for auto-approval: <strong>{{selectedInstrument.max_days_ahead_pre_approval}} days</strong></div>
+            </div>
+          }
         </div>
-      }
-      @if (selectedInstrument.max_days_ahead_pre_approval && selectedInstrument.max_days_ahead_pre_approval > 0) {
-        <div>
-          <p>
-            <b>Highest amount of days the instrument can be booked ahead of time for auto-approval</b>: <br>
-            {{selectedInstrument.max_days_ahead_pre_approval}} days
-          </p>
-        </div>
-      }
+      </div>
     </div>
-    @if (selectedInstrumentUsage) {
-      <div>
-        <p>
-          <b>Selected usage:</b> <br>
-          Stated: {{selectedInstrumentUsage.time_started|date:'short'}} <br>
-          Ended: {{selectedInstrumentUsage.time_ended|date:'short'}}<br>
-          User: {{selectedInstrumentUsage.user}}
-        </p>
-        <div class="d-flex flex-row gap-1">
-          <button class="btn btn-sm btn-outline-danger" (click)="deleteUsage(selectedInstrumentUsage)"><i class="bi bi-trash"></i></button>
-          <button class="btn btn-sm btn-outline-primary" (click)="selectedInstrumentUsage=undefined"><i class="bi bi-x"></i></button>
-        </div>
 
+    <!-- Selected Usage Display (if usage is selected) -->
+    @if (selectedInstrumentUsage) {
+      <div class="card border-0 shadow-sm mb-3">
+        <div class="card-header border-bottom">
+          <h6 class="mb-0"><i class="bi bi-calendar-event me-2"></i>Selected Booking</h6>
+        </div>
+        <div class="card-body">
+          <div class="d-flex flex-column gap-2 mb-3">
+            <div class="d-flex align-items-center">
+              <span class="fw-bold me-2" style="width: 80px;">Start:</span>
+              <span>{{selectedInstrumentUsage.time_started|date:'short'}}</span>
+            </div>
+            <div class="d-flex align-items-center">
+              <span class="fw-bold me-2" style="width: 80px;">End:</span>
+              <span>{{selectedInstrumentUsage.time_ended|date:'short'}}</span>
+            </div>
+            <div class="d-flex align-items-center">
+              <span class="fw-bold me-2" style="width: 80px;">User:</span>
+              <span>{{selectedInstrumentUsage.user}}</span>
+            </div>
+          </div>
+
+          <div class="d-flex gap-2">
+            <button class="btn btn-outline-danger" (click)="deleteUsage(selectedInstrumentUsage)">
+              <i class="bi bi-trash me-1"></i>Delete
+            </button>
+            <button class="btn btn-outline-secondary" (click)="selectedInstrumentUsage=undefined">
+              <i class="bi bi-x me-1"></i>Cancel
+            </button>
+          </div>
+        </div>
       </div>
     } @else {
-      <app-booking-time-visualizer [enableDelete]="true" (selectedUsageBlock)="handleSelectedInstrumentUsage($event)" (selectedRangeOut)="handleSelectedRange($event)" [instrument]="selectedInstrument" [enableEdit]="true"></app-booking-time-visualizer>
-
-      <div class="container">
-        <div class="form-group mt-2">
-          <label for="bookingDescription">Booking Description</label>
-          <textarea class="form-control" [(ngModel)]="usageDescription" id="bookingDescription" style="height: 150px"></textarea>
+      <!-- Booking Time Visualizer -->
+      <div class="card border-0 shadow-sm mb-3">
+        <div class="card-header border-bottom">
+          <h6 class="mb-0"><i class="bi bi-calendar-week me-2"></i>Booking Calendar</h6>
         </div>
-        @if (dataService.instrumentPermissions[selectedInstrument.id]) {
-          @if (accounts.is_staff|| dataService.instrumentPermissions[selectedInstrument.id].can_manage) {
-            <div class="form-check">
-              <input type="checkbox" class="form-check-input" [(ngModel)]="maintenance">
-              <label class="form-check-label">This is a booking for instrument maintenance purpose</label>
-            </div>
-            @if (maintenance) {
-              <div class="d-flex flex-column gap-2">
-                <div class="form-group mt-2">
-                  <label for="repeatDays">Repeat every (days)</label>
-                  <input type="number" class="form-control" [(ngModel)]="repeat" id="repeatDays" min="0" placeholder="Enter number of days">
-                </div>
-                <div class="input-group mt-2">
-                  <input
-                    class="form-control"
-                    placeholder="yyyy-mm-dd"
-                    name="dp"
-                    ngbDatepicker
-                    #d="ngbDatepicker"
-                    [(ngModel)]="repeatUntil"
-                  />
-                  <button class="btn btn-outline-secondary bi bi-calendar3" (click)="d.toggle()" type="button"></button>
-                </div>
+        <div class="card-body p-0">
+          <app-booking-time-visualizer
+            [enableDelete]="true"
+            (selectedUsageBlock)="handleSelectedInstrumentUsage($event)"
+            (selectedRangeOut)="handleSelectedRange($event)"
+            [instrument]="selectedInstrument"
+            [enableEdit]="true">
+          </app-booking-time-visualizer>
+        </div>
+      </div>
+
+      <!-- Booking Form -->
+      <div class="card border-0 shadow-sm">
+        <div class="card-header border-bottom">
+          <h6 class="mb-0"><i class="bi bi-pencil me-2"></i>Booking Details</h6>
+        </div>
+        <div class="card-body">
+          <div class="form-floating mb-3">
+            <textarea class="form-control" [(ngModel)]="usageDescription" id="bookingDescription"
+                      style="height: 120px" placeholder="Enter booking description"></textarea>
+            <label for="bookingDescription">Description</label>
+          </div>
+
+          @if (dataService.instrumentPermissions[selectedInstrument.id]) {
+            @if (accounts.is_staff|| dataService.instrumentPermissions[selectedInstrument.id].can_manage) {
+              <div class="form-check mb-3">
+                <input type="checkbox" class="form-check-input" id="maintenanceCheck" [(ngModel)]="maintenance">
+                <label class="form-check-label" for="maintenanceCheck">
+                  <i class="bi bi-tools me-1"></i>This is a booking for instrument maintenance
+                </label>
               </div>
 
+              @if (maintenance) {
+                <div class="card border shadow-sm">
+                  <div class="card-header py-2 border-bottom">
+                    <h6 class="mb-0 small"><i class="bi bi-arrow-repeat me-1"></i>Maintenance Schedule</h6>
+                  </div>
+                  <div class="card-body">
+                    <div class="mb-3">
+                      <label for="repeatDays" class="form-label">Repeat every (days)</label>
+                      <input type="number" class="form-control" [(ngModel)]="repeat" id="repeatDays"
+                             min="0" placeholder="Enter number of days">
+                    </div>
+
+                    <div class="mb-0">
+                      <label class="form-label">Repeat until</label>
+                      <div class="input-group">
+                        <input
+                          class="form-control"
+                          placeholder="yyyy-mm-dd"
+                          name="dp"
+                          ngbDatepicker
+                          #d="ngbDatepicker"
+                          [(ngModel)]="repeatUntil"
+                        />
+                        <button class="btn btn-outline-secondary" (click)="d.toggle()" type="button">
+                          <i class="bi bi-calendar3"></i>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              }
             }
           }
-        }
+        </div>
       </div>
     }
-
   }
-
 </div>
+
 <div class="modal-footer">
   @if (hasMaintenance) {
-    <ngb-alert type="danger" [dismissible]="false">
-      This booking overlaps with maintenance schedule for the instrument and can't be submitted. Please adjust the booking time.
-    </ngb-alert>
+    <div class="alert alert-danger d-flex align-items-center w-100 mb-2 py-2">
+      <i class="bi bi-exclamation-triangle-fill me-2"></i>
+      <div>This booking overlaps with maintenance schedule and cannot be submitted. Please adjust the booking time.</div>
+    </div>
   }
-  <button type="button" class="btn btn-secondary" (click)="submit()" [disabled]="hasMaintenance">Submit</button>
-  <button type="button" class="btn btn-primary" (click)="cancel()">Close</button>
+  <button type="button" class="btn btn-secondary" (click)="cancel()">
+    <i class="bi bi-x-circle me-1"></i>Cancel
+  </button>
+  <button type="button" class="btn btn-primary" (click)="submit()" [disabled]="hasMaintenance">
+    <i class="bi bi-check-circle me-1"></i>Submit Booking
+  </button>
 </div>

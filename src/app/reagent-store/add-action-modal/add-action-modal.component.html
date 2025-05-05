@@ -1,23 +1,64 @@
 <div class="modal-header">
   <h5 class="modal-title">
-    Add Stock Action
+    <i class="bi bi-plus-circle me-2"></i>Add Stock Action
   </h5>
 </div>
+
 <div class="modal-body">
   @if (storedReagent) {
-    <form [formGroup]="form" class="d-flex flex-column gap-2" >
-      <div class="form-floating">
-        <input type="number" class="form-control" id="quantity" formControlName="quantity" placeholder="Quantity ({{storedReagent.reagent.unit}})">
-        <label for="quantity">Quantity ({{storedReagent.reagent.unit}})</label>
+    <div class="d-flex flex-column gap-3">
+      <!-- Item Information -->
+      <div class="card border-0 shadow-sm">
+        <div class="card-body">
+          <div class="d-flex align-items-center mb-2">
+            <h6 class="mb-0 fw-bold me-2">{{storedReagent.reagent.name}}</h6>
+            <span class="badge bg-info">
+              <i class="bi bi-box me-1"></i>
+              Current: {{storedReagent.current_quantity}} {{storedReagent.reagent.unit}}
+            </span>
+          </div>
+
+          <div class="text-muted small">
+            <i class="bi bi-person me-1"></i>Owner: {{storedReagent.user}}
+          </div>
+        </div>
       </div>
-      <div class="form-floating">
-        <textarea class="form-control" id="notes" formControlName="notes" placeholder="Notes"></textarea>
-        <label for="notes">Notes</label>
-      </div>
-    </form>
+
+      <!-- Add Stock Form -->
+      <form [formGroup]="form" class="d-flex flex-column gap-3">
+        <div class="form-floating">
+          <input
+            type="number"
+            class="form-control"
+            id="quantity"
+            formControlName="quantity"
+            placeholder="Quantity ({{storedReagent.reagent.unit}})">
+          <label for="quantity">
+            <i class="bi bi-plus me-1"></i>Quantity to Add ({{storedReagent.reagent.unit}})
+          </label>
+        </div>
+
+        <div class="form-floating">
+          <textarea
+            class="form-control"
+            id="notes"
+            formControlName="notes"
+            placeholder="Notes"
+            style="min-height: 100px"></textarea>
+          <label for="notes">
+            <i class="bi bi-pencil me-1"></i>Notes
+          </label>
+        </div>
+      </form>
+    </div>
   }
 </div>
+
 <div class="modal-footer">
-  <button type="button" class="btn btn-primary" (click)="submit()">Add</button>
-  <button type="button" class="btn btn-secondary" (click)="close()">Close</button>
+  <button type="button" class="btn btn-secondary" (click)="close()">
+    <i class="bi bi-x-circle me-1"></i>Cancel
+  </button>
+  <button type="button" class="btn btn-primary" (click)="submit()">
+    <i class="bi bi-check-circle me-1"></i>Add Stock
+  </button>
 </div>

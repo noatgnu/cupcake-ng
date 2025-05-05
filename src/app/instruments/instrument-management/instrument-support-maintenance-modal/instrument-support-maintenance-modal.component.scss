@@ -1,0 +1,21 @@
+:host {
+  display: block;
+}
+
+.modal-body {
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+
+.btn-close {
+  font-size: 0.7rem;
+}
+
+.card {
+  transition: all 0.2s ease;
+}
+
+.card:hover {
+  border-left: 3px solid #0d6efd;
+}

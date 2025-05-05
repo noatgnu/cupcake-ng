@@ -1,140 +1,298 @@
-<div class="modal-header">
-  <h5 class="modal-title">Access Control</h5>
+<div class="modal-header ">
+  <h5 class="modal-title">
+    <i class="bi bi-shield-lock me-2"></i>Access Control
+  </h5>
+  <button type="button" class="btn-close" aria-label="Close" (click)="close()"></button>
 </div>
+
 <div class="modal-body">
-  <ul ngbNav #nav="ngbNav" [(activeId)]="activeID" class="nav-tabs">
+  <ul ngbNav #nav="ngbNav" [(activeId)]="activeID" class="nav-tabs mb-3">
     <li [ngbNavItem]="'user'">
-      <button ngbNavLink>User Access</button>
+      <button ngbNavLink class="px-4">
+        <i class="bi bi-person me-2"></i>User Access
+      </button>
       <ng-template ngbNavContent>
-        <div class="alert alert-info">
-          <p>
-            Any users regardless of lab group given access to the reagent through this interface will be able to reserve or top up the reagent.
+        <div class="alert alert-info d-flex">
+          <i class="bi bi-info-circle-fill me-2 fs-5"></i>
+          <p class="mb-0">
+            Users granted access here will be able to reserve or top up this reagent regardless of their lab group.
           </p>
         </div>
-        @if (reagentUserAccess) {
-          <b>{{reagentUserAccess.count}} users have been given access</b>
-          <table class="table table-striped">
-            <thead>
-            <tr>
-              <th scope="col">ID</th>
-              <th scope="col">Username</th>
-              <th scope="col">Actions</th>
-            </tr>
-            </thead>
-            <tbody>
-              @for (u of reagentUserAccess.results; track u.id) {
-                <tr>
-                  <td>{{u.id}}</td>
-                  <td>{{u.username}}</td>
-                  <td><button class="btn btn-sm btn-danger" (click)="removeUser(u)"><i class="bi bi-trash"></i></button></td>
-                </tr>
+
+        <!-- Current Access List -->
+        <div class="card mb-3">
+          <div class="card-header  d-flex justify-content-between align-items-center">
+            <h6 class="mb-0">
+              <i class="bi bi-people me-2"></i>Current Access
+              @if (reagentUserAccess) {
+                <span class="badge bg-primary ms-1">{{reagentUserAccess.count}}</span>
               }
-            </tbody>
-          </table>
-          <ngb-pagination (pageChange)="pageEvent($event)" [collectionSize]="reagentUserAccess.count" [(page)]="this.currentUserPage" [pageSize]="10"></ngb-pagination>
-        } @else {
-          <b>0 user has been given access</b>
-        }
-        <hr>
-        <b>Add user to access list</b>
-        <form [formGroup]="form">
-          <div class="form-group">
-            <label for="usernameSearch">Search for user</label>
-            <input id="usernameSearch" type="search" class="form-control" formControlName="username">
+            </h6>
           </div>
-          @if (userQuery) {
-            <table class="table table-striped">
-              <thead>
-              <tr>
-                <th scope="col">ID</th>
-                <th scope="col">Username</th>
-                <th scope="col">Actions</th>
-              </tr>
-              </thead>
-              <tbody>
-                @for (u of userQuery.results; track u.id) {
+
+          @if (reagentUserAccess) {
+            @if (reagentUserAccess.results.length > 0) {
+              <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                  <thead class="table-light">
                   <tr>
-                    <td>{{u.id}}</td>
-                    <td>{{u.username}}</td>
-                    <td>
-                      <button class="btn btn-primary" (click)="addUser(u)">+</button>
-                    </td>
+                    <th scope="col" width="60">ID</th>
+                    <th scope="col">Username</th>
+                    <th scope="col" width="80" class="text-center">Actions</th>
                   </tr>
-                }
-              </tbody>
-            </table>
+                  </thead>
+                  <tbody>
+                    @for (u of reagentUserAccess.results; track u.id) {
+                      <tr>
+                        <td>{{u.id}}</td>
+                        <td>{{u.username}}</td>
+                        <td class="text-center">
+                          <button class="btn btn-sm btn-outline-danger" (click)="removeUser(u)" ngbTooltip="Remove user">
+                            <i class="bi bi-trash"></i>
+                          </button>
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+              <div class="card-footer  d-flex justify-content-center">
+                <ngb-pagination
+                  (pageChange)="pageEvent($event)"
+                  [collectionSize]="reagentUserAccess.count"
+                  [(page)]="currentUserPage"
+                  [pageSize]="10"
+                  [maxSize]="5"
+                  [rotate]="true"
+                  [boundaryLinks]="true"
+                  aria-label="User access pagination"
+                  class="mb-0">
+                </ngb-pagination>
+              </div>
+            } @else {
+              <div class="card-body text-center py-4">
+                <i class="bi bi-person-x fs-3 text-muted mb-2"></i>
+                <p class="mb-0">No users have been granted access yet</p>
+              </div>
+            }
+          } @else {
+            <div class="card-body text-center py-3">
+              <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+            </div>
           }
-        </form>
+        </div>
+
+        <!-- Add User Form -->
+        <div class="card">
+          <div class="card-header ">
+            <h6 class="mb-0"><i class="bi bi-person-plus me-2"></i>Add User</h6>
+          </div>
+          <div class="card-body">
+            <form [formGroup]="form">
+              <div class="input-group mb-3">
+                <span class="input-group-text "><i class="bi bi-search"></i></span>
+                <input
+                  id="usernameSearch"
+                  type="search"
+                  class="form-control"
+                  placeholder="Search by username"
+                  formControlName="username"
+                  autocomplete="off">
+                <button
+                  class="btn btn-outline-secondary"
+                  type="button"
+                  [disabled]="!form.controls.username.value"
+                  (click)="form.controls.username.setValue('')">
+                  <i class="bi bi-x"></i>
+                </button>
+              </div>
+            </form>
+
+            @if (userQuery) {
+              @if (userQuery.results.length > 0) {
+                <div class="table-responsive">
+                  <table class="table table-hover table-sm mb-0">
+                    <thead class="table-light">
+                    <tr>
+                      <th scope="col" width="60">ID</th>
+                      <th scope="col">Username</th>
+                      <th scope="col" width="80" class="text-center">Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                      @for (u of userQuery.results; track u.id) {
+                        <tr>
+                          <td>{{u.id}}</td>
+                          <td>{{u.username}}</td>
+                          <td class="text-center">
+                            <button class="btn btn-sm btn-success" (click)="addUser(u)" ngbTooltip="Add user">
+                              <i class="bi bi-plus-lg"></i>
+                            </button>
+                          </td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
+              } @else {
+                <div class="text-center py-3">
+                  <p class="text-muted mb-0">No users found matching your search</p>
+                </div>
+              }
+            }
+          </div>
+        </div>
       </ng-template>
     </li>
+
     <li [ngbNavItem]="'lab_group'">
-      <button ngbNavLink>Lab Group Access</button>
+      <button ngbNavLink class="px-4">
+        <i class="bi bi-building me-2"></i>Lab Group Access
+      </button>
       <ng-template ngbNavContent>
-        <div class="alert alert-info">
-          <p>
-            Any lab group given access to the reagent through this user interface automatically allow all their members to reserve or top up the reagent.
+        <div class="alert alert-info d-flex">
+          <i class="bi bi-info-circle-fill me-2 fs-5"></i>
+          <p class="mb-0">
+            Lab groups granted access will automatically allow all their members to reserve or top up this reagent.
           </p>
         </div>
-        @if (reagentLabGroupAccess) {
-          <b>{{reagentLabGroupAccess.count}} lab groups have been given access</b>
-          <table class="table table-striped">
-            <thead>
-            <tr>
-              <th scope="col">ID</th>
-              <th scope="col">Lab Group</th>
-              <th scope="col">Actions</th>
-            </tr>
-            </thead>
-            <tbody>
-              @for (l of reagentLabGroupAccess.results; track l.id) {
-                <tr>
-                  <td>{{l.id}}</td>
-                  <td>{{l.name}}</td>
-                  <td><button class="btn btn-sm btn-danger" (click)="removeLabGroup(l)"><i class="bi bi-trash"></i></button></td>
-                </tr>
+
+        <!-- Current Lab Group Access -->
+        <div class="card mb-3">
+          <div class="card-header  d-flex justify-content-between align-items-center">
+            <h6 class="mb-0">
+              <i class="bi bi-buildings me-2"></i>Current Access
+              @if (reagentLabGroupAccess) {
+                <span class="badge bg-primary ms-1">{{reagentLabGroupAccess.count}}</span>
               }
-            </tbody>
-          </table>
-          <ngb-pagination (pageChange)="pageEvent($event)" [collectionSize]="reagentLabGroupAccess.count" [(page)]="this.currentLabGroupPage" [pageSize]="10"></ngb-pagination>
-        } @else {
-          <b>0 lab groups hve been given access</b>
-        }
-        <hr>
-        <b>Add lab group to access list</b>
-        <form [formGroup]="formLabGroup">
-          <div class="form-group">
-            <label for="labgroupSearch">Search for lab group</label>
-            <input id="labgroupSearch" type="search" class="form-control" formControlName="name">
+            </h6>
           </div>
-          @if (labQuery) {
-            <table class="table table-striped">
-              <thead>
-              <tr>
-                <th scope="col">ID</th>
-                <th scope="col">name</th>
-                <th scope="col">Actions</th>
-              </tr>
-              </thead>
-              <tbody>
-                @for (l of labQuery.results; track l.id) {
+
+          @if (reagentLabGroupAccess) {
+            @if (reagentLabGroupAccess.results.length > 0) {
+              <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                  <thead class="table-light">
                   <tr>
-                    <td>{{l.id}}</td>
-                    <td>{{l.name}}</td>
-                    <td>
-                      <button class="btn btn-primary" (click)="addLabGroup(l)">+</button>
-                    </td>
+                    <th scope="col" width="60">ID</th>
+                    <th scope="col">Lab Group</th>
+                    <th scope="col" width="80" class="text-center">Actions</th>
                   </tr>
-                }
-              </tbody>
-            </table>
+                  </thead>
+                  <tbody>
+                    @for (l of reagentLabGroupAccess.results; track l.id) {
+                      <tr>
+                        <td>{{l.id}}</td>
+                        <td>{{l.name}}</td>
+                        <td class="text-center">
+                          <button class="btn btn-sm btn-outline-danger" (click)="removeLabGroup(l)" ngbTooltip="Remove group">
+                            <i class="bi bi-trash"></i>
+                          </button>
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+              <div class="card-footer  d-flex justify-content-center">
+                <ngb-pagination
+                  (pageChange)="pageEvent($event)"
+                  [collectionSize]="reagentLabGroupAccess.count"
+                  [(page)]="currentLabGroupPage"
+                  [pageSize]="10"
+                  [maxSize]="5"
+                  [rotate]="true"
+                  [boundaryLinks]="true"
+                  aria-label="Lab group pagination"
+                  class="mb-0">
+                </ngb-pagination>
+              </div>
+            } @else {
+              <div class="card-body text-center py-4">
+                <i class="bi bi-building-slash fs-3 text-muted mb-2"></i>
+                <p class="mb-0">No lab groups have been granted access yet</p>
+              </div>
+            }
+          } @else {
+            <div class="card-body text-center py-3">
+              <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+            </div>
           }
-        </form>
+        </div>
+
+        <!-- Add Lab Group Form -->
+        <div class="card">
+          <div class="card-header ">
+            <h6 class="mb-0"><i class="bi bi-building-add me-2"></i>Add Lab Group</h6>
+          </div>
+          <div class="card-body">
+            <form [formGroup]="formLabGroup">
+              <div class="input-group mb-3">
+                <span class="input-group-text "><i class="bi bi-search"></i></span>
+                <input
+                  id="labgroupSearch"
+                  type="search"
+                  class="form-control"
+                  placeholder="Search by lab group name"
+                  formControlName="name"
+                  autocomplete="off">
+                <button
+                  class="btn btn-outline-secondary"
+                  type="button"
+                  [disabled]="!formLabGroup.controls.name.value"
+                  (click)="formLabGroup.controls.name.setValue('')">
+                  <i class="bi bi-x"></i>
+                </button>
+              </div>
+            </form>
+
+            @if (labQuery) {
+              @if (labQuery.results.length > 0) {
+                <div class="table-responsive">
+                  <table class="table table-hover table-sm mb-0">
+                    <thead class="table-light">
+                    <tr>
+                      <th scope="col" width="60">ID</th>
+                      <th scope="col">Name</th>
+                      <th scope="col" width="80" class="text-center">Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                      @for (l of labQuery.results; track l.id) {
+                        <tr>
+                          <td>{{l.id}}</td>
+                          <td>{{l.name}}</td>
+                          <td class="text-center">
+                            <button class="btn btn-sm btn-success" (click)="addLabGroup(l)" ngbTooltip="Add group">
+                              <i class="bi bi-plus-lg"></i>
+                            </button>
+                          </td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
+              } @else {
+                <div class="text-center py-3">
+                  <p class="text-muted mb-0">No lab groups found matching your search</p>
+                </div>
+              }
+            }
+          </div>
+        </div>
       </ng-template>
     </li>
   </ul>
-  <div [ngbNavOutlet]="nav" class="mt-2"></div>
 
+  <div [ngbNavOutlet]="nav"></div>
 </div>
-<div class="modal-footer">
-  <button class="btn btn-primar" (click)="close()">Close</button>
+
+<div class="modal-footer ">
+  <button class="btn btn-primary" (click)="close()">
+    <i class="bi bi-x-circle me-1"></i>Close
+  </button>
 </div>

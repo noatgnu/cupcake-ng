@@ -1,102 +1,167 @@
 <div class="container">
-  <ul ngbNav #nav="ngbNav" [(activeId)]="activeID" class="nav-tabs"  [destroyOnHide]="false">
+  <ul ngbNav #nav="ngbNav" [(activeId)]="activeID" class="nav-tabs border-bottom mb-3" [destroyOnHide]="false">
     <li [ngbNavItem]="'Bookings'">
-      <button ngbNavLink>Bookings</button>
+      <button ngbNavLink><i class="bi bi-calendar-check me-1"></i>Bookings</button>
       <ng-template ngbNavContent>
-        <form [formGroup]="form">
-          <div class="form-floating">
-            <input class="form-control" id="searchTerm" formControlName="searchTerm" placeholder="Search Term">
-            <label for="searchTerm">Instrument Search Term</label>
+        <!-- Search Form -->
+        <form [formGroup]="form" class="mb-3">
+          <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-search"></i></span>
+            <div class="form-floating flex-grow-1">
+              <input class="form-control" id="searchTerm" formControlName="searchTerm" placeholder="Search Term">
+              <label for="searchTerm">Instrument Search Term</label>
+            </div>
           </div>
         </form>
+
+        <!-- Instrument Results -->
         @if (instrumentQuery) {
           @if (instrumentQuery.results.length > 0) {
-            <div class="list-group mt-2">
+            <div class="list-group shadow-sm">
               @for (result of instrumentQuery.results; track result.id) {
-                <div class="list-group-item list-group-item-action" (click)="clickInstrument(result)" >
-                  <div>
-                    <b>{{result.instrument_name}}</b>
+                <div class="list-group-item list-group-item-action p-3 border-start border-1"
+                     [class.border-primary]="dataService.instrumentPermissions[result.id]?.['can_book']"
+                     (click)="clickInstrument(result)">
+
+                  <!-- Header with name and permissions -->
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h6 class="mb-0 fw-bold">{{result.instrument_name}}</h6>
+                    <div class="d-flex gap-2">
+                      <span class="badge rounded-pill border"
+                            [class.text-success]="dataService.instrumentPermissions[result.id]?.['can_view']"
+                            [class.text-danger]="!dataService.instrumentPermissions[result.id]?.['can_view']">
+                        <i class="bi bi-eye-fill me-1"></i>View
+                      </span>
+                      <span class="badge rounded-pill border"
+                            [class.text-success]="dataService.instrumentPermissions[result.id]?.['can_book']"
+                            [class.text-danger]="!dataService.instrumentPermissions[result.id]?.['can_book']">
+                        <i class="bi bi-calendar-plus-fill me-1"></i>Book
+                      </span>
+                    </div>
                   </div>
-                  <small>{{result.instrument_description}}</small>
-                  <div class="d-flex flex-row">
-                    @if (result.metadata_columns.length > 0) {
+
+                  <!-- Description -->
+                  <p class="text-muted mb-2">{{result.instrument_description}}</p>
+
+                  <!-- Metadata tags -->
+                  @if (result.metadata_columns.length > 0) {
+                    <div class="d-flex flex-wrap gap-1 mb-2">
                       @for (m of result.metadata_columns; track m.id) {
                         @if (m.type === "Characteristics") {
-                          <span class="badge bg-primary" ngbTooltip="Characteristics">{{m.name}}: {{m.value}}</span>
+                          <span class="badge bg-primary rounded-pill" ngbTooltip="Characteristics">
+                            <i class="bi bi-tag-fill me-1"></i>{{m.name}}: {{m.value}}
+                          </span>
                         } @else if (m.type === "Comment") {
-                          <span class="badge bg-secondary" ngbTooltip="Comment">{{m.name}}: {{m.value}}</span>
+                          <span class="badge bg-secondary rounded-pill" ngbTooltip="Comment">
+                            <i class="bi bi-chat-fill me-1"></i>{{m.name}}: {{m.value}}
+                          </span>
                         } @else if (m.type === "Factor value") {
-                          <span class="badge bg-success" ngbTooltip="Factor value">{{m.name}}: {{m.value}}</span>
+                          <span class="badge bg-success rounded-pill" ngbTooltip="Factor value">
+                            <i class="bi bi-graph-up me-1"></i>{{m.name}}: {{m.value}}
+                          </span>
                         } @else {
-                          <span class="badge bg-danger" ngbTooltip="Other">{{m.name}}: {{m.value}}</span>
+                          <span class="badge bg-danger rounded-pill" ngbTooltip="Other">
+                            <i class="bi bi-info-circle-fill me-1"></i>{{m.name}}: {{m.value}}
+                          </span>
                         }
                       }
-                    }
-                  </div>
-                  <div class="d-flex flex-row gap-1">
-                    @if (dataService.instrumentPermissions[result.id]) {
-                      @if (dataService.instrumentPermissions[result.id]['can_view']) {
-                        <i class="bi bi-eye"></i>
-                      } @else {
-                        <i class="bi bi-eye text-danger"></i>
-                      }
-                      @if (dataService.instrumentPermissions[result.id]['can_book']) {
-                        <i class="bi bi-book"></i>
-                      } @else {
-                        <i class="bi bi-book text-danger"></i>
-                      }
-                    }
-                  </div>
-                  <app-booking-time-visualizer [instrument]="result" [enableEdit]="false"></app-booking-time-visualizer>
+                    </div>
+                  }
 
+                  <!-- Time visualizer -->
+                  <div class="card border-0 shadow-sm mb-2">
+                    <div class="card-header py-2 border-bottom">
+                      <i class="bi bi-clock-history me-1"></i>Availability Timeline
+                    </div>
+                    <div class="card-body py-2">
+                      <app-booking-time-visualizer [instrument]="result" [enableEdit]="false"></app-booking-time-visualizer>
+                    </div>
+                  </div>
+
+                  <!-- Scheduled usage -->
                   @if (instrumentUsageMap[result.id]) {
                     @if (instrumentUsageMap[result.id].results.length > 0) {
-                      <div class="mt-2">
-                        Scheduled Usage in the next 21 days:
-                        @for (u of instrumentUsageMap[result.id].results; track u.id) {
-                          <div class="d-flex flex-row gap-1 mt-1">
-                            <span>{{u.time_started| date: 'short'}} - {{u.time_ended| date: 'short'}}</span>
-                            <span class="badge bg-primary">{{u.user}}</span>
-                            <span class="badge" [class.bg-success]="u.approved" [class.bg-danger]="!u.approved">{{u.approved ? 'Approved' : 'Not approved'}}</span>
-                            @if (u.maintenance) {
-                              <span class="badge bg-danger">Maintenance</span>
+                      <div class="card border-0 shadow-sm">
+                        <div class="card-header py-2 border-bottom">
+                          <i class="bi bi-calendar3 me-1"></i>Scheduled Usage (Next 21 Days)
+                        </div>
+                        <div class="card-body p-0">
+                          <div class="list-group list-group-flush">
+                            @for (u of instrumentUsageMap[result.id].results; track u.id) {
+                              <div class="list-group-item py-2">
+                                <div class="d-flex justify-content-between align-items-center">
+                                  <div>
+                                    <i class="bi bi-clock me-1"></i>
+                                    <span>{{u.time_started | date: 'short'}} - {{u.time_ended | date: 'short'}}</span>
+                                  </div>
+                                  <div class="d-flex gap-1">
+                                  <span class="badge bg-primary rounded-pill">
+                                    <i class="bi bi-person me-1"></i>{{u.user}}
+                                  </span>
+                                    <span class="badge rounded-pill"
+                                          [class.bg-success]="u.approved"
+                                          [class.bg-danger]="!u.approved">
+                                    <i [class]="u.approved ? 'bi bi-check-circle me-1' : 'bi bi-x-circle me-1'"></i>
+                                      {{u.approved ? 'Approved' : 'Pending'}}
+                                  </span>
+                                    @if (u.maintenance) {
+                                      <span class="badge bg-danger rounded-pill">
+                                      <i class="bi bi-tools me-1"></i>Maintenance
+                                    </span>
+                                    }
+                                  </div>
+                                </div>
+                              </div>
                             }
                           </div>
-                        }
+                        </div>
                       </div>
                     }
                   }
+
                 </div>
               }
             </div>
-            <div class="mt-2">
-              <ngb-pagination (pageChange)="handlePageChange($event)" [collectionSize]="instrumentQuery.count" [(page)]="currentInstrumentPage" [pageSize]="pageSize" [rotate]="true" [boundaryLinks]="true" />
-            </div>
 
-            <div>
-              <b>Legend</b>
-              <div class="d-flex flex-column gap-1">
-                <small><i class="bi bi-eye"></i> View Permission (red if denied)</small>
-                <small><i class="bi bi-book"></i> Book Permission (red if denied)</small>
+            <!-- Pagination -->
+            <div class="d-flex justify-content-between align-items-center mt-3">
+              <div class="card border-0 shadow-sm p-2">
+                <div class="d-flex flex-column">
+                  <span class="fw-bold mb-1"><i class="bi bi-info-circle me-1"></i>Legend</span>
+                  <div class="small text-muted">
+                    <div><i class="bi bi-eye-fill text-success me-1"></i> View Permission Granted</div>
+                    <div><i class="bi bi-eye-fill text-danger me-1"></i> View Permission Denied</div>
+                    <div><i class="bi bi-calendar-plus-fill text-success me-1"></i> Book Permission Granted</div>
+                    <div><i class="bi bi-calendar-plus-fill text-danger me-1"></i> Book Permission Denied</div>
+                  </div>
+                </div>
               </div>
+              <ngb-pagination
+                (pageChange)="handlePageChange($event)"
+                [collectionSize]="instrumentQuery.count"
+                [(page)]="currentInstrumentPage"
+                [pageSize]="pageSize"
+                [rotate]="true"
+                [boundaryLinks]="true"
+                [maxSize]="5"
+                class="mb-0" />
             </div>
-
           } @else {
-            <div class="alert-warning">
-              No instruments found.
+            <div class="alert alert-warning">
+              <i class="bi bi-exclamation-triangle me-2"></i>No instruments found matching your search criteria.
             </div>
           }
         }
       </ng-template>
     </li>
     <li [ngbNavItem]="'Logs'">
-      <button ngbNavLink>Logs</button>
+      <button ngbNavLink><i class="bi bi-journal-text me-1"></i>Logs</button>
       <ng-template ngbNavContent>
         <app-instrument-booking-logs></app-instrument-booking-logs>
       </ng-template>
     </li>
     <li [ngbNavItem]="'Export'">
-      <button ngbNavLink>Export Bookings</button>
+      <button ngbNavLink><i class="bi bi-download me-1"></i>Export Bookings</button>
       <ng-template ngbNavContent>
         <app-export-bookings></app-export-bookings>
       </ng-template>

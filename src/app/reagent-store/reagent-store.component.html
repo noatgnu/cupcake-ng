@@ -1,50 +1,97 @@
-<nav class="navbar navbar-expand-lg navbar-light d-flex flex-wrap" style="padding-top: 80px">
-  <div class="container-fluid d-flex flex-row justify-content-center">
-    <a class="navbar-brand">Expendable/Consumable/Sample Storage Locator</a>
-  </div>
-</nav>
-<div>
-  <div class="d-flex g-1" style="position:relative">
-    @if (sidePanel) {
-      <div class="border-end border-1 border-black d-flex flex-column" style="width: 300px">
-        <nav class="navbar navbar-expand-lg navbar-light d-flex flex-wrap">
-          <div class="container-fluid">
-            <a class="navbar-brand">Storage Location</a> <button class="btn btn-sm btn-outline-primary" (click)="openStorageObjectCreator()" ngbTooltip="Create storage location object"><i class="bi bi-folder-plus"></i></button>
-          </div>
-        </nav>
-        <div style="height: calc(100vh - 64px*4 - 20px); padding: 2px; overflow: auto">
-          @if (rootStorageObjects) {
-            <div class="list-group">
-              @if (selectedStorageObject) {
-                <div class="list-group-item list-group-item-action" (click)="goBack()">
-                  <div>
-                    <b>..</b>
-                  </div>
-                </div>
-              }
-              @if (rootStorageObjects.results.length > 0) {
-                @for (storage of rootStorageObjects.results; track storage.id) {
-                  <div class="list-group-item list-group-item-action" (click)="clickStorage(storage)">
-                    <div>
-                      <b>{{storage.object_name}}</b>
-                    </div>
-                    <small>{{storage.object_type}}</small>
-                  </div>
-                }
-              }
-            </div>
-          }
-        </div>
-        <div class="p-2">
-          @if ( rootStorageObjects) {
-            <ngb-pagination (pageChange)="handlePageChange($event)" [collectionSize]="rootStorageObjects.count" [(page)]="currentPage" [pageSize]="pageSize" [rotate]="true" [boundaryLinks]="true" />
-          }
+<div class="container-fluid p-0 d-flex flex-column vh-100">
+  <!-- Main header -->
+  <header class=" border-bottom shadow-sm py-3 px-4">
+    <div class="d-flex align-items-center justify-content-center">
+      <h4 class="m-0 text-primary fw-bold">Expendable/Consumable/Sample Storage Locator</h4>
+    </div>
+  </header>
+
+  <div class="flex-grow-1 d-flex">
+    <!-- Storage locations sidebar -->
+    <div class="sidebar" [ngClass]="{'sidebar-collapsed': !sidePanel}">
+      <div class="sidebar-header border-bottom p-3">
+        <div class="d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">Storage Location</h5>
+          <button class="btn btn-sm btn-outline-primary" (click)="openStorageObjectCreator()"
+                  ngbTooltip="Create storage location object">
+            <i class="bi bi-folder-plus"></i>
+          </button>
         </div>
       </div>
-    }
-    <div class="flex-grow-1">
-      <app-storage-object-view [storedReagentID]="storedReagentID" [storageObject]="selectedStorageObject" (toggleSidePanel)="sidePanel=!sidePanel"></app-storage-object-view>
+
+      <!-- Storage locations list -->
+      <div class="sidebar-body">
+        @if (rootStorageObjects) {
+          <div class="list-group list-group-flush">
+            <!-- Back navigation -->
+            @if (selectedStorageObject) {
+              <button class="list-group-item list-group-item-action py-3 d-flex align-items-center" (click)="goBack()">
+                <i class="bi bi-arrow-left me-2"></i>
+                <span class="fw-bold">..</span>
+              </button>
+            }
+
+            <!-- Storage locations -->
+            @if (rootStorageObjects.results.length > 0) {
+              @for (storage of rootStorageObjects.results; track storage.id) {
+                <button class="list-group-item list-group-item-action py-2" (click)="clickStorage(storage)">
+                  <div class="fw-bold mb-1">{{storage.object_name}}</div>
+                  <small class="text-muted">{{storage.object_type}}</small>
+                </button>
+              }
+            } @else {
+              <div class="list-group-item text-center py-4 text-muted">
+                <i class="bi bi-folder-x fs-3 mb-2 d-block"></i>
+                <span>No storage locations found</span>
+              </div>
+            }
+          </div>
+
+          <!-- Pagination -->
+          <div class="p-2 border-top">
+            <ngb-pagination
+              (pageChange)="handlePageChange($event)"
+              [collectionSize]="rootStorageObjects.count"
+              [(page)]="currentPage"
+              [pageSize]="pageSize"
+              [rotate]="true"
+              [maxSize]="5"
+              [boundaryLinks]="true"
+              class="pagination-sm justify-content-center mb-0" />
+          </div>
+        } @else {
+          <div class="d-flex justify-content-center align-items-center py-5">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+          </div>
+        }
+      </div>
     </div>
 
+    <!-- Main content area -->
+    <div class="content-wrapper" [ngClass]="{'content-expanded': !sidePanel}">
+      <!-- Section header -->
+      <div class="content-header border-bottom  p-3 d-flex align-items-center shadow-sm">
+        <button type="button" class="btn btn-outline-primary sidebar-toggle me-3"
+                (click)="sidePanel = !sidePanel"
+                aria-label="Toggle sidebar">
+          <i class="bi" [ngClass]="sidePanel ? 'bi-layout-sidebar' : 'bi-layout-sidebar-inset'"></i>
+        </button>
+        <h5 class="mb-0">
+          <i class="bi bi-box me-2"></i>
+          {{ selectedStorageObject?.object_name || 'Storage View' }}
+        </h5>
+      </div>
+
+      <!-- Component content -->
+      <div class="content-body p-0 overflow-auto">
+        <app-storage-object-view
+          [storedReagentID]="storedReagentID"
+          [storageObject]="selectedStorageObject"
+          (toggleSidePanel)="sidePanel=!sidePanel">
+        </app-storage-object-view>
+      </div>
+    </div>
   </div>
 </div>

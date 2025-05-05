@@ -14,6 +14,7 @@ import {FormBuilder, FormControl, ReactiveFormsModule, Validators} from "@angula
 export class StorageObjectEditorModalComponent {
   private _storageObject?: StorageObject|undefined = undefined
 
+
   @Input() set storageObject(value: StorageObject|undefined) {
     this._storageObject = value
     if (value) {

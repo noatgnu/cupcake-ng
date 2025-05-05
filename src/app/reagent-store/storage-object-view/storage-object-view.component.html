@@ -1,58 +1,157 @@
-<nav class="navbar navbar-expand-lg navbar-light d-flex flex-wrap">
-  <div class="container-fluid">
-    <div class="d-flex flex-row gap-2">
-      <div class="d-flex flex-row justify-content-center align-items-center">
-        <button class="btn btn-sm btn-outline-primary" (click)="toggleSidePanel.emit(true)"><i class="bi bi-menu-app"></i></button>
-      </div>
-      <a class="navbar-brand">@if (storageObject) {{{storageObject.object_name}}} @else {
-        Select a storage location
-      } </a>
-    </div>
+<div class="d-flex flex-column" style="height: calc( 100vh - 200px);">
+  <!-- Header section -->
+  <nav class="navbar navbar-expand-lg  border-bottom mb-3">
+    <div class="container-fluid">
+      <div class="d-flex align-items-center">
+        <button
+          class="btn btn-outline-secondary me-2"
+          (click)="toggleSidePanel.emit(true)"
+          ngbTooltip="Toggle sidebar">
+          <i class="bi bi-menu-app"></i>
+        </button>
 
-    @if (storageObject) {
-      <div class="d-flex flex-row gap-2">
-        <button class="btn btn-sm btn-outline-primary" (click)="openQRCodeModal()" ngbTooltip="View QR code of this location">QR</button>
-        <button class="btn btn-sm btn-outline-danger" (click)="openStorageObjectAccessControlModal()" ngbTooltip="Storage object access control"><i class="bi bi-people"></i></button>
-        <button class="btn btn-sm btn-outline-primary" (click)="openCameraModal()" ngbTooltip="Add photo identification for this storage location"><i class="bi bi-camera"></i></button>
-        <button class="btn btn-sm btn-outline-primary" (click)="openStorageObjectEditorModal()" ngbTooltip="Edit storage location detail"><i class="bi bi-pen"></i></button>
-        <button class="btn btn-sm btn-outline-danger" (click)="deleteStorageObject()" ngbTooltip="Delete storage location"><i class="bi bi-trash"></i></button>
-        <button class="btn btn-sm btn-outline-primary" (click)="openBarcodeScannerModal()" ngbTooltip="Search for item in this location using barcode"><i class="bi bi-upc-scan"></i></button>
-        <button class="btn btn-sm btn-outline-primary" (click)="openStoredReagentCreatorModal()" ngbTooltip="Create a new item in this storage location"><i class="bi bi-plus"></i></button>
-      </div>
-    }
-  </div>
-</nav>
-<div class="p-2">
-  <div>
-    <a>//</a> >
-    @for (path of pathToRoot; track path.id) {
-      <a href="/#/reagent-store/{{path.id}}">{{path.name}}</a> >
-    }
-  </div>
-  <form [formGroup]="form" class="mt-2">
-    <div class="form-floating">
-      <input type="search" class="form-control" id="search" formControlName="name" placeholder="Search for items">
-      <label for="search">Search for items</label>
-    </div>
-  </form>
-  @if (storedReagentQuery) {
-    <div class="list-group mt-2" style="height: calc(100vh - 64px*5 - 50px); overflow: auto">
-      @if (storedReagentQuery.results.length > 0) {
-        @for (reagent of storedReagentQuery.results; track reagent.id) {
-          @if (dataService.storedReagentPermissions[reagent.id]) {
-            <div class="list-group-item">
-              <app-stored-reagent-item [permission]="dataService.storedReagentPermissions[reagent.id]" (openAddActionModal)="openAddActionModal(reagent)" (openReserveActionModal)="openReserveActionModal(reagent)" (openActionLogsModal)="openActionLogsModal(reagent)" (openCloneStoredReagentModal)="openCloningReagentModal(reagent)" (openQrScannerModal)="openBarcodeScannerReagent(reagent)" [storedReagent]="reagent" (delete)="delete(reagent)" (openStoredReagentEditorModal)="openStoredReagentEditorModal(reagent)" (openCameraModal)="openReagentCameraModal(reagent)" (openStoredReagentAccessControlModal)="openStoredReagentAccessControlModal(reagent)"></app-stored-reagent-item>
-            </div>
+        <h5 class="mb-0">
+          @if (storageObject) {
+            <span>{{storageObject.object_name}}</span>
+          } @else {
+            <span class="text-muted">Select a storage location</span>
           }
-        }
+        </h5>
+      </div>
+
+      @if (storageObject) {
+        <div class="d-flex flex-wrap gap-2">
+          <button class="btn btn-sm btn-outline-primary" (click)="openQRCodeModal()" ngbTooltip="View QR code">
+            <i class="bi bi-qr-code me-1"></i><span class="d-none d-md-inline">QR</span>
+          </button>
+          <button class="btn btn-sm btn-outline-danger" (click)="openStorageObjectAccessControlModal()" ngbTooltip="Access control">
+            <i class="bi bi-people me-1"></i><span class="d-none d-md-inline">Access</span>
+          </button>
+          <button class="btn btn-sm btn-outline-primary" (click)="openCameraModal()" ngbTooltip="Add photo">
+            <i class="bi bi-camera me-1"></i><span class="d-none d-md-inline">Photo</span>
+          </button>
+          <button class="btn btn-sm btn-outline-primary" (click)="openStorageObjectEditorModal()" ngbTooltip="Edit details">
+            <i class="bi bi-pen me-1"></i><span class="d-none d-md-inline">Edit</span>
+          </button>
+          <button class="btn btn-sm btn-outline-danger" (click)="deleteStorageObject()" ngbTooltip="Delete location">
+            <i class="bi bi-trash me-1"></i><span class="d-none d-md-inline">Delete</span>
+          </button>
+          <button class="btn btn-sm btn-outline-primary" (click)="openBarcodeScannerModal()" ngbTooltip="Scan barcode">
+            <i class="bi bi-upc-scan me-1"></i><span class="d-none d-md-inline">Scan</span>
+          </button>
+          <button class="btn btn-sm btn-success" (click)="openStoredReagentCreatorModal()" ngbTooltip="Create new item">
+            <i class="bi bi-plus me-1"></i><span class="d-none d-md-inline">New Item</span>
+          </button>
+        </div>
       }
     </div>
-  }
-  <div>
+  </nav>
+
+  <div class="container-fluid d-flex flex-column" style="min-height: 0; flex: 1 1 auto; overflow: hidden;">
+    <!-- Breadcrumb navigation -->
+    <nav aria-label="breadcrumb" class="mb-3">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/#/reagent-store"><i class="bi bi-house"></i> Home</a></li>
+        @for (path of pathToRoot; track path.id) {
+          <li class="breadcrumb-item">
+            <a href="/#/reagent-store/{{path.id}}">{{path.name}}</a>
+          </li>
+        }
+      </ol>
+    </nav>
+
+    <!-- Search form -->
+    <div class="mb-3">
+      <form [formGroup]="form">
+        <div class="input-group">
+          <span class="input-group-text ">
+            <i class="bi bi-search"></i>
+          </span>
+          <input
+            type="search"
+            class="form-control"
+            id="search"
+            formControlName="name"
+            placeholder="Search for items in this location">
+          <button
+            class="btn btn-outline-secondary"
+            type="button"
+            [disabled]="!form.controls.name.value"
+            (click)="form.controls.name.setValue('')">
+            <i class="bi bi-x"></i>
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Items list -->
     @if (storedReagentQuery) {
-      <ngb-pagination (pageChange)="handlePageChange($event)" [collectionSize]="storedReagentQuery.count" [(page)]="currentPage" [pageSize]="pageSize" [rotate]="true" [boundaryLinks]="true" />
+      @if (storedReagentQuery.results.length > 0) {
+        <div class="card d-flex flex-column" style="min-height: 0; flex: 1 1 auto;">
+          <div class="card-header  d-flex justify-content-between">
+            <span>
+              <i class="bi bi-list me-2"></i>Items
+              <span class="badge bg-primary ms-1">{{storedReagentQuery.count}}</span>
+            </span>
+          </div>
+          <div class="overflow-auto" style="flex: 1 1 auto; min-height: 0;">
+            <div class="list-group list-group-flush">
+              @for (reagent of storedReagentQuery.results; track reagent.id) {
+                @if (dataService.storedReagentPermissions[reagent.id]) {
+                  <div class="list-group-item border-start-0 border-end-0">
+                    <app-stored-reagent-item
+                      [permission]="dataService.storedReagentPermissions[reagent.id]"
+                      [storedReagent]="reagent"
+                      (openAddActionModal)="openAddActionModal(reagent)"
+                      (openReserveActionModal)="openReserveActionModal(reagent)"
+                      (openActionLogsModal)="openActionLogsModal(reagent)"
+                      (openCloneStoredReagentModal)="openCloningReagentModal(reagent)"
+                      (openQrScannerModal)="openBarcodeScannerReagent(reagent)"
+                      (delete)="delete(reagent)"
+                      (openStoredReagentEditorModal)="openStoredReagentEditorModal(reagent)"
+                      (openCameraModal)="openReagentCameraModal(reagent)"
+                      (openStoredReagentAccessControlModal)="openStoredReagentAccessControlModal(reagent)">
+                    </app-stored-reagent-item>
+                  </div>
+                }
+              }
+            </div>
+          </div>
+          <div class="card-footer ">
+            <ngb-pagination
+              class="d-flex justify-content-center mb-0"
+              (pageChange)="handlePageChange($event)"
+              [collectionSize]="storedReagentQuery.count"
+              [(page)]="currentPage"
+              [pageSize]="pageSize"
+              [rotate]="true"
+              [boundaryLinks]="true" />
+          </div>
+        </div>
+      } @else {
+        <div class="alert alert-info d-flex align-items-center">
+          <i class="bi bi-info-circle me-2 fs-4"></i>
+          <div>
+            <strong>No items found.</strong>
+            @if (form.controls.name.value) {
+              <p class="mb-0">No results match your search criteria.</p>
+            } @else if (storageObject) {
+              <p class="mb-0">
+                This storage location doesn't have any items yet.
+                <button class="btn btn-sm btn-success ms-2" (click)="openStoredReagentCreatorModal()">
+                  <i class="bi bi-plus me-1"></i>Add Item
+                </button>
+              </p>
+            }
+          </div>
+        </div>
+      }
+    } @else {
+      <div class="d-flex justify-content-center my-5">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+      </div>
     }
   </div>
 </div>
-
-

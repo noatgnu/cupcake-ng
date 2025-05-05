@@ -44,7 +44,6 @@ export class StorageObjectViewComponent {
 
   @Input() set storedReagentID(value: number|undefined) {
     this._storedReagentID = value
-    console.log(value)
   }
   get storedReagentID(): number|undefined {
     return this._storedReagentID

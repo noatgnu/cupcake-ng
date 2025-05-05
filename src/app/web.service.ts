@@ -872,10 +872,13 @@ export class WebService {
     )
   }
 
-  getAnnotationInFolder(folder_id: number, limit: number = 5, offset: number = 0) {
+  getAnnotationInFolder(folder_id: number, limit: number = 5, offset: number = 0, search_term: string|undefined|null = "") {
     let params = new HttpParams().set('folder', folder_id.toString())
     params = params.set('limit', limit.toString())
     params = params.set('offset', offset.toString())
+    if (search_term !== "" && search_term !== undefined && search_term !== null) {
+      params = params.append('search_term', search_term);
+    }
     return this.http.get<AnnotationQuery>(
       `${this.baseURL}/api/annotation/get_annotation_in_folder/`,
       {responseType: 'json', observe: 'body', params: params}
@@ -2285,6 +2288,29 @@ export class WebService {
 
   validateMetadataTemplateSDRF(data: string[][]) {
     return this.http.post<{errors: string[]}>(`${this.baseURL}/api/metadata_table_templates/validate_sdrf_metadata/`, {sdrf: data}, {responseType: 'json', observe: 'body'})
+  }
+
+  addInstrumentSupportInfo(instrument_id: number, payload: any) {
+    return this.http.put<Instrument>(
+      `${this.baseURL}/api/instrument/${instrument_id}/add_support_information/`,
+      payload,
+      {responseType: 'json', observe: 'body'}
+    )
+  }
+
+  createInstrumentSupportInfo(instrument_id: number, payload: any) {
+    return this.http.post<Instrument>(
+      `${this.baseURL}/api/instrument/${instrument_id}/create_support_information/`,
+      payload,
+      {responseType: 'json', observe: 'body'}
+    )
+  }
+
+  removeInstrumentSupportInfo(instrument_id: number, support_info_id: number) {
+    return this.http.delete(
+      `${this.baseURL}/api/instrument/${instrument_id}/remove_support_information/${support_info_id}/`,
+      {responseType: 'json', observe: 'body'}
+    )
   }
 }
 

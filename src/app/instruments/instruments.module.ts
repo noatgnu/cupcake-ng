@@ -3,11 +3,16 @@ import { CommonModule } from '@angular/common';
 import {RouterModule, Routes} from "@angular/router";
 import {InstrumentsComponent} from "./instruments.component";
 import {InstrumentJobManagementComponent} from "./instrument-job-management/instrument-job-management.component";
+import {InstrumentMaintenanceLogsComponent} from "./instrument-management/instrument-maintenance-logs/instrument-maintenance-logs.component";
 
 const routes: Routes = [
   {
     path: '',
     component: InstrumentsComponent,
+  },
+  {
+    path: ':instrumentId/maintenance-logs',
+    component: InstrumentMaintenanceLogsComponent
   },
   {
     path: ':section',
@@ -16,7 +21,7 @@ const routes: Routes = [
   {
     path: ':section/:id',
     component: InstrumentsComponent
-  }
+  },
   ]
 
 

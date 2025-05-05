@@ -1,11 +1,68 @@
-.instrument-avatar {
-  width: 50px;
-  height: 50px;
-  object-fit: cover;
-  border-radius: 50%;
+:host {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+}
+
+.scrollable-content {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 0 15px 15px;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
 }
 
 .list-group-item {
+  margin-bottom: 8px;
+  border-radius: 4px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  transition: transform 0.2s ease;
+}
+
+.list-group-item:hover {
+  transform: translateY(-2px);
+}
+
+.list-group {
+  margin-bottom: 70px;
+}
+
+form {
+  margin: 15px 0;
+}
+
+.legend-container {
+  border-radius: 4px;
+  padding: 10px;
+  margin-bottom: 15px;
+  font-size: 0.9rem;
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}
+
+.img-thumbnail.cursor-pointer:hover {
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.5);
   position: relative;
 }
 
+.img-thumbnail.cursor-pointer:hover::after {
+  content: '🔍';
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  background: rgba(255, 255, 255, 0.7);
+  border-top-left-radius: 4px;
+  padding: 2px 4px;
+  font-size: 10px;
+}

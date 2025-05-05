@@ -1,168 +1,294 @@
 <div class="modal-header">
   <h5 class="modal-title">
-    Entry Editor
+    <i class="bi bi-pencil-square me-2"></i>Item Editor
   </h5>
 </div>
+
 <div class="modal-body">
   @if (storedReagent) {
-    <b>Entry Basic Data</b>
-    <form [formGroup]="form" class="d-flex flex-column gap-2">
-      <div class="form-floating">
-        <input type="number" class="form-control" id="quantity" formControlName="quantity" placeholder="Entry Quantity ({{storedReagent.reagent.unit}})">
-        <label for="quantity">Entry Quantity ({{storedReagent.reagent.unit}})</label>
-      </div>
-      <div class="form-floating">
-        <textarea class="form-control" id="notes" formControlName="notes" placeholder="Entry Notes"></textarea>
-        <label for="notes">Entry Notes</label>
-      </div>
-      <div class="form-check">
-        <input class="form-check-input" type="checkbox" id="shareable" formControlName="shareable">
-        <label class="form-check-label" for="shareable">
-          Shareable
-        </label>
-      </div>
-      <div class="form-check">
-        <input class="form-check-input" type="checkbox" id="access_all" formControlName="access_all">
-        <label class="form-check-label" for="access_all">
-          Allow Everyone to Access
-        </label>
-      </div>
-      <div class="form-floating">
-        <input type="text" class="form-control" id="barcode" formControlName="barcode" placeholder="Barcode">
-        <label for="barcode">Barcode</label>
-      </div>
-      <div class="row row-cols-sm-auto">
-        <div class="col-12">
-          <label for="expiration_date">Expiration Date</label>
-          <div class="input-group">
-            <input
-              class="form-control"
-              placeholder="yyyy-mm-dd"
-              name="dp"
-              formControlName="expiration_date"
-              ngbDatepicker
-              #d="ngbDatepicker"
-              id="expiration_date"
-            />
-            <button class="btn btn-outline-secondary bi bi-calendar3" (click)="d.toggle()" type="button"></button>
+    <div class="d-flex flex-column gap-3">
+      <!-- Basic Information Section -->
+      <section>
+        <h6 class="fw-bold mb-3 border-bottom pb-2">
+          <i class="bi bi-card-list me-2"></i>Item Basic Information
+        </h6>
+
+        <form [formGroup]="form" class="d-flex flex-column gap-3">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <div class="form-floating">
+                <input type="number" class="form-control" id="quantity" formControlName="quantity"
+                       placeholder="Entry Quantity">
+                <label for="quantity">Quantity ({{storedReagent.reagent.unit}})</label>
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <div class="form-floating">
+                <input type="text" class="form-control" id="barcode" formControlName="barcode"
+                       placeholder="Barcode">
+                <label for="barcode"><i class="bi bi-upc me-1"></i>Barcode</label>
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
-      <div class="d-flex flex-row justify-content-center">
-        <svg id="stored-reagent-{{storedReagent.id}}-barcode-canvas" width="300" height="300"></svg>
-      </div>
-    </form>
-    <hr>
-    <form [formGroup]="formAutocomplete" class="d-flex flex-column gap-2">
-      <div>
-        <b>Created from Protocol</b>
-        <div>
-          @if (createdByProtocol) {
-            <div>
-              @if (createdByProtocol.protocol_title) {
-                {{createdByProtocol.protocol_title}}
+
+          <div class="form-floating">
+            <textarea class="form-control" id="notes" formControlName="notes"
+                      placeholder="Entry Notes" style="min-height: 100px"></textarea>
+            <label for="notes"><i class="bi bi-sticky me-1"></i>Notes</label>
+          </div>
+
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label for="expiration_date" class="form-label">
+                <i class="bi bi-calendar-event me-1"></i>Expiration Date
+              </label>
+              <div class="input-group">
+                <input
+                  class="form-control"
+                  placeholder="yyyy-mm-dd"
+                  name="dp"
+                  formControlName="expiration_date"
+                  ngbDatepicker
+                  #d="ngbDatepicker"
+                  id="expiration_date"
+                />
+                <button class="btn btn-outline-secondary" (click)="d.toggle()" type="button">
+                  <i class="bi bi-calendar3"></i>
+                </button>
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <div class="card h-100">
+                <div class="card-body py-2">
+                  <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" id="shareable" formControlName="shareable">
+                    <label class="form-check-label" for="shareable">
+                      <i class="bi bi-share me-1"></i>Shareable
+                    </label>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="access_all" formControlName="access_all">
+                    <label class="form-check-label" for="access_all">
+                      <i class="bi bi-people me-1"></i>Allow Everyone to Access
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          @if (storedReagent.id) {
+            <div class="card mt-3">
+              <div class="card-header d-flex justify-content-between align-items-center py-2">
+                <h6 class="mb-0"><i class="bi bi-upc-scan me-2"></i>Barcode Preview</h6>
+              </div>
+              <div class="card-body text-center p-3">
+                @if (form.controls.barcode.value) {
+                  <svg id="stored-reagent-{{storedReagent.id}}-barcode-canvas" width="300" height="200"></svg>
+                } @else {
+                  <div class="border border-dashed border-secondary rounded p-4 text-muted">
+                    <i class="bi bi-upc-scan fs-3 mb-2"></i>
+                    <p class="mb-0">Enter a barcode value above to generate a preview</p>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+        </form>
+      </section>
+
+      <hr>
+
+      <!-- Protocol & Session Section -->
+      <section>
+        <h6 class="fw-bold mb-3 border-bottom pb-2">
+          <i class="bi bi-file-earmark-text me-2"></i>Protocol & Project Origin
+        </h6>
+
+        <form [formGroup]="formAutocomplete" class="d-flex flex-column gap-3">
+          <!-- Protocol Selection -->
+          <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center py-2">
+              <h6 class="mb-0"><i class="bi bi-journal-code me-2"></i>Created from Protocol</h6>
+            </div>
+            <div class="card-body">
+              @if (createdByProtocol) {
+                <div class="mb-2 border-start border-success border-3 ps-2">
+                  <div class="fw-bold">{{createdByProtocol.protocol_title || "Untitled Protocol"}}</div>
+                  <small class="text-muted">
+                    <a href="/#/protocol-session/{{createdByProtocol.id}}" target="_blank">
+                      <i class="bi bi-box-arrow-up-right me-1"></i>Go to protocol
+                    </a>
+                  </small>
+                </div>
               }
-            </div>
-            <small class="text-muted"><a href="/#/protocol-session/{{createdByProtocol.id}}" target="_blank">Go to protocol</a></small>
-          }
-          <input (selectItem)="selectedProtocol($event)" [resultTemplate]="rtProtocol" [inputFormatter]="inputFormatterProtocol" [resultFormatter]="resultFormatterProtocol" type="search" class="form-control" placeholder="Search Protocol" [ngbTypeahead]="searchProtocol" formControlName="protocolName">
 
-          <ng-template #rtProtocol let-r="result" let-t="term">
-            <ngb-highlight [result]="r.protocol_title" [term]="t"></ngb-highlight>
-          </ng-template>
-        </div>
-      </div>
-      @if (form.value.created_by_protocol) {
-        <b>Created from Session</b>
-        @if (createdBySession && createdByProtocol) {
-          <div>
-            @if (createdBySession.name) {
-              {{createdBySession.name}}
-            } @else {
-              {{createdBySession.unique_id}}
-            }
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-search"></i></span>
+                <input (selectItem)="selectedProtocol($event)"
+                       [resultTemplate]="rtProtocol"
+                       [inputFormatter]="inputFormatterProtocol"
+                       [resultFormatter]="resultFormatterProtocol"
+                       type="search"
+                       class="form-control"
+                       placeholder="Search for protocol"
+                       [ngbTypeahead]="searchProtocol"
+                       formControlName="protocolName">
+              </div>
+
+              <ng-template #rtProtocol let-r="result" let-t="term">
+                <ngb-highlight [result]="r.protocol_title" [term]="t"></ngb-highlight>
+              </ng-template>
+            </div>
           </div>
-          <small class="text-muted"><a href="/#/protocol-session/{{createdByProtocol.id}}&{{createdBySession.unique_id}}" target="_blank">Go to session</a></small>
-        }
-        <div>
-          <input #sessionSearch (selectItem)="selectedSession($event)" (focus)="onSessionFocus(sessionSearch)" [resultTemplate]="rtSession" [ngbTypeahead]="searchSession" [inputFormatter]="inputFormatterSession" [resultFormatter]="resultFormatterSession" type="search" class="form-control" placeholder="Search Session" formControlName="sessionName">
 
-          <ng-template #rtSession let-r="result" let-t="term">
-            @if (r.name) {
-              <ngb-highlight [result]="r.name" [term]="t"></ngb-highlight>
-            } @else {
-              <ngb-highlight [result]="r.unique_id" [term]="t"></ngb-highlight>
-            }
-          </ng-template>
-        </div>
+          <!-- Session Selection - Only shown if protocol is selected -->
+          @if (form.value.created_by_protocol) {
+            <div class="card">
+              <div class="card-header d-flex justify-content-between align-items-center py-2">
+                <h6 class="mb-0"><i class="bi bi-layers me-2"></i>Created from Session</h6>
+              </div>
+              <div class="card-body">
+                @if (createdBySession && createdByProtocol) {
+                  <div class="mb-2 border-start border-success border-3 ps-2">
+                    <div class="fw-bold">{{createdBySession.name || createdBySession.unique_id}}</div>
+                    <small class="text-muted">
+                      <a href="/#/protocol-session/{{createdByProtocol.id}}&{{createdBySession.unique_id}}" target="_blank">
+                        <i class="bi bi-box-arrow-up-right me-1"></i>Go to session
+                      </a>
+                    </small>
+                  </div>
+                }
 
-        @if (stepList.length > 0) {
-          <b>Created From Step</b>
-          @if (!storedReagent.created_by_step) {
-            <div>
-              <small class="text-muted">No step selected. Please select one from this protocol</small>
+                <div class="input-group">
+                  <span class="input-group-text"><i class="bi bi-search"></i></span>
+                  <input #sessionSearch
+                         (selectItem)="selectedSession($event)"
+                         (focus)="onSessionFocus(sessionSearch)"
+                         [resultTemplate]="rtSession"
+                         [ngbTypeahead]="searchSession"
+                         [inputFormatter]="inputFormatterSession"
+                         [resultFormatter]="resultFormatterSession"
+                         type="search"
+                         class="form-control"
+                         placeholder="Search for session"
+                         formControlName="sessionName">
+                </div>
+
+                <ng-template #rtSession let-r="result" let-t="term">
+                  @if (r.name) {
+                    <ngb-highlight [result]="r.name" [term]="t"></ngb-highlight>
+                  } @else {
+                    <ngb-highlight [result]="r.unique_id" [term]="t"></ngb-highlight>
+                  }
+                </ng-template>
+              </div>
             </div>
-          } @else {
-            <div>
-              <div class="card bg-info">
-                <div class="card-body">
-                  <div [innerHTML]="storedReagent.created_by_step.step_description">
 
+            <!-- Step Selection - Only shown if steps are available -->
+            @if (stepList.length > 0) {
+              <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center py-2">
+                  <h6 class="mb-0"><i class="bi bi-list-check me-2"></i>Created From Step</h6>
+                </div>
+                <div class="card-body">
+                  @if (!storedReagent.created_by_step) {
+                    <div class="alert alert-info py-2">
+                      <small><i class="bi bi-info-circle me-1"></i>No step selected. Please select one from this protocol</small>
+                    </div>
+                  } @else {
+                    <div class="card border-primary mb-3">
+                      <div class="card-body py-2">
+                        <div [innerHTML]="storedReagent.created_by_step.step_description"></div>
+                      </div>
+                    </div>
+                  }
+
+                  <div class="mb-2 fw-bold">
+                    <i class="bi bi-list-ol me-1"></i>Steps from this protocol:
+                  </div>
+
+                  <div class="d-flex flex-column gap-2">
+                    @for (s of paginatedSteps; track s.id) {
+                      <div class="card cursor-pointer"
+                           [ngClass]="{'border-primary': form.value.created_by_step === s.id}"
+                           (mouseover)="onStepHover(s)"
+                           (mouseleave)="onStepUnhover()"
+                           (click)="selectStep(s)">
+                        <div class="card-body py-2">
+                          <div [innerHTML]="s.step_description"></div>
+                        </div>
+                      </div>
+                    }
+
+                    <ngb-pagination
+                      [collectionSize]="stepList.length"
+                      [(page)]="page"
+                      [pageSize]="pageSize"
+                      (pageChange)="onPageChange($event)"
+                      [maxSize]="5"
+                      [rotate]="true"
+                      class="d-flex justify-content-center">
+                    </ngb-pagination>
                   </div>
                 </div>
               </div>
-            </div>
-          }
-          <div>
-            Steps from this protocol
-          </div>
-          <div class="d-flex flex-column gap-2">
-            @for (s of paginatedSteps; track s.id) {
-              <div class="card"
-                   [ngClass]="{'bg-primary text-light': form.value.created_by_step === s.id}"
-                   (mouseover)="onStepHover(s)"
-                   (mouseleave)="onStepUnhover()"
-                   (click)="selectStep(s)"
-              >
-                <div class="card-body">
-                  <div [innerHTML]="s.step_description">
-                  </div>
-                </div>
-              </div>
             }
-            <ngb-pagination
-              [collectionSize]="stepList.length"
-              [(page)]="page"
-              [pageSize]="pageSize"
-              (pageChange)="onPageChange($event)"
-              [maxSize]="5"
-              [rotate]="true"
-            ></ngb-pagination>
-          </div>
-        }
-      }
-      <div>
-        <b>Created from Project</b>
-        <div>
-          @if (createdByProject) {
-            <div>
-              {{createdByProject.project_name}}
-            </div>
           }
-          <input (selectItem)="selectedProject($event)" [resultTemplate]="rt" [inputFormatter]="inputFormatter" [resultFormatter]="resultFormatter" type="search" class="form-control" placeholder="Search Project" [ngbTypeahead]="searchProject" formControlName="projectName">
 
-          <ng-template #rt let-r="result" let-t="term">
-            <ngb-highlight [result]="r.project_name" [term]="t"></ngb-highlight>
-          </ng-template>
-        </div>
-      </div>
-    </form>
-    <hr>
-    <b>Item Metadata</b>
-    <app-item-metadata [parentType]="'stored_reagent'" [storedReagent]="storedReagent"></app-item-metadata>
+          <!-- Project Selection -->
+          <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center py-2">
+              <h6 class="mb-0"><i class="bi bi-kanban me-2"></i>Created from Project</h6>
+            </div>
+            <div class="card-body">
+              @if (createdByProject) {
+                <div class="mb-2 border-start border-success border-3 ps-2">
+                  <div class="fw-bold">{{createdByProject.project_name}}</div>
+                </div>
+              }
+
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-search"></i></span>
+                <input (selectItem)="selectedProject($event)"
+                       [resultTemplate]="rt"
+                       [inputFormatter]="inputFormatter"
+                       [resultFormatter]="resultFormatter"
+                       type="search"
+                       class="form-control"
+                       placeholder="Search for project"
+                       [ngbTypeahead]="searchProject"
+                       formControlName="projectName">
+              </div>
+
+              <ng-template #rt let-r="result" let-t="term">
+                <ngb-highlight [result]="r.project_name" [term]="t"></ngb-highlight>
+              </ng-template>
+            </div>
+          </div>
+        </form>
+      </section>
+
+      <hr>
+
+      <!-- Item Metadata Section -->
+      <section>
+        <h6 class="fw-bold mb-3 border-bottom pb-2">
+          <i class="bi bi-tags me-2"></i>Item Metadata
+        </h6>
+        <app-item-metadata [parentType]="'stored_reagent'" [storedReagent]="storedReagent"></app-item-metadata>
+      </section>
+    </div>
   }
 </div>
+
 <div class="modal-footer">
-  <button type="button" class="btn btn-primary" (click)="submit()">Submit</button>
-  <button type="button" class="btn btn-secondary" (click)="close()">Close</button>
+  <button type="button" class="btn btn-secondary" (click)="close()">
+    <i class="bi bi-x-circle me-1"></i>Cancel
+  </button>
+  <button type="button" class="btn btn-primary" (click)="submit()">
+    <i class="bi bi-check-circle me-1"></i>Save Changes
+  </button>
 </div>

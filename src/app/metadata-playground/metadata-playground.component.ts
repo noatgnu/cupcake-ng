@@ -36,7 +36,7 @@ import {FieldMaskEditorModalComponent} from "../field-mask-editor-modal/field-ma
     NgbDropdownMenu,
     NgbDropdownToggle,
     NgbAlert,
-    NgbTooltip
+    NgbTooltip,
   ],
   templateUrl: './metadata-playground.component.html',
   styleUrl: './metadata-playground.component.scss'

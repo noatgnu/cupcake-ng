@@ -1,0 +1,186 @@
+<div class="container-fluid py-3">
+  @if (instrument) {
+    <div class="card mt-5 mb-4 shadow-sm">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">
+          <i class="bi bi-diagram-3 me-2"></i>Instrument Details
+        </h5>
+      </div>
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-md-4">
+            <h6 class="fw-bold mb-1">Name</h6>
+            <p class="mb-0">{{instrument.instrument_name}}</p>
+          </div>
+          <div class="col-md-4">
+            <h6 class="fw-bold mb-1">Description</h6>
+            <p class="mb-0">{{instrument.instrument_description || 'Not specified'}}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">
+      <i class="bi bi-tools me-2"></i>Maintenance Logs:
+    </h1>
+    <button class="btn btn-primary" (click)="createLog()">
+      <i class="bi bi-plus-circle me-2"></i>New Maintenance Log
+    </button>
+  </div>
+
+  <!-- Filters -->
+  <div class="card mb-4 shadow-sm">
+    <div class="card-header">
+      <h5 class="mb-0">
+        <i class="bi bi-funnel me-2"></i>Filters
+      </h5>
+    </div>
+    <div class="card-body">
+      <form [formGroup]="filterForm">
+        <div class="row g-3">
+          <div class="col-md-4">
+            <label for="search" class="form-label">Search</label>
+            <div class="input-group">
+              <span class="input-group-text"><i class="bi bi-search"></i></span>
+              <input type="text" class="form-control" id="search" formControlName="search"
+                     placeholder="Search in descriptions...">
+            </div>
+          </div>
+          <div class="col-md-4">
+            <label for="maintenance_type" class="form-label">Maintenance Type</label>
+            <select class="form-select" id="maintenance_type" formControlName="maintenance_type">
+              <option value="">All Types</option>
+              @for (type of maintenanceTypes; track type.value) {
+                <option [value]="type.value">{{type.label}}</option>
+              }
+            </select>
+          </div>
+          <div class="col-md-4">
+            <label for="status" class="form-label">Status</label>
+            <select class="form-select" id="status" formControlName="status">
+              <option value="">All Statuses</option>
+              @for (status of statusTypes; track status.value) {
+                <option [value]="status.value">{{status.label}}</option>
+              }
+            </select>
+          </div>
+          <div class="col-md-6">
+            <div class="row g-2">
+              <div class="col">
+                <label for="start_date" class="form-label">From Date</label>
+                <div class="input-group">
+                  <span class="input-group-text"><i class="bi bi-calendar3"></i></span>
+                  <input type="date" class="form-control" id="start_date" formControlName="start_date">
+                </div>
+              </div>
+              <div class="col">
+                <label for="end_date" class="form-label">To Date</label>
+                <div class="input-group">
+                  <span class="input-group-text"><i class="bi bi-calendar3"></i></span>
+                  <input type="date" class="form-control" id="end_date" formControlName="end_date">
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <label class="invisible d-block">Actions</label>
+            <button type="button" class="btn btn-outline-secondary" (click)="clearFilters()">
+              <i class="bi bi-trash3 me-1"></i>Clear Filters
+            </button>
+            <button type="button" class="btn btn-primary ms-2" (click)="loadLogs()">
+              <i class="bi bi-search me-1"></i>Apply Filters
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Loading state -->
+  @if (isLoading) {
+    <div class="d-flex justify-content-center my-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+    </div>
+  }
+
+  <!-- Error state -->
+  @if (error) {
+    <div class="alert alert-danger">
+      <i class="bi bi-exclamation-triangle-fill me-2"></i>
+      {{error}}
+    </div>
+  }
+
+  <!-- Empty state -->
+  @if (!isLoading && logs) {
+    @if (logs.count === 0) {
+      <div class="alert alert-info d-flex align-items-center my-4">
+        <i class="bi bi-info-circle-fill me-3 fs-4"></i>
+        <div>
+          <h5 class="mb-1">No maintenance logs found</h5>
+          <p class="mb-0">There are no maintenance logs for this instrument matching your filters.</p>
+        </div>
+      </div>
+    }
+
+  }
+
+  <!-- Results -->
+  @if (!isLoading && logs) {
+    <div class="card shadow-sm">
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead>
+          <tr>
+            <th>Type</th>
+            <th>Description</th>
+            <th>Status</th>
+            <th>Date</th>
+            <th>Last Updated</th>
+            <th>Actions</th>
+          </tr>
+          </thead>
+          <tbody>
+            @for (log of logs.results; track log.id) {
+              <tr>
+                <td>{{getTypeLabel(log.maintenance_type)}}</td>
+                <td class="text-truncate" style="max-width: 350px;">{{log.maintenance_description}}</td>
+                <td>
+                  <span class="badge {{getStatusClass(log.status)}}">
+                    {{getStatusLabel(log.status)}}
+                  </span>
+                </td>
+                <td>{{log.maintenance_date | date:'MMM d, y'}}</td>
+                <td>{{log.updated_at | date:'MMM d, y h:mm a'}}</td>
+                <td>
+                  <button class="btn btn-sm btn-outline-primary" (click)="viewLog(log)">
+                    <i class="bi bi-eye"></i>
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      @if (logs.count! > pageSize) {
+        <div class="d-flex justify-content-center p-3 border-top">
+          <ngb-pagination
+            [collectionSize]="logs.count!"
+            [(page)]="currentPage"
+            [pageSize]="pageSize"
+            [maxSize]="5"
+            [ellipses]="false"
+            [boundaryLinks]="true"
+            (pageChange)="handlePageChange($event)"
+            aria-label="Maintenance logs pagination"
+          ></ngb-pagination>
+        </div>
+      }
+    </div>
+  }
+</div>

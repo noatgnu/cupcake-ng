@@ -25,7 +25,11 @@ import {AnnotationFolder} from "../../annotation";
 import {AnnotationFolderModalComponent} from "../../annotation-folder-modal/annotation-folder-modal.component";
 import {UploadLargeFileModalComponent} from "../../upload-large-file-modal/upload-large-file-modal.component";
 import {InstrumentImageModalComponent} from "./instrument-image-modal/instrument-image-modal.component";
-
+import {NgClass} from "@angular/common";
+import {ImageViewerModalComponent} from "../../image-viewer-modal/image-viewer-modal.component";
+import {InstrumentSupportMaintenanceModalComponent} from "./instrument-support-maintenance-modal/instrument-support-maintenance-modal.component";
+import {MaintenanceLogModalComponent} from "../../maintenance-log-modal/maintenance-log-modal.component";
+import {RouterLink} from "@angular/router";
 @Component({
     selector: 'app-instrument-management',
   imports: [
@@ -36,7 +40,9 @@ import {InstrumentImageModalComponent} from "./instrument-image-modal/instrument
     NgbDropdown,
     NgbDropdownMenu,
     NgbDropdownToggle,
-    NgbDropdownItem
+    NgbDropdownItem,
+    NgClass,
+    RouterLink
   ],
     templateUrl: './instrument-management.component.html',
     styleUrl: './instrument-management.component.scss'
@@ -178,5 +184,31 @@ export class InstrumentManagementComponent {
         this.toastService.show("Instrument image", "Successfully upload image")
       })
     });
+  }
+
+  openImageViewModal(imageSrc: string, instrumentName: string): void {
+    const modalRef = this.modal.open(ImageViewerModalComponent, {
+      centered: true,
+      size: 'lg',
+      windowClass: 'image-view-modal'
+    });
+
+    modalRef.componentInstance.imageSrc = imageSrc;
+    modalRef.componentInstance.title = instrumentName || 'Instrument Image';
+  }
+
+  manageSupportInfo(instrument: Instrument): void {
+    const modalRef = this.modal.open(InstrumentSupportMaintenanceModalComponent, {
+      size: 'lg',
+      backdrop: 'static',
+      scrollable: true,
+    });
+    modalRef.componentInstance.instrumentId = instrument.id;
+  }
+
+  createInstrumentMaintenanceLog(instrument: Instrument): void {
+    const ref = this.modal.open(MaintenanceLogModalComponent, {scrollable: true, backdrop: 'static'});
+    ref.componentInstance.instrumentId = instrument.id;
+    ref.componentInstance.mode = "create";
   }
 }
