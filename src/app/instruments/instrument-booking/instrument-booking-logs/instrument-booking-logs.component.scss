@@ -34,3 +34,22 @@
 .event-details {
   margin-left: 20px;
 }
+.form-switch .form-check-input {
+  cursor: pointer;
+  width: 2.5em;
+  height: 1.2em;
+
+  &:checked {
+    background-color: #198754;
+    border-color: #198754;
+  }
+
+  &:not(:checked) {
+    background-color: #dc3545;
+    border-color: #dc3545;
+  }
+}
+
+.status-label {
+  color: #6c757d;
+}

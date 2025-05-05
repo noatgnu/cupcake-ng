@@ -1,61 +1,156 @@
-<div class="container mt-2">
-  <h5>Instrument Booking Creation Logs</h5>
-  <div class="filter-form">
-    <form [formGroup]="filterForm" class="d-flex gap-2">
-      <div>
-        <label for="user">User Filter:</label>
-        <input [inputFormatter]="formatter" [resultFormatter]="formatter" [ngbTypeahead]="searchUser" id="user" type="search" class="form-control" (selectItem)="selectUser($event)">
-        <div class="d-flex gap-2 flex-wrap">
-          @if (filterForm.value['users']) {
-            @for (u of filterForm.value['users']; track u.id) {
-              <span class="badge bg-primary"><i class="bi bi-x-circle" (click)="removeUserFromFilter(u)"></i>{{ u.username }}</span>
-            }
-          }
-        </div>
-      </div>
-      <div>
-        <label for="instrument">Instrument Filter:</label>
-        <input [ngbTypeahead]="searchInstrument" [inputFormatter]="formatterInstrument" [resultFormatter]="formatterInstrument" (selectItem)="selectInstrument($event)" id="instrument" type="search" class="form-control">
-        <div class="d-flex gap-2 flex-wrap">
-          @if (filterForm.value['instrument']) {
-            @for (i of filterForm.value['instrument']; track i.id) {
-              <span class="badge bg-primary"><i class="bi bi-x-circle" (click)="removeInstrumentFromFilter(i)"></i>{{ i.instrument_name }}</span>
-            }
-          }
-        </div>
-      </div>
-      <div>
-        <label for="timeStarted">For The Period of Time Until Today (days)</label>
-        <input type="number" class="form-control" formControlName="timeStarted" id="timeStarted">
+<div class="container-fluid py-3">
+  <div class="card">
+    <div class="card-header bg-primary text-white">
+      <h4 class="mb-0"><i class="bi bi-journal-text me-2"></i>Instrument Booking Logs</h4>
+    </div>
 
-      </div>
-    </form>
-  </div>
-
-  <div class="timeline-container">
-    <div class="timeline">
-      @for (day of getDaysWithBookings(); track $index) {
-        <hr>
-        <div class="day-header">Booked On {{ day.date | date: 'fullDate' }}</div>
-        <div class="timeline-event">
-          @for (booking of day.bookings; track booking.id) {
-            <div class="event-time">{{ booking.time_started | date: 'shortDate' }} - {{ booking.time_ended | date: 'shortDate' }}</div>
-            <div class="event-details">
-              <div>User: {{ booking.user }}</div>
-              <div>Instrument: {{ instrumentMap[booking.instrument].instrument_name }}</div>
-              @if (dataService.instrumentPermissions[booking.instrument]) {
-                @if (dataService.instrumentPermissions[booking.instrument]['can_manage'] || accountService.is_staff) {
-                  <div>@if(booking.approved) {<i ngbTooltip="Approved" class="bi bi-check-circle text-success" (click)="toggleApproval(booking)"></i>} @else {<i ngbTooltip="Not approved" class="bi bi-x-circle text-danger" (click)="toggleApproval(booking)"></i>}</div>
-                } @else {
-                  <div>@if(booking.approved) {<i ngbTooltip="Approved" class="bi bi-check-circle text-success"></i>} @else {<i ngbTooltip="Not approved" class="bi bi-x-circle text-danger"></i>}</div>
+    <div class="card-body">
+      <!-- Filters Section -->
+      <div class="card mb-4">
+        <div class="card-header ">
+          <h5 class="mb-0">Filter Options</h5>
+        </div>
+        <div class="card-body">
+          <form [formGroup]="filterForm" class="row g-3">
+            <!-- User Filter -->
+            <div class="col-md-4">
+              <label for="user" class="form-label">User Filter</label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-person"></i></span>
+                <input [inputFormatter]="formatter"
+                       [resultFormatter]="formatter"
+                       [ngbTypeahead]="searchUser"
+                       id="user"
+                       type="search"
+                       class="form-control"
+                       (selectItem)="selectUser($event)"
+                       placeholder="Search users...">
+              </div>
+              <div class="selected-items mt-2">
+                @if (filterForm.value['users']?.length) {
+                  <div class="d-flex gap-2 flex-wrap">
+                    @for (u of filterForm.value['users']; track u.id) {
+                      <span class="badge bg-primary p-2">
+                        {{ u.username }}
+                        <i class="bi bi-x-circle ms-1" (click)="removeUserFromFilter(u)" role="button"></i>
+                      </span>
+                    }
+                  </div>
                 }
-              }
+              </div>
+            </div>
 
+            <!-- Instrument Filter -->
+            <div class="col-md-4">
+              <label for="instrument" class="form-label">Instrument Filter</label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-tools"></i></span>
+                <input [ngbTypeahead]="searchInstrument"
+                       [inputFormatter]="formatterInstrument"
+                       [resultFormatter]="formatterInstrument"
+                       (selectItem)="selectInstrument($event)"
+                       id="instrument"
+                       type="search"
+                       class="form-control"
+                       placeholder="Search instruments...">
+              </div>
+              <div class="selected-items mt-2">
+                @if (filterForm.value['instrument']?.length) {
+                  <div class="d-flex gap-2 flex-wrap">
+                    @for (i of filterForm.value['instrument']; track i.id) {
+                      <span class="badge bg-primary p-2">
+                        {{ i.instrument_name }}
+                        <i class="bi bi-x-circle ms-1" (click)="removeInstrumentFromFilter(i)" role="button"></i>
+                      </span>
+                    }
+                  </div>
+                }
+              </div>
+            </div>
+
+            <!-- Time Period -->
+            <div class="col-md-4">
+              <label for="timeStarted" class="form-label">Time Period (days)</label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-calendar-range"></i></span>
+                <input type="number"
+                       class="form-control"
+                       formControlName="timeStarted"
+                       id="timeStarted"
+                       min="1"
+                       placeholder="Days to look back">
+                <span class="input-group-text">days ago until today</span>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Timeline Section -->
+      <div class="timeline-container">
+        @if (getDaysWithBookings().length) {
+          @for (day of getDaysWithBookings(); track $index) {
+            <div class="card mb-3">
+              <div class="card-header ">
+                <h5 class="mb-0">{{ day.date | date: 'fullDate' }}</h5>
+              </div>
+              <div class="card-body p-0">
+                <div class="list-group list-group-flush">
+                  @for (booking of day.bookings; track booking.id) {
+                    <div class="list-group-item">
+                      <div class="row align-items-center">
+                        <div class="col-md-3">
+                          <div class="d-flex align-items-center">
+                            <div class="booking-dates">
+                              <h6 class="mb-0">Booking Period</h6>
+                              <div class="text-muted">
+                                <i class="bi bi-calendar-range me-1"></i>
+                                {{ booking.time_started | date: 'MMM d, y' }} - {{ booking.time_ended | date: 'MMM d, y' }}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="col-md-3">
+                          <h6 class="mb-0">User</h6>
+                          <div><i class="bi bi-person me-1"></i> {{ booking.user }}</div>
+                        </div>
+                        <div class="col-md-4">
+                          <h6 class="mb-0">Instrument</h6>
+                          <div><i class="bi bi-tools me-1"></i> {{ instrumentMap[booking.instrument]?.instrument_name || 'Loading...' }}</div>
+                        </div>
+                        <div class="col-md-2 text-end">
+                          @if (dataService.instrumentPermissions[booking.instrument]) {
+                            @if (dataService.instrumentPermissions[booking.instrument]['can_manage'] || accountService.is_staff) {
+                              <div class="d-flex justify-content-end align-items-center gap-2">
+                                <span class="status-label small">{{ booking.approved ? 'Approved' : 'Pending' }}</span>
+                                <div class="form-check form-switch mb-0">
+                                  <input type="checkbox" class="form-check-input"
+                                         [checked]="booking.approved"
+                                         (change)="toggleApproval(booking)"
+                                         id="approval-toggle-{{booking.id}}">
+                                </div>
+                              </div>
+                            } @else {
+                              <span class="badge {{ booking.approved ? 'bg-success' : 'bg-danger' }} p-1">
+                                <i class="bi bi-{{ booking.approved ? 'check' : 'x' }}-circle"></i>
+                                <span class="small ms-1">{{ booking.approved ? 'Approved' : 'Pending' }}</span>
+                              </span>
+                            }
+                          }
+                        </div>
+                      </div>
+                    </div>
+                  }
+                </div>
+              </div>
             </div>
           }
-        </div>
-      }
+        } @else {
+          <div class="alert alert-info">
+            <i class="bi bi-info-circle me-2"></i>No booking logs found matching your criteria.
+          </div>
+        }
+      </div>
     </div>
   </div>
-
 </div>

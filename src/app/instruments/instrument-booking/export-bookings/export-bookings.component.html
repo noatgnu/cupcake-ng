@@ -1,110 +1,191 @@
-<div class="container mt-2">
-  <h5>Export Instrument Booking</h5>
-
-  <form [formGroup]="form" class="d-flex gap-2">
-    <div class="form-group">
-      <label for="mode">Export From</label>
-      <select class="form-select" formControlName="mode" id="mode">
-        <option value="user">User</option>
-        <option value="service_lab_group">Professional Lab Group</option>
-      </select>
+<div class="container my-3">
+  <div class="card mb-4">
+    <div class="card-header bg-primary text-white">
+      <h4 class="mb-0">Export Instrument Booking</h4>
     </div>
-    <div class="form-group">
-      <label for="dataSearch">Search @if (form.value.mode === 'user') {User} @else if (form.value.mode === 'service_lab_group') {Lab Group}</label>
-      <input type="search" class="form-control" formControlName="dataSearch" id="dataSearch" [ngbTypeahead]="dataSearch" [inputFormatter]="formatter" [resultFormatter]="formatter" (selectItem)="selectItem($event)">
-      <div class="d-flex gap-2 flex-wrap">
-        @if (selectedList.length > 0) {
-          @for (s of selectedList; track s.id) {
-            @if (s['username']) {
-              <span class="badge bg-primary mt-2"><i class="bi bi-x-circle" (click)="removeItem(s)"></i>{{ s['username'] }}</span>
-            } @else if (s['name']) {
-              <span class="badge bg-primary mt-2"><i class="bi bi-x-circle" (click)="removeItem(s)"></i>{{ s['name'] }}</span>
+    <div class="card-body">
+      <!-- Source Selection -->
+      <div class="card mb-4">
+        <div class="card-header ">
+          <h5 class="mb-0">1. Select Data Source</h5>
+        </div>
+        <div class="card-body">
+          <form [formGroup]="form">
+            <div class="row mb-3">
+              <div class="col-md-4">
+                <label for="mode" class="form-label">Export From</label>
+                <select class="form-select" formControlName="mode" id="mode">
+                  <option value="user">User</option>
+                  <option value="service_lab_group">Professional Lab Group</option>
+                </select>
+              </div>
+              <div class="col-md-8">
+                <label for="dataSearch" class="form-label">
+                  Search {{ form.value.mode === 'user' ? 'User' : 'Lab Group' }}
+                </label>
+                <input type="search" class="form-control" formControlName="dataSearch"
+                       id="dataSearch" [ngbTypeahead]="dataSearch"
+                       [inputFormatter]="formatter" [resultFormatter]="formatter"
+                       (selectItem)="selectItem($event)" placeholder="Type to search...">
+              </div>
+            </div>
+
+            <div class="selected-items mt-2">
+              @if (selectedList.length > 0) {
+                <label class="form-label">Selected items:</label>
+                <div class="d-flex gap-2 flex-wrap">
+                  @for (s of selectedList; track s.id) {
+                    <span class="badge bg-primary p-2">
+                      {{ s['username'] || s['name'] }}
+                      <i class="bi bi-x-circle ms-1" (click)="removeItem(s)" role="button"></i>
+                    </span>
+                  }
+                </div>
+              } @else {
+                <ngb-alert type="warning">
+                  Please search and select at least one {{ form.value.mode === 'user' ? 'user' : 'lab group' }}.
+                </ngb-alert>
+              }
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Instrument Selection -->
+      <div class="card mb-4">
+        <div class="card-header ">
+          <h5 class="mb-0">2. Select Instruments</h5>
+        </div>
+        <div class="card-body">
+          <div class="row mb-3">
+            <div class="col-md-8">
+              <label for="instrument" class="form-label">Instrument Filter</label>
+              <input [ngbTypeahead]="instrumentSearch"
+                     [inputFormatter]="instrumentFormatter"
+                     [resultFormatter]="instrumentFormatter"
+                     (selectItem)="selectInstrument($event)"
+                     id="instrument" type="search"
+                     class="form-control" placeholder="Type to search instruments...">
+            </div>
+          </div>
+
+          <div class="selected-instruments mt-2">
+            @if (instrumentList.length > 0) {
+              <label class="form-label">Selected instruments:</label>
+              <div class="d-flex gap-2 flex-wrap">
+                @for (i of instrumentList; track i.id) {
+                  <span class="badge bg-primary p-2">
+                    {{ i.instrument_name }}
+                    <i class="bi bi-x-circle ms-1" (click)="removeInstrument(i)" role="button"></i>
+                  </span>
+                }
+              </div>
+            } @else {
+              <ngb-alert type="warning">
+                Please search and select at least one instrument.
+              </ngb-alert>
             }
-          }
-        } @else {
-          <ngb-alert type="warning">
-            Please search and select at least one user or professional lab group.
-          </ngb-alert>
-        }
-      </div>
-    </div>
-  </form>
-
-  <div class="d-flex gap-2">
-    <div class="form-group">
-      <label for="instrument">Instrument Filter:</label>
-      <input [ngbTypeahead]="instrumentSearch" [inputFormatter]="instrumentFormatter" [resultFormatter]="instrumentFormatter" (selectItem)="selectInstrument($event)" id="instrument" type="search" class="form-control">
-      @if (instrumentList.length > 0) {
-        <div class="d-flex gap-2 flex-wrap mt-2">
-          @for (i of instrumentList; track i.id) {
-            <span class="badge bg-primary"><i class="bi bi-x-circle" (click)="removeInstrument(i)"></i>{{ i.instrument_name }}</span>
-          }
-        </div>
-      } @else {
-        <ngb-alert type="warning">
-          Please search and select at least one instrument.
-        </ngb-alert>
-      }
-
-    </div>
-  </div>
-
-  <div class="d-flex justify-content-center flex-column gap-2">
-    <b>Select Time Range For Export</b>
-    <div>
-      <ngb-datepicker #dp [displayMonths]="2" [dayTemplate]="t" outsideDays="hidden" (dateSelect)="dateSelection($event)" />
-      <ng-template #t let-date let-focused="focused">
-      <span
-        class="custom-day"
-        [class.focused]="focused"
-        [class.range]="isRange(date)"
-        [class.faded]="isHovered(date) || isInside(date)"
-        (mouseenter)="hoveredDate = date"
-        (mouseleave)="hoveredDate = null"
-      >
-        {{ date.day }}
-      </span>
-      </ng-template>
-    </div>
-
-    <form [formGroup]="form" class="d-flex flex-column gap-2">
-      <div>
-        <p>
-          @if (fromDate) {
-            Calendar Selected Start Date: {{fromDate.year}}.{{fromDate.month}}.{{fromDate.day}}<br>
-          }
-          @if (toDate) {
-            Calendar Selected End Date: {{toDate.year}}.{{toDate.month}}.{{toDate.day}}
-          }
-        </p>
-      </div>
-      <div class="form-check">
-        <input type="checkbox" class="form-check-input" formControlName="splitted_boundaries_calculation" id="split_boundaries_calculation">
-        <label class="form-check-label" for="split_boundaries_calculation">Split Boundaries Calculation for Duration</label>
-      </div>
-      <div class="form-check">
-        <input type="checkbox" class="form-check-input" formControlName="include_maintenance" id="include_maintenance">
-        <label class="form-check-label" for="include_maintenance">Include Maintenance</label>
-      </div>
-      <div class="form-check">
-        <input type="checkbox" class="form-check-input" formControlName="approved_only" id="approved_only">
-        <label class="form-check-label" for="approved_only">Approved Only</label>
-      </div>
-      <div class="d-flex gap-2">
-        <div class="form-group">
-          <label for="file_format">Export File Format</label>
-          <select class="form-select" formControlName="file_format" id="file_format">
-            <option value="csv">CSV</option>
-            <option value="tsv">TSV</option>
-            <option value="xlsx">Excel</option>
-          </select>
+          </div>
         </div>
       </div>
 
-      <div class="d-flex gap-2">
-        <button class="btn btn-primary" [disabled]="!instrumentList || !selectedList" (click)="exportData()">Export</button>
-      </div>
-    </form>
-  </div>
+      <!-- Time Range Selection -->
+      <div class="card mb-4">
+        <div class="card-header ">
+          <h5 class="mb-0">3. Select Time Range</h5>
+        </div>
+        <div class="card-body">
+          <div class="row justify-content-center">
+            <div class="col-auto">
+              <ngb-datepicker #dp
+                              [displayMonths]="2"
+                              [dayTemplate]="t"
+                              outsideDays="hidden"
+                              (dateSelect)="dateSelection($event)" />
+              <ng-template #t let-date let-focused="focused">
+          <span class="custom-day"
+                [class.focused]="focused"
+                [class.range]="isRange(date)"
+                [class.faded]="isHovered(date) || isInside(date)"
+                (mouseenter)="hoveredDate = date"
+                (mouseleave)="hoveredDate = null">
+            {{ date.day }}
+          </span>
+              </ng-template>
+            </div>
+          </div>
 
+          @if (fromDate || toDate) {
+            <div class="alert alert-info mt-3">
+              <strong>Selected Range:</strong>
+              @if (fromDate) {
+                <span>From: {{fromDate.year}}-{{fromDate.month}}-{{fromDate.day}}</span>
+              }
+              @if (toDate) {
+                <span class="ms-2">To: {{toDate.year}}-{{toDate.month}}-{{toDate.day}}</span>
+              }
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Export Options -->
+      <div class="card mb-4">
+        <div class="card-header ">
+          <h5 class="mb-0">4. Export Options</h5>
+        </div>
+        <div class="card-body">
+          <form [formGroup]="form">
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <div class="form-check mb-2">
+                  <input type="checkbox" class="form-check-input"
+                         formControlName="splitted_boundaries_calculation"
+                         id="split_boundaries_calculation">
+                  <label class="form-check-label" for="split_boundaries_calculation">
+                    Split Boundaries Calculation for Duration
+                  </label>
+                </div>
+
+                <div class="form-check mb-2">
+                  <input type="checkbox" class="form-check-input"
+                         formControlName="include_maintenance"
+                         id="include_maintenance">
+                  <label class="form-check-label" for="include_maintenance">
+                    Include Maintenance
+                  </label>
+                </div>
+
+                <div class="form-check mb-2">
+                  <input type="checkbox" class="form-check-input"
+                         formControlName="approved_only"
+                         id="approved_only">
+                  <label class="form-check-label" for="approved_only">
+                    Approved Only
+                  </label>
+                </div>
+              </div>
+
+              <div class="col-md-6">
+                <label for="file_format" class="form-label">Export File Format</label>
+                <select class="form-select" formControlName="file_format" id="file_format">
+                  <option value="csv">CSV</option>
+                  <option value="tsv">TSV</option>
+                  <option value="xlsx">Excel</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="d-grid gap-2 col-md-4 mx-auto mt-4">
+              <button class="btn btn-primary"
+                      [disabled]="!instrumentList.length || !selectedList.length"
+                      (click)="exportData()">
+                <i class="bi bi-download me-2"></i>Export Data
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
