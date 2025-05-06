@@ -23,6 +23,7 @@ export interface MaintenanceLog {
   updated_at: Date;
   created_by: number;
   status: MaintenanceLogStatus;
+  is_template: boolean;
 }
 
 export interface MaintenanceLogCreate {

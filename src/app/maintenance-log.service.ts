@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import {MaintenanceLog, MaintenanceLogQuery} from './maintenance-log';
+import {MaintenanceLog, MaintenanceLogQuery, MaintenanceLogCreate} from './maintenance-log';
 import {environment} from "../environments/environment";
 
 @Injectable({
@@ -42,5 +42,28 @@ export class MaintenanceLogService {
 
   updateStatus(id: number, status: string): Observable<MaintenanceLog> {
     return this.http.post<MaintenanceLog>(`${this.baseURL}/maintenance_logs/${id}/update_status/`, { status });
+  }
+
+  getTemplates(params?: any): Observable<MaintenanceLogQuery> {
+    const templateParams = { ...params, is_template: 'true' };
+    return this.http.get<MaintenanceLogQuery>(`${this.baseURL}/maintenance_logs/`, { params: templateParams });
+  }
+
+  createFromTemplate(templateId: number): Observable<MaintenanceLog> {
+    return this.http.post<MaintenanceLog>(
+      `${this.baseURL}/maintenance_logs/${templateId}/create_from_template/`,
+      {}
+    );
+  }
+
+  createTemplate(data: MaintenanceLogCreate & { is_template: true }): Observable<MaintenanceLog> {
+    return this.http.post<MaintenanceLog>(`${this.baseURL}/maintenance_logs/`, data);
+  }
+
+  toggleTemplate(id: number, isTemplate: boolean): Observable<MaintenanceLog> {
+    return this.http.patch<MaintenanceLog>(
+      `${this.baseURL}/maintenance_logs/${id}/`,
+      { is_template: isTemplate }
+    );
   }
 }

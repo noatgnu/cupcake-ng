@@ -135,7 +135,8 @@ export class InstrumentMaintenanceLogsComponent {
 
   viewLog(log: MaintenanceLog): void {
     const modalRef = this.modalService.open(MaintenanceLogModalComponent, { size: 'lg' });
-    modalRef.componentInstance.maintenanceLogId = log.id;
+    modalRef.componentInstance.data = log;
+    modalRef.componentInstance.instrumentId = this.instrumentId;
     modalRef.componentInstance.mode = 'view';
 
     modalRef.result.then((result: any) => {
