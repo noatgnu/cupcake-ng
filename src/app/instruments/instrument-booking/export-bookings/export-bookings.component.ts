@@ -8,6 +8,7 @@ import {debounceTime, distinctUntilChanged, map, Observable, OperatorFunction, S
 import {Instrument} from "../../../instrument";
 import {environment} from "../../../../environments/environment";
 import {WebsocketService} from "../../../websocket.service";
+import {InstrumentService} from "../../../instrument.service";
 
 @Component({
   selector: 'app-export-bookings',
@@ -47,7 +48,7 @@ export class ExportBookingsComponent implements OnDestroy {
     }
   }
 
-  constructor(private toast: ToastService, private ws: WebsocketService, private accounts: AccountsService, private web: WebService, private toastService: ToastService, private fb: FormBuilder) {
+  constructor(private instrumentService: InstrumentService, private toast: ToastService, private ws: WebsocketService, private accounts: AccountsService, private web: WebService, private toastService: ToastService, private fb: FormBuilder) {
     if (this.ws.instrumentJobWSConnection) {
       this.instrumentJobWebsocketSubscription = this.ws.instrumentJobWSConnection.subscribe((message: any) => {
         if ("signed_value" in message && "instance_id" in message) {
@@ -122,7 +123,7 @@ export class ExportBookingsComponent implements OnDestroy {
       debounceTime(200),
       distinctUntilChanged(),
       switchMap((searchText) => {
-        return this.web.getInstruments(undefined, 10, 0, searchText).pipe(
+        return this.instrumentService.getInstruments(undefined, 10, 0, searchText).pipe(
           map((data) => {
             return data.results;
           })

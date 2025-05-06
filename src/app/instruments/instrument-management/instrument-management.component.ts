@@ -30,6 +30,7 @@ import {ImageViewerModalComponent} from "../../image-viewer-modal/image-viewer-m
 import {InstrumentSupportMaintenanceModalComponent} from "./instrument-support-maintenance-modal/instrument-support-maintenance-modal.component";
 import {MaintenanceLogModalComponent} from "../../maintenance-log-modal/maintenance-log-modal.component";
 import {RouterLink} from "@angular/router";
+import {InstrumentService} from "../../instrument.service";
 @Component({
     selector: 'app-instrument-management',
   imports: [
@@ -57,14 +58,14 @@ export class InstrumentManagementComponent {
     searchTerm: ['']
   })
 
-  constructor(private fb: FormBuilder, private web: WebService, public dataService: DataService, private modal: NgbModal, private toastService: ToastService, public accounts: AccountsService) {
-    this.web.getInstruments().subscribe((data: any) => {
+  constructor(private instrumentService: InstrumentService, private fb: FormBuilder, private web: WebService, public dataService: DataService, private modal: NgbModal, private toastService: ToastService, public accounts: AccountsService) {
+    this.instrumentService.getInstruments().subscribe((data: any) => {
       this.instrumentQuery = data
       this.getInstrumentPermission()
     })
     this.form.controls.searchTerm.valueChanges.subscribe((value: string| null) => {
       if (value) {
-        this.web.getInstruments(undefined, this.pageSize, 0, value).subscribe((data: InstrumentQuery) => {
+        this.instrumentService.getInstruments(undefined, this.pageSize, 0, value).subscribe((data: InstrumentQuery) => {
           this.instrumentQuery = data
           this.getInstrumentPermission()
         })
@@ -74,12 +75,12 @@ export class InstrumentManagementComponent {
 
   handlePageChange(event: any) {
     if (this.form.controls.searchTerm.value) {
-      this.web.getInstruments(undefined, this.pageSize, (event.page - 1) * this.pageSize, this.form.controls.searchTerm.value).subscribe((data: InstrumentQuery) => {
+      this.instrumentService.getInstruments(undefined, this.pageSize, (event.page - 1) * this.pageSize, this.form.controls.searchTerm.value).subscribe((data: InstrumentQuery) => {
         this.instrumentQuery = data
         this.getInstrumentPermission()
       })
     } else {
-      this.web.getInstruments(undefined, this.pageSize, (event.page - 1) * this.pageSize).subscribe((data: InstrumentQuery) => {
+      this.instrumentService.getInstruments(undefined, this.pageSize, (event.page - 1) * this.pageSize).subscribe((data: InstrumentQuery) => {
         this.instrumentQuery = data
         this.getInstrumentPermission()
       })
@@ -91,7 +92,7 @@ export class InstrumentManagementComponent {
       const ref = this.modal.open(InstrumentManagementModalComponent, {scrollable: true})
       ref.componentInstance.instrument = instrument
       ref.closed.subscribe((data: any) => {
-        this.web.assignInstrumentPermission(data.instrument.id, data.username, data.permissions).subscribe((data) => {
+        this.instrumentService.assignInstrumentPermission(data.instrument.id, data.username, data.permissions).subscribe((data) => {
           this.toastService.show("Instrument permission", "Successfully assigned permission")
         }, (error) => {
           this.toastService.show("Instrument permission", "Failed to assign permission")
@@ -104,7 +105,7 @@ export class InstrumentManagementComponent {
 
   getInstrumentPermission() {
     for (let instrument of this.instrumentQuery!.results) {
-      this.web.getInstrumentPermission(instrument.id).subscribe((data) => {
+      this.instrumentService.getInstrumentPermission(instrument.id).subscribe((data) => {
         this.dataService.instrumentPermissions[instrument.id] = data
       }, (error) => {
         this.dataService.instrumentPermissions[instrument.id] = {can_view: false, can_book: false, can_manage: false}
@@ -117,8 +118,8 @@ export class InstrumentManagementComponent {
   openInstrumentCreateModal() {
     const ref = this.modal.open(InstrumentCreateModalComponent, {scrollable: true})
     ref.closed.subscribe((data: any) => {
-      this.web.createInstrument(data.name, data.description).subscribe((instrument) => {
-        this.web.getInstruments().subscribe((data: any) => {
+      this.instrumentService.createInstrument(data.name, data.description).subscribe((instrument) => {
+        this.instrumentService.getInstruments().subscribe((data: any) => {
           this.instrumentQuery = data
           this.getInstrumentPermission()
         })
@@ -136,7 +137,7 @@ export class InstrumentManagementComponent {
       const ref = this.modal.open(DelayUsageModalComponent)
       ref.result.then((data: any) => {
         if (data) {
-          this.web.instrumentDelayUsage(instrument.id, data.days, data.start_date).subscribe(d => {
+          this.instrumentService.instrumentDelayUsage(instrument.id, data.days, data.start_date).subscribe(d => {
             this.toastService.show("Instrument usage", "Successfully delay usages by " + data.days + " days")
           }, error => {
             this.toastService.show("Instrument usage", "Failed to delay usages")
@@ -152,7 +153,7 @@ export class InstrumentManagementComponent {
     const ref = this.modal.open(InstrumentEditorModalComponent)
     ref.componentInstance.instrument = instrument
     ref.result.then((data: any) => {
-      this.web.updateInstrument(instrument.id, data.name, data.description, data.max_days_ahead, data.max_duration).subscribe((data) => {
+      this.instrumentService.updateInstrument(instrument.id, data.name, data.description, data.max_days_ahead, data.max_duration).subscribe((data) => {
         this.toastService.show("Instrument", "Successfully edited instrument")
         if (this.instrumentQuery) {
           const index = this.instrumentQuery.results.findIndex((i) => i.id === instrument.id)
@@ -180,7 +181,7 @@ export class InstrumentManagementComponent {
     const ref = this.modal.open(InstrumentImageModalComponent);
     ref.componentInstance.imageBase64.subscribe((base64: string) => {
       instrument.image = base64;
-      this.web.updateInstrument(instrument.id, instrument.instrument_name, instrument.instrument_description, instrument.max_days_ahead_pre_approval, instrument.max_days_within_usage_pre_approval, base64).subscribe((data) => {
+      this.instrumentService.updateInstrument(instrument.id, instrument.instrument_name, instrument.instrument_description, instrument.max_days_ahead_pre_approval, instrument.max_days_within_usage_pre_approval, base64).subscribe((data) => {
         this.toastService.show("Instrument image", "Successfully upload image")
       })
     });

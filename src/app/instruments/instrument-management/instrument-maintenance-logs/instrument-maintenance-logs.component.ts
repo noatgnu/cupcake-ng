@@ -7,8 +7,9 @@ import { MaintenanceLogModalComponent } from '../../../maintenance-log-modal/mai
 import {NgbModal, NgbPagination} from '@ng-bootstrap/ng-bootstrap';
 import {debounceTime, distinctUntilChanged} from 'rxjs/operators';
 import {DatePipe, NgClass} from "@angular/common";
-import {Instrument} from "../../../instrument";
+import {Instrument, MaintenanceStatus} from "../../../instrument";
 import {WebService} from "../../../web.service";
+import {InstrumentService} from "../../../instrument.service";
 
 @Component({
   selector: 'app-instrument-maintenance-logs',
@@ -24,6 +25,7 @@ import {WebService} from "../../../web.service";
 export class InstrumentMaintenanceLogsComponent {
   instrumentId!: number;
   instrumentName: string = '';
+  maintenanceStatus: MaintenanceStatus| null = null;
   logs: MaintenanceLogQuery | null = null;
   isLoading = true;
   error: string | null = null;
@@ -39,6 +41,7 @@ export class InstrumentMaintenanceLogsComponent {
     private modalService: NgbModal,
     private fb: FormBuilder,
     private web: WebService,
+    private instrumentService: InstrumentService
   ) {
     this.filterForm = this.fb.group({
       search: [''],
@@ -70,9 +73,25 @@ export class InstrumentMaintenanceLogsComponent {
   }
 
   loadInstrumentDetails(): void {
-    this.web.getInstrument(this.instrumentId).subscribe((instrument:Instrument) => {
+    this.isLoading = true;
+
+    // Load instrument details and maintenance status in parallel
+    this.instrumentService.getInstrument(this.instrumentId).subscribe((instrument: Instrument) => {
       this.instrument = instrument;
-    })
+      this.instrumentName = instrument.instrument_name;
+    });
+
+    this.instrumentService.getMaintenanceStatus(this.instrumentId).subscribe({
+      next: (status) => {
+        this.maintenanceStatus = status;
+        this.isLoading = false;
+      },
+      error: (err) => {
+        console.error('Failed to load maintenance status', err);
+        this.error = 'Failed to load maintenance status details';
+        this.isLoading = false;
+      }
+    });
   }
 
   loadStatusTypes(): void {
@@ -163,5 +182,21 @@ export class InstrumentMaintenanceLogsComponent {
       case 'cancelled': return 'bg-danger';
       default: return 'bg-secondary';
     }
+  }
+
+  isWarrantyActive(): boolean {
+    if (!this.instrument) {
+      return false;
+    }
+    if (this.instrument.support_information.length === 0) {
+      return false;
+    }
+    if (!this.instrument.support_information[0].warranty_end_date) {
+      return false;
+    }
+    const endDate = new Date(this.instrument.support_information[0].warranty_end_date);
+    const today = new Date();
+
+    return endDate >= today;
   }
 }

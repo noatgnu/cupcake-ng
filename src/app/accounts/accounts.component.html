@@ -101,44 +101,30 @@
             </div>
           </div>
         } @else if (selectedSection === 'appearance') {
-          <div class="card shadow-sm">
-            <div class="card-body">
-              <h3 class="fs-5 mb-3">Theme Settings</h3>
-              <div class="mb-3">
-                <div class="form-check form-switch">
-                  <input class="form-check-input" type="checkbox" id="darkModeFollowSystemSwitch"
-                         [(ngModel)]="dataService.systemTheme" (change)="followSystemTheme($event)">
-                  <label class="form-check-label" for="darkModeFollowSystemSwitch">
-                    <i class="bi bi-display me-2"></i> Follow System Theme
-                  </label>
+          <div class="container">
+            <div class="card shadow-sm">
+              <div class="card-body">
+                <h3 class="fs-5 mb-3">Theme Settings</h3>
+                <div class="mb-3">
+                  <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="darkModeFollowSystemSwitch"
+                           [(ngModel)]="dataService.systemTheme" (change)="followSystemTheme($event)">
+                    <label class="form-check-label" for="darkModeFollowSystemSwitch">
+                      <i class="bi bi-display me-2"></i> Follow System Theme
+                    </label>
+                  </div>
+                  <div class="form-text">Automatically adjust theme based on system preferences</div>
                 </div>
-                <div class="form-text">Automatically adjust theme based on system preferences</div>
-              </div>
-              <div class="mb-3">
-                <div class="form-check form-switch">
-                  <input class="form-check-input" type="checkbox" id="darkModeSwitch"
-                         [(ngModel)]="dataService.darkMode" (change)="toggleDarkMode($event)">
-                  <label class="form-check-label" for="darkModeSwitch">
-                    <i class="bi bi-moon me-2"></i> Dark Mode
-                  </label>
+                <div class="mb-3">
+                  <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="darkModeSwitch"
+                           [(ngModel)]="dataService.darkMode" (change)="toggleDarkMode($event)">
+                    <label class="form-check-label" for="darkModeSwitch">
+                      <i class="bi bi-moon me-2"></i> Dark Mode
+                    </label>
+                  </div>
+                  <div class="form-text">Switch between light and dark appearance</div>
                 </div>
-                <div class="form-text">Switch between light and dark appearance</div>
-              </div>
-            </div>
-          </div>
-          <div class="card">
-            <div class="card-body d-flex justify-content-between">
-              <div class="theme-preview light p-3 text-center border rounded">
-                <div class="preview-box bg-light border mb-2 d-flex align-items-center justify-content-center">
-                  <span>Light Theme</span>
-                </div>
-                <span class="badge bg-primary">Light Mode</span>
-              </div>
-              <div class="theme-preview dark p-3 text-center border rounded">
-                <div class="preview-box bg-dark text-light border mb-2 d-flex align-items-center justify-content-center">
-                  <span>Dark Theme</span>
-                </div>
-                <span class="badge bg-secondary">Dark Mode</span>
               </div>
             </div>
           </div>

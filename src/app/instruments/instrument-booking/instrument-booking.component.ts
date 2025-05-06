@@ -18,7 +18,7 @@ import {DatePipe, NgClass} from "@angular/common";
 import {InstrumentBookingModalComponent} from "../instrument-booking-modal/instrument-booking-modal.component";
 import {ToastService} from "../../toast.service";
 import {BookingTimeVisualizerComponent} from "../booking-time-visualizer/booking-time-visualizer.component";
-import {InstrumentService} from "../instrument.service";
+import {InstrumentService} from "../../instrument.service";
 import {InstrumentBookingLogsComponent} from "./instrument-booking-logs/instrument-booking-logs.component";
 import {ExportBookingsComponent} from "./export-bookings/export-bookings.component";
 
@@ -55,14 +55,14 @@ export class InstrumentBookingComponent {
   instrumentUsageMap: {[key: string]: InstrumentUsageQuery} = {}
 
   constructor(private web: WebService, private fb: FormBuilder, public dataService: DataService, private modal: NgbModal, private toastService: ToastService, private instrumentService: InstrumentService) {
-    this.web.getInstruments().subscribe((data: InstrumentQuery) => {
+    this.instrumentService.getInstruments().subscribe((data: InstrumentQuery) => {
       this.instrumentQuery = data
       this.updateInstrumentUsageMap(data.results);
       this.getInstrumentPermission()
     })
     this.form.controls.searchTerm.valueChanges.subscribe((value: string| null) => {
       if (value) {
-        this.web.getInstruments(undefined, this.pageSize, 0, value).subscribe((data: InstrumentQuery) => {
+        this.instrumentService.getInstruments(undefined, this.pageSize, 0, value).subscribe((data: InstrumentQuery) => {
           this.instrumentQuery = data
           this.updateInstrumentUsageMap(data.results)
           this.getInstrumentPermission()
@@ -101,13 +101,13 @@ export class InstrumentBookingComponent {
 
   handlePageChange(event: any) {
     if (this.form.controls.searchTerm.value) {
-      this.web.getInstruments(undefined, this.pageSize, (event.page - 1) * this.pageSize, this.form.controls.searchTerm.value).subscribe((data: InstrumentQuery) => {
+      this.instrumentService.getInstruments(undefined, this.pageSize, (event.page - 1) * this.pageSize, this.form.controls.searchTerm.value).subscribe((data: InstrumentQuery) => {
         this.instrumentQuery = data
         this.updateInstrumentUsageMap(data.results)
         this.getInstrumentPermission()
       })
     } else {
-      this.web.getInstruments(undefined, this.pageSize, (event.page - 1) * this.pageSize).subscribe((data: InstrumentQuery) => {
+      this.instrumentService.getInstruments(undefined, this.pageSize, (event.page - 1) * this.pageSize).subscribe((data: InstrumentQuery) => {
         this.instrumentQuery = data
         this.updateInstrumentUsageMap(data.results)
         this.getInstrumentPermission()
@@ -117,7 +117,7 @@ export class InstrumentBookingComponent {
 
   getInstrumentPermission() {
     for (let instrument of this.instrumentQuery!.results) {
-      this.web.getInstrumentPermission(instrument.id).subscribe((data) => {
+      this.instrumentService.getInstrumentPermission(instrument.id).subscribe((data) => {
         this.dataService.instrumentPermissions[instrument.id] = data
       }, (error) => {
         this.dataService.instrumentPermissions[instrument.id] = {can_view: false, can_book: false, can_manage: false}
@@ -130,5 +130,4 @@ export class InstrumentBookingComponent {
   getInstrumentUsageForNextPeriodOfTime(instrument: Instrument, days: number) {
     return this.web.getInstrumentUsage(instrument.id, new Date(), new Date(Date.now() + days * 24 * 60 * 60 * 1000))
   }
-
 }

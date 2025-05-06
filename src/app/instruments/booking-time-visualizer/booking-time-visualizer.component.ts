@@ -33,7 +33,7 @@ import {WebService} from "../../web.service";
 import {ToastService} from "../../toast.service";
 import {DataService} from "../../data.service";
 import {AccountsService} from "../../accounts/accounts.service";
-import {InstrumentService} from "../instrument.service";
+import {InstrumentService} from "../../instrument.service";
 
 @Component({
     selector: 'app-booking-time-visualizer',

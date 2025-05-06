@@ -1,21 +1,66 @@
-<div class="modal-header">
-  <h5>Lab Group User Creation</h5>
+<div class="modal-header  border-bottom">
+  <h5 class="modal-title d-flex align-items-center">
+    <i class="bi bi-person-plus-fill text-primary me-2"></i>
+    Lab Group User Creation
+    @if (lab_group) {
+      <span class="badge bg-primary ms-2">{{ lab_group.name }}</span>
+    }
+  </h5>
+  <button type="button" class="btn-close" aria-label="Close" (click)="close()"></button>
 </div>
-<div class="modal-body">
+
+<div class="modal-body p-3">
+  <div class="alert alert-info d-flex align-items-center mb-3">
+    <i class="bi bi-info-circle-fill me-2"></i>
+    <div>Enter the email address to create a new user for this lab group</div>
+  </div>
+
   <form [formGroup]="form">
-    <div class="form-group">
-      <label for="email">Email</label>
-      <input type="email" class="form-control" id="email" formControlName="email">
+    <div class="mb-3">
+      <label for="email" class="form-label">Email Address</label>
+      <div class="input-group">
+        <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+        <input
+          type="email"
+          class="form-control"
+          id="email"
+          formControlName="email"
+          placeholder="user@example.com"
+          [class.is-invalid]="form.get('email')?.invalid && form.get('email')?.touched">
+      </div>
+      @if (form.get('email')?.invalid && form.get('email')?.touched) {
+        <div class="text-danger small mt-1">
+          Please provide a valid email address
+        </div>
+      }
     </div>
   </form>
 </div>
-<div class="modal-footer">
-  <div ngbDropdown class="d-inline-block">
-    <button class="btn btn-primary" id="dropdownBasic1" ngbDropdownToggle>Create User</button>
-    <div ngbDropdownMenu aria-labelledby="dropdownBasic1">
-      <button ngbDropdownItem (click)="generateToken()">Create Registration Token</button>
-      <button ngbDropdownItem (click)="generateTokenAndSendEmail()">Create Token and Send Email</button>
-    </div>
-  </div>
-  <button type="button" class="btn btn-secondary" (click)="close()">Close</button>
+
+<div class="modal-footer  border-top">
+  <button type="button" class="btn btn-outline-secondary" (click)="close()">
+    Cancel
+  </button>
+  <button
+    type="button"
+    class="btn btn-primary"
+    [disabled]="form.invalid || sending"
+    (click)="generateToken()">
+    <i class="bi bi-key me-1"></i>
+    Create Registration Token
+    @if (sending) {
+      <span class="spinner-border spinner-border-sm ms-1" aria-hidden="true"></span>
+    }
+  </button>
+  <button
+    type="button"
+    class="btn btn-outline-primary"
+    [disabled]="form.invalid || sending"
+    (click)="generateTokenAndSendEmail()">
+    <i class="bi bi-envelope me-1"></i>
+    Create & Send Email
+    @if (sending) {
+      <span class="spinner-border spinner-border-sm ms-1" aria-hidden="true"></span>
+    }
+  </button>
 </div>

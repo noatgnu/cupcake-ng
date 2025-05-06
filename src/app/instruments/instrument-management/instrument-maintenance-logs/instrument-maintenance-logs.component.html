@@ -9,23 +9,94 @@
       <div class="card-body">
         <div class="row g-3">
           <div class="col-md-3 text-center">
-            @if (instrument.image) {
-              <img [src]="instrument.image" alt="{{instrument.instrument_name}}" class="img-fluid rounded" style="max-height: 150px; object-fit: contain;">
+            @if (instrument?.image) {
+              <img [src]="instrument.image" alt="{{instrument?.instrument_name}}" class="img-fluid rounded" style="max-height: 150px; object-fit: contain;">
             } @else {
               <div class="d-flex align-items-center justify-content-center bg-light rounded" style="height: 150px;">
                 <i class="bi bi-camera text-muted" style="font-size: 2rem;"></i>
               </div>
             }
           </div>
+
+          <!-- Right column - Details and Maintenance Status -->
           <div class="col-md-9">
-            <div class="row g-3">
-              <div class="col-md-6">
+            <div class="row">
+              <!-- Basic Instrument Details -->
+              <div class="col-md-4">
+                <h6 class="fw-bold mb-2 border-bottom pb-1">Basic Details</h6>
                 <h6 class="fw-bold mb-1">Name</h6>
-                <p class="mb-0">{{instrument.instrument_name}}</p>
+                <p class="mb-0">{{instrument?.instrument_name}}</p>
+
+                <h6 class="fw-bold mb-1 mt-3">Description</h6>
+                <p class="mb-0">{{instrument?.instrument_description || 'Not specified'}}</p>
               </div>
-              <div class="col-md-6">
-                <h6 class="fw-bold mb-1">Description</h6>
-                <p class="mb-0">{{instrument.instrument_description || 'Not specified'}}</p>
+
+              <!-- Warranty Information -->
+              <div class="col-md-4">
+                <h6 class="fw-bold mb-2 border-bottom pb-1">Warranty Information</h6>
+                @if (instrument.support_information.length > 0) {
+                  @if (instrument.support_information[0].warranty_start_date) {
+                    <p class="mb-1"><strong>Start date:</strong> {{instrument.support_information[0].warranty_start_date | date:'dd-MM-yy'}}</p>
+                  }
+                  @if (instrument.support_information[0].warranty_end_date) {
+                    <p class="mb-1"><strong>End date:</strong> {{instrument.support_information[0].warranty_end_date | date:'dd-MM-yy'}}</p>
+
+                    <!-- Show warranty status badge -->
+                    <p class="mb-1">
+                      <strong>Status:</strong>
+                      @if (isWarrantyActive()) {
+                        <span class="badge bg-success ms-1">Active</span>
+                      } @else {
+                        <span class="badge bg-danger ms-1">Expired</span>
+                      }
+                    </p>
+                  }
+                } @else {
+                  <p class="text-muted">No warranty information available</p>
+                }
+              </div>
+
+              <!-- Maintenance Status Information -->
+              <div class="col-md-4">
+                <h6 class="fw-bold mb-2 border-bottom pb-1">Maintenance Status</h6>
+                @if (maintenanceStatus) {
+                  <div class="mb-2">
+                    @if (maintenanceStatus.is_overdue) {
+                      <span class="badge bg-danger me-2">Overdue</span>
+                      @if (maintenanceStatus.overdue_days) {
+                        <span>Maintenance is overdue by {{maintenanceStatus.overdue_days}} days</span>
+                      }
+                    } @else if (maintenanceStatus.days_until_next_maintenance !== undefined && maintenanceStatus.days_until_next_maintenance < 7) {
+                      <span class="badge bg-warning me-2">Due Soon</span>
+                      <span>Maintenance due in {{maintenanceStatus.days_until_next_maintenance}} days</span>
+                    } @else if (maintenanceStatus.has_maintenance_record) {
+                      <span class="badge bg-success me-2">Up to Date</span>
+                      <span>Maintenance is on schedule</span>
+                    } @else {
+                      <span class="badge bg-secondary me-2">No Records</span>
+                      <span>No maintenance records found</span>
+                    }
+                  </div>
+                  @if (maintenanceStatus.last_maintenance_date) {
+                    <p class="mb-1"><strong>Last maintenance:</strong> {{maintenanceStatus.last_maintenance_date | date:'medium'}}</p>
+                  }
+                  @if (maintenanceStatus.next_maintenance_date) {
+                    <p class="mb-1"><strong>Next maintenance:</strong> {{maintenanceStatus.next_maintenance_date | date:'medium'}}</p>
+                  }
+                  @if (maintenanceStatus.days_since_last_maintenance !== undefined) {
+                    <p class="mb-1"><strong>Days since maintenance:</strong> {{maintenanceStatus.days_since_last_maintenance}}</p>
+                  }
+                  @if (maintenanceStatus.maintenance_frequency_days) {
+                    <p class="mb-1"><strong>Maintenance frequency:</strong> Every {{maintenanceStatus.maintenance_frequency_days}} days</p>
+                  }
+                } @else if (isLoading) {
+                  <div class="d-flex align-items-center">
+                    <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+                    <span>Loading maintenance status...</span>
+                  </div>
+                } @else {
+                  <p class="text-muted">No maintenance status information available</p>
+                }
               </div>
             </div>
           </div>

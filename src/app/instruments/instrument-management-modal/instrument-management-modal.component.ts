@@ -7,6 +7,7 @@ import {AccountsService} from "../../accounts/accounts.service";
 import {ToastService} from "../../toast.service";
 import {debounceTime, map, Observable, switchMap} from "rxjs";
 import {User} from "../../user";
+import {InstrumentService} from "../../instrument.service";
 
 @Component({
     selector: 'app-instrument-management-modal',
@@ -37,13 +38,13 @@ export class InstrumentManagementModalComponent {
   permissionMap: {[key: string]: {can_book: boolean, can_manage: boolean, can_view: boolean}} = {}
 
   formPermissions!:FormGroup<{can_book: FormControl<boolean>, can_manage: FormControl<boolean>, can_view: FormControl<boolean>}>
-  constructor(private toastService: ToastService, private activeModal: NgbActiveModal, private fb: FormBuilder, private web: WebService, public accounts: AccountsService) {
+  constructor(private instrumentService: InstrumentService, private toastService: ToastService, private activeModal: NgbActiveModal, private fb: FormBuilder, private web: WebService, public accounts: AccountsService) {
     this.formUser.controls.username.valueChanges.subscribe((value) => {
       if (value) {
         this.web.getUsers(undefined, 5, 0, value).subscribe((data) => {
           this.userList = data.results
           for (const user of this.userList) {
-            this.web.getUserInstrumentPermission(this.instrument.id, user.username).subscribe((data) => {
+            this.instrumentService.getUserInstrumentPermission(this.instrument.id, user.username).subscribe((data) => {
               this.permissionMap[user.username] = data
             })
           }
@@ -52,21 +53,19 @@ export class InstrumentManagementModalComponent {
     })
   }
 
-
-
   getUserPermission(user: string) {
     const currentUser = this.userList.find((u) => u.username === user)
     if (currentUser) {
       this.currentUser = currentUser
     }
-    this.web.getUserInstrumentPermission(this.instrument.id, user).subscribe((data) => {
+    this.instrumentService.getUserInstrumentPermission(this.instrument.id, user).subscribe((data: any) => {
       // @ts-ignore
       this.formPermissions = this.fb.group({
         can_book: new FormControl(data.can_book),
         can_manage: new FormControl(data.can_manage),
         can_view: new FormControl(data.can_view),
       })
-    }, (error) => {
+    }, (error:any) => {
       this.toastService.show("Instrument Permission", "User not found")
     })
   }

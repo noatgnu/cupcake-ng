@@ -1,98 +1,191 @@
-<div class="modal-header">
-  <h5 class="modal-title">
-    Add/Remove User from Group
+<div class="modal-header border-bottom">
+  <h5 class="modal-title d-flex align-items-center">
+    <i class="bi bi-people-fill text-primary me-2"></i>
+    Manage Lab Group Users
+    @if (labGroup) {
+      <span class="badge bg-primary ms-2">{{ labGroup.name }}</span>
+    }
   </h5>
+  <button type="button" class="btn-close" aria-label="Close" (click)="close()"></button>
 </div>
-<div class="modal-body">
+
+<div class="modal-body p-3">
+  <!-- Search Form -->
   <form [formGroup]="form">
-    <div class="form-group">
-      <label for="userSearch">User Search</label>
-      <input type="search" class="form-control" formControlName="name" id="userSearch">
+    <div class="mb-3">
+      <label for="userSearch" class="form-label">Search Users</label>
+      <div class="input-group">
+        <span class="input-group-text">
+          <i class="bi bi-search"></i>
+        </span>
+        <input
+          type="search"
+          class="form-control"
+          formControlName="name"
+          id="userSearch"
+          placeholder="Enter username to search"
+        >
+        @if (isLoading) {
+          <span class="input-group-text">
+            <div class="spinner-border spinner-border-sm" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+          </span>
+        }
+      </div>
     </div>
   </form>
+
+  <!-- All Users Section -->
   @if (userQuery) {
-    <hr>
-    <h5>User List From Entire Database</h5>
-    <table class="table table-striped">
-      <thead>
-      <tr>
-        <th scope="col">
-          ID
-        </th>
-        <th scope="col">
-          Username
-        </th>
-        <th scope="col">
-          Actions
-        </th>
-      </tr>
-      </thead>
-      <tbody>
-
-        @for (user of userQuery.results; track user.id) {
+    <div class="card mb-4 shadow-sm">
+      <div class="card-header py-2 d-flex justify-content-between align-items-center">
+        <h6 class="mb-0"><i class="bi bi-people me-2"></i>All Available Users</h6>
+        <span class="badge bg-secondary">{{ userQuery.count }} total</span>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead>
           <tr>
-            <td>
-              {{user.id}}
-            </td>
-            <td>
-              {{user.username}}
-            </td>
-            <td>
-              <div class="d-flex gap-2 h-100">
-                @if (inThisLabGroupMap[user.id]) {
-                  <button class="btn btn-sm btn-danger" ngbTooltip="Remove user from group" (click)="removeUserFromLabGroup(user)"><i class="bi bi-person-dash"></i></button>
-                } @else {
-                  <button class="btn btn-sm btn-primary" ngbTooltip="Add user to group" (click)="addUserToLabGroup(user)"><i class="bi bi-person-add"></i></button>
-                }
-              </div>
-
-            </td>
+            <th scope="col">ID</th>
+            <th scope="col">Username</th>
+            <th scope="col" class="text-end">Actions</th>
           </tr>
-        }
-
-      </tbody>
-    </table>
-    <ngb-pagination (pageChange)="handleUserPageChange($event)" [collectionSize]="userQuery.count" [(page)]="userPage" [pageSize]="10" [rotate]="true" [boundaryLinks]="true" />
+          </thead>
+          <tbody>
+            @for (user of userQuery.results; track user.id) {
+              <tr>
+                <td class="align-middle">{{ user.id }}</td>
+                <td class="align-middle">
+                  <div class="d-flex align-items-center">
+                    <i class="bi bi-person-circle me-2 text-secondary"></i>
+                    <strong>{{ user.username }}</strong>
+                  </div>
+                </td>
+                <td class="text-end">
+                  @if (inThisLabGroupMap[user.id]) {
+                    <button
+                      class="btn btn-sm btn-outline-danger"
+                      ngbTooltip="Remove from lab group"
+                      (click)="removeUserFromLabGroup(user)"
+                      [disabled]="isActionPending"
+                    >
+                      <i class="bi bi-person-dash me-1"></i>
+                      Remove
+                    </button>
+                  } @else {
+                    <button
+                      class="btn btn-sm btn-outline-primary"
+                      ngbTooltip="Add to lab group"
+                      (click)="addUserToLabGroup(user)"
+                      [disabled]="isActionPending"
+                    >
+                      <i class="bi bi-person-add me-1"></i>
+                      Add
+                    </button>
+                  }
+                </td>
+              </tr>
+            }
+            @if (userQuery.results.length === 0) {
+              <tr>
+                <td colspan="3" class="text-center py-3">
+                  <i class="bi bi-search me-2"></i>
+                  No users found matching your search
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      <div class="card-footer border-top-0 pb-0 pt-2">
+        <div class="d-flex justify-content-center">
+          <ngb-pagination
+            (pageChange)="handleUserPageChange($event)"
+            [collectionSize]="userQuery.count"
+            [(page)]="userPage"
+            [pageSize]="10"
+            [rotate]="true"
+            [boundaryLinks]="true"
+            aria-label="All users pagination"
+          />
+        </div>
+      </div>
+    </div>
   }
-  @if (currentLabGroupUserQuery) {
-    <hr>
-    <h5>User List From Lab Group</h5>
-    <table class="table table-striped">
-      <thead>
-      <tr>
-        <th scope="col">
-          ID
-        </th>
-        <th scope="col">
-          Username
-        </th>
-        <th scope="col">
-          Actions
-        </th>
-      </tr>
-      </thead>
-      <tbody>
 
-        @for (user of currentLabGroupUserQuery.results; track user.id) {
+  <!-- Lab Group Users Section -->
+  @if (currentLabGroupUserQuery) {
+    <div class="card shadow-sm">
+      <div class="card-header py-2 d-flex justify-content-between align-items-center">
+        <h6 class="mb-0">
+          <i class="bi bi-people-fill me-2"></i>
+          Current Lab Group Members
+        </h6>
+        <span class="badge bg-primary">{{ currentLabGroupUserQuery.count }} members</span>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead>
           <tr>
-            <td>
-              {{user.id}}
-            </td>
-            <td>
-              {{user.username}}
-            </td>
-            <td>
-              <div class="d-flex gap-2">
-                <button class="btn btn-sm btn-danger" ngbTooltip="Remove user from group" (click)="removeUserFromLabGroup(user)"><i class="bi bi-person-dash"></i></button>
-              </div>
-            </td>
+            <th scope="col">ID</th>
+            <th scope="col">Username</th>
+            <th scope="col" class="text-end">Actions</th>
           </tr>
-        }
-      </tbody>
-    </table>
-    <ngb-pagination (pageChange)="handleLabGroupUserPageChange($event)" [collectionSize]="currentLabGroupUserQuery.count" [(page)]="currentLabGroupUserPage" [pageSize]="10" [rotate]="true" [boundaryLinks]="true" />
+          </thead>
+          <tbody>
+            @for (user of currentLabGroupUserQuery.results; track user.id) {
+              <tr>
+                <td class="align-middle">{{ user.id }}</td>
+                <td class="align-middle">
+                  <div class="d-flex align-items-center">
+                    <i class="bi bi-person-check me-2 text-primary"></i>
+                    <strong>{{ user.username }}</strong>
+                  </div>
+                </td>
+                <td class="text-end">
+                  <button
+                    class="btn btn-sm btn-outline-danger"
+                    ngbTooltip="Remove from lab group"
+                    (click)="removeUserFromLabGroup(user)"
+                    [disabled]="isActionPending"
+                  >
+                    <i class="bi bi-person-dash me-1"></i>
+                    Remove
+                  </button>
+                </td>
+              </tr>
+            }
+            @if (currentLabGroupUserQuery.results.length === 0) {
+              <tr>
+                <td colspan="3" class="text-center py-3">
+                  <i class="bi bi-info-circle me-2"></i>
+                  No users in this lab group yet
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      <div class="card-footer border-top-0 pb-0 pt-2">
+        <div class="d-flex justify-content-center">
+          <ngb-pagination
+            (pageChange)="handleLabGroupUserPageChange($event)"
+            [collectionSize]="currentLabGroupUserQuery.count"
+            [(page)]="currentLabGroupUserPage"
+            [pageSize]="10"
+            [rotate]="true"
+            [boundaryLinks]="true"
+            aria-label="Lab group members pagination"
+          />
+        </div>
+      </div>
+    </div>
   }
 </div>
-<div class="modal-footer">
-  <button type="button" class="btn btn-secondary" (click)="close()">Close</button>
+
+<div class="modal-footer border-top">
+  <button type="button" class="btn btn-primary" (click)="close()">
+    <i class="bi bi-check-circle me-1"></i>Done
+  </button>
 </div>

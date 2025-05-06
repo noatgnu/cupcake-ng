@@ -8,6 +8,7 @@ import {debounceTime, distinctUntilChanged, map, Observable, OperatorFunction, s
 import {NgbTooltip, NgbTypeahead} from "@ng-bootstrap/ng-bootstrap";
 import {DataService} from "../../../data.service";
 import {AccountsService} from "../../../accounts/accounts.service";
+import {InstrumentService} from "../../../instrument.service";
 
 @Component({
   selector: 'app-instrument-booking-logs',
@@ -29,7 +30,7 @@ export class InstrumentBookingLogsComponent implements OnInit {
   userModel: string = "";
   timeStarted: number = 30;
 
-  constructor(private web: WebService, private fb: FormBuilder, public dataService: DataService, public accountService: AccountsService) {
+  constructor(private instrumentService: InstrumentService, private web: WebService, private fb: FormBuilder, public dataService: DataService, public accountService: AccountsService) {
     this.filterForm = this.fb.group({
       users: [[]],
       instrument: [[]],
@@ -84,11 +85,11 @@ export class InstrumentBookingLogsComponent implements OnInit {
         const bookingDate = new Date(booking.created_at);
         bookingDate.setHours(0, 0, 0, 0);
         if (!this.instrumentMap[booking.instrument]) {
-          this.web.getInstrumentPermission(booking.instrument).subscribe(usage => {
+          this.instrumentService.getInstrumentPermission(booking.instrument).subscribe(usage => {
             this.dataService.instrumentPermissions[booking.instrument] = usage
           })
           this.instrumentMap[booking.instrument] = {} as Instrument;
-          this.web.getInstrument(booking.instrument).subscribe((instrument: Instrument) => {
+          this.instrumentService.getInstrument(booking.instrument).subscribe((instrument: Instrument) => {
             this.instrumentMap[booking.instrument] = instrument;
           })
         }
@@ -117,7 +118,7 @@ export class InstrumentBookingLogsComponent implements OnInit {
     return text$.pipe(
       debounceTime(200),
       distinctUntilChanged(),
-      switchMap(term => this.web.getInstruments(undefined, 10, 0, term).pipe(
+      switchMap(term => this.instrumentService.getInstruments(undefined, 10, 0, term).pipe(
         map((data: any) => data.results)
       ))
     );

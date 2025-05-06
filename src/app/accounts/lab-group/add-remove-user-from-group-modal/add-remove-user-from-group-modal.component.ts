@@ -17,6 +17,9 @@ import {User, UserQuery} from "../../../user";
     styleUrl: './add-remove-user-from-group-modal.component.scss'
 })
 export class AddRemoveUserFromGroupModalComponent {
+  isLoading = false;
+  isActionPending = false;
+
   userQuery: UserQuery|undefined
   currentLabGroupUserQuery: UserQuery|undefined
   private _labGroup: LabGroup|undefined
@@ -41,17 +44,20 @@ export class AddRemoveUserFromGroupModalComponent {
 
   constructor(private modal: NgbActiveModal, private web: WebService, private fb: FormBuilder) {
     this.form.controls.name.valueChanges.pipe(
-      debounceTime(200),
+      debounceTime(300),
       // @ts-ignore
       distinctUntilChanged(),
       switchMap((term: string) => {
         if (!this.labGroup) {
           return of(undefined)
         }
+        this.isLoading = true;
         return this.web.getUsers(undefined, 10, 0, term).pipe(
           map((users) => {
+            this.isLoading = false;
             return users
           }), catchError(() => {
+            this.isLoading = false;
             return of(undefined)
           })
         )
@@ -127,18 +133,26 @@ export class AddRemoveUserFromGroupModalComponent {
 
   addUserToLabGroup(user: User) {
     if (this.labGroup) {
+      this.isActionPending = true;
       this.web.addLabGroupMember(this.labGroup.id, user.id).subscribe(() => {
         this.getCurrentLabGroupUsers()
         this.getUsers(this.form.value.name)
+        this.isActionPending = false;
+      }, () => {
+        this.isActionPending = false;
       })
     }
   }
 
   removeUserFromLabGroup(user: User) {
     if (this.labGroup) {
+      this.isActionPending = true;
       this.web.removeLabGroupMember(this.labGroup.id, user.id).subscribe(() => {
         this.getCurrentLabGroupUsers()
         this.getUsers(this.form.value.name)
+        this.isActionPending = false;
+      }, () => {
+        this.isActionPending = false;
       })
     }
   }

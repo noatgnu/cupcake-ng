@@ -6,7 +6,7 @@ import {FormBuilder, FormsModule, ReactiveFormsModule, Validators} from "@angula
 import {ToastService} from "../../toast.service";
 import {BookingTimeVisualizerComponent} from "../booking-time-visualizer/booking-time-visualizer.component";
 import {DataService} from "../../data.service";
-import {InstrumentService} from "../instrument.service";
+import {InstrumentService} from "../../instrument.service";
 import {DatePipe} from "@angular/common";
 import {AccountsService} from "../../accounts/accounts.service";
 
@@ -57,7 +57,7 @@ export class InstrumentBookingModalComponent implements OnInit, AfterViewInit{
   }
 
   ngOnInit() {
-    this.web.getInstruments().subscribe(instrumentQuery => {
+    this.instrumentService.getInstruments().subscribe(instrumentQuery => {
       this.instrumentQuery = instrumentQuery
       this.getInstrumentPermission()
     })
@@ -66,7 +66,7 @@ export class InstrumentBookingModalComponent implements OnInit, AfterViewInit{
   ngAfterViewInit() {
     this.searchForm.controls.instrument.valueChanges.subscribe(value => {
       if (value) {
-        this.web.getInstruments(undefined, 5, 0, value).subscribe(instrumentQuery => {
+        this.instrumentService.getInstruments(undefined, 5, 0, value).subscribe(instrumentQuery => {
           this.instrumentQuery = instrumentQuery
           this.getInstrumentPermission()
         })
@@ -75,7 +75,7 @@ export class InstrumentBookingModalComponent implements OnInit, AfterViewInit{
   }
 
   getInstruments(url: string) {
-    this.web.getInstruments(url).subscribe(instrumentQuery => {
+    this.instrumentService.getInstruments(url).subscribe(instrumentQuery => {
       this.instrumentQuery = instrumentQuery
       this.getInstrumentPermission()
     })
@@ -86,7 +86,7 @@ export class InstrumentBookingModalComponent implements OnInit, AfterViewInit{
       return
     }
     // @ts-ignore
-    this.web.createInstrument(this.instrumentForm.value.name, this.instrumentForm.value.description).subscribe((instrument) => {
+    this.instrumentService.createInstrument(this.instrumentForm.value.name, this.instrumentForm.value.description).subscribe((instrument) => {
       this.toastService.show("Instrument created", instrument.instrument_name)
     })
   }
@@ -127,9 +127,9 @@ export class InstrumentBookingModalComponent implements OnInit, AfterViewInit{
 
   getInstrumentPermission() {
     for (const instrument of this.instrumentQuery.results) {
-      this.web.getInstrumentPermission(instrument.id).subscribe(data => {
+      this.instrumentService.getInstrumentPermission(instrument.id).subscribe((data:any) => {
         this.dataService.instrumentPermissions[instrument.id] = data
-      }, error => {
+      }, (error:any) => {
         this.dataService.instrumentPermissions[instrument.id] = {can_view: false, can_book: false, can_manage: false}
       })
     }

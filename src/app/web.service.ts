@@ -1024,65 +1024,7 @@ export class WebService {
     )
   }
 
-  getInstrument(instrument_id: number) {
-    return this.http.get<Instrument>(
-      `${this.baseURL}/api/instrument/${instrument_id}/`,
-      {responseType: 'json', observe: 'body'}
-    )
-  }
 
-  getInstruments(url?: string, limit: number = 5, offset: number = 0, searchTerm: string = "") {
-    if (url) {
-      return this.http.get<InstrumentQuery>(
-        url,
-        {responseType: 'json', observe: 'body'}
-
-      )
-    }
-    let params = new HttpParams()
-      .set('limit', limit.toString())
-      .set('offset', offset.toString())
-    if (searchTerm !== "") {
-      params = params.append('search', searchTerm);
-    }
-    return this.http.get<InstrumentQuery>(
-      `${this.baseURL}/api/instrument/`,
-      {responseType: 'json', observe: 'body', params: params}
-    )
-  }
-
-  createInstrument(instrument_name: string, instrument_description: string) {
-    return this.http.post<Instrument>(
-      `${this.baseURL}/api/instrument/`,
-      {name: instrument_name, description: instrument_description},
-      {responseType: 'json', observe: 'body'}
-    )
-  }
-
-  updateInstrument(instrument_id: number, instrument_name: string, instrument_description: string, max_days_ahead: number|undefined|null, max_duration: number|undefined|null, image: string|undefined|null = undefined) {
-    const payload: any = {name: instrument_name, description: instrument_description}
-    if (max_days_ahead) {
-      payload['max_days_ahead_pre_approval'] = max_days_ahead
-    }
-    if (max_duration) {
-      payload['max_days_within_usage_pre_approval'] = max_duration
-    }
-    if (image) {
-      payload['image'] = image
-    }
-    return this.http.put<Instrument>(
-      `${this.baseURL}/api/instrument/${instrument_id}/`,
-      payload,
-      {responseType: 'json', observe: 'body'}
-    )
-  }
-
-  deleteInstrument(instrument_id: number) {
-    return this.http.delete(
-      `${this.baseURL}/api/instrument/${instrument_id}/`,
-      {responseType: 'json', observe: 'body'}
-    )
-  }
 
   createInstrumentUsageAnnotation(session_id: string|undefined|null, instrument_id: number, time_started: Date|undefined, time_ended: Date|undefined, step_id: number|null = 0, annotation: string, instrument_job_id: number|null|undefined = undefined, instrument_user_type: null|'user_annotation'|'staff_annotation' = null, stored_reagent_id: number|null = null, maintenance: boolean = false, repeat: number = 0, repeatUntil: NgbDateStruct|undefined = undefined) {
     const payload: any = { annotation_type: 'instrument', instrument: instrument_id, time_started: time_started, time_ended: time_ended, annotation: annotation, maintenance}
@@ -1154,12 +1096,7 @@ export class WebService {
 
   }
 
-  getInstrumentPermission(instrument_id: number) {
-    return this.http.get<{can_view: boolean, can_manage: boolean, can_book: boolean}>(
-      `${this.baseURL}/api/instrument/${instrument_id}/get_instrument_permission/`,
-      {responseType: 'json', observe: 'body'}
-    )
-  }
+
 
   createInstrumentUsage(instrument_id: number, time_start: Date, time_end: Date, description: string, maintenance: boolean = false, repeat: number = 0, repeatUntil: NgbDateStruct|undefined = undefined) {
     const data: any = {time_started: time_start, time_ended: time_end, instrument: instrument_id, description: description, maintenance, repeat: repeat}
@@ -1181,20 +1118,7 @@ export class WebService {
     )
   }
 
-  getUserInstrumentPermission(instrument_id: number, username: string) {
-    return this.http.get<{can_view: boolean, can_manage: boolean, can_book: boolean}>(
-      `${this.baseURL}/api/instrument/${instrument_id}/get_instrument_permission_for/?user=${username}`,
-      {responseType: 'json', observe: 'body'}
-    )
-  }
 
-  assignInstrumentPermission(instrument_id: number, username: string, permissions: any) {
-    return this.http.post(
-      `${this.baseURL}/api/instrument/${instrument_id}/assign_instrument_permission/`,
-      {user: username, can_view: permissions.can_view, can_manage: permissions.can_manage, can_book: permissions.can_book},
-      {responseType: 'json', observe: 'body'}
-    )
-  }
 
   getStorageObjects(url?: string, limit: number = 10, offset: number = 0, searchTerm: string = "", root: boolean = false, stored_at: number|null = null) {
     if (url) {
@@ -2259,12 +2183,6 @@ export class WebService {
     return this.http.post<InstrumentJob>(`${this.baseURL}/api/instrument_jobs/${instrument_job_id}/remove_selected_template/`, {}, {responseType: 'json', observe: 'body'})
   }
 
-  instrumentDelayUsage(instrument_job_id: number, days: number, start_date: Date|undefined|null) {
-    if (!start_date) {
-      start_date = new Date()
-    }
-    return this.http.post<Instrument>(`${this.baseURL}/api/instrument/${instrument_job_id}/delay_usage/`, {days, start_date}, {responseType: 'json', observe: 'body'})
-  }
 
   instrumentUsageDelayUsage(instrument_usage_id: number, days: number) {
     return this.http.post<InstrumentUsage>(`${this.baseURL}/api/instrument_usage/${instrument_usage_id}/delay_usage/`, {days}, {responseType: 'json', observe: 'body'})
@@ -2290,28 +2208,7 @@ export class WebService {
     return this.http.post<{errors: string[]}>(`${this.baseURL}/api/metadata_table_templates/validate_sdrf_metadata/`, {sdrf: data}, {responseType: 'json', observe: 'body'})
   }
 
-  addInstrumentSupportInfo(instrument_id: number, payload: any) {
-    return this.http.put<Instrument>(
-      `${this.baseURL}/api/instrument/${instrument_id}/add_support_information/`,
-      payload,
-      {responseType: 'json', observe: 'body'}
-    )
-  }
 
-  createInstrumentSupportInfo(instrument_id: number, payload: any) {
-    return this.http.post<Instrument>(
-      `${this.baseURL}/api/instrument/${instrument_id}/create_support_information/`,
-      payload,
-      {responseType: 'json', observe: 'body'}
-    )
-  }
-
-  removeInstrumentSupportInfo(instrument_id: number, support_info_id: number) {
-    return this.http.delete(
-      `${this.baseURL}/api/instrument/${instrument_id}/remove_support_information/${support_info_id}/`,
-      {responseType: 'json', observe: 'body'}
-    )
-  }
 }
 
 interface ChunkUploadResponse {

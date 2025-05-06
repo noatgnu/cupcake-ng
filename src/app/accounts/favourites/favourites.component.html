@@ -1,242 +1,307 @@
-<div class="container">
-  <div class="d-flex flex-column gap-2">
-    <div class="container-fluid mt-4" id="favouriteOptionCreator">
-      <div class="accordion">
-        <div class="accordion-item">
-          <h2 class="accordion-header">
-            <button [ngClass]="{'accordion-button': true, 'collapsed': creatorIsCollapsed}" type="button" (click)=" creatorIsCollapsed=!creatorIsCollapsed">
-              Favourite Option Creator
-            </button>
-          </h2>
-          <div #collapse="ngbCollapse" [(ngbCollapse)]="creatorIsCollapsed">
-            <div class="accordion-body">
-              <div class="d-flex gap-2">
-                <form [formGroup]="formFavourite" class="d-flex gap-2 flex-wrap flex-column">
-                  <div class="d-flex gap-2">
-                    <div>
-                      <div class="form-group">
-                        <label>Select A Field Name From Options Below</label>
-                        <select class="form-select" size="7" formControlName="name">
-                          @for (f of metadata.userMetadataTemplate; track $index) {
-                            <option value="{{f.name}}">
-                              {{f.name}} @if(f.type) { ({{f.type}}) }
-                            </option>
-                          }
-                          @for (f of metadata.staffMetadataSpecific; track $index) {
-                            <option value="{{f}}">{{f}} (Comment)</option>
-                          }
-                        </select>
-                      </div>
-                      <div class="form-group">
-                        <label class="fieldType">Field Type</label>
-                        <select class="form-select" formControlName="type" id="fieldType">
-                          <option value="">None</option>
-                          <option value="Characteristics">Essential Characteristics of The Sample</option>
-                          <option value="Comment">Sample Associated MS Parameters and Comment</option>
-                        </select>
-                      </div>
-                    </div>
-                    <div>
-                      <div class="form-group">
-                        <label for="fieldName">Or Specify Field Name Manually</label>
-                        <input type="text" class="form-control" formControlName="name" id="fieldName">
-                      </div>
-                      @if (formFavourite.value.name && formFavourite.value.type) {
-                        <div class="form-group">
-                          <label for="metadataValue">Favourite Value To Be Associated With This Field</label>
-                          <div class="d-flex gap-2">
-                            <input type="text" class="form-control" formControlName="value" id="metadataValue">
-                            <div class="d-flex flex-column">
-                              <button class="btn btn-sm btn-primary" ngbTooltip="Use Metadata Value Editor" (click)="favouriteValueEdit(formFavourite.value.name, formFavourite.value.type)"><i class="bi bi-pen"></i></button>
-                            </div>
-                          </div>
-                        </div>
-                        <div class="form-group">
-                          <label for="displayValue">Display Name For This Value</label>
-                          <input type="text" class="form-control" formControlName="displayName" id="displayValue">
-                        </div>
-                      }
-
-                    </div>
+<div class="container-fluid p-3">
+  <div class="row g-3">
+    <!-- Favourite Option Creator Card -->
+    <div class="col-12">
+      <div class="card shadow-sm">
+        <div class="card-header  d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">
+            <i class="bi bi-star-fill text-primary me-2"></i>
+            Favourite Option Creator
+          </h5>
+          <button class="btn btn-sm btn-outline-primary" type="button" (click)="creatorIsCollapsed=!creatorIsCollapsed">
+            <i class="bi" [ngClass]="creatorIsCollapsed ? 'bi-chevron-down' : 'bi-chevron-up'"></i>
+          </button>
+        </div>
+        <div #collapse="ngbCollapse" [(ngbCollapse)]="creatorIsCollapsed">
+          <div class="card-body">
+            <div class="row g-3">
+              <div class="col-12">
+                <form [formGroup]="formFavourite" class="row g-3">
+                  <div class="col-md-4">
                     <div class="form-group">
-                      <label for="mode">Create Option For</label>
+                      <label class="form-label">Select A Field Name From Options Below</label>
+                      <select class="form-select" size="7" formControlName="name">
+                        @for (f of metadata.userMetadataTemplate; track $index) {
+                          <option value="{{f.name}}">
+                            {{f.name}} @if(f.type) { ({{f.type}}) }
+                          </option>
+                        }
+                        @for (f of metadata.staffMetadataSpecific; track $index) {
+                          <option value="{{f}}">{{f}} (Comment)</option>
+                        }
+                      </select>
+                    </div>
+                    <div class="form-group mt-2">
+                      <label class="form-label">Field Type</label>
+                      <select class="form-select" formControlName="type" id="fieldType">
+                        <option value="">None</option>
+                        <option value="Characteristics">Essential Characteristics of The Sample</option>
+                        <option value="Comment">Sample Associated MS Parameters and Comment</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div class="col-md-4">
+                    <div class="form-group">
+                      <label for="fieldName" class="form-label">Or Specify Field Name Manually</label>
+                      <input type="text" class="form-control" formControlName="name" id="fieldName">
+                    </div>
+                    @if (formFavourite.value.name && formFavourite.value.type) {
+                      <div class="form-group mt-2">
+                        <label for="metadataValue" class="form-label">Favourite Value To Be Associated With This Field</label>
+                        <div class="input-group">
+                          <input type="text" class="form-control" formControlName="value" id="metadataValue">
+                          <button class="btn btn-primary" ngbTooltip="Use Metadata Value Editor" (click)="favouriteValueEdit(formFavourite.value.name, formFavourite.value.type)">
+                            <i class="bi bi-pen"></i>
+                          </button>
+                        </div>
+                      </div>
+                      <div class="form-group mt-2">
+                        <label for="displayValue" class="form-label">Display Name For This Value</label>
+                        <input type="text" class="form-control" formControlName="displayName" id="displayValue">
+                      </div>
+                    }
+                  </div>
+
+                  <div class="col-md-4">
+                    <div class="form-group">
+                      <label for="mode" class="form-label">Create Option For</label>
                       <select class="form-select" id="mode" formControlName="mode">
                         <option value="user">User</option>
                         <option value="service_lab_group">Professional Lab Group</option>
                       </select>
                     </div>
-                  </div>
-                </form>
-                @if (formFavourite.value.mode === 'service_lab_group') {
-                  <form [formGroup]="formLabGroup" class="d-flex gap-2">
-                    <div class="form-group">
-                      <label>Search Lab Group</label>
-                      <input type="search" class="form-control" formControlName="search_term">
-                    </div>
-                    @if (labGroupQuery) {
-                      <div class="form-group">
-                        <label>Lab Group Options</label>
-                        <select class="form-select" size="5" formControlName="service_lab_group">
-                          @for (f of labGroupQuery.results; track f.id) {
-                            <option value="{{f.id}}">{{f.name}}</option>
+
+                    @if (formFavourite.value.mode === 'service_lab_group') {
+                      <div class="form-group mt-3">
+                        <form [formGroup]="formLabGroup" class="row g-2">
+                          <div class="col-12">
+                            <label class="form-label">Search Lab Group</label>
+                            <input type="search" class="form-control" formControlName="search_term">
+                          </div>
+                          @if (labGroupQuery) {
+                            <div class="col-12 mt-2">
+                              <label class="form-label">Lab Group Options</label>
+                              <select class="form-select" size="5" formControlName="service_lab_group">
+                                @for (f of labGroupQuery.results; track f.id) {
+                                  <option value="{{f.id}}">{{f.name}}</option>
+                                }
+                              </select>
+                              <div class="mt-2 d-flex justify-content-center">
+                                <ngb-pagination (pageChange)="labGroupPageChange($event)" [collectionSize]="labGroupQuery.count" [(page)]="labGroupPage" [pageSize]="pageSize" [maxSize]="5" [boundaryLinks]="true" [rotate]="true"></ngb-pagination>
+                              </div>
+                            </div>
                           }
-                        </select>
-                        <div class="mt-2">
-                          <ngb-pagination (pageChange)="labGroupPageChange($event)" [collectionSize]="labGroupQuery.count" [(page)]="labGroupPage" [pageSize]="pageSize" [maxSize]="5" [boundaryLinks]="true" [rotate]="true"></ngb-pagination>
-                        </div>
+                        </form>
                       </div>
                     }
-                  </form>
-                }
-              </div>
-              @if (formFavourite.value.name && formFavourite.value.value && formFavourite.value.displayName) {
-                @if (formFavourite.value.mode === 'user') {
-                  <div class="mt-2">
-                    <button class="btn btn-primary" (click)="createFavourite()">Create User Favourite</button>
                   </div>
-                } @else {
-                  @if (formLabGroup.value.service_lab_group) {
-                    <div class="mt-2">
-                      <button class="btn btn-primary" (click)="createFavourite()">Create Group Recommendation</button>
-                    </div>
-                  }
-                }
+                </form>
+              </div>
+
+              @if (formFavourite.value.name && formFavourite.value.value && formFavourite.value.displayName) {
+                <div class="col-12">
+                  <div class="d-grid d-md-flex justify-content-md-end">
+                    @if (formFavourite.value.mode === 'user') {
+                      <button class="btn btn-primary" (click)="createFavourite()">
+                        <i class="bi bi-plus-circle me-1"></i> Create User Favourite
+                      </button>
+                    } @else {
+                      @if (formLabGroup.value.service_lab_group) {
+                        <button class="btn btn-primary" (click)="createFavourite()">
+                          <i class="bi bi-plus-circle me-1"></i> Create Group Recommendation
+                        </button>
+                      }
+                    }
+                  </div>
+                </div>
               }
             </div>
           </div>
         </div>
       </div>
     </div>
-    <div class="d-flex gap-2">
-      <form [formGroup]="form" class="d-flex gap-2">
-        <div class="form-group">
-          <label>Search Favourite Value</label>
-          <input type="search" class="form-control" formControlName="searchTerm">
-          <div class="mt-2">
-            <button class="btn btn-primary" (click)="searchFavourite()">Search</button>
-          </div>
-        </div>
-        <div class="form-group">
-          <label>Filter For</label>
-          <select class="form-select" formControlName="filterBy">
-            <option value="">All</option>
-            <option value="user">Personal Only</option>
-            <option value="service_lab_group">Professional Lab Group</option>
-          </select>
-        </div>
-      </form>
 
-      @if (form.value.filterBy === 'service_lab_group') {
-        <form [formGroup]="formLabGroup" class="d-flex gap-2">
-          <div class="form-group">
-            <label>Search Lab Group</label>
-            <input type="search" class="form-control" formControlName="search_term">
-          </div>
-          @if (labGroupQuery) {
-            <div class="form-group">
-              <label>Lab Group Options</label>
-              <select class="form-select" size="5" formControlName="service_lab_group">
-                @for (f of labGroupQuery.results; track f.id) {
-                  <option value="{{f.id}}">{{f.name}}</option>
-                }
-              </select>
-              <div class="mt-2">
-                <ngb-pagination (pageChange)="labGroupPageChange($event)" [collectionSize]="labGroupQuery.count" [(page)]="labGroupPage" [pageSize]="pageSize" [maxSize]="5" [boundaryLinks]="true" [rotate]="true"></ngb-pagination>
-              </div>
+    <!-- Search and Filter Card -->
+    <div class="col-12">
+      <div class="card shadow-sm">
+        <div class="card-header ">
+          <h5 class="mb-0">
+            <i class="bi bi-search text-primary me-2"></i>
+            Search and Filter
+          </h5>
+        </div>
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <form [formGroup]="form" class="row g-2">
+                <div class="col-md-7">
+                  <label class="form-label">Search Favourite Value</label>
+                  <div class="input-group">
+                    <input type="search" class="form-control" formControlName="searchTerm" placeholder="Enter search term...">
+                    <button class="btn btn-primary" type="button" (click)="searchFavourite()">
+                      <i class="bi bi-search me-1"></i> Search
+                    </button>
+                  </div>
+                </div>
+                <div class="col-md-5">
+                  <label class="form-label">Filter For</label>
+                  <select class="form-select" formControlName="filterBy">
+                    <option value="">All</option>
+                    <option value="user">Personal Only</option>
+                    <option value="service_lab_group">Professional Lab Group</option>
+                  </select>
+                </div>
+              </form>
             </div>
-          }
-        </form>
-      }
 
+            @if (form.value.filterBy === 'service_lab_group') {
+              <div class="col-md-6">
+                <form [formGroup]="formLabGroup" class="row g-2">
+                  <div class="col-md-5">
+                    <label class="form-label">Search Lab Group</label>
+                    <input type="search" class="form-control" formControlName="search_term" placeholder="Enter lab group name...">
+                  </div>
+                  @if (labGroupQuery) {
+                    <div class="col-md-7">
+                      <label class="form-label">Lab Group Options</label>
+                      <select class="form-select" size="5" formControlName="service_lab_group">
+                        @for (f of labGroupQuery.results; track f.id) {
+                          <option value="{{f.id}}">{{f.name}}</option>
+                        }
+                      </select>
+                      <div class="mt-2 d-flex justify-content-center">
+                        <ngb-pagination (pageChange)="labGroupPageChange($event)" [collectionSize]="labGroupQuery.count" [(page)]="labGroupPage" [pageSize]="pageSize" [maxSize]="5" [boundaryLinks]="true" [rotate]="true"></ngb-pagination>
+                      </div>
+                    </div>
+                  }
+                </form>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
     </div>
 
-
+    <!-- Results Table Card -->
     @if (favouriteQuery) {
-      <table class="table table-hover">
-        <thead>
-        <tr>
-          <th scope="col">ID</th>
-          <th scope="col">Data type</th>
-          <th scope="col">Data name</th>
-          <th scope="col">Display name</th>
-          <th scope="col">Value</th>
-          <th scope="col">Professional Lab group</th>
-          <th scope="col">User</th>
-          <th scope="col">Global</th>
-          <th scope="col">Actions</th>
-        </tr>
-        </thead>
-        <tbody>
-          @for (f of favouriteQuery.results; track f.id) {
-            <tr>
-              <td>
-                {{f.id}}
-              </td>
-              <td>{{f.type}}</td>
-              <td>{{f.name}}</td>
-              <td (mouseenter)="currentCell = {row: f.id, col: 'display_value'}">
-                @if (editableCell && editableCell?.row === f.id && editableCell?.col === 'display_value') {
-                  <input [(ngModel)]="f.display_value" class="form-control" (blur)="saveEditableCell(f, 'display_value')">
-                } @else {
-                  {{f.display_value}} @if (currentCell && (currentCell?.row === f.id && currentCell?.col === 'display_value')) {
-                    <div ngbDropdown>
-                      <i class="bi bi-pencil-fill" id="favouriteDropdownDisplayValue" ngbDropdownToggle></i>
-                      <div ngbDropdownMenu aria-labelledby="favouriteDropdownDisplayValue">
-                        <button class="dropdown-item" (click)="toggleEditableCell(f.id, 'display_value')">Direct Edit Display Name</button>
-
-                      </div>
-                    </div>
+      <div class="col-12">
+        <div class="card shadow-sm">
+          <div class="card-header ">
+            <h5 class="mb-0">
+              <i class="bi bi-table text-primary me-2"></i>
+              Favourite Results
+            </h5>
+          </div>
+          <div class="card-body p-0">
+            <div class="table-responsive">
+              <table class="table table-hover table-striped mb-0">
+                <thead>
+                <tr>
+                  <th scope="col">ID</th>
+                  <th scope="col">Data type</th>
+                  <th scope="col">Data name</th>
+                  <th scope="col">Display name</th>
+                  <th scope="col">Value</th>
+                  <th scope="col">Professional Lab group</th>
+                  <th scope="col">User</th>
+                  <th scope="col">Global</th>
+                  <th scope="col">Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                  @for (f of favouriteQuery.results; track f.id) {
+                    <tr>
+                      <td>{{f.id}}</td>
+                      <td>{{f.type}}</td>
+                      <td>{{f.name}}</td>
+                      <td (mouseenter)="currentCell = {row: f.id, col: 'display_value'}">
+                        @if (editableCell && editableCell?.row === f.id && editableCell?.col === 'display_value') {
+                          <input [(ngModel)]="f.display_value" class="form-control form-control-sm" (blur)="saveEditableCell(f, 'display_value')">
+                        } @else {
+                          <div class="d-flex align-items-center">
+                            {{f.display_value}}
+                            @if (currentCell && (currentCell?.row === f.id && currentCell?.col === 'display_value')) {
+                              <div ngbDropdown class="ms-2">
+                                <i class="bi bi-pencil-fill text-primary" id="favouriteDropdownDisplayValue" ngbDropdownToggle role="button"></i>
+                                <div ngbDropdownMenu aria-labelledby="favouriteDropdownDisplayValue">
+                                  <button class="dropdown-item" (click)="toggleEditableCell(f.id, 'display_value')">Direct Edit Display Name</button>
+                                </div>
+                              </div>
+                            }
+                          </div>
+                        }
+                      </td>
+                      <td (mouseover)="currentCell = {row: f.id, col: 'value'}">
+                        @if (editableCell && editableCell?.row === f.id && editableCell?.col === 'value') {
+                          <input [(ngModel)]="f.value" class="form-control form-control-sm" (blur)="saveEditableCell(f, 'value')">
+                        } @else {
+                          <div class="d-flex align-items-center">
+                            {{f.value}}
+                            @if (currentCell && (currentCell?.row === f.id && currentCell?.col === 'value')) {
+                              <div ngbDropdown class="ms-2">
+                                <i class="bi bi-pencil-fill text-primary" id="favouriteDropdown" ngbDropdownToggle role="button"></i>
+                                <div ngbDropdownMenu aria-labelledby="favouriteDropdown">
+                                  <button class="dropdown-item" (click)="toggleEditableCell(f.id, 'value')">Direct Edit Value</button>
+                                  <button class="dropdown-item" (click)="editFavoriteMetadata(f)">Edit Value Using Data Editor</button>
+                                </div>
+                              </div>
+                            }
+                          </div>
+                        }
+                      </td>
+                      <td>
+                        @if (f.service_lab_group) {
+                          @if (labGroupMap[f.service_lab_group]) {
+                            {{labGroupMap[f.service_lab_group].name}}
+                          }
+                        }
+                      </td>
+                      <td>
+                        @if (f.user) {
+                          @if (userMap[f.user]) {
+                            {{userMap[f.user].username}}
+                          }
+                        }
+                      </td>
+                      <td>
+                        <div class="text-center">
+                          @if (accountService.is_staff) {
+                            <i class="bi bi-globe fs-5 cursor-pointer"
+                               [class.text-success]="f.is_global"
+                               [class.text-danger]="!f.is_global"
+                               (click)="toggleFavouriteGlobal(f)"></i>
+                          } @else {
+                            <i class="bi bi-globe fs-5"
+                               [class.text-success]="f.is_global"
+                               [class.text-danger]="!f.is_global"></i>
+                          }
+                        </div>
+                      </td>
+                      <td>
+                        <button class="btn btn-sm btn-danger" (click)="removeFavourite(f.id)" ngbTooltip="Remove Favourite">
+                          <i class="bi bi-trash"></i>
+                        </button>
+                      </td>
+                    </tr>
                   }
-                }
-              </td>
-              <td (mouseover)="currentCell = {row: f.id, col: 'value'}">
-                @if (editableCell && editableCell?.row === f.id && editableCell?.col === 'value') {
-                  <input [(ngModel)]="f.value" class="form-control" (blur)="saveEditableCell(f, 'value')">
-                } @else {
-                  {{f.value}} @if (currentCell && (currentCell?.row === f.id && currentCell?.col === 'value')) {
-                    <div ngbDropdown>
-                      <i class="bi bi-pencil-fill" id="favouriteDropdown" ngbDropdownToggle></i>
-                      <div ngbDropdownMenu aria-labelledby="favouriteDropdown">
-                        <button class="dropdown-item" (click)="toggleEditableCell(f.id, 'value')">Direct Edit Value</button>
-                        <button class="dropdown-item" (click)="editFavoriteMetadata(f)">Edit Value Using Data Editor</button>
-                      </div>
-                    </div>
-                  }
-                }
-              </td>
-              <td>
-                @if (f.service_lab_group) {
-                  @if (labGroupMap[f.service_lab_group]) {
-                    {{labGroupMap[f.service_lab_group].name}}
-                  }
-                }
-              </td>
-              <td>
-                @if (f.user) {
-                  @if (userMap[f.user]) {
-                    {{userMap[f.user].username}}
-                  }
-                }
-              </td>
-              <td>
-                @if (accountService.is_staff) {
-                  <i class="bi bi-globe" [class.text-success]="f.is_global" [class.text-danger]="!f.is_global" (click)="toggleFavouriteGlobal(f)"></i>
-                } @else {
-                  <i class="bi bi-globe" [class.text-success]="f.is_global" [class.text-danger]="!f.is_global"></i>
-                }
-
-              </td>
-              <td>
-                <div class="d-flex gap-2">
-                  <button class="btn btn-sm btn-danger" (click)="removeFavourite(f.id)" [ngbTooltip]="'Remove Favourite'"><i class="bi bi-trash"></i></button>
-                </div>
-              </td>
-            </tr>
-          }
-        </tbody>
-      </table>
-      <ngb-pagination (pageChange)="onPageChange($event)" [collectionSize]="favouriteQuery.count" [(page)]="page" [pageSize]="pageSize" [maxSize]="5" [boundaryLinks]="true" [rotate]="true"></ngb-pagination>
+                </tbody>
+              </table>
+            </div>
+            <div class="d-flex justify-content-center py-3">
+              <ngb-pagination
+                (pageChange)="onPageChange($event)"
+                [collectionSize]="favouriteQuery.count"
+                [(page)]="page"
+                [pageSize]="pageSize"
+                [maxSize]="5"
+                [boundaryLinks]="true"
+                [rotate]="true">
+              </ngb-pagination>
+            </div>
+          </div>
+        </div>
+      </div>
     }
-    <hr>
   </div>
 </div>

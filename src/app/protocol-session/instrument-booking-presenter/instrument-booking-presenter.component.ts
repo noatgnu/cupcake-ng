@@ -7,6 +7,7 @@ import {
   BookingTimeVisualizerComponent
 } from "../../instruments/booking-time-visualizer/booking-time-visualizer.component";
 import {DataService} from "../../data.service";
+import {InstrumentService} from "../../instrument.service";
 
 @Component({
     selector: 'app-instrument-booking-presenter',
@@ -28,7 +29,7 @@ export class InstrumentBookingPresenterComponent implements AfterViewInit {
     for (const usage of value.instrument_usage) {
       usage.time_started = new Date(usage.time_started)
       usage.time_ended = new Date(usage.time_ended)
-      this.web.getInstrument(usage.instrument).subscribe((data) => {
+      this.instrumentService.getInstrument(usage.instrument).subscribe((data) => {
         let windowStart = new Date(usage.time_started).setHours(0, 0, 0, 0)
         let oneDayBeforeWindowStart = windowStart - 24 * 60 * 60 * 1000
         let windowEnd = new Date(usage.time_ended).setHours(0,0,0,0)
@@ -42,7 +43,7 @@ export class InstrumentBookingPresenterComponent implements AfterViewInit {
     return this._annotation!
   }
 
-  constructor(private web: WebService, private dateService: DataService) {
+  constructor(private instrumentService: InstrumentService, private web: WebService, private dateService: DataService) {
 
   }
 

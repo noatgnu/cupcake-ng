@@ -107,7 +107,7 @@ export class MaintenanceLogModalComponent implements OnInit {
   getTemplateDetails(): void {
     if (this.selectedTemplateId) {
       this.isLoading = true;
-      this.maintenanceLogService.getMaintenanceLog(this.selectedTemplateId).subscribe({
+      this.maintenanceLogService.getMaintenanceLogTemplate(this.selectedTemplateId).subscribe({
         next: (template) => {
           this.selectedTemplate = template;
           this.isLoading = false;

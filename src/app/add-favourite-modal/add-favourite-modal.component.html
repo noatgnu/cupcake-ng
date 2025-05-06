@@ -1,84 +1,180 @@
-<div class="modal-header">
-  <h5 class="modal-title">Favourite</h5>
+<div class="modal-header border-bottom">
+  <h5 class="modal-title d-flex align-items-center">
+    <i class="bi bi-star-fill text-warning me-2"></i>
+    Add to Favourites
+  </h5>
+  <button type="button" class="btn-close" aria-label="Close" (click)="close()"></button>
 </div>
-<div class="modal-body">
+
+<div class="modal-body p-3">
   <form [formGroup]="form">
-    @if (userFavouriteOption) {
-      <p>
-        <b>Display name:</b> {{userFavouriteOption.display_value}}
-      </p>
-      <button class="btn btn-sm btn-danger" (click)="removeFavouriteUser()" ngbTooltip="Remove from favourite list"><i class="bi bi-star-half"></i></button>
-    } @else {
-      <div class="form-group">
-        <label for="display_name">Display Name</label>
-        <input id="display_name" class="form-control" type="text" formControlName="display_name">
+    <!-- User Favourite Section -->
+    <div class="card mb-3 shadow-sm">
+      <div class="card-header py-2">
+        <h6 class="mb-0">
+          <i class="bi bi-person me-2"></i>User Favourite Information
+        </h6>
       </div>
-    }
-    <div class="form-group">
-      <label for="mode">@if (userFavouriteOption && form.value.mode === ''){Already Existed In} @else {Add To}</label>
-      <select id="mode" formControlName="mode" class="form-control">
-        <option value="">User's List</option>
-        <option value="service_lab_group">Professional Lab Group</option>
-      </select>
-    </div>
-    @if ((form.value.mode === 'service_lab_group' || form.value.mode === 'lab_group')&& labGroupQuery) {
-      <div class="form-group">
-        <label for="lab_group">Lab Group Search</label>
-        <input type="search" id="lab_group" formControlName="lab_group_search" class="form-control">
-      </div>
-      <table class="table table-hover">
-        <thead>
-        <tr>
-          <th scope="col">ID</th>
-          <th scope="col">Name</th>
-        </tr>
-        </thead>
-        <tbody>
-        @for (l of labGroupQuery.results; track l.id) {
-          <tr (click)="selectLabGroup(l)" [class.table-primary]="selectedLabGroup === l" [class.table-danger]="alreadyFavouritedLabGroups.includes(l)">
-            <td>{{ l.id }}</td>
-            <td>{{ l.name }} @if (alreadyFavouritedLabGroups.includes(l)) {(already in recommended list)}</td>
-          </tr>
+      <div class="card-body">
+        @if (userFavouriteOption) {
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <span class="fw-bold">Display name:</span>
+              <span class="ms-2">{{userFavouriteOption.display_value}}</span>
+            </div>
+            <button
+              class="btn btn-outline-danger"
+              (click)="removeFavouriteUser()"
+              ngbTooltip="Remove from favourite list">
+              <i class="bi bi-star me-1"></i>
+              Remove
+            </button>
+          </div>
+        } @else {
+          <div class="mb-3">
+            <label for="display_name" class="form-label">Display Name</label>
+            <input
+              id="display_name"
+              class="form-control"
+              type="text"
+              formControlName="display_name"
+              placeholder="Enter a name to show in your favourites list">
+          </div>
         }
-        </tbody>
-      </table>
-      <hr>
-      @if (alreadyFavouritedLabGroups.length > 0) {
-        <div>
-          <b>Already recommended by lab groups:</b>
-          <table class="table table-striped table-hover">
-            <thead>
-            <tr>
-              <th scope="col">ID</th>
-              <th scope="col">Name</th>
-              <th scope="col">Display Value</th>
-              <th scope="col">Actions</th>
-            </tr>
-            </thead>
-            <tbody>
-            @for (l of alreadyFavouritedLabGroups; track l.id) {
-              <tr>
-                <td>{{ l.id }}</td>
-                <td>{{ l.name }}</td>
-                <td>{{ labGroupFavouriteMap[l.id].display_value }}</td>
-                <td>
-                  <button class="btn btn-sm btn-danger" (click)="removeFavouriteLabGroup(l)" ngbTooltip="Remove from recommended list"><i class="bi bi-star-half"></i></button>
-                </td>
-              </tr>
+
+        <div class="mb-0">
+          <label for="mode" class="form-label">
+            @if (userFavouriteOption && form.value.mode === '') {
+              Add to Existing List
+            } @else {
+              Add To
             }
-            </tbody>
-          </table>
+          </label>
+          <select id="mode" formControlName="mode" class="form-select">
+            <option value="">Personal Favourites</option>
+            <option value="service_lab_group">Professional Lab Group</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Lab Group Section -->
+    @if ((form.value.mode === 'service_lab_group' || form.value.mode === 'lab_group') && labGroupQuery) {
+      <div class="card shadow-sm mb-3">
+        <div class="card-header py-2 d-flex justify-content-between align-items-center">
+          <h6 class="mb-0">
+            <i class="bi bi-people me-2"></i>Select Lab Group
+          </h6>
+          <span class="badge bg-primary">{{ labGroupQuery.results.length }} available</span>
+        </div>
+        <div class="card-body pb-2">
+          <div class="mb-3">
+            <label for="lab_group" class="form-label">Search Lab Groups</label>
+            <div class="input-group">
+              <span class="input-group-text"><i class="bi bi-search"></i></span>
+              <input
+                type="search"
+                id="lab_group"
+                formControlName="lab_group_search"
+                class="form-control"
+                placeholder="Type to search lab groups">
+            </div>
+          </div>
+
+          <div class="table-responsive">
+            <table class="table table-hover table-sm border">
+              <thead>
+              <tr>
+                <th scope="col">ID</th>
+                <th scope="col">Name</th>
+              </tr>
+              </thead>
+              <tbody>
+                @for (l of labGroupQuery.results; track l.id) {
+                  <tr
+                    (click)="selectLabGroup(l)"
+                    [class.table-primary]="selectedLabGroup === l"
+                    [class.table-danger]="alreadyFavouritedLabGroups.includes(l)"
+                    style="cursor: pointer">
+                    <td>{{ l.id }}</td>
+                    <td>
+                      {{ l.name }}
+                      @if (alreadyFavouritedLabGroups.includes(l)) {
+                        <span class="badge bg-danger ms-2">Already added</span>
+                      }
+                    </td>
+                  </tr>
+                }
+                @if (labGroupQuery.results.length === 0) {
+                  <tr>
+                    <td colspan="2" class="text-center py-3">
+                      No lab groups found matching your search
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Already Recommended Section -->
+      @if (alreadyFavouritedLabGroups.length > 0) {
+        <div class="card shadow-sm">
+          <div class="card-header py-2 d-flex justify-content-between align-items-center">
+            <h6 class="mb-0">
+              <i class="bi bi-star me-2 text-warning"></i>Already in Lab Group Favourites
+            </h6>
+            <span class="badge bg-warning text-dark">{{ alreadyFavouritedLabGroups.length }} items</span>
+          </div>
+          <div class="table-responsive">
+            <table class="table table-hover table-sm mb-0 border">
+              <thead class="table-light">
+              <tr>
+                <th scope="col">ID</th>
+                <th scope="col">Name</th>
+                <th scope="col">Display Value</th>
+                <th scope="col" class="text-end">Actions</th>
+              </tr>
+              </thead>
+              <tbody>
+                @for (l of alreadyFavouritedLabGroups; track l.id) {
+                  <tr>
+                    <td>{{ l.id }}</td>
+                    <td>{{ l.name }}</td>
+                    <td>{{ labGroupFavouriteMap[l.id].display_value }}</td>
+                    <td class="text-end">
+                      <button
+                        class="btn btn-sm btn-outline-danger"
+                        (click)="removeFavouriteLabGroup(l)"
+                        ngbTooltip="Remove from recommended list">
+                        <i class="bi bi-trash me-1"></i>
+                        Remove
+                      </button>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
         </div>
       }
-    } @else {
-
     }
   </form>
-
 </div>
-<div class="modal-footer">
+
+<div class="modal-footer border-top">
+  <button type="button" class="btn btn-outline-secondary" (click)="close()">
+    Cancel
+  </button>
   @if (!userFavouriteOption) {
-    <button type="button" class="btn btn-primary" (click)="submit()">Submit</button>
+    <button
+      type="button"
+      class="btn btn-primary"
+      [disabled]="form.invalid"
+      (click)="submit()">
+      <i class="bi bi-star me-1"></i>
+      Add to Favourites
+    </button>
   }
-  <button type="button" class="btn btn-secondary" (click)="close()">Close</button>
 </div>

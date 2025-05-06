@@ -20,6 +20,10 @@ export class MaintenanceLogService {
     return this.http.get<MaintenanceLog>(`${this.baseURL}/maintenance_logs/${id}/`);
   }
 
+  getMaintenanceLogTemplate(id: number): Observable<MaintenanceLog> {
+    return this.http.get<MaintenanceLog>(`${this.baseURL}/maintenance_logs/${id}/?is_template=true`);
+  }
+
   createMaintenanceLog(data: any): Observable<MaintenanceLog> {
     return this.http.post<MaintenanceLog>(`${this.baseURL}/maintenance_logs/`, data);
   }
@@ -51,7 +55,7 @@ export class MaintenanceLogService {
 
   createFromTemplate(templateId: number): Observable<MaintenanceLog> {
     return this.http.post<MaintenanceLog>(
-      `${this.baseURL}/maintenance_logs/${templateId}/create_from_template/`,
+      `${this.baseURL}/maintenance_logs/${templateId}/create_from_template/?is_template=true`,
       {}
     );
   }

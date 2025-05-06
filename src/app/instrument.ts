@@ -83,3 +83,13 @@ export interface InstrumentSupportInfo {
   support_information_id: number;
 }
 
+export interface MaintenanceStatus {
+  has_maintenance_record: boolean;
+  maintenance_frequency_days: number | null;
+  last_maintenance_date?: string;
+  days_since_last_maintenance?: number;
+  next_maintenance_date?: string;
+  days_until_next_maintenance?: number;
+  is_overdue?: boolean;
+  overdue_days?: number | null;
+}

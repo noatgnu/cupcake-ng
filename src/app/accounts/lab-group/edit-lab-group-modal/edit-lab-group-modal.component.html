@@ -1,77 +1,198 @@
-<div class="modal-header">
-  <h5 class="modal-title">Edit Lab Group</h5>
+<div class="modal-header  border-bottom">
+  <h5 class="modal-title d-flex align-items-center">
+    <i class="bi bi-people-fill text-primary me-2"></i>
+    Edit Lab Group
+    @if (labGroup) {
+      <span class="badge bg-primary ms-2">{{ labGroup.name }}</span>
+    }
+  </h5>
+  <button type="button" class="btn-close" aria-label="Close" (click)="close()"></button>
 </div>
-<div class="modal-body">
-  <form [formGroup]="form" class="d-flex flex-column gap-2">
-    <div class="form-group">
-      <label for="name">Name</label>
-      <input type="text" class="form-control" id="name" formControlName="name">
-    </div>
-    <div class="form-group">
-      <label for="description">Description</label>
-      <textarea class="form-control" id="description" formControlName="description"></textarea>
-    </div>
-    <div class="form-check">
-      <input type="checkbox" class="form-check-input" id="isProfessional" formControlName="is_professional">
-      <label class="form-check-label" for="isProfessional">Is Professional</label>
-    </div>
-    @if (this.labGroup) {
-      @if (this.labGroup.default_storage) {
-        <div class="d-flex gap-2 align-items-center">
-          <span>Default Storage: {{this.labGroup.default_storage.object_name}}</span> <a type="button" class="btn btn-sm btn-link" target="_blank" href="/#/reagent-store/{{this.labGroup.default_storage.id}}"><i class="bi bi-link"></i></a><button class="btn btn-sm btn-danger" (click)="removeDefaultStorage()"><i class="bi bi-trash"></i></button>
+
+<div class="modal-body p-3">
+  <form [formGroup]="form" class="d-flex flex-column gap-3">
+    <!-- Basic Information -->
+    <div class="card shadow-sm">
+      <div class="card-header  py-2">
+        <h6 class="mb-0"><i class="bi bi-info-circle me-2"></i>Basic Information</h6>
+      </div>
+      <div class="card-body">
+        <div class="mb-3">
+          <label for="name" class="form-label">Name</label>
+          <input type="text" class="form-control" id="name" formControlName="name" placeholder="Enter lab group name">
         </div>
-      }
-      @if (labGroup.is_professional) {
-        @if (this.labGroup.service_storage) {
-          <div class="d-flex gap-2 align-items-center">
-            <span>Service Storage: {{this.labGroup.service_storage.object_name}}</span> <a type="button" class="btn btn-sm btn-link" target="_blank" href="/#/reagent-store/{{this.labGroup.service_storage.id}}"><i class="bi bi-link"></i></a><button class="btn btn-sm btn-danger" (click)="removeServiceStorage()"><i class="bi bi-trash"></i></button>
+
+        <div class="mb-3">
+          <label for="description" class="form-label">Description</label>
+          <textarea class="form-control" id="description" formControlName="description" rows="3"
+                    placeholder="Enter a description of this lab group"></textarea>
+        </div>
+
+        <div class="form-check">
+          <input type="checkbox" class="form-check-input" id="isProfessional" formControlName="is_professional">
+          <label class="form-check-label" for="isProfessional">Professional Lab Group</label>
+          <div class="form-text">Professional groups have access to additional features</div>
+        </div>
+      </div>
+    </div>
+
+    @if (labGroup) {
+      <!-- Storage Configuration -->
+      <div class="card shadow-sm">
+        <div class="card-header  py-2">
+          <h6 class="mb-0"><i class="bi bi-hdd-stack me-2"></i>Storage Configuration</h6>
+        </div>
+        <div class="card-body">
+          <!-- Default Storage -->
+          <div class="mb-3">
+            <label class="form-label">Default Storage</label>
+            @if (labGroup.default_storage) {
+              <div class="d-flex align-items-center p-2 border rounded ">
+                <div class="flex-grow-1">
+                  <i class="bi bi-hdd-fill text-primary me-2"></i>
+                  <strong>{{labGroup.default_storage.object_name}}</strong>
+                </div>
+                <div class="d-flex gap-2">
+                  <a class="btn btn-sm btn-outline-secondary" target="_blank" href="/#/reagent-store/{{labGroup.default_storage.id}}"
+                     ngbTooltip="View storage details">
+                    <i class="bi bi-link"></i>
+                  </a>
+                  <button class="btn btn-sm btn-outline-danger" (click)="removeDefaultStorage()"
+                          ngbTooltip="Remove default storage">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </div>
+              </div>
+            } @else {
+              <div class="alert alert-info py-2 mb-0">
+                <i class="bi bi-info-circle me-2"></i>No default storage assigned
+              </div>
+            }
           </div>
-        }
-      }
-      <div class="form-group">
-        <label for="search_storage_name">Storage Object Group Has Direct Access</label>
-        <input type="search" class="form-control" id="search_storage_name" formControlName="search_storage_name">
+
+          <!-- Service Storage (conditional) -->
+          @if (labGroup.is_professional) {
+            <div class="mb-3">
+              <label class="form-label">Service Storage</label>
+              @if (labGroup.service_storage) {
+                <div class="d-flex align-items-center p-2 border rounded ">
+                  <div class="flex-grow-1">
+                    <i class="bi bi-device-ssd text-primary me-2"></i>
+                    <strong>{{labGroup.service_storage.object_name}}</strong>
+                  </div>
+                  <div class="d-flex gap-2">
+                    <a class="btn btn-sm btn-outline-secondary" target="_blank" href="/#/reagent-store/{{labGroup.service_storage.id}}"
+                       ngbTooltip="View storage details">
+                      <i class="bi bi-link"></i>
+                    </a>
+                    <button class="btn btn-sm btn-outline-danger" (click)="removeServiceStorage()"
+                            ngbTooltip="Remove service storage">
+                      <i class="bi bi-trash"></i>
+                    </button>
+                  </div>
+                </div>
+              } @else {
+                <div class="alert alert-info py-2 mb-0">
+                  <i class="bi bi-info-circle me-2"></i>No service storage assigned
+                </div>
+              }
+            </div>
+          }
+        </div>
       </div>
 
-      @if (this.storageObjectQuery) {
-        <table class="table table-striped table-hover">
-          <thead>
-          <tr>
-            <th scope="col">ID</th>
-            <th scope="col">Name</th>
-            <th scope="col">Description</th>
-            <th scope="col">Actions</th>
-          </tr>
-          </thead>
-          <tbody>
-            @for (s of this.storageObjectQuery.results; track s.id) {
-              <tr>
-                <td>{{s.id}}</td>
-                <td>{{s.object_name}}</td>
-                <td>{{s.object_description}}</td>
-                <td>
-                  <div class="d-flex gap-2">
-                    @if (s.id !== this.labGroup.default_storage?.id) {
-                      <button class="btn btn-sm btn-primary" ngbTooltip="Assign object as default storage" (click)="assignDefaultStorageObject(s)"><i class="bi bi-device-hdd-fill"></i></button>
-                    }
+      <!-- Storage Object Access -->
+      <div class="card shadow-sm">
+        <div class="card-header  py-2 d-flex justify-content-between align-items-center">
+          <h6 class="mb-0"><i class="bi bi-folder-symlink me-2"></i>Storage Object Access</h6>
+        </div>
+        <div class="card-body">
+          <div class="mb-3">
+            <label for="search_storage_name" class="form-label">Search Storage Objects</label>
+            <div class="input-group">
+              <span class="input-group-text"><i class="bi bi-search"></i></span>
+              <input type="search" class="form-control" id="search_storage_name"
+                     formControlName="search_storage_name" placeholder="Enter storage name to search">
+            </div>
+          </div>
 
-                    @if (labGroup.is_professional && s.id !== this.labGroup.service_storage?.id) {
-                      <button class="btn btn-sm btn-primary" ngbTooltip="Assign object as service storage" (click)="assignServiceStorage(s)"><i class="bi bi-device-ssd-fill"></i></button>
+          @if (storageObjectQuery) {
+            @if (storageObjectQuery.results.length > 0) {
+              <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                  <thead>
+                  <tr>
+                    <th scope="col">ID</th>
+                    <th scope="col">Name</th>
+                    <th scope="col">Description</th>
+                    <th scope="col" class="text-end">Actions</th>
+                  </tr>
+                  </thead>
+                  <tbody>
+                    @for (s of storageObjectQuery.results; track s.id) {
+                      <tr>
+                        <td class="align-middle">{{s.id}}</td>
+                        <td class="align-middle">
+                          <strong>{{s.object_name}}</strong>
+                        </td>
+                        <td class="align-middle">{{s.object_description}}</td>
+                        <td class="text-end">
+                          <div class="btn-group">
+                            @if (s.id !== labGroup.default_storage?.id) {
+                              <button class="btn btn-sm btn-outline-primary"
+                                      ngbTooltip="Assign as default storage"
+                                      (click)="assignDefaultStorageObject(s)">
+                                <i class="bi bi-hdd-fill"></i>
+                              </button>
+                            }
+                            @if (labGroup.is_professional && s.id !== labGroup.service_storage?.id) {
+                              <button class="btn btn-sm btn-outline-secondary"
+                                      ngbTooltip="Assign as service storage"
+                                      (click)="assignServiceStorage(s)">
+                                <i class="bi bi-device-ssd"></i>
+                              </button>
+                            }
+                          </div>
+                        </td>
+                      </tr>
                     }
-                  </div>
-                </td>
-              </tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="d-flex justify-content-center mt-2">
+                <ngb-pagination
+                  [collectionSize]="storageObjectQuery.count"
+                  [(page)]="currentStorageObjectPage"
+                  [pageSize]="storageObjectPageSize"
+                  [maxSize]="5"
+                  [rotate]="true"
+                  [boundaryLinks]="true"
+                  (pageChange)="onGetStorageObjectPageChange($event)">
+                </ngb-pagination>
+              </div>
+            } @else {
+              <div class="alert alert-info">
+                <i class="bi bi-info-circle me-2"></i>No storage objects found matching your search
+              </div>
             }
-          </tbody>
-        </table>
-        <ngb-pagination [collectionSize]="this.storageObjectQuery.count" [(page)]="this.currentStorageObjectPage" [pageSize]="this.storageObjectPageSize" [maxSize]="5" [rotate]="true" (pageChange)="onGetStorageObjectPageChange($event)"></ngb-pagination>
-
-      }
+          } @else {
+            <div class="d-flex justify-content-center py-3">
+              <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
     }
-
   </form>
 </div>
-<div class="modal-footer">
-  <button class="btn btn-secondary" (click)="close()">Close</button>
-  <button class="btn btn-primary" (click)="submit()">Save</button>
+
+<div class="modal-footer  border-top">
+  <button class="btn btn-outline-secondary" (click)="close()">
+    <i class="bi bi-x-circle me-1"></i>Cancel
+  </button>
+  <button class="btn btn-primary" (click)="submit()">
+    <i class="bi bi-save me-1"></i>Save Changes
+  </button>
 </div>
