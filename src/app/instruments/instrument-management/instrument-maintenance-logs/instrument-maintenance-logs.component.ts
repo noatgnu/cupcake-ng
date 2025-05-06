@@ -108,15 +108,18 @@ export class InstrumentMaintenanceLogsComponent {
 
   loadLogs(): void {
     this.isLoading = true;
+    const offset = (this.currentPage - 1) * this.pageSize;
+
     const params = {
       instrument: this.instrumentId,
-      page: this.currentPage,
-      page_size: this.pageSize,
+      limit: this.pageSize,
+      offset: offset,  // Using offset instead of page
       search: this.filterForm.get('search')?.value,
       maintenance_type: this.filterForm.get('maintenance_type')?.value,
       status: this.filterForm.get('status')?.value,
       start_date: this.filterForm.get('start_date')?.value,
-      end_date: this.filterForm.get('end_date')?.value
+      end_date: this.filterForm.get('end_date')?.value,
+      ordering: '-maintenance_date'  // Sort by maintenance date, newest first
     };
 
     this.maintenanceLogService.getMaintenanceLogs(params).subscribe({
