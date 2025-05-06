@@ -1,33 +1,237 @@
-<div class="container" style="padding-top: 100px">
-  <h5>Scheduled Session Calendar</h5>
-  <ngb-datepicker #dp [dayTemplate]="t"></ngb-datepicker>
+<div class="calendar-container mt-5">
+  <!-- Calendar Header -->
+  <div class="calendar-header mb-3">
+    <div class="row align-items-center">
+      <div class="col-md-4">
+        <h2><i class="bi bi-calendar me-2"></i>Your Calendar</h2>
+      </div>
 
-  <ng-template #t let-date let-focused="focused">
-	    <span
-        class="custom-day"
-      >
-        {{ date.day }}
-        @for (d of Object.keys(dateToSession); track d) {
-          @if (checkDateMatch(date, d)) {
-            @if (dateToSession[d]) {
-              <div class="p-1 view-button">
-                  <button class="btn btn-sm btn-danger" (click)="openSessionListModal(dateToSession[d])">View</button>
-              </div>
-              @if (dateToSession[d].length > 0) {
-                @for (session of dateToSession[d]; track session.id) {
-                  <div class="p-1 session-list">
-                    <span (click)="handleClick(session)" class="badge bg-danger text-truncate">
-                      {{ session.name !== '' ? session.name : session.unique_id }}
-                    </span>
-                  </div>
-                }
-              }
+      <div class="col-md-8">
+        <div class="d-flex justify-content-end">
+          <!-- View Switcher -->
+          <div class="btn-group me-3">
+            <button class="btn" [ngClass]="currentView === 'month' ? 'btn-primary' : 'btn-outline-primary'"
+                    (click)="setView('month')">Month</button>
+            <button class="btn" [ngClass]="currentView === 'week' ? 'btn-primary' : 'btn-outline-primary'"
+                    (click)="setView('week')">Week</button>
+            <button class="btn" [ngClass]="currentView === 'day' ? 'btn-primary' : 'btn-outline-primary'"
+                    (click)="setView('day')">Day</button>
+          </div>
 
-            }
-          }
+          <!-- Navigation -->
+          <div class="btn-group me-3">
+            <button class="btn btn-outline-secondary" (click)="navigatePrevious()">
+              <i class="bi bi-chevron-left"></i>
+            </button>
+            <button class="btn btn-outline-secondary" (click)="goToToday()">Today</button>
+            <button class="btn btn-outline-secondary" (click)="navigateNext()">
+              <i class="bi bi-chevron-right"></i>
+            </button>
+          </div>
+
+          <!-- Add Session Button -->
+          <button class="btn btn-success" (click)="addNewSession()">
+            <i class="bi bi-plus-circle me-1"></i>Add Session
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Current Period Display -->
+    <div class="period-display mt-2">
+      <h3 class="mb-0 text-center">
+        @if (currentView === 'month') {
+          {{ startDate | date:'MMMM yyyy' }}
+        } @else if (currentView === 'week') {
+          {{ getStartOfWeek() | date:'MMM d' }} - {{ getEndOfWeek() | date:'MMM d, yyyy' }}
+        } @else {
+          {{ startDate | date:'EEEE, MMMM d, yyyy' }}
         }
+      </h3>
+    </div>
 
-	    </span>
-  </ng-template>
+    <!-- Filter Options -->
+    <div class="filter-options mt-3">
+      <form [formGroup]="filterForm" class="row g-2 align-items-center">
+        <div class="col-md-3">
+          <select class="form-select" formControlName="protocolType">
+            <option value="all">All Protocols</option>
+            @for (protocol of Object.keys(protocolColors); track protocol) {
+              <option [value]="protocol">{{ protocol }}</option>
+            }
+          </select>
+        </div>
+        <div class="col-md-3">
+          <select class="form-select" formControlName="status">
+            <option value="all">All Statuses</option>
+            <option value="ongoing">Ongoing</option>
+            <option value="completed">Completed</option>
+            <option value="upcoming">Upcoming</option>
+          </select>
+        </div>
+        <div class="col-md-6">
+          <div class="input-group">
+            <input type="text" class="form-control" formControlName="searchTerm" placeholder="Search sessions...">
+            <button class="btn btn-outline-secondary" type="button">
+              <i class="bi bi-search"></i>
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Loading Spinner -->
+  @if (isLoading) {
+    <div class="d-flex justify-content-center my-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+    </div>
+  }
+
+  <!-- Month View -->
+  @if (currentView === 'month' && !isLoading) {
+    <div class="month-view">
+      <div class="calendar-grid">
+        <div class="calendar-days-header">
+          <div class="day-header">Sun</div>
+          <div class="day-header">Mon</div>
+          <div class="day-header">Tue</div>
+          <div class="day-header">Wed</div>
+          <div class="day-header">Thu</div>
+          <div class="day-header">Fri</div>
+          <div class="day-header">Sat</div>
+        </div>
+
+        <ngb-datepicker #datepicker
+                        [displayMonths]="1"
+                        [navigation]="'none'"
+                        [dayTemplate]="customDay"
+                        [firstDayOfWeek]="1"
+                        [startDate]="{year: startDate.getFullYear(), month: startDate.getMonth() + 1, day: 1}"
+                        (dateSelect)="selectDate($event)">
+        </ngb-datepicker>
+
+        <ng-template #customDay let-date="date" let-focused="focused">
+          <div class="custom-day"
+               [class.has-sessions]="getSessionsForDate(date).length > 0"
+               [class.focused]="focused"
+               [class.today]="date.year === today.getFullYear() &&
+                              date.month === today.getMonth() + 1 &&
+                              date.day === today.getDate()">
+            <span>{{ date.day }}</span>
+            @if (getSessionsForDate(date).length > 0) {
+              <div class="session-indicators">
+                @for (session of getSessionsForDate(date); track session.id; let i = $index) {
+                  @if (i < 3) {
+                    <div class="session-dot" [style.background-color]="getSessionColor(session)"></div>
+                  } @else if (i === 3) {
+                    <div class="more-indicator">+{{ getSessionsForDate(date).length - 3 }}</div>
+                  }
+                }
+              </div>
+            }
+          </div>
+        </ng-template>
+      </div>
+    </div>
+  }
+
+  <!-- Week View -->
+  @if (currentView === 'week' && !isLoading) {
+    <div class="week-view">
+      <div class="week-container">
+        <div class="time-column">
+          <div class="time-header"></div>
+          @for (hour of [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23]; track hour) {
+            <div class="time-slot">{{ hour }}:00</div>
+          }
+        </div>
+
+        @for (i of [0,1,2,3,4,5,6]; track i) {
+          <div class="day-column">
+            <div class="day-header">
+              {{ getDateFromOffset(i) | date:'EEE, MMM d' }}
+            </div>
+
+            <div class="day-schedule">
+              @for (session of getSessionsForDayOffset(i); track session.id) {
+                <div class="week-session"
+                     [style.top.px]="getSessionTopPosition(session)"
+                     [style.height.px]="getSessionHeight(session)"
+                     [style.background-color]="getSessionColor(session)"
+                     (click)="handleClick(session)">
+                  <div class="session-time">
+                    {{ session.started_at | date:'shortTime' }}
+                  </div>
+                  <div class="session-title">{{ session.name || 'Untitled Session' }}</div>
+                </div>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- Day View -->
+  @if (currentView === 'day' && !isLoading) {
+    <div class="day-view">
+      <div class="day-container">
+        <div class="time-column">
+          <div class="time-header"></div>
+          @for (hour of [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23]; track hour) {
+            <div class="time-slot">{{ hour }}:00</div>
+          }
+        </div>
+
+        <div class="full-day-column">
+          <div class="day-header">
+            {{ startDate | date:'EEEE, MMMM d' }}
+          </div>
+
+          <div class="day-schedule">
+            @if (getSessionsForDate({year: startDate.getFullYear(),
+              month: startDate.getMonth() + 1,
+              day: startDate.getDate()}).length === 0) {
+              <div class="no-sessions">No sessions scheduled for today</div>
+            }
+
+            @for (session of getSessionsForDate({year: startDate.getFullYear(),
+              month: startDate.getMonth() + 1,
+              day: startDate.getDate()}); track session.id) {
+              <div class="day-session"
+                   [style.top.px]="getSessionTopPosition(session)"
+                   [style.height.px]="getSessionHeight(session)"
+                   [style.background-color]="getSessionColor(session)"
+                   (click)="handleClick(session)">
+                <div class="session-time">
+                  {{ session.started_at | date:'shortTime' }} -
+                  {{ session.ended_at ? (session.ended_at | date:'shortTime') : '?' }}
+                </div>
+                <div class="session-title">{{ session.name || 'Untitled Session' }}</div>
+                <div class="session-protocol">{{ session.protocols[0] || 'No Protocol' }}</div>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Legend -->
+  @if (!isLoading && Object.keys(protocolColors).length > 0) {
+    <div class="calendar-legend mt-3">
+      <h6>Protocol Types:</h6>
+      <div class="d-flex flex-wrap">
+        @for (protocol of Object.keys(protocolColors); track protocol) {
+          <div class="legend-item me-3 mb-2">
+            <span class="color-dot" [style.background-color]="protocolColors[protocol]"></span>
+            <span class="ms-1">{{ protocol }}</span>
+          </div>
+        }
+      </div>
+    </div>
+  }
 </div>
-

@@ -43,35 +43,27 @@
             <div class="mb-3">
               <label for="location" class="form-label">Location</label>
               <div class="input-group">
-                <input
-                  id="location"
-                  type="text"
-                  class="form-control"
-                  [class.is-invalid]="searchFailed"
-                  [ngbTypeahead]="search"
-                  [inputFormatter]="formatter"
-                  [resultFormatter]="formatter"
-                  placeholder="Search for locations..."
-                  (selectItem)="onLocationSelect($event)"
-                  [value]="selectedLocation?.object_name || ''"
-                />
-                <input type="hidden" formControlName="location_id">
-                @if (searching) {
-                  <div class="spinner-border spinner-border-sm" role="status">
-                    <span class="visually-hidden">Loading...</span>
-                  </div>
+                <input id="location" type="text" class="form-control"
+                       [ngbTypeahead]="search"
+                       [resultFormatter]="formatter"
+                       [inputFormatter]="formatter"
+                       [editable]="false"
+                       placeholder="Search location..."
+                       (selectItem)="onLocationSelect($event)">
+                @if (selectedLocation) {
+                 <button class="btn btn-outline-secondary" type="button"
+                         (click)="clearSelectedLocation()">
+                   <i class="bi bi-x"></i>
+                 </button>
                 }
+
               </div>
-              @if (searchFailed) {
-                <div class="invalid-feedback">
-                  Sorry, locations could not be loaded.
-                </div>
-              }
               @if (selectedLocation) {
                 <div class="form-text">
-                  Selected: {{ selectedLocation.object_name }} ({{ selectedLocation.object_type || 'location' }})
+                  Selected: {{selectedLocation.object_name}} ({{selectedLocation.object_type || 'location'}})
                 </div>
               }
+
             </div>
 
             <div class="row">

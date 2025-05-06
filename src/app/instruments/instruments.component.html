@@ -62,6 +62,128 @@
           <app-instrument-management></app-instrument-management>
         } @else if (selectedSection === 'jobs') {
           <app-instrument-job-management [currentJobId]="currentJob"></app-instrument-job-management>
+        } @else {
+          <!-- Welcome Dashboard - shown when no specific section is selected -->
+          <div class="container py-4">
+            <div class="card shadow-sm mb-4">
+              <div class="card-body">
+                <h2 class="card-title mb-3">
+                  <i class="bi bi-info-circle text-primary me-2"></i>
+                  Welcome to Instrument & Job Submission
+                </h2>
+                <p class="lead">
+                  This system helps you manage laboratory instruments, schedule instrument time, and process job submissions.
+                </p>
+                <p>Select one of the sections from the sidebar to get started or explore the available features below.</p>
+              </div>
+            </div>
+
+            <div class="row g-4">
+              <div class="col-md-4">
+                <div class="card h-100 shadow-sm">
+                  <div class="card-body">
+                    <h4 class="card-title d-flex align-items-center mb-3">
+                      <i class="bi bi-briefcase text-primary me-2"></i>
+                      Jobs
+                    </h4>
+                    <p class="card-text">
+                      Submit, track and manage instrument jobs. Create job requests, monitor progress, and view results of completed jobs.
+                    </p>
+                    <ul class="list-unstyled">
+                      <li><i class="bi bi-check-circle-fill text-success me-2"></i>Submit job requests</li>
+                      <li><i class="bi bi-check-circle-fill text-success me-2"></i>Track job status</li>
+                      <li><i class="bi bi-check-circle-fill text-success me-2"></i>View and download results</li>
+                    </ul>
+                  </div>
+                  <div class="card-footer bg-transparent border-0">
+                    <a href="/#/instruments/jobs" class="btn btn-outline-primary">
+                      Go to Jobs <i class="bi bi-arrow-right ms-1"></i>
+                    </a>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-md-4">
+                <div class="card h-100 shadow-sm">
+                  <div class="card-body">
+                    <h4 class="card-title d-flex align-items-center mb-3">
+                      <i class="bi bi-calendar-check text-primary me-2"></i>
+                      Bookings
+                    </h4>
+                    <p class="card-text">
+                      Schedule and manage instrument time. Book instruments, view availability, and manage your reservations.
+                    </p>
+                    <ul class="list-unstyled">
+                      <li><i class="bi bi-check-circle-fill text-success me-2"></i>Book instrument time</li>
+                      <li><i class="bi bi-check-circle-fill text-success me-2"></i>View instrument availability</li>
+                      <li><i class="bi bi-check-circle-fill text-success me-2"></i>Manage your reservations</li>
+                    </ul>
+                  </div>
+                  <div class="card-footer bg-transparent border-0">
+                    <a href="/#/instruments/bookings" class="btn btn-outline-primary">
+                      Go to Bookings <i class="bi bi-arrow-right ms-1"></i>
+                    </a>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-md-4">
+                <div class="card h-100 shadow-sm">
+                  <div class="card-body">
+                    <h4 class="card-title d-flex align-items-center mb-3">
+                      <i class="bi bi-gear text-primary me-2"></i>
+                      Management
+                    </h4>
+                    <p class="card-text">
+                      Manage instrument details, maintenance logs, and access controls. Add metadata and documentation.
+                    </p>
+                    <ul class="list-unstyled">
+                      <li><i class="bi bi-check-circle-fill text-success me-2"></i>View and edit instrument details</li>
+                      <li><i class="bi bi-check-circle-fill text-success me-2"></i>Track maintenance history</li>
+                      <li><i class="bi bi-check-circle-fill text-success me-2"></i>Manage access permissions</li>
+                    </ul>
+                  </div>
+                  <div class="card-footer bg-transparent border-0">
+                    <a href="/#/instruments/management" class="btn btn-outline-primary">
+                      Go to Management <i class="bi bi-arrow-right ms-1"></i>
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card mt-4 shadow-sm">
+              <div class="card-body">
+                <h5 class="card-title"><i class="bi bi-question-circle text-primary me-2"></i>Quick Start</h5>
+                <div class="row">
+                  <div class="col-md-4">
+                    <div class="d-flex align-items-center mb-3">
+                      <div class="bg-light rounded-circle p-2 me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                        <span class="fw-bold text-primary">1</span>
+                      </div>
+                      <span>Browse available instruments in the Management section</span>
+                    </div>
+                  </div>
+                  <div class="col-md-4">
+                    <div class="d-flex align-items-center mb-3">
+                      <div class="bg-light rounded-circle p-2 me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                        <span class="fw-bold text-primary">2</span>
+                      </div>
+                      <span>Book instrument time in the Bookings section</span>
+                    </div>
+                  </div>
+                  <div class="col-md-4">
+                    <div class="d-flex align-items-center mb-3">
+                      <div class="bg-light rounded-circle p-2 me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                        <span class="fw-bold text-primary">3</span>
+                      </div>
+                      <span>Submit jobs and track results in the Jobs section</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         }
       </div>
     </div>

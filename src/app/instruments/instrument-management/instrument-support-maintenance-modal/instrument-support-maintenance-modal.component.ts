@@ -62,8 +62,19 @@ export class InstrumentSupportMaintenanceModalComponent implements OnInit {
   supportInfo?: SupportInformation;
 
   contactTypes = ['email', 'phone', 'website', 'address', 'other'];
-  formatter = (location: {id: number, object_name: string}) => location.object_name;
+  formatter = (location: {id: number, object_name: string, object_type?: string, object_description?: string}) => {
+    let display = location.object_name;
 
+    if (location.object_type) {
+      display += ` (${location.object_type})`;
+    }
+
+    if (location.object_description) {
+      display += ` - ${location.object_description}`;
+    }
+
+    return display;
+  };
   constructor(
     private activeModal: NgbActiveModal,
     private fb: FormBuilder,
@@ -449,6 +460,13 @@ export class InstrumentSupportMaintenanceModalComponent implements OnInit {
           resolve(undefined);
         }
       });
+    });
+  }
+
+  clearSelectedLocation(): void {
+    this.selectedLocation = null;
+    this.supportInfoForm.patchValue({
+      location_id: null
     });
   }
 }
