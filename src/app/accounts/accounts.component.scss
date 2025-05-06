@@ -1,0 +1,65 @@
+/* Layout */
+.vh-100 {
+  height: 100vh;
+}
+
+/* Sidebar styling */
+.sidebar {
+  width: 280px;
+  transition: all 0.3s;
+  background-color: var(--bs-body-bg);
+  border-right: 1px solid var(--bs-border-color);
+  z-index: 1000;
+}
+
+.sidebar-collapsed {
+  margin-left: -280px;
+}
+
+.sidebar .list-group-item {
+  border-radius: 0;
+  border-left: 0;
+  border-right: 0;
+  cursor: pointer;
+}
+
+.sidebar .list-group-item.active {
+  background-color: var(--bs-primary-bg-subtle);
+  color: var(--bs-primary);
+  border-color: var(--bs-border-color);
+}
+
+
+/* Content area styling */
+.content-wrapper {
+  flex: 1;
+  transition: all 0.3s;
+  overflow-x: hidden;
+}
+
+.content-expanded {
+  margin-left: 0;
+}
+
+
+.content-body {
+  height: calc(100vh - 130px);
+}
+
+@media (max-width: 767.98px) {
+  .sidebar {
+    position: fixed;
+    height: 100vh;
+    left: 0;
+    top: 0;
+  }
+
+  .content-expanded {
+    margin-left: 0;
+  }
+}
+
+/* Card and form utilities */
+.max-width-400 {
+  max-width: 400px;
+}

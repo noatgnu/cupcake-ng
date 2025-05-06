@@ -1,0 +1,19 @@
+.max-width-500 {
+  max-width: 500px;
+}
+
+.invalid-feedback.d-block {
+  display: block;
+  width: 100%;
+  margin-top: 0.25rem;
+  font-size: 0.875em;
+  color: var(--bs-form-invalid-color);
+}
+
+.card {
+  transition: box-shadow 0.2s ease;
+
+  &:hover {
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+  }
+}

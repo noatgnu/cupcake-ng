@@ -10,6 +10,7 @@ import {AccountsService} from "./accounts.service";
 import {SignupComponent} from "./signup/signup.component";
 import {ProfileComponent} from "./profile/profile.component";
 import {FavouritesComponent} from "./favourites/favourites.component";
+import {NgClass} from "@angular/common";
 
 @Component({
     selector: 'app-accounts',
@@ -23,13 +24,15 @@ import {FavouritesComponent} from "./favourites/favourites.component";
     LabGroupComponent,
     SignupComponent,
     ProfileComponent,
-    FavouritesComponent
+    FavouritesComponent,
+    NgClass
   ],
     templateUrl: './accounts.component.html',
     styleUrl: './accounts.component.scss'
 })
 export class AccountsComponent {
   selectedSection = 'security'
+  hideSidebar: boolean = false
   @Input() set section(value: string) {
     this.selectedSection = value
   }

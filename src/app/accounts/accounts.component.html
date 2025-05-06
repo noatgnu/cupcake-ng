@@ -1,106 +1,235 @@
-<div class="container-fluid p-0">
-  <div style="height: 60px"></div>
-  <nav class="navbar navbar-expand-lg navbar-light d-flex flex-wrap">
-    <div class="container-fluid d-flex flex-row justify-content-center">
-      <a class="navbar-brand">Accounts Information</a>
+<div class="container-fluid p-0 d-flex flex-column vh-100">
+  <header class="border-bottom shadow-sm py-3 px-4">
+    <div class="d-flex align-items-center justify-content-center">
+      <h4 class="m-0 text-primary fw-bold">Account Management</h4>
     </div>
-  </nav>
-  <div class="d-flex g-1" style="height: 86vh; position:relative">
-    <div class="border-end border-1 border-black d-flex flex-column" style="width: 300px">
-      <nav class="navbar navbar-expand-lg navbar-light d-flex flex-wrap">
-        <div class="container-fluid">
-          <a class="navbar-brand">Sections</a>
+  </header>
+
+  <div class="flex-grow-1 d-flex">
+    <div class="sidebar" [ngClass]="{'sidebar-collapsed': hideSidebar}">
+      <div class="sidebar-header border-bottom p-3">
+        <div class="d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">Sections</h5>
+          <button type="button" class="btn-close d-md-none" aria-label="Close sidebar" (click)="hideSidebar = true"></button>
         </div>
-      </nav>
-      <div class="list-group d-flex flex-column rounded-0 overflow-auto">
+      </div>
+      <div class="list-group list-group-flush">
         @if (accountService.loggedIn) {
-          <button type="button" class="list-group-item list-group-item-action" (click)="selectedSection='profile'">Profile</button>
+          <a class="list-group-item list-group-item-action py-3 d-flex align-items-center"
+             [ngClass]="{'active': selectedSection==='profile'}"
+             (click)="selectedSection='profile'">
+            <i class="bi bi-person me-2"></i> Profile
+          </a>
         }
-        <button type="button" class="list-group-item list-group-item-action" (click)="selectedSection='security'">Security</button>
-        <button type="button" class="list-group-item list-group-item-action" (click)="selectedSection='appearance'">Appearance</button>
-        <button type="button" class="list-group-item list-group-item-action" (click)="selectedSection='user-data'">User Data</button>
-        <button type="button" class="list-group-item list-group-item-action" (click)="selectedSection='lab-group'">Lab Group</button>
-        <button type="button" class="list-group-item list-group-item-action" (click)="selectedSection='favourite'">Favourites</button>
+        <a class="list-group-item list-group-item-action py-3 d-flex align-items-center"
+           [ngClass]="{'active': selectedSection==='security'}"
+           (click)="selectedSection='security'">
+          <i class="bi bi-shield-lock me-2"></i> Security
+        </a>
+        <a class="list-group-item list-group-item-action py-3 d-flex align-items-center"
+           [ngClass]="{'active': selectedSection==='appearance'}"
+           (click)="selectedSection='appearance'">
+          <i class="bi bi-palette me-2"></i> Appearance
+        </a>
+        <a class="list-group-item list-group-item-action py-3 d-flex align-items-center"
+           [ngClass]="{'active': selectedSection==='user-data'}"
+           (click)="selectedSection='user-data'">
+          <i class="bi bi-database me-2"></i> User Data
+        </a>
+        <a class="list-group-item list-group-item-action py-3 d-flex align-items-center"
+           [ngClass]="{'active': selectedSection==='lab-group'}"
+           (click)="selectedSection='lab-group'">
+          <i class="bi bi-people me-2"></i> Lab Group
+        </a>
+        <a class="list-group-item list-group-item-action py-3 d-flex align-items-center"
+           [ngClass]="{'active': selectedSection==='favourite'}"
+           (click)="selectedSection='favourite'">
+          <i class="bi bi-star me-2"></i> Favourites
+        </a>
       </div>
     </div>
-    <div class="d-flex flex-column w-100">
-      @if (selectedSection === 'security') {
-        <nav class="navbar navbar-expand-lg navbar-light d-flex flex-wrap">
-          <div class="container-fluid">
-            <a class="navbar-brand">Security</a>
-          </div>
-        </nav>
-        <div class="d-flex flex-row">
-          <div class="d-flex flex-column p-5">
-            <form [formGroup]="passwordForm" (ngSubmit)="changePassword()" class="d-flex flex-column gap-2">
-              <div class="form-floating">
-                <input id="currentPassword" type="password" class="form-control" formControlName="currentPassword">
-                <label for="currentPassword">Current Password</label>
-              </div>
-              <div class="form-floating">
-                <input id="newPassword" type="password" class="form-control" formControlName="newPassword">
-                <label for="newPassword">New Password</label>
-              </div>
-              <button type="submit" class="btn btn-primary">Change Password</button>
-            </form>
-          </div>
-        </div>
-      } @else if (selectedSection === 'appearance') {
-        <nav class="navbar navbar-expand-lg navbar-light d-flex flex-wrap">
-          <div class="container-fluid">
-            <a class="navbar-brand">Appearance</a>
-          </div>
-        </nav>
-        <div class="d-flex flex-row">
-          <div class="d-flex flex-column p-5">
-            <div class="form-check form-switch">
-              <input class="form-check-input" type="checkbox" id="darkModeFollowSystemSwitch" [(ngModel)]="dataService.systemTheme" (change)="followSystemTheme($event)">
-              <label class="form-check-label" for="darkModeFollowSystemSwitch">Dark Mode Follow System Theme</label>
+
+    <div class="content-wrapper" [ngClass]="{'content-expanded': hideSidebar}">
+      <div class="content-header border-bottom p-3 d-flex align-items-center shadow-sm">
+        <button type="button" class="btn btn-outline-primary sidebar-toggle me-3"
+                (click)="hideSidebar = !hideSidebar"
+                aria-label="Toggle sidebar">
+          <i class="bi" [ngClass]="hideSidebar ? 'bi-layout-sidebar-inset' : 'bi-layout-sidebar'"></i>
+        </button>
+        <h5 class="mb-0">
+          @if (selectedSection === 'profile') {
+            <i class="bi bi-person me-2"></i> Profile
+          } @else if (selectedSection === 'security') {
+            <i class="bi bi-shield-lock me-2"></i> Security
+          } @else if (selectedSection === 'appearance') {
+            <i class="bi bi-palette me-2"></i> Appearance
+          } @else if (selectedSection === 'user-data') {
+            <i class="bi bi-database me-2"></i> User Data
+          } @else if (selectedSection === 'lab-group') {
+            <i class="bi bi-people me-2"></i> Lab Group
+          } @else if (selectedSection === 'favourite') {
+            <i class="bi bi-star me-2"></i> Favourites
+          } @else if (selectedSection === 'signup') {
+            <i class="bi bi-person-plus me-2"></i> Signup
+          }
+        </h5>
+      </div>
+
+      <div class="content-body p-3 overflow-auto">
+        @if (selectedSection === 'security') {
+          <div class="card shadow-sm">
+            <div class="card-body">
+              <form [formGroup]="passwordForm" (ngSubmit)="changePassword()" class="max-width-400">
+                <div class="mb-3">
+                  <label for="currentPassword" class="form-label">Current Password</label>
+                  <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-key"></i></span>
+                    <input id="currentPassword" type="password" class="form-control" formControlName="currentPassword">
+                  </div>
+                </div>
+                <div class="mb-3">
+                  <label for="newPassword" class="form-label">New Password</label>
+                  <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                    <input id="newPassword" type="password" class="form-control" formControlName="newPassword">
+                  </div>
+                </div>
+                <button type="submit" class="btn btn-primary">
+                  <i class="bi bi-save me-2"></i> Change Password
+                </button>
+              </form>
             </div>
-            <div class="form-check form-switch">
-              <input class="form-check-input" type="checkbox" id="darkModeSwitch" [(ngModel)]="dataService.darkMode" (change)="toggleDarkMode($event)">
-              <label class="form-check-label" for="darkModeSwitch">Dark Mode</label>
+          </div>
+        } @else if (selectedSection === 'appearance') {
+          <div class="card shadow-sm">
+            <div class="card-body">
+              <h3 class="fs-5 mb-3">Theme Settings</h3>
+              <div class="mb-3">
+                <div class="form-check form-switch">
+                  <input class="form-check-input" type="checkbox" id="darkModeFollowSystemSwitch"
+                         [(ngModel)]="dataService.systemTheme" (change)="followSystemTheme($event)">
+                  <label class="form-check-label" for="darkModeFollowSystemSwitch">
+                    <i class="bi bi-display me-2"></i> Follow System Theme
+                  </label>
+                </div>
+                <div class="form-text">Automatically adjust theme based on system preferences</div>
+              </div>
+              <div class="mb-3">
+                <div class="form-check form-switch">
+                  <input class="form-check-input" type="checkbox" id="darkModeSwitch"
+                         [(ngModel)]="dataService.darkMode" (change)="toggleDarkMode($event)">
+                  <label class="form-check-label" for="darkModeSwitch">
+                    <i class="bi bi-moon me-2"></i> Dark Mode
+                  </label>
+                </div>
+                <div class="form-text">Switch between light and dark appearance</div>
+              </div>
             </div>
           </div>
-        </div>
-      } @else if (selectedSection === 'user-data') {
-        <nav class="navbar navbar-expand-lg navbar-light d-flex flex-wrap">
-          <div class="container-fluid">
-            <a class="navbar-brand">User Data</a>
+          <div class="card">
+            <div class="card-body d-flex justify-content-between">
+              <div class="theme-preview light p-3 text-center border rounded">
+                <div class="preview-box bg-light border mb-2 d-flex align-items-center justify-content-center">
+                  <span>Light Theme</span>
+                </div>
+                <span class="badge bg-primary">Light Mode</span>
+              </div>
+              <div class="theme-preview dark p-3 text-center border rounded">
+                <div class="preview-box bg-dark text-light border mb-2 d-flex align-items-center justify-content-center">
+                  <span>Dark Theme</span>
+                </div>
+                <span class="badge bg-secondary">Dark Mode</span>
+              </div>
+            </div>
           </div>
-        </nav>
-        <app-user-data></app-user-data>
-      } @else if (selectedSection === 'lab-group') {
-        <nav class="navbar navbar-expand-lg navbar-light d-flex flex-wrap">
-          <div class="container-fluid">
-            <a class="navbar-brand">Lab Group</a>
+        } @else if (selectedSection === 'user-data') {
+          <app-user-data></app-user-data>
+        } @else if (selectedSection === 'lab-group') {
+          <app-lab-group></app-lab-group>
+        } @else if (selectedSection === 'signup') {
+          @if (token) {
+            <app-signup [token]="token"></app-signup>
+          }
+        } @else if (selectedSection === 'profile') {
+          <app-profile></app-profile>
+        } @else if (selectedSection === 'favourite') {
+          <app-favourites></app-favourites>
+        } @else {
+          <div class="container py-4">
+            <div class="card shadow-sm mb-4">
+              <div class="card-body">
+                <h2 class="card-title mb-3">
+                  <i class="bi bi-info-circle text-primary me-2"></i>
+                  Welcome to Account Management
+                </h2>
+                <p class="lead">
+                  This is where you can manage your account settings, profile information, and personal preferences.
+                </p>
+                <p>Select one of the sections from the sidebar to get started or explore the available features below.</p>
+              </div>
+            </div>
+
+            <div class="row g-4">
+              <div class="col-md-4">
+                <div class="card h-100 shadow-sm">
+                  <div class="card-body">
+                    <h4 class="card-title d-flex align-items-center mb-3">
+                      <i class="bi bi-person text-primary me-2"></i>
+                      Profile
+                    </h4>
+                    <p class="card-text">
+                      Update your personal information, profile picture, and contact details.
+                    </p>
+                  </div>
+                  <div class="card-footer bg-transparent border-0">
+                    <button class="btn btn-outline-primary" (click)="selectedSection='profile'">
+                      Go to Profile <i class="bi bi-arrow-right ms-1"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-md-4">
+                <div class="card h-100 shadow-sm">
+                  <div class="card-body">
+                    <h4 class="card-title d-flex align-items-center mb-3">
+                      <i class="bi bi-shield-lock text-primary me-2"></i>
+                      Security
+                    </h4>
+                    <p class="card-text">
+                      Manage your password and security settings to protect your account.
+                    </p>
+                  </div>
+                  <div class="card-footer bg-transparent border-0">
+                    <button class="btn btn-outline-primary" (click)="selectedSection='security'">
+                      Go to Security <i class="bi bi-arrow-right ms-1"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-md-4">
+                <div class="card h-100 shadow-sm">
+                  <div class="card-body">
+                    <h4 class="card-title d-flex align-items-center mb-3">
+                      <i class="bi bi-people text-primary me-2"></i>
+                      Lab Group
+                    </h4>
+                    <p class="card-text">
+                      Manage your lab group memberships and collaborations.
+                    </p>
+                  </div>
+                  <div class="card-footer bg-transparent border-0">
+                    <button class="btn btn-outline-primary" (click)="selectedSection='lab-group'">
+                      Go to Lab Group <i class="bi bi-arrow-right ms-1"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-        </nav>
-        <app-lab-group></app-lab-group>
-      } @else if (selectedSection === 'signup') {
-        <nav class="navbar navbar-expand-lg navbar-light d-flex flex-wrap">
-          <div class="container-fluid">
-            <a class="navbar-brand">Signup</a>
-          </div>
-        </nav>
-        @if (token) {
-          <app-signup [token]="token"></app-signup>
         }
-      } @else if (selectedSection === 'profile') {
-        <nav class="navbar navbar-expand-lg navbar-light d-flex flex-wrap">
-          <div class="container-fluid">
-            <a class="navbar-brand">Profile</a>
-          </div>
-        </nav>
-        <app-profile></app-profile>
-      } @else if (selectedSection === 'favourite') {
-        <nav class="navbar navbar-expand-lg navbar-light d-flex flex-wrap">
-          <div class="container-fluid">
-            <a class="navbar-brand">Favourites</a>
-          </div>
-        </nav>
-        <app-favourites></app-favourites>
-      }
+      </div>
     </div>
   </div>
 </div>
