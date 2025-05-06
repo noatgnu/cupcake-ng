@@ -1,4 +1,4 @@
-:host {
+:root {
   // Light mode (default)
   --calendar-bg: #ffffff;
   --calendar-text: #212529;
@@ -9,31 +9,18 @@
   --calendar-focus: #80bdff;
   --calendar-muted: #6c757d;
   --calendar-panel-bg: #f8f9fa;
+}
 
-  // Apply dark mode variables when dark theme is active
-  @media (prefers-color-scheme: dark) {
-    --calendar-bg: #2d3238;
-    --calendar-text: #e9ecef;
-    --calendar-border: #495057;
-    --calendar-border-light: #343a40;
-    --calendar-hover: rgba(255, 255, 255, 0.1);
-    --calendar-today: rgba(0, 123, 255, 0.2);
-    --calendar-focus: #0d6efd;
-    --calendar-muted: #adb5bd;
-    --calendar-panel-bg: #343a40;
-  }
-
-  &.dark-theme {
-    --calendar-bg: #2d3238;
-    --calendar-text: #e9ecef;
-    --calendar-border: #495057;
-    --calendar-border-light: #343a40;
-    --calendar-hover: rgba(255, 255, 255, 0.1);
-    --calendar-today: rgba(0, 123, 255, 0.2);
-    --calendar-focus: #0d6efd;
-    --calendar-muted: #adb5bd;
-    --calendar-panel-bg: #343a40;
-  }
+body.dark-theme, body[data-bs-theme="dark"] {
+  --calendar-bg: #2d3238;
+  --calendar-text: #e9ecef;
+  --calendar-border: #495057;
+  --calendar-border-light: #343a40;
+  --calendar-hover: rgba(255, 255, 255, 0.1);
+  --calendar-today: rgba(0, 123, 255, 0.2);
+  --calendar-focus: #0d6efd;
+  --calendar-muted: #adb5bd;
+  --calendar-panel-bg: #343a40;
 }
 
 .calendar-container {
@@ -207,37 +194,14 @@
   }
 }
 
-.day-view {
-  .day-container {
-    display: flex;
-    min-height: 600px;
-    border: 1px solid var(--calendar-border);
-    background-color: var(--calendar-bg);
-
-    .full-day-column {
-      flex: 1;
-      position: relative;
-
-      .no-sessions {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 200px;
-        color: var(--calendar-muted);
-        font-style: italic;
-      }
-    }
-  }
-}
-
-// Session styling
+/* Rest of your calendar styling */
 .week-session, .day-session {
   position: absolute;
   left: 4px;
   right: 4px;
   border-radius: 4px;
   padding: 4px;
-  color: white; // White text works well on colored backgrounds in both modes
+  color: white;
   overflow: hidden;
   cursor: pointer;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
@@ -264,54 +228,9 @@
   }
 }
 
-// Filter options
-.filter-options {
-  background-color: var(--calendar-panel-bg);
-  padding: 1rem;
-  border-radius: 4px;
-  border: 1px solid var(--calendar-border);
-}
-
-// Legend styling
-.calendar-legend {
-  padding: 1rem;
-  background-color: var(--calendar-panel-bg);
-  border-radius: 4px;
-  border: 1px solid var(--calendar-border);
-  margin-top: 1rem;
-
-  .legend-item {
-    display: flex;
-    align-items: center;
-
-    .color-dot {
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
-      display: inline-block;
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
-    }
-  }
-}
-
-// Responsive adjustments
 @media (max-width: 768px) {
   .custom-day {
     height: 80px;
     min-width: auto;
-  }
-}
-
-// Calendar days header
-.calendar-days-header {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  text-align: center;
-  border-bottom: 1px solid var(--calendar-border);
-
-  .day-header {
-    padding: 0.5rem;
-    font-weight: bold;
-    background-color: var(--calendar-panel-bg);
   }
 }
