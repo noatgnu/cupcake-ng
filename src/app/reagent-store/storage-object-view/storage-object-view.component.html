@@ -88,7 +88,7 @@
     @if (storedReagentQuery) {
       @if (storedReagentQuery.results.length > 0) {
         <div class="card d-flex flex-column" style="min-height: 0; flex: 1 1 auto;">
-          <div class="card-header  d-flex justify-content-between">
+          <div class="card-header d-flex justify-content-between">
             <span>
               <i class="bi bi-list me-2"></i>Items
               <span class="badge bg-primary ms-1">{{storedReagentQuery.count}}</span>
@@ -146,11 +146,26 @@
           </div>
         </div>
       }
-    } @else {
+    } @else if (isLoadingReagents) {
       <div class="d-flex justify-content-center my-5">
         <div class="spinner-border text-primary" role="status">
           <span class="visually-hidden">Loading...</span>
         </div>
+      </div>
+    } @else if (!storageObject) {
+      <div class="text-center my-5">
+        <i class="bi bi-box-seam fs-1 text-muted mb-3 d-block"></i>
+        <h5 class="text-muted">No Storage Location Selected</h5>
+        <p class="text-muted">Please select a storage location to view its contents</p>
+      </div>
+    } @else {
+      <div class="text-center my-5">
+        <i class="bi bi-collection fs-1 text-muted mb-3 d-block"></i>
+        <h5 class="text-muted">Ready to Load Items</h5>
+        <p class="text-muted">Click the button below to add your first item</p>
+        <button class="btn btn-sm btn-success mt-2" (click)="openStoredReagentCreatorModal()">
+          <i class="bi bi-plus me-1"></i>Add First Item
+        </button>
       </div>
     }
   </div>

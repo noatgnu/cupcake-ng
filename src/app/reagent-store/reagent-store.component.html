@@ -59,11 +59,22 @@
               [boundaryLinks]="true"
               class="pagination-sm justify-content-center mb-0" />
           </div>
-        } @else {
+        } @else if (isLoading) {
+          <!-- Only show spinner when actively loading -->
           <div class="d-flex justify-content-center align-items-center py-5">
             <div class="spinner-border text-primary" role="status">
               <span class="visually-hidden">Loading...</span>
             </div>
+          </div>
+        } @else {
+          <!-- Empty state for default landing page -->
+          <div class="text-center py-5">
+            <i class="bi bi-grid-3x3-gap fs-1 text-muted mb-3 d-block"></i>
+            <h6 class="text-muted">Storage Locator</h6>
+            <p class="text-muted small">Select or create a storage location to get started</p>
+            <button class="btn btn-sm btn-outline-primary mt-2" (click)="openStorageObjectCreator()">
+              <i class="bi bi-folder-plus me-1"></i>Create Location
+            </button>
           </div>
         }
       </div>

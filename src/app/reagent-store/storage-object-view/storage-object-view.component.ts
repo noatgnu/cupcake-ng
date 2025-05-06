@@ -40,6 +40,8 @@ import {
     styleUrl: './storage-object-view.component.scss'
 })
 export class StorageObjectViewComponent {
+  isLoadingReagents = false
+
   private _storedReagentID?: number|undefined
 
   @Input() set storedReagentID(value: number|undefined) {

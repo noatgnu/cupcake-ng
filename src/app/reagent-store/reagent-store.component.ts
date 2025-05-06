@@ -25,6 +25,7 @@ export class ReagentStoreComponent implements OnInit{
   private _storageID?: number|undefined;
   private _storedReagentID?: number|undefined;
   sidePanel: boolean = true
+  isLoading: boolean = false
 
   @Input() set storageID(value: number|undefined) {
     this._storageID = value;
