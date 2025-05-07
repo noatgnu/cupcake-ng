@@ -158,7 +158,14 @@ export class BarcodeScannerModalComponent implements AfterViewInit, OnDestroy {
   initializeScannerWithDevice(preferredDeviceId: string | undefined): Promise<void> {
     console.log(`Initializing Quagga scanner with device: ${preferredDeviceId || 'default'}`);
 
-    const constraints: MediaTrackConstraints = {};
+    const constraints: any = {
+      // Add focus mode constraints
+      focusMode: ['continuous', 'auto'],  // Prioritize continuous autofocus
+      // Additional optional constraints that can help with scanning
+      zoom: 1.0,
+      exposureMode: 'continuous'
+    };
+
     if (preferredDeviceId) {
       constraints.deviceId = preferredDeviceId;
     } else {
@@ -166,6 +173,7 @@ export class BarcodeScannerModalComponent implements AfterViewInit, OnDestroy {
     }
 
     return Quagga.init({
+      frequency: 10,
       inputStream: {
         type: 'LiveStream',
         constraints,
@@ -176,6 +184,7 @@ export class BarcodeScannerModalComponent implements AfterViewInit, OnDestroy {
           bottom: '20%'
         },
         target: document.querySelector(this.videoElementPreviewID) ?? undefined,
+
       },
       decoder: {
         readers: [
@@ -309,6 +318,34 @@ export class BarcodeScannerModalComponent implements AfterViewInit, OnDestroy {
     this.activeModal.close({barcode: this.lastScannedCode});
   }
 
+  toggleFocus() {
+    if (!this.startedQR) return;
+
+    const videoTrack = Quagga.CameraAccess.getActiveTrack();
+    if (videoTrack) {
+      try {
+        const capabilities = videoTrack.getCapabilities() as any;
+
+        if (capabilities.focusMode && capabilities.focusMode.includes('continuous')) {
+          videoTrack.applyConstraints({
+            advanced: [{ focusMode: 'continuous' } as any]
+          }).catch(e => console.error("Focus error:", e));
+        } else {
+          videoTrack.applyConstraints({
+            advanced: [{ focusMode: 'manual' } as any]
+          }).then(() => {
+            setTimeout(() => {
+              videoTrack.applyConstraints({
+                advanced: [{ focusDistance: 0.5 } as any]
+              });
+            }, 500);
+          }).catch(e => console.error("Focus error:", e));
+        }
+      } catch (e) {
+        console.error("Camera focus not supported:", e);
+      }
+    }
+  }
   stopCamera() {
     if (this.startedQR) {
       Quagga.offDetected(this.onDetected);

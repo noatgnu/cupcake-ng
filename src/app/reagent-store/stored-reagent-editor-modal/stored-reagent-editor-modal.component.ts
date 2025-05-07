@@ -217,7 +217,11 @@ export class StoredReagentEditorModalComponent implements AfterViewInit, OnInit{
   }
 
   ngAfterViewInit() {
-    this.drawBarcode()
+    if (this.form.controls.barcode.value) {
+      this.detectBarcodeFormat();
+    } else {
+      this.drawBarcode();
+    }
   }
 
 
@@ -295,6 +299,45 @@ export class StoredReagentEditorModalComponent implements AfterViewInit, OnInit{
         )
       })
     )
+  }
+
+  detectBarcodeFormat(): void {
+    if (!this.storedReagent || !this.form.controls.barcode.value) return;
+
+    const originalFormat = this.selectedBarcodeFormat;
+    let validFormatFound = false;
+
+    for (const format of this.barcodeFormats) {
+      try {
+        const testCanvas = document.createElement('canvas');
+        testCanvas.style.display = 'none';
+        document.body.appendChild(testCanvas);
+
+        JsBarcode(testCanvas, this.form.controls.barcode.value, {
+          format: format.value,
+          displayValue: false,
+          valid: (valid: boolean) => {
+            if (valid && !validFormatFound) {
+              console.log(`Found valid barcode format: ${format.value}`);
+              this.selectedBarcodeFormat = format.value;
+              validFormatFound = true;
+              this.drawBarcode();
+            }
+          }
+        });
+
+        document.body.removeChild(testCanvas);
+
+        if (validFormatFound) break;
+      } catch (e) {
+        console.debug(`Format ${format.value} failed:`, e);
+      }
+    }
+
+    if (!validFormatFound) {
+      console.warn('No valid barcode format found, using default');
+      this.selectedBarcodeFormat = originalFormat;
+    }
   }
 
   searchSession = (text$: Observable<string>) => {

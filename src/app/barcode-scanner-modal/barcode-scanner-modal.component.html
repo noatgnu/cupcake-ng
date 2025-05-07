@@ -30,6 +30,14 @@
 
   <!-- Scanner UI -->
   @if (!manualEntryMode) {
+    <div class="camera-controls mb-2">
+      <button class="btn btn-sm btn-outline-secondary me-2" (click)="toggleFocus()">
+        <i class="bi bi-camera-fill"></i> Refocus
+      </button>
+      <button class="btn btn-sm btn-outline-secondary" (click)="resetDetection()">
+        <i class="bi bi-arrow-clockwise"></i> Reset
+      </button>
+    </div>
     <div class="scanner-container position-relative">
       <div id="videoElementPreview" class="w-100 rounded"></div>
       @if (scanningActive) {
@@ -47,6 +55,7 @@
         </div>
       }
     </div>
+
   }
 
   <!-- Manual Entry Form -->
