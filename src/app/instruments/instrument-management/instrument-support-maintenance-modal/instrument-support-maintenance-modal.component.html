@@ -31,7 +31,12 @@
 
             <div class="mb-3">
               <label for="serial_number" class="form-label">Serial Number</label>
-              <input type="text" class="form-control" id="serial_number" formControlName="serial_number">
+              <div class="input-group">
+                <input type="text" class="form-control" id="serial_number" formControlName="serial_number">
+                <button class="btn btn-outline-secondary" type="button" (click)="openBarcodeScanner()">
+                  <i class="bi bi-upc-scan"></i> Scan
+                </button>
+              </div>
             </div>
 
             <div class="mb-3">

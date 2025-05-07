@@ -1,7 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { FormBuilder, FormArray, FormGroup, ReactiveFormsModule, Validators, AbstractControl } from '@angular/forms';
 import {
-  NgbActiveModal,
+  NgbActiveModal, NgbModal,
   NgbNav,
   NgbNavContent,
   NgbNavItem, NgbNavLink,
@@ -14,6 +14,8 @@ import {ToastService} from "../../../toast.service";
 import {DatePipe} from '@angular/common';
 import { InstrumentSupportInformationService} from "../../../instrument-support-information.service";
 import { Observable, of, switchMap, map, debounceTime, distinctUntilChanged, tap, catchError } from 'rxjs';
+import { BarcodeScannerModalComponent } from '../../../barcode-scanner-modal/barcode-scanner-modal.component';
+
 @Component({
   selector: 'app-instrument-support-maintenance-modal',
   standalone: true,
@@ -80,7 +82,8 @@ export class InstrumentSupportMaintenanceModalComponent implements OnInit {
     private fb: FormBuilder,
     private supportService: InstrumentSupportInformationService,
     private toast: ToastService,
-    private webService: WebService
+    private webService: WebService,
+    private modalService: NgbModal
   ) { }
 
   search = (text$: Observable<string>) => {
@@ -468,5 +471,21 @@ export class InstrumentSupportMaintenanceModalComponent implements OnInit {
     this.supportInfoForm.patchValue({
       location_id: null
     });
+  }
+
+  openBarcodeScanner(): void {
+    const modalRef = this.modalService.open(BarcodeScannerModalComponent, {
+      size: 'lg',
+      centered: true,
+      backdrop: 'static'
+    });
+    modalRef.componentInstance.enableSearch = false;
+    modalRef.result.then((barcode: any) => {
+      if (barcode) {
+        this.supportInfoForm.patchValue({
+          serial_number: barcode.barcode
+        });
+      }
+    })
   }
 }
