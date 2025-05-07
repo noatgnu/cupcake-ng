@@ -22,6 +22,14 @@ export class MaintenanceLogModalComponent implements OnInit {
   @Input() instrumentId: number | null = null;
 
   logForm!: FormGroup;
+  textAnnotationForm!: FormGroup;
+  fileAnnotationForm!: FormGroup;
+
+  showAddTextAnnotation = false;
+  showAddFileAnnotation = false;
+  selectedFile: File | null = null;
+  fileError: string | null = null;
+
   maintenanceTypes: {value: string, label: string}[] = [];
   statusTypes: {value: string, label: string}[] = [];
 
@@ -51,17 +59,25 @@ export class MaintenanceLogModalComponent implements OnInit {
       this.activeTab = 'manage';
       this.loadTemplates();
     }
+
+    if (this.mode === 'view' && this.data?.id && (!this.data.annotations || this.data.annotations.length === 0)) {
+      this.loadAnnotations();
+    }
   }
 
-  initializeForm(): void {
-    this.logForm = this.fb.group({
-      maintenance_type: [this.data?.maintenance_type || '', Validators.required],
-      maintenance_date: [this.formatDate(this.data?.maintenance_date) || this.formatDate(new Date()), Validators.required],
-      maintenance_description: [this.data?.maintenance_description || '', Validators.required],
-      maintenance_notes: [this.data?.maintenance_notes || ''],
-      status: [this.data?.status || 'pending'],
-      is_template: [this.data?.is_template || false]
+  initTextAnnotationForm(): void {
+    this.textAnnotationForm = this.fb.group({
+      name: ['', Validators.required],
+      text: ['', Validators.required]
     });
+  }
+
+  initFileAnnotationForm(): void {
+    this.fileAnnotationForm = this.fb.group({
+      name: ['']
+    });
+    this.selectedFile = null;
+    this.fileError = null;
   }
 
   switchToEditMode(): void {
@@ -200,5 +216,98 @@ export class MaintenanceLogModalComponent implements OnInit {
     if (!date) return '';
     const d = new Date(date);
     return d.toISOString().split('T')[0];
+  }
+
+  loadAnnotations(): void {
+    if (!this.data?.id) return;
+
+    this.isLoading = true;
+    this.maintenanceLogService.getAnnotations(this.data.id).subscribe({
+      next: (annotations) => {
+        if (this.data) {
+          this.data.annotations = annotations;
+        }
+        this.isLoading = false;
+      },
+      error: (err) => {
+        this.error = 'Failed to load annotations';
+        this.isLoading = false;
+      }
+    });
+  }
+
+  onFileSelected(event: Event): void {
+    const element = event.target as HTMLInputElement;
+    if (element.files && element.files.length > 0) {
+      this.selectedFile = element.files[0];
+      this.fileError = null;
+      if (!this.fileAnnotationForm.get('name')?.value) {
+        this.fileAnnotationForm.get('name')?.setValue(this.selectedFile.name);
+      }
+    }
+  }
+
+  addTextAnnotation(): void {
+    if (!this.data?.id || this.textAnnotationForm.invalid) return;
+
+    const name = this.textAnnotationForm.get('name')?.value;
+    const text = this.textAnnotationForm.get('text')?.value;
+
+    this.isLoading = true;
+    this.maintenanceLogService.addTextAnnotation(this.data.id, text, name).subscribe({
+      next: (annotation) => {
+        if (!this.data!.annotations) {
+          this.data!.annotations = [];
+        }
+        this.data!.annotations.push(annotation);
+        this.showAddTextAnnotation = false;
+        this.isLoading = false;
+      },
+      error: (err) => {
+        this.error = 'Failed to add annotation';
+        this.isLoading = false;
+      }
+    });
+  }
+
+  addFileAnnotation(): void {
+    if (!this.data?.id || !this.selectedFile) return;
+
+    const name = this.fileAnnotationForm.get('name')?.value;
+
+    this.isLoading = true;
+    this.maintenanceLogService.addFileAnnotation(
+      this.data.id,
+      this.selectedFile,
+      'file',
+      name || undefined
+    ).subscribe({
+      next: (annotation) => {
+        if (!this.data!.annotations) {
+          this.data!.annotations = [];
+        }
+        this.data!.annotations.push(annotation);
+        this.showAddFileAnnotation = false;
+        this.isLoading = false;
+      },
+      error: (err) => {
+        this.fileError = 'Failed to upload file. Please try again.';
+        this.isLoading = false;
+      }
+    });
+  }
+
+  initializeForm(): void {
+    this.logForm = this.fb.group({
+      maintenance_type: [this.data?.maintenance_type || '', Validators.required],
+      maintenance_date: [this.formatDate(this.data?.maintenance_date) || this.formatDate(new Date()), Validators.required],
+      maintenance_description: [this.data?.maintenance_description || '', Validators.required],
+      maintenance_notes: [this.data?.maintenance_notes || ''],
+      status: [this.data?.status || 'pending'],
+      is_template: [this.data?.is_template || false]
+    });
+
+    this.initTextAnnotationForm();
+    this.initFileAnnotationForm();
   }
 }

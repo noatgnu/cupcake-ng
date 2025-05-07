@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import {MaintenanceLog, MaintenanceLogQuery, MaintenanceLogCreate} from './maintenance-log';
 import {environment} from "../environments/environment";
+import {Annotation, AnnotationFolder} from "./annotation";
 
 @Injectable({
   providedIn: 'root'
@@ -69,5 +70,95 @@ export class MaintenanceLogService {
       `${this.baseURL}/maintenance_logs/${id}/`,
       { is_template: isTemplate }
     );
+  }
+
+  getAnnotations(maintenanceLogId: number): Observable<Annotation[]> {
+    return this.http.get<Annotation[]>(`${this.baseURL}/maintenance_logs/${maintenanceLogId}/get_annotations/`);
+  }
+
+  addAnnotation(
+    maintenanceLogId: number,
+    annotationData: {
+      annotation_type: string;
+      annotation_name: string;
+      annotation?: string;
+      file?: File;
+      [key: string]: any;
+    }
+  ): Observable<Annotation> {
+    const formData = new FormData();
+    Object.keys(annotationData).forEach(key => {
+      if (key === 'file' && annotationData.file) {
+        formData.append('file', annotationData.file);
+      } else if (annotationData[key] !== undefined && annotationData[key] !== null) {
+        formData.append(key, annotationData[key]);
+      }
+    });
+
+    return this.http.post<Annotation>(
+      `${this.baseURL}/maintenance_logs/${maintenanceLogId}/add_annotation/`,
+      formData
+    );
+  }
+
+  addFileAnnotation(
+    maintenanceLogId: number,
+    file: File,
+    annotationType: string,
+    annotationName?: string
+  ): Observable<Annotation> {
+    return this.addAnnotation(maintenanceLogId, {
+      annotation_type: annotationType,
+      annotation_name: annotationName || file.name,
+      file: file
+    });
+  }
+
+  addTextAnnotation(
+    maintenanceLogId: number,
+    text: string,
+    annotationName: string
+  ): Observable<Annotation> {
+    const payload = {
+      annotation: text,
+      annotation_type: 'text',
+      annotation_name: annotationName
+    };
+
+    return this.http.post<Annotation>(
+      `${this.baseURL}/maintenance_logs/${maintenanceLogId}/add_annotation/`,
+      payload
+    );
+  }
+
+  addImageAnnotation(
+    maintenanceLogId: number,
+    imageFile: File,
+    annotationName?: string
+  ): Observable<Annotation> {
+    return this.addFileAnnotation(
+      maintenanceLogId,
+      imageFile,
+      'image',
+      annotationName
+    );
+  }
+
+  addVideoAnnotation(
+    maintenanceLogId: number,
+    videoFile: File,
+    annotationName?: string
+  ): Observable<Annotation> {
+    return this.addFileAnnotation(
+      maintenanceLogId,
+      videoFile,
+      'video',
+      annotationName
+    );
+  }
+
+  notifySlack(id: number, message?: string): Observable<any> {
+    const payload = message ? { message } : {};
+    return this.http.post(`${this.baseURL}/maintenance_logs/${id}/notify_slack/`, payload);
   }
 }

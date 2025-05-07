@@ -1,3 +1,5 @@
+import {AnnotationFolder, Annotation} from "./annotation";
+
 export enum MaintenanceLogType {
   ROUTINE = "routine",
   EMERGENCY = "emergency",
@@ -24,6 +26,12 @@ export interface MaintenanceLog {
   created_by: number;
   status: MaintenanceLogStatus;
   is_template: boolean;
+  annotations: Annotation[];
+  created_by_user: {
+    id: number;
+    username: string;
+  };
+  annotation_folder_details: Partial<AnnotationFolder>;
 }
 
 export interface MaintenanceLogCreate {

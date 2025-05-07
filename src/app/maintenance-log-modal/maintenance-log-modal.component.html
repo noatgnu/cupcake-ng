@@ -213,6 +213,109 @@
       {{error}}
     </div>
   }
+
+  @if (mode === 'view' || mode === 'edit') {
+    <div class="mt-4">
+      <h5 class="border-bottom pb-2">
+        <i class="bi bi-paperclip me-2"></i>Annotations
+      </h5>
+
+      @if (mode === 'edit') {
+        <div class="mb-3">
+          <button type="button" class="btn btn-sm btn-outline-primary me-2" (click)="showAddTextAnnotation = true; initTextAnnotationForm()">
+            <i class="bi bi-sticky me-1"></i> Add Note
+          </button>
+          <button type="button" class="btn btn-sm btn-outline-secondary" (click)="showAddFileAnnotation = true; initFileAnnotationForm()">
+            <i class="bi bi-file-earmark-plus me-1"></i> Add File
+          </button>
+        </div>
+        @if (showAddTextAnnotation) {
+          <div class="card mb-3">
+            <div class="card-header d-flex justify-content-between align-items-center">
+              <h6 class="mb-0">Add Text Annotation</h6>
+              <button type="button" class="btn-close" (click)="showAddTextAnnotation = false"></button>
+            </div>
+            <div class="card-body">
+              <form [formGroup]="textAnnotationForm">
+                <div class="mb-3">
+                  <label for="annotationName" class="form-label">Name</label>
+                  <input type="text" class="form-control" id="annotationName" formControlName="name" required>
+                </div>
+                <div class="mb-3">
+                  <label for="annotationText" class="form-label">Text</label>
+                  <textarea class="form-control" id="annotationText" rows="3" formControlName="text" required></textarea>
+                </div>
+                <div class="text-end">
+                  <button type="button" class="btn btn-secondary me-2" (click)="showAddTextAnnotation = false">Cancel</button>
+                  <button type="button" class="btn btn-primary" [disabled]="textAnnotationForm.invalid" (click)="addTextAnnotation()">Save</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        }
+        @if (showAddFileAnnotation) {
+          <div class="card mb-3">
+            <div class="card-header d-flex justify-content-between align-items-center">
+              <h6 class="mb-0">Add File Annotation</h6>
+              <button type="button" class="btn-close" (click)="showAddFileAnnotation = false"></button>
+            </div>
+            <div class="card-body">
+              <form [formGroup]="fileAnnotationForm">
+                <div class="mb-3">
+                  <label for="fileAnnotationName" class="form-label">Name (optional)</label>
+                  <input type="text" class="form-control" id="fileAnnotationName" formControlName="name" placeholder="Default: file name">
+                </div>
+                <div class="mb-3">
+                  <label for="annotationFile" class="form-label">File</label>
+                  <input type="file" class="form-control" id="annotationFile" (change)="onFileSelected($event)" required>
+                  @if (fileError) {
+                    <div class="text-danger mt-1">{{fileError}}</div>
+                  }
+                </div>
+                <div class="text-end">
+                  <button type="button" class="btn btn-secondary me-2" (click)="showAddFileAnnotation = false">Cancel</button>
+                  <button type="button" class="btn btn-primary" [disabled]="!selectedFile" (click)="addFileAnnotation()">Upload</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        }
+      }
+      @if (data) {
+        @if (data.annotations.length > 0) {
+          <div class="list-group mt-3">
+            @for (annotation of data.annotations; track annotation.id) {
+              <div class="list-group-item list-group-item-action flex-column align-items-start">
+                <div class="d-flex w-100 justify-content-between">
+                  <h6 class="mb-1">
+                    @if (annotation.annotation_type === 'text') {
+                      <i class="bi bi-sticky me-2"></i>
+                    } @else if (annotation.annotation_type === 'file') {
+                      <i class="bi bi-file-earmark me-2"></i>
+                    }
+                    {{annotation.annotation_name}}
+                  </h6>
+                  <small>{{annotation.created_at | date:'short'}}</small>
+                </div>
+                @if (annotation.annotation_type === 'text') {
+                  <div class="mt-2">{{annotation.annotation}}</div>
+                } @else if (annotation.annotation_type === 'file') {
+                  <a [href]="annotation.annotation" target="_blank" class="btn btn-sm btn-outline-primary mt-2">
+                    <i class="bi bi-download me-1"></i>Download
+                  </a>
+                }
+
+              </div>
+            }
+          </div>
+        } @else {
+          <div class="text-muted text-center py-3">
+            No annotations available for this maintenance log
+          </div>
+        }
+      }
+    </div>
+  }
 </div>
 
 <div class="modal-footer">

@@ -43,13 +43,29 @@ import {NgClass} from "@angular/common";
         NgbHighlight,
         ItemMetadataComponent,
         NgbPagination,
-        NgClass
+        NgClass,
+      FormsModule
     ],
     templateUrl: './stored-reagent-editor-modal.component.html',
     styleUrl: './stored-reagent-editor-modal.component.scss'
 })
 export class StoredReagentEditorModalComponent implements AfterViewInit, OnInit{
-
+  barcodeFormats = [
+    {value: 'CODE128', label: 'CODE 128 (Auto)'},
+    {value: 'CODE128A', label: 'CODE 128 A'},
+    {value: 'CODE128B', label: 'CODE 128 B'},
+    {value: 'CODE128C', label: 'CODE 128 C'},
+    {value: 'EAN13', label: 'EAN-13'},
+    {value: 'EAN8', label: 'EAN-8'},
+    {value: 'UPC', label: 'UPC-A'},
+    {value: 'UPCE', label: 'UPC-E'},
+    {value: 'CODE39', label: 'CODE 39'},
+    {value: 'ITF14', label: 'ITF-14'},
+    {value: 'MSI', label: 'MSI'},
+    {value: 'pharmacode', label: 'Pharmacode'},
+    {value: 'codabar', label: 'Codabar'}
+  ];
+  selectedBarcodeFormat = 'EAN13';
   private _storedReagent: StoredReagent|undefined = undefined
   createdByProject!: Project
   createdBySession!: ProtocolSession
@@ -220,19 +236,50 @@ export class StoredReagentEditorModalComponent implements AfterViewInit, OnInit{
     if (this.storedReagent) {
       const canvas = document.getElementById(`stored-reagent-${this.storedReagent.id}-barcode-canvas`) as HTMLOrSVGImageElement
       if (this.form.controls.barcode.value) {
-        JsBarcode(canvas, this.form.controls.barcode.value, {
-          format: 'EAN13',
-          width: 5,  // Increase this value to make the barcode thicker
-          height: 100,  // Decrease this value to make the barcode shorter
-          margin: 50,
-          displayValue: true
-        })
+        try {
+          JsBarcode(canvas, this.form.controls.barcode.value, {
+            format: this.selectedBarcodeFormat,
+            width: 2,
+            height: 60,
+            margin: 10,
+            displayValue: true,
+            fontSize: 12,
+            flat: true,
+            background: "#ffffff"
+          });
+
+          canvas.setAttribute('style', 'max-width:100%');
+        } catch (e) {
+          console.error('Barcode rendering error:', e);
+          this.renderTextFallback(canvas, this.form.controls.barcode.value);
+        }
       }
     }
-
+  }
+  onBarcodeFormatChange(event: any) {
+    if (!event.target) {
+      return
+    }
+    const format = event.target.value;
+    this.selectedBarcodeFormat = format;
+    this.drawBarcode();
   }
 
+  renderTextFallback(canvas: HTMLOrSVGImageElement, text: string) {
+    while (canvas.firstChild) {
+      canvas.removeChild(canvas.firstChild);
+    }
 
+    const svgNS = "http://www.w3.org/2000/svg";
+    const textElement = document.createElementNS(svgNS, "text");
+    textElement.setAttribute("x", "50%");
+    textElement.setAttribute("y", "50%");
+    textElement.setAttribute("text-anchor", "middle");
+    textElement.setAttribute("dominant-baseline", "middle");
+    textElement.textContent = text;
+
+    canvas.appendChild(textElement);
+  }
 
   searchProtocol = (text$: Observable<string>) => {
     return text$.pipe(
