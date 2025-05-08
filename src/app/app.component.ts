@@ -84,6 +84,20 @@ export class AppComponent {
     this.ws.userWSConnection?.subscribe((data) => {
       if (data) {
         console.log(data)
+        if ("signed_value" in data && "instance_id" in data) {
+          if (data["instance_id"] === this.web.cupcakeInstanceID) {
+            if (data["signed_value"].startsWith("reagent_actions_export")) {
+              this.toastService.show("Export File", "Exporting file...")
+              const downloadURL = environment.baseURL + "/api/storage_object/download_report/?token=" + data["signed_value"]
+              const link = document.createElement('a');
+              link.href = downloadURL;
+              link.download = data["signed_value"].split(":")[0]
+              document.body.appendChild(link);
+              link.click();
+              document.body.removeChild(link);
+            }
+          }
+        }
 
         /*if(data.signed_value && data.user_download) {
           this.toastService.show("Export File", "Downloading file...")

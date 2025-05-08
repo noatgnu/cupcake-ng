@@ -27,7 +27,7 @@ import {MetadataColumn} from "../../metadata-column";
 import {
   StorageObjectAccessControlModalComponent
 } from "../storage-object-access-control-modal/storage-object-access-control-modal.component";
-
+import {ActionExportModalComponent} from "../action-export-modal/action-export-modal.component";
 @Component({
     selector: 'app-storage-object-view',
     imports: [
@@ -327,5 +327,40 @@ export class StorageObjectViewComponent {
   openStorageObjectAccessControlModal() {
     const ref = this.modal.open(StorageObjectAccessControlModalComponent)
     ref.componentInstance.data = this.storageObject
+  }
+
+  exportReagentActions(storageObjectId: number) {
+    const modalRef = this.modal.open(ActionExportModalComponent);
+
+    const endDate = new Date();
+    const startDate = new Date();
+    startDate.setMonth(startDate.getMonth() - 1);
+
+    modalRef.componentInstance.startDate = startDate;
+    modalRef.componentInstance.endDate = endDate;
+
+    modalRef.closed.subscribe((data: {startDate: Date, endDate: Date}) => {
+      const instanceId = this.web.cupcakeInstanceID;
+
+      this.web.exportStoredReagentActions(storageObjectId, data.startDate, data.endDate, instanceId)
+        .subscribe({
+          next: (response) => {
+            if (response && response.job_id) {
+              this.toastService.show(
+                'Export Started',
+                'Your export job has been queued. You will be notified when it is ready.'
+              );
+              console.log('Export job ID:', response.job_id);
+            }
+          },
+          error: (error) => {
+            console.error('Export error:', error);
+            this.toastService.show(
+              'Export Failed',
+              'There was a problem exporting the reagent actions.'
+            );
+          }
+        });
+    });
   }
 }

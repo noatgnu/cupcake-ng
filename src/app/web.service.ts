@@ -1327,6 +1327,11 @@ export class WebService {
     )
   }
 
+  exportStoredReagentActions(storage_object_id: number, start_date: Date, end_date: Date, instance_id: string) {
+    const payload: any = {start_date: start_date, end_date: end_date, instance_id: instance_id}
+    return this.http.post<{job_id: string}>(`${this.baseURL}/api/storage_object/${storage_object_id}/export_reagent_actions/`, payload, {responseType: 'json', observe: 'body'})
+  }
+
   getStoredReagentActionWithinRange(reagent_id: number, start: Date, end: Date) {
     let params = new HttpParams()
     params = params.set('reagent', reagent_id.toString())

@@ -207,7 +207,7 @@ export class BarcodeScannerModalComponent implements AfterViewInit, OnDestroy {
       locate: true,
       locator: {
         halfSample: true,
-        patchSize: "medium"
+        patchSize: "medium",
       }
     });
   }
