@@ -1186,8 +1186,11 @@ export class WebService {
   }
 
   updateStorageObject(object_id: number, object_name: string, object_description: string, png_base64: string|null = null) {
-    const payload: any = {name: object_name, description: object_description, png_base64: png_base64}
 
+    const payload: any = {name: object_name, description: object_description}
+    if (png_base64) {
+      payload['png_base64'] = png_base64
+    }
     return this.http.put<StorageObject>(
       `${this.baseURL}/api/storage_object/${object_id}/`,
       payload,

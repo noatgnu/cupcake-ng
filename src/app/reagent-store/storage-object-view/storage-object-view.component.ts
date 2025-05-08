@@ -179,7 +179,7 @@ export class StorageObjectViewComponent {
     const ref = this.modal.open(StorageObjectEditorModalComponent, {scrollable: true})
     ref.componentInstance.storageObject = this.storageObject
     ref.closed.subscribe((data) => {
-      this.web.updateStorageObject(this.storageObject!.id, data.name, data.description).subscribe((data) => {
+      this.web.updateStorageObject(this.storageObject!.id, data.object_name, data.object_description).subscribe((data) => {
         this.storageObject = data
       })
     })
