@@ -1120,7 +1120,7 @@ export class WebService {
 
 
 
-  getStorageObjects(url?: string, limit: number = 10, offset: number = 0, searchTerm: string = "", root: boolean = false, stored_at: number|null = null) {
+  getStorageObjects(url?: string, limit: number = 10, offset: number = 0, searchTerm: string = "", root: boolean = false, stored_at: number|null = null, exclude_objects: number[]|null = null) {
     if (url) {
       return this.http.get<StorageObjectQuery>(
         url,
@@ -1138,6 +1138,9 @@ export class WebService {
     }
     if (stored_at) {
       params = params.append('stored_at', stored_at.toString())
+    }
+    if (exclude_objects) {
+      params = params.append('exclude_objects', exclude_objects.join(','))
     }
 
     return this.http.get<StorageObjectQuery>(
@@ -1733,6 +1736,14 @@ export class WebService {
     return this.http.get<LabGroupQuery>(
       `${this.baseURL}/api/lab_groups/`,
       {responseType: 'json', observe: 'body', params: params}
+    )
+  }
+
+  moveStorageObjects(target_parent_id: number, storage_object_ids: number[]) {
+    return this.http.post<StorageObject[]>(
+      `${this.baseURL}/api/storage_object/move_storage_objects/`,
+      {target_parent_id: target_parent_id, storage_object_ids: storage_object_ids},
+      {responseType: 'json', observe: 'body'}
     )
   }
 

@@ -28,6 +28,9 @@ import {
   StorageObjectAccessControlModalComponent
 } from "../storage-object-access-control-modal/storage-object-access-control-modal.component";
 import {ActionExportModalComponent} from "../action-export-modal/action-export-modal.component";
+import {StorageObjectSelectorModalComponent} from "../storage-object-selector-modal/storage-object-selector-modal.component";
+import {Router} from "@angular/router";
+
 @Component({
     selector: 'app-storage-object-view',
     imports: [
@@ -58,11 +61,11 @@ export class StorageObjectViewComponent {
     this.storedReagentQuery = undefined
     if (value) {
       this.getStoredReagents(undefined, this.pageSize, this.currentPageOffset, undefined, value.id, this.storedReagentID)
-      this.web.getStorageObjectPathToRoot(value.id).subscribe((data) => {
-        this.pathToRoot = data
-      })
+      //this.web.getStorageObjectPathToRoot(value.id).subscribe((data) => {
+      //  this.pathToRoot = data
+      //})
     } else {
-      this.pathToRoot = []
+      //this.pathToRoot = []
     }
   }
 
@@ -84,7 +87,7 @@ export class StorageObjectViewComponent {
     name: new FormControl("", Validators.required),
   })
 
-  constructor(private web: WebService, private fb: FormBuilder, private modal: NgbModal, private toastService: ToastService, public dataService: DataService) {
+  constructor(private router: Router, private web: WebService, private fb: FormBuilder, private modal: NgbModal, private toastService: ToastService, public dataService: DataService) {
     this.form.controls.name.valueChanges.subscribe((value) => {
       if (value) {
         this.getStoredReagents(undefined, this.pageSize, this.currentPageOffset, value, this.storageObject?.id)
@@ -361,6 +364,41 @@ export class StorageObjectViewComponent {
             );
           }
         });
+    });
+  }
+
+  moveStorageObject() {
+    const modalRef = this.modal.open(StorageObjectSelectorModalComponent, { size: 'lg' });
+    modalRef.componentInstance.title = 'Select Destination';
+    modalRef.componentInstance.multiSelect = false;
+    if (this.storageObject) {
+      modalRef.componentInstance.excludeIds = [this.storageObject.id];
+    }
+
+    modalRef.closed.subscribe((result: StorageObject[]) => {
+      if (result && result.length > 0) {
+        const targetParentId = result[0].id;
+        if (this.storageObject) {
+          const storageObjectIds = [this.storageObject.id];
+          this.web.moveStorageObjects(targetParentId, storageObjectIds).subscribe({
+            next: (movedObjects) => {
+              this.toastService.show(
+                'Success',
+                `Moved ${this.storageObject?.object_name} to ${result[0].object_name}`
+              );
+              this.router.navigate(['reagent-store', targetParentId]);
+            },
+            error: (error) => {
+              console.error('Move error:', error);
+              this.toastService.show(
+                'Move Failed',
+                `Failed to move ${this.storageObject?.object_name}`,
+              );
+            }
+          });
+        }
+
+      }
     });
   }
 }

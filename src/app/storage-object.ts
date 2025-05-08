@@ -14,6 +14,8 @@ export interface StorageObject {
   can_delete: boolean;
   png_base64: string;
   user: string;
+  child_count: number;
+  path_to_root: {id: number, name: string}[];
 }
 
 export interface StoredReagent {

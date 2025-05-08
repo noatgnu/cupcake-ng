@@ -26,6 +26,11 @@
                   ngbTooltip="Export all reagent actions">
             <i class="bi bi-file-earmark-arrow-down"></i> Export Actions
           </button>
+          <button class="btn btn-sm btn-outline-secondary"
+                  (click)="moveStorageObject()"
+                  ngbTooltip="Move to another location">
+            <i class="bi bi-arrows-move"></i> Move
+          </button>
           <button class="btn btn-sm btn-outline-primary" (click)="openQRCodeModal()" ngbTooltip="View QR code">
             <i class="bi bi-qr-code me-1"></i><span class="d-none d-md-inline">QR</span>
           </button>
@@ -57,7 +62,7 @@
     <nav aria-label="breadcrumb" class="mb-3">
       <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="/#/reagent-store"><i class="bi bi-house"></i> Home</a></li>
-        @for (path of pathToRoot; track path.id) {
+        @for (path of storageObject?.path_to_root; track path.id) {
           <li class="breadcrumb-item">
             <a href="/#/reagent-store/{{path.id}}">{{path.name}}</a>
           </li>

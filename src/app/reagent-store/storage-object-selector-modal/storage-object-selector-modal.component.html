@@ -1,0 +1,100 @@
+<div class="modal-header">
+  <h4 class="modal-title">{{title}}</h4>
+  <button type="button" class="btn-close" aria-label="Close" (click)="dismiss()"></button>
+</div>
+
+<div class="modal-body">
+  <form [formGroup]="searchForm" class="mb-3">
+    <div class="input-group">
+      <span class="input-group-text"><i class="bi bi-search"></i></span>
+      <input
+        type="search"
+        formControlName="searchTerm"
+        class="form-control"
+        placeholder="Search by name or location...">
+      <button
+        class="btn btn-outline-secondary"
+        type="button"
+        [disabled]="!searchForm.get('searchTerm')?.value"
+        (click)="searchForm.get('searchTerm')?.setValue('')">
+        <i class="bi bi-x"></i>
+      </button>
+    </div>
+  </form>
+
+  <p class="text-muted small mb-3">
+    @if (multiSelect) {
+      Select one or more storage locations
+    } @else {
+      Select a destination storage location
+    }
+  </p>
+
+  @if (isLoading) {
+    <div class="text-center my-4">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+    </div>
+  } @else if (storageObjects.length === 0) {
+    <div class="alert alert-info">
+      <i class="bi bi-info-circle me-2"></i>
+      No storage locations found. Try adjusting your search criteria.
+    </div>
+  } @else {
+    <div class="list-group">
+      @for (object of storageObjects; track object.id) {
+        <button
+          type="button"
+          class="list-group-item list-group-item-action d-flex align-items-center"
+          [class.active]="isSelected(object)"
+          (click)="toggleSelection(object)">
+          <span class="me-2">
+            @if (isSelected(object)) {
+              <i class="bi bi-check-circle-fill"></i>
+            } @else {
+              <i class="bi bi-circle"></i>
+            }
+          </span>
+          <div>
+            <div class="fw-bold">{{object.object_name || object.object_name}}</div>
+            @if (object.path_to_root.length > 0) {
+              <small class="text-muted">@for (p of object.path_to_root; track $index) {<span>/{{p.name}}</span>}</small>
+            }
+
+          </div>
+        </button>
+      }
+    </div>
+
+    <!-- Pagination -->
+    @if (totalCount > pageSize) {
+      <div class="d-flex justify-content-center mt-3">
+        <ngb-pagination
+          [collectionSize]="totalCount"
+          [(page)]="currentPage"
+          [pageSize]="pageSize"
+          [maxSize]="5"
+          [rotate]="true"
+          [boundaryLinks]="true"
+          (pageChange)="onPageChange($event)">
+        </ngb-pagination>
+      </div>
+    }
+  }
+</div>
+
+<div class="modal-footer">
+  <button type="button" class="btn btn-outline-secondary" (click)="dismiss()">Cancel</button>
+  <button
+    type="button"
+    class="btn btn-primary"
+    [disabled]="selectedObjects.length === 0"
+    (click)="confirm()">
+    @if (multiSelect) {
+      Select ({{selectedObjects.length}})
+    } @else {
+      Select
+    }
+  </button>
+</div>

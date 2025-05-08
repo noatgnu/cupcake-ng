@@ -1,148 +1,230 @@
-<div class="container d-flex flex-column gap-2 mt-2">
-  <ul ngbNav #nav="ngbNav" [(activeId)]="activeTab" (activeIdChange)="changeActiveID($event)" class="nav-tabs"  [destroyOnHide]="false">
-    <li [ngbNavItem]="'user'">
-      <button ngbNavLink>Personal Templates</button>
-      <ng-template ngbNavContent>
-
-      </ng-template>
-    </li>
-    <li [ngbNavItem]="'service_lab_group'">
-      <button ngbNavLink>Professional Group Templates</button>
-      <ng-template ngbNavContent>
-        @if (userLabGroupQuery) {
-          <form [formGroup]="labGroupForm">
-            <div class="form-group">
-              <label>User's Professional Lab Group</label>
-              <select class="form-select" formControlName="lab_group_id" [size]="5" style="width:400px">
-                <option [value]="0">None</option>
-                @for (l of userLabGroupQuery.results; track l.id) {
-                  <option [value]="l.id">{{l.name}}</option>
-                }
-              </select>
-            </div>
-            <ngb-pagination (pageChange)="onPageChange($event)" [collectionSize]="userLabGroupQuery.count" [(page)]="labGroupPage" [pageSize]="labGroupPageSize" [maxSize]="3" [boundaryLinks]="true" [rotate]="true"></ngb-pagination>
-          </form>
-        }
-      </ng-template>
-    </li>
-  </ul>
-  <div [ngbNavOutlet]="nav"></div>
-  <form [formGroup]="tableTemplateForm">
-    <div class="form-group">
-      <label for="tableTemplateName">Search Metadata Table Template Name</label>
-      <input type="search" class="form-control" formControlName="searchTerm" id="tableTemplateName">
+<div class="container-fluid mt-3">
+  <!-- Navigation Tabs -->
+  <div class="card mb-3">
+    <div class="card-body">
+      <ul ngbNav #nav="ngbNav" [(activeId)]="activeTab" (activeIdChange)="changeActiveID($event)" class="nav-tabs" [destroyOnHide]="false">
+        <li [ngbNavItem]="'user'">
+          <button ngbNavLink>Personal Templates</button>
+          <ng-template ngbNavContent></ng-template>
+        </li>
+        <li [ngbNavItem]="'service_lab_group'">
+          <button ngbNavLink>Professional Group Templates</button>
+          <ng-template ngbNavContent>
+            @if (userLabGroupQuery) {
+              <form [formGroup]="labGroupForm" class="mt-3">
+                <div class="form-group mb-3">
+                  <label class="form-label">User's Professional Lab Group</label>
+                  <select class="form-select" formControlName="lab_group_id" [size]="5" style="max-width:400px">
+                    <option [value]="0">None</option>
+                    @for (l of userLabGroupQuery.results; track l.id) {
+                      <option [value]="l.id">{{l.name}}</option>
+                    }
+                  </select>
+                </div>
+                <ngb-pagination
+                  (pageChange)="onPageChange($event)"
+                  [collectionSize]="userLabGroupQuery.count"
+                  [(page)]="labGroupPage"
+                  [pageSize]="labGroupPageSize"
+                  [maxSize]="3"
+                  [boundaryLinks]="true"
+                  [rotate]="true">
+                </ngb-pagination>
+              </form>
+            }
+          </ng-template>
+        </li>
+      </ul>
     </div>
-  </form>
-  <div>
-    @if (activeTab === 'user') {
-      <button class="btn btn-primary" (click)="createNewTemplate('user')">Create Personal Template</button>
-    } @else {
-      <button class="btn btn-warning" (click)="createNewTemplate('service_lab_group')" [disabled]="labGroupForm.value.lab_group_id === 0 || !labGroupForm.value.lab_group_id">Create Professional Group Template</button>
-
-    }
   </div>
 
+  <!-- Content Area -->
+  <div [ngbNavOutlet]="nav"></div>
 
-  @if (tableTemplateQuery) {
-    <table class="table table-hover">
-      <thead>
-      <tr>
-        <th scope="col">ID</th>
-        <th scope="col">Name</th>
-        <th scope="col">Number of user columns</th>
-        <th scope="col">Number of staff columns</th>
-        <th scope="col">Actions</th>
-      </tr>
-      </thead>
-      <tbody>
-        @for (t of tableTemplateQuery.results; track t.id) {
-          <tr>
-            <td>{{t.id}}</td>
-            <td>{{t.name}}</td>
-            <td>{{t.user_columns.length}} ({{t.hidden_user_columns}} hidden)</td>
-            <td>{{t.staff_columns.length}} ({{t.hidden_staff_columns}} hidden)</td>
-            <td>
-              <div class="d-flex gap-2">
-                <button class="btn btn-sm btn-primary" (click)="exportTemplateToJSON(t)" ngbTooltip="Download template file"><i class="bi bi-arrow-down"></i></button>
-                <button class="btn btn-sm btn-primary" (click)="selectedTemplate=t" ngbTooltip="Edit template"><i class="bi bi-pencil"></i></button>
-                <button class="btn btn-sm btn-danger" (click)="deleteTemplate(t)" ngbTooltip="Remove template"><i class="bi bi-trash"></i></button>
-              </div>
-            </td>
-          </tr>
-        }
-      </tbody>
-    </table>
-    <ngb-pagination (pageChange)="onTableTemplatePageChange($event)" [collectionSize]="tableTemplateQuery.count" [(page)]="tableTemplatePage" [pageSize]="tableTemplatePageSize" [maxSize]="5" [boundaryLinks]="true" [rotate]="true"></ngb-pagination>
-  }
+  <div class="row mb-3">
+    <!-- Search and Create actions -->
+    <div class="col-md-6">
+      <form [formGroup]="tableTemplateForm">
+        <div class="input-group mb-3">
+          <span class="input-group-text"><i class="bi bi-search"></i></span>
+          <input type="search" class="form-control" formControlName="searchTerm" id="tableTemplateName" placeholder="Search by template name...">
+        </div>
+      </form>
+    </div>
+    <div class="col-md-6 text-md-end">
+      @if (activeTab === 'user') {
+        <button class="btn btn-primary" (click)="createNewTemplate('user')">
+          <i class="bi bi-plus-circle me-1"></i> Create Personal Template
+        </button>
+      } @else {
+        <button class="btn btn-warning"
+                (click)="createNewTemplate('service_lab_group')"
+                [disabled]="labGroupForm.value.lab_group_id === 0 || !labGroupForm.value.lab_group_id">
+          <i class="bi bi-plus-circle me-1"></i> Create Professional Group Template
+        </button>
+      }
+    </div>
+  </div>
 
+  <!-- Templates Table -->
+  <div class="card mb-3">
+    <div class="card-body">
+      @if (tableTemplateQuery) {
+        <div class="table-responsive">
+          <table class="table table-hover align-middle">
+            <thead>
+            <tr>
+              <th scope="col">ID</th>
+              <th scope="col">Name</th>
+              <th scope="col">User Columns</th>
+              <th scope="col">Staff Columns</th>
+              <th scope="col" class="text-end">Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+              @for (t of tableTemplateQuery.results; track t.id) {
+                <tr>
+                  <td>{{t.id}}</td>
+                  <td>{{t.name}}</td>
+                  <td>{{t.user_columns.length}} <span class="text-muted">({{t.hidden_user_columns}} hidden)</span></td>
+                  <td>{{t.staff_columns.length}} <span class="text-muted">({{t.hidden_staff_columns}} hidden)</span></td>
+                  <td>
+                    <div class="d-flex gap-2 justify-content-end">
+                      <button class="btn btn-sm btn-outline-primary" (click)="exportTemplateToJSON(t)" ngbTooltip="Download template file">
+                        <i class="bi bi-download"></i>
+                      </button>
+                      <button class="btn btn-sm btn-outline-secondary" (click)="selectedTemplate=t" ngbTooltip="Edit template">
+                        <i class="bi bi-pencil"></i>
+                      </button>
+                      <button class="btn btn-sm btn-outline-danger" (click)="deleteTemplate(t)" ngbTooltip="Remove template">
+                        <i class="bi bi-trash"></i>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              }
+              @if (tableTemplateQuery.results.length === 0) {
+                <tr>
+                  <td colspan="5" class="text-center py-4 text-muted">
+                    No templates found. Create your first template to get started.
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="d-flex justify-content-center mt-3">
+          <ngb-pagination
+            (pageChange)="onTableTemplatePageChange($event)"
+            [collectionSize]="tableTemplateQuery.count"
+            [(page)]="tableTemplatePage"
+            [pageSize]="tableTemplatePageSize"
+            [maxSize]="5"
+            [boundaryLinks]="true"
+            [rotate]="true">
+          </ngb-pagination>
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- Template Editor -->
   @if (selectedTemplate) {
-    @if (missingColumns.length > 0) {
-      <ngb-alert type="danger">
-        <p>
-          The following required columns are missing from the template:
-        </p>
-        <ul>
-          @for (c of missingColumns; track c) {
-            <li>{{c}}</li>
-          }
-        </ul>
-      </ngb-alert>
-    }
-    <div class="form-check">
-      <input type="checkbox" class="form-check-input" [(ngModel)]="templateShowHidden" id="showHidden">
-      <label class="form-check-label" for="showHidden">Show hidden columns</label>
-    </div>
-    <div class="d-flex gap-2">
-      <button class="btn btn-primary" (click)="openFieldMaskEditorModal()">Field masks @if(selectedTemplate.field_mask_mapping.length > 0){({{selectedTemplate.field_mask_mapping.length}})}</button>
-      <button class="btn btn-warning" (click)="importFromJSON()" ngbTooltip="Import default data from json file">Import</button>
-      <div ngbDropdown display="dynamic" class="d-inline-black">
-        <button class="btn btn-primary" id="addMetadata" ngbDropdownToggle>
-          + User Columns
-        </button>
-        <div ngbDropdownMenu aria-labelledby="addMetadata">
-          @for (m of metadataService.userMetadataTemplate; track m.name) {
-            <a class="dropdown-item" (click)="addMetadata(m, 'user_metadata')">
-              @if (selectedTemplateFieldMap[m.name]) {
-                {{selectedTemplateFieldMap[m.name]}}
-              } @else {
-                {{m.name}}
-              }
-            </a>
-          }
-          <a class="dropdown-item" (click)="addMetadata({name: 'Sample type', type: 'Characteristics'}, 'user_metadata')">
-            Sample Type
-          </a>
-          <a class="dropdown-item" (click)="addMetadata({name: '', type: ''}, 'user_metadata')">
-            Custom Metadata
-          </a>
+    <div class="card mb-3">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Editing Template: <span class="text-primary">{{selectedTemplate.name}}</span></h5>
+        <div class="form-check form-switch">
+          <input type="checkbox" class="form-check-input" [(ngModel)]="templateShowHidden" id="showHidden">
+          <label class="form-check-label" for="showHidden">Show hidden columns</label>
         </div>
       </div>
-      <div ngbDropdown display="dynamic" class="d-inline-black">
-        <button class="btn btn-warning" id="addStaffMetadata" ngbDropdownToggle>
-          + Staff Columns
-        </button>
-        <div ngbDropdownMenu aria-labelledby="addStaffMetadata">
-          @for (m of metadataService.staffMetadataSpecific; track m) {
-            <a class="dropdown-item" (click)="addMetadata({name: m, type: 'Comment'}, 'staff_metadata')">
-              @if (selectedTemplateFieldMap[m]) {
-                {{selectedTemplateFieldMap[m]}}
-              } @else {
-                {{m}}
+      <div class="card-body">
+        @if (missingColumns.length > 0) {
+          <ngb-alert type="danger" class="mb-3">
+            <p class="mb-2">
+              <i class="bi bi-exclamation-triangle me-2"></i>
+              The following required columns are missing from the template:
+            </p>
+            <ul class="mb-0">
+              @for (c of missingColumns; track c) {
+                <li>{{c}}</li>
               }
-            </a>
-          }
-          <a class="dropdown-item" (click)="addMetadata({name: '', type: 'Factor value'}, 'staff_metadata')">
-            Factor Value
-          </a>
-          <a class="dropdown-item" (click)="addMetadata({name: '', type: ''}, 'staff_metadata')">
-            Custom Metadata
-          </a>
+            </ul>
+          </ngb-alert>
+        }
+
+        <div class="row mb-3">
+          <div class="col-12">
+            <div class="d-flex flex-wrap gap-2">
+              <button class="btn btn-outline-primary" (click)="openFieldMaskEditorModal()">
+                <i class="bi bi-mask me-1"></i> Field Masks
+                @if(selectedTemplate.field_mask_mapping.length > 0){
+                  <span class="badge bg-secondary ms-1">{{selectedTemplate.field_mask_mapping.length}}</span>
+                }
+              </button>
+              <button class="btn btn-outline-warning" (click)="importFromJSON()" ngbTooltip="Import default data from json file">
+                <i class="bi bi-file-earmark-arrow-up me-1"></i> Import
+              </button>
+
+              <div ngbDropdown display="dynamic" class="d-inline-block">
+                <button class="btn btn-primary" id="addMetadata" ngbDropdownToggle>
+                  <i class="bi bi-plus-lg me-1"></i> User Columns
+                </button>
+                <div ngbDropdownMenu aria-labelledby="addMetadata" class="dropdown-menu-end">
+                  @for (m of metadataService.userMetadataTemplate; track m.name) {
+                    <a class="dropdown-item" (click)="addMetadata(m, 'user_metadata')">
+                      {{selectedTemplateFieldMap[m.name] || m.name}}
+                    </a>
+                  }
+                  <div class="dropdown-divider"></div>
+                  <a class="dropdown-item" (click)="addMetadata({name: 'Sample type', type: 'Characteristics'}, 'user_metadata')">
+                    Sample Type
+                  </a>
+                  <a class="dropdown-item" (click)="addMetadata({name: '', type: ''}, 'user_metadata')">
+                    <i class="bi bi-plus-circle me-1"></i> Custom Metadata
+                  </a>
+                </div>
+              </div>
+
+              <div ngbDropdown display="dynamic" class="d-inline-block">
+                <button class="btn btn-warning" id="addStaffMetadata" ngbDropdownToggle>
+                  <i class="bi bi-plus-lg me-1"></i> Staff Columns
+                </button>
+                <div ngbDropdownMenu aria-labelledby="addStaffMetadata" class="dropdown-menu-end">
+                  @for (m of metadataService.staffMetadataSpecific; track m) {
+                    <a class="dropdown-item" (click)="addMetadata({name: m, type: 'Comment'}, 'staff_metadata')">
+                      {{selectedTemplateFieldMap[m] || m}}
+                    </a>
+                  }
+                  <div class="dropdown-divider"></div>
+                  <a class="dropdown-item" (click)="addMetadata({name: '', type: 'Factor value'}, 'staff_metadata')">
+                    Factor Value
+                  </a>
+                  <a class="dropdown-item" (click)="addMetadata({name: '', type: ''}, 'staff_metadata')">
+                    <i class="bi bi-plus-circle me-1"></i> Custom Metadata
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Template Preview -->
+        <div class="metadata-table-container border rounded p-3 ">
+          <app-metadata-table
+            [template]="selectedTemplate"
+            [showHidden]="templateShowHidden"
+            (metadataUpdated)="updateMetadataTemplate($event)"
+            [templateMode]="true"
+            [staffModeActive]="true"
+            [sampleNumber]="5"
+            [userMetadata]="selectedTemplate.user_columns"
+            [staffMetadata]="selectedTemplate.staff_columns">
+          </app-metadata-table>
         </div>
       </div>
-    </div>
-    <b>Template Preview for <span class="text-primary">{{selectedTemplate.name}}</span></b>
-    <div class="metadata-table-container">
-      <app-metadata-table [template]="selectedTemplate" [showHidden]="templateShowHidden" (metadataUpdated)="updateMetadataTemplate($event)" [templateMode]="true" [staffModeActive]="true" [sampleNumber]="5" [userMetadata]="selectedTemplate.user_columns" [staffMetadata]="selectedTemplate.staff_columns"></app-metadata-table>
     </div>
   }
 </div>
