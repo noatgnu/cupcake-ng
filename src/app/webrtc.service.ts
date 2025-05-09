@@ -12,6 +12,32 @@ export interface ChatMessage {
   senderName: string;
   message: string;
   timestamp: number;
+  fileMetadata?: {
+    fileId: string;
+    fileName: string;
+    fileSize: number;
+    fileType: string;
+    sender: string;
+  };
+}
+
+interface FileChunk {
+  fileId: string;
+  fileName: string;
+  chunkIndex: number;
+  totalChunks: number;
+  data: ArrayBuffer;
+  mimeType?: string;
+}
+
+interface FileTransfer {
+  fileId: string;
+  fileName: string;
+  mimeType: string;
+  size: number;
+  chunks: ArrayBuffer[];
+  receivedChunks: number;
+  sending: boolean;
 }
 
 interface PeerConnection {
@@ -31,6 +57,9 @@ export class WebrtcService {
   private _chatMessages = new Subject<ChatMessage>();
   chatMessages$ = this._chatMessages.asObservable();
   userName: string = 'User';
+  private fileTransfers: Map<string, FileTransfer> = new Map();
+  private chunkSize = 16384;
+  private availableFiles: Map<string, File> = new Map();
 
   // Media devices
   selectedVideoDevice?: MediaDeviceInfo;
@@ -188,10 +217,24 @@ export class WebrtcService {
 
       try {
         const data = JSON.parse(event.data);
-        if (data.type === 'chat') {
-          this.zone.run(() => {
-            this._chatMessages.next(data.data);
-          });
+        switch (data.type) {
+          case 'chat':
+            this.zone.run(() => {
+              this._chatMessages.next(data.data);
+            });
+            break;
+          case 'file-start':
+
+            break;
+          case 'file-chunk':
+            this.handleFileChunk(data.data, connectionID);
+            break;
+          case 'file-request':
+            // Handle incoming file request
+            this.zone.run(() => {
+              this.sendFileToPeer(data.data.fileId, data.data.requesterId);
+            });
+            break;
         }
       } catch (e) {
         console.error('Error parsing message data', e);
@@ -944,5 +987,212 @@ export class WebrtcService {
     });
 
     this._chatMessages.next(chatMessage);
+  }
+
+  async sendFile(file: File): Promise<void> {
+    const fileId = crypto.randomUUID();
+    const arrayBuffer = await file.arrayBuffer();
+    const totalChunks = Math.ceil(arrayBuffer.byteLength / this.chunkSize);
+
+    this.fileTransfers.set(fileId, {
+      fileId,
+      fileName: file.name,
+      mimeType: file.type,
+      size: file.size,
+      chunks: [],
+      receivedChunks: 0,
+      sending: true
+    });
+
+    // Notify peers about incoming file
+    this.broadcastToDataChannels({
+      type: 'file-start',
+      data: {
+        fileId,
+        fileName: file.name,
+        mimeType: file.type,
+        size: file.size,
+        totalChunks
+      }
+    });
+
+    // Send file in chunks
+    for (let i = 0; i < totalChunks; i++) {
+      const start = i * this.chunkSize;
+      const end = Math.min(start + this.chunkSize, arrayBuffer.byteLength);
+      const chunk = arrayBuffer.slice(start, end);
+
+      // Send to all peers
+      this.broadcastToDataChannels({
+        type: 'file-chunk',
+        data: {
+          fileId,
+          fileName: file.name,
+          chunkIndex: i,
+          totalChunks,
+          data: chunk,
+          mimeType: file.type
+        }
+      });
+
+      await new Promise(resolve => setTimeout(resolve, 10));
+    }
+  }
+
+  private broadcastToDataChannels(message: any): void {
+    Object.keys(this.peerConnectionMap).forEach(peerId => {
+      const connection = this.peerConnectionMap[peerId];
+      if (connection.dataChannel?.readyState === 'open') {
+        connection.dataChannel.send(JSON.stringify(message));
+      }
+    });
+  }
+
+  storeFileForSharing(fileId: string, file: File): void {
+    this.availableFiles.set(fileId, file);
+  }
+
+  sendFileMetadata(fileMetadata: any, message: string): void {
+    const chatMessage: ChatMessage = {
+      senderId: this.unique_id || 'local',
+      senderName: this.userName,
+      message: message || `Shared file: ${fileMetadata.fileName}`,
+      timestamp: Date.now(),
+      fileMetadata
+    };
+
+    this.broadcastToDataChannels({
+      type: 'chat',
+      data: chatMessage
+    });
+
+    this._chatMessages.next(chatMessage);
+  }
+
+  async sendFileToPeer(fileId: string, peerId: string): Promise<void> {
+    const file = this.availableFiles.get(fileId);
+    if (!file || !this.peerConnectionMap[peerId]?.dataChannel) {
+      console.error("File not available or peer not connected");
+      return;
+    }
+
+    const dataChannel = this.peerConnectionMap[peerId].dataChannel;
+    const arrayBuffer = await file.arrayBuffer();
+    const totalChunks = Math.ceil(arrayBuffer.byteLength / this.chunkSize);
+
+    // Notify peer about incoming file
+    dataChannel.send(JSON.stringify({
+      type: 'file-start',
+      data: {
+        fileId,
+        fileName: file.name,
+        mimeType: file.type,
+        size: file.size,
+        totalChunks
+      }
+    }));
+
+    // Send file in chunks to specific peer
+    for (let i = 0; i < totalChunks; i++) {
+      const start = i * this.chunkSize;
+      const end = Math.min(start + this.chunkSize, arrayBuffer.byteLength);
+      const chunk = arrayBuffer.slice(start, end);
+
+      dataChannel.send(JSON.stringify({
+        type: 'file-chunk',
+        data: {
+          fileId,
+          fileName: file.name,
+          chunkIndex: i,
+          totalChunks,
+          data: Array.from(new Uint8Array(chunk)),
+          mimeType: file.type
+        }
+      }));
+
+      await new Promise(resolve => setTimeout(resolve, 10));
+    }
+  }
+
+  private handleFileChunk(chunk: FileChunk, fromPeer: string): void {
+    let fileTransfer = this.fileTransfers.get(chunk.fileId);
+
+    if (!fileTransfer) {
+      fileTransfer = {
+        fileId: chunk.fileId,
+        fileName: chunk.fileName,
+        mimeType: chunk.mimeType || 'application/octet-stream',
+        size: 0, // Will be updated with file-start message
+        chunks: new Array(chunk.totalChunks),
+        receivedChunks: 0,
+        sending: false
+      };
+      this.fileTransfers.set(chunk.fileId, fileTransfer);
+    }
+
+    // Store this chunk
+    fileTransfer.chunks[chunk.chunkIndex] = chunk.data;
+    fileTransfer.receivedChunks++;
+
+    // Emit progress event
+    this.zone.run(() => {
+      // You could add a Subject for file transfer progress here
+    });
+
+    // Check if file is complete
+    if (fileTransfer.receivedChunks === chunk.totalChunks) {
+      this.assembleFile(fileTransfer);
+    }
+  }
+
+// Assemble complete file
+  private assembleFile(fileTransfer: FileTransfer): void {
+    // Combine all chunks
+    const blob = new Blob(fileTransfer.chunks, { type: fileTransfer.mimeType });
+
+    // Create download link
+    const url = URL.createObjectURL(blob);
+
+    this.zone.run(() => {
+      // Notify UI that file is ready
+      this._chatMessages.next({
+        senderId: 'system',
+        senderName: 'System',
+        message: `File received: ${fileTransfer.fileName}`,
+        timestamp: Date.now()
+      });
+
+      // Trigger download or handle the file as needed
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = fileTransfer.fileName;
+      a.click();
+    });
+  }
+
+  requestFileFromPeer(fileId: string, senderId: string): void {
+    if (!this.peerConnectionMap[senderId]?.dataChannel) {
+      console.error("Cannot request file: Peer not connected");
+      return;
+    }
+
+    const dataChannel = this.peerConnectionMap[senderId].dataChannel;
+
+    // Send file request to the specific peer
+    dataChannel.send(JSON.stringify({
+      type: 'file-request',
+      data: {
+        fileId: fileId,
+        requesterId: this.unique_id
+      }
+    }));
+
+    // Notify user that file is being requested
+    this._chatMessages.next({
+      senderId: 'system',
+      senderName: 'System',
+      message: `Requesting file... Please wait.`,
+      timestamp: Date.now()
+    })
   }
 }

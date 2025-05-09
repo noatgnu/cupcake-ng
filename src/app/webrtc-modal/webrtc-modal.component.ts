@@ -31,7 +31,7 @@ export class WebrtcModalComponent implements OnInit, OnDestroy {
   private chatSubscription?: Subscription;
   private connectionSubscription?: Subscription;
   @ViewChild('chatContainer') chatContainer?: ElementRef;
-
+  selectedFile: File | null = null;
 
   constructor(public webrtc: WebrtcService, private activeModal: NgbActiveModal, private accounts: AccountsService) {
     this.webrtc.userName = this.accounts.username
@@ -168,10 +168,27 @@ export class WebrtcModalComponent implements OnInit, OnDestroy {
   }
 
   sendMessage(): void {
-    if (!this.newMessage.trim()) return;
+    if (this.selectedFile) {
+      // Send file metadata in chat message
+      const fileMetadata = {
+        fileId: crypto.randomUUID(),
+        fileName: this.selectedFile.name,
+        fileSize: this.selectedFile.size,
+        fileType: this.selectedFile.type,
+        sender: this.webrtc.unique_id
+      };
 
-    this.webrtc.sendChatMessage(this.newMessage);
-    this.newMessage = '';
+      // Store file reference in service for later download
+      this.webrtc.storeFileForSharing(fileMetadata.fileId, this.selectedFile);
+
+      // Send as special message
+      this.webrtc.sendFileMetadata(fileMetadata, this.newMessage);
+      this.newMessage = '';
+      this.clearSelectedFile();
+    } else if (this.newMessage.trim()) {
+      this.webrtc.sendChatMessage(this.newMessage);
+      this.newMessage = '';
+    }
   }
 
   formatTimestamp(timestamp: number): string {
@@ -183,5 +200,32 @@ export class WebrtcModalComponent implements OnInit, OnDestroy {
       const element = this.chatContainer.nativeElement;
       element.scrollTop = element.scrollHeight;
     }
+  }
+
+  handleFileSelection(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      this.selectedFile = input.files[0];
+    }
+  }
+
+  clearSelectedFile(): void {
+    this.selectedFile = null;
+    // Reset file input
+    const fileInput = document.querySelector('input[type=file]') as HTMLInputElement;
+    if (fileInput) fileInput.value = '';
+  }
+
+  formatFileSize(bytes: number): string {
+    if (bytes < 1024) return bytes + ' B';
+    else if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+    else return (bytes / 1048576).toFixed(1) + ' MB';
+  }
+
+  requestFile(fileMetadata: any): void {
+    if (!fileMetadata || !fileMetadata.fileId || !fileMetadata.sender) return;
+
+    // Send request to the file owner
+    this.webrtc.requestFileFromPeer(fileMetadata.fileId, fileMetadata.sender);
   }
 }

@@ -172,17 +172,33 @@
               } @else {
                 @for (message of chatMessages; track message.timestamp) {
                   <div class="chat-message rounded p-1 mb-1"
-                       [ngClass]="{
-                   'own-message ms-auto bg-primary bg-opacity-10': message.senderId === webrtc.unique_id,
-                   'system-message w-100 bg-opacity-75 text-muted fst-italic': message.senderId === 'system',
-                   'bg-secondary bg-opacity-10': message.senderId !== 'system' && message.senderId !== webrtc.unique_id
-                 }">
+                       [ngClass]="{'own-message ms-auto bg-warning bg-opacity-10': message.senderId === webrtc.unique_id,
+                'system-message w-100 bg-opacity-75 text-muted fst-italic': message.senderId === 'system',
+                'bg-secondary bg-opacity-10': message.senderId !== 'system' && message.senderId !== webrtc.unique_id}">
                     <div class="message-header d-flex justify-content-between">
                       <strong class="small">{{ message.senderName }}</strong>
                       <small class="text-muted">{{ formatTimestamp(message.timestamp) }}</small>
                     </div>
+
                     <div class="message-body small">{{ message.message }}</div>
+
+                    @if (message.fileMetadata) {
+                      <div class="file-attachment mt-1 p-1 border rounded">
+                        <div class="d-flex align-items-center">
+                          <i class="bi bi-file-earmark me-1"></i>
+                          <span class="small text-truncate">{{ message.fileMetadata.fileName }}</span>
+                          <small class="text-muted ms-1">({{ formatFileSize(message.fileMetadata.fileSize) }})</small>
+                        </div>
+                        @if (message.senderId !== webrtc.unique_id) {
+                          <button class="btn btn-sm btn-outline-primary mt-1"
+                                  (click)="requestFile(message.fileMetadata)">
+                            <i class="bi bi-download"></i>
+                          </button>
+                        }
+                      </div>
+                    }
                   </div>
+
                 }
               }
             </div>
@@ -191,11 +207,28 @@
               <div class="input-group input-group-sm">
                 <input type="text" class="form-control" placeholder="Message..."
                        [(ngModel)]="newMessage" (keyup.enter)="sendMessage()">
+
+                <!-- File attachment button -->
+                <button class="btn btn-outline-secondary btn-sm" type="button"
+                        (click)="fileInput.click()">
+                  <i class="bi bi-paperclip"></i>
+                </button>
+                <input #fileInput type="file" class="d-none" (change)="handleFileSelection($event)">
+
                 <button class="btn btn-primary btn-sm" type="button" (click)="sendMessage()"
                         [disabled]="!newMessage.trim()">
                   <i class="bi bi-send"></i>
                 </button>
               </div>
+              <!-- Show selected file info -->
+              @if (selectedFile) {
+                <small class="d-block text-muted mt-1">
+                  File: {{ selectedFile.name }} ({{ formatFileSize(selectedFile.size) }})
+                  <button class="btn btn-link btn-sm p-0 ms-2" (click)="clearSelectedFile()">
+                    <i class="bi bi-x"></i>
+                  </button>
+                </small>
+              }
             </div>
           </div>
         }
