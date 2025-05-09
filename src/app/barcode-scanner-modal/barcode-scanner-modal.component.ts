@@ -22,6 +22,8 @@ import { CommonModule } from '@angular/common';
   styleUrl: './barcode-scanner-modal.component.scss'
 })
 export class BarcodeScannerModalComponent implements AfterViewInit, OnDestroy {
+  torchAvailable: boolean = false;
+  torchEnabled: boolean = false;
   videoElementPreviewID: string = '#videoElementPreview';
   errorMessage: string = '';
   startedQR: boolean = false;
@@ -57,6 +59,8 @@ export class BarcodeScannerModalComponent implements AfterViewInit, OnDestroy {
   }
 
   storedReagentQuery?: StoredReagentQuery;
+
+
 
   constructor(
     private web: WebService,
@@ -116,6 +120,50 @@ export class BarcodeScannerModalComponent implements AfterViewInit, OnDestroy {
       });
   }
 
+  toggleTorch() {
+    if (!this.startedQR) return;
+
+    const videoTrack = Quagga.CameraAccess.getActiveTrack();
+    if (videoTrack) {
+      try {
+        const capabilities = videoTrack.getCapabilities() as any;
+
+        // Check if torch is supported
+        if (capabilities.torch) {
+          this.torchEnabled = !this.torchEnabled;
+
+          videoTrack.applyConstraints({
+            advanced: [{ torch: this.torchEnabled } as any]
+          }).catch(e => {
+            console.error("Torch control error:", e);
+            this.errorMessage = "Failed to control flashlight";
+            this.torchEnabled = false;
+            this.change.detectChanges();
+          });
+        }
+      } catch (e) {
+        console.error("Torch not supported:", e);
+        this.errorMessage = "Flashlight not available on this device";
+        this.change.detectChanges();
+      }
+    }
+  }
+
+  checkTorchCapability() {
+    const videoTrack = Quagga.CameraAccess.getActiveTrack();
+    if (videoTrack) {
+      try {
+        const capabilities = videoTrack.getCapabilities() as any;
+        this.torchAvailable = !!capabilities.torch;
+        this.change.detectChanges();
+      } catch (e) {
+        console.error("Could not check torch capability:", e);
+        this.torchAvailable = false;
+        this.change.detectChanges();
+      }
+    }
+  }
+
   initiateCameraForQRScan() {
     if (this.startedQR) return;
 
@@ -127,13 +175,12 @@ export class BarcodeScannerModalComponent implements AfterViewInit, OnDestroy {
         this.startedQR = true;
         this.scanningActive = true;
         this.isLoading = false;
+        this.checkTorchCapability();
         this.change.detectChanges();
 
-        // Register for processing events after initialization
         Quagga.onProcessed(this.onProcessed.bind(this));
         Quagga.onDetected(this.onDetected.bind(this));
 
-        // Start the scanner
         Quagga.start();
       })
       .catch(err => {

@@ -1,0 +1,34 @@
+<div class="modal-header">
+  <h4 class="modal-title">Reagent Import Instructions</h4>
+  <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss()"></button>
+</div>
+<div class="modal-body">
+  <h5>File Format</h5>
+  <p>Supported formats: CSV, Excel (.xlsx, .xls), or Tab-delimited (.txt)</p>
+
+  <h5>Required Columns</h5>
+  <ul>
+    <li><strong>item_name</strong>: Name of the reagent</li>
+    <li><strong>unit</strong>: Unit of measurement</li>
+    <li><strong>quantity</strong>: Amount of reagent</li>
+  </ul>
+
+  <h5>Optional Columns</h5>
+  <ul>
+    <li><strong>notes</strong>: Additional information</li>
+    <li><strong>barcode</strong>: Barcode identifier</li>
+    <li><strong>expiration_date</strong>: Expiration date in valid date format</li>
+  </ul>
+
+  <h5>Allowed Units</h5>
+  <p>Units must be one of the following:</p>
+  <ul class="allowed-units">
+    <li>Mass: ng, ug, mg, g</li>
+    <li>Volume: nL, uL, mL, L</li>
+    <li>Molarity: uM, mM, nM, M</li>
+    <li>Count: ea, other</li>
+  </ul>
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn btn-primary" (click)="modal.close()">Got it</button>
+</div>

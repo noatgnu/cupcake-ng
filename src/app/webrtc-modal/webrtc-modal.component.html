@@ -1,82 +1,234 @@
 <div class="modal-header">
-  <h5 class="modal-title">WebRTC</h5>
+  <h4 class="modal-title">
+    <i class="bi bi-camera-video me-2"></i>
+    WebRTC {{ connectionType === 'host' ? 'Broadcast' : 'View' }}
+  </h4>
+  <button type="button" class="btn-close" aria-label="Close" (click)="close()"></button>
 </div>
+
 <div class="modal-body">
-  <div class="d-flex flex-row gap-2">
-    @if (!webrtc.searchingForPeers) {
-      <button class="btn btn-primary" (click)="connect()">Connect</button>
-    } @else {
-      <button class="btn btn-danger" (click)="webrtc.end()">Disconnect</button>
-    }
-    <div class="form-floating" style="width:200px">
-      <select class="form-select" [(ngModel)]="connectionType">
-        <option [value]="'viewer'">Viewer</option>
-        <option [value]="'host'">Host</option>
-      </select>
-      <label>Connection Type</label>
+  <!-- Connection Type Selection -->
+  <div class="mb-4">
+    <div class="form-check form-check-inline">
+      <input class="form-check-input" type="radio" id="host" value="host"
+             [(ngModel)]="connectionType" name="connectionType"
+             [disabled]="connectionState !== 'disconnected'">
+      <label class="form-check-label" for="host">Host (Broadcast)</label>
     </div>
-<!--    <button class="btn btn-primary" (click)="webrtc.reNegotiateAllPeers()">Refresh</button>-->
+    <div class="form-check form-check-inline">
+      <input class="form-check-input" type="radio" id="viewer" value="viewer"
+             [(ngModel)]="connectionType" name="connectionType"
+             [disabled]="connectionState !== 'disconnected'">
+      <label class="form-check-label" for="viewer">Viewer</label>
+    </div>
   </div>
+
+  <!-- Media Settings (visible for host only) -->
   @if (connectionType === 'host') {
-    <div class="d-flex flex-row gap-2">
-      <div class="form-check">
-        <input class="form-check-input" [(ngModel)]="webrtc.enableVideo" type="checkbox">
-        <label>Enable Video</label>
-      </div>
-      <div class="form-check">
-        <input type="checkbox" class="form-check-input" [(ngModel)]="webrtc.enableAudio">
-        <label>Enable Audio</label>
-      </div>
-    </div>
-  }
-  <div class="d-flex flex-row gap-2 flex-wrap">
-    @if (webrtc.enableVideo) {
-      <div class="form-floating" style="width:200px">
-        <select class="form-select" [(ngModel)]="webrtc.selectedVideoDevice">
-          @for (device of webrtc.cameraDevices; track device) {
-            <option [ngValue]="device">{{device.label}}</option>
-          }
-        </select>
-        <label>Video Device</label>
-      </div>
-    }
-    @if (webrtc.enableAudio) {
-      <div class="form-floating" style="width:200px">
-        <select class="form-select" [(ngModel)]="webrtc.selectedAudioDevice">
-          @for (device of webrtc.audioDevices; track device) {
-            <option [ngValue]="device">{{device.label}}</option>
-          }
-        </select>
-        <label>Audio Device</label>
-      </div>
-    }
-    @if (webrtc.enableVideo || webrtc.enableAudio) {
-      <button class="btn btn-primary" (click)="webrtc.changeMediaInput(webrtc.selectedVideoDevice, webrtc.selectedAudioDevice)">Apply</button>
-    }
-  </div>
+    <div class="card mb-4">
+      <div class="card-header">Media Settings</div>
+      <div class="card-body">
+        <!-- Toggle Video/Audio -->
+        <div class="mb-3">
+          <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" id="enableVideo"
+                   [(ngModel)]="webrtc.enableVideo" (ngModelChange)="toggleVideo($event)">
+            <label class="form-check-label" for="enableVideo">Enable Video</label>
+          </div>
+          <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" id="enableAudio"
+                   [(ngModel)]="webrtc.enableAudio" (ngModelChange)="toggleAudio($event)">
+            <label class="form-check-label" for="enableAudio">Enable Audio</label>
+          </div>
+        </div>
 
-
-  @if (webrtc.connectionType==='host') {
-    <video id="webrtc-local" muted autoplay [width]="400" [height]="300"></video>
-  }
-  @if (webrtc.connected && webrtc.searchingForPeers) {
-    @for (peer of webrtc.peerList; track peer) {
-      @if (webrtc.peerConnectionMap[peer]) {
-        @if (webrtc.peerConnectionMap[peer].connectionType==='host') {
-          <div class="d-flex flex-row gap-2">
-            <video id="webrtc-{{peer}}" autoplay [width]="400" [height]="300"></video>
+        <!-- Camera Selection -->
+        @if (webrtc.enableVideo) {
+          <div class="mb-3">
+            <label for="videoDevice" class="form-label">Camera</label>
+            <select class="form-select" id="videoDevice" [(ngModel)]="selectedVideoDevice"
+                    (change)="changeInputDevice()" [disabled]="isLoading">
+              <option [ngValue]="undefined">Select camera</option>
+              @for (device of webrtc.cameraDevices; track device) {
+                <option [ngValue]="device">
+                  {{ device.label || ('Camera ' + ($index + 1)) }}
+                </option>
+              }
+            </select>
           </div>
         }
+
+        <!-- Microphone Selection -->
+        @if (webrtc.enableAudio) {
+          <div class="mb-3">
+            <label for="audioDevice" class="form-label">Microphone</label>
+            <select class="form-select" id="audioDevice" [(ngModel)]="selectedAudioDevice"
+                    (change)="changeInputDevice()" [disabled]="isLoading">
+              <option [ngValue]="undefined">Select microphone</option>
+              @for (device of webrtc.audioDevices; track device) {
+                <option [ngValue]="device">
+                  {{ device.label || ('Microphone ' + ($index + 1)) }}
+                </option>
+              }
+            </select>
+          </div>
+        }
+      </div>
+    </div>
+  }
+  @if (connectionState === 'connecting') {
+    <ngb-alert type="info" [dismissible]="false">
+      <div class="d-flex align-items-center">
+        <div class="spinner-border spinner-border-sm me-2"></div>
+        <div>Establishing connection...</div>
+      </div>
+    </ngb-alert>
+  } @else if (connectionState === 'connected') {
+    <ngb-alert type="success" [dismissible]="false">
+      <div class="d-flex align-items-center">
+        <i class="bi bi-check-circle-fill me-2"></i>
+        <div>Connected</div>
+      </div>
+    </ngb-alert>
+  } @else {
+    <ngb-alert type="secondary" [dismissible]="false">
+      <div class="d-flex align-items-center">
+        <i class="bi bi-circle me-2"></i>
+        <div>Not connected</div>
+      </div>
+    </ngb-alert>
+  }
+  <!-- Video Preview (for host) -->
+  @if (connectionType === 'host' && webrtc.enableVideo) {
+    <div class="video-container mb-3 bg-dark rounded">
+      <div class="local-video-wrapper">
+        <video id="webrtc-local" autoplay playsinline muted></video>
+        @if (connectionState !== 'connected') {
+          <div class="video-overlay bg-dark bg-opacity-75 text-light">
+            <span>Camera Preview</span>
+          </div>
+        }
+      </div>
+    </div>
+  }
+    <div class="d-flex align-items-center">
+      @if (connectionState === 'connecting') {
+        <div class="spinner-border spinner-border-sm me-2"></div>
+      } @else if (connectionState === 'connected') {
+        <i class="bi bi-check-circle-fill me-2"></i>
+      } @else {
+        <i class="bi bi-circle me-2"></i>
       }
-    }
-  } @else if (!webrtc.connected && webrtc.searchingForPeers) {
-    <div class="d-flex flex-row justify-content-center align-items-center">
-      <div class="spinner-border text-primary" role="status">
-        <span class="visually-hidden">Connecting to peers...</span>
+      <div>
+        @if (connectionState === 'connecting') {
+          <span>Establishing connection...</span>
+        } @else if (connectionState === 'connected') {
+          <span>Connected</span>
+        } @else {
+          <span>Not connected</span>
+        }
+      </div>
+    </div>
+
+
+  @if (connectionState === 'connected') {
+    <div class="d-flex flex-column flex-lg-row gap-3 mt-3">
+      <!-- Left side: Videos -->
+      <div class="video-section flex-grow-1">
+        <h5 class="mb-2">Connected Peers: {{ webrtc.peerList.length }}</h5>
+        <div class="remote-video-grid">
+          @for (peer of webrtc.peerList; track peer) {
+            <div class="remote-video-container bg-dark rounded position-relative">
+              <video [id]="'webrtc-' + peer" autoplay playsinline></video>
+              <div class="peer-label bg-dark bg-opacity-75 text-light">{{ peer }}</div>
+            </div>
+          }
+          @if (webrtc.peerList.length === 0) {
+            <div class="no-peers text-muted">
+              <i class="bi bi-people"></i> No peers connected
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Right side: Chat -->
+      <div class="chat-sidebar" style="width: 280px;">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <h5 class="mb-0">Chat</h5>
+          <button type="button" class="btn btn-sm btn-outline-secondary"
+                  (click)="showChatPanel = !showChatPanel">
+            {{ showChatPanel ? 'Hide' : 'Show' }}
+          </button>
+        </div>
+
+        @if (showChatPanel) {
+          <div class="chat-container card h-100">
+            <div class="chat-messages small" #chatContainer>
+              @if (chatMessages.length === 0) {
+                <div class="text-center text-muted p-2">
+                  <i class="bi bi-chat-dots"></i>
+                  <p class="mb-0">No messages yet</p>
+                </div>
+              } @else {
+                @for (message of chatMessages; track message.timestamp) {
+                  <div class="chat-message rounded p-1 mb-1"
+                       [ngClass]="{
+                   'own-message ms-auto bg-primary bg-opacity-10': message.senderId === webrtc.unique_id,
+                   'system-message w-100 bg-opacity-75 text-muted fst-italic': message.senderId === 'system',
+                   'bg-secondary bg-opacity-10': message.senderId !== 'system' && message.senderId !== webrtc.unique_id
+                 }">
+                    <div class="message-header d-flex justify-content-between">
+                      <strong class="small">{{ message.senderName }}</strong>
+                      <small class="text-muted">{{ formatTimestamp(message.timestamp) }}</small>
+                    </div>
+                    <div class="message-body small">{{ message.message }}</div>
+                  </div>
+                }
+              }
+            </div>
+
+            <div class="chat-input-container">
+              <div class="input-group input-group-sm">
+                <input type="text" class="form-control" placeholder="Message..."
+                       [(ngModel)]="newMessage" (keyup.enter)="sendMessage()">
+                <button class="btn btn-primary btn-sm" type="button" (click)="sendMessage()"
+                        [disabled]="!newMessage.trim()">
+                  <i class="bi bi-send"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        }
       </div>
     </div>
   }
 </div>
+
 <div class="modal-footer">
-  <button class="btn btn-secondary" (click)="close()">Close</button>
+  <div class="d-flex justify-content-between w-100">
+    <div>
+      <button type="button" class="btn btn-outline-secondary" (click)="close()">
+        Close
+      </button>
+    </div>
+    <div>
+      @if (connectionState === 'disconnected') {
+        <button type="button" class="btn btn-primary"
+                (click)="connect()" [disabled]="isLoading">
+          @if (isLoading) {
+            <span class="spinner-border spinner-border-sm me-1"></span>
+          }
+          {{ connectionType === 'host' ? 'Start Broadcasting' : 'Start Viewing' }}
+        </button>
+      } @else {
+        <button type="button" class="btn btn-danger"
+                (click)="disconnect()" [disabled]="isLoading">
+          @if (isLoading) {
+            <span class="spinner-border spinner-border-sm me-1"></span>
+          }
+          {{ connectionType === 'host' ? 'Stop Broadcasting' : 'Stop Viewing' }}
+        </button>
+      }
+    </div>
+  </div>
 </div>

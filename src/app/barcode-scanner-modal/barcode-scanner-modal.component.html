@@ -37,6 +37,17 @@
       <button class="btn btn-sm btn-outline-secondary" (click)="resetDetection()">
         <i class="bi bi-arrow-clockwise"></i> Reset
       </button>
+      @if (torchAvailable) {
+        <button type="button"
+                class="btn btn-sm"
+                [ngClass]="torchEnabled ? 'btn-warning' : 'btn-outline-warning'"
+                (click)="toggleTorch()"
+                [disabled]="!startedQR">
+          <i class="bi bi-lightbulb"></i>
+          {{torchEnabled ? 'Turn Off Light' : 'Turn On Light'}}
+        </button>
+      }
+
     </div>
     <div class="scanner-container position-relative">
       <div id="videoElementPreview" class="w-100 rounded"></div>

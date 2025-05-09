@@ -34,13 +34,9 @@ export class StoredReagentActivityCalendarComponent implements AfterViewInit{
   }
 
   computeStartAndEndOfMonth() {
-    // Get the current date
     let now = new Date();
 
-    // Get the start date of the time range window
     let startDate = new Date(now.getFullYear(), now.getMonth() - 4, 1);
-
-    // Set the start and end dates
     this.startDate = startDate;
     this.endDate = now;
 
@@ -58,7 +54,7 @@ export class StoredReagentActivityCalendarComponent implements AfterViewInit{
   }
 
   drawCalendar() {
-    this.web.getStoredReagentActionWithinRange(this.storedReagent!.id, this.startDate, this.endDate).subscribe((data) => {
+    this.web.getStoredReagentActionWithinRange(this.storedReagent!.id, this.startDate, new Date()).subscribe((data) => {
       this.data = data
       if (this.calendar && this.cal) {
         const options: any = {
@@ -72,7 +68,7 @@ export class StoredReagentActivityCalendarComponent implements AfterViewInit{
           },
           date: {
             start: this.startDate,
-            end: this.endDate
+            end: new Date()
           },
           data: {
             source: this.data,
@@ -100,12 +96,8 @@ export class StoredReagentActivityCalendarComponent implements AfterViewInit{
           options.theme = 'light'
         }
         this.cal.paint(options).then(() => {
-
         })
       }
-
     })
   }
-
-
 }

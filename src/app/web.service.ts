@@ -2227,10 +2227,18 @@ export class WebService {
     return this.http.post<{errors: string[]}>(`${this.baseURL}/api/metadata_table_templates/validate_sdrf_metadata/`, {sdrf: data}, {responseType: 'json', observe: 'body'})
   }
 
+  importReagentFromFile(storage_object_id: number, file_upload_id: string, instance_id: string) {
+    return this.http.post<{job_id: string}>(
+      `${this.baseURL}/api/storage_object/${storage_object_id}/import_reagent/`,
+      { file_upload_id, instance_id },
+      { responseType: 'json', observe: 'body' }
+    );
+  }
+
 
 }
 
-interface ChunkUploadResponse {
+export interface ChunkUploadResponse {
   id: string,
   url: string,
   file: string,

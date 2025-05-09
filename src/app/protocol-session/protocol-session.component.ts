@@ -44,7 +44,8 @@ import {FolderViewComponent} from "./folder-view/folder-view.component";
         SectionListComponent,
         FolderListComponent,
         StepViewComponent,
-        FolderViewComponent
+        FolderViewComponent,
+      NgClass
     ],
     templateUrl: './protocol-session.component.html',
     styleUrl: './protocol-session.component.scss'
