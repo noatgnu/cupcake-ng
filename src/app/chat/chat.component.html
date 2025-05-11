@@ -1,0 +1,77 @@
+<div class="chat-sidebar">
+  @if (showHeader) {
+    <div class="d-flex justify-content-between align-items-center mb-2">
+      <h5 class="mb-0">Chat</h5>
+      <button type="button" class="btn btn-sm btn-outline-secondary"
+              (click)="showChatPanel = !showChatPanel">
+        {{ showChatPanel ? 'Hide' : 'Show' }}
+      </button>
+    </div>
+  }
+
+  @if (showChatPanel) {
+    <div class="chat-container card h-100">
+      <div class="chat-messages small" #chatContainer [style.max-height]="maxHeight">
+        @if (messages.length === 0) {
+          <div class="text-center text-muted p-2">
+            <i class="bi bi-chat-dots"></i>
+            <p class="mb-0">No messages yet</p>
+          </div>
+        } @else {
+          @for (message of messages; track $index) {
+            <app-chat-message
+              [message]="message"
+              [currentUserId]="currentUserId"
+              (fileRequest)="requestFile($event)">
+            </app-chat-message>
+          }
+        }
+      </div>
+      <div class="file-transfers px-2 pt-2">
+        @for (transfer of fileTransfers.values(); track $index) {
+          <div class="file-transfer-item mb-2 p-2 border rounded">
+            <div class="d-flex justify-content-between align-items-center">
+              <small class="text-truncate me-2">{{ transfer.fileName }}</small>
+              <small>{{ transfer.progress }}%</small>
+            </div>
+            <div class="progress mt-1" style="height: 5px;">
+              <div class="progress-bar"
+                   [style.width.%]="transfer.progress"
+                   [ngClass]="{'bg-success': transfer.progress === 100}">
+              </div>
+            </div>
+            <small class="text-muted">
+              {{ transfer.type === 'upload' ? 'Sending' : 'Downloading' }}
+            </small>
+          </div>
+        }
+      </div>
+      <div class="chat-input-container">
+        <div class="input-group input-group-sm">
+          <input type="text" class="form-control" placeholder="Message..."
+                 [(ngModel)]="newMessage" (keyup.enter)="sendMessage()">
+
+          <button class="btn btn-outline-secondary btn-sm" type="button"
+                  (click)="fileInput.click()">
+            <i class="bi bi-paperclip"></i>
+          </button>
+          <input #fileInput type="file" class="d-none" (change)="handleFileSelection($event)">
+
+          <button class="btn btn-primary btn-sm" type="button" (click)="sendMessage()"
+                  [disabled]="!newMessage.trim() && !selectedFile">
+            <i class="bi bi-send"></i>
+          </button>
+        </div>
+        <!-- Show selected file info -->
+        @if (selectedFile) {
+          <small class="d-block text-muted mt-1">
+            File: {{ selectedFile.name }} ({{ formatFileSize(selectedFile.size) }})
+            <button class="btn btn-link btn-sm p-0 ms-2" (click)="clearSelectedFile()">
+              <i class="bi bi-x"></i>
+            </button>
+          </small>
+        }
+      </div>
+    </div>
+  }
+</div>

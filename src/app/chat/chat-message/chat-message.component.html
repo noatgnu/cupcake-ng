@@ -1,0 +1,36 @@
+@if (currentUserId) {
+  <div class="chat-message rounded p-1 mb-1"
+       [ngClass]="{'own-message ms-auto bg-warning bg-opacity-10': message.senderId === currentUserId,
+      'system-message w-100 bg-opacity-75 text-muted fst-italic': message.senderId === 'system',
+      'bg-secondary bg-opacity-10': message.senderId !== 'system' && message.senderId !== currentUserId}">
+    <div class="message-header d-flex justify-content-between">
+      <strong class="small">{{ message.senderName }} @if (message.encrypted) {
+        <span class="encryption-indicator">
+          <i class="bi bi-lock-fill" title="End-to-end encrypted"></i>
+        </span>
+      }</strong>
+
+
+      <small class="text-info">{{ formattedTimestamp }}</small>
+    </div>
+
+    <div class="message-body small">{{ message.message }}</div>
+
+    @if (message.fileMetadata) {
+      <div class="file-attachment mt-1 p-1 border rounded">
+        <div class="d-flex align-items-center">
+          <i class="bi bi-file-earmark me-1"></i>
+          <span class="small text-truncate">{{ message.fileMetadata.fileName }}</span>
+          <small class="text-muted ms-1">({{ formatFileSize(message.fileMetadata.fileSize) }})</small>
+        </div>
+        @if (message.senderId !== currentUserId) {
+          <button class="btn btn-sm btn-outline-primary mt-1"
+                  (click)="onRequestFile(message.fileMetadata)">
+            <i class="bi bi-download"></i>
+          </button>
+        }
+      </div>
+    }
+  </div>
+}
+

@@ -5,6 +5,9 @@ import {NgbActiveModal, NgbAlert} from "@ng-bootstrap/ng-bootstrap";
 import { Subscription } from 'rxjs';
 import {NgClass} from "@angular/common";
 import {AccountsService} from "../accounts/accounts.service";
+import {ChatComponent} from "../chat/chat.component";
+import {ToastService} from "../toast.service";
+import {EncryptionService} from "../encryption.service";
 
 @Component({
   selector: 'app-webrtc-modal',
@@ -12,7 +15,7 @@ import {AccountsService} from "../accounts/accounts.service";
   imports: [
     FormsModule,
     NgbAlert,
-    NgClass
+    ChatComponent
   ],
   templateUrl: './webrtc-modal.component.html',
   styleUrl: './webrtc-modal.component.scss'
@@ -21,63 +24,71 @@ export class WebrtcModalComponent implements OnInit, OnDestroy {
   connectionType: 'host'|'viewer' = 'viewer';
   connectionState: 'disconnected' | 'connecting' | 'connected' = 'disconnected';
   isLoading = false;
-
-  // For device selection
+  allowCustomEncryption = false;
   selectedVideoDevice?: MediaDeviceInfo;
   selectedAudioDevice?: MediaDeviceInfo;
   chatMessages: ChatMessage[] = [];
   newMessage = '';
   showChatPanel = true;
-  private chatSubscription?: Subscription;
   private connectionSubscription?: Subscription;
-  @ViewChild('chatContainer') chatContainer?: ElementRef;
   selectedFile: File | null = null;
 
-  constructor(public webrtc: WebrtcService, private activeModal: NgbActiveModal, private accounts: AccountsService) {
+  private chatSubscription?: Subscription;
+
+  encryptionEnabled = false;
+  encryptionSupported = true;
+  constructor(
+    public webrtc: WebrtcService,
+    private activeModal: NgbActiveModal,
+    private accounts: AccountsService,
+    public encryption: EncryptionService,
+    private toastService: ToastService
+  ) {
     this.webrtc.userName = this.accounts.username
   }
 
   async ngOnInit() {
-    // Get initial connection type
     this.connectionType = this.webrtc.connectionType;
+    this.chatSubscription = this.webrtc.chatMessages$.subscribe(
+      (message: ChatMessage) => {
+        if (message.senderId !== this.webrtc.unique_id) {
+          this.chatMessages = [...this.chatMessages, message];
+        }
+      }
+    )
 
     this.connectionSubscription = this.webrtc.connectionState$.subscribe(state => {
       this.connectionState = state;
     });
-    this.chatSubscription = this.webrtc.chatMessages$.subscribe(message => {
-      this.chatMessages.push(message);
-      setTimeout(() => this.scrollToBottom(), 0);
-    });
 
-    // Load available devices
     await this.loadInputDevices();
-    console.log(this.webrtc.audioDevices);
-    console.log(this.webrtc.cameraDevices);
-    // Initialize camera preview if host mode is selected
     if (this.connectionType === 'host' && this.webrtc.enableVideo) {
       await this.webrtc.start();
     }
+    this.encryptionSupported = typeof window.crypto !== 'undefined' &&
+      typeof window.crypto.subtle !== 'undefined';
+    this.encryption.encryptionEnabled$.subscribe((enabled:any) => {
+      this.encryptionEnabled = enabled;
+    });
   }
 
-// Modify toggleVideo to preview immediately
   async toggleVideo(event: boolean) {
+    this.webrtc.enableVideo = event;
+
     if (event) {
       if (this.connectionType === 'host') {
-        if (this.webrtc.enableVideo) {
-          // Start preview immediately when enabling video
-          await this.webrtc.start();
-        } else if (this.webrtc.stream) {
-          // Stop video tracks when disabling
-          this.webrtc.stream.getVideoTracks().forEach(track => {
-            track.stop();
-          });
-        }
+        await this.webrtc.start();
+      }
+    } else {
+      if (this.webrtc.stream) {
+        this.webrtc.stream.getVideoTracks().forEach(track => {
+          track.stop();
+        });
       }
     }
   }
 
   ngOnDestroy() {
-    // Clean up subscription
     if (this.connectionSubscription) {
       this.connectionSubscription.unsubscribe();
     }
@@ -91,7 +102,6 @@ export class WebrtcModalComponent implements OnInit, OnDestroy {
     try {
       const devices = await this.webrtc.getAllInputDevices();
 
-      // Pre-select the first device of each type if available
       if (devices.video.length > 0 && !this.selectedVideoDevice) {
         this.selectedVideoDevice = devices.video[0];
         this.webrtc.selectedVideoDevice = devices.video[0];
@@ -139,11 +149,17 @@ export class WebrtcModalComponent implements OnInit, OnDestroy {
   }
 
   toggleAudio(event: boolean) {
+    this.webrtc.enableAudio = event;
     if (event) {
       if (this.connectionState === 'connected' && this.webrtc.stream) {
-        // Toggle audio tracks
         this.webrtc.stream.getAudioTracks().forEach(track => {
           track.enabled = this.webrtc.enableAudio;
+        });
+      }
+    } else {
+      if (this.webrtc.stream) {
+        this.webrtc.stream.getAudioTracks().forEach(track => {
+          track.stop();
         });
       }
     }
@@ -167,9 +183,8 @@ export class WebrtcModalComponent implements OnInit, OnDestroy {
     }
   }
 
-  sendMessage(): void {
+  async sendMessage(): Promise<void> {
     if (this.selectedFile) {
-      // Send file metadata in chat message
       const fileMetadata = {
         fileId: crypto.randomUUID(),
         fileName: this.selectedFile.name,
@@ -178,7 +193,6 @@ export class WebrtcModalComponent implements OnInit, OnDestroy {
         sender: this.webrtc.unique_id
       };
 
-      // Store file reference in service for later download
       this.webrtc.storeFileForSharing(fileMetadata.fileId, this.selectedFile);
 
       // Send as special message
@@ -186,7 +200,7 @@ export class WebrtcModalComponent implements OnInit, OnDestroy {
       this.newMessage = '';
       this.clearSelectedFile();
     } else if (this.newMessage.trim()) {
-      this.webrtc.sendChatMessage(this.newMessage);
+      await this.webrtc.sendChatMessage(this.newMessage);
       this.newMessage = '';
     }
   }
@@ -195,12 +209,6 @@ export class WebrtcModalComponent implements OnInit, OnDestroy {
     return new Date(timestamp).toLocaleTimeString();
   }
 
-  private scrollToBottom(): void {
-    if (this.chatContainer) {
-      const element = this.chatContainer.nativeElement;
-      element.scrollTop = element.scrollHeight;
-    }
-  }
 
   handleFileSelection(event: Event): void {
     const input = event.target as HTMLInputElement;
@@ -211,7 +219,6 @@ export class WebrtcModalComponent implements OnInit, OnDestroy {
 
   clearSelectedFile(): void {
     this.selectedFile = null;
-    // Reset file input
     const fileInput = document.querySelector('input[type=file]') as HTMLInputElement;
     if (fileInput) fileInput.value = '';
   }
@@ -224,8 +231,73 @@ export class WebrtcModalComponent implements OnInit, OnDestroy {
 
   requestFile(fileMetadata: any): void {
     if (!fileMetadata || !fileMetadata.fileId || !fileMetadata.sender) return;
-
-    // Send request to the file owner
     this.webrtc.requestFileFromPeer(fileMetadata.fileId, fileMetadata.sender);
+  }
+
+  async onMessageSent(message: string) {
+    await this.webrtc.sendChatMessage(message);
+    const chatMessage: ChatMessage = {
+      senderId: this.webrtc.unique_id || '',
+      senderName: 'You',
+      message: message,
+      timestamp: Date.now()
+    };
+
+    this.chatMessages = [...this.chatMessages, chatMessage];
+  }
+
+  onFileSent(file: File) {
+    // Create a unique file ID
+    const fileId = crypto.randomUUID();
+
+    // Store the file locally first (don't send it immediately)
+    this.webrtc.storeFileForSharing(fileId, file);
+
+    // Create file metadata
+    const fileMetadata = {
+      fileId: fileId,
+      fileName: file.name,
+      fileSize: file.size,
+      fileType: file.type,
+      sender: this.webrtc.unique_id || ''
+    };
+
+    // Send metadata (not the actual file)
+    this.webrtc.sendFileMetadata(fileMetadata, '');
+
+    // Add message to chat
+    const chatMessage: ChatMessage = {
+      senderId: this.webrtc.unique_id || '',
+      senderName: 'You',
+      message: `Shared a file: ${file.name}`,
+      timestamp: Date.now(),
+      fileMetadata: fileMetadata
+    };
+
+    this.chatMessages = [...this.chatMessages, chatMessage];
+  }
+
+  minimize() {
+    this.webrtc.toggleMinimize(true);
+    this.activeModal.dismiss('minimized');
+  }
+
+  disconnectAndClose() {
+    this.webrtc.end().then(() => {
+      this.webrtc.toggleMinimize(false);
+      this.activeModal.dismiss('closed');
+    });
+  }
+
+  async toggleEncryption(event: any): Promise<void> {
+    await this.encryption.generateKeyPair()
+    this.encryption.encryptionEnabled = event;
+    this.webrtc.notifyEncryptionStatus(event);
+    this.toastService.show(
+      'Encryption',
+      event ? 'Encryption enabled for this session.' : 'Encryption disabled for this session.',
+      3000,
+      'info'
+    )
   }
 }

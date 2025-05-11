@@ -9,7 +9,12 @@
 } @else {
   <ng-container *ngTemplateOutlet="appContent"></ng-container>
 }
+@if (webrtc.connectionState$ | async; as connectionState) {
+  @if (connectionState !== 'disconnected') {
+    <app-floating-chat></app-floating-chat>
 
+  }
+}
 <ng-template #appContent>
   @if (ready) {
     <app-navbar></app-navbar>

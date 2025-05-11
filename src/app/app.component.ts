@@ -17,11 +17,23 @@ import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import {DownloadModalComponent} from "./download-modal/download-modal.component";
 import {LoadingIndicatorComponent} from "./loading-indicator/loading-indicator.component";
 import {LoadingTrackerService} from "./loading-tracker.service";
-import {AsyncPipe, NgTemplateOutlet} from "@angular/common";
+import {AsyncPipe, NgClass, NgTemplateOutlet} from "@angular/common";
+import {FloatingChatComponent} from "./chat/floating-chat/floating-chat.component";
 
 @Component({
     selector: 'app-root',
-  imports: [RouterOutlet, NavbarComponent, LoadingComponent, ToastContainerComponent, HandwrittenAnnotationComponent, LoadingIndicatorComponent, AsyncPipe, NgTemplateOutlet],
+  imports: [
+    RouterOutlet,
+    NavbarComponent,
+    LoadingComponent,
+    ToastContainerComponent,
+    HandwrittenAnnotationComponent,
+    LoadingIndicatorComponent,
+    AsyncPipe,
+    NgTemplateOutlet,
+    NgClass,
+    FloatingChatComponent
+  ],
     templateUrl: './app.component.html',
     styleUrl: './app.component.scss'
 })
@@ -31,7 +43,7 @@ export class AppComponent {
   routerToast: any;
   loadingChunk = this.loadingTracker.loading$;
 
-  constructor(private loadingTracker: LoadingTrackerService, private modal: NgbModal, private router: Router, private web: WebService, private accounts: AccountsService, private webrtc: WebrtcService, private ws: WebsocketService, private dataService: DataService, private toastService: ToastService) {
+  constructor(private loadingTracker: LoadingTrackerService, private modal: NgbModal, private router: Router, private web: WebService, private accounts: AccountsService, public webrtc: WebrtcService, private ws: WebsocketService, private dataService: DataService, private toastService: ToastService) {
     this.router.events.subscribe(async (event )=> {
       if (event instanceof NavigationStart) {
         this.routerToast = await this.toastService.show("Loading", "Loading page...", 0, "info", 30)

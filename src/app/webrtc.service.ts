@@ -6,12 +6,15 @@ import { WebService } from "./web.service";
 import { BehaviorSubject, firstValueFrom, Subscription, Subject } from 'rxjs';
 import { catchError, take } from 'rxjs/operators';
 import { ToastService } from './toast.service';
+import {EncryptionService} from "./encryption.service";
+import jsSHA from "jssha";
 
 export interface ChatMessage {
   senderId: string;
   senderName: string;
   message: string;
   timestamp: number;
+  encrypted?: boolean;
   fileMetadata?: {
     fileId: string;
     fileName: string;
@@ -38,6 +41,7 @@ interface FileTransfer {
   chunks: ArrayBuffer[];
   receivedChunks: number;
   sending: boolean;
+  fileHash?: string;
 }
 
 interface PeerConnection {
@@ -58,8 +62,22 @@ export class WebrtcService {
   chatMessages$ = this._chatMessages.asObservable();
   userName: string = 'User';
   private fileTransfers: Map<string, FileTransfer> = new Map();
-  private chunkSize = 16384;
+  private chunkSize = 262144;
   private availableFiles: Map<string, File> = new Map();
+  private _fileTransferProgress = new Subject<{
+    fileId: string;
+    fileName: string;
+    progress: number;
+    type: 'upload' | 'download';
+    peerId?: string;
+    encrypted?: boolean;
+  }>();
+  lastChunkHeader: {
+    fileId: string;
+    chunkIndex: number;
+    totalChunks: number;
+  } | null = null;
+  fileTransferProgress$ = this._fileTransferProgress.asObservable();
 
   // Media devices
   selectedVideoDevice?: MediaDeviceInfo;
@@ -103,11 +121,14 @@ export class WebrtcService {
   connectionType: 'viewer'|'host' = 'viewer';
   isCallerMap: {[key: string]: boolean} = {};
 
+  isMinimized = false;
+
   constructor(
     private accounts: AccountsService,
     private web: WebService,
     private zone: NgZone,
-    private toastService: ToastService
+    private toastService: ToastService,
+    private encryption: EncryptionService
   ) {}
 
   get connected(): boolean {
@@ -116,6 +137,30 @@ export class WebrtcService {
 
   set connected(value: boolean) {
     this._connectionState.next(value ? 'connected' : 'disconnected');
+  }
+
+  toggleMinimize(state: boolean) {
+    this.isMinimized = state;
+  }
+
+  async exchangePublicKey(peerId: string): Promise<void> {
+    if (!this.peerConnectionMap[peerId]?.dataChannel ||
+      this.peerConnectionMap[peerId].dataChannel?.readyState !== 'open') {
+      return;
+    }
+
+    // Make sure we have a key pair generated
+    if (!this.encryption.keyPair) {
+      await this.encryption.generateKeyPair();
+    }
+
+    const publicKeyString = await this.encryption.exportPublicKey();
+    if (!publicKeyString) return;
+
+    this.peerConnectionMap[peerId].dataChannel?.send(JSON.stringify({
+      type: 'public-key',
+      data: publicKeyString
+    }));
   }
 
   /**
@@ -200,6 +245,9 @@ export class WebrtcService {
   private setupDataChannelHandlers(dataChannel: RTCDataChannel, connectionID: string) {
     dataChannel.onopen = () => {
       console.log(`Data channel with peer ${connectionID} opened`);
+      if (this.encryption.isEncryptionEnabled) {
+        this.exchangePublicKey(connectionID);
+      }
 
       if (this.peerConnectionMap[connectionID]?.connected) {
         // Send a system message to notify connection
@@ -212,22 +260,155 @@ export class WebrtcService {
       }
     };
 
-    dataChannel.onmessage = (event) => {
-      console.log(`Data received from peer ${connectionID}:`, event.data);
+    dataChannel.onmessage = async (event) => {
+      //console.log(`Data received from peer ${connectionID}:`, event.data);
+      if (event.data instanceof ArrayBuffer) {
+        // Use the last received header to process this chunk
+        if (this.lastChunkHeader) {
+          const { fileId, chunkIndex, totalChunks } = this.lastChunkHeader;
+          console.log(`Processing binary chunk ${chunkIndex + 1} of ${totalChunks} for file ${fileId}`);
+          this.processFileChunk(fileId, chunkIndex, event.data, connectionID);
+          this.lastChunkHeader = null; // Clear after use
+        } else {
+          console.error("Received binary data without header information");
+        }
+        return;
+      }
 
       try {
         const data = JSON.parse(event.data);
         switch (data.type) {
+          case 'file-chunk-header':
+            console.log(`Received header for chunk ${data.chunkIndex + 1} of ${data.totalChunks}`);
+
+            // Store the header for the next binary message
+            this.lastChunkHeader = {
+              fileId: data.fileId,
+              chunkIndex: data.chunkIndex,
+              totalChunks: data.totalChunks
+            };
+            if (data.chunkId) {
+              dataChannel.send(JSON.stringify({
+                type: 'chunk-header-ack',
+                chunkId: data.chunkId
+              }));
+            }
+            break;
+          case 'file-chunk-encrypted':
+            // Handle encrypted file chunk
+            if (this.encryption.isEncryptionEnabled) {
+              const decrypted = await this.encryption.decryptData(data.data);
+              if (decrypted) {
+                const messsageData = JSON.parse(decrypted);
+                this.handleFileChunk(messsageData, connectionID);
+              }
+
+            }
+            break;
+          case 'encryption-status':
+            if (data.enabled) {
+              const success = await this.encryption.importPeerPublicKey(connectionID, data.publicKey);
+              if (success) {
+                if (this.encryption.isEncryptionEnabled) {
+                  await this.exchangePublicKey(connectionID);
+                }
+
+                this._chatMessages.next({
+                  senderId: 'system',
+                  senderName: 'System',
+                  message: `Peer ${connectionID} enabled end-to-end encryption`,
+                  timestamp: Date.now()
+                });
+              }
+            } else {
+              this.encryption.removePeerPublicKey(connectionID);
+              this._chatMessages.next({
+                senderId: 'system',
+                senderName: 'System',
+                message: `Peer ${connectionID} disabled end-to-end encryption`,
+                timestamp: Date.now()
+              });
+            }
+            break
+
+          case 'public-key':
+            const success = await this.encryption.importPeerPublicKey(connectionID, data.data);
+            if (success) {
+              if (!this.encryption.hasCompletedKeyExchange(connectionID)) {
+                await this.exchangePublicKey(connectionID);
+              }
+              this._chatMessages.next({
+                senderId: 'system',
+                senderName: 'System',
+                message: `End-to-end encryption enabled with peer ${connectionID}`,
+                timestamp: Date.now()
+              });
+            }
+            break;
           case 'chat':
-            this.zone.run(() => {
-              this._chatMessages.next(data.data);
+            this.zone.run( async () => {
+              let messageData = data.data;
+              let wasEncrypted = false;
+              if (typeof data.data === 'string') {
+                if (this.encryption.isEncryptionEnabled && this.encryption.isEncryptedMessage(data.data)) {
+                  console.log(data.data)
+                  const decrypted = await this.encryption.decryptData(data.data);
+                  wasEncrypted = true;
+                  if (decrypted) {
+                    try {
+                      messageData = JSON.parse(decrypted);
+                      try {
+                        messageData = JSON.parse(messageData);
+                      } catch (e) {
+                        console.error("Failed to parse decrypted message", e);
+                      }
+                    } catch (e) {
+                      console.error("Failed to parse decrypted message", e);
+                    }
+                  }
+                } else {
+                  try {
+                    messageData = JSON.parse(data.data);
+                  } catch (e) {
+                    console.error("Failed to parse message data", e);
+                  }
+                }
+              }
+              if (messageData) {
+                messageData.encrypted = wasEncrypted;
+              }
+
+              this._chatMessages.next(messageData);
             });
             break;
           case 'file-start':
+            const fileTransfer: FileTransfer = {
+              fileId: data.data.fileId,
+              fileName: data.data.fileName,
+              mimeType: data.data.mimeType || 'application/octet-stream',
+              size: data.data.size || 0,
+              chunks: new Array(data.data.totalChunks),
+              receivedChunks: 0,
+              sending: false,
+              fileHash: data.data.fileHash
+            };
 
+            this.fileTransfers.set(data.data.fileId, fileTransfer);
             break;
           case 'file-chunk':
-            this.handleFileChunk(data.data, connectionID);
+            if (data.data && this.encryption.isEncryptionEnabled && data.encrypted) {
+              const decrypted = await this.encryption.decryptData(data.data);
+              if (decrypted) {
+                try {
+                  const chunkData = JSON.parse(decrypted);
+                  this.handleFileChunk(chunkData, connectionID);
+                } catch (e) {
+                  console.error("Failed to parse decrypted chunk data", e);
+                }
+              }
+            } else {
+              this.handleFileChunk(data.data, connectionID);
+            }
             break;
           case 'file-request':
             // Handle incoming file request
@@ -866,7 +1047,7 @@ export class WebrtcService {
         window.clearInterval(this.connectionCheckInterval);
         this.connectionCheckInterval = undefined;
       }
-
+      this.encryption.reset();
       return Promise.resolve();
     } catch (error) {
       console.error("Error ending call:", error);
@@ -900,7 +1081,7 @@ export class WebrtcService {
       // Update constraints with new device IDs
       this.updateMediaConstraints();
 
-      // Only proceed if we have video or audio enabled
+      // Only proceed if video or audio enabled
       if (this.enableVideo || this.enableAudio) {
         // Stop the current tracks
         if (this.stream) {
@@ -966,27 +1147,47 @@ export class WebrtcService {
     }
   }
 
-  sendChatMessage(message: string): void {
+  async sendChatMessage(message: string): Promise<void> {
     if (!message.trim()) return;
 
+    // Create message initially with encrypted: false
     const chatMessage: ChatMessage = {
       senderId: this.unique_id || 'local',
       senderName: this.userName,
       message: message.trim(),
-      timestamp: Date.now()
+      timestamp: Date.now(),
+      encrypted: false
     };
 
-    Object.keys(this.peerConnectionMap).forEach(peerId => {
+    const localMessageCopy = {...chatMessage};
+    this._chatMessages.next(localMessageCopy);
+
+    let wasActuallyEncrypted = false;
+
+    for (const peerId of Object.keys(this.peerConnectionMap)) {
       const connection = this.peerConnectionMap[peerId];
       if (connection.dataChannel && connection.dataChannel.readyState === 'open') {
+        let messageData = JSON.stringify(chatMessage);
+
+        if (this.encryption.hasPeerPublicKey(peerId)) {
+          const encrypted = await this.encryption.encryptData(peerId, messageData);
+          if (encrypted) {
+            messageData = encrypted;
+            wasActuallyEncrypted = true;
+          }
+        }
+
         connection.dataChannel.send(JSON.stringify({
           type: 'chat',
-          data: chatMessage
+          data: messageData
         }));
       }
-    });
+    }
 
-    this._chatMessages.next(chatMessage);
+    if (wasActuallyEncrypted) {
+      localMessageCopy.encrypted = true;
+      this._chatMessages.next({...localMessageCopy});
+    }
   }
 
   async sendFile(file: File): Promise<void> {
@@ -1080,7 +1281,15 @@ export class WebrtcService {
     const arrayBuffer = await file.arrayBuffer();
     const totalChunks = Math.ceil(arrayBuffer.byteLength / this.chunkSize);
 
-    // Notify peer about incoming file
+    // Calculate file hash before sending
+    const hashObj = new jsSHA("SHA-256", "ARRAYBUFFER");
+    hashObj.update(arrayBuffer);
+    const fileHash = hashObj.getHash("HEX");
+    console.log(`File hash for ${file.name}: ${fileHash}`);
+
+    const shouldEncrypt = this.encryption.hasPeerPublicKey(peerId);
+
+    // Notify peer about incoming file with hash
     dataChannel.send(JSON.stringify({
       type: 'file-start',
       data: {
@@ -1088,33 +1297,100 @@ export class WebrtcService {
         fileName: file.name,
         mimeType: file.type,
         size: file.size,
-        totalChunks
+        totalChunks,
+        encrypted: shouldEncrypt,
+        fileHash
       }
     }));
 
-    // Send file in chunks to specific peer
+    // Send file in chunks
     for (let i = 0; i < totalChunks; i++) {
       const start = i * this.chunkSize;
       const end = Math.min(start + this.chunkSize, arrayBuffer.byteLength);
       const chunk = arrayBuffer.slice(start, end);
 
-      dataChannel.send(JSON.stringify({
-        type: 'file-chunk',
-        data: {
+      if (shouldEncrypt) {
+        // For encrypted transfers, we need to send a special format
+        // Convert to base64 string to maintain compatibility with encryption
+        const base64Data = btoa(
+          new Uint8Array(chunk).reduce((data, byte) => data + String.fromCharCode(byte), '')
+        );
+
+        const chunkMetadata = {
           fileId,
           fileName: file.name,
           chunkIndex: i,
           totalChunks,
-          data: Array.from(new Uint8Array(chunk)),
+          base64Data: base64Data,  // Use base64 string instead of array
           mimeType: file.type
-        }
-      }));
+        };
 
-      await new Promise(resolve => setTimeout(resolve, 10));
+        const encrypted = await this.encryption.encryptData(peerId, JSON.stringify(chunkMetadata));
+        if (encrypted) {
+          dataChannel.send(JSON.stringify({
+            type: 'file-chunk',
+            data: encrypted,
+            encrypted: true
+          }));
+        }
+      } else {
+        const chunkId = `${fileId}-${i}`;
+        // For unencrypted transfer, use binary data
+        dataChannel.send(JSON.stringify({
+          type: 'chunk-header-ack',
+          chunkId
+        }));
+        const headerMessage = JSON.stringify({
+          type: 'file-chunk-header',
+          fileId,
+          chunkIndex: i,
+          totalChunks,
+          fileName: file.name,
+          mimeType: file.type,
+          chunkId
+        });
+
+        dataChannel.send(headerMessage);
+        await new Promise<void>((resolve) => {
+          const ackHandler = (event: MessageEvent) => {
+            try {
+              const data = JSON.parse(event.data);
+              if (data.type === 'chunk-header-ack' && data.chunkId === chunkId) {
+                dataChannel.removeEventListener('message', ackHandler);
+                resolve();
+              }
+            } catch (e) {
+            }
+          };
+          dataChannel.addEventListener('message', ackHandler);
+
+          // Set timeout in case acknowledgment is lost
+          setTimeout(() => {
+            dataChannel.removeEventListener('message', ackHandler);
+            console.log(`No ack received for chunk ${i}, sending anyway`);
+            resolve();
+          }, 500);
+        });
+        dataChannel.send(chunk);
+
+        await new Promise(resolve => setTimeout(resolve, 10));
+      }
+
+      // Update progress
+      if (i % 10 === 0 || i === totalChunks - 1) {
+        this.zone.run(() => {
+          const progress = Math.round(((i + 1) / totalChunks) * 100);
+          this._fileTransferProgress.next({
+            fileId, fileName: file.name, progress,
+            type: 'upload', peerId, encrypted: shouldEncrypt
+          });
+        });
+      }
     }
   }
 
-  private handleFileChunk(chunk: FileChunk, fromPeer: string): void {
+  private handleFileChunk(chunk: any, fromPeer: string): void {
+    console.log(chunk)
     let fileTransfer = this.fileTransfers.get(chunk.fileId);
 
     if (!fileTransfer) {
@@ -1122,7 +1398,7 @@ export class WebrtcService {
         fileId: chunk.fileId,
         fileName: chunk.fileName,
         mimeType: chunk.mimeType || 'application/octet-stream',
-        size: 0, // Will be updated with file-start message
+        size: 0,
         chunks: new Array(chunk.totalChunks),
         receivedChunks: 0,
         sending: false
@@ -1130,39 +1406,61 @@ export class WebrtcService {
       this.fileTransfers.set(chunk.fileId, fileTransfer);
     }
 
-    // Store this chunk
-    fileTransfer.chunks[chunk.chunkIndex] = chunk.data;
+    let bufferData: ArrayBuffer;
+    if (chunk.base64Data) {
+      // Convert base64 back to ArrayBuffer
+      const binary = atob(chunk.base64Data);
+      const bytes = new Uint8Array(binary.length);
+      for (let i = 0; i < binary.length; i++) {
+        bytes[i] = binary.charCodeAt(i);
+      }
+      bufferData = bytes.buffer;
+    } else if (Array.isArray(chunk.data)) {
+      bufferData = new Uint8Array(chunk.data).buffer;
+    } else {
+      bufferData = chunk.data;
+    }
+
+    fileTransfer.chunks[chunk.chunkIndex] = bufferData;
     fileTransfer.receivedChunks++;
 
-    // Emit progress event
+    // Calculate and emit progress
+    const progress = Math.round((fileTransfer.receivedChunks / chunk.totalChunks) * 100);
     this.zone.run(() => {
-      // You could add a Subject for file transfer progress here
+      this._fileTransferProgress.next({
+        fileId: chunk.fileId,
+        fileName: chunk.fileName,
+        progress,
+        type: 'download',
+        peerId: fromPeer
+      });
     });
-
-    // Check if file is complete
+    console.log(`Received chunk ${chunk.chunkIndex + 1} of ${chunk.totalChunks} for file ${chunk.fileId}`);
     if (fileTransfer.receivedChunks === chunk.totalChunks) {
       this.assembleFile(fileTransfer);
     }
   }
 
-// Assemble complete file
   private assembleFile(fileTransfer: FileTransfer): void {
-    // Combine all chunks
     const blob = new Blob(fileTransfer.chunks, { type: fileTransfer.mimeType });
-
-    // Create download link
     const url = URL.createObjectURL(blob);
+    let integrityMessage = '';
+    if (fileTransfer.fileHash) {
+      const calculatedHash = this.calculateHash(fileTransfer.chunks);
+      const hashValid = calculatedHash === fileTransfer.fileHash;
+      integrityMessage = hashValid
+        ? " (Integrity verified ✓)"
+        : " (WARNING: Integrity check failed ✗)";
+    }
 
     this.zone.run(() => {
-      // Notify UI that file is ready
       this._chatMessages.next({
         senderId: 'system',
         senderName: 'System',
-        message: `File received: ${fileTransfer.fileName}`,
+        message: `File received: ${fileTransfer.fileName}${integrityMessage}`,
         timestamp: Date.now()
       });
 
-      // Trigger download or handle the file as needed
       const a = document.createElement('a');
       a.href = url;
       a.download = fileTransfer.fileName;
@@ -1194,5 +1492,82 @@ export class WebrtcService {
       message: `Requesting file... Please wait.`,
       timestamp: Date.now()
     })
+  }
+
+  async notifyEncryptionStatus(enabled: boolean): Promise<void> {
+    // Only notify if we have active connections
+    for (const peerId of Object.keys(this.peerConnectionMap)) {
+      const connection = this.peerConnectionMap[peerId];
+      if (connection.dataChannel && connection.dataChannel.readyState === 'open') {
+        if (enabled) {
+          // Send public key when enabling
+          const publicKeyString = await this.encryption.exportPublicKey();
+          if (publicKeyString) {
+            connection.dataChannel.send(JSON.stringify({
+              type: 'encryption-status',
+              enabled: true,
+              publicKey: publicKeyString
+            }));
+          }
+          console.log(publicKeyString);
+        } else {
+          // Just notify when disabling
+          connection.dataChannel.send(JSON.stringify({
+            type: 'encryption-status',
+            enabled: false
+          }));
+        }
+      }
+    }
+  }
+
+  private processFileChunk(fileId: string, chunkIndex: number, binaryData: ArrayBuffer, fromPeer: string = 'unknown'): void {
+    console.log(this.fileTransfers)
+    console.log(fileId)
+    let fileTransfer = this.fileTransfers.get(fileId);
+
+    if (!fileTransfer) {
+      console.error("Received binary chunk without file metadata");
+      return;
+    }
+
+    // Store the binary data directly
+    fileTransfer.chunks[chunkIndex] = binaryData;
+    fileTransfer.receivedChunks++;
+
+    // Calculate and emit progress
+    const totalChunks = fileTransfer.chunks.length;
+    const progress = Math.round((fileTransfer.receivedChunks / totalChunks) * 100);
+
+    // Log using the parameters passed to this method, not properties of binaryData
+    console.log(`Received binary chunk ${chunkIndex + 1} of ${totalChunks} for file ${fileId}`);
+
+    this.zone.run(() => {
+      this._fileTransferProgress.next({
+        fileId,
+        fileName: fileTransfer.fileName,
+        progress,
+        type: 'download',
+        peerId: fromPeer
+      });
+    });
+    console.log(fileTransfer.receivedChunks, totalChunks);
+    // If we've received all chunks, assemble the file
+    if (fileTransfer.receivedChunks === totalChunks) {
+      this.assembleFile(fileTransfer);
+    }
+  }
+
+  private calculateHash(chunks: ArrayBuffer[]): string {
+    // Create a new SHA-256 object
+    const hashObj = new jsSHA("SHA-256", "ARRAYBUFFER");
+
+    // Update the hash with each chunk
+    for (const chunk of chunks) {
+      hashObj.update(chunk);
+    }
+
+    // Get the final hash digest
+    return hashObj.getHash("HEX");
   }
 }

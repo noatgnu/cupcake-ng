@@ -1,0 +1,29 @@
+.floating-chat-container {
+  position: fixed;
+  bottom: 0;
+  right: 100px;
+  width: 300px;
+  box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+  border-radius: 8px 8px 0 0;
+  z-index: 500;
+}
+.floating-chat-header {
+  cursor: pointer;
+  border-radius: 8px 8px 0 0;
+}
+.floating-chat-body {
+  height: 400px;
+  overflow: hidden;
+}
+.floating-chat-container:not(.expanded) {
+  height: 40px;
+}
+.floating-chat-container.expanded {
+  height: 400px;
+}
+.floating-chat-body app-chat {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}

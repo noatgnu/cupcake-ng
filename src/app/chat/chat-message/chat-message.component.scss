@@ -1,0 +1,35 @@
+.chat-message {
+  max-width: 95%;
+}
+
+.own-message {
+  margin-left: auto;
+  color: black;
+}
+
+.system-message {
+  width: 100%;
+  max-width: 100%;
+  text-align: center;
+  padding: 0.25rem 0.5rem;
+}
+
+.message-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  margin-bottom: 0.25rem;
+}
+
+.message-body {
+  word-break: break-word;
+}
+
+.encryption-indicator {
+  margin-left: 5px;
+  color: #28a745;
+
+  i {
+    font-size: 0.8em;
+  }
+}
