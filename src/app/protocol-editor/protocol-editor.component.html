@@ -1,62 +1,82 @@
 @if (!protocol) {
-  <div class="container-fluid d-flex flex-row justify-content-center" style="padding-top: 80px">
-    <form  [formGroup]="form" (ngSubmit)="createProtocol()" class="d-flex flex-column gap-2 justify-content-center" style="width: 800px">
-      <h5>Initial project input</h5>
-      <div class="form-floating">
-        <input type="text" class="form-control" formControlName="protocol_title" id="protocol_title">
-        <label for="protocol_title">Protocol Title</label>
+  <div class="container-fluid py-5">
+    <div class="row justify-content-center">
+      <div class="col-md-8 col-lg-6">
+        <div class="card shadow">
+          <div class="card-header">
+            <h5 class="mb-0">Create New Protocol</h5>
+          </div>
+          <div class="card-body">
+            <form [formGroup]="form" (ngSubmit)="createProtocol()">
+              <div class="form-floating mb-3">
+                <input type="text" class="form-control" formControlName="protocol_title" id="protocol_title">
+                <label for="protocol_title">Protocol Title</label>
+              </div>
+              <div class="form-floating mb-3">
+                <textarea class="form-control" formControlName="protocol_description" id="protocol_description" style="height: 300px"></textarea>
+                <label for="protocol_description">Protocol Description</label>
+              </div>
+              <button type="submit" class="btn btn-primary">Create Protocol</button>
+            </form>
+          </div>
+        </div>
       </div>
-      <div class="form-floating">
-        <textarea class="form-control" formControlName="protocol_description" id="protocol_description" style="height: 300px"></textarea>
-        <label for="protocol_description">Protocol Description</label>
-      </div>
-      <div>
-        <button type="submit" class="btn btn-primary">Create</button>
-      </div>
-
-    </form>
+    </div>
   </div>
 }
 
-@if (dataService.protocolPermissions['edit']) {
-  @if (!protocol) {
+@if (dataService.protocolPermissions['edit'] && protocol) {
+  <div class="container-fluid mt-3 pt-5">
+    <div class="row g-4">
+      <!-- Left sidebar -->
+      <div class="col-md-4 col-lg-3">
+        <div class="card shadow-sm mb-3">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Protocol Settings</h5>
+            <button class="btn btn-sm btn-primary" (click)="saveProtocol()">Save</button>
+          </div>
+          <div class="card-body">
+            <form [formGroup]="form">
+              <div class="form-check mb-3">
+                <input class="form-check-input" type="checkbox" formControlName="enabled" id="protocol_enabled">
+                <label class="form-check-label" for="protocol_enabled">
+                  Enable For Public View
+                </label>
+              </div>
+            </form>
 
-  } @else {
-    <div class="d-flex justify-content-center align-items-center flex-row flex-wrap gap-2 overflow-x-hidden">
-      <div class="d-flex flex-column mb-4 mt-4">
-        <form [formGroup]="form" class="p-2">
-          <div class="form-check">
-            <label class="form-check-label" for="protocol_enabled">Enabled For Public View</label>
-            <input class="form-check-input" type="checkbox" formControlName="enabled" id="protocol_enabled">
-          </div>
-          <div>
-            <button class="btn btn-sm btn-primary" (click)="saveProtocol()">Update Protocol Settings</button>
-          </div>
-        </form>
-        @if (protocol.tags.length > 0) {
-          <div class="d-flex flex-row gap-2 flex-wrap p-2">
-            <b>Tags: </b>
-            @for (tag of protocol.tags; track tag.id) {
-              <span class="badge bg-primary">{{tag.tag.tag}}</span>
+            @if (protocol.tags.length > 0) {
+              <div class="mb-3">
+                <label class="form-label"><strong>Tags</strong></label>
+                <div class="d-flex flex-wrap gap-1">
+                  @for (tag of protocol.tags; track tag.id) {
+                    <span class="badge bg-primary">{{tag.tag.tag}}</span>
+                  }
+                </div>
+              </div>
             }
-          </div>
-        }
-        <div class="d-flex flex-row gap-2 p-2">
-          <div ngbDropdown placement="top-end" class="d-inline-block">
-            <button class="btn btn-sm btn-primary" ngbDropdownToggle>Protocol Actions</button>
-            <div ngbDropdownMenu>
-              <button ngbDropdownItem (click)="viewEditorModal()">Protocol Editors</button>
-              <button ngbDropdownItem (click)="viewViewerModal()">Protocol Viewers</button>
-              <button ngbDropdownItem (click)="viewProtocolTagModal()">Protocol Tag Editors</button>
+
+            <div ngbDropdown class="d-inline-block">
+              <button class="btn btn-outline-primary w-100" ngbDropdownToggle>
+                Protocol Actions
+              </button>
+              <div ngbDropdownMenu>
+                <button ngbDropdownItem (click)="viewEditorModal()">Manage Editors</button>
+                <button ngbDropdownItem (click)="viewViewerModal()">Manage Viewers</button>
+                <button ngbDropdownItem (click)="viewProtocolTagModal()">Manage Tags</button>
+              </div>
             </div>
           </div>
         </div>
 
         @if (sections.length > 0) {
-          <div class="d-flex flex-row overflow-auto">
-            <div class="d-flex flex-column gap-2 " style="width: 500px">
-              <form [formGroup]="formSectionSelect">
-                <div class="form-floating">
+          <div class="card shadow-sm mb-3">
+            <div class="card-header">
+              <h5 class="mb-0">Sections</h5>
+            </div>
+            <div class="card-body">
+              <form [formGroup]="formSectionSelect" class="mb-3">
+                <div class="form-floating mb-3">
                   <select class="form-select" formControlName="currentSection" id="sectionSelect">
                     @for (section of sections; track section.data.id; let i = $index) {
                       <option [value]="i">{{section.data.section_description}}</option>
@@ -65,153 +85,220 @@
                   <label for="sectionSelect">Select Section</label>
                 </div>
               </form>
-              <div class="d-flex flex-row gap-2">
-                <button class="btn btn-sm btn-primary" (click)="createNewSection()">Create New Section</button>
-                <button class="btn btn-sm btn-primary" (click)="saveSection()">Save Section Data</button>
-                <button class="btn btn-sm btn-primary" (click)="addStepToSection(formSectionSelect.controls['currentSection'].value)">Add Step</button>
-                <button class="btn btn-sm btn-danger" (click)="deleteSection()">Delete Section</button>
+
+              <div class="d-flex flex-wrap gap-2">
+                <button class="btn btn-sm btn-primary" (click)="createNewSection()">
+                  <i class="bi bi-plus"></i> New Section
+                </button>
+                <button class="btn btn-sm btn-success" (click)="saveSection()">
+                  <i class="bi bi-save"></i> Save Section
+                </button>
+                <button class="btn btn-sm btn-danger" (click)="deleteSection()" title="Delete Section">
+                  <i class="bi bi-trash"></i>
+                </button>
               </div>
             </div>
-
           </div>
-        }
 
-        @if (sections[formSectionSelect.controls['currentSection'].value]) {
-          <div class="d-flex flex-column gap-2" style="width: 500px">
-            <form class="mt-2" >
-              <div class="form-floating">
-                <input [ngModelOptions]="{standalone: true}" type="text" class="form-control" id="section-title" [(ngModel)]="sections[formSectionSelect.controls['currentSection'].value].data.section_description">
-                <label for="section-title">Section Title</label>
+          @if (sections[formSectionSelect.controls['currentSection'].value]) {
+            <div class="card shadow-sm">
+              <div class="card-header">
+                <h5 class="mb-0">Section Details</h5>
               </div>
-            </form>
-            <app-time-picker [seconds]="sections[formSectionSelect.controls['currentSection'].value].data.section_duration" (output)="handleUpdateSectionDuration($event)"></app-time-picker>
-          </div>
+              <div class="card-body">
+                <div class="form-floating mb-3">
+                  <input [ngModelOptions]="{standalone: true}" type="text"
+                         class="form-control" id="section-title"
+                         [(ngModel)]="sections[formSectionSelect.controls['currentSection'].value].data.section_description">
+                  <label for="section-title">Section Title</label>
+                </div>
+
+                <label class="form-label">Section Duration</label>
+                <app-time-picker
+                  [seconds]="sections[formSectionSelect.controls['currentSection'].value].data.section_duration"
+                  (output)="handleUpdateSectionDuration($event)">
+                </app-time-picker>
+
+                <div class="d-grid gap-2 mt-3">
+                  <button class="btn btn-primary" (click)="addStepToSection(formSectionSelect.controls['currentSection'].value)">
+                    <i class="bi bi-plus-lg"></i> Add Step
+                  </button>
+                </div>
+              </div>
+            </div>
+          }
         }
       </div>
-      <div class="d-flex flex-row justify-content-center">
-        <div class="list-group overflow-auto" style="max-height: 80vh; width: 600px">
-          @for (step of sections[formSectionSelect.controls['currentSection'].value].steps; track step.id; let i = $index) {
-            <div class="list-group-item border-0">
-              <div class="d-flex flex-row justify-content-around gap-2">
-                <b>Step {{ i + 1 }}/{{sections[formSectionSelect.controls['currentSection'].value].steps.length}}</b>
-                <div class="d-flex flex-row justify-content-end gap-2">
-                  <button class="btn btn-outline-primary" (click)="moveStep(step.id)"><i class="bi bi-arrow-up"></i></button>
-                  <button class="btn btn-outline-primary" (click)="moveStep(step.id, false)"><i class="bi bi-arrow-down"></i></button>
-                  <button class="btn btn-outline-danger" (click)="deleteStep(step.id)"><i class="bi bi-trash"></i></button>
-                </div>
-              </div>
-              <app-step-description-editor [step]="step"></app-step-description-editor>
-              <div>
-                Step Duration
-              </div>
-              <app-time-picker [seconds]="step.step_duration" (output)="handleUpdateStepDuration($event, i)"></app-time-picker>
-              @if (step.reagents.length > 0) {
-                <div class="d-flex flex-row justify-content-between">
-                  <b>Reagents</b>
-                </div>
-                <div class="d-flex flex-column gap-2">
-                  @for (reagent of step.reagents; track reagent.id; let j = $index) {
-                    <div class="d-flex flex-row gap-2">
-                      <p>
-                        @if (reagent.scalable === true){
-                          {{reagent.quantity}} x {{reagent.scalable_factor}} = {{reagent.quantity * reagent.scalable_factor}} {{reagent.reagent.unit}} {{reagent.reagent.name}}
 
-                        } @else {
-                          {{reagent.quantity}} {{reagent.reagent.unit}} {{reagent.reagent.name}}
-                        }
-                      </p>
-                      <div>
-                        <span class="badge bg-primary" (click)="clickViewTag(reagent)">
-                        @if (viewTemplateTagMap[reagent.id]) {
-                          -
-                        } @else {
-                          +
-                        }
-                          template tag
-                      </span>
+      <!-- Main content area -->
+      <div class="col-md-8 col-lg-9">
+        @if (sections[formSectionSelect.controls['currentSection'].value]) {
+          @if (sections[formSectionSelect.controls['currentSection'].value].steps.length > 0) {
+            <div class="card shadow-sm">
+              <div class="card-header">
+                <h5 class="mb-0">
+                  Steps for: {{sections[formSectionSelect.controls['currentSection'].value].data.section_description}}
+                </h5>
+              </div>
+              <div class="card-body p-0">
+                <div class="list-group list-group-flush" style="max-height: 75vh; overflow-y: auto;">
+                  @for (step of sections[formSectionSelect.controls['currentSection'].value].steps; track step.id; let i = $index) {
+                    <div class="list-group-item p-3">
+                      <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h6 class="mb-0">Step {{ i + 1 }} of {{sections[formSectionSelect.controls['currentSection'].value].steps.length}}</h6>
+                        <div class="btn-group">
+                          <button class="btn btn-sm btn-outline-secondary" [disabled]="i === 0" (click)="moveStep(step.id)" title="Move Up">
+                            <i class="bi bi-arrow-up"></i>
+                          </button>
+                          <button class="btn btn-sm btn-outline-secondary" [disabled]="i === sections[formSectionSelect.controls['currentSection'].value].steps.length - 1" (click)="moveStep(step.id, false)" title="Move Down">
+                            <i class="bi bi-arrow-down"></i>
+                          </button>
+                          <button class="btn btn-sm btn-outline-danger" (click)="deleteStep(step.id)" title="Delete Step">
+                            <i class="bi bi-trash"></i>
+                          </button>
+                        </div>
                       </div>
 
+                      <app-step-description-editor [step]="step"></app-step-description-editor>
+
+                      <div class="mb-3">
+                        <label class="form-label">Step Duration</label>
+                        <app-time-picker [seconds]="step.step_duration" (output)="handleUpdateStepDuration($event, i)"></app-time-picker>
+                      </div>
+
+                      @if (step.reagents.length > 0) {
+                        <div class="card mb-3">
+                          <div class="card-header py-2">
+                            <div class="d-flex justify-content-between align-items-center">
+                              <h6 class="mb-0">Reagents</h6>
+                            </div>
+                          </div>
+                          <ul class="list-group list-group-flush">
+                            @for (reagent of step.reagents; track reagent.id; let j = $index) {
+                              <li class="list-group-item">
+                                <div class="d-flex justify-content-between align-items-center">
+                                  <div>
+                                    @if (reagent.scalable === true){
+                                      <span>{{reagent.quantity}} × {{reagent.scalable_factor}} = <strong>{{reagent.quantity * reagent.scalable_factor}}</strong> {{reagent.reagent.unit}} {{reagent.reagent.name}}</span>
+                                    } @else {
+                                      <span>{{reagent.quantity}} {{reagent.reagent.unit}} {{reagent.reagent.name}}</span>
+                                    }
+                                  </div>
+                                  <button class="btn btn-sm btn-outline-primary" (click)="clickViewTag(reagent)">
+                                    Template Tags <i class="bi" [ngClass]="viewTemplateTagMap[reagent.id] ? 'bi-dash-lg' : 'bi-plus-lg'"></i>
+                                  </button>
+                                </div>
+
+                                @if (viewTemplateTagMap[reagent.id]) {
+                                  <div class="alert alert-light mt-2 p-2">
+                                    <code class="small">
+                                      name: %{{reagent.id}}.name%<br>
+                                      quantity: %{{reagent.id}}.quantity%<br>
+                                      unit: %{{reagent.id}}.unit%<br>
+                                      scaled_quantity: %{{reagent.id}}.scaled_quantity%
+                                    </code>
+                                  </div>
+                                }
+                              </li>
+                            }
+                          </ul>
+                        </div>
+                      }
+
+                      <div class="d-flex justify-content-between align-items-center mt-3">
+                        <small class="text-muted">Last updated: {{step.updated_at | date: "medium"}}</small>
+                        <div class="d-flex gap-2">
+                          <button class="btn btn-sm btn-primary" (click)="openReagentEditorModal(step)">
+                            <i class="bi bi-flask"></i> Edit Reagents
+                          </button>
+                          <button class="btn btn-sm btn-outline-secondary" (click)="previewDescription(step)">
+                            <i class="bi bi-eye"></i> Preview
+                          </button>
+                        </div>
+                      </div>
                     </div>
-                    @if (viewTemplateTagMap[reagent.id]) {
-                    <div class="alert alert-primary">
-                      <small>
-
-                          name: %{{reagent.id}}.name%<br>
-                          quantity: %{{reagent.id}}.quantity%<br>
-                          unit: %{{reagent.id}}.unit%<br>
-                          scaled_quantity: %{{reagent.id}}.scaled_quantity%<br>
-
-                      </small>
-                    </div>
-                    }
-
                   }
                 </div>
-              }
-              Last updated: {{step.updated_at | date: "medium"}}
-              <div class="mt-2 d-flex flex-row gap-1">
-                <button class="btn btn-sm btn-primary" (click)="openReagentEditorModal(step)">Reagent Editor</button>
-                <button class="btn btn-sm btn-primary" (click)="previewDescription(step)">Preview</button>
               </div>
-              <hr>
+            </div>
+          } @else {
+            <div class="card shadow-sm">
+              <div class="card-body text-center p-5">
+                <h5>No steps in this section</h5>
+                <p class="text-muted mb-4">Add your first step to get started</p>
+                <button class="btn btn-primary" (click)="addStepToSection(formSectionSelect.controls['currentSection'].value)">
+                  <i class="bi bi-plus-lg"></i> Add Step
+                </button>
+              </div>
             </div>
           }
-        </div>
+        }
+
       </div>
     </div>
-  }
+  </div>
 } @else if (!dataService.protocolPermissions['view'] && dataService.protocol) {
-  <div class="container d-flex flex-row justify-content-between align-items-center">
-    <p>
-      No protocol edit permission
-    </p>
-  </div>
-}
-
-@if (floatedClick) {
-  <div style="position: fixed; z-index: 1030; bottom: 150px; right: 50px">
-    <div class="d-flex flex-row gap-2 align-items-center">
-      <div class="card">
-        <div class="card-body">
-          @switch (floatedClick) {
-            @case ('Ingredient Summary') {
-              <div style="max-height:300px; max-width:300px; overflow: auto">
-                <b>Reagent Summary</b>
-                <ul>
-                  @for (reagent of protocol?.reagents; track reagent.id) {
-                    <li>
-                      {{reagent.quantity}} {{reagent.reagent.unit}} {{reagent.reagent.name}}
-                    </li>
-                  }
-                </ul>
-              </div>
-
-            }
-            @case ('Calculator') {
-              <div style="width: 320px; max-height: 600px;  overflow: auto">
-                <app-calculator-annotation></app-calculator-annotation>
-              </div>
-
-            }
-          }
-        </div>
-      </div>
-
+  <div class="container mt-5">
+    <div class="alert alert-warning">
+      <i class="bi bi-exclamation-triangle me-2"></i>
+      You don't have permission to view or edit this protocol.
     </div>
   </div>
 }
 
-<div style="position: fixed; z-index: 1030; bottom: 50px; right: 50px">
-  <div class="d-flex flex-row gap-2 align-items-center">
-    <div ngbDropdown placement="top-end" class="d-inline-block">
-      <button class="btn btn-outline-success" ngbDropdownToggle><i class="bi bi-info"></i></button>
-      <div ngbDropdownMenu>
-        @for (a of ['Reagent Summary', 'Calculator']; track a) {
-          <button ngbDropdownItem (click)="editorFloatClick(a)">{{a}}</button>
+<!-- Floating tools panel -->
+@if (floatedClick) {
+  <div class="position-fixed bottom-0 end-0 mb-5 me-5 z-3">
+    <div class="card shadow">
+      <div class="card-header py-2 d-flex justify-content-between align-items-center">
+        <h6 class="mb-0">{{floatedClick}}</h6>
+        <button type="button" class="btn-close" aria-label="Close" (click)="floatedClick = null"></button>
+      </div>
+      <div class="card-body">
+        @switch (floatedClick) {
+          @case ('Reagent Summary') {
+            <div style="max-height:300px; max-width:350px; overflow: auto">
+              @if (protocol) {
+                @if (protocol.reagents.length) {
+                  <ul class="list-group">
+                    @for (reagent of protocol.reagents; track reagent.id) {
+                      <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span>{{reagent.reagent.name}}</span>
+                        <span>{{reagent.quantity}} {{reagent.reagent.unit}}</span>
+                      </li>
+                    }
+                  </ul>
+                } @else {
+                  <p class="text-center text-muted">No reagents in this protocol</p>
+                }
+              }
+
+            </div>
+          }
+          @case ('Calculator') {
+            <div style="width: 320px; max-height: 600px; overflow: auto">
+              <app-calculator-annotation></app-calculator-annotation>
+            </div>
+          }
         }
       </div>
     </div>
+  </div>
+}
 
+<!-- Tools button -->
+<div class="position-fixed bottom-0 end-0 mb-4 me-4 z-3">
+  <div ngbDropdown class="d-inline-block">
+    <button class="btn btn-primary rounded-circle shadow" style="width: 50px; height: 50px;" ngbDropdownToggle>
+      <i class="bi bi-tools"></i>
+    </button>
+    <div ngbDropdownMenu class="dropdown-menu-end">
+      @for (tool of ['Reagent Summary', 'Calculator']; track tool) {
+        <button ngbDropdownItem (click)="editorFloatClick(tool)">
+          <i class="bi" [ngClass]="{'bi-clipboard-data': tool === 'Reagent Summary', 'bi-calculator': tool === 'Calculator'}"></i>
+          {{tool}}
+        </button>
+      }
+    </div>
   </div>
 </div>
-

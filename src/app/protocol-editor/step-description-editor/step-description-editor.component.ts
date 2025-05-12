@@ -97,4 +97,8 @@ export class StepDescriptionEditorComponent implements AfterViewInit{
     this.step.step_description = this.quillEditor.quillEditor.root.innerHTML
 
   }
+
+  hasScalableReagents(step: ProtocolStep): boolean {
+    return step.reagents.some(r => r.scalable === true);
+  }
 }

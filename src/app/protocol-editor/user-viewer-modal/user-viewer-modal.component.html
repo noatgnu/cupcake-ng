@@ -1,36 +1,58 @@
-<div class="modal-header">
-  <h5 class="modal-title">Protocol Viewers</h5>
+<div class="modal-header ">
+  <h5 class="modal-title"><i class="bi bi-eye me-2"></i>Protocol Viewers</h5>
+  <button type="button" class="btn-close" aria-label="Close" (click)="close()"></button>
 </div>
+
 <div class="modal-body">
-  <form [formGroup]="form" (ngSubmit)="submit()">
-    <div class="form-group">
-      <label for="username">Username</label>
-      <input type="text" class="form-control" id="username" formControlName="username" >
+  <!-- Add Viewer Form -->
+  <div class="card shadow-sm mb-4">
+    <div class="card-header ">
+      <h6 class="mb-0">Add Viewer</h6>
     </div>
-    <div class="mt-1">
-      <button type="submit" class="btn btn-primary">Add</button>
-    </div>
-
-  </form>
-
-  @if (viewers.length > 0) {
-    <div class="list-group">
-      List of viewers
-      @for (user of viewers; track user.id) {
-        <div class="list-group-item list-group-item-action">
-          <div class="d-flex w-100 justify-content-between">
-            <b class="mb-1">{{ user.username }}</b>
-            <small>
-              <button class="btn btn-sm btn-danger" (click)="removeUserFromProtocol(user.username)">
-                <i class="bi bi-trash"></i>
-              </button>
-            </small>
-          </div>
+    <div class="card-body">
+      <form [formGroup]="form" (ngSubmit)="submit()" class="d-flex gap-2">
+        <div class="form-floating flex-grow-1">
+          <input type="text" class="form-control" id="username" formControlName="username" placeholder="Username">
+          <label for="username">Username</label>
         </div>
-      }
+        <button type="submit" class="btn btn-primary" [disabled]="!form.valid">
+          <i class="bi bi-plus-circle me-1"></i> Add
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Viewers List -->
+  @if (viewers.length > 0) {
+    <div class="card shadow-sm">
+      <div class="card-header  d-flex justify-content-between align-items-center">
+        <h6 class="mb-0">Current Viewers</h6>
+        <span class="badge bg-primary">{{viewers.length}}</span>
+      </div>
+      <ul class="list-group list-group-flush">
+        @for (user of viewers; track user.id) {
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            <div>
+              <i class="bi bi-eye me-2 text-secondary"></i>
+              <span>{{user.username}}</span>
+            </div>
+            <button class="btn btn-sm btn-outline-danger" (click)="removeUserFromProtocol(user.username)" title="Remove viewer">
+              <i class="bi bi-trash"></i>
+            </button>
+          </li>
+        }
+      </ul>
+    </div>
+  } @else {
+    <div class="alert alert-info">
+      <i class="bi bi-info-circle me-2"></i>
+      No viewers have been added to this protocol yet.
     </div>
   }
 </div>
-<div class="modal-footer">
-  <button type="button" class="btn btn-secondary" (click)="close()">Close</button>
+
+<div class="modal-footer ">
+  <button type="button" class="btn btn-secondary" (click)="close()">
+    <i class="bi bi-x-circle me-1"></i> Close
+  </button>
 </div>

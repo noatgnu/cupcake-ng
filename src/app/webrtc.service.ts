@@ -24,14 +24,6 @@ export interface ChatMessage {
   };
 }
 
-interface FileChunk {
-  fileId: string;
-  fileName: string;
-  chunkIndex: number;
-  totalChunks: number;
-  data: ArrayBuffer;
-  mimeType?: string;
-}
 
 interface FileTransfer {
   fileId: string;

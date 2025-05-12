@@ -26,7 +26,7 @@ import {StepDescriptionEditorComponent} from "./step-description-editor/step-des
 import {
   StepDescriptionPreviewModalComponent
 } from "./step-description-preview-modal/step-description-preview-modal.component";
-import {DatePipe} from "@angular/common";
+import {DatePipe, NgClass} from "@angular/common";
 
 @Component({
     selector: 'app-protocol-editor',
@@ -40,7 +40,8 @@ import {DatePipe} from "@angular/common";
         NgbDropdownToggle,
         CalculatorAnnotationComponent,
         StepDescriptionEditorComponent,
-        DatePipe
+        DatePipe,
+      NgClass
     ],
     templateUrl: './protocol-editor.component.html',
     styleUrl: './protocol-editor.component.scss'
@@ -82,7 +83,7 @@ export class ProtocolEditorComponent {
   sections: {data: ProtocolSection, steps: ProtocolStep[], currentStep: number}[] = []
   protocol?: Protocol
   _protocolID: number = 0
-  floatedClick?: string
+  floatedClick: string|undefined|null = null
   @Input() set protocolID(value: number) {
     if (!value) {
       return

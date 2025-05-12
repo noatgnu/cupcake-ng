@@ -1,118 +1,173 @@
 <div class="modal-header">
-  <h5 class="modal-title">Reagent</h5>
+  <h5 class="modal-title"><i class="bi bi-flask me-2"></i>Reagent Editor</h5>
+  <button type="button" class="btn-close" aria-label="Close" (click)="close()"></button>
 </div>
+
 <div class="modal-body">
-  <div class="d-flex flex-column gap-2">
-    <h5>Add Reagent</h5>
-    <form [formGroup]="reagentSearchForm" class="d-flex flex-column gap-2">
-      <div class="d-flex flex-row gap-2">
-        <div class="form-floating">
-          <input [resultTemplate]="rt" (selectItem)="onSearchIngredients($event)" id="reagentNameSearch" type="search" class="form-control" formControlName="name" [ngbTypeahead]="search" [inputFormatter]="formatIngredient" />
-          <label for="reagentNameSearch">Reagent</label>
-        </div>
-        <div class="form-floating">
-          <input type="number" class="form-control" formControlName="quantity" />
-          <label>Quantity</label>
-        </div>
-        <div class="form-floating">
-          <select id="reagentUnit" class="form-select" formControlName="unit">
-            <optgroup label="Volume">
-              <option value="nL">nL</option>
-              <option value="uL">uL</option>
-              <option value="mL">mL</option>
-              <option value="L">L</option>
-            </optgroup>
-            <optgroup label="Mass">
-              <option value="ng">ng</option>
-              <option value="ug">ug</option>
-              <option value="mg">mg</option>
-              <option value="g">g</option>
-              <option value="kg">kg</option>
-            </optgroup>
-            <optgroup label="Mole">
-              <option value="nM">nM</option>
-              <option value="uM">uM</option>
-              <option value="mM">mM</option>
-              <option value="M">M</option>
-            </optgroup>
-            <optgroup label="Count">
-              <option value="ea">ea</option>
-            </optgroup>
-          </select>
-          <label for="reagentUnit">Unit</label>
-        </div>
-      </div>
-      <div class="d-flex flex-row gap-2">
-        @if (reagentSearchForm.controls.scalable.value) {
+  <!-- Add Reagent Form -->
+  <div class="card mb-4 shadow-sm">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <h6 class="mb-0">Add New Reagent</h6>
+    </div>
+    <div class="card-body">
+      <form [formGroup]="reagentSearchForm" class="row g-3">
+        <!-- Main reagent info -->
+        <div class="col-md-5">
           <div class="form-floating">
-            <input class="form-control" formControlName="scalable_factor" type="number">
-            <label>Scale Factor</label>
+            <input
+              [resultTemplate]="rt"
+              (selectItem)="onSearchIngredients($event)"
+              id="reagentNameSearch"
+              type="search"
+              class="form-control"
+              formControlName="name"
+              [ngbTypeahead]="search"
+              [inputFormatter]="formatIngredient"
+              placeholder="Search reagent" />
+            <label for="reagentNameSearch">Reagent Name</label>
           </div>
-        }
-        <div class="form-check">
-          <input class="form-check-input" formControlName="scalable" type="checkbox">
-          <label class="form-check-label">Scalable</label>
         </div>
+
+        <div class="col-md-3">
+          <div class="form-floating">
+            <input type="number" class="form-control" id="reagentQuantity" formControlName="quantity" placeholder="Amount" />
+            <label for="reagentQuantity">Quantity</label>
+          </div>
+        </div>
+
+        <div class="col-md-4">
+          <div class="form-floating">
+            <select id="reagentUnit" class="form-select" formControlName="unit">
+              <optgroup label="Volume">
+                <option value="nL">nL</option>
+                <option value="uL">uL</option>
+                <option value="mL">mL</option>
+                <option value="L">L</option>
+              </optgroup>
+              <optgroup label="Mass">
+                <option value="ng">ng</option>
+                <option value="ug">ug</option>
+                <option value="mg">mg</option>
+                <option value="g">g</option>
+                <option value="kg">kg</option>
+              </optgroup>
+              <optgroup label="Mole">
+                <option value="nM">nM</option>
+                <option value="uM">uM</option>
+                <option value="mM">mM</option>
+                <option value="M">M</option>
+              </optgroup>
+              <optgroup label="Count">
+                <option value="ea">ea</option>
+              </optgroup>
+            </select>
+            <label for="reagentUnit">Unit</label>
+          </div>
+        </div>
+
+        <!-- Scaling options -->
+        <div class="col-12">
+          <div class="d-flex align-items-center">
+            <div class="form-check me-4">
+              <input class="form-check-input" id="reagentScalable" formControlName="scalable" type="checkbox">
+              <label class="form-check-label" for="reagentScalable">Enable Scaling</label>
+            </div>
+
+            @if (reagentSearchForm.controls.scalable.value) {
+              <div class="form-floating flex-grow-1">
+                <input class="form-control" id="scaleFactor" formControlName="scalable_factor" type="number" placeholder="Factor">
+                <label for="scaleFactor">Scale Factor</label>
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- Add button -->
+        <div class="col-12 mt-2">
+          <button type="button" class="btn btn-primary w-100"
+                  [disabled]="!reagentSearchForm.valid"
+                  (click)="addIngredient()">
+            <i class="bi bi-plus-circle me-1"></i> Add Reagent
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Reagent List -->
+  @if (reagentForms.length > 0) {
+    <div class="card shadow-sm">
+      <div class="card-header">
+        <h6 class="mb-0">Added Reagents ({{reagentForms.length}})</h6>
       </div>
-    </form>
-    <button type="button" class="btn btn-primary" (click)="addIngredient()"><i class="bi bi-plus"></i></button>
-    <hr>
-    @if (reagentForms.length > 0){
-      <h5>Reagents</h5>
-      <table class="table">
-        <thead>
+      <div class="table-responsive">
+        <table class="table table-striped table-hover mb-0">
+          <thead>
           <tr>
             <th>Name</th>
-            <th>Quant</th>
+            <th style="width: 15%">Quantity</th>
             <th>Unit</th>
             <th>Scalable</th>
             <th>Scale Factor</th>
-            <th></th>
+            <th class="text-center">Actions</th>
           </tr>
-        </thead>
-        <tbody>
-          @for (i of reagentForms; track i) {
-            <tr>
-              <td>
-                {{ i.controls["name"].value }}
-              </td>
-              <td>
-                <form [formGroup]="i" class="d-flex flex-column gap-2">
-                  <input type="number" class="form-control" formControlName="quantity" />
-                </form>
-              </td>
-              <td>
-                {{ i.controls["unit"].value }}
-              </td>
-              <td>
-                <form [formGroup]="i">
-                  <div class="form-check">
-                    <input class="form-check-input" type="checkbox" formControlName="scalable">
-                  </div>
-                </form>
-
-              </td>
-              <td>
-                <form [formGroup]="i">
-                  <div class="form-group">
-                    <input class="form-control" type="number" formControlName="scalable_factor">
-                  </div>
-                </form>
-
-              </td>
-              <td>
-                <button class="btn btn-outline-danger" (click)="removeIngredient(i.controls['id'].value)"><i class="bi bi-trash"></i></button>
-              </td>
-            </tr>
-          }
-        </tbody>
-      </table>
-    }
-  </div>
+          </thead>
+          <tbody>
+            @for (form of reagentForms; track form) {
+              <tr>
+                <td class="align-middle">
+                  {{ form.controls["name"].value }}
+                </td>
+                <td>
+                  <form [formGroup]="form">
+                    <input type="number" class="form-control form-control-sm" formControlName="quantity" />
+                  </form>
+                </td>
+                <td class="align-middle">
+                  {{ form.controls["unit"].value }}
+                </td>
+                <td class="align-middle">
+                  <form [formGroup]="form">
+                    <div class="form-check d-flex justify-content-center">
+                      <input class="form-check-input" type="checkbox" formControlName="scalable">
+                    </div>
+                  </form>
+                </td>
+                <td>
+                  <form [formGroup]="form">
+                    <input class="form-control form-control-sm"
+                           type="number"
+                           formControlName="scalable_factor"
+                           [disabled]="!form.controls['scalable'].value">
+                  </form>
+                </td>
+                <td class="text-center">
+                  <button class="btn btn-sm btn-outline-danger"
+                          (click)="removeIngredient(form.controls['id'].value)"
+                          title="Remove reagent">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  } @else {
+    <div class="alert alert-info">
+      <i class="bi bi-info-circle me-2"></i> No reagents added yet
+    </div>
+  }
 </div>
+
 <div class="modal-footer">
-  <button type="button" class="btn btn-primary" (click)="save()">Save</button>
-  <button type="button" class="btn btn-secondary" (click)="close()">Close</button>
+  <button type="button" class="btn btn-secondary" (click)="close()">
+    <i class="bi bi-x-circle me-1"></i> Cancel
+  </button>
+  <button type="button" class="btn btn-primary" [disabled]="reagentForms.length === 0" (click)="save()">
+    <i class="bi bi-check-circle me-1"></i> Save Changes
+  </button>
 </div>
 
 <ng-template #rt let-r="result" let-t="term">

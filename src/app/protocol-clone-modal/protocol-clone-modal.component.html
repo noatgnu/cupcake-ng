@@ -1,21 +1,45 @@
-<div class="modal-header">
-  <h5 class="modal-title">Clone Protocol</h5>
+<div class="modal-header ">
+  <h5 class="modal-title"><i class="bi bi-files me-2"></i>Clone Protocol</h5>
+  <button type="button" class="btn-close" aria-label="Close" (click)="cancel()"></button>
 </div>
-<div class="modal-body">
-  <form [formGroup]="form">
-    <div class="form-group">
-      <label for="protocol_title">New Protocol Title</label>
-      <input type="text" class="form-control" id="protocol_title" formControlName="protocol_title">
-    </div>
-    <div class="form-group">
-      <label>New Protocol Description</label>
-      <quill-editor formControlName="protocol_description" [modules]="editorConfig">
 
-      </quill-editor>
+<div class="modal-body">
+  <form [formGroup]="form" class="mb-3">
+    <div class="card shadow-sm mb-4">
+      <div class="card-body">
+        <!-- Protocol Title -->
+        <div class="form-floating mb-3">
+          <input
+            type="text"
+            class="form-control"
+            id="protocol_title"
+            formControlName="protocol_title"
+            placeholder="Enter protocol title">
+          <label for="protocol_title">New Protocol Title</label>
+        </div>
+
+        <!-- Protocol Description -->
+        <div class="mb-1">
+          <label for="protocol-description" class="form-label">New Protocol Description</label>
+          <div class="editor-wrapper">
+            <quill-editor
+              id="protocol-description"
+              formControlName="protocol_description"
+              [modules]="editorConfig"
+              class="shadow-sm">
+            </quill-editor>
+          </div>
+        </div>
+      </div>
     </div>
   </form>
 </div>
-<div class="modal-footer">
-  <button type="button" class="btn btn-primary" (click)="clone()">Clone</button>
-  <button type="button" class="btn btn-secondary" (click)="cancel()">Cancel</button>
+
+<div class="modal-footer ">
+  <button type="button" class="btn btn-secondary" (click)="cancel()">
+    <i class="bi bi-x-circle me-1"></i> Cancel
+  </button>
+  <button type="button" class="btn btn-primary" (click)="clone()">
+    <i class="bi bi-files me-1"></i> Clone
+  </button>
 </div>
