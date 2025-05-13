@@ -114,7 +114,12 @@ export class StoredReagentEditorModalComponent implements AfterViewInit, OnInit{
       }
       if (value.created_by_step) {
         this.form.controls.created_by_step.setValue(value.created_by_step.id)
-
+      }
+      if (value.low_stock_threshold) {
+        this.form.controls.lowStockThreshold.setValue(value.low_stock_threshold)
+      }
+      if (value.notify_on_low_stock !== undefined && value.notify_on_low_stock !== null) {
+        this.form.controls.lowStockNotification.setValue(value.notify_on_low_stock)
       }
     }
   }
@@ -133,7 +138,9 @@ export class StoredReagentEditorModalComponent implements AfterViewInit, OnInit{
     created_by_project: new FormControl<number|null>(null),
     created_by_protocol: new FormControl<number|null>(null),
     created_by_session: new FormControl<number|null>(null),
-    created_by_step: new FormControl<number|null>(null)
+    created_by_step: new FormControl<number|null>(null),
+    lowStockThreshold: new FormControl<number|null>(null),
+    lowStockNotification: new FormControl<boolean>(false),
   })
 
 

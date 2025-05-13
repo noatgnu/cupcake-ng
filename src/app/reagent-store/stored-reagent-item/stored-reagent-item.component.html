@@ -34,10 +34,13 @@
               <i class="bi bi-box me-1 text-primary"></i>
               <strong>Quantity:</strong> {{storedReagent?.current_quantity}} @if (storedReagent) {@if(storedReagent.reagent) { {{storedReagent.reagent.unit}} }}
             </span>
-            <span>
+            @if (storedReagent) {
+              <span>
               <i class="bi bi-person me-1 text-secondary"></i>
-              <strong>User:</strong> {{storedReagent?.user}}
+              <strong>User:</strong> {{storedReagent.user.username}}
             </span>
+            }
+
           </div>
 
           @if (storedReagent?.expiration_date) {
@@ -147,42 +150,45 @@
         }
 
         <!-- Manage Actions -->
-        @if (accounts.is_staff || storedReagent?.user === accounts.username) {
-          <div class="btn-group me-2">
-            <button class="btn btn-sm btn-outline-primary" (click)="openStoredReagentEditorModal.emit(true)" ngbTooltip="Edit item">
-              <i class="bi bi-pencil me-1"></i><span class="d-none d-sm-inline">Edit</span>
-            </button>
-            <button class="btn btn-sm btn-outline-primary" (click)="openCameraModal.emit(true)" ngbTooltip="Upload photo">
-              <i class="bi bi-camera me-1"></i><span class="d-none d-sm-inline">Photo</span>
-            </button>
-            <button
-              class="btn btn-sm"
-              [ngClass]="storedReagent?.barcode ? 'btn-outline-success' : 'btn-outline-secondary'"
-              (click)="openQrScannerModal.emit(true)"
-              [ngbTooltip]="storedReagent?.barcode ? 'Update barcode' : 'Set item barcode'">
-              <i class="bi bi-upc-scan me-1"></i><span class="d-none d-sm-inline">Barcode</span>
-            </button>
-          </div>
+        @if (storedReagent) {
+          @if (accounts.is_staff || storedReagent.user.username === accounts.username) {
+            <div class="btn-group me-2">
+              <button class="btn btn-sm btn-outline-primary" (click)="openStoredReagentEditorModal.emit(true)" ngbTooltip="Edit item">
+                <i class="bi bi-pencil me-1"></i><span class="d-none d-sm-inline">Edit</span>
+              </button>
+              <button class="btn btn-sm btn-outline-primary" (click)="openCameraModal.emit(true)" ngbTooltip="Upload photo">
+                <i class="bi bi-camera me-1"></i><span class="d-none d-sm-inline">Photo</span>
+              </button>
+              <button
+                class="btn btn-sm"
+                [ngClass]="storedReagent.barcode ? 'btn-outline-success' : 'btn-outline-secondary'"
+                (click)="openQrScannerModal.emit(true)"
+                [ngbTooltip]="storedReagent.barcode ? 'Update barcode' : 'Set item barcode'">
+                <i class="bi bi-upc-scan me-1"></i><span class="d-none d-sm-inline">Barcode</span>
+              </button>
+            </div>
 
-          <div class="btn-group">
+            <div class="btn-group">
+              <button class="btn btn-sm btn-outline-primary" (click)="openCloneStoredReagentModal.emit(true)" ngbTooltip="Clone item">
+                <i class="bi bi-copy me-1"></i><span class="d-none d-sm-inline">Clone</span>
+              </button>
+              <button class="btn btn-sm btn-outline-danger" (click)="openStoredReagentAccessControlModal.emit(true)" ngbTooltip="Access control">
+                <i class="bi bi-people me-1"></i><span class="d-none d-sm-inline">Access</span>
+              </button>
+              <button class="btn btn-sm btn-outline-danger" (click)="delete.emit(true)" ngbTooltip="Remove item">
+                <i class="bi bi-trash me-1"></i><span class="d-none d-sm-inline">Delete</span>
+              </button>
+            </div>
+          } @else {
             <button class="btn btn-sm btn-outline-primary" (click)="openCloneStoredReagentModal.emit(true)" ngbTooltip="Clone item">
               <i class="bi bi-copy me-1"></i><span class="d-none d-sm-inline">Clone</span>
             </button>
-            <button class="btn btn-sm btn-outline-danger" (click)="openStoredReagentAccessControlModal.emit(true)" ngbTooltip="Access control">
-              <i class="bi bi-people me-1"></i><span class="d-none d-sm-inline">Access</span>
-            </button>
-            <button class="btn btn-sm btn-outline-danger" (click)="delete.emit(true)" ngbTooltip="Remove item">
+            <button class="btn btn-sm btn-outline-danger" disabled ngbTooltip="Remove item (no permission)">
               <i class="bi bi-trash me-1"></i><span class="d-none d-sm-inline">Delete</span>
             </button>
-          </div>
-        } @else {
-          <button class="btn btn-sm btn-outline-primary" (click)="openCloneStoredReagentModal.emit(true)" ngbTooltip="Clone item">
-            <i class="bi bi-copy me-1"></i><span class="d-none d-sm-inline">Clone</span>
-          </button>
-          <button class="btn btn-sm btn-outline-danger" disabled ngbTooltip="Remove item (no permission)">
-            <i class="bi bi-trash me-1"></i><span class="d-none d-sm-inline">Delete</span>
-          </button>
+          }
         }
+
       </div>
     </div>
   </div>

@@ -1242,7 +1242,7 @@ export class WebService {
   }
 
 
-  updateStoredReagent(reagent_id: number, quantity: number, notes: string, png_base64: string|null = null, barcode: string|null = null, shareable: boolean = true, expiration_date: NgbDateStruct|null = null, created_by_project: number|null = null, created_by_protocol: number|null = null, created_by_session: number|null = null, created_by_step: number|null = null) {
+  updateStoredReagent(reagent_id: number, quantity: number, notes: string, png_base64: string|null = null, barcode: string|null = null, shareable: boolean = true, expiration_date: NgbDateStruct|null = null, created_by_project: number|null = null, created_by_protocol: number|null = null, created_by_session: number|null = null, created_by_step: number|null = null, low_stock_threshold: number|null = null, notify_on_low_stock: boolean = false) {
     const payload: any = {quantity: quantity, notes: notes, png_base64: png_base64, barcode: barcode, shareable: shareable}
     if (expiration_date) {
       payload['expiration_date'] = `${expiration_date.year}-${expiration_date.month}-${expiration_date.day}`
@@ -1259,6 +1259,13 @@ export class WebService {
     if (created_by_step) {
       payload['created_by_step'] = created_by_step
     }
+    if (low_stock_threshold) {
+      payload['low_stock_threshold'] = low_stock_threshold
+    }
+    if (notify_on_low_stock !== null && notify_on_low_stock !== undefined) {
+      payload['notify_on_low_stock'] = notify_on_low_stock
+    }
+
     return this.http.put<StoredReagent>(
       `${this.baseURL}/api/stored_reagent/${reagent_id}/`,
       payload,

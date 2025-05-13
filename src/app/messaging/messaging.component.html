@@ -1,0 +1,271 @@
+<div class="container-fluid p-0">
+  <div class="row g-0 messaging-container">
+    <!-- Threads sidebar -->
+    <div class="col-md-4 col-lg-3 threads-sidebar border-end">
+      <div class="d-flex justify-content-between align-items-center p-3 border-bottom">
+        <h5 class="mb-0">Conversations</h5>
+        <button (click)="createNewThread()" class="btn btn-primary btn-sm">
+          <i class="bi bi-plus-lg me-1"></i>New
+        </button>
+      </div>
+
+      @if (loading) {
+        <div class="d-flex justify-content-center p-3">
+          <div class="spinner-border spinner-border-sm text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+        </div>
+      } @else {
+        <div class="list-group list-group-flush thread-list">
+          @for (thread of threads; track thread.id) {
+            <button
+              type="button"
+              [class.active]="selectedThread && selectedThread.id === thread.id"
+              class="list-group-item list-group-item-action"
+              (click)="selectThread(thread)">
+              <div class="d-flex w-100 justify-content-between">
+                <h6 class="mb-1 text-truncate">{{ thread.title }}</h6>
+                @if (thread.unread_count) {
+                  <span class="badge bg-danger rounded-pill">{{ thread.unread_count }}</span>
+                }
+              </div>
+              <div class="d-flex justify-content-between align-items-center">
+                <small class="text-body-secondary">
+                  {{ thread.latest_message?.created_at | date:'short' }}
+                </small>
+                @if (thread.latest_message?.attachment_count) {
+                  <small><i class="bi bi-paperclip text-body-secondary"></i></small>
+                }
+              </div>
+            </button>
+          }
+
+          @if (threads.length === 0) {
+            <div class="text-center text-body-secondary p-4">
+              <p>No conversations found</p>
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- Message area -->
+    <div class="col-md-8 col-lg-9 message-area d-flex flex-column">
+      @if (selectedThread) {
+        <div class="thread-detail flex-grow-1 overflow-auto">
+          <div class="p-3 border-bottom">
+            <h5 class="mb-0">{{ selectedThread.title }}</h5>
+          </div>
+
+          <div class="p-3">
+            @for (message of selectedThread.messages; track message.id) {
+              <div class="card mb-3">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                  <div>
+                    <span class="fw-bold">{{ message.sender?.username || 'System' }}</span>
+                    <span ngbTooltip="{{ message.priority }}" class="ms-2 badge"
+                          [ngClass]="{
+                            'bg-danger': message.priority === 'urgent',
+                            'bg-warning': message.priority === 'high',
+                            'bg-success': message.priority === 'normal',
+                            'bg-secondary': message.priority === 'low'
+                          }">
+                      {{ message.priority }}
+                    </span>
+                  </div>
+                  <small class="text-body-secondary">{{ message.created_at | date:'medium' }}</small>
+                </div>
+                <div
+                  class="card-body"
+                  [ngClass]="'message-type-' + message.message_type"
+                  [innerHTML]="message.content">
+                </div>
+                @if (message.attachment_count > 0) {
+                  <div class="card-footer">
+                    <small class="text-body-secondary">
+                      <i class="bi bi-paperclip me-1"></i>{{ message.attachment_count }} attachment(s)
+                    </small>
+                  </div>
+                }
+              </div>
+            }
+
+            @if (selectedThread.messages.length === 0) {
+              <div class="text-center text-body-secondary p-4">
+                <p>No messages in this conversation</p>
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- Only show reply form if thread is NOT alert, system, or announcement -->
+        @if (selectedThread.messages.length > 0 &&
+        selectedThread.messages[0].message_type !== 'alert' &&
+        selectedThread.messages[0].message_type !== 'system_notification' &&
+        selectedThread.messages[0].message_type !== 'announcement') {
+          <div class="border-top p-3">
+            <form [formGroup]="messageForm" (ngSubmit)="sendMessage()">
+              <div class="mb-3">
+                <quill-editor
+                  formControlName="content"
+                  [modules]="quillModules"
+                  [styles]="{height: '150px'}"
+                  placeholder="Compose your message...">
+                </quill-editor>
+              </div>
+
+              <div class="row g-3">
+                @if (accounts.is_staff) {
+                  <div class="col-md-4">
+                    <select formControlName="messageType" class="form-select form-select-sm">
+                      @for (mType of messageTypes; track mType) {
+                        <option [value]="mType.value">{{ mType.label }}</option>
+                      }
+                    </select>
+                  </div>
+                }
+
+                <div class="col-md-4">
+                  <select formControlName="priority" class="form-select form-select-sm">
+                    @for (priority of priorities; track priority) {
+                      <option [value]="priority.value">{{ priority.label }}</option>
+                    }
+                  </select>
+                </div>
+                <div class="col-md-4 d-flex gap-2 justify-content-end">
+                  <label for="file-upload" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-paperclip me-1"></i>Attach
+                  </label>
+                  <input id="file-upload" type="file" multiple (change)="handleFileInput($event)" class="d-none">
+
+                  <button type="submit" [disabled]="messageForm.invalid || loading" class="btn btn-primary btn-sm">
+                    <i class="bi bi-send me-1"></i>Send
+                  </button>
+                </div>
+                @if (attachments.length) {
+                  <div class="col-12">
+                    <small class="text-body-secondary">{{ attachments.length }} file(s) attached</small>
+                  </div>
+                }
+              </div>
+            </form>
+          </div>
+        } @else if (selectedThread.messages.length > 0) {
+          <div class="p-3 border-top text-center">
+            <p class="mb-0 text-muted"><i class="bi bi-info-circle me-2"></i>This thread type doesn't allow replies</p>
+          </div>
+        }
+      } @else {
+        <!-- New message form when no thread is selected -->
+        <div class="p-3">
+          <h5>New Message</h5>
+          <form [formGroup]="messageForm" (ngSubmit)="sendMessage()">
+            <div class="mb-3">
+              <label for="title" class="form-label">Subject</label>
+              <input id="title" type="text" formControlName="title" class="form-control">
+            </div>
+            <div class="mb-3">
+              <label for="recipients" class="form-label">Recipients</label>
+              <div class="input-group mb-2">
+                <input
+                  type="text"
+                  class="form-control"
+                  placeholder="Search users..."
+                  [ngModel]="userSearchTerm"
+                  (ngModelChange)="searchUsers($event)"
+                  [ngModelOptions]="{standalone: true}"
+                  [disabled]="loading">
+                <button
+                  class="btn btn-outline-secondary"
+                  type="button"
+                  (click)="clearUserSearch()"
+                  [disabled]="!userSearchTerm">
+                  <i class="bi bi-x"></i>
+                </button>
+              </div>
+              @if (userResults.length > 0) {
+                <div class="mb-2">
+                  <div class="list-group">
+                    @for (user of userResults; track user.id) {
+                      <button
+                        type="button"
+                        class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
+                        (click)="addRecipient(user)">
+                        {{ user.username }}
+                        <i class="bi bi-plus-circle text-primary"></i>
+                      </button>
+                    }
+                  </div>
+                </div>
+              }
+              <select id="recipients" formControlName="recipientIds" multiple class="form-select d-none">
+                @for (recipient of selectedRecipients; track recipient.id) {
+                  <option [value]="recipient.id" selected>{{ recipient.username }}</option>
+                }
+              </select>
+
+              @if (selectedRecipients.length > 0) {
+                <div class="mt-2">
+                  <div class="d-flex flex-wrap gap-2">
+                    @for (recipient of selectedRecipients; track recipient.id) {
+                      <span class="badge bg-primary d-flex align-items-center">
+                        {{ recipient.username }}
+                        <button type="button" class="btn-close btn-close-white ms-2"
+                                aria-label="Remove"
+                                (click)="removeRecipient(recipient)"></button>
+                      </span>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+            <div class="mb-3">
+              <label for="content" class="form-label">Message</label>
+              <quill-editor
+                id="content"
+                formControlName="content"
+                [modules]="quillModules"
+                [styles]="{height: '200px'}"
+                placeholder="Compose your message...">
+              </quill-editor>
+            </div>
+
+            <div class="row g-2">
+              <div class="col-md-3">
+                <label for="messageType" class="form-label">Type</label>
+                <select id="messageType" formControlName="messageType" class="form-select">
+                  @for (mType of messageTypes; track mType) {
+                    <option [value]="mType.value">{{ mType.label }}</option>
+                  }
+                </select>
+              </div>
+              <div class="col-md-3">
+                <label for="priority" class="form-label">Priority</label>
+                <select id="priority" formControlName="priority" class="form-select">
+                  @for (priority of priorities; track priority) {
+                    <option [value]="priority.value">{{ priority.label }}</option>
+                  }
+                </select>
+              </div>
+              <div class="col-md-6 d-flex align-items-end justify-content-end gap-2">
+                <label for="new-file-upload" class="btn btn-outline-secondary">
+                  <i class="bi bi-paperclip me-1"></i>Attach Files
+                </label>
+                <input id="new-file-upload" type="file" multiple (change)="handleFileInput($event)" class="d-none">
+
+                <button type="submit" [disabled]="messageForm.invalid || loading" class="btn btn-primary">
+                  <i class="bi bi-send me-1"></i>Send
+                </button>
+              </div>
+              @if (attachments.length) {
+                <div class="col-12">
+                  <small class="text-body-secondary">{{ attachments.length }} file(s) attached</small>
+                </div>
+              }
+            </div>
+          </form>
+        </div>
+      }
+    </div>
+  </div>
+</div>

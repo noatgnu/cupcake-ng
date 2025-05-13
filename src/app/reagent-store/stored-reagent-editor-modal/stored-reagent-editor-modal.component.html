@@ -32,6 +32,24 @@
             </div>
           </div>
 
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="notifyLowStock" formControlName="lowStockNotification">
+                <label class="form-check-label" for="notifyLowStock">
+                  <i class="bi bi-bell me-1"></i>Notify when low stock
+                </label>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-floating">
+                <input type="number" class="form-control" id="stockThreshold" formControlName="lowStockThreshold"
+                       placeholder="Stock Threshold">
+                <label for="stockThreshold">Low stock threshold</label>
+              </div>
+            </div>
+          </div>
+
           <div class="form-floating">
             <textarea class="form-control" id="notes" formControlName="notes"
                       placeholder="Entry Notes" style="min-height: 100px"></textarea>

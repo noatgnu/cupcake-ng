@@ -20,6 +20,11 @@
              (click)="selectedSection='profile'">
             <i class="bi bi-person me-2"></i> Profile
           </a>
+          <a class="list-group-item list-group-item-action py-3 d-flex align-items-center"
+             [ngClass]="{'active': selectedSection==='messaging'}"
+             (click)="selectedSection='messaging'">
+            <i class="bi bi-chat-dots me-2"></i> Messages
+          </a>
         }
         <a class="list-group-item list-group-item-action py-3 d-flex align-items-center"
            [ngClass]="{'active': selectedSection==='security'}"
@@ -71,6 +76,8 @@
             <i class="bi bi-star me-2"></i> Favourites
           } @else if (selectedSection === 'signup') {
             <i class="bi bi-person-plus me-2"></i> Signup
+          } @else if (selectedSection === 'messaging') {
+            <i class="bi bi-chat-dots me-2"></i> Messages
           }
         </h5>
       </div>
@@ -140,6 +147,8 @@
           <app-profile></app-profile>
         } @else if (selectedSection === 'favourite') {
           <app-favourites></app-favourites>
+        } @else if (selectedSection === 'messaging') {
+          <app-messaging></app-messaging>
         } @else {
           <div class="container py-4">
             <div class="card shadow-sm mb-4">

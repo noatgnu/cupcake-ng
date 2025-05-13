@@ -1,0 +1,41 @@
+.component-container {
+  max-height: 50vh;
+  overflow-y: auto;
+  position: relative;
+  padding-bottom: 20px;
+}
+
+.visualizer-container {
+  max-width: 250px;
+  margin: 0 auto;
+}
+
+#visualizer {
+  width: 100%;
+  background-color: #f8f9fa;
+}
+
+.annotation-selector {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  z-index: 1030;
+}
+
+/* Custom scrollbar styling */
+.annotation-input-container::-webkit-scrollbar {
+  width: 8px;
+}
+
+.annotation-input-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.annotation-input-container::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+.annotation-input-container::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}

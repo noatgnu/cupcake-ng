@@ -11,6 +11,7 @@ import {SignupComponent} from "./signup/signup.component";
 import {ProfileComponent} from "./profile/profile.component";
 import {FavouritesComponent} from "./favourites/favourites.component";
 import {NgClass} from "@angular/common";
+import {MessagingComponent} from "../messaging/messaging.component";
 
 @Component({
     selector: 'app-accounts',
@@ -25,7 +26,8 @@ import {NgClass} from "@angular/common";
     SignupComponent,
     ProfileComponent,
     FavouritesComponent,
-    NgClass
+    NgClass,
+    MessagingComponent
   ],
     templateUrl: './accounts.component.html',
     styleUrl: './accounts.component.scss'

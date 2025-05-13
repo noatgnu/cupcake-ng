@@ -26,7 +26,7 @@ export interface StoredReagent {
   created_at: Date;
   updated_at: Date;
   notes: string;
-  user: string;
+  user: {id: number, username: string};
   png_base64: string;
   barcode: string|null;
   shareable: boolean;
@@ -38,6 +38,9 @@ export interface StoredReagent {
   created_by_protocol: number|null;
   created_by_step: ProtocolStep|null;
   metadata_columns: MetadataColumn[];
+  low_stock_threshold: number|null;
+  notify_on_low_stock: boolean;
+  last_notification_sent: Date|null;
 }
 
 export interface StorageObjectQuery {

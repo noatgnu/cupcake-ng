@@ -32,27 +32,29 @@ import {ReagentTableComponent} from "../reagent-table/reagent-table.component";
 import {
   StepMetadataExporterModalComponent
 } from "./step-metadata-exporter-modal/step-metadata-exporter-modal.component";
+import {AnnotationInputComponent} from "../annotation-input/annotation-input.component";
+import {MediaDeviceService} from "../../media-device.service";
 
 @Component({
     selector: 'app-step-view',
-    imports: [
-        AnnotationTextFormComponent,
-        FormsModule,
-        HandwrittenAnnotationComponent,
-        AnnotationPresenterComponent,
-        NgbDropdown,
-        NgbDropdownItem,
-        NgbDropdownMenu,
-        NgbDropdownToggle,
-        NgbProgressbar,
-        ReagentTableComponent,
-        NgbTooltip
-    ],
+  imports: [
+    AnnotationTextFormComponent,
+    FormsModule,
+    HandwrittenAnnotationComponent,
+    AnnotationPresenterComponent,
+    NgbDropdown,
+    NgbDropdownItem,
+    NgbDropdownMenu,
+    NgbDropdownToggle,
+    NgbProgressbar,
+    ReagentTableComponent,
+    NgbTooltip,
+    AnnotationInputComponent
+  ],
     templateUrl: './step-view.component.html',
     styleUrl: './step-view.component.scss'
 })
 export class StepViewComponent {
-  @ViewChild('previewVideo') previewVideo?: ElementRef;
   @Input() currentSection?: {data: ProtocolSection, steps: ProtocolStep[], currentStep: number}
   @Output() showSidebar: EventEmitter<boolean> = new EventEmitter<boolean>();
   private _currentStep?: ProtocolStep
@@ -76,24 +78,20 @@ export class StepViewComponent {
 
   mouseOverElement: string = "";
   clickedElement: string = "";
-  screenRecording: boolean = false;
-  speechRecognition: any;
-  recording: boolean = false;
-  recordingChunks: any[] = [];
-  recordedBlob?: Blob;
-  mediaRecorder?: MediaRecorder
-  audioURL?: string;
   annotations?: AnnotationQuery;
 
-  cameraDevices: MediaDeviceInfo[] = [];
-  currentCameraDevice: MediaDeviceInfo|null = null;
-  audioDevices: MediaDeviceInfo[] = [];
-  currentAudioDevice: MediaDeviceInfo|null = null;
-  audioContext: AudioContext = new AudioContext();
-  analyser: AnalyserNode = this.audioContext.createAnalyser();
-  dataArray: Uint8Array = new Uint8Array(this.analyser.frequencyBinCount);
-  animationFrame: any
-  constructor(private modalConfig: NgbModalConfig, private modal: NgbModal, public timer: TimerService, public dataService: DataService, private ws: WebsocketService, private toastService: ToastService, private web: WebService, private accounts: AccountsService, private speech: SpeechService ) {
+  constructor(
+    private modalConfig: NgbModalConfig,
+    private modal: NgbModal,
+    public timer: TimerService,
+    public dataService: DataService,
+    private ws: WebsocketService,
+    private toastService: ToastService,
+    private web: WebService,
+    private accounts: AccountsService,
+    private speech: SpeechService,
+    public mediaDevice: MediaDeviceService
+  ) {
     this.modalConfig.backdrop = 'static';
     this.modalConfig.keyboard = false;
     this.ws.annotationWSConnection?.subscribe((data: Annotation) => {
@@ -125,10 +123,6 @@ export class StepViewComponent {
       }
     })
 
-    navigator.mediaDevices.enumerateDevices().then((devices) => {
-      this.cameraDevices = devices.filter((device) => device.kind === 'videoinput');
-      this.audioDevices = devices.filter((device) => device.kind === 'audioinput');
-    })
   }
 
   showHideSidebar() {
@@ -277,169 +271,17 @@ export class StepViewComponent {
     this.timer.timeKeeper[step_id.toString()].started = false;
   }
 
-  startScreenRecording(audio: boolean) {
-    this.recording = true;
-    this.recordingChunks = [];
-    let constraints: any = { audio: audio, video: {cursor: "always"} };
-    if (this.currentAudioDevice && audio) {
-      constraints.audio = { deviceId: {exact: this.currentAudioDevice.deviceId} }
-    }
-    navigator.mediaDevices.getDisplayMedia(constraints).then((stream) => {
-      this.mediaRecorder = new MediaRecorder(stream);
-      this.mediaRecorder.onstart = () => {
-        this.toastService.show('Recording', 'Recording Started')
-        console.log('recording started')
-        this.recording = true;
-        this.screenRecording = true;
-      }
-      this.mediaRecorder.ondataavailable = (event) => {
-        console.log(event);
-        this.recordingChunks.push(event.data);
-      }
-      this.mediaRecorder.onstop = () => {
-        stream.getTracks().forEach((track) => track.stop());
-        console.log('recording stopped')
-        this.toastService.show('Recording', 'Recording Stopped')
-        this.recordedBlob = new Blob(this.recordingChunks, {type: 'video/webm'});
-        this.audioURL = window.URL.createObjectURL(this.recordedBlob);
-        this.recording = false;
-        this.screenRecording = false;
-      }
-      this.mediaRecorder.start();
-    })
-  }
-
-  startRecording(audio: boolean, video: boolean) {
-    //this.speechRecognition.start();
-    console.log('start recording')
-    this.recording = true;
-    this.recordingChunks = [];
-    let constraints: MediaStreamConstraints = { audio: audio, video: video };
-    if (video) {
-      // check agent if mobile or desktop
-      if (navigator.userAgent.match(/Android/i) || navigator.userAgent.match(/iPhone/i) || navigator.userAgent.match(/iPad/i)) {
-        constraints.video = { width: { ideal: 1920 }, height: { ideal: 1080 }, facingMode: {exact: 'environment'}};
-      } else {
-        constraints.video = { width: { ideal: 1920 }, height: { ideal: 1080 }};
-      }
-      //constraints.video = { width: { ideal: 1920 }, height: { ideal: 1080 }, facingMode: {exact: 'environment'}};
-      if (this.currentCameraDevice) {
-        console.log(this.currentCameraDevice)
-        constraints.video = { deviceId: {exact: this.currentCameraDevice.deviceId}, width: { ideal: 1920 }, height: { ideal: 1080 }};
-      }
-    }
-
-    if (this.currentAudioDevice) {
-      console.log(this.currentAudioDevice)
-      constraints.audio = { deviceId: {exact: this.currentAudioDevice.deviceId} }
-    }
-    navigator.mediaDevices.getUserMedia(constraints).then(
-      (stream) => {
-        if (this.previewVideo) {
-          this.previewVideo.nativeElement.srcObject = stream;
-          this.previewVideo.nativeElement.oncanplaythrough = () => {
-            // @ts-ignore
-            this.previewVideo.nativeElement.muted = true;
-          }
-          this.previewVideo.nativeElement.play();
-
-        }
-        if (audio) {
-          let source = this.audioContext.createMediaStreamSource(stream);
-          source.connect(this.analyser);
-        }
-        this.mediaRecorder = new MediaRecorder(stream);
-        this.mediaRecorder.onstart = () => {
-          this.toastService.show('Recording', 'Recording Started')
-          console.log('recording started')
-        }
-        this.mediaRecorder.ondataavailable = (event) => {
-          console.log(event);
-          this.recordingChunks.push(event.data);
-        }
-        this.mediaRecorder.onstop = () => {
-          stream.getTracks().forEach((track) => track.stop());
-          console.log('recording stopped')
-          this.toastService.show('Recording', 'Recording Stopped')
-          this.recordedBlob = new Blob(this.recordingChunks, {type: 'audio/webm'});
-          this.audioURL = window.URL.createObjectURL(this.recordedBlob);
-          if (this.previewVideo) {
-            this.previewVideo.nativeElement.stop()
-          }
-        }
-        this.mediaRecorder.start();
-        this.drawVisualizer();
-        console.log(this.mediaRecorder)
-      }
-    )
-  }
-
-  drawVisualizer() {
-    this.animationFrame = requestAnimationFrame(() => this.drawVisualizer());
-    this.analyser.getByteFrequencyData(this.dataArray);
-    let canvas = document.getElementById('visualizer') as HTMLCanvasElement;
-    let ctx = canvas.getContext('2d');
-    if (ctx) {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      let barWidth = (canvas.width / this.analyser.frequencyBinCount) * 2.5;
-      let barHeight;
-      let x = 0;
-      for (let i = 0; i < this.analyser.frequencyBinCount; i++) {
-        barHeight = this.dataArray[i];
-        ctx.fillStyle = 'rgb(' + (barHeight + 100) + ',50,50)';
-        ctx.fillRect(x, canvas.height - barHeight / 2, barWidth, barHeight / 2);
-        x += barWidth + 1;
-      }
-    }
-  }
-
-  stopRecording() {
-    console.log(this.mediaRecorder)
-    this.mediaRecorder?.stop();
-    this.recording = false;
-    if (this.animationFrame) {
-      cancelAnimationFrame(this.animationFrame);
-    }
-  }
-
-  recordingHandler(event: any) {
-    if ("results" in event) {
-      const result = event.results[0][0].transcript;
-      console.log(result)
-    }
-  }
-
-  startSpeechRecognition() {
-    this.speechRecognition = this.speech.createSpeechRecognition()
-    this.speechRecognition.continuous = true;
-    this.speechRecognition.interimResults = true;
-    this.speechRecognition.onresult = (event:any) => {
-      let transcript = '';
-      for (let i = event.resultIndex; i < event.results.length; i++) {
-        transcript += event.results[i][0].transcript;
-      }
-      console.log(transcript)
-    }
-    this.speechRecognition.onend = (event:any) => {
-      console.log(event)
-      this.speechRecognition.stop()
-    }
-    this.speechRecognition.onstart = (event:any) => {
-      console.log(event)
-    }
-    this.speechRecognition.start();
-  }
-
-  deletePreviewRecording() {
-    this.recordedBlob = undefined;
-    this.audioURL = undefined;
-  }
-
   saveRecording() {
-    if (this.dataService.currentSession && this.currentStep && this.recordedBlob) {
-      this.web.saveMediaRecorderBlob(this.dataService.currentSession.unique_id, this.currentStep.id, this.recordedBlob, this.clickedElement.toLowerCase()).subscribe((data: any) => {
+    if (this.dataService.currentSession && this.currentStep && this.mediaDevice.recordedBlob) {
+      this.web.saveMediaRecorderBlob(
+        this.dataService.currentSession.unique_id,
+        this.currentStep.id,
+        this.mediaDevice.recordedBlob,
+        this.clickedElement.toLowerCase()
+      ).subscribe((data: any) => {
         this.toastService.show('Annotation', 'Recording Saved Successfully')
         this.refreshAnnotations();
+        this.mediaDevice.deletePreviewRecording(); // Clear the recording after saving
       })
     }
   }
