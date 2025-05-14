@@ -85,12 +85,21 @@
           </a>
           <div ngbDropdownMenu aria-labelledby="accountDropdown">
             @if (accounts.loggedIn) {
-              <a class="dropdown-item" (click)="navigateToAccount()">
+              <a class="dropdown-item" routerLink="/accounts">
                 Account: {{accounts.username}}
                 @if (accounts.is_staff) {
                   <i class="bi bi-book ms-1"></i>
                 } @else {
                   <i class="bi bi-pen ms-1"></i>
+                }
+              </a>
+              <a class="dropdown-item" routerLink="/accounts" [queryParams]="{section: 'messaging'}">
+                Messages
+                @if (unreadAlertCount > 0) {
+                  <span class="badge rounded-pill bg-danger">
+                      {{ unreadAlertCount > 99 ? '99+' : unreadAlertCount }}
+                    <span class="visually-hidden">unread messages</span>
+                  </span>
                 }
               </a>
               <div class="dropdown-divider"></div>

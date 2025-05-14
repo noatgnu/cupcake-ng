@@ -121,6 +121,12 @@ export class StoredReagentEditorModalComponent implements AfterViewInit, OnInit{
       if (value.notify_on_low_stock !== undefined && value.notify_on_low_stock !== null) {
         this.form.controls.lowStockNotification.setValue(value.notify_on_low_stock)
       }
+      if (value.notify_days_before_expiry) {
+        this.form.controls.expiryThresholdDays.setValue(value.notify_days_before_expiry)
+      }
+      if (value.notify_on_expiry !== undefined && value.notify_on_expiry !== null) {
+        this.form.controls.expiryNotification.setValue(value.notify_on_expiry)
+      }
     }
   }
 
@@ -141,6 +147,8 @@ export class StoredReagentEditorModalComponent implements AfterViewInit, OnInit{
     created_by_step: new FormControl<number|null>(null),
     lowStockThreshold: new FormControl<number|null>(null),
     lowStockNotification: new FormControl<boolean>(false),
+    expiryThresholdDays: new FormControl<number|null>(null),
+    expiryNotification: new FormControl<boolean>(false),
   })
 
 

@@ -1,10 +1,10 @@
-import { Component } from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {DataService} from "../data.service";
 import {NgbCollapse, NgbDropdown, NgbDropdownMenu, NgbDropdownToggle, NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import {LoginModalComponent} from "../login-modal/login-modal.component";
 import {AccountsService} from "../accounts/accounts.service";
 import {NgOptimizedImage, SlicePipe} from "@angular/common";
-import {Router} from "@angular/router";
+import {Router, RouterLink} from "@angular/router";
 import {QrcodeModalComponent} from "../qrcode-modal/qrcode-modal.component";
 import {WebsocketService} from "../websocket.service";
 import {WebService} from "../web.service";
@@ -15,27 +15,37 @@ import {ToastService} from "../toast.service";
 import {ProtocolCloneModalComponent} from "../protocol-clone-modal/protocol-clone-modal.component";
 import {DownloadModalComponent} from "../download-modal/download-modal.component";
 import {WebsocketStatusModalComponent} from "../websocket-status-modal/websocket-status-modal.component";
+import {MessageService} from "../message.service";
+import {Subscription} from "rxjs";
 
 @Component({
     selector: 'app-navbar',
-    imports: [
-        NgbDropdown,
-        NgbDropdownToggle,
-        NgbDropdownMenu,
-        NgOptimizedImage,
-        NgbCollapse,
-      SlicePipe
-    ],
+  imports: [
+    NgbDropdown,
+    NgbDropdownToggle,
+    NgbDropdownMenu,
+    NgOptimizedImage,
+    NgbCollapse,
+    SlicePipe,
+    RouterLink
+  ],
     templateUrl: './navbar.component.html',
     styleUrl: './navbar.component.scss'
 })
-export class NavbarComponent {
+export class NavbarComponent implements OnInit {
   isMenuCollapsed = true;
-  switched = false
+  switched = false;
+  unreadAlertCount = 0;
 
-  constructor(private toastService: ToastService, private webrtc: WebrtcService, public dataService: DataService, private modal: NgbModal, public accounts: AccountsService, private router: Router, private ws: WebsocketService, private web: WebService) {
+  constructor(private messageService: MessageService, private toastService: ToastService, private webrtc: WebrtcService, public dataService: DataService, private modal: NgbModal, public accounts: AccountsService, private router: Router, private ws: WebsocketService, private web: WebService) {
     this.accounts.triggerLoginSubject.subscribe(() => {
       this.openAccountLogin()
+    })
+  }
+
+  ngOnInit() {
+    this.messageService.getThreads({unread:true}).subscribe((messages) => {
+      this.unreadAlertCount = messages.count
     })
   }
 
@@ -85,8 +95,8 @@ export class NavbarComponent {
     ref.componentInstance.url = location.origin + "/#/protocol-session/" + this.dataService.protocol?.id + "&" + this.dataService.currentSession?.unique_id
   }
 
-  navigateToAccount() {
-    this.router.navigate(["/accounts"])
+  navigateToAccount(location: string) {
+    this.router.navigate([location])
   }
 
   exportToDocx(exportType: string, format: string) {
@@ -145,7 +155,5 @@ export class NavbarComponent {
 
   openWebsocketStatusModal() {
     const ref = this.modal.open(WebsocketStatusModalComponent)
-
-
   }
 }

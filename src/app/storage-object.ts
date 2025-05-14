@@ -41,6 +41,9 @@ export interface StoredReagent {
   low_stock_threshold: number|null;
   notify_on_low_stock: boolean;
   last_notification_sent: Date|null;
+  notify_days_before_expiry: number|null;
+  notify_on_expiry: boolean;
+  last_expiry_notification_sent: Date|null;
 }
 
 export interface StorageObjectQuery {

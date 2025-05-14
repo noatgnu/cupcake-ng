@@ -13,7 +13,7 @@ export class MessageService {
   constructor(private http: HttpClient) {
   }
 
-  getThreads(params: { limit?: number, offset?: number, all?: boolean } = {}): Observable<MessageThreadQuery> {
+  getThreads(params: { limit?: number, offset?: number, all?: boolean, message_type?: string, unread?: boolean } = {}): Observable<MessageThreadQuery> {
     let httpParams = new HttpParams();
     if (params.limit) {
       httpParams = httpParams.set('limit', params.limit.toString());
@@ -23,6 +23,12 @@ export class MessageService {
     }
     if (params.all) {
       httpParams = httpParams.set('all', 'true');
+    }
+    if (params.message_type) {
+      httpParams = httpParams.set('message_type', params.message_type);
+    }
+    if (params.unread) {
+      httpParams = httpParams.set('unread', 'true');
     }
     return this.http.get<MessageThreadQuery>(`${this.baseUrl}/message_threads/`, {params: httpParams});
   }

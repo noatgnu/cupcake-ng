@@ -1,4 +1,4 @@
-import {Component, Input} from '@angular/core';
+import {Component, Input, OnInit} from '@angular/core';
 import {FormBuilder, FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {ToastService} from "../toast.service";
 import {WebService} from "../web.service";
@@ -12,6 +12,7 @@ import {ProfileComponent} from "./profile/profile.component";
 import {FavouritesComponent} from "./favourites/favourites.component";
 import {NgClass} from "@angular/common";
 import {MessagingComponent} from "../messaging/messaging.component";
+import {ActivatedRoute, Router} from "@angular/router";
 
 @Component({
     selector: 'app-accounts',
@@ -32,7 +33,7 @@ import {MessagingComponent} from "../messaging/messaging.component";
     templateUrl: './accounts.component.html',
     styleUrl: './accounts.component.scss'
 })
-export class AccountsComponent {
+export class AccountsComponent implements OnInit{
   selectedSection = 'security'
   hideSidebar: boolean = false
   @Input() set section(value: string) {
@@ -45,11 +46,19 @@ export class AccountsComponent {
     currentPassword: [''],
     newPassword: [''],
   })
-  constructor(private fb: FormBuilder, private toastService: ToastService, private web: WebService, public dataService: DataService, public accountService: AccountsService) {
+  constructor(private route: ActivatedRoute, private fb: FormBuilder, private toastService: ToastService, private web: WebService, public dataService: DataService, public accountService: AccountsService) {
     if (!accountService.loggedIn) {
       this.toastService.show("Accounts", "Please log in or sign up to access this page")
       this.selectedSection = 'signup'
     }
+  }
+
+  ngOnInit() {
+    this.route.queryParams.subscribe(params => {
+      if (params['section']) {
+        this.selectedSection = params['section']
+      }
+    })
   }
 
   changePassword() {

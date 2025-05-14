@@ -3,8 +3,15 @@ import {MessagePriority, MessageThread, MessageThreadDetail, MessageType, UserBa
 import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from "@angular/forms";
 import {MessageService} from "../message.service";
 import {DatePipe, NgClass} from "@angular/common";
-import {QuillEditorComponent} from "ngx-quill";
-import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
+import {QuillEditorComponent, QuillViewComponent} from "ngx-quill";
+import {
+  NgbDropdown,
+  NgbDropdownItem,
+  NgbDropdownMenu,
+  NgbDropdownToggle,
+  NgbPagination,
+  NgbTooltip
+} from "@ng-bootstrap/ng-bootstrap";
 import {User} from "../user";
 import {WebService} from "../web.service";
 import {AccountsService} from "../accounts/accounts.service";
@@ -18,11 +25,20 @@ import {AccountsService} from "../accounts/accounts.service";
     NgClass,
     NgbTooltip,
     FormsModule,
+    QuillViewComponent,
+    NgbDropdown,
+    NgbDropdownToggle,
+    NgbDropdownItem,
+    NgbDropdownMenu,
+    NgbPagination
   ],
   templateUrl: './messaging.component.html',
   styleUrl: './messaging.component.scss'
 })
 export class MessagingComponent implements OnInit {
+  maxFileSizeMB:number = 5;
+  fileSizeErrorMessage = '';
+  selectedMessageTypeFilter: MessageType | 'all' = 'all';
   threads: MessageThread[] = [];
   selectedThread: MessageThreadDetail | null = null;
   messageForm: FormGroup = this.fb.group({
@@ -34,6 +50,10 @@ export class MessagingComponent implements OnInit {
   });
   attachments: File[] = [];
   loading = false;
+
+  currentPage = 1;
+  pageSize = 10;
+  totalItems = 0;
 
   messageTypes: {value: MessageType, label: string}[] = [
     {value: 'user_message', label: 'User Message'},
@@ -81,9 +101,22 @@ export class MessagingComponent implements OnInit {
 
   loadThreads(): void {
     this.loading = true;
-    this.messageService.getThreads().subscribe(
+    const params: {
+      limit?: number,
+      offset?: number,
+      message_type?: string,
+      all?: boolean,
+    } = {
+      limit: this.pageSize,
+      offset: (this.currentPage - 1) * this.pageSize
+    }
+    if (this.selectedMessageTypeFilter !== 'all') {
+      params.message_type = this.selectedMessageTypeFilter;
+    }
+    this.messageService.getThreads(params).subscribe(
       response => {
         this.threads = response.results;
+        this.totalItems = response.count;
         this.loading = false;
       },
       error => {
@@ -98,6 +131,7 @@ export class MessagingComponent implements OnInit {
     this.messageService.getThread(thread.id).subscribe(
       threadDetail => {
         this.selectedThread = threadDetail;
+        this.messageForm.controls['title'].setValue(this.selectedThread.title);
         this.loading = false;
         if (this.selectedThread) {
           this.messageService.markAllThreadMessagesAsRead(thread.id).subscribe();
@@ -150,7 +184,9 @@ export class MessagingComponent implements OnInit {
       this.messageService.sendMessage(messageData, this.attachments).subscribe(
         () => {
           this.resetForm();
-          const thread = this.selectedThread as MessageThread
+          const thread = this.selectedThread as MessageThread;
+          this.selectedRecipients = [];
+          this.userResults = [];
           this.selectThread(thread);
         },
         error => console.error('Error sending message', error)
@@ -160,7 +196,24 @@ export class MessagingComponent implements OnInit {
 
   handleFileInput(event: any): void {
     const files: FileList = event.target.files;
-    this.attachments = Array.from(files);
+    const validFiles: File[] = [];
+    const oversizedFiles: string[] = [];
+    Array.from(files).forEach(file => {
+      if (file.size <= this.maxFileSizeMB * 1024 * 1024) {
+        validFiles.push(file);
+      } else {
+        oversizedFiles.push(file.name);
+      }
+    });
+
+    this.attachments = [...this.attachments, ...validFiles];
+
+    if (oversizedFiles.length > 0) {
+      this.fileSizeErrorMessage = `${oversizedFiles.length} file(s) exceeded the ${this.maxFileSizeMB}MB limit: ${oversizedFiles.join(', ')}`;
+    } else {
+      this.fileSizeErrorMessage = '';
+    }
+    event.target.value = '';
   }
 
   resetForm(): void {
@@ -210,5 +263,19 @@ export class MessagingComponent implements OnInit {
         this.selectedRecipients.map(r => r.id)
       );
     }
+  }
+
+  filterByMessageType(type: MessageType | 'all'): void {
+    this.selectedMessageTypeFilter = type;
+    this.loadThreads();
+  }
+
+  onPageChange(page: number): void {
+    this.currentPage = page;
+    this.loadThreads();
+  }
+
+  removeAttachment(index: number): void {
+    this.attachments.splice(index, 1);
   }
 }

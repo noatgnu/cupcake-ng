@@ -153,7 +153,7 @@ export class StorageObjectViewComponent {
     const ref = this.modal.open(StoredReagentEditorModalComponent, {scrollable: true})
     ref.componentInstance.storedReagent = reagent
     ref.closed.subscribe((data) => {
-      this.web.updateStoredReagent(reagent.id, data.quantity, data.notes, reagent.png_base64, data.barcode, data.shareable, data.expiration_date, data.created_by_project, data.created_by_protocol, data.created_by_session, data.created_by_step, data.lowStockThreshold, data.lowStockNotification).subscribe((data) => {
+      this.web.updateStoredReagent(reagent.id, data.quantity, data.notes, reagent.png_base64, data.barcode, data.shareable, data.expiration_date, data.created_by_project, data.created_by_protocol, data.created_by_session, data.created_by_step, data.lowStockThreshold, data.lowStockNotification, data.expiryThresholdDays, data.expiryNotification).subscribe((data) => {
         this.getStoredReagents(undefined, this.pageSize, this.currentPageOffset, undefined, this.storageObject?.id)
         this.toastService.show(`Reagent ${reagent.reagent.name}`, "Updated")
       })

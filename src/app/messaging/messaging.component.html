@@ -3,7 +3,7 @@
     <!-- Threads sidebar -->
     <div class="col-md-4 col-lg-3 threads-sidebar border-end">
       <div class="d-flex justify-content-between align-items-center p-3 border-bottom">
-        <h5 class="mb-0">Conversations</h5>
+        <h5 class="mb-0">Messages</h5>
         <button (click)="createNewThread()" class="btn btn-primary btn-sm">
           <i class="bi bi-plus-lg me-1"></i>New
         </button>
@@ -16,11 +16,70 @@
           </div>
         </div>
       } @else {
+        <div class="d-flex justify-content-between align-items-center p-3 border-bottom mb-2">
+          <div ngbDropdown class="d-inline-block">
+            <button class="btn btn-outline-secondary btn-sm" id="messageTypeDropdown" ngbDropdownToggle>
+              <i class="bi bi-filter me-1"></i>
+              @if (selectedMessageTypeFilter === 'all') {
+                All Messages
+              } @else {
+                @switch (selectedMessageTypeFilter) {
+                  @case ('user_message') {
+                    <i class="bi bi-chat me-1"></i>Messages
+                  }
+                  @case ('system_notification') {
+                    <i class="bi bi-bell me-1"></i>Notifications
+                  }
+                  @case ('alert') {
+                    <i class="bi bi-exclamation-triangle me-1"></i>Alerts
+                  }
+                  @case ('announcement') {
+                    <i class="bi bi-megaphone me-1"></i>Announcements
+                  }
+                  @default {
+                    <i class="bi bi-file-earmark-text me-1"></i>{{ selectedMessageTypeFilter }}
+                  }
+                }
+              }
+            </button>
+            <div ngbDropdownMenu aria-labelledby="messageTypeDropdown" class="shadow-sm">
+              <button ngbDropdownItem (click)="filterByMessageType('all')"
+                      [class.active]="selectedMessageTypeFilter === 'all'">
+                <i class="bi bi-funnel me-2"></i>All Messages
+              </button>
+              <div class="dropdown-divider"></div>
+              @for (type of messageTypes; track type.value) {
+                <button ngbDropdownItem (click)="filterByMessageType(type.value)"
+                        [class.active]="selectedMessageTypeFilter === type.value">
+                  @switch (type.value) {
+                    @case ('user_message') {
+                      <i class="bi bi-chat me-2"></i>
+                    }
+                    @case ('system_notification') {
+                      <i class="bi bi-bell me-2"></i>
+                    }
+                    @case ('alert') {
+                      <i class="bi bi-exclamation-triangle me-2"></i>
+                    }
+                    @case ('announcement') {
+                      <i class="bi bi-megaphone me-2"></i>
+                    }
+                    @default {
+                      <i class="bi bi-file-earmark-text me-2"></i>
+                    }
+                  }
+                  {{ type.label }}
+                </button>
+              }
+            </div>
+          </div>
+        </div>
         <div class="list-group list-group-flush thread-list">
           @for (thread of threads; track thread.id) {
             <button
               type="button"
               [class.active]="selectedThread && selectedThread.id === thread.id"
+              [class.list-group-item-primary]="thread.is_system_thread"
               class="list-group-item list-group-item-action"
               (click)="selectThread(thread)">
               <div class="d-flex w-100 justify-content-between">
@@ -45,6 +104,17 @@
               <p>No conversations found</p>
             </div>
           }
+          <div class="d-flex justify-content-center mt-3">
+            <ngb-pagination
+              [collectionSize]="totalItems"
+              [(page)]="currentPage"
+              [pageSize]="pageSize"
+              [maxSize]="5"
+              [boundaryLinks]="true"
+              (pageChange)="onPageChange($event)"
+              aria-label="Thread pagination">
+            </ngb-pagination>
+          </div>
         </div>
       }
     </div>
@@ -75,11 +145,10 @@
                   </div>
                   <small class="text-body-secondary">{{ message.created_at | date:'medium' }}</small>
                 </div>
-                <div
-                  class="card-body"
-                  [ngClass]="'message-type-' + message.message_type"
-                  [innerHTML]="message.content">
+                <div class="card-body">
+                  <quill-view [content]="message.content"></quill-view>
                 </div>
+
                 @if (message.attachment_count > 0) {
                   <div class="card-footer">
                     <small class="text-body-secondary">
@@ -98,7 +167,6 @@
           </div>
         </div>
 
-        <!-- Only show reply form if thread is NOT alert, system, or announcement -->
         @if (selectedThread.messages.length > 0 &&
         selectedThread.messages[0].message_type !== 'alert' &&
         selectedThread.messages[0].message_type !== 'system_notification' &&
@@ -106,12 +174,16 @@
           <div class="border-top p-3">
             <form [formGroup]="messageForm" (ngSubmit)="sendMessage()">
               <div class="mb-3">
-                <quill-editor
-                  formControlName="content"
-                  [modules]="quillModules"
-                  [styles]="{height: '150px'}"
-                  placeholder="Compose your message...">
-                </quill-editor>
+                <div class="d-flex flex-column gap-2">
+                  <label for="messageContent" class="form-label">Reply</label>
+                  <quill-editor
+                    formControlName="content"
+                    [modules]="quillModules"
+                    [styles]="{height: '150px'}"
+                    placeholder="Compose your message...">
+                  </quill-editor>
+                </div>
+
               </div>
 
               <div class="row g-3">
@@ -149,6 +221,8 @@
                 }
               </div>
             </form>
+
+
           </div>
         } @else if (selectedThread.messages.length > 0) {
           <div class="p-3 border-top text-center">
@@ -219,15 +293,19 @@
                 </div>
               }
             </div>
+
             <div class="mb-3">
-              <label for="content" class="form-label">Message</label>
-              <quill-editor
-                id="content"
-                formControlName="content"
-                [modules]="quillModules"
-                [styles]="{height: '200px'}"
-                placeholder="Compose your message...">
-              </quill-editor>
+              <div class="d-flex flex-column gap-2">
+                <label for="messageContent" class="form-label">Message Content</label>
+                <quill-editor
+                  id="content"
+                  formControlName="content"
+                  [modules]="quillModules"
+                  [styles]="{height: '200px'}"
+                  placeholder="Compose your message...">
+                </quill-editor>
+              </div>
+
             </div>
 
             <div class="row g-2">
@@ -259,7 +337,20 @@
               </div>
               @if (attachments.length) {
                 <div class="col-12">
-                  <small class="text-body-secondary">{{ attachments.length }} file(s) attached</small>
+                  <div class="d-flex flex-column gap-1">
+                    <small class="text-body-secondary">{{ attachments.length }} file(s) attached</small>
+                    <div class="d-flex flex-wrap gap-2">
+                      @for (file of attachments; track file.name; let i = $index) {
+                        <div class="badge bg-light text-dark d-flex align-items-center">
+                          <i class="bi bi-paperclip me-1"></i>
+                          {{ file.name }}
+                          <button type="button" class="btn-close ms-2"
+                                  (click)="removeAttachment(i)"
+                                  aria-label="Remove"></button>
+                        </div>
+                      }
+                    </div>
+                  </div>
                 </div>
               }
             </div>

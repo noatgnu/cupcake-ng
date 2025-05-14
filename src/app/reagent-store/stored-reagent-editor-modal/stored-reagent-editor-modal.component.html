@@ -19,7 +19,8 @@
               <div class="form-floating">
                 <input type="number" class="form-control" id="quantity" formControlName="quantity"
                        placeholder="Entry Quantity">
-                <label for="quantity">Quantity ({{storedReagent.reagent.unit}})</label>
+                <label for="quantity">Initial input quantity ({{storedReagent.reagent.unit}})</label>
+                <small class="text-muted">Quantity of this item when first input (current: {{storedReagent.current_quantity}} {{storedReagent.reagent.unit}})</small>
               </div>
             </div>
 
@@ -49,7 +50,21 @@
               </div>
             </div>
           </div>
-
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="expiryNotification" formControlName="expiryNotification">
+                <label class="form-check-label" for="notifyLowStock">
+                  <i class="bi bi-bell me-1"></i>Notify before expire
+                </label>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <input type="number" class="form-control" formControlName="expiryThresholdDays"
+                     [disabled]="!form.controls.expiryNotification.value" placeholder="Days before expiry">
+              <small class="text-muted">Days before expiration to send notification</small>
+            </div>
+          </div>
           <div class="form-floating">
             <textarea class="form-control" id="notes" formControlName="notes"
                       placeholder="Entry Notes" style="min-height: 100px"></textarea>
