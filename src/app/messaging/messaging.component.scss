@@ -1,9 +1,8 @@
 /* Messaging container layout */
 .messaging-container {
   display: flex;
+  height: calc(100vh - 170px);
   min-height: 500px;
-  background-color: var(--bs-body-bg);
-  overflow: hidden;
 }
 
 /* Threads sidebar styling */
@@ -13,7 +12,8 @@
   border-right: 1px solid var(--bs-border-color);
   display: flex;
   flex-direction: column;
-  transition: all 0.3s;
+  height: 100%;
+  overflow: hidden;
 }
 
 .sidebar-header {
@@ -46,7 +46,9 @@
 .thread-list {
   flex: 1;
   overflow-y: auto;
-  min-height: 100px;
+  height: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 .thread-item {
@@ -54,6 +56,7 @@
   border-bottom: 1px solid var(--bs-border-color);
   cursor: pointer;
   transition: background-color 0.2s;
+  flex-shrink: 0;
 }
 
 .thread-item:hover {
@@ -81,6 +84,15 @@
   color: rgba(255, 255, 255, 0.8);
 }
 
+.thread-pagination {
+  padding: 0.5rem;
+  border-top: 1px solid var(--bs-border-color);
+  display: flex;
+  justify-content: center;
+  flex-shrink: 0;
+  background-color: var(--bs-body-bg);
+}
+
 .unread-badge {
   background-color: var(--bs-danger, #dc3545);
   color: white;
@@ -97,18 +109,31 @@
 
 /* Message area styling */
 .message-area {
-  flex: 1;
   display: flex;
   flex-direction: column;
+  height: 100%;
   overflow: hidden;
+  flex: 1;
 }
 
 .thread-detail {
-  flex: 1;
-  overflow-y: auto;
-  height: 0;
   display: flex;
   flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+}
+
+.thread-detail > .p-3.border-bottom {
+  flex-shrink: 0;
+}
+
+.thread-detail > .p-3:nth-child(2) {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.border-top.p-3 {
+  flex-shrink: 0;
 }
 
 .thread-header {
@@ -243,3 +268,4 @@
     align-items: flex-start;
   }
 }
+
