@@ -8,6 +8,7 @@ import {
 import {StorageObjectViewComponent} from "./storage-object-view/storage-object-view.component";
 import {Location, NgClass} from "@angular/common";
 import {MetadataNotificationModalComponent} from "./metadata-notification-modal/metadata-notification-modal.component";
+import {Router} from "@angular/router";
 
 @Component({
     selector: 'app-reagent-store',
@@ -58,7 +59,7 @@ export class ReagentStoreComponent implements OnInit{
   currentPageOffset = 0
 
 
-  constructor(private web: WebService, private modal: NgbModal, private location: Location) {
+  constructor(private router: Router, private web: WebService, private modal: NgbModal, private location: Location) {
 
   }
 
@@ -71,7 +72,11 @@ export class ReagentStoreComponent implements OnInit{
 
   clickStorage(storageObject: StorageObject) {
     this.selectedStorageObject = storageObject
+    this.router.navigate(['/reagent-store', storageObject.id], {
+      replaceUrl: false
+    }).then()
     this.getStorageObjects(undefined, this.pageSize, 0, undefined, false, storageObject.id)
+
   }
 
   openStorageObjectCreator() {
@@ -98,13 +103,14 @@ export class ReagentStoreComponent implements OnInit{
   goBack() {
     if (this.selectedStorageObject) {
       if (this.selectedStorageObject.stored_at) {
+        this.router.navigate(['/reagent-store', this.selectedStorageObject.stored_at]);
         this.getStorageObjects(undefined, this.pageSize, 0, this.search, false, this.selectedStorageObject.stored_at)
         this.web.getStorageObject(this.selectedStorageObject.stored_at).subscribe((data) => {
           this.selectedStorageObject = data
-
         })
       } else {
         this.selectedStorageObject = undefined
+        this.router.navigate(['/reagent-store']);
         this.getStorageObjects(undefined, this.pageSize, this.currentPageOffset, this.search, true)
       }
     }

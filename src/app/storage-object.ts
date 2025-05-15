@@ -44,6 +44,13 @@ export interface StoredReagent {
   notify_days_before_expiry: number|null;
   notify_on_expiry: boolean;
   last_expiry_notification_sent: Date|null;
+  is_subscribed: boolean;
+  subscriber_count: number;
+  subscription: {
+    id: number
+    notify_on_low_stock: boolean
+    notify_on_expiry: boolean
+  };
 }
 
 export interface StorageObjectQuery {
@@ -77,4 +84,10 @@ export interface ReagentActionQuery {
   next: string;
   previous: string;
   results: ReagentAction[];
+}
+
+export interface ReagentSubscription {
+  user_email: string;
+  user_name: string;
+  reagent_name: string;
 }

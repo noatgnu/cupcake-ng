@@ -1376,6 +1376,36 @@ export class WebService {
     )
   }
 
+  subscribeToStoredReagentNotification(stored_reagent_id: number, low_stock?: boolean, close_to_expiry?: boolean) {
+    const payload: any = {stored_reagent: stored_reagent_id}
+    if (low_stock !== undefined && low_stock !== null) {
+      payload['notify_on_low_stock'] = low_stock
+    }
+    if (close_to_expiry) {
+      payload['notify_on_expiry'] = close_to_expiry
+    }
+    return this.http.post(
+      `${this.baseURL}/api/stored_reagent/${stored_reagent_id}/subscribe/`,
+      payload,
+      {responseType: 'json', observe: 'body'}
+    )
+  }
+
+  unsubscribeFromStoredReagentNotification(stored_reagent_id: number, low_stock?: boolean, close_to_expiry?: boolean) {
+    const payload: any = {stored_reagent: stored_reagent_id}
+    if (low_stock !== undefined && low_stock !== null) {
+      payload['notify_on_low_stock'] = low_stock
+    }
+    if (close_to_expiry) {
+      payload['notify_on_expiry'] = close_to_expiry
+    }
+    return this.http.post(
+      `${this.baseURL}/api/stored_reagent/${stored_reagent_id}/unsubscribe/`,
+      {},
+      {responseType: 'json', observe: 'body'}
+    )
+  }
+
   createMetaDataColumn(parent_id: number, metadataColumn?: any, parent_type: "instrument"|"stored_reagent"|"annotation" = "stored_reagent") {
     const payload: any = {parent_id: parent_id, parent_type: parent_type}
 

@@ -1,0 +1,48 @@
+<div class="modal-header">
+  <h5 class="modal-title">Reagent Notifications</h5>
+  <button type="button" class="btn-close" (click)="modal.dismiss()"></button>
+</div>
+<div class="modal-body">
+  @if (reagent) {
+    <p>Subscribe to receive notifications for <strong>{{ reagent.reagent.name }}</strong></p>
+
+    <div class="form-check mb-3">
+      <input class="form-check-input" type="checkbox" id="lowStockCheckbox"
+             [(ngModel)]="subscribeToLowStock">
+      <label class="form-check-label" for="lowStockCheckbox">
+        Low Stock Notification
+        <small class="text-muted d-block">
+          Get notified when quantity falls below threshold: {{ reagent.low_stock_threshold }} {{ reagent.reagent.unit }}
+        </small>
+      </label>
+    </div>
+
+    <div class="form-check mb-3">
+      <input class="form-check-input" type="checkbox" id="expiryCheckbox"
+             [(ngModel)]="subscribeToExpiry">
+      <label class="form-check-label" for="expiryCheckbox">
+        Expiry Notification
+        <small class="text-muted d-block">
+          Get notified {{ reagent.notify_days_before_expiry }} days before expiration
+          @if (reagent.expiration_date) {
+            <span>
+              (Expires: {{ reagent.expiration_date | date:'mediumDate' }})
+            </span>
+          }
+
+        </small>
+      </label>
+    </div>
+
+  }
+
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn btn-secondary" (click)="modal.dismiss()">Cancel</button>
+  @if (reagent?.subscription) {
+    <button class="btn btn-outline-danger" (click)="unsubscribeAll()">
+      Unsubscribe all
+    </button>
+  }
+  <button type="button" class="btn btn-primary" (click)="submit()">Save</button>
+</div>

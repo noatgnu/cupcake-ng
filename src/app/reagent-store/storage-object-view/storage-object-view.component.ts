@@ -30,6 +30,9 @@ import {
 import {ActionExportModalComponent} from "../action-export-modal/action-export-modal.component";
 import {StorageObjectSelectorModalComponent} from "../storage-object-selector-modal/storage-object-selector-modal.component";
 import {Router} from "@angular/router";
+import {
+  StoredReagentSubscriptionModalComponent
+} from "../stored-reagent-item/stored-reagent-subscription-modal/stored-reagent-subscription-modal.component";
 
 @Component({
     selector: 'app-storage-object-view',
@@ -398,6 +401,97 @@ export class StorageObjectViewComponent {
           });
         }
 
+      }
+    });
+  }
+
+  openStoredReagentSubscriptionModal(reagent: StoredReagent) {
+    console.log('Opening Stored Reagent Subscription...');
+    const ref = this.modal.open(StoredReagentSubscriptionModalComponent);
+    ref.componentInstance.reagent = reagent
+    if (reagent.subscription) {
+      ref.componentInstance.subscribeToLowStock = reagent.subscription.notify_on_low_stock
+      ref.componentInstance.subscribeToExpiry = reagent.subscription.notify_on_expiry
+    }
+    ref.closed.subscribe((data: {
+      subscribeToLowStock: boolean,
+      subscribeToExpiry: boolean
+    }) => {
+      if (!data) return;
+
+      // If both settings are false - unsubscribe completely
+      if (!data.subscribeToLowStock && !data.subscribeToExpiry) {
+        this.web.unsubscribeFromStoredReagentNotification(reagent.id).subscribe({
+          next: () => {
+            this.toastService.show("Unsubscribed", `All notifications for ${reagent.reagent.name} disabled`);
+            this.getStoredReagents(undefined, this.pageSize, this.currentPageOffset, undefined, this.storageObject?.id);
+          },
+          error: (err: Error) => this.toastService.show("Error", "Failed to unsubscribe")
+        });
+        return;
+      }
+
+      // Handle existing subscription
+      if (reagent.subscription) {
+        const hasChanges = data.subscribeToLowStock !== reagent.subscription.notify_on_low_stock ||
+          data.subscribeToExpiry !== reagent.subscription.notify_on_expiry;
+
+        if (!hasChanges) return;
+
+        // Check which notifications need to be enabled (changed from false to true)
+        const enableLowStock = !reagent.subscription.notify_on_low_stock && data.subscribeToLowStock;
+        const enableExpiry = !reagent.subscription.notify_on_expiry && data.subscribeToExpiry;
+
+        // Check which notifications need to be disabled (changed from true to false)
+        const disableLowStock = reagent.subscription.notify_on_low_stock && !data.subscribeToLowStock;
+        const disableExpiry = reagent.subscription.notify_on_expiry && !data.subscribeToExpiry;
+
+        // Handle enables and disables separately
+        let subscribeCall = false;
+        let unsubscribeCall = false;
+
+        if (enableLowStock || enableExpiry) {
+          subscribeCall = true;
+          this.web.subscribeToStoredReagentNotification(
+            reagent.id, data.subscribeToLowStock, data.subscribeToExpiry
+          ).subscribe({
+            next: () => {
+              this.toastService.show("Updated", `Notifications enabled for ${reagent.reagent.name}`);
+              if (!unsubscribeCall) {
+                this.getStoredReagents(undefined, this.pageSize, this.currentPageOffset, undefined, this.storageObject?.id);
+              }
+            },
+            error: (err: Error) => this.toastService.show("Error", "Failed to enable notifications")
+          });
+        }
+
+        if (disableLowStock || disableExpiry) {
+          unsubscribeCall = true;
+          this.web.unsubscribeFromStoredReagentNotification(
+            reagent.id, disableLowStock, disableExpiry
+          ).subscribe({
+            next: () => {
+              this.toastService.show("Updated", `Some notifications disabled for ${reagent.reagent.name}`);
+              this.getStoredReagents(undefined, this.pageSize, this.currentPageOffset, undefined, this.storageObject?.id);
+            },
+            error: (err: Error) => this.toastService.show("Error", "Failed to disable notifications")
+          });
+        }
+      } else {
+        // No existing subscription but user wants notifications - create new
+        if (!data.subscribeToLowStock && !data.subscribeToExpiry) {
+          this.toastService.show("Error", "At least one notification type must be selected");
+          return;
+        }
+        this.web.subscribeToStoredReagentNotification(
+          reagent.id, data.subscribeToLowStock, data.subscribeToExpiry
+        ).subscribe({
+          next: () => {
+            this.toastService.show("Subscribed", `Notifications for ${reagent.reagent.name} enabled`);
+            this.getStoredReagents(undefined, this.pageSize, this.currentPageOffset, undefined, this.storageObject?.id);
+          },
+          error: (err: Error) => this.toastService.show("Error", "Failed to subscribe")
+        });
       }
     });
   }

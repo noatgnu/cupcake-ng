@@ -27,6 +27,11 @@ export class StoredReagentItemComponent {
   @Input() set storedReagent(value: StoredReagent|undefined) {
     this._storedReagent = value
     if (value) {
+      this.isSubscribed = value.is_subscribed
+      if (value.subscription) {
+        this.subscribedToExpiration = value.subscription.notify_on_expiry
+        this.subscribedToLowStock = value.subscription.notify_on_low_stock
+      }
       this.web.getStorageObjectPathToRoot(value.storage_object.id).subscribe((data) => {
         this.pathToRoot = data
       })
@@ -54,9 +59,15 @@ export class StoredReagentItemComponent {
   @Output() openReserveActionModal: EventEmitter<boolean> = new EventEmitter<boolean>()
   @Output() openAddActionModal: EventEmitter<boolean> = new EventEmitter<boolean>()
   @Output() openStoredReagentAccessControlModal: EventEmitter<boolean> = new EventEmitter<boolean>()
+  @Output() openStoredReagentSubscriptionModal: EventEmitter<boolean> = new EventEmitter<boolean>()
+
   pathToRoot: {id: number, name: string}[] = []
 
   detailsOpen: boolean = false
+
+  subscribedToLowStock: boolean = false;
+  subscribedToExpiration: boolean = false;
+  isSubscribed: boolean = false;
   constructor(private web: WebService, public accounts: AccountsService, private toast: ToastService) {
 
   }
@@ -70,5 +81,33 @@ export class StoredReagentItemComponent {
     }
   }
 
+  getSubscriptionTooltip(): string {
+    if (!this.isSubscribed) {
+      return 'Subscribe to notifications';
+    }
+
+    let tooltip = 'Subscribed to: ';
+    let notifications = [];
+
+    if (this.subscribedToLowStock) {
+      notifications.push('Low Stock');
+    }
+    if (this.subscribedToExpiration) {
+      notifications.push('Expiration');
+    }
+
+    return tooltip + notifications.join(', ');
+  }
+
+  getSubscriptionBadgeText(): string {
+    if (this.subscribedToLowStock && this.subscribedToExpiration) {
+      return 'All';
+    } else if (this.subscribedToLowStock) {
+      return 'Low Stock';
+    } else if (this.subscribedToExpiration) {
+      return 'Expiry';
+    }
+    return '';
+  }
 
 }

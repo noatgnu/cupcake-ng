@@ -187,6 +187,27 @@
               <i class="bi bi-trash me-1"></i><span class="d-none d-sm-inline">Delete</span>
             </button>
           }
+          <button class="btn btn-sm"
+                  [ngClass]="{
+              'btn-outline-primary': !isSubscribed,
+              'btn-primary': isSubscribed
+            }"
+                  [ngbTooltip]="getSubscriptionTooltip()"
+                  (click)="openStoredReagentSubscriptionModal.emit(true)">
+            <i class="bi"
+               [ngClass]="{
+               'bi-bell': !isSubscribed,
+               'bi-bell-fill': isSubscribed
+             }"></i>
+            <span class="d-none d-sm-inline">
+              {{isSubscribed ? 'Subscribed' : 'Subscribe'}}
+              @if (isSubscribed) {
+                <span class="badge text-bg-light ms-1">
+                  {{getSubscriptionBadgeText()}}
+                </span>
+              }
+            </span>
+          </button>
         }
 
       </div>
