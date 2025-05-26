@@ -22,23 +22,25 @@ import {
 import {SessionAnnotationComponent} from "../protocol-session/session-annotation/session-annotation.component";
 import {ProtocolListComponent} from "../protocol-list/protocol-list.component";
 import {Project, ProjectQuery} from "../project";
+import {FlapTextComponent} from "../flap-text/flap-text.component";
 
 @Component({
     selector: 'app-home',
-    imports: [
-        ReactiveFormsModule,
-        NgOptimizedImage,
-        DatePipe,
-        NgbNav,
-        NgbNavContent,
-        NgbNavLinkButton,
-        NgbNavItem,
-        NgbRating,
-        NgbNavOutlet,
-        ProtocolListComponent,
-        NgbPagination,
-        FormsModule
-    ],
+  imports: [
+    ReactiveFormsModule,
+    NgOptimizedImage,
+    DatePipe,
+    NgbNav,
+    NgbNavContent,
+    NgbNavLinkButton,
+    NgbNavItem,
+    NgbRating,
+    NgbNavOutlet,
+    ProtocolListComponent,
+    NgbPagination,
+    FormsModule,
+    FlapTextComponent
+  ],
     templateUrl: './home.component.html',
     styleUrl: './home.component.scss'
 })

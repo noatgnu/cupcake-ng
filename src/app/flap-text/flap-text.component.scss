@@ -1,0 +1,9 @@
+.flap {
+  display: inline-block;
+  width: 0.7em;
+  overflow: hidden;
+}
+.flap span {
+  display: block;
+  transition: transform 0.1s ease-in-out;
+}

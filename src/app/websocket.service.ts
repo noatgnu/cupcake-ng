@@ -43,7 +43,7 @@ export class WebsocketService implements OnDestroy {
     this.instrumentJobIntentionalDisconnect = false;
 
     console.log("Connecting to instrument job websocket")
-    console.log(`${this.baseURL}/ws/instrument-job/${sessionID}/?token=${this.accounts.token}`)
+    console.log(`${this.baseURL}/ws/instrument_job/${sessionID}/?token=${this.accounts.token}`)
     this.instrumentJobWSConnection = new WebSocketSubject({
       url: `${this.baseURL}/ws/instrument_job/${sessionID}/?token=${this.accounts.token}`,
       openObserver: {

@@ -1,0 +1,283 @@
+@if (job) {
+  <div [formGroup]="jobSubmission.metadata">
+    <!-- User Metadata Section -->
+    <div [formArrayName]="'user_metadata'" class="d-flex gap-2 flex-column">
+      @for (i of jobSubmission.metadata.controls['user_metadata'].controls; track i; let index = $index) {
+        <form [formGroupName]="index" class="d-flex gap-2">
+          <div class="form-group" style="width:400px">
+            <label>{{i.value['name']}}</label>
+            <div class="d-flex gap-2">
+              @if (i.value['name']==='Modification parameters') {
+                <input readonly (focus)="setCurrentForm(i)" type="search" [ngbTypeahead]="searchValue" class="form-control" [formControl]="jobSubmission.metadata.controls['user_metadata'].controls[index].controls['value']">
+                <button class="btn btn-sm btn-primary" (click)="jobSubmission.editMetadata(index, 'user_metadata', job)"><i class="bi bi-pen"></i></button>
+              } @else {
+                <input (focus)="setCurrentForm(i)" type="search" [ngbTypeahead]="searchValue" class="form-control" [formControl]="jobSubmission.metadata.controls['user_metadata'].controls[index].controls['value']">
+              }
+              @if (!i.value['mandatory']) {
+                <button class="btn btn-sm btn-danger" (click)="jobSubmission.removeMetadata(index, 'user_metadata')" ngbTooltip="Remove this metadata"><i class="bi bi-trash2"></i></button>
+              }
+              <button class="btn btn-sm btn-info" (click)="jobSubmission.addMetadataModifier(index, 'user_metadata', job)" ngbTooltip="Add modifier for different sample carrying this metadata"><i class="bi bi-signpost-split"></i></button>
+              @if (i.value['name'] && i.value['type'] && i.value['value']) {
+                <button class="btn btn-sm btn-warning" (click)="jobSubmission.addToFavourite(i.value['name'], i.value['type'], i.value['value'])" ngbTooltip="Favourite"><i class="bi bi-star"></i></button>
+              }
+            </div>
+            @if (i.value['name']==='Modification parameters' && i.value['value']) {
+              <app-display-modification-parameters-metadata [value]="i.value['value']"></app-display-modification-parameters-metadata>
+            }
+          </div>
+        </form>
+        @if (i.value['modifiers']) {
+          @if (i.value['modifiers'].length > 0) {
+            <div>
+              <table class="table table-striped table-hover">
+                <thead>
+                <tr>
+                  <th scope="col">Value</th>
+                  <th scope="col">Samples</th>
+                  <th scope="col">Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                  @for (modifier of i.value['modifiers']; track $index; let indexM = $index) {
+                    <tr>
+                      <td>{{modifier['value']}}</td>
+                      <td>{{modifier['samples']}}</td>
+                      <td>
+                        <div class="d-flex gap-2">
+                          <button class="btn btn-sm btn-danger" (click)="jobSubmission.removeMetadataModifier(index, indexM, 'user_metadata')" ngbTooltip="Remove modifier">
+                            <i class="bi bi-trash2"></i>
+                          </button>
+                          <button class="btn btn-sm btn-primary" (click)="jobSubmission.editMetadataModifier(index, indexM, 'user_metadata', job)" ngbTooltip="Edit modifier">
+                            <i class="bi bi-pencil-fill"></i>
+                          </button>
+                          @if (i.value['name'] && i.value['type'] && modifier['value']) {
+                            <button class="btn btn-sm btn-warning" (click)="jobSubmission.addToFavourite(i.value['name'], i.value['type'], modifier['value'])" ngbTooltip="Favourite"><i class="bi bi-star"></i></button>
+                          }
+                        </div>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+        }
+      }
+    </div>
+
+    <!-- Staff Metadata Section (when in staff mode) -->
+    @if (staffModeAvailable) {
+      @if (jobSubmission.metadata.controls['staff_metadata']) {
+        @if (jobSubmission.metadata.controls['staff_metadata'].controls.length > 0) {
+          <h5 class="mt-3">MS Experiment Details (for staff)</h5>
+          <div [formArrayName]="'staff_metadata'" class="d-flex gap-2 flex-column">
+            @for (i of jobSubmission.metadata.controls['staff_metadata'].controls; track i; let index = $index) {
+              <form [formGroupName]="index" class="d-flex gap-2">
+                <div class="form-group" style="width:400px">
+                  <label>{{i.value['name']}}</label>
+                  <div class="d-flex gap-2">
+                    @if (i.value['name']==='Modification parameters') {
+                      <input readonly (focus)="setCurrentForm(i)" type="search" [ngbTypeahead]="searchValue" class="form-control" [formControl]="jobSubmission.metadata.controls['staff_metadata'].controls[index].controls['value']">
+                      <button [disabled]="!staffModeAvailable" class="btn btn-sm btn-primary" (click)="jobSubmission.editMetadata(index, 'staff_metadata', job)"><i class="bi bi-pen"></i></button>
+                    } @else {
+                      <input [readOnly]="!staffModeAvailable" (focus)="setCurrentForm(i)" type="search" [ngbTypeahead]="searchValue" class="form-control" [formControl]="jobSubmission.metadata.controls['staff_metadata'].controls[index].controls['value']">
+                    }
+                    @if (!i.value['mandatory']) {
+                      <button class="btn btn-sm btn-danger" (click)="jobSubmission.removeMetadata(index, 'staff_metadata')"><i class="bi bi-trash2"></i></button>
+                    }
+                    <button class="btn btn-sm btn-info" (click)="jobSubmission.addMetadataModifier(index, 'staff_metadata', job)" ngbTooltip="Add modifier for different sample carrying this metadata"><i class="bi bi-signpost-split"></i></button>
+                    @if (i.value['name'] && i.value['type'] && i.value['value']) {
+                      <button class="btn btn-sm btn-warning" (click)="jobSubmission.addToFavourite(i.value['name'], i.value['type'], i.value['value'])" ngbTooltip="Favourite"><i class="bi bi-star"></i></button>
+                    }
+                  </div>
+                  @if (i.value['name']==='Modification parameters' && i.value['value']) {
+                    <app-display-modification-parameters-metadata [value]="i.value['value']"></app-display-modification-parameters-metadata>
+                  }
+                </div>
+              </form>
+              @if (i.value['modifiers']) {
+                @if (i.value['modifiers'].length > 0) {
+                  <div>
+                    <table class="table table-striped table-hover">
+                      <thead>
+                      <tr>
+                        <th scope="col">Value</th>
+                        <th scope="col">Samples</th>
+                        <th scope="col">Actions</th>
+                      </tr>
+                      </thead>
+                      <tbody>
+                        @for (modifier of i.value['modifiers']; track $index; let indexM = $index) {
+                          <tr>
+                            <td>{{modifier['value']}}</td>
+                            <td>{{modifier['samples']}}</td>
+                            <td>
+                              <div class="d-flex gap-2">
+                                <button class="btn btn-sm btn-danger" (click)="jobSubmission.removeMetadataModifier(index, indexM, 'staff_metadata')" ngbTooltip="Remove modifier">
+                                  <i class="bi bi-trash2"></i>
+                                </button>
+                                <button class="btn btn-sm btn-primary" (click)="jobSubmission.editMetadataModifier(index, indexM, 'staff_metadata', job)" ngbTooltip="Edit modifier">
+                                  <i class="bi bi-pencil-fill"></i>
+                                </button>
+                                @if (i.value['name'] && i.value['type'] && modifier['value']) {
+                                  <button class="btn btn-sm btn-warning" (click)="jobSubmission.addToFavourite(i.value['name'], i.value['type'], modifier['value'])" ngbTooltip="Favourite"><i class="bi bi-star"></i></button>
+                                }
+                              </div>
+                            </td>
+                          </tr>
+                        }
+                      </tbody>
+                    </table>
+                  </div>
+                }
+              }
+            }
+          </div>
+        }
+      }
+    }
+  </div>
+  <div [formGroup]="jobSubmission.metadata">
+    <div [formArrayName]="'staff_metadata'" class="d-flex gap-2 flex-column">
+      @for (i of jobSubmission.metadata.controls['staff_metadata'].controls; track i; let index = $index) {
+        <form [formGroupName]="index" class="d-flex gap-2">
+          <div class="form-group" style="width:400px">
+            <label>{{i.value['name']}}</label>
+            <div class="d-flex gap-2">
+              @if (i.value['name']==='Modification parameters') {
+                <input readonly (focus)="setCurrentForm(i)" type="search" [ngbTypeahead]="searchValue" class="form-control" [formControl]="jobSubmission.metadata.controls['staff_metadata'].controls[index].controls['value']">
+                <button [disabled]="!staffModeAvailable" class="btn btn-sm btn-primary" (click)="jobSubmission.editMetadata(index, 'staff_metadata', job)"><i class="bi bi-pen"></i></button>
+              } @else {
+                <input [readOnly]="!staffModeAvailable" (focus)="setCurrentForm(i)" type="search" [ngbTypeahead]="searchValue" class="form-control" [formControl]="jobSubmission.metadata.controls['staff_metadata'].controls[index].controls['value']">
+              }
+              @if (!i.value['mandatory']) {
+                <button class="btn btn-sm btn-danger" (click)="jobSubmission.removeMetadata(index, 'staff_metadata')"><i class="bi bi-trash2"></i></button>
+              }
+              <button class="btn btn-sm btn-info" (click)="jobSubmission.addMetadataModifier(index, 'staff_metadata', job)" ngbTooltip="Add modifier for different sample carrying this metadata"><i class="bi bi-signpost-split"></i></button>
+              @if (i.value['name'] && i.value['type'] && i.value['value']) {
+                <button class="btn btn-sm btn-warning" (click)="jobSubmission.addToFavourite(i.value['name'], i.value['type'], i.value['value'])" ngbTooltip="Favourite"><i class="bi bi-star"></i></button>
+              }
+            </div>
+            @if (i.value['name']==='Modification parameters' && i.value['value']) {
+              <app-display-modification-parameters-metadata [value]="i.value['value']"></app-display-modification-parameters-metadata>
+            }
+          </div>
+        </form>
+        @if (i.value['modifiers']) {
+          @if (i.value['modifiers'].length > 0) {
+            <div>
+              <table class="table table-striped table-hover">
+                <thead>
+                <tr>
+                  <th scope="col">
+                    Value
+                  </th>
+                  <th scope="col">
+                    Samples
+                  </th>
+                  <th scope="col">
+                    Actions
+                  </th>
+                </tr>
+                </thead>
+                <tbody>
+                  @for (modifier of i.value['modifiers']; track $index; let indexM = $index) {
+                    <tr>
+                      <td>{{modifier['value']}}</td>
+                      <td>{{modifier['samples']}}</td>
+                      <td>
+                        <div class="d-flex gap-2">
+                          <button class="btn btn-sm btn-danger" (click)="jobSubmission.removeMetadataModifier(index, indexM, 'staff_metadata')" ngbTooltip="Remove modifier">
+                            <i class="bi bi-trash2"></i>
+                          </button>
+                          <button class="btn btn-sm btn-primary" (click)="jobSubmission.editMetadataModifier(index, indexM, 'staff_metadata', job)" ngbTooltip="Edit modifier">
+                            <i class="bi bi-pencil-fill"></i>
+                          </button>
+                          @if (i.value['name'] && i.value['type'] && modifier['value']) {
+                            <button class="btn btn-sm btn-warning" (click)="jobSubmission.addToFavourite(i.value['name'], i.value['type'], modifier['value'])" ngbTooltip="Favourite"><i class="bi bi-star"></i></button>
+                          }
+                        </div>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+        }
+      }
+    </div>
+  </div>
+  <div class="d-flex flex-wrap gap-2 mt-2">
+    <!-- User can edit - User columns dropdown -->
+    @if (userCanEdit) {
+      <div ngbDropdown display="dynamic" class="d-inline-block">
+        <button class="btn btn-primary" ngbDropdownToggle>
+          <i class="bi bi-plus-circle me-1"></i> User Columns
+        </button>
+        <div ngbDropdownMenu aria-labelledby="addMetadata">
+          @for (m of metadataService.userMetadataTemplate; track m.name) {
+            <a class="dropdown-item" (click)="jobSubmission.addMetadata(m, 'user_metadata', job)">
+              {{selectedTemplateFieldMap[m.name] || m.name}}
+            </a>
+          }
+          <div class="dropdown-divider"></div>
+          <a class="dropdown-item" (click)="jobSubmission.addMetadata({name: 'Sample type', type: 'Characteristics'}, 'user_metadata', job)">
+            <i class="bi bi-tag me-1"></i> Sample Type
+          </a>
+          <a class="dropdown-item" (click)="jobSubmission.addMetadata({name: '', type: ''}, 'user_metadata', job)">
+            <i class="bi bi-plus-square me-1"></i> Custom Metadata
+          </a>
+        </div>
+      </div>
+    }
+
+    <!-- Staff mode - Additional controls -->
+    @if (staffModeAvailable) {
+      <!-- Only show this dropdown if job is submitted -->
+      @if (job?.status === "submitted") {
+        <div ngbDropdown display="dynamic" class="d-inline-block">
+          <button class="btn btn-primary" ngbDropdownToggle>
+            <i class="bi bi-plus-circle me-1"></i> User Columns
+          </button>
+          <div ngbDropdownMenu aria-labelledby="addMetadata">
+            @for (m of metadataService.userMetadataTemplate; track m.name) {
+              <a class="dropdown-item" (click)="jobSubmission.addMetadata(m, 'user_metadata', job)">
+                {{selectedTemplateFieldMap[m.name] || m.name}}
+              </a>
+            }
+            <div class="dropdown-divider"></div>
+            <a class="dropdown-item" (click)="jobSubmission.addMetadata({name: 'Sample type', type: 'Characteristics'}, 'user_metadata', job)">
+              <i class="bi bi-tag me-1"></i> Sample Type
+            </a>
+            <a class="dropdown-item" (click)="jobSubmission.addMetadata({name: '', type: ''}, 'user_metadata', job)">
+              <i class="bi bi-plus-square me-1"></i> Custom Metadata
+            </a>
+          </div>
+        </div>
+      }
+
+      <!-- Staff columns dropdown - always available in staff mode -->
+      <div ngbDropdown display="dynamic" class="d-inline-block">
+        <button class="btn btn-warning" ngbDropdownToggle>
+          <i class="bi bi-plus-circle me-1"></i> Staff Columns
+        </button>
+        <div ngbDropdownMenu aria-labelledby="addStaffMetadata">
+          @for (m of metadataService.staffMetadataSpecific; track m) {
+            <a class="dropdown-item" (click)="jobSubmission.addMetadata({name: m, type: 'Comment'}, 'staff_metadata', job)">
+              {{selectedTemplateFieldMap[m] || m}}
+            </a>
+          }
+          <div class="dropdown-divider"></div>
+          <a class="dropdown-item" (click)="jobSubmission.addMetadata({name: '', type: 'Factor value'}, 'staff_metadata', job)">
+            <i class="bi bi-diagram-3 me-1"></i> Factor Value
+          </a>
+          <a class="dropdown-item" (click)="jobSubmission.addMetadata({name: '', type: ''}, 'staff_metadata', job)">
+            <i class="bi bi-plus-square me-1"></i> Custom Metadata
+          </a>
+        </div>
+      </div>
+    }
+  </div>
+
+}

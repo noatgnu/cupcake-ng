@@ -1,0 +1,191 @@
+<div class="d-flex flex-column gap-2">
+  <form [formGroup]="form" class="d-flex flex-column gap-3">
+    <div class="form-group">
+      <label for="jobName" class="form-label">Job Name <span class="text-danger">*</span></label>
+      <input
+        id="jobName"
+        type="text"
+        class="form-control"
+        [ngClass]="{'is-invalid': form.controls['job_name'].invalid && form.controls['job_name'].touched}"
+        formControlName="job_name"
+        placeholder="Enter job name">
+      @if (form.controls['job_name'].invalid && form.controls['job_name'].touched) {
+        <div class="invalid-feedback">
+          Job name is required
+        </div>
+      }
+    </div>
+  </form>
+
+  <form [formGroup]="projectForm" class="d-flex flex-column gap-3">
+    <div class="form-group">
+      @if (!selectedProject) {
+        <label for="projectName" class="form-label">Project Name <span class="text-danger">*</span></label>
+      } @else {
+        <label for="projectName" class="form-label">Project Name</label>
+      }
+      <div class="input-group">
+        <input
+          id="projectName"
+          type="search"
+          class="form-control"
+          [ngClass]="{'is-invalid': !selectedProject && projectForm.controls['project_name'].invalid && projectForm.controls['project_name'].touched}"
+          formControlName="project_name"
+          (selectItem)="onProjectSelected($event)"
+          [ngbTypeahead]="searchProjects"
+          [resultFormatter]="formatter"
+          [inputFormatter]="formatter"
+          placeholder="Search for a project...">
+        @if (projectSearchLoading) {
+          <span class="input-group-text">
+        <div class="spinner-border spinner-border-sm" role="status">
+          <span class="visually-hidden">Loading projects...</span>
+        </div>
+      </span>
+        }
+        @if (!selectedProject && projectForm.controls['project_name'].invalid && projectForm.controls['project_name'].touched) {
+          <div class="invalid-feedback">
+            Project name is required
+          </div>
+        }
+      </div>
+    </div>
+
+    @if (selectedProject) {
+      <div class="card">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-start">
+            <div>
+              <h5 class="card-title">
+                <a href="/#/project-editor/{{selectedProject.id}}">{{selectedProject.project_name}}</a>
+              </h5>
+              <p class="card-text mb-1"><strong>Created at:</strong> {{selectedProject.created_at | date: 'short'}}</p>
+              <p class="card-text"><strong>Description:</strong> {{selectedProject.project_description}}</p>
+            </div>
+            <button
+              class="btn btn-sm btn-danger"
+              ngbTooltip="Remove from selection"
+              (click)="selectedProject = undefined; projectForm.reset()">
+              <i class="bi bi-trash"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    } @else {
+      <div class="form-group">
+        <label for="projectDescription" class="form-label">
+          Project Description <span class="text-danger">*</span>
+        </label>
+        <textarea
+          id="projectDescription"
+          class="form-control"
+          [ngClass]="{'is-invalid': projectForm.controls['project_description'].invalid && projectForm.controls['project_description'].touched}"
+          formControlName="project_description"
+          placeholder="Enter project description"
+          rows="3"></textarea>
+        @if (projectForm.controls['project_description'].invalid && projectForm.controls['project_description'].touched) {
+          <div class="invalid-feedback">
+            Project description is required
+          </div>
+        }
+      </div>
+    }
+  </form>
+
+  @if (job) {
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title">Job Information</h5>
+        <p>
+          <b>Current status:</b> {{job?.status || 'N/A'}}<br>
+          <b>Owner:</b> {{job?.user?.username || 'N/A'}}
+        </p>
+
+        <form [formGroup]="fundingForm" class="d-flex gap-2 flex-wrap">
+          <div class="form-group">
+            <label for="costCenter">Cost Centre</label>
+            <input id="costCenter" type="text"
+                   class="form-control" (focus)="currentField='cost_center'" formControlName="cost_center"
+                   [ngbTypeahead]="individualFieldSearchValue">
+          </div>
+          <div class="form-group">
+            <label for="funder">Funder</label>
+            <input id="funder" type="text"
+                   class="form-control" (focus)="currentField='funder'" formControlName="funder"
+                   [ngbTypeahead]="individualFieldSearchValue">
+          </div>
+        </form>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title">Job Submission To</h5>
+        <form [formGroup]="labGroupForm">
+          <fieldset>
+            <legend class="h6">Facility Group</legend>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="groupSearch">Group Name Search</label>
+                  <input id="groupSearch" formControlName="name" class="form-control" type="search"
+                         aria-describedby="groupSearchHelp">
+                  <small id="groupSearchHelp" class="form-text text-muted">Search for a group name (defaults to "MS Facility")</small>
+                </div>
+              </div>
+
+              @if (labGroupQuery) {
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label for="groupSelect">Select Group <span class="text-danger">*</span></label>
+                    <select id="groupSelect" class="form-select" size="5" formControlName="selected"
+                            [ngClass]="{'is-invalid': !job?.service_lab_group}"
+                            aria-describedby="groupSelectHelp">
+                      @for (group of labGroupQuery.results; track group.id) {
+                        <option [value]="group.id">{{group.name}}</option>
+                      }
+                    </select>
+                    <small id="groupSelectHelp" class="form-text text-muted">Select a group to submit the job to (required)</small>
+                    @if (selectedGroup) {
+                      <div class="mt-2 text-success">
+                        <i class="bi bi-check-circle-fill me-1"></i> <b>Currently selected: {{selectedGroup.name}}</b>
+                      </div>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+          </fieldset>
+        </form>
+
+        @if (labGroupUserQuery) {
+          <form [formGroup]="form" class="mt-3">
+            <fieldset>
+              <legend class="h6">Facility Staff</legend>
+              <div class="form-group">
+                <label for="staffSelect">Select Staff Members</label>
+                <select id="staffSelect" class="form-select" multiple formControlName="staff"
+                        aria-describedby="staffSelectHelp">
+                  @for (user of labGroupUserQuery.results; track user.id) {
+                    <option [value]="user.id">{{user.username}}</option>
+                  }
+                </select>
+                <small id="staffSelectHelp" class="form-text text-muted">Select the staff members to notify</small>
+              </div>
+            </fieldset>
+          </form>
+        }
+
+        @if (job && !job.service_lab_group) {
+          <ngb-alert type="warning" class="mt-3">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            Please confirm the professional group that would handle this job after submission by selecting a lab group
+            and optionally select the user(s) that you are submitting the job to.
+          </ngb-alert>
+        }
+      </div>
+    </div>
+  }
+
+</div>
+
+

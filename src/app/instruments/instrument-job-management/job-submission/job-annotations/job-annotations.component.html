@@ -1,0 +1,178 @@
+<!-- job-annotations.component.html -->
+<div class="d-flex flex-column g-2">
+  <!-- File upload for FASTA files -->
+  <input type="file" hidden #fastaFileUpload (change)="annotationService.handleFileInput($event, job.id, 'user_annotation', 'fasta file from job '+job.job_name, 'file')">
+
+  <!-- Recording preview -->
+  @if (annotationService.audioURL) {
+    <div class="d-flex flex-column gap-1">
+      <div class="d-flex flex-row justify-content-center">
+        <div class="card recording-preview-card">
+          <div class="card-header">
+            <h5 class="card-title">Recording Preview</h5>
+          </div>
+          <div class="card-body">
+            @if (annotationService.clickedInstrumentItem==='Audio') {
+              <audio controls>
+                <source [src]="annotationService.audioURL" type="audio/webm">
+                Your browser does not support the audio element.
+              </audio>
+            } @else if (annotationService.clickedInstrumentItem==='Video') {
+              <video controls [width]="400" [height]="300">
+                <source [src]="annotationService.audioURL" type="video/webm">
+                Your browser does not support the video element.
+              </video>
+            }
+          </div>
+        </div>
+      </div>
+      <div class="d-flex flex-row gap-2">
+        <button class="btn btn-primary" (click)="annotationService.saveRecording(job.id, 'user_annotation')">Save</button>
+        <button class="btn btn-danger" (click)="annotationService.deletePreviewRecording()">Delete</button>
+      </div>
+    </div>
+  }
+</div>
+
+<!-- Annotation Creator -->
+<div class="p-2 mt-2" id="annotationCreator">
+  @if (annotationService.clickedInstrumentItem==='Text') {
+    <app-annotation-text-form (text)="annotationService.handleTextAnnotation($event, job.id, 'user_annotation')"></app-annotation-text-form>
+  } @else if (annotationService.clickedInstrumentItem==='Sketchpad') {
+    <app-handwritten-annotation (sketch)="annotationService.handleSketchAnnotation($event, job.id, 'user_annotation')"></app-handwritten-annotation>
+  } @else if (annotationService.clickedInstrumentItem==='File') {
+    <div class="form-group">
+      <label for="file">Upload File</label>
+      <input type="file" class="form-control" id="file" (change)="annotationService.handleFileInput($event, job.id, 'user_annotation')">
+    </div>
+  } @else if (annotationService.clickedInstrumentItem==='Audio') {
+    <div class="d-flex flex-row gap-2 flex-wrap">
+      @if (annotationService.recording) {
+        <button class="btn btn-danger" (click)="annotationService.stopRecording()">Stop Recording</button>
+      } @else {
+        <button class="btn btn-primary" (click)="annotationService.startRecording(true, false)">Start Recording</button>
+      }
+
+      <div class="form-floating">
+        <select class="form-select" [(ngModel)]="annotationService.currentAudioDevice">
+          <option selected [value]="null">Default Selected</option>
+          @for (a of annotationService.audioDevices; track a) {
+            <option [ngValue]="a">{{a.label}}</option>
+          }
+        </select>
+        <label>Select Audio Device</label>
+      </div>
+      <canvas id="visualizer" width="200" height="50"></canvas>
+    </div>
+  } @else if (annotationService.clickedInstrumentItem==='Video') {
+    <div class="container">
+      <div class="d-flex flex-column gap-2">
+        <div class="card">
+          <div class="card-header">
+            <h5 class="card-title">Video Preview</h5>
+          </div>
+          <div class="d-flex flex-row justify-content-center">
+            <video id="previewVideo" autoplay muted #previewVideo [width]="400" [height]="300"></video>
+          </div>
+          <canvas id="visualizer" width="200" height="50"></canvas>
+        </div>
+
+        <div class="d-flex flex-row gap-2">
+          @if (annotationService.recording) {
+            <button class="btn btn-danger" (click)="annotationService.stopRecording()">Stop Recording</button>
+          } @else {
+            <button class="btn btn-primary" (click)="annotationService.startRecording(enableAudio.checked, enableVideo.checked)">Record Video</button>
+            <button class="btn btn-primary" (click)="annotationService.startScreenRecording(enableAudio.checked)">Record Screen</button>
+          }
+        </div>
+
+        <div class="d-flex flex-row gap-2">
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" #enableVideo [(ngModel)]="annotationService.enableVideo">
+            <label class="form-check-label">Enable Video</label>
+          </div>
+          @if (annotationService.enableVideo) {
+            <div class="form-floating">
+              <select class="form-select" [(ngModel)]="annotationService.currentCameraDevice">
+                <option selected>Default Selected</option>
+                @for (a of annotationService.cameraDevices; track a) {
+                  <option [ngValue]="a">{{a.label}}</option>
+                }
+              </select>
+              <label>Select Camera Device</label>
+            </div>
+          }
+        </div>
+
+        <div class="d-flex flex-row gap-2">
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" #enableAudio [(ngModel)]="annotationService.enableAudio">
+            <label class="form-check-label">Enable Audio</label>
+          </div>
+          @if (annotationService.enableAudio) {
+            <div class="form-floating">
+              <select class="form-select" [(ngModel)]="annotationService.currentAudioDevice">
+                <option selected>Default Selected</option>
+                @for (a of annotationService.audioDevices; track a) {
+                  <option [ngValue]="a">{{a.label}}</option>
+                }
+              </select>
+              <label>Select Audio Device</label>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  } @else if (annotationService.clickedInstrumentItem==='Image') {
+    <div class="form-group">
+      <label for="image">Upload Image</label>
+      <input type="file" class="form-control" id="image" (change)="annotationService.handleFileInput($event, job.id, 'user_annotation')">
+    </div>
+  } @else if (annotationService.clickedInstrumentItem==='Alignment') {
+    <div class="form-group">
+      <label for="alignment-file">Upload Alignment</label>
+      <input type="file" class="form-control" id="alignment-file" (change)="annotationService.handleFileInput($event, job.id, 'user_annotation')">
+    </div>
+  }
+</div>
+
+<!-- Annotation tabs -->
+@if (job.user_annotations || job.staff_annotations) {
+  <ul ngbNav #nav="ngbNav" [(activeId)]="activeTab" (activeIdChange)="activeTabChange.emit($event)" class="nav-tabs" [destroyOnHide]="true">
+    <li [ngbNavItem]="'user'">
+      <button ngbNavLink>User Annotations</button>
+      <ng-template ngbNavContent>
+        @if (activeTab === 'user') {
+          <app-annotation-presenter [annotations]="job.user_annotations" (deleteAnnotation)="handleDeleteAnnotation($event)"></app-annotation-presenter>
+        }
+      </ng-template>
+    </li>
+    @if (staffModeAvailable) {
+      <li [ngbNavItem]="'staff'">
+        <button ngbNavLink>Staff Annotations</button>
+        <ng-template ngbNavContent>
+          <app-annotation-presenter [annotations]="job.staff_annotations" (deleteAnnotation)="handleDeleteAnnotation($event)"></app-annotation-presenter>
+        </ng-template>
+      </li>
+    }
+  </ul>
+  <div [ngbNavOutlet]="nav" class="mt-2"></div>
+
+  <!-- Floating action button -->
+  <div style="position: fixed; z-index: 1030; bottom: 50px; right: 50px">
+    <div class="d-flex flex-row gap-2 align-items-center">
+      @if (staffModeAvailable) {
+        <button class="btn btn-warning" (click)="openStaffDataEntryPanel()">Staff</button>
+        <button class="btn btn-danger" (click)="annotationService.annotationInstrumentMenuClick('Instrument', 'staff_annotation', job.id)">Book Instrument</button>
+      }
+      <div ngbDropdown placement="top-end" class="d-inline-block">
+        <button class="btn btn-outline-success" ngbDropdownToggle><i class="bi bi-plus"></i></button>
+        <div ngbDropdownMenu>
+          @for (a of ['Audio', 'Text', 'Video', 'Image', 'Sketchpad', 'Counter','File', 'Checklist', 'Table', 'Alignment', 'Calculator', 'Molarity Calculator', 'Randomization', 'Large/Multiple Files']; track a) {
+            <button ngbDropdownItem (click)="annotationService.annotationInstrumentMenuClick(a, staffModeAvailable ? 'staff_annotation' : 'user_annotation', job.id)">{{a}}</button>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+}
