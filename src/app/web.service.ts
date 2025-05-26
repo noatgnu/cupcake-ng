@@ -2278,12 +2278,14 @@ export class WebService {
     );
   }
 
-  getReagentDocuments(reagent_id: number, foldler_name: string, limit: number = 10, offset: number = 0) {
+  getReagentDocuments(reagent_id: number, foldler_name: string, limit: number = 10, offset: number = 0, search_term: string|null|undefined = null) {
     let params = new HttpParams()
       .set('reagent_id', reagent_id.toString())
       .set('limit', limit.toString())
       .set('offset', offset.toString()).set('folder_name', foldler_name);
-
+    if (search_term && search_term !== "") {
+      params = params.append('search', search_term);
+    }
 
     return this.http.get<AnnotationQuery>(
       `${this.baseURL}/api/reagent_documents/`,

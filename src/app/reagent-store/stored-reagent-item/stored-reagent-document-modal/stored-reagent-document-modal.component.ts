@@ -1,5 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import {NgbActiveModal, NgbModal, NgbPagination} from '@ng-bootstrap/ng-bootstrap';
 import {ToastService} from "../../../toast.service";
 import {WebService} from "../../../web.service";
 import {StoredReagent} from "../../../storage-object";
@@ -8,10 +8,13 @@ import { firstValueFrom } from 'rxjs';
 import {DatePipe} from "@angular/common";
 import {Annotation} from "../../../annotation";
 import {AccountsService} from "../../../accounts/accounts.service";
+import {FormBuilder, ReactiveFormsModule} from "@angular/forms";
 @Component({
   selector: 'app-stored-reagent-document-modal',
   imports: [
-    DatePipe
+    DatePipe,
+    ReactiveFormsModule,
+    NgbPagination
   ],
   templateUrl: './stored-reagent-document-modal.component.html',
   styleUrl: './stored-reagent-document-modal.component.scss'
@@ -23,13 +26,20 @@ export class StoredReagentDocumentModalComponent implements OnInit {
   documents: Annotation[] = [];
   isLoading = false;
   totalDocuments = 0;
+  pageSize = 10;
+  currentPage = 1;
+
+  form = this.fb.group({
+    searchTerm: ['']
+  });
 
   constructor(
     private modal: NgbModal,
     private activeModal: NgbActiveModal,
     private web: WebService,
     private toast: ToastService,
-    public accounts: AccountsService
+    public accounts: AccountsService,
+    private fb: FormBuilder
   ) {}
 
   ngOnInit(): void {
@@ -40,7 +50,7 @@ export class StoredReagentDocumentModalComponent implements OnInit {
     if (!this.storedReagent) return;
 
     this.isLoading = true;
-    this.web.getReagentDocuments(this.storedReagent.id, this.folderName, 10, offset)
+    this.web.getReagentDocuments(this.storedReagent.id, this.folderName, this.pageSize, offset, this.form.value.searchTerm)
       .subscribe({
         next: (response) => {
           this.documents = response.results;
@@ -61,7 +71,7 @@ export class StoredReagentDocumentModalComponent implements OnInit {
 
     modalRef.closed.subscribe((result) => {
       if (result) {
-        this.loadDocuments();
+        this.refreshDocuments();
       }
     });
   }
@@ -125,4 +135,12 @@ export class StoredReagentDocumentModalComponent implements OnInit {
     return `${size.toFixed(1)} ${units[unitIndex]}`;
   }
 
+  handlePageChange(page: number): void {
+    this.currentPage = page;
+    this.loadDocuments((page - 1) * this.pageSize);
+  }
+
+  refreshDocuments(): void {
+    this.loadDocuments((this.currentPage - 1) * this.pageSize);
+  }
 }
