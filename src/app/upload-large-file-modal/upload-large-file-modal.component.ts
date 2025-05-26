@@ -27,6 +27,9 @@ export class UploadLargeFileModalComponent {
   @Input() instrument_job_id: number = 0;
   @Input() instrument_user_type: "user_annotation" | "staff_annotation" | null = null;
   @Input() storage_object_id: number = 0;
+  @Input() stored_reagent_id: number = 0;
+  @Input() folder_name: string = "";
+  @Input() file_description: string = "";
 
   private _metadata_import: string = "";
   @Input() set metadata_import(data_type: string) {
@@ -221,7 +224,9 @@ export class UploadLargeFileModalComponent {
     const progressTracker = this.fileProgressMap[fileName];
     progressTracker.status = 'binding';
     try {
-      if (this.storage_object_id > 0) {
+      if (this.stored_reagent_id > 0) {
+        await this.uploadReagentDocument(fileId, fileName);
+      } else if (this.storage_object_id > 0) {
         await this.importReagents(fileId, fileName);
       } else if (this.instrument_job_id && this.instrument_user_type) {
         const data = await firstValueFrom(
@@ -324,5 +329,44 @@ export class UploadLargeFileModalComponent {
 
   showReagentImportInstruction() {
     this.modal.open(ReagentImportFileFormatInstructionsComponent, { size: 'lg' });
+  }
+
+  async uploadReagentDocument(fileId: string, fileName: string) {
+    const progressTracker = this.fileProgressMap[fileName];
+    progressTracker.status = 'processing';
+
+    try {
+      const file = this.fileList.find(f => f.name === fileName);
+      if (!file) {
+        throw new Error("File not found");
+      }
+
+      const response = await firstValueFrom(
+        this.web.bindReagentDocumentChunkedFile(
+          fileId,
+          this.stored_reagent_id,
+          this.folder_name,
+          fileName,
+          this.file_description
+        )
+      )
+
+      if (response) {
+        this.toastService.show(fileName, "Document uploaded successfully", 1000, "success");
+        progressTracker.status = 'completed';
+        this.activeModal.close(response);
+      } else {
+        throw new Error("Document upload failed");
+      }
+    } catch (error: any) {
+      progressTracker.status = 'error';
+      progressTracker.error = error.message || 'Upload failed';
+      this.toastService.show(
+        fileName,
+        `Document upload failed: ${error.message || 'Unknown error'}`,
+        3000,
+        "danger"
+      );
+    }
   }
 }

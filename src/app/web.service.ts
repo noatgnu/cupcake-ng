@@ -2278,7 +2278,71 @@ export class WebService {
     );
   }
 
+  getReagentDocuments(reagent_id: number, foldler_name: string, limit: number = 10, offset: number = 0) {
+    let params = new HttpParams()
+      .set('reagent_id', reagent_id.toString())
+      .set('limit', limit.toString())
+      .set('offset', offset.toString()).set('folder_name', foldler_name);
 
+
+    return this.http.get<AnnotationQuery>(
+      `${this.baseURL}/api/reagent_documents/`,
+      {responseType: 'json', observe: 'body', params: params}
+    );
+  }
+
+  uploadReagentDocument(reagent_id: number, file: File, description: string = '') {
+    const formData = new FormData();
+    formData.append('reagent', reagent_id.toString());
+    formData.append('file', file);
+
+    if (description) {
+      formData.append('description', description);
+    }
+
+    return this.http.post<any>(
+      `${this.baseURL}/api/reagent_documents/`,
+      formData,
+      {responseType: 'json', observe: 'body'}
+    );
+  }
+
+  deleteReagentDocument(document_id: number) {
+    return this.http.delete(
+      `${this.baseURL}/api/reagent_documents/${document_id}/`,
+      {responseType: 'json', observe: 'body'}
+    );
+  }
+
+  downloadReagentDocument(document_id: number) {
+    return this.http.get(
+      `${this.baseURL}/api/reagent_documents/${document_id}/download/`,
+      {responseType: 'blob', observe: 'response'}
+    );
+  }
+
+  bindReagentDocumentChunkedFile(upload_id: string, reagent_id: number, folder_name: string = "", annotation_name: string = "", annotation: string = "") {
+    const payload = {
+      upload_id,
+      reagent_id,
+      folder_name,
+      annotation_name,
+      annotation
+    };
+
+    return this.http.post<any>(
+      `${this.baseURL}/api/reagent_documents/bind_chunked_file/`,
+      payload,
+      { responseType: 'json', observe: 'body' }
+    );
+  }
+
+  getReagentDocumentDownloadToken(document_id: number) {
+    return this.http.get<{token: string}>(
+      `${this.baseURL}/api/reagent_documents/get_download_token/?annotation_id=${document_id}`,
+      {responseType: 'json', observe: 'body'}
+    );
+  }
 }
 
 export interface ChunkUploadResponse {

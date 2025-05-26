@@ -147,6 +147,20 @@
               <i class="bi bi-dash-circle me-1"></i><span class="d-none d-sm-inline">Use</span>
             </button>
           </div>
+          <div ngbDropdown class="d-inline-block me-2">
+            <button class="btn btn-sm btn-outline-secondary" id="documentCategoryDropdown" ngbDropdownToggle>
+              <i class="bi bi-file-earmark-text me-1"></i> <span class="d-none d-sm-inline">Documents</span>
+            </button>
+            <div ngbDropdownMenu aria-labelledby="documentCategoryDropdown">
+              @for (category of documentCategories; track category.id) {
+                <button ngbDropdownItem
+                        (click)="openStoredReagentDocumentModal.emit(category.id)">
+                  {{ category.name }}
+                </button>
+              }
+            </div>
+          </div>
+
         }
 
         <!-- Manage Actions -->
@@ -214,3 +228,4 @@
     </div>
   </div>
 </div>
+

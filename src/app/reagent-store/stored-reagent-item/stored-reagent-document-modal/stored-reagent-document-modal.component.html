@@ -1,0 +1,65 @@
+
+<div class="modal-header">
+  @if (storedReagent) {
+    <h4 class="modal-title">{{folderName}} Documents for {{storedReagent.reagent.name}}</h4>
+  }
+
+  <button type="button" class="btn-close" aria-label="Close" (click)="close()"></button>
+</div>
+
+<div class="modal-body">
+  <div class="mb-3">
+    <button class="btn btn-primary" (click)="openUploadModal()">
+      <i class="bi bi-upload me-1"></i> Upload Document
+    </button>
+  </div>
+  @if (isLoading) {
+    <div class="text-center my-4">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+    </div>
+  } @else if (!isLoading && documents.length === 0) {
+    <div class="alert alert-info">
+      No documents found for this reagent.
+    </div>
+  }
+
+  @if (!isLoading && documents.length > 0) {
+    <div class="list-group">
+
+      @for (doc of documents; track doc.id) {
+        <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+          <div class="d-flex align-items-center">
+            <div>
+              <h6 class="mb-0">{{doc.annotation_name}}</h6>
+              @if (doc.annotation) {
+                <p class="mb-0 text-muted small">{{doc.annotation}}</p>
+              }
+            </div>
+          </div>
+
+          <div class="btn-group">
+            <button class="btn btn-sm btn-outline-primary" (click)="downloadDocument(doc)" title="Download">
+              <i class="bi bi-download"></i>
+            </button>
+            @if (doc.user) {
+              @if (accounts.is_staff || accounts.username === doc.user.username) {
+                <button class="btn btn-sm btn-outline-danger" (click)="deleteDocument(doc)" title="Delete">
+                  <i class="bi bi-trash"></i>
+                </button>
+              }
+            }
+          </div>
+        </div>
+      }
+
+    </div>
+  }
+
+
+</div>
+
+<div class="modal-footer">
+  <button type="button" class="btn btn-secondary" (click)="close()">Close</button>
+</div>

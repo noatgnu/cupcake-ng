@@ -33,6 +33,9 @@ import {Router} from "@angular/router";
 import {
   StoredReagentSubscriptionModalComponent
 } from "../stored-reagent-item/stored-reagent-subscription-modal/stored-reagent-subscription-modal.component";
+import {
+  StoredReagentDocumentModalComponent
+} from "../stored-reagent-item/stored-reagent-document-modal/stored-reagent-document-modal.component";
 
 @Component({
     selector: 'app-storage-object-view',
@@ -494,5 +497,11 @@ export class StorageObjectViewComponent {
         });
       }
     });
+  }
+
+  openStoredReagentDocumentModal(reagent: StoredReagent, folderName: string = "MSDS") {
+    const ref = this.modal.open(StoredReagentDocumentModalComponent)
+    ref.componentInstance.storedReagent = reagent;
+    ref.componentInstance.folderName = folderName;
   }
 }

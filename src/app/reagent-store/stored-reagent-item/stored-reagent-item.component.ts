@@ -5,19 +5,23 @@ import {AccountsService} from "../../accounts/accounts.service";
 import {
   StoredReagentActivityCalendarComponent
 } from "./stored-reagent-activity-calendar/stored-reagent-activity-calendar.component";
-import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
-import {ActivatedRoute} from "@angular/router";
+import {NgbDropdown, NgbDropdownItem, NgbDropdownMenu, NgbDropdownToggle, NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {ToastService} from "../../toast.service";
 import {DatePipe, NgClass} from "@angular/common";
+import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
 
 @Component({
     selector: 'app-stored-reagent-item',
-    imports: [
-        StoredReagentActivityCalendarComponent,
-        NgbTooltip,
-        DatePipe,
-      NgClass
-    ],
+  imports: [
+    StoredReagentActivityCalendarComponent,
+    NgbTooltip,
+    DatePipe,
+    NgClass,
+    NgbDropdownItem,
+    NgbDropdownMenu,
+    NgbDropdownToggle,
+    NgbDropdown
+  ],
     templateUrl: './stored-reagent-item.component.html',
     styleUrl: './stored-reagent-item.component.scss'
 })
@@ -60,6 +64,7 @@ export class StoredReagentItemComponent {
   @Output() openAddActionModal: EventEmitter<boolean> = new EventEmitter<boolean>()
   @Output() openStoredReagentAccessControlModal: EventEmitter<boolean> = new EventEmitter<boolean>()
   @Output() openStoredReagentSubscriptionModal: EventEmitter<boolean> = new EventEmitter<boolean>()
+  @Output() openStoredReagentDocumentModal: EventEmitter<string> = new EventEmitter<string>();
 
   pathToRoot: {id: number, name: string}[] = []
 
@@ -68,7 +73,13 @@ export class StoredReagentItemComponent {
   subscribedToLowStock: boolean = false;
   subscribedToExpiration: boolean = false;
   isSubscribed: boolean = false;
-  constructor(private web: WebService, public accounts: AccountsService, private toast: ToastService) {
+  documentCategories = [
+    { id: 'MSDS', name: 'MSDS' },
+    { id: 'Certificates', name: 'Certificates' },
+    { id: 'Manuals', name: 'Manuals' }
+  ];
+
+  constructor(private web: WebService, public accounts: AccountsService, private toast: ToastService, private modal: NgbModal) {
 
   }
 
