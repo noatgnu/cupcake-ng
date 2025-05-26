@@ -80,21 +80,24 @@
                   @if (dataService.instrumentPermissions[result.id]['can_view'] ||
                   dataService.instrumentPermissions[result.id]['can_book'] ||
                   dataService.instrumentPermissions[result.id]['can_manage']) {
-                    <div class="btn-group me-2">
-                      <div ngbDropdown container="body" class="d-inline-block">
-                        <button class="btn btn-sm btn-outline-secondary" ngbTooltip="Attaching documents"
-                                ngbDropdownToggle id="{{result.id}}instrumentAttachingDoc">
-                          <i class="bi bi-file-plus"></i> <span class="d-none d-sm-inline">Attach</span>
-                        </button>
-                        <div ngbDropdownMenu>
-                          @for (folder of result.annotation_folders; track folder.id) {
-                            <button ngbDropdownItem (click)="addFileToAnnotationFolder(folder)">
-                              {{folder.folder_name}}
-                            </button>
-                          }
+                    @if (dataService.instrumentPermissions[result.id]['can_manage']) {
+                      <div class="btn-group me-2">
+                        <div ngbDropdown container="body" class="d-inline-block">
+                          <button class="btn btn-sm btn-outline-secondary" ngbTooltip="Attaching documents"
+                                  ngbDropdownToggle id="{{result.id}}instrumentAttachingDoc">
+                            <i class="bi bi-file-plus"></i> <span class="d-none d-sm-inline">Attach</span>
+                          </button>
+                          <div ngbDropdownMenu>
+                            @for (folder of result.annotation_folders; track folder.id) {
+                              <button ngbDropdownItem (click)="addFileToAnnotationFolder(folder)">
+                                {{folder.folder_name}}
+                              </button>
+                            }
+                          </div>
                         </div>
                       </div>
-                    </div>
+                    }
+
 
                     <div class="btn-group me-2">
                       <div ngbDropdown container="body" class="d-inline-block">
