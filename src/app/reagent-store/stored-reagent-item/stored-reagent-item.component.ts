@@ -26,7 +26,7 @@ import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
     styleUrl: './stored-reagent-item.component.scss'
 })
 export class StoredReagentItemComponent {
-  @Input() permission: {view: boolean, edit: boolean, delete: boolean} = {view: false, edit: false, delete: false}
+  @Input() permission: {view: boolean, edit: boolean, delete: boolean, use:boolean} = {view: false, edit: false, delete: false, use: false}
   private _storedReagent: StoredReagent|undefined = undefined
   @Input() set storedReagent(value: StoredReagent|undefined) {
     this._storedReagent = value

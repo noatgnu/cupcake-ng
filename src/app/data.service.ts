@@ -34,7 +34,7 @@ export class DataService {
     allow_overlap_bookings: false,
     default_service_lab_group: "",
   }
-  storedReagentPermissions: {[key: string]: {edit: boolean, view: boolean, delete: boolean}} = {};
+  storedReagentPermissions: {[key: string]: {edit: boolean, view: boolean, delete: boolean, use:boolean}} = {};
   annotationPermissions: {[key: string]: {edit: boolean, view: boolean, delete: boolean}} = {};
   instrumentPermissions: {[key: string]: {can_view: boolean, can_book: boolean, can_manage: boolean}} = {};
 

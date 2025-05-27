@@ -1,8 +1,6 @@
 <div class="card border-0 shadow-sm mb-2">
   <div class="card-body p-3">
-    <!-- Main Item Info -->
     <div class="d-flex gap-3 flex-wrap">
-      <!-- Item Image -->
       @if (storedReagent) {
         @if (storedReagent.png_base64) {
           <div class="flex-shrink-0">
@@ -16,8 +14,6 @@
         }
       }
 
-
-      <!-- Item Details -->
       <div class="flex-grow-1" style="max-width: 500px">
         <div class="d-flex align-items-center gap-2 mb-2">
           <h5 class="fw-bold mb-0">@if (storedReagent) {@if(storedReagent.reagent) {{{storedReagent.reagent.name}}} } </h5>
@@ -70,13 +66,11 @@
         </div>
       </div>
 
-      <!-- Activity Calendar -->
       <div class="flex-shrink-0 ms-auto">
         <app-stored-reagent-activity-calendar [storedReagent]="storedReagent"></app-stored-reagent-activity-calendar>
       </div>
     </div>
 
-    <!-- Metadata Tags -->
     @if (storedReagent) {
       @if (storedReagent.metadata_columns) {
         @if (storedReagent.metadata_columns.length > 0) {
@@ -108,7 +102,6 @@
     }
 
 
-    <!-- Notes Section -->
     @if (detailsOpen && storedReagent?.notes) {
       <div class="alert alert-info mt-3 mb-3 p-3">
         <div class="d-flex align-items-start">
@@ -121,10 +114,8 @@
       </div>
     }
 
-    <!-- Action Buttons -->
     <div class="mt-3">
       <div class="d-flex flex-wrap gap-2">
-        <!-- Info Actions -->
         <div class="btn-group me-2">
           <button class="btn btn-sm btn-outline-secondary" (click)="detailsOpen=!detailsOpen" ngbTooltip="View item notes">
             <i class="bi bi-ticket-detailed me-1"></i><span class="d-none d-sm-inline">Details</span>
@@ -138,7 +129,7 @@
         </div>
 
         <!-- Inventory Actions -->
-        @if (permission.edit) {
+        @if (permission.use) {
           <div class="btn-group me-2">
             <button class="btn btn-sm btn-outline-success" (click)="openAddActionModal.emit(true)" ngbTooltip="Add more quantity">
               <i class="bi bi-plus-circle me-1"></i><span class="d-none d-sm-inline">Add</span>
@@ -223,7 +214,6 @@
             </span>
           </button>
         }
-
       </div>
     </div>
   </div>
