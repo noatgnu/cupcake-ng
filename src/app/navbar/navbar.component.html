@@ -67,12 +67,14 @@
         @if (accounts.loggedIn) {
           <li class="nav-item"><a class="nav-link" href="/#/calendar" target="_blank"><i class="bi bi-calendar3 me-1"></i> Calendar</a></li>
         }
+
       </ul>
 
       <div class="d-flex align-items-center gap-2">
         <button class="btn btn-sm btn-outline-danger" (click)="openWebsocketStatusModal()" >
           <i class="bi bi-wifi"></i>
         </button>
+
 
         <div class="nav-item dropdown" ngbDropdown placement="bottom-left" display="dynamic">
           <a class="nav-link" id="accountDropdown" ngbDropdownToggle>
@@ -108,6 +110,9 @@
             } @else {
               <a class="dropdown-item" (click)="openAccountLogin()"><i class="bi bi-box-arrow-in-right me-2"></i> Login</a>
             }
+            <a class="dropdown-item" href="https://github.com/noatgnu/CupcakeAndroid/releases" target="_blank">
+              <i class="bi bi-android2 me-1"></i> Android App (Alpha)
+            </a>
           </div>
         </div>
       </div>
