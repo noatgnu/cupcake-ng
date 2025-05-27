@@ -31,6 +31,7 @@ import {InstrumentSupportMaintenanceModalComponent} from "./instrument-support-m
 import {MaintenanceLogModalComponent} from "../../maintenance-log-modal/maintenance-log-modal.component";
 import {RouterLink} from "@angular/router";
 import {InstrumentService} from "../../instrument.service";
+import {AreYouSureModalComponent} from "../../are-you-sure-modal/are-you-sure-modal.component";
 @Component({
     selector: 'app-instrument-management',
   imports: [
@@ -211,5 +212,28 @@ export class InstrumentManagementComponent {
     const ref = this.modal.open(MaintenanceLogModalComponent, {scrollable: true, backdrop: 'static'});
     ref.componentInstance.instrumentId = instrument.id;
     ref.componentInstance.mode = "create";
+  }
+
+  deleteInstrument(instrument: Instrument) {
+    const ref = this.modal.open(AreYouSureModalComponent)
+    ref.componentInstance.message = `Are you sure you want to delete "${instrument.instrument_name}"? This action cannot be undone.`
+    ref.result.then((data) => {
+      if (data) {
+        this.instrumentService.deleteInstrument(instrument.id).subscribe(
+          () => {
+            this.toastService.show("Instrument", "Successfully deleted instrument");
+            this.instrumentService.getInstruments(undefined, this.pageSize,
+              (this.currentInstrumentPage - 1) * this.pageSize,
+              this.form.controls.searchTerm.value || '').subscribe((data: InstrumentQuery) => {
+              this.instrumentQuery = data;
+              this.getInstrumentPermission();
+            });
+          },
+          (error) => {
+            this.toastService.show("Instrument", "Failed to delete instrument");
+          }
+        );
+      }
+    })
   }
 }

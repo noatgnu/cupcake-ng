@@ -130,4 +130,5 @@ export class InstrumentService {
   getMaintenanceStatus(instrumentId: number): Observable<MaintenanceStatus> {
     return this.http.get<MaintenanceStatus>(`${this.baseURL}/api/instrument/${instrumentId}/get_maintenance_status/`);
   }
+
 }

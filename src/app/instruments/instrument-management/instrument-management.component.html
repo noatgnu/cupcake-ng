@@ -23,7 +23,7 @@
           @for (result of instrumentQuery.results; track result.id) {
             <div class="list-group-item">
               <div class="d-flex align-items-start mb-2">
-                <div class="me-3">
+                <div class="me-3" style="min-width: 60px; flex-shrink: 0;">
                   @if (result.image) {
                     <img [src]="result.image" class="img-thumbnail cursor-pointer" alt="{{result.instrument_name}}"
                          style="width: 60px; height: 60px; object-fit: cover;" loading="lazy"
@@ -107,9 +107,17 @@
                         </button>
                         <div ngbDropdownMenu>
                           @for (folder of result.annotation_folders; track folder.id) {
-                            <button ngbDropdownItem (click)="openAnnotationFolder(folder)">
-                              {{folder.folder_name}}
-                            </button>
+                            @if (folder.folder_name === 'Maintenance') {
+                              @if (dataService.instrumentPermissions[result.id]['can_manage'] || accounts.is_staff) {
+                                <button ngbDropdownItem (click)="openAnnotationFolder(folder)">
+                                  {{folder.folder_name}}
+                                </button>
+                              }
+                            } @else {
+                              <button ngbDropdownItem (click)="openAnnotationFolder(folder)">
+                                {{folder.folder_name}}
+                              </button>
+                            }
                           }
                         </div>
                       </div>
@@ -157,6 +165,10 @@
                               ngbTooltip="Manage instrument metadata">
                         <i class="bi bi-database"></i>
                       </button>
+                      <button class="btn btn-sm btn-outline-danger" (click)="deleteInstrument(result)"
+                              ngbTooltip="Delete instrument">
+                        <i class="bi bi-trash"></i>
+                      </button>
                     </div>
                   }
                 </div>
@@ -165,7 +177,6 @@
           }
         </div>
 
-        <!-- Pagination -->
         <div class="d-flex justify-content-center mb-3">
           <ngb-pagination
             (pageChange)="handlePageChange($event)"
@@ -190,7 +201,6 @@
     }
   </div>
 
-  <!-- Admin Add Button -->
   @if (accounts.is_staff) {
     <div class="position-fixed bottom-0 end-0 p-3">
       <button class="btn btn-primary rounded-circle shadow" (click)="openInstrumentCreateModal()"
