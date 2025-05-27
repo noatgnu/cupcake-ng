@@ -1708,7 +1708,7 @@ export class WebService {
   }
 
   checkStoredReagentPermission(reagent_ids: number[]) {
-    return this.http.post<{permission: {edit: boolean, view: boolean, delete: boolean}, "stored_reagent": number}[]>(
+    return this.http.post<{permission: {edit: boolean, view: boolean, delete: boolean, use: boolean}, "stored_reagent": number}[]>(
       `${this.baseURL}/api/user/check_stored_reagent_permission/`,
       {stored_reagents: reagent_ids},
       {responseType: 'json', observe: 'body'}
