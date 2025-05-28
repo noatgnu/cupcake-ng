@@ -1,7 +1,7 @@
 <div class="modal-header">
   <h4 class="modal-title d-flex align-items-center">
     <i class="bi bi-tools me-2"></i>
-    {{ form.get('id')?.value ? 'Edit Instrument' : 'Create New Instrument' }}
+    {{ instrument ? 'Edit Instrument' : 'Create New Instrument' }}
   </h4>
   <button type="button" class="btn-close" aria-label="Close" (click)="close()"></button>
 </div>
@@ -97,6 +97,6 @@
     class="btn btn-primary"
     [disabled]="form.invalid || form.pristine"
     (click)="submit()">
-    <i class="bi bi-check2-circle me-1"></i> {{ form.get('id')?.value ? 'Update' : 'Create' }}
+    <i class="bi bi-check2-circle me-1"></i> {{ instrument ? 'Update' : 'Create' }}
   </button>
 </div>
