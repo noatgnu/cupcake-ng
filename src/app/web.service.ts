@@ -714,7 +714,7 @@ export class WebService {
 
     if (url !== "") {
       // If a specific URL is provided, use that for the upload but check if it is not localhost. If it is not localhost replace http:// with https://
-      if (url.startsWith('http://localhost')) {
+      if (!url.startsWith('http://localhost')) {
         url = url.replace('http://', 'https://');
       }
       return this.http.put<ChunkUploadResponse>(
@@ -736,6 +736,12 @@ export class WebService {
   uploadDataChunkComplete(url: string = "", md5: string, file?: File, filename?: string) {
     const form = new FormData()
     form.append('sha256', md5)
+    if (url !== "") {
+      // If a specific URL is provided, use that for the upload but check if it is not localhost. If it is not localhost replace http:// with https://
+      if (!url.startsWith('http://localhost')) {
+        url = url.replace('http://', 'https://');
+      }
+    }
     if (file && filename) {
       form.append('file', file)
       form.append('filename', filename)
