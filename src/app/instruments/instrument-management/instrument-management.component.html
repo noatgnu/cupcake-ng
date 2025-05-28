@@ -107,7 +107,7 @@
                         </button>
                         <div ngbDropdownMenu>
                           @for (folder of result.annotation_folders; track folder.id) {
-                            @if (folder.folder_name === 'Maintenance') {
+                            @if (folder.folder_name === 'Maintenance' || folder.folder_name === 'Certificates') {
                               @if (dataService.instrumentPermissions[result.id]['can_manage'] || accounts.is_staff) {
                                 <button ngbDropdownItem (click)="openAnnotationFolder(folder)">
                                   {{folder.folder_name}}
