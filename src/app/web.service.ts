@@ -711,8 +711,12 @@ export class WebService {
     let headers = new HttpHeaders()
     headers = headers.append('Content-Range', contentRange)
     //headers.append('Content-Disposition', `attachment; filename=${filename}`)
-    console.log(headers)
+
     if (url !== "") {
+      // If a specific URL is provided, use that for the upload but check if it is not localhost. If it is not localhost replace http:// with https://
+      if (url.startsWith('http://localhost')) {
+        url = url.replace('http://', 'https://');
+      }
       return this.http.put<ChunkUploadResponse>(
         url,
         form,
