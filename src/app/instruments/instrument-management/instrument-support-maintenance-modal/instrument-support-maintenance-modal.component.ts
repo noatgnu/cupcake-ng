@@ -11,10 +11,11 @@ import {
 import { Instrument, SupportInformation, ExternalContact, ExternalContactDetails} from "../../../instrument";
 import { WebService} from "../../../web.service";
 import {ToastService} from "../../../toast.service";
-import {DatePipe} from '@angular/common';
+import {DatePipe, NgClass} from '@angular/common';
 import { InstrumentSupportInformationService} from "../../../instrument-support-information.service";
 import { Observable, of, switchMap, map, debounceTime, distinctUntilChanged, tap, catchError } from 'rxjs';
 import { BarcodeScannerModalComponent } from '../../../barcode-scanner-modal/barcode-scanner-modal.component';
+import {InstrumentService} from "../../../instrument.service";
 
 @Component({
   selector: 'app-instrument-support-maintenance-modal',
@@ -27,7 +28,8 @@ import { BarcodeScannerModalComponent } from '../../../barcode-scanner-modal/bar
     DatePipe,
     NgbTypeahead,
     NgbNavContent,
-    NgbNavLink
+    NgbNavLink,
+    NgClass
   ],
   templateUrl: './instrument-support-maintenance-modal.component.html',
   styleUrls: ['./instrument-support-maintenance-modal.component.scss']
@@ -38,6 +40,8 @@ export class InstrumentSupportMaintenanceModalComponent implements OnInit {
   selectedLocation: any = null;
   active: number = 1
   private _instrumentId?: number;
+  checkingMaintenance = false;
+
   @Input() set instrumentId(instrumentId: number) {
     this._instrumentId = instrumentId;
     this.supportService.getInstrumentSupportInformation(instrumentId).subscribe(
@@ -83,7 +87,8 @@ export class InstrumentSupportMaintenanceModalComponent implements OnInit {
     private supportService: InstrumentSupportInformationService,
     private toast: ToastService,
     private webService: WebService,
-    private modalService: NgbModal
+    private modalService: NgbModal,
+    private instrumentService: InstrumentService
   ) { }
 
   search = (text$: Observable<string>) => {
@@ -487,5 +492,28 @@ export class InstrumentSupportMaintenanceModalComponent implements OnInit {
         });
       }
     })
+  }
+
+  triggerMaintenanceCheck(): void {
+    this.checkingMaintenance = true;
+
+    const daysBeforeWarrantyWarning = 30;
+    const daysBeforeMaintenanceWarning = 15;
+
+    this.instrumentService.triggerInstrumentCheck(
+      this.instrumentId,
+      daysBeforeWarrantyWarning,
+      daysBeforeMaintenanceWarning
+    ).subscribe(
+      (response: any) => {
+        this.checkingMaintenance = false;
+        this.toast.show("Maintenance Check", "Successfully triggered maintenance and warranty check");
+      },
+      (error: any) => {
+        this.checkingMaintenance = false;
+        this.toast.show("Maintenance Check", "Failed to trigger maintenance check");
+        console.error('Error triggering maintenance check:', error);
+      }
+    );
   }
 }

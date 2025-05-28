@@ -287,5 +287,12 @@
 </div>
 
 <div class="modal-footer">
+  <button type="button"
+          class="btn btn-outline-info me-2"
+          (click)="triggerMaintenanceCheck()"
+          [disabled]="checkingMaintenance">
+    <i class="bi" [ngClass]="checkingMaintenance ? 'bi-hourglass-split' : 'bi-check-circle'"></i>
+    {{ checkingMaintenance ? 'Checking...' : 'Check Warranty & Maintenance Status' }}
+  </button>
   <button type="button" class="btn btn-outline-secondary" (click)="dismiss()">Exit</button>
 </div>

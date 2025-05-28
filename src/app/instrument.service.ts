@@ -6,6 +6,7 @@ import { Instrument, InstrumentQuery, InstrumentUsage, InstrumentUsageQuery, Mai
 import { InstrumentJob, InstrumentJobQuery } from "./instrument-job";
 import { NgbDateStruct } from "@ng-bootstrap/ng-bootstrap";
 import { Annotation } from "./annotation";
+import {WebService} from "./web.service";
 
 @Injectable({
   providedIn: 'root'
@@ -14,7 +15,7 @@ export class InstrumentService {
   baseURL: string = environment.baseURL;
   updateTrigger: Subject<boolean> = new Subject<boolean>()
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient, private web: WebService) { }
 
   instrumentDelayUsage(instrument_job_id: number, days: number, start_date: Date|undefined|null) {
     if (!start_date) {
@@ -129,6 +130,30 @@ export class InstrumentService {
 
   getMaintenanceStatus(instrumentId: number): Observable<MaintenanceStatus> {
     return this.http.get<MaintenanceStatus>(`${this.baseURL}/api/instrument/${instrumentId}/get_maintenance_status/`);
+  }
+
+  triggerInstrumentCheck(instrumentId?: number, daysBeforeWarrantyWarning?: number, daysBeforeMaintenanceWarning?: number) {
+    const payload: any = {};
+
+    if (instrumentId) {
+      payload.instrument_id = instrumentId;
+    }
+
+    if (daysBeforeWarrantyWarning) {
+      payload.days_before_warranty_warning = daysBeforeWarrantyWarning;
+    }
+
+    if (daysBeforeMaintenanceWarning) {
+      payload.days_before_maintenance_warning = daysBeforeMaintenanceWarning;
+    }
+
+    payload.instance_id = this.web.cupcakeInstanceID
+
+    return this.http.post<{message: string, task_id: string}>(
+      `${this.baseURL}/api/instrument/trigger_instrument_check/`,
+      payload,
+      {responseType: 'json', observe: 'body'}
+    );
   }
 
 }
