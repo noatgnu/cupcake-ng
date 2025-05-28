@@ -154,7 +154,16 @@ export class InstrumentManagementComponent {
     const ref = this.modal.open(InstrumentEditorModalComponent)
     ref.componentInstance.instrument = instrument
     ref.result.then((data: any) => {
-      this.instrumentService.updateInstrument(instrument.id, data.name, data.description, data.max_days_ahead, data.max_duration).subscribe((data) => {
+      this.instrumentService.updateInstrument(
+        instrument.id,
+        data.name,
+        data.description,
+        data.max_days_ahead,
+        data.max_duration,
+        instrument.image,
+        data.days_before_warranty_notification,
+        data.days_before_maintenance_notification
+      ).subscribe((data) => {
         this.toastService.show("Instrument", "Successfully edited instrument")
         if (this.instrumentQuery) {
           const index = this.instrumentQuery.results.findIndex((i) => i.id === instrument.id)

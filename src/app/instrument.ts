@@ -11,6 +11,8 @@ export interface Instrument {
   metadata_columns: MetadataColumn[];
   max_days_within_usage_pre_approval: number;
   max_days_ahead_pre_approval: number;
+  days_before_maintenance_notification: number;
+  days_before_warranty_notification: number;
   annotation_folders: AnnotationFolder[];
   image: string|null;
   support_information: SupportInformation[];

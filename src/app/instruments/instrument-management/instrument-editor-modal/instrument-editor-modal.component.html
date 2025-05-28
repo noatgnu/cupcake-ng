@@ -44,7 +44,47 @@
       </div>
     </div>
 
-    <!-- Booking Settings -->
+    <div class="card mb-3 shadow-sm">
+      <div class="card-header">
+        <h5 class="mb-0">Notification Settings</h5>
+      </div>
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label for="warrantyNotification" class="form-label">Days Before Warranty Notification</label>
+            <div class="input-group">
+              <span class="input-group-text"><i class="bi bi-bell"></i></span>
+              <input
+                type="number"
+                class="form-control"
+                id="warrantyNotification"
+                formControlName="days_before_warranty_notification"
+                min="0"
+                step="1"
+                placeholder="e.g. 30">
+            </div>
+            <small class="text-muted">Notify when warranty expiration is this many days away</small>
+          </div>
+
+          <div class="col-md-6">
+            <label for="maintenanceNotification" class="form-label">Days Before Maintenance Notification</label>
+            <div class="input-group">
+              <span class="input-group-text"><i class="bi bi-tools"></i></span>
+              <input
+                type="number"
+                class="form-control"
+                id="maintenanceNotification"
+                formControlName="days_before_maintenance_notification"
+                min="0"
+                step="1"
+                placeholder="e.g. 15">
+            </div>
+            <small class="text-muted">Notify when scheduled maintenance is this many days away</small>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="card mb-3 shadow-sm">
       <div class="card-header">
         <h5 class="mb-0">Booking Settings</h5>

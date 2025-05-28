@@ -81,7 +81,7 @@ export class InstrumentService {
     )
   }
 
-  updateInstrument(instrument_id: number, instrument_name: string, instrument_description: string, max_days_ahead: number|undefined|null, max_duration: number|undefined|null, image: string|undefined|null = undefined) {
+  updateInstrument(instrument_id: number, instrument_name: string, instrument_description: string, max_days_ahead: number|undefined|null, max_duration: number|undefined|null, image: string|undefined|null = undefined, days_before_warranty_notification: number|undefined|null = undefined, days_before_maintenance_notification: number|undefined|null = undefined) {
     const payload: any = {name: instrument_name, description: instrument_description}
     if (max_days_ahead) {
       payload['max_days_ahead_pre_approval'] = max_days_ahead
@@ -91,6 +91,12 @@ export class InstrumentService {
     }
     if (image) {
       payload['image'] = image
+    }
+    if (days_before_warranty_notification) {
+      payload['days_before_warranty_notification'] = days_before_warranty_notification
+    }
+    if (days_before_maintenance_notification) {
+      payload['days_before_maintenance_notification'] = days_before_maintenance_notification
     }
     return this.http.put<Instrument>(
       `${this.baseURL}/api/instrument/${instrument_id}/`,
