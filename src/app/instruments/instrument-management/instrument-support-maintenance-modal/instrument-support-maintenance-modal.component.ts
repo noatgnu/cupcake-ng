@@ -41,9 +41,18 @@ export class InstrumentSupportMaintenanceModalComponent implements OnInit {
   active: number = 1
   private _instrumentId?: number;
   checkingMaintenance = false;
+  instrument?: Instrument;
 
   @Input() set instrumentId(instrumentId: number) {
     this._instrumentId = instrumentId;
+    this.instrumentService.getInstrument(instrumentId).subscribe(
+      (instrument: Instrument) => {
+        this.instrument = instrument;
+      },
+      (error: any) => {
+        console.error('Error loading instrument:', error);
+      }
+    )
     this.supportService.getInstrumentSupportInformation(instrumentId).subscribe(
       (data: SupportInformation[]) => {
         this.supportInfo = data[0];

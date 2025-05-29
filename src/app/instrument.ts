@@ -13,6 +13,8 @@ export interface Instrument {
   max_days_ahead_pre_approval: number;
   days_before_maintenance_notification: number;
   days_before_warranty_notification: number;
+  last_maintenance_notification_sent: Date|null;
+  last_warranty_notification_sent: Date|null;
   annotation_folders: AnnotationFolder[];
   image: string|null;
   support_information: SupportInformation[];
