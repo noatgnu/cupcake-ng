@@ -20,7 +20,11 @@ export class WebsocketService implements OnDestroy {
   userConnected: boolean = false
   summaryConnected: boolean = false
   instrumentJobConnected: boolean = false
+  notificationWSConnection?: WebSocketSubject<any>
+  notificationConnected: boolean = false
 
+
+  private notificationIntentionalDisconnect = false;
   private timerIntentionalDisconnect = false;
   private annotationIntentionalDisconnect = false;
   private userIntentionalDisconnect = false;
@@ -333,6 +337,64 @@ export class WebsocketService implements OnDestroy {
     if (this.summaryWSConnection) {
       this.summaryWSConnection.complete();
       this.summaryWSConnection = undefined;
+    }
+  }
+
+  connectNotificationWS() {
+    this.notificationIntentionalDisconnect = false;
+
+    console.log("Connecting to notification websocket")
+    console.log(`${this.baseURL}/ws/notifications/?token=${this.accounts.token}`)
+    this.notificationWSConnection = new WebSocketSubject({
+      url: `${this.baseURL}/ws/notifications/?token=${this.accounts.token}`,
+      openObserver: {
+        next: () => {
+          console.log("Connected to notification websocket")
+          this.notificationConnected = true;
+        }
+      },
+      closeObserver: {
+        next: () => {
+          console.log("Closed connection to notification websocket")
+          this.notificationConnected = false;
+          if (!this.notificationIntentionalDisconnect) {
+            this.reconnectNotificationWS();
+          }
+        }
+      },
+    })
+
+    const sub = this.notificationWSConnection
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        error: (err) => {
+          console.error('Notification WS error:', err);
+          if (!this.notificationIntentionalDisconnect) {
+            this.reconnectNotificationWS();
+          }
+        }
+      });
+    this.subscriptions.push(sub);
+  }
+
+  reconnectNotificationWS(retryCount = 0) {
+    if (this.notificationIntentionalDisconnect || retryCount >= this.maxRetries) return;
+
+    const delay = Math.min(1000 * Math.pow(2, retryCount), 30000);
+    console.log(`Attempting to reconnect Notification WS in ${delay}ms (attempt ${retryCount + 1})`);
+
+    setTimeout(() => {
+      if (!this.notificationIntentionalDisconnect) {
+        this.connectNotificationWS();
+      }
+    }, delay);
+  }
+
+  closeNotificationWS() {
+    this.notificationIntentionalDisconnect = true;
+    if (this.notificationWSConnection) {
+      this.notificationWSConnection.complete();
+      this.notificationWSConnection = undefined;
     }
   }
 }
