@@ -1,9 +1,12 @@
 @if (annotation && mediaURL) {
   @if (annotation.annotation_type === 'video' ) {
     <video controls (timeupdate)="highLightSubtitle($event)" #videoControlElement [width]="400" [height]="300">
+      @if (annotation.file.endsWith(".mp4")) {
+        <source [attr.src]="mediaURL" type="video/mp4">
+      } @else if (annotation.file.endsWith(".webm")) {
+        <source [attr.src]="mediaURL" type="video/webm">
+      }
 
-      <source [attr.src]="mediaURL" type="video/mp4">
-      <source [attr.src]="mediaURL" type="video/webm">
       @if (transcription) {
         <track [attr.src]="transcription" kind="captions" srclang="en" label="captions">
       }
@@ -14,10 +17,11 @@
     </video>
   } @else {
     <audio controls (timeupdate)="highLightSubtitle($event)" #audioControlElement>
-      <source [attr.src]="mediaURL" type="audio/mp4">
-      <source [attr.src]="mediaURL" type="audio/x-m4a">
-      <source [attr.src]="mediaURL" type="audio/webm">
-
+      @if (annotation.file.endsWith(".m4a")) {
+        <source [attr.src]="mediaURL" type="audio/mp4">
+      } @else if (annotation.file.endsWith(".webm")) {
+        <source [attr.src]="mediaURL" type="audio/webm">
+      }
 
       @if (transcription) {
         <track [attr.src]="transcription" kind="captions" srclang="en" label="captions">
