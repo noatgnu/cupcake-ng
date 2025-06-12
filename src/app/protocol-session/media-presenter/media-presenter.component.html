@@ -18,7 +18,7 @@
   } @else {
     <audio controls (timeupdate)="highLightSubtitle($event)" #audioControlElement>
       @if (annotation.file.endsWith(".m4a")) {
-        <source [attr.src]="mediaURL" type="audio/x-m4a">
+        <source [attr.src]="mediaURL" type="audio/m4a">
       } @else if (annotation.file.endsWith(".webm")) {
         <source [attr.src]="mediaURL" type="audio/webm">
       }
