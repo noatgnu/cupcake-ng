@@ -53,7 +53,7 @@ export class InstrumentService {
     )
   }
 
-  getInstruments(url?: string, limit: number = 5, offset: number = 0, searchTerm: string = "") {
+  getInstruments(url?: string, limit: number = 5, offset: number = 0, searchTerm: string = "", serialNumber: string = ""): Observable<InstrumentQuery> {
     if (url) {
       return this.http.get<InstrumentQuery>(
         url,
@@ -66,6 +66,9 @@ export class InstrumentService {
       .set('offset', offset.toString())
     if (searchTerm !== "") {
       params = params.append('search', searchTerm);
+    }
+    if (serialNumber !== "") {
+      params = params.append('serial_number', serialNumber);
     }
     return this.http.get<InstrumentQuery>(
       `${this.baseURL}/api/instrument/`,

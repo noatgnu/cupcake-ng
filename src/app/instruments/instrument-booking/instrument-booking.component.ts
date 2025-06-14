@@ -49,7 +49,8 @@ export class InstrumentBookingComponent {
 
   instrumentQuery?: InstrumentQuery
   form = this.fb.group({
-    searchTerm: ['']
+    searchTerm: [''],
+    serialNumber: ['']
   })
 
   instrumentUsageMap: {[key: string]: InstrumentUsageQuery} = {}
@@ -60,14 +61,18 @@ export class InstrumentBookingComponent {
       this.updateInstrumentUsageMap(data.results);
       this.getInstrumentPermission()
     })
-    this.form.controls.searchTerm.valueChanges.subscribe((value: string| null) => {
-      if (value) {
-        this.instrumentService.getInstruments(undefined, this.pageSize, 0, value).subscribe((data: InstrumentQuery) => {
-          this.instrumentQuery = data
-          this.updateInstrumentUsageMap(data.results)
-          this.getInstrumentPermission()
-        })
-      }
+    this.form.valueChanges.subscribe((value) => {
+      this.instrumentService.getInstruments(
+        undefined,
+        this.pageSize,
+        0,
+        value.searchTerm || "",
+        value.serialNumber || ""
+      ).subscribe((data: InstrumentQuery) => {
+        this.instrumentQuery = data
+        this.updateInstrumentUsageMap(data.results)
+        this.getInstrumentPermission()
+      })
     })
   }
 
@@ -100,19 +105,18 @@ export class InstrumentBookingComponent {
   }
 
   handlePageChange(event: any) {
-    if (this.form.controls.searchTerm.value) {
-      this.instrumentService.getInstruments(undefined, this.pageSize, (event.page - 1) * this.pageSize, this.form.controls.searchTerm.value).subscribe((data: InstrumentQuery) => {
-        this.instrumentQuery = data
-        this.updateInstrumentUsageMap(data.results)
-        this.getInstrumentPermission()
-      })
-    } else {
-      this.instrumentService.getInstruments(undefined, this.pageSize, (event.page - 1) * this.pageSize).subscribe((data: InstrumentQuery) => {
-        this.instrumentQuery = data
-        this.updateInstrumentUsageMap(data.results)
-        this.getInstrumentPermission()
-      })
-    }
+    const { searchTerm, serialNumber } = this.form.value;
+    this.instrumentService.getInstruments(
+      undefined,
+      this.pageSize,
+      (event.page - 1) * this.pageSize,
+      searchTerm || "",
+      serialNumber || ""
+    ).subscribe((data: InstrumentQuery) => {
+      this.instrumentQuery = data
+      this.updateInstrumentUsageMap(data.results)
+      this.getInstrumentPermission()
+    })
   }
 
   getInstrumentPermission() {

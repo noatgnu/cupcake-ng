@@ -394,7 +394,6 @@ export class JobMetadataCreationModalComponent {
     if (this.name === "Modification parameters") {
       const result: any[] = []
       let specs = this.selectedSpecs
-      // check if this.selectedSpecs is array
       if (!Array.isArray(this.selectedSpecs)) {
         specs = [this.selectedSpecs]
       }
