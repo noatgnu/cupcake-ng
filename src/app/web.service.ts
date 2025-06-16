@@ -1304,7 +1304,7 @@ export class WebService {
   }
 
   createStoredReagent(storage_object: number, name: string, unit: string, quantity: number, notes: string, barcode: string|null = null, shareable: boolean = true, access_all: boolean = false, created_by_project: number|null = null, created_by_protocol: number|null = null, created_by_session: number|null = null, created_by_step: number|null = null) {
-    const payload: any = {storage_object: storage_object, name: name, unit: unit, quantity: quantity, notes: notes, shareable: shareable, access_all: access_all}
+    const payload: any = {storage_object_id: storage_object, name: name, unit: unit, quantity: quantity, notes: notes, shareable: shareable, access_all: access_all}
     if (barcode) {
       payload['barcode'] = barcode
     }
