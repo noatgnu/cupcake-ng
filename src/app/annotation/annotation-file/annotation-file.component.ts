@@ -4,6 +4,7 @@ import {Annotation} from "../../annotation";
 import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {AnnotationService} from "../../annotation.service";
 import {DataService} from "../../data.service";
+import {WebService} from "../../web.service";
 
 @Component({
   selector: 'app-annotation-file',
@@ -26,13 +27,28 @@ export class AnnotationFileComponent {
   @Input() enableMetadata: boolean = false;
   @Input() enableScratch: boolean = false;
 
-  constructor(public annotationService: AnnotationService, public dataService: DataService) {
+  constructor(public annotationService: AnnotationService, public dataService: DataService, private webService: WebService) {
 
   }
 
   deleteAnnotation() {
     if (this.annotation) {
       this.annotationService.deleteAnnotation(this.annotation.id)
+    }
+  }
+
+  isPdfFile(): boolean {
+    if (!this.annotation?.file) return false;
+    const fileUrl = this.annotation.file.toString();
+    return fileUrl.toLowerCase().endsWith('.pdf');
+  }
+
+  viewPdf() {
+    if (this.annotation) {
+      this.webService.getSignedURL(this.annotation.id).subscribe((token: any) => {
+        const viewUrl = `${this.webService.baseURL}/api/annotation/download_signed/?token=${token["signed_token"]}&?view=inline`;
+        window.open(viewUrl, '_blank');
+      });
     }
   }
 

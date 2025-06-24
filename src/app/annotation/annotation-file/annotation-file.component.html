@@ -36,6 +36,9 @@
         @if (['image', 'audio', 'video', 'sketch', 'file'].includes(annotation.annotation_type)) {
           <button class="btn btn-outline-primary btn-sm" (click)="annotationService.download(annotation.id)"><i class="bi bi-download"></i></button>
         }
+        @if (annotation.annotation_type === 'file' && isPdfFile()) {
+          <button class="btn btn-outline-success btn-sm" (click)="viewPdf()" ngbTooltip="View PDF"><i class="bi bi-file-earmark-pdf"></i></button>
+        }
         @if (dataService.annotationPermissions[annotation.id].delete){
           <button class="btn btn-outline-danger btn-sm" (click)="annotationService.deleteAnnotation(annotation.id)"><i class="bi bi-trash"></i></button>
         }
