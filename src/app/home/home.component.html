@@ -7,7 +7,9 @@
           <div class="d-flex header-container flex-row justify-content-center align-items-center gap-4">
             <!-- Logo Section -->
             <div class="text-center">
-              <img #logo class="logo_home" ngSrc="assets/cupcake_logo.png" alt="Cupcake Logo" [width]="128" [height]="128">
+              @if (hasLogo) {
+                <img #logo class="logo_home" ngSrc="assets/cupcake_logo.png" alt="Cupcake Logo" [width]="128" [height]="128">
+              }
             </div>
 
             <!-- Divider -->
