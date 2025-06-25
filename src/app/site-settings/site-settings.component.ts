@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {NgbModal, NgbNavModule, NgbTooltipModule, NgbAlertModule, NgbActiveModal} from '@ng-bootstrap/ng-bootstrap';
@@ -31,6 +31,8 @@ export class SiteSettingsComponent implements OnInit {
   saving = false;
   isStaff = false;
   sidebarCollapsed = false;
+
+  @ViewChild(SiteSettingsFormComponent) siteSettingsForm!: SiteSettingsFormComponent;
 
   constructor(
     private siteSettingsService: SiteSettingsService,
@@ -103,12 +105,20 @@ export class SiteSettingsComponent implements OnInit {
   }
 
   openPreviewModal(): void {
-    // Open a modal to preview the current settings
+    // Get current form values for preview
+    const currentFormValues = this.siteSettingsForm?.settingsForm?.value;
+
+    // Merge saved settings with current form values for preview
+    const previewSettings: SiteSettings = {
+      ...this.settings,
+      ...currentFormValues
+    } as SiteSettings;
+
     const modalRef = this.modalService.open(SitePreviewModalComponent, {
       size: 'lg',
       backdrop: 'static'
     });
-    modalRef.componentInstance.settings = this.settings;
+    modalRef.componentInstance.settings = previewSettings;
   }
 
   resetBannerDismissal(): void {
@@ -136,13 +146,16 @@ export class SiteSettingsComponent implements OnInit {
         <!-- Navbar Preview -->
         <div class="preview-section">
           <h6>Navigation Bar Preview</h6>
-          <nav class="navbar navbar-expand-lg bg-body-tertiary shadow-sm mb-3"
-               [style.border-left]="'4px solid ' + (settings?.primary_color || '#0066cc')">
+          <nav class="navbar navbar-expand-lg bg-body-tertiary shadow-sm mb-3 border-start border-primary border-4">
             <div class="container-fluid">
-              <a class="navbar-brand" href="#">{{ settings?.site_name || 'CUPCAKE' }}</a>
+              <a class="navbar-brand text-primary fw-bold" href="#">{{ settings?.site_name || 'CUPCAKE' }}</a>
               @if (settings?.site_tagline) {
                 <small class="text-muted ms-2">{{ settings?.site_tagline }}</small>
               }
+              <div class="navbar-nav ms-auto">
+                <a class="nav-link link-primary" href="#">Sample Link</a>
+                <button class="btn btn-primary btn-sm">Login</button>
+              </div>
             </div>
           </nav>
         </div>
@@ -171,35 +184,51 @@ export class SiteSettingsComponent implements OnInit {
           <div class="row">
             <div class="col-md-6">
               <div class="card mb-2">
-                <div class="card-header text-white"
-                     [style.background-color]="settings?.primary_color || '#0066cc'">
+                <div class="card-header bg-primary text-white">
                   Primary Color
                 </div>
                 <div class="card-body">
-                  <button class="btn me-2"
-                          [style.background-color]="settings?.primary_color || '#0066cc'"
-                          [style.border-color]="settings?.primary_color || '#0066cc'"
-                          style="color: white;">
+                  <button class="btn btn-primary me-2">
                     Primary Button
+                  </button>
+                  <button class="btn btn-outline-primary">
+                    Outline Primary
                   </button>
                 </div>
               </div>
             </div>
             <div class="col-md-6">
               <div class="card mb-2">
-                <div class="card-header text-white"
-                     [style.background-color]="settings?.secondary_color || '#6c757d'">
+                <div class="card-header bg-secondary text-white">
                   Secondary Color
                 </div>
                 <div class="card-body">
-                  <button class="btn"
-                          [style.background-color]="settings?.secondary_color || '#6c757d'"
-                          [style.border-color]="settings?.secondary_color || '#6c757d'"
-                          style="color: white;">
+                  <button class="btn btn-secondary me-2">
                     Secondary Button
+                  </button>
+                  <button class="btn btn-outline-secondary">
+                    Outline Secondary
                   </button>
                 </div>
               </div>
+            </div>
+          </div>
+
+          <!-- Additional Bootstrap components preview -->
+          <div class="row mt-3">
+            <div class="col-md-6">
+              <div class="alert alert-primary" role="alert">
+                <strong>Primary Alert:</strong> This is how primary alerts will look.
+              </div>
+              <span class="badge bg-primary">Primary Badge</span>
+              <a href="#" class="link-primary ms-2">Primary Link</a>
+            </div>
+            <div class="col-md-6">
+              <div class="alert alert-secondary" role="alert">
+                <strong>Secondary Alert:</strong> This is how secondary alerts will look.
+              </div>
+              <span class="badge bg-secondary">Secondary Badge</span>
+              <a href="#" class="link-secondary ms-2">Secondary Link</a>
             </div>
           </div>
         </div>
@@ -208,7 +237,7 @@ export class SiteSettingsComponent implements OnInit {
         @if (settings?.footer_text) {
           <div class="preview-section">
             <h6>Footer Preview</h6>
-            <footer class="footer mt-auto py-3 bg-light">
+            <footer class="footer mt-auto py-3 bg-body-secondary border-top">
               <div class="container text-center">
                 <span class="text-muted">{{ settings?.footer_text }}</span>
               </div>
@@ -223,26 +252,107 @@ export class SiteSettingsComponent implements OnInit {
   `,
   styles: [`
     .preview-container {
-      background: #f8f9fa;
       padding: 1rem;
       border-radius: 0.375rem;
     }
     .preview-section {
       margin-bottom: 1.5rem;
       padding: 1rem;
-      background: white;
+      background: var(--bs-body-bg);
       border-radius: 0.375rem;
-      border: 1px solid #dee2e6;
+      border: 1px solid var(--bs-border-color);
     }
     .preview-section h6 {
       margin-bottom: 0.75rem;
-      color: #495057;
+      color: var(--bs-body-color);
       font-weight: 600;
+    }
+
+    [data-bs-theme="dark"] .preview-container {
+      background: var(--bs-gray-800);
     }
   `]
 })
-export class SitePreviewModalComponent {
+export class SitePreviewModalComponent implements OnInit, OnDestroy {
   settings: SiteSettings | null = null;
+  private originalColors: { [key: string]: string } = {};
 
-  constructor(public activeModal: NgbActiveModal) {}
+  constructor(
+    public activeModal: NgbActiveModal,
+    private siteSettingsService: SiteSettingsService
+  ) {}
+
+  ngOnInit(): void {
+    if (this.settings) {
+      // Store original colors from CSS variables
+      this.storeOriginalColors();
+      
+      // Apply preview colors temporarily
+      this.applyPreviewColors();
+    }
+  }
+
+  ngOnDestroy(): void {
+    // Restore original colors when modal closes
+    this.restoreOriginalColors();
+  }
+
+  private storeOriginalColors(): void {
+    const root = document.documentElement;
+    const computedStyle = getComputedStyle(root);
+    
+    // Store all Bootstrap color variables we might modify
+    const colorVars = [
+      '--bs-primary', '--bs-primary-rgb',
+      '--bs-secondary', '--bs-secondary-rgb'
+    ];
+    
+    colorVars.forEach(varName => {
+      this.originalColors[varName] = computedStyle.getPropertyValue(varName).trim();
+    });
+  }
+
+  private applyPreviewColors(): void {
+    if (this.settings) {
+      const root = document.documentElement;
+      
+      // Apply primary color
+      if (this.settings.primary_color) {
+        root.style.setProperty('--bs-primary', this.settings.primary_color);
+        const primaryRgb = this.hexToRgb(this.settings.primary_color);
+        if (primaryRgb) {
+          root.style.setProperty('--bs-primary-rgb', `${primaryRgb.r}, ${primaryRgb.g}, ${primaryRgb.b}`);
+        }
+      }
+      
+      // Apply secondary color
+      if (this.settings.secondary_color) {
+        root.style.setProperty('--bs-secondary', this.settings.secondary_color);
+        const secondaryRgb = this.hexToRgb(this.settings.secondary_color);
+        if (secondaryRgb) {
+          root.style.setProperty('--bs-secondary-rgb', `${secondaryRgb.r}, ${secondaryRgb.g}, ${secondaryRgb.b}`);
+        }
+      }
+    }
+  }
+
+  private restoreOriginalColors(): void {
+    const root = document.documentElement;
+    Object.entries(this.originalColors).forEach(([varName, value]) => {
+      if (value) {
+        root.style.setProperty(varName, value);
+      } else {
+        root.style.removeProperty(varName);
+      }
+    });
+  }
+
+  private hexToRgb(hex: string): {r: number, g: number, b: number} | null {
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? {
+      r: parseInt(result[1], 16),
+      g: parseInt(result[2], 16),
+      b: parseInt(result[3], 16)
+    } : null;
+  }
 }

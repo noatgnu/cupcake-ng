@@ -30,11 +30,8 @@ import {PublicSiteSettings} from "./site-settings";
     NavbarComponent,
     LoadingComponent,
     ToastContainerComponent,
-    HandwrittenAnnotationComponent,
-    LoadingIndicatorComponent,
     AsyncPipe,
     NgTemplateOutlet,
-    NgClass,
     FloatingChatComponent,
     FooterComponent
   ],
@@ -51,8 +48,17 @@ export class AppComponent {
   constructor(private loadingTracker: LoadingTrackerService, private modal: NgbModal, private router: Router, private web: WebService, private accounts: AccountsService, public webrtc: WebrtcService, private ws: WebsocketService, private dataService: DataService, private toastService: ToastService, private siteSettings: SiteSettingsService) {
     this.siteSettings.publicSettings$.subscribe((data) => {
       this.title = data?.site_name || "Cupcake";
+      if (data) {
+        this.siteSettings.applyThemeColors(data);
+        this.siteSettings.updatePageBranding(data);
+      }
     })
-    this.siteSettings.getPublicSettings().subscribe((data) => {})
+    this.siteSettings.getPublicSettings().subscribe((data) => {
+      if (data) {
+        this.siteSettings.applyThemeColors(data);
+        this.siteSettings.updatePageBranding(data);
+      }
+    })
 
 
     this.router.events.subscribe(async (event )=> {
@@ -65,19 +71,26 @@ export class AppComponent {
       }
     })
     const followSystemTheme = localStorage.getItem("cupcake-follow-system-theme")
+    console.log("Follow system theme:", followSystemTheme)
     if (followSystemTheme) {
+      console.log("Follow system theme is set to:", followSystemTheme)
       if (followSystemTheme === "true") {
         const prefersDarkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
         if (prefersDarkMode) {
           this.dataService.setDarkMode(true)
         }
+        console.log("Preferred dark mode:", prefersDarkMode)
       }
     } else {
+      console.log("Follow system theme not set, checking local storage for dark mode")
       const darkMode = localStorage.getItem("cupcake-dark-mode")
+      console.log("Dark mode from local storage:", darkMode)
       if (darkMode && darkMode === "true") {
         this.dataService.setDarkMode(true)
       }
+      console.log(darkMode)
     }
+
     this.web.getCSRFToken().subscribe(resp => {})
 
     if (this.accounts.token === "") {

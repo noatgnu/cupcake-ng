@@ -92,13 +92,19 @@ export class AccountsComponent implements OnInit{
     } else {
       body.setAttribute('data-bs-theme', 'light')
       body.classList.remove('dark-theme')
-      localStorage.setItem('cupcake-dark-mode', 'false')
+      localStorage.removeItem('cupcake-dark-mode')
       this.dataService.darkMode = false
     }
+    console.log(localStorage.getItem("cupcake-dark-mode"))
   }
 
   followSystemTheme(event: any) {
-    localStorage.setItem('cupcake-follow-system-theme', event.target.checked.toString())
+    console.log(event.target.checked.toString())
+    if (event.target.checked) {
+      localStorage.setItem('cupcake-follow-system-theme', event.target.checked.toString())
+    } else {
+      localStorage.removeItem('cupcake-follow-system-theme')
+    }
     const prefersDarkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
     if (prefersDarkMode) {
       document.getElementsByTagName('body')[0].setAttribute('data-bs-theme', 'dark')
@@ -106,7 +112,4 @@ export class AccountsComponent implements OnInit{
       this.dataService.darkMode = true
     }
   }
-
-
-
 }

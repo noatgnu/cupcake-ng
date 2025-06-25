@@ -195,10 +195,58 @@ export class SiteSettingsService {
    */
   applyThemeColors(settings: PublicSiteSettings): void {
     const root = document.documentElement;
+    
+    // Set cupcake-specific custom properties
     root.style.setProperty('--cupcake-primary-color', settings.primary_color);
     root.style.setProperty('--cupcake-secondary-color', settings.secondary_color);
     root.style.setProperty('--cupcake-banner-color', settings.banner_color);
     root.style.setProperty('--cupcake-banner-text-color', settings.banner_text_color);
+    
+    // Override Bootstrap's primary and secondary color variables
+    root.style.setProperty('--bs-primary', settings.primary_color);
+    root.style.setProperty('--bs-primary-rgb', this.hexToRgb(settings.primary_color));
+    root.style.setProperty('--bs-secondary', settings.secondary_color);
+    root.style.setProperty('--bs-secondary-rgb', this.hexToRgb(settings.secondary_color));
+    
+    // Generate lighter and darker variants for Bootstrap
+    const primaryDark = this.adjustBrightness(settings.primary_color, -20);
+    const primaryLight = this.adjustBrightness(settings.primary_color, 20);
+    const secondaryDark = this.adjustBrightness(settings.secondary_color, -20);
+    const secondaryLight = this.adjustBrightness(settings.secondary_color, 20);
+    
+    root.style.setProperty('--bs-primary-dark', primaryDark);
+    root.style.setProperty('--bs-primary-light', primaryLight);
+    root.style.setProperty('--bs-secondary-dark', secondaryDark);
+    root.style.setProperty('--bs-secondary-light', secondaryLight);
+  }
+
+  /**
+   * Convert hex color to RGB values for Bootstrap RGB variables
+   */
+  private hexToRgb(hex: string): string {
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    if (result) {
+      const r = parseInt(result[1], 16);
+      const g = parseInt(result[2], 16);
+      const b = parseInt(result[3], 16);
+      return `${r}, ${g}, ${b}`;
+    }
+    return '0, 0, 0'; // fallback
+  }
+
+  /**
+   * Adjust brightness of a hex color
+   */
+  private adjustBrightness(hex: string, percent: number): string {
+    const num = parseInt(hex.replace('#', ''), 16);
+    const amt = Math.round(2.55 * percent);
+    const R = (num >> 16) + amt;
+    const G = (num >> 8 & 0x00FF) + amt;
+    const B = (num & 0x0000FF) + amt;
+    
+    return '#' + (0x1000000 + (R < 255 ? R < 1 ? 0 : R : 255) * 0x10000 +
+      (G < 255 ? G < 1 ? 0 : G : 255) * 0x100 +
+      (B < 255 ? B < 1 ? 0 : B : 255)).toString(16).slice(1);
   }
 
   /**
