@@ -79,7 +79,12 @@ export class HomeComponent implements OnInit, AfterViewInit {
         if (data.logo) {
           this.hasLogo = true;
           console.log(data.logo);
-          this.logo?.nativeElement.setAttribute('src', `${this.baseUrl}/api/site_settings/download_logo/`);
+          // Delay logo setting to ensure ViewChild is available
+          setTimeout(() => {
+            if (this.logo?.nativeElement) {
+              this.logo.nativeElement.src = `${this.baseUrl}/api/site_settings/download_logo/`;
+            }
+          }, 0);
         }
       }
     })
