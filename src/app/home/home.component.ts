@@ -70,6 +70,7 @@ export class HomeComponent implements OnInit, AfterViewInit {
   searchTerm = '';
   hasLogo = false;
   baseUrl = environment.baseURL;
+  logoUrl: string | null = null;
 
 
   constructor(public accounts: AccountsService, private router: Router, private fb: FormBuilder, private web: WebService, private dataService: DataService, private toastService: ToastService, private siteSettings: SiteSettingsService) {
@@ -78,13 +79,8 @@ export class HomeComponent implements OnInit, AfterViewInit {
       if (data) {
         if (data.logo) {
           this.hasLogo = true;
-          console.log(data.logo);
-          // Delay logo setting to ensure ViewChild is available
-          setTimeout(() => {
-            if (this.logo?.nativeElement) {
-              this.logo.nativeElement.src = `${this.baseUrl}/api/site_settings/download_logo/`;
-            }
-          }, 0);
+          this.logoUrl = `${this.baseUrl}/api/site_settings/download_logo/`;
+          console.log('Logo URL set to:', this.logoUrl);
         }
       }
     })
@@ -260,5 +256,23 @@ export class HomeComponent implements OnInit, AfterViewInit {
       return;
     }
     this.currentProjectID = project.id;
+  }
+
+  onImageError(event: any) {
+    console.error('Logo failed to load:', event);
+    console.log('Failed URL:', this.logoUrl);
+    // Try with a cache-busting parameter
+    if (this.logoUrl && !this.logoUrl.includes('?')) {
+      this.logoUrl = `${this.logoUrl}?t=${Date.now()}`;
+      console.log('Retrying with cache-busting URL:', this.logoUrl);
+    } else {
+      // If it still fails, hide the logo
+      this.hasLogo = false;
+      this.logoUrl = null;
+    }
+  }
+
+  onImageLoad(event: any) {
+    console.log('Logo loaded successfully:', event);
   }
 }

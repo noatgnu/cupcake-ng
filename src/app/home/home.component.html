@@ -7,8 +7,9 @@
           <div class="d-flex header-container flex-row justify-content-center align-items-center gap-4">
             <!-- Logo Section -->
             <div class="text-center">
-              @if (hasLogo) {
-                <img #logo class="logo_home" ngSrc="assets/cupcake_logo.png" alt="Cupcake Logo" [width]="128" [height]="128">
+              @if (hasLogo && logoUrl) {
+                <img class="logo_home" [src]="logoUrl" alt="Site Logo" width="128" height="128" 
+                     (error)="onImageError($event)" (load)="onImageLoad($event)">
               }
             </div>
 
