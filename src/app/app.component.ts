@@ -19,6 +19,7 @@ import {LoadingIndicatorComponent} from "./loading-indicator/loading-indicator.c
 import {LoadingTrackerService} from "./loading-tracker.service";
 import {AsyncPipe, NgClass, NgTemplateOutlet} from "@angular/common";
 import {FloatingChatComponent} from "./chat/floating-chat/floating-chat.component";
+import {FooterComponent} from "./footer/footer.component";
 import {SiteSettingsService} from "./site-settings.service";
 import {PublicSiteSettings} from "./site-settings";
 
@@ -34,7 +35,8 @@ import {PublicSiteSettings} from "./site-settings";
     AsyncPipe,
     NgTemplateOutlet,
     NgClass,
-    FloatingChatComponent
+    FloatingChatComponent,
+    FooterComponent
   ],
     templateUrl: './app.component.html',
     styleUrl: './app.component.scss'

@@ -1,6 +1,5 @@
 :host {
   display: block;
-
 }
 
 .sidebar {
@@ -24,7 +23,7 @@
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  padding-bottom: 80px;
 }
 
 .content-wrapper {
@@ -45,6 +44,7 @@
   flex: 1;
   overflow-y: auto;
 }
+
 
 .list-group-item {
   border-left: 4px solid transparent;

@@ -1,4 +1,8 @@
 
+:host {
+  display: block;
+}
+
 .sidebar {
   width: 280px;
   transition: all 0.3s;
@@ -37,6 +41,7 @@
 
 .content-body {
   height: calc(100vh - 140px);
+  padding-bottom: var(--footer-height, 0px);
 }
 
 @media (max-width: 767.98px) {

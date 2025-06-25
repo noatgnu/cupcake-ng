@@ -58,10 +58,13 @@
       <div class="content-body p-3 overflow-auto">
         @if (selectedSection === 'bookings') {
           <app-instrument-booking></app-instrument-booking>
+          <div class="footer-spacer"></div>
         } @else if (selectedSection === 'management') {
           <app-instrument-management></app-instrument-management>
+          <div class="footer-spacer"></div>
         } @else if (selectedSection === 'jobs') {
           <app-instrument-job-management [currentJobId]="currentJob"></app-instrument-job-management>
+          <div class="footer-spacer"></div>
         } @else {
           <!-- Welcome Dashboard - shown when no specific section is selected -->
           <div class="container py-4">
@@ -184,6 +187,7 @@
               </div>
             </div>
           </div>
+          <div class="footer-spacer"></div>
         }
       </div>
     </div>

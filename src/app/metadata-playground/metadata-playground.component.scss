@@ -41,6 +41,7 @@
 .content-body {
   flex: 1;
   overflow-y: auto;
+  padding-bottom: var(--footer-height, 0px);
 }
 
 .list-group-item.active {

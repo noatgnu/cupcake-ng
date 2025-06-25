@@ -5,6 +5,7 @@ import { NgbTooltipModule, NgbAlertModule } from '@ng-bootstrap/ng-bootstrap';
 import { SiteSettings } from '../../site-settings';
 import { SiteSettingsService } from '../../site-settings.service';
 import { ToastService } from '../../toast.service';
+import {environment} from "../../../environments/environment";
 
 @Component({
   selector: 'app-site-settings-form',
@@ -44,6 +45,7 @@ export class SiteSettingsFormComponent implements OnInit, OnChanges {
   faviconFile: File | null = null;
   logoPreview: string | null = null;
   faviconPreview: string | null = null;
+  baseURL: string = environment.baseURL;
 
   constructor(
     private fb: FormBuilder,
@@ -97,10 +99,10 @@ export class SiteSettingsFormComponent implements OnInit, OnChanges {
 
       // Set image previews if available
       if (this.settings.logo) {
-        this.logoPreview = this.settings.logo;
+        this.logoPreview = `${this.baseURL}/api/site_settings/download_logo/`;
       }
       if (this.settings.favicon) {
-        this.faviconPreview = this.settings.favicon;
+        this.faviconPreview = `${this.baseURL}/api/site_settings/download_favicon/`;
       }
     }
   }
