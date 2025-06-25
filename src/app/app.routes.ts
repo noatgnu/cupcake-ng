@@ -9,6 +9,7 @@ import {AccountsModule} from "./accounts/accounts.module";
 import {ProtocolEditorModule} from "./protocol-editor/protocol-editor.module";
 import {ProtocolSessionModule} from "./protocol-session/protocol-session.module";
 import {HomeModule} from "./home/home.module";
+import {SiteSettingsComponent} from "./site-settings/site-settings.component";
 
 export const routes: Routes = [
   {
@@ -51,6 +52,10 @@ export const routes: Routes = [
   {
     path: 'sdrf-playground',
     loadChildren: () => MetadataPlaygroundModule
+  },
+  {
+    path: 'site-settings',
+    component: SiteSettingsComponent
   },
   {
     path: '**',

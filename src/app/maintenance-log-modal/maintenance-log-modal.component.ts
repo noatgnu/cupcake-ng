@@ -4,6 +4,7 @@ import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { MaintenanceLogService } from '../maintenance-log.service';
 import {MaintenanceLog, MaintenanceLogCreate, MaintenanceLogQuery} from "../maintenance-log";
 import {DatePipe, NgClass} from "@angular/common";
+import {AnnotationService} from "../annotation.service";
 
 
 @Component({
@@ -47,7 +48,8 @@ export class MaintenanceLogModalComponent implements OnInit {
   constructor(
     public activeModal: NgbActiveModal,
     private fb: FormBuilder,
-    private maintenanceLogService: MaintenanceLogService
+    private maintenanceLogService: MaintenanceLogService,
+    private annotationService: AnnotationService
   ) {}
 
   ngOnInit(): void {
@@ -157,7 +159,7 @@ export class MaintenanceLogModalComponent implements OnInit {
 
     const formData = this.logForm.value;
     formData.instrument = this.instrumentId;
-
+    console.log(formData)
     this.isLoading = true;
 
     if (this.data?.id) {
@@ -309,5 +311,10 @@ export class MaintenanceLogModalComponent implements OnInit {
 
     this.initTextAnnotationForm();
     this.initFileAnnotationForm();
+  }
+
+  downloadAnnotationFile(annotationId: number): void {
+    this.annotationService.download(annotationId)
+
   }
 }

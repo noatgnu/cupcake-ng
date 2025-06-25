@@ -1,0 +1,399 @@
+<div class="mt-4">
+  <form [formGroup]="settingsForm" (ngSubmit)="saveSettings()">
+    @if (activeTab === 'general') {
+      <div class="tab-content">
+        <div class="card border-0 shadow-sm">
+          <div class="card-body">
+            <div class="d-flex align-items-center mb-4">
+              <i class="bi bi-gear fs-4 text-primary me-3"></i>
+              <div>
+                <h5 class="mb-0">General Settings</h5>
+                <small class="text-muted">Configure basic site information and branding</small>
+              </div>
+            </div>
+
+            <div class="row g-4">
+              <div class="col-md-6">
+                <div class="form-floating">
+                  <input type="text"
+                         class="form-control"
+                         id="siteName"
+                         formControlName="site_name"
+                         [class.is-invalid]="getFieldError('site_name')"
+                         placeholder="Enter site name">
+                  <label for="siteName">
+                    <i class="bi bi-exclamation-triangle-fill text-warning me-1"></i>
+                    Site Name *
+                  </label>
+                  @if (getFieldError('site_name')) {
+                    <div class="invalid-feedback">{{ getFieldError('site_name') }}</div>
+                  }
+                </div>
+              </div>
+
+              <div class="col-md-6">
+                <div class="form-floating">
+                  <input type="text"
+                         class="form-control"
+                         id="siteTagline"
+                         formControlName="site_tagline"
+                         [class.is-invalid]="getFieldError('site_tagline')"
+                         placeholder="Enter site tagline (optional)">
+                  <label for="siteTagline">
+                    <i class="bi bi-info-circle-fill text-info me-1"></i>
+                    Site Tagline
+                  </label>
+                  @if (getFieldError('site_tagline')) {
+                    <div class="invalid-feedback">{{ getFieldError('site_tagline') }}</div>
+                  }
+                </div>
+              </div>
+
+              <div class="col-12">
+                <div class="form-floating">
+                <textarea class="form-control"
+                          id="footerText"
+                          formControlName="footer_text"
+                          style="height: 100px"
+                          placeholder="Enter footer text (optional)"></textarea>
+                  <label for="footerText">
+                    <i class="bi bi-info-circle-fill text-info me-1"></i>
+                    Footer Text
+                  </label>
+                </div>
+                <div class="form-text">This text will appear at the bottom of every page</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- Branding Tab -->
+    @if (activeTab === 'branding') {
+      <div class="tab-content">
+        <div class="card border-0 shadow-sm">
+          <div class="card-body">
+            <div class="d-flex align-items-center mb-4">
+              <i class="bi bi-palette fs-4 text-primary me-3"></i>
+              <div>
+                <h5 class="mb-0">Branding & Assets</h5>
+                <small class="text-muted">Upload logos and manage brand assets</small>
+              </div>
+            </div>
+
+            <div class="row g-4">
+              <!-- Logo Upload -->
+              <div class="col-lg-6">
+                <div class="upload-card">
+                  <h6 class="mb-3">
+                    <i class="bi bi-image me-2"></i>Site Logo
+                  </h6>
+                  <div class="upload-area border rounded-3 p-4 text-center" [class.has-image]="logoPreview">
+                    @if (logoPreview) {
+                      <div class="preview-container mb-3">
+                        <img [src]="logoPreview" alt="Logo Preview" class="preview-image rounded-2 shadow-sm">
+                      </div>
+                      <div class="preview-actions">
+                        <button type="button" class="btn btn-sm btn-outline-danger" (click)="removeImage('logo')">
+                          <i class="bi bi-trash me-1"></i>Remove Logo
+                        </button>
+                      </div>
+                    } @else {
+                      <div class="empty-state">
+                        <i class="bi bi-cloud-upload display-1 text-muted mb-3"></i>
+                        <h6 class="text-muted">No logo uploaded</h6>
+                        <p class="text-muted small mb-0">Upload a logo to brand your site</p>
+                      </div>
+                    }
+                    <input type="file"
+                           class="form-control mt-3"
+                           accept="image/*"
+                           (change)="onFileSelected($event, 'logo')">
+                    <div class="upload-hint mt-2">
+                      <small class="text-muted">
+                        <i class="bi bi-info-circle me-1"></i>
+                        Max 5MB • JPEG, PNG, GIF supported
+                      </small>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Favicon Upload -->
+              <div class="col-lg-6">
+                <div class="upload-card">
+                  <h6 class="mb-3">
+                    <i class="bi bi-star me-2"></i>Favicon
+                  </h6>
+                  <div class="upload-area border rounded-3 p-4 text-center" [class.has-image]="faviconPreview">
+                    @if (faviconPreview) {
+                      <div class="preview-container mb-3">
+                        <img [src]="faviconPreview" alt="Favicon Preview" class="favicon-preview rounded-1 shadow-sm">
+                      </div>
+                      <div class="preview-actions">
+                        <button type="button" class="btn btn-sm btn-outline-danger" (click)="removeImage('favicon')">
+                          <i class="bi bi-trash me-1"></i>Remove Favicon
+                        </button>
+                      </div>
+                    } @else {
+                      <div class="empty-state">
+                        <i class="bi bi-diamond display-1 text-muted mb-3"></i>
+                        <h6 class="text-muted">No favicon uploaded</h6>
+                        <p class="text-muted small mb-0">Upload a favicon for browser tabs</p>
+                      </div>
+                    }
+                    <input type="file"
+                           class="form-control mt-3"
+                           accept="image/*"
+                           (change)="onFileSelected($event, 'favicon')">
+                    <div class="upload-hint mt-2">
+                      <small class="text-muted">
+                        <i class="bi bi-info-circle me-1"></i>
+                        Recommended 32×32px • Max 5MB
+                      </small>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- Banner Tab -->
+    @if (activeTab === 'banner') {
+      <div class="tab-content">
+        <div class="card border-0 shadow-sm">
+          <div class="card-body">
+            <div class="d-flex align-items-center mb-4">
+              <i class="bi bi-megaphone fs-4 text-primary me-3"></i>
+              <div>
+                <h5 class="mb-0">Site Banner</h5>
+                <small class="text-muted">Configure site-wide notification banner</small>
+              </div>
+            </div>
+
+            <div class="row g-4">
+              <div class="col-12">
+                <div class="form-check form-switch form-check-lg">
+                  <input class="form-check-input"
+                         type="checkbox"
+                         id="bannerEnabled"
+                         formControlName="banner_enabled">
+                  <label class="form-check-label fw-medium" for="bannerEnabled">
+                    <i class="bi bi-toggle-on me-2"></i>Enable Site Banner
+                  </label>
+                </div>
+                <div class="form-text">Show a notification banner at the top of every page</div>
+              </div>
+
+              @if (settingsForm.get('banner_enabled')?.value) {
+                <div class="col-12">
+                  <div class="banner-config-section p-3 border rounded-3 ">
+                    <h6 class="mb-3">
+                      <i class="bi bi-sliders me-2"></i>Banner Configuration
+                    </h6>
+
+                    <div class="row g-3">
+                      <div class="col-12">
+                        <div class="form-floating">
+                        <textarea class="form-control"
+                                  id="bannerText"
+                                  formControlName="banner_text"
+                                  style="height: 80px"
+                                  placeholder="Enter banner message"></textarea>
+                          <label for="bannerText">
+                            <i class="bi bi-chat-text me-1"></i>Banner Message
+                          </label>
+                        </div>
+                      </div>
+
+                      <div class="col-md-6">
+                        <label for="bannerColor" class="form-label">
+                          <i class="bi bi-palette me-1"></i>Background Color
+                        </label>
+                        <div class="color-input-group">
+                          <input type="color"
+                                 class="form-control form-control-color"
+                                 id="bannerColor"
+                                 formControlName="banner_color"
+                                 [class.is-invalid]="getFieldError('banner_color')">
+                          <input type="text"
+                                 class="form-control"
+                                 formControlName="banner_color"
+                                 placeholder="#0066cc"
+                                 [class.is-invalid]="getFieldError('banner_color')">
+                        </div>
+                        @if (getFieldError('banner_color')) {
+                          <div class="invalid-feedback">{{ getFieldError('banner_color') }}</div>
+                        }
+                      </div>
+
+                      <div class="col-md-6">
+                        <label for="bannerTextColor" class="form-label">
+                          <i class="bi bi-type me-1"></i>Text Color
+                        </label>
+                        <div class="color-input-group">
+                          <input type="color"
+                                 class="form-control form-control-color"
+                                 id="bannerTextColor"
+                                 formControlName="banner_text_color"
+                                 [class.is-invalid]="getFieldError('banner_text_color')">
+                          <input type="text"
+                                 class="form-control"
+                                 formControlName="banner_text_color"
+                                 placeholder="#ffffff"
+                                 [class.is-invalid]="getFieldError('banner_text_color')">
+                        </div>
+                        @if (getFieldError('banner_text_color')) {
+                          <div class="invalid-feedback">{{ getFieldError('banner_text_color') }}</div>
+                        }
+                      </div>
+
+                      <div class="col-12">
+                        <div class="form-check">
+                          <input class="form-check-input"
+                                 type="checkbox"
+                                 id="bannerDismissible"
+                                 formControlName="banner_dismissible">
+                          <label class="form-check-label" for="bannerDismissible">
+                            <i class="bi bi-x-circle me-1"></i>Allow users to dismiss banner
+                          </label>
+                        </div>
+                        <div class="form-text">Users can close the banner and it won't show again</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- Theme Tab -->
+    @if (activeTab === 'theme') {
+      <div class="tab-content">
+        <div class="card border-0 shadow-sm">
+          <div class="card-body">
+            <div class="d-flex align-items-center mb-4">
+              <i class="bi bi-brush fs-4 text-primary me-3"></i>
+              <div>
+                <h5 class="mb-0">Theme Colors</h5>
+                <small class="text-muted">Customize the color scheme of your site</small>
+              </div>
+            </div>
+
+            <div class="row g-4">
+              <div class="col-lg-6">
+                <div class="theme-color-card p-3 border rounded-3">
+                  <div class="d-flex align-items-center mb-3">
+                    <div class="color-preview me-3" [style.background-color]="settingsForm.get('primary_color')?.value"></div>
+                    <div>
+                      <h6 class="mb-0">
+                        <i class="bi bi-exclamation-triangle-fill text-warning me-1"></i>
+                        Primary Color *
+                      </h6>
+                      <small class="text-muted">Used for buttons, links, and accents</small>
+                    </div>
+                  </div>
+                  <div class="color-input-group">
+                    <input type="color"
+                           class="form-control form-control-color"
+                           id="primaryColor"
+                           formControlName="primary_color"
+                           [class.is-invalid]="getFieldError('primary_color')">
+                    <input type="text"
+                           class="form-control"
+                           formControlName="primary_color"
+                           placeholder="#0066cc"
+                           [class.is-invalid]="getFieldError('primary_color')">
+                  </div>
+                  @if (getFieldError('primary_color')) {
+                    <div class="invalid-feedback">{{ getFieldError('primary_color') }}</div>
+                  }
+                </div>
+              </div>
+
+              <div class="col-lg-6">
+                <div class="theme-color-card p-3 border rounded-3">
+                  <div class="d-flex align-items-center mb-3">
+                    <div class="color-preview me-3" [style.background-color]="settingsForm.get('secondary_color')?.value"></div>
+                    <div>
+                      <h6 class="mb-0">
+                        <i class="bi bi-exclamation-triangle-fill text-warning me-1"></i>
+                        Secondary Color *
+                      </h6>
+                      <small class="text-muted">Used for secondary elements and borders</small>
+                    </div>
+                  </div>
+                  <div class="color-input-group">
+                    <input type="color"
+                           class="form-control form-control-color"
+                           id="secondaryColor"
+                           formControlName="secondary_color"
+                           [class.is-invalid]="getFieldError('secondary_color')">
+                    <input type="text"
+                           class="form-control"
+                           formControlName="secondary_color"
+                           placeholder="#6c757d"
+                           [class.is-invalid]="getFieldError('secondary_color')">
+                  </div>
+                  @if (getFieldError('secondary_color')) {
+                    <div class="invalid-feedback">{{ getFieldError('secondary_color') }}</div>
+                  }
+                </div>
+              </div>
+
+              <div class="col-12">
+                <div class="alert alert-info border-0" role="alert">
+                  <i class="bi bi-info-circle-fill me-2"></i>
+                  <strong>Preview:</strong> Theme colors will be applied immediately after saving.
+                  Changes affect buttons, navigation, and UI accents throughout the site.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- Form Actions -->
+    <div class="sticky-bottom  border-top shadow-sm p-3 mt-4">
+      <div class="d-flex justify-content-between align-items-center">
+        <button type="button"
+                class="btn btn-outline-secondary"
+                (click)="resetToDefaults()"
+                [disabled]="saving"
+                ngbTooltip="Reset all settings to their default values">
+          <i class="bi bi-arrow-clockwise me-1"></i>
+          <span class="d-none d-sm-inline">Reset to Defaults</span>
+        </button>
+
+        <div class="d-flex gap-2">
+          @if (saving) {
+            <div class="d-flex align-items-center text-primary me-3">
+              <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+              <small>Saving changes...</small>
+            </div>
+          }
+
+          <button type="submit"
+                  class="btn btn-primary"
+                  [disabled]="settingsForm.invalid || saving || disabled">
+            @if (saving) {
+              <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+            }
+            <i class="bi bi-save me-1"></i>
+            <span class="d-none d-sm-inline">Save Settings</span>
+            <span class="d-sm-none">Save</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
+

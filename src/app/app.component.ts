@@ -19,6 +19,8 @@ import {LoadingIndicatorComponent} from "./loading-indicator/loading-indicator.c
 import {LoadingTrackerService} from "./loading-tracker.service";
 import {AsyncPipe, NgClass, NgTemplateOutlet} from "@angular/common";
 import {FloatingChatComponent} from "./chat/floating-chat/floating-chat.component";
+import {SiteSettingsService} from "./site-settings.service";
+import {PublicSiteSettings} from "./site-settings";
 
 @Component({
     selector: 'app-root',
@@ -42,8 +44,15 @@ export class AppComponent {
   ready = false;
   routerToast: any;
   loadingChunk = this.loadingTracker.loading$;
+  currentSettings: PublicSiteSettings| undefined = undefined;
 
-  constructor(private loadingTracker: LoadingTrackerService, private modal: NgbModal, private router: Router, private web: WebService, private accounts: AccountsService, public webrtc: WebrtcService, private ws: WebsocketService, private dataService: DataService, private toastService: ToastService) {
+  constructor(private loadingTracker: LoadingTrackerService, private modal: NgbModal, private router: Router, private web: WebService, private accounts: AccountsService, public webrtc: WebrtcService, private ws: WebsocketService, private dataService: DataService, private toastService: ToastService, private siteSettings: SiteSettingsService) {
+    this.siteSettings.publicSettings$.subscribe((data) => {
+      this.title = data?.site_name || "Cupcake";
+    })
+    this.siteSettings.getPublicSettings().subscribe((data) => {})
+
+
     this.router.events.subscribe(async (event )=> {
       if (event instanceof NavigationStart) {
         this.routerToast = await this.toastService.show("Loading", "Loading page...", 0, "info", 30)

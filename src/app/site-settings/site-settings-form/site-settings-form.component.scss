@@ -1,0 +1,287 @@
+// Tab content styling
+.tab-content {
+  min-height: 400px;
+  animation: fadeInUp 0.3s ease-in-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Card styling improvements
+.card {
+  border: none !important;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.08) !important;
+  transition: box-shadow 0.3s ease;
+
+  &:hover {
+    box-shadow: 0 4px 20px rgba(0,0,0,0.12) !important;
+  }
+
+  .card-body {
+    padding: 2rem;
+  }
+}
+
+// Upload area styling
+.upload-area {
+  transition: all 0.3s ease;
+  border: 2px dashed #e1e5e9 !important;
+  min-height: 200px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+  &:hover {
+    border-color: #007bff !important;
+  }
+
+  &.has-image {
+    border-style: solid;
+    border-color: #28a745 !important;
+  }
+}
+
+.preview-image {
+  max-height: 100px;
+  max-width: 200px;
+  object-fit: contain;
+}
+
+.favicon-preview {
+  max-height: 32px;
+  max-width: 32px;
+  object-fit: contain;
+}
+
+.empty-state {
+  .display-1 {
+    font-size: 3rem;
+    opacity: 0.5;
+  }
+}
+
+.upload-hint {
+  .text-muted {
+    font-size: 0.8rem;
+  }
+}
+
+// Color input styling
+.color-input-group {
+  display: flex;
+  gap: 0.5rem;
+
+  .form-control-color {
+    width: 60px;
+    height: 38px;
+    border: 1px solid #ced4da;
+    border-radius: 0.375rem;
+    padding: 0.25rem;
+    flex-shrink: 0;
+  }
+
+  .form-control {
+    flex: 1;
+  }
+}
+
+// Color preview styling
+.color-preview {
+  width: 40px;
+  height: 40px;
+  border-radius: 0.5rem;
+  border: 2px solid #fff;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2), inset 0 0 0 1px rgba(0,0,0,0.1);
+  display: inline-block;
+  position: relative;
+  flex-shrink: 0;
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: -4px;
+    left: -4px;
+    right: -4px;
+    bottom: -4px;
+    border-radius: 0.75rem;
+    border: 1px solid rgba(0,0,0,0.1);
+    pointer-events: none;
+  }
+}
+
+// Theme color card styling
+.theme-color-card {
+  transition: all 0.2s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  }
+}
+
+// Banner configuration section
+.banner-config-section {
+  border: 1px solid #e9ecef !important;
+}
+
+// Form styling improvements
+.form-floating {
+  position: relative;
+
+  .form-control {
+    padding-top: 1.625rem;
+    padding-bottom: 0.625rem;
+    border: 1px solid #e1e5e9;
+    transition: all 0.15s ease-in-out;
+
+    &:focus {
+      border-color: #007bff;
+      box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.25);
+    }
+  }
+
+  label {
+    padding-top: 0.625rem;
+    padding-bottom: 0.625rem;
+    font-weight: 500;
+
+    i {
+      opacity: 0.7;
+    }
+  }
+}
+
+// Form check styling
+.form-check {
+  padding-left: 2rem;
+
+  .form-check-input {
+    width: 1.25rem;
+    height: 1.25rem;
+    margin-left: -2rem;
+    margin-top: 0.125rem;
+  }
+
+  &.form-check-lg {
+    .form-check-input {
+      width: 1.5rem;
+      height: 1.5rem;
+    }
+
+    .form-check-label {
+      font-size: 1.1rem;
+    }
+  }
+}
+
+// Button styling improvements
+.btn {
+  transition: all 0.2s ease;
+  font-weight: 500;
+
+  &:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+  }
+
+  &:focus {
+    box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.25);
+  }
+}
+
+// Sticky bottom styling
+.sticky-bottom {
+  position: sticky;
+  bottom: 0;
+  z-index: 1020;
+  margin-left: -1rem;
+  margin-right: -1rem;
+  margin-bottom: -1rem;
+  border-radius: 0;
+}
+
+// Alert styling improvements
+.alert {
+  border: none;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+
+  &.alert-info {
+    color: #0c5460;
+
+    i {
+      color: #17a2b8;
+    }
+  }
+}
+
+// Upload card styling
+.upload-card {
+  h6 {
+    color: #495057;
+    font-weight: 600;
+    margin-bottom: 1rem;
+  }
+}
+
+// Form text styling
+.form-text {
+  font-size: 0.875rem;
+  color: #6c757d;
+  margin-top: 0.5rem;
+}
+
+// Input group styling
+.input-group {
+  .form-control-color {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    border-right: 0;
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 767.98px) {
+  .card .card-body {
+    padding: 1.5rem;
+  }
+
+  .upload-area {
+    min-height: 150px;
+  }
+
+  .preview-image {
+    max-height: 80px;
+  }
+
+  .color-input-group {
+    flex-direction: column;
+
+    .form-control-color {
+      width: 100%;
+    }
+  }
+
+  .sticky-bottom {
+    margin-left: -1rem;
+    margin-right: -1rem;
+    margin-bottom: -1rem;
+
+    .d-flex {
+      flex-direction: column;
+      gap: 1rem;
+
+      .btn {
+        width: 100%;
+      }
+    }
+  }
+}

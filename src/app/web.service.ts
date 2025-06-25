@@ -2355,6 +2355,37 @@ export class WebService {
       {responseType: 'json', observe: 'body'}
     );
   }
+
+  // Site Settings API methods
+  getSiteSettings() {
+    return this.http.get(
+      `${this.baseURL}/api/site_settings/`,
+      {responseType: 'json', observe: 'body'}
+    );
+  }
+
+  getPublicSiteSettings() {
+    return this.http.get(
+      `${this.baseURL}/api/site_settings/public/`,
+      {responseType: 'json', observe: 'body'}
+    );
+  }
+
+  createSiteSettings(settings: any) {
+    return this.http.post(
+      `${this.baseURL}/api/site_settings/`,
+      settings,
+      {responseType: 'json', observe: 'body'}
+    );
+  }
+
+  updateSiteSettings(id: number, settings: any) {
+    return this.http.patch(
+      `${this.baseURL}/api/site_settings/${id}/`,
+      settings,
+      {responseType: 'json', observe: 'body'}
+    );
+  }
 }
 
 export interface ChunkUploadResponse {

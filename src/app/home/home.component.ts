@@ -23,6 +23,8 @@ import {SessionAnnotationComponent} from "../protocol-session/session-annotation
 import {ProtocolListComponent} from "../protocol-list/protocol-list.component";
 import {Project, ProjectQuery} from "../project";
 import {FlapTextComponent} from "../flap-text/flap-text.component";
+import {SiteSettingsService} from "../site-settings.service";
+import {environment} from "../../environments/environment";
 
 @Component({
     selector: 'app-home',
@@ -34,12 +36,10 @@ import {FlapTextComponent} from "../flap-text/flap-text.component";
     NgbNavContent,
     NgbNavLinkButton,
     NgbNavItem,
-    NgbRating,
     NgbNavOutlet,
     ProtocolListComponent,
     NgbPagination,
-    FormsModule,
-    FlapTextComponent
+    FormsModule
   ],
     templateUrl: './home.component.html',
     styleUrl: './home.component.scss'
@@ -68,8 +68,22 @@ export class HomeComponent implements OnInit, AfterViewInit {
   active = 'protocols'
   rating = 0;
   searchTerm = '';
+  hasLogo = false;
+  baseUrl = environment.baseURL;
 
-  constructor(public accounts: AccountsService, private router: Router, private fb: FormBuilder, private web: WebService, private dataService: DataService, private toastService: ToastService) {
+
+  constructor(public accounts: AccountsService, private router: Router, private fb: FormBuilder, private web: WebService, private dataService: DataService, private toastService: ToastService, private siteSettings: SiteSettingsService) {
+    this.siteSettings.publicSettings$.subscribe((data) => {
+      console.log(data)
+      if (data) {
+        if (data.logo) {
+          this.hasLogo = true;
+          console.log(data.logo);
+          this.logo?.nativeElement.setAttribute('src', `${this.baseUrl}/api/site_settings/download_logo/`);
+        }
+      }
+    })
+
     this.dataService.triggerReload.subscribe((data) => {
       this.currentSessionPage = 1;
       this.currentProtocolPage = 1;

@@ -1,0 +1,129 @@
+<div class="container-fluid p-0 d-flex flex-column h-100">
+  <div class="flex-grow-1 d-flex">
+    <!-- Sidebar -->
+    <div class="sidebar" [ngClass]="{'sidebar-collapsed': sidebarCollapsed}">
+      <div class="sidebar-header border-bottom p-3">
+        <div class="d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">Sections</h5>
+          <button type="button" class="btn-close d-md-none" aria-label="Close sidebar" (click)="sidebarCollapsed = true"></button>
+        </div>
+      </div>
+      <div class="list-group list-group-flush">
+        <button class="list-group-item list-group-item-action py-3 d-flex align-items-center"
+                [ngClass]="{'active': activeTab === 'general'}"
+                (click)="activeTab = 'general'">
+          <i class="bi bi-gear me-2"></i> General Settings
+        </button>
+        <button class="list-group-item list-group-item-action py-3 d-flex align-items-center"
+                [ngClass]="{'active': activeTab === 'branding'}"
+                (click)="activeTab = 'branding'">
+          <i class="bi bi-palette me-2"></i> Branding & Assets
+        </button>
+        <button class="list-group-item list-group-item-action py-3 d-flex align-items-center"
+                [ngClass]="{'active': activeTab === 'banner'}"
+                (click)="activeTab = 'banner'">
+          <i class="bi bi-megaphone me-2"></i> Site Banner
+        </button>
+        <button class="list-group-item list-group-item-action py-3 d-flex align-items-center"
+                [ngClass]="{'active': activeTab === 'theme'}"
+                (click)="activeTab = 'theme'">
+          <i class="bi bi-brush me-2"></i> Theme Colors
+        </button>
+      </div>
+    </div>
+
+    <!-- Main content area -->
+    <div class="content-wrapper" [ngClass]="{'content-expanded': sidebarCollapsed}">
+      <!-- Section header -->
+      <div class="content-header border-bottom p-3 d-flex align-items-center shadow-sm">
+        <button type="button" class="btn btn-outline-primary sidebar-toggle me-3"
+                (click)="sidebarCollapsed = !sidebarCollapsed"
+                aria-label="Toggle sidebar">
+          <i class="bi" [ngClass]="sidebarCollapsed ? 'bi-layout-sidebar-inset' : 'bi-layout-sidebar'"></i>
+        </button>
+        <h5 class="mb-0">
+          @if (activeTab === 'general') {
+            <i class="bi bi-gear me-2"></i> General Settings
+          } @else if (activeTab === 'branding') {
+            <i class="bi bi-palette me-2"></i> Branding & Assets
+          } @else if (activeTab === 'banner') {
+            <i class="bi bi-megaphone me-2"></i> Site Banner
+          } @else if (activeTab === 'theme') {
+            <i class="bi bi-brush me-2"></i> Theme Colors
+          }
+        </h5>
+
+        @if (saving) {
+          <div class="d-flex align-items-center text-primary ms-auto">
+            <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+            <small>Saving changes...</small>
+          </div>
+        }
+      </div>
+
+      <!-- Component content -->
+      <div class="content-body p-3 overflow-auto">
+        <!-- Staff Permission Check -->
+        @if (!isStaff) {
+          <div class="alert alert-warning mb-4" role="alert">
+            <i class="bi bi-shield-exclamation me-2"></i>
+            <strong>Access Restricted:</strong> You need staff permissions to modify site settings.
+          </div>
+        }
+
+        <!-- Loading State -->
+        @if (loading) {
+          <div class="d-flex justify-content-center align-items-center" style="min-height: 400px;">
+            <div class="text-center">
+              <div class="spinner-border text-primary mb-3" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+              <p class="text-muted">Loading site settings...</p>
+            </div>
+          </div>
+        }
+
+        <!-- Settings Content -->
+        @if (!loading && settings) {
+          <app-site-settings-form
+            [settings]="settings"
+            [activeTab]="activeTab"
+            [disabled]="!isStaff"
+            (settingsUpdated)="onSettingsUpdated($event)"
+            (savingChange)="saving = $event">
+          </app-site-settings-form>
+        }
+
+        <!-- Error State -->
+        @if (!loading && !settings) {
+          <div class="alert alert-danger" role="alert">
+            <i class="bi bi-exclamation-circle-fill me-2"></i>
+            <strong>Error:</strong> Failed to load site settings. Please try refreshing the page.
+            <button class="btn btn-outline-danger btn-sm ms-3" (click)="loadSettings()">
+              <i class="bi bi-arrow-clockwise me-1"></i>Retry
+            </button>
+          </div>
+        }
+
+        <!-- Quick Action Buttons (for staff only) -->
+        @if (settings && isStaff) {
+          <div class="mt-4 d-flex gap-2 justify-content-end">
+            <button class="btn btn-outline-primary btn-sm"
+                    (click)="openPreviewModal()"
+                    [disabled]="loading"
+                    ngbTooltip="Preview current settings">
+              <i class="bi bi-eye me-1"></i>
+              Preview
+            </button>
+            <button class="btn btn-outline-secondary btn-sm"
+                    (click)="resetBannerDismissal()"
+                    ngbTooltip="Reset banner dismissal for testing">
+              <i class="bi bi-arrow-clockwise me-1"></i>
+              Reset Banner
+            </button>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+</div>

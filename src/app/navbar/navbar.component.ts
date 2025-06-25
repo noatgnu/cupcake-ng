@@ -17,6 +17,7 @@ import {DownloadModalComponent} from "../download-modal/download-modal.component
 import {WebsocketStatusModalComponent} from "../websocket-status-modal/websocket-status-modal.component";
 import {MessageService} from "../message.service";
 import {Subscription} from "rxjs";
+import {SiteSettingsService} from "../site-settings.service";
 
 @Component({
     selector: 'app-navbar',
@@ -36,8 +37,14 @@ export class NavbarComponent implements OnInit {
   isMenuCollapsed = true;
   switched = false;
   unreadAlertCount = 0;
+  title = "CUPCAKE";
 
-  constructor(private messageService: MessageService, private toastService: ToastService, private webrtc: WebrtcService, public dataService: DataService, private modal: NgbModal, public accounts: AccountsService, private router: Router, private ws: WebsocketService, private web: WebService) {
+  constructor(private messageService: MessageService, private toastService: ToastService, private webrtc: WebrtcService, public dataService: DataService, private modal: NgbModal, public accounts: AccountsService, private router: Router, private ws: WebsocketService, private web: WebService, private siteSettings: SiteSettingsService) {
+    this.siteSettings.publicSettings$.subscribe(publicSettings => {
+      if (publicSettings) {
+        this.title = publicSettings.site_name
+      }
+    })
     this.accounts.triggerLoginSubject.subscribe(() => {
       this.openAccountLogin()
     })
