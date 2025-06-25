@@ -258,10 +258,32 @@ export class SiteSettingsService {
 
     // Update favicon if available
     if (settings.favicon) {
-      const favicon = document.querySelector('link[rel="icon"]') as HTMLLinkElement;
-      if (favicon) {
-        favicon.href = settings.favicon;
-      }
+      this.updateFavicon();
+    }
+  }
+
+  /**
+   * Update the site favicon dynamically
+   */
+  private updateFavicon(): void {
+    // Construct the favicon URL from the API
+    const faviconUrl = `${environment.baseURL}/api/site_settings/download_favicon/`;
+    
+    // Find existing favicon link or create one
+    let favicon = document.querySelector('link[rel="icon"]') as HTMLLinkElement;
+    if (!favicon) {
+      favicon = document.createElement('link');
+      favicon.rel = 'icon';
+      document.head.appendChild(favicon);
+    }
+    
+    // Update the favicon href
+    favicon.href = faviconUrl;
+    
+    // Also update shortcut icon if it exists
+    const shortcutIcon = document.querySelector('link[rel="shortcut icon"]') as HTMLLinkElement;
+    if (shortcutIcon) {
+      shortcutIcon.href = faviconUrl;
     }
   }
 }
