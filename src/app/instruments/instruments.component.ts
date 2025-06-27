@@ -13,7 +13,6 @@ import {SiteSettingsService} from "../site-settings.service";
     selector: 'app-instruments',
     imports: [
       ReactiveFormsModule,
-      UserDataComponent,
       InstrumentBookingComponent,
       InstrumentManagementComponent,
       InstrumentJobManagementComponent,
