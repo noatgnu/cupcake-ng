@@ -90,6 +90,19 @@
         <h5 class="mb-0">Booking Settings</h5>
       </div>
       <div class="card-body">
+        <div class="mb-3">
+          <div class="form-check form-switch">
+            <input
+              class="form-check-input"
+              type="checkbox"
+              id="acceptsBookings"
+              formControlName="accepts_bookings">
+            <label class="form-check-label" for="acceptsBookings">
+              <strong>Enable Bookings</strong>
+            </label>
+          </div>
+          <small class="text-muted">Allow users to book this instrument for usage</small>
+        </div>
         <div class="row g-3">
           <div class="col-md-6">
             <label for="maxDuration" class="form-label">Max Duration For Auto-approval (hours)</label>

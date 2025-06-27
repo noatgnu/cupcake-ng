@@ -162,7 +162,8 @@ export class InstrumentManagementComponent {
         data.max_duration,
         instrument.image,
         data.days_before_warranty_notification,
-        data.days_before_maintenance_notification
+        data.days_before_maintenance_notification,
+        data.accepts_bookings,
       ).subscribe((data) => {
         this.toastService.show("Instrument", "Successfully edited instrument")
         if (this.instrumentQuery) {
@@ -191,7 +192,14 @@ export class InstrumentManagementComponent {
     const ref = this.modal.open(InstrumentImageModalComponent);
     ref.componentInstance.imageBase64.subscribe((base64: string) => {
       instrument.image = base64;
-      this.instrumentService.updateInstrument(instrument.id, instrument.instrument_name, instrument.instrument_description, instrument.max_days_ahead_pre_approval, instrument.max_days_within_usage_pre_approval, base64).subscribe((data) => {
+      this.instrumentService.updateInstrument(
+        instrument.id,
+        instrument.instrument_name,
+        instrument.instrument_description,
+        instrument.max_days_ahead_pre_approval,
+        instrument.max_days_within_usage_pre_approval,
+        base64
+      ).subscribe((data) => {
         this.toastService.show("Instrument image", "Successfully upload image")
       })
     });

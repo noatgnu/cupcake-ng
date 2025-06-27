@@ -56,7 +56,7 @@ export class InstrumentBookingComponent {
   instrumentUsageMap: {[key: string]: InstrumentUsageQuery} = {}
 
   constructor(private web: WebService, private fb: FormBuilder, public dataService: DataService, private modal: NgbModal, private toastService: ToastService, private instrumentService: InstrumentService) {
-    this.instrumentService.getInstruments().subscribe((data: InstrumentQuery) => {
+    this.instrumentService.getInstruments(undefined, this.pageSize, 0, undefined, undefined, true).subscribe((data: InstrumentQuery) => {
       this.instrumentQuery = data
       this.updateInstrumentUsageMap(data.results);
       this.getInstrumentPermission()
@@ -67,7 +67,8 @@ export class InstrumentBookingComponent {
         this.pageSize,
         0,
         value.searchTerm || "",
-        value.serialNumber || ""
+        value.serialNumber || "",
+        true
       ).subscribe((data: InstrumentQuery) => {
         this.instrumentQuery = data
         this.updateInstrumentUsageMap(data.results)
@@ -111,7 +112,8 @@ export class InstrumentBookingComponent {
       this.pageSize,
       (event.page - 1) * this.pageSize,
       searchTerm || "",
-      serialNumber || ""
+      serialNumber || "",
+      true
     ).subscribe((data: InstrumentQuery) => {
       this.instrumentQuery = data
       this.updateInstrumentUsageMap(data.results)

@@ -53,12 +53,11 @@ export class InstrumentService {
     )
   }
 
-  getInstruments(url?: string, limit: number = 5, offset: number = 0, searchTerm: string = "", serialNumber: string = ""): Observable<InstrumentQuery> {
+  getInstruments(url?: string, limit: number = 5, offset: number = 0, searchTerm: string = "", serialNumber: string = "", forBookings: boolean = false): Observable<InstrumentQuery> {
     if (url) {
       return this.http.get<InstrumentQuery>(
         url,
         {responseType: 'json', observe: 'body'}
-
       )
     }
     let params = new HttpParams()
@@ -69,6 +68,9 @@ export class InstrumentService {
     }
     if (serialNumber !== "") {
       params = params.append('serial_number', serialNumber);
+    }
+    if (forBookings) {
+      params = params.append('accepts_bookings', 'true');
     }
     return this.http.get<InstrumentQuery>(
       `${this.baseURL}/api/instrument/`,
@@ -84,7 +86,7 @@ export class InstrumentService {
     )
   }
 
-  updateInstrument(instrument_id: number, instrument_name: string, instrument_description: string, max_days_ahead: number|undefined|null, max_duration: number|undefined|null, image: string|undefined|null = undefined, days_before_warranty_notification: number|undefined|null = undefined, days_before_maintenance_notification: number|undefined|null = undefined) {
+  updateInstrument(instrument_id: number, instrument_name: string, instrument_description: string, max_days_ahead: number|undefined|null, max_duration: number|undefined|null, image: string|undefined|null = undefined, days_before_warranty_notification: number|undefined|null = undefined, days_before_maintenance_notification: number|undefined|null = undefined, accepts_bookings: boolean|null|undefined = undefined) {
     const payload: any = {name: instrument_name, description: instrument_description}
     if (max_days_ahead) {
       payload['max_days_ahead_pre_approval'] = max_days_ahead
@@ -100,6 +102,9 @@ export class InstrumentService {
     }
     if (days_before_maintenance_notification) {
       payload['days_before_maintenance_notification'] = days_before_maintenance_notification
+    }
+    if (accepts_bookings !== undefined && accepts_bookings !== null) {
+      payload['accepts_bookings'] = accepts_bookings;
     }
     return this.http.put<Instrument>(
       `${this.baseURL}/api/instrument/${instrument_id}/`,

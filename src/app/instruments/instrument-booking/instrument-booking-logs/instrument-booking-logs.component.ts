@@ -118,7 +118,7 @@ export class InstrumentBookingLogsComponent implements OnInit {
     return text$.pipe(
       debounceTime(200),
       distinctUntilChanged(),
-      switchMap(term => this.instrumentService.getInstruments(undefined, 10, 0, term).pipe(
+      switchMap(term => this.instrumentService.getInstruments(undefined, 10, 0, term, undefined, true).pipe(
         map((data: any) => data.results)
       ))
     );

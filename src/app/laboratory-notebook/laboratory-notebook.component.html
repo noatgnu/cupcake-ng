@@ -1,0 +1,276 @@
+<div class="container-fluid home-container">
+  <!-- Header Section -->
+  <div class="row justify-content-center py-5">
+    <div class="col-md-10 col-lg-8">
+      <div class="card shadow-sm border-0">
+        <div class="card-body">
+          <div class="d-flex header-container flex-row justify-content-center align-items-center gap-4">
+            <!-- Logo Section -->
+            <div class="text-center">
+              @if (hasLogo && logoUrl) {
+                <img class="logo_home" [src]="logoUrl" alt="Site Logo" width="128" height="128" 
+                     (error)="onImageError($event)" (load)="onImageLoad($event)">
+              }
+            </div>
+
+            <!-- Divider -->
+            <div class="vr divider"></div>
+
+            <!-- Form Section -->
+            <div class="flex-grow-1 d-flex flex-column gap-2">
+              <h4 class="card-title mb-3">Import or Create Protocol</h4>
+              <form [formGroup]="form" (ngSubmit)="onSubmit()" class="mb-2">
+                <div class="input-group">
+                  <input formControlName="url" type="text" class="form-control" id="protocolUrl" placeholder="Enter Protocols.io URL">
+                  <button class="btn btn-primary" type="submit" id="protocolSubmit" [disabled]="!form.valid">
+                    <i class="bi bi-arrow-right-circle me-1"></i> Import
+                  </button>
+                </div>
+              </form>
+
+              <small class="text-muted">
+                *Please note that the URL must be a valid Protocols.io URL or DOI.<br>
+                *Example: <a target="_blank" href="https://www.protocols.io/view/expression-and-purification-of-rab10-1-181-stoichi-4r3l24p1xg1y/v1?step=1" class="long-url">
+                https://www.protocols.io/view/expression-and-purification-of-rab10-1-181-stoichi-4r3l24p1xg1y/v1?step=1
+              </a>
+              </small>
+
+              <div class="text-center mt-3">
+                <button class="btn btn-outline-primary" (click)="navigateToEditor()">
+                  <i class="bi bi-file-earmark-plus me-1"></i> Create New Protocol
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Search Section -->
+  <div class="row justify-content-center mb-4">
+    <div class="col-md-8 col-lg-6">
+      <div class="search-container">
+        <form (ngSubmit)="search()">
+          <div class="input-group">
+            <input type="search" [(ngModel)]="searchTerm" [ngModelOptions]="{standalone:true}" class="form-control"
+                   placeholder="Search protocols or sessions..." aria-label="Search Term">
+            <button class="btn btn-primary" type="submit" id="homeSearchButton">
+              <i class="bi bi-search me-1"></i> Search
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Content Section -->
+  @if (protocolQuery || protocolSessionQuery || projectQuery) {
+    <div class="row justify-content-center">
+      <div class="col-md-10 col-lg-9">
+        <div class="card shadow-sm">
+          <div class="card-header">
+            <ul ngbNav #nav="ngbNav" [(activeId)]="active" class="nav-tabs card-header-tabs" [destroyOnHide]="false">
+              @if (protocolQuery) {
+                <li [ngbNavItem]="'protocols'" [destroyOnHide]="false">
+                  <button ngbNavLink>
+                    <i class="bi bi-journal-text me-1"></i> Protocols
+                    <span class="badge bg-primary rounded-pill tab-count">{{protocolQuery.count}}</span>
+                  </button>
+                  <ng-template ngbNavContent>
+                    @if (loadingProtocol) {
+                      <div class="loading-container">
+                        <div class="spinner-border text-primary" role="status"></div>
+                        <p class="mt-2">Loading protocols...</p>
+                      </div>
+                    } @else {
+                      <app-protocol-list [protocols]="protocolQuery.results" [enableRemove]="true" [enableEdit]="true"
+                                         (editProtocol)="navigateToEditProtocol($event)" (removeProtocol)="deleteProtocol($event)">
+                      </app-protocol-list>
+
+                      @if (protocolQuery.results.length === 0) {
+                        <div class="text-center py-5 text-muted">
+                          <i class="bi bi-inbox fs-1"></i>
+                          <p class="mt-2">No protocols found</p>
+                        </div>
+                      }
+
+                      <div class="d-flex justify-content-center mt-3">
+                        <ngb-pagination (pageChange)="handlePageChange($event)" [collectionSize]="protocolQuery.count"
+                                        [(page)]="currentProtocolPage" [pageSize]="pageSize" [rotate]="true" [boundaryLinks]="true">
+                        </ngb-pagination>
+                      </div>
+                    }
+                  </ng-template>
+                </li>
+              }
+
+              @if (protocolSessionQuery) {
+                <li [ngbNavItem]="'sessions'" [destroyOnHide]="false">
+                  <button ngbNavLink>
+                    <i class="bi bi-file-earmark-text me-1"></i> Sessions
+                    <span class="badge bg-primary rounded-pill tab-count">{{protocolSessionQuery.count}}</span>
+                  </button>
+                  <ng-template ngbNavContent>
+                    @if (loadingSession) {
+                      <div class="loading-container">
+                        <div class="spinner-border text-primary" role="status"></div>
+                        <p class="mt-2">Loading sessions...</p>
+                      </div>
+                    } @else {
+                      @if (protocolSessionQuery.results.length === 0) {
+                        <div class="text-center py-5 text-muted">
+                          <i class="bi bi-inbox fs-1"></i>
+                          <p class="mt-2">No sessions found</p>
+                        </div>
+                      } @else {
+                        <div class="list-group">
+                          @for (session of protocolSessionQuery.results; track session.id) {
+                            <div class="list-group-item list-group-item-action protocol-card" (click)="getAssociatedProtocolTitle(session.unique_id)">
+                              <div class="d-flex w-100 justify-content-between align-items-center">
+                                <h6 class="mb-1">
+                                  @if (session.name) {
+                                    {{session.name}}
+                                  } @else {
+                                    {{session.unique_id}}
+                                  }
+                                </h6>
+                                <div>
+                                  <a class="btn btn-sm btn-outline-primary" href="#/session-editor/{{session.unique_id}}" target="_blank">
+                                    <i class="bi bi-pen"></i> Edit
+                                  </a>
+                                </div>
+                              </div>
+                              <p class="mb-1 text-muted small">Created: {{ session.created_at | date : "medium" }}</p>
+
+                              @if (session.unique_id === currentSessionID && associatedSessionProtocols.length > 0) {
+                                <div class="mt-2 pt-2 border-top">
+                                  <p class="mb-2 small fw-bold"><i class="bi bi-link-45deg"></i> Associated Protocols:</p>
+                                  <div class="list-group list-group-flush">
+                                    @for (protocol of associatedSessionProtocols; track protocol.id) {
+                                      <a href="/#/protocol-session/{{protocol.id}}&{{session.unique_id}}"
+                                         class="list-group-item list-group-item-action py-2 small" target="_blank">
+                                        <i class="bi bi-journal-text me-1"></i> {{protocol.protocol_title}}
+                                      </a>
+                                    }
+                                  </div>
+                                </div>
+                              }
+                            </div>
+                          }
+                        </div>
+                      }
+
+                      <div class="d-flex justify-content-center mt-3">
+                        <ngb-pagination (pageChange)="handlePageChange($event)" [collectionSize]="protocolSessionQuery.count"
+                                        [(page)]="currentSessionPage" [pageSize]="pageSize" [rotate]="true" [boundaryLinks]="true">
+                        </ngb-pagination>
+                      </div>
+                    }
+                  </ng-template>
+                </li>
+              }
+
+              @if (projectQuery) {
+                <li [ngbNavItem]="'projects'" [destroyOnHide]="false">
+                  <button ngbNavLink>
+                    <i class="bi bi-folder me-1"></i> Projects
+                    <span class="badge bg-primary rounded-pill tab-count">{{projectQuery.count}}</span>
+                  </button>
+                  <ng-template ngbNavContent>
+                    @if (loadingProject) {
+                      <div class="loading-container">
+                        <div class="spinner-border text-primary" role="status"></div>
+                        <p class="mt-2">Loading projects...</p>
+                      </div>
+                    } @else {
+                      @if (projectQuery.results.length === 0) {
+                        <div class="text-center py-5 text-muted">
+                          <i class="bi bi-inbox fs-1"></i>
+                          <p class="mt-2">No projects found</p>
+                        </div>
+                      } @else {
+                        <div class="list-group">
+                          @for (project of projectQuery.results; track project.id) {
+                            <div class="list-group-item list-group-item-action protocol-card">
+                              <div class="d-flex w-100 justify-content-between align-items-center mb-2">
+                                <h6 class="mb-0">{{project.project_name}}</h6>
+                                <div>
+                                  <a class="btn btn-sm btn-outline-primary me-1" href="/#/project-editor/{{project.id}}">
+                                    <i class="bi bi-pen"></i> Edit
+                                  </a>
+                                  <button class="btn btn-sm btn-outline-secondary" (click)="clickProject(project)">
+                                    <i class="bi bi-info-circle"></i> Details
+                                  </button>
+                                </div>
+                              </div>
+                              <p class="text-muted small mb-2">Created: {{project.created_at | date : "medium"}}</p>
+
+                              @if (currentProjectID === project.id && project.project_description) {
+                                <div class="card bg-light mb-2">
+                                  <div class="card-body py-2">
+                                    <p class="card-text small mb-0">{{project.project_description}}</p>
+                                  </div>
+                                </div>
+                              }
+
+                              @if (project.sessions && project.sessions.length > 0) {
+                                <div class="mt-2">
+                                  <p class="mb-1 small fw-bold"><i class="bi bi-collection"></i> Sessions:</p>
+                                  <div class="row row-cols-1 row-cols-md-2 g-2">
+                                    @for (session of project.sessions; track session.unique_id) {
+                                      <div class="col">
+                                        <a href="/#/protocol-session/{{session.protocol}}&{{session.unique_id}}"
+                                           class="btn btn-sm btn-outline-info text-truncate w-100" target="_blank">
+                                          @if (session.name) {
+                                            {{session.name}}
+                                          } @else {
+                                            {{session.unique_id}}
+                                          }
+                                        </a>
+                                      </div>
+                                    }
+                                  </div>
+                                </div>
+                              }
+                            </div>
+                          }
+                        </div>
+                      }
+
+                      <div class="d-flex justify-content-center mt-3">
+                        <ngb-pagination (pageChange)="handlePageChange($event)" [collectionSize]="projectQuery.count"
+                                        [(page)]="currentProjectPage" [pageSize]="pageSize" [rotate]="true" [boundaryLinks]="true">
+                        </ngb-pagination>
+                      </div>
+
+                    }
+                  </ng-template>
+                </li>
+              }
+            </ul>
+          </div>
+          <div class="card-body">
+            <div [ngbNavOutlet]="nav"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  } @else {
+    <div class="row justify-content-center">
+      <div class="col-md-8 text-center py-5">
+        @if (!accounts.loggedIn) {
+          <div class="alert alert-info">
+            <i class="bi bi-info-circle-fill me-2"></i> Please log in to view your protocols and sessions
+          </div>
+        } @else {
+          <div class="loading-container">
+            <div class="spinner-border text-primary" role="status"></div>
+            <p class="mt-2">Loading your data...</p>
+          </div>
+        }
+      </div>
+    </div>
+  }
+</div>
+<div class="footer-spacer"></div>

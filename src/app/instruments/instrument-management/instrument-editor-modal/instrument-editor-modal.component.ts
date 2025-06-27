@@ -22,6 +22,7 @@ export class InstrumentEditorModalComponent {
       max_duration: value.max_days_within_usage_pre_approval,
       days_before_warranty_notification: value.days_before_warranty_notification || 30,
       days_before_maintenance_notification: value.days_before_maintenance_notification || 14,
+      accepts_bookings: value.accepts_bookings,
     })
   }
 
@@ -36,6 +37,7 @@ export class InstrumentEditorModalComponent {
     max_duration: this.fb.control(0, [Validators.required]),
     days_before_warranty_notification: this.fb.control(30, [Validators.required, Validators.min(0)]),
     days_before_maintenance_notification: this.fb.control(14, [Validators.required, Validators.min(0)]),
+    accepts_bookings: this.fb.control(true),
   })
 
   constructor(private modal: NgbActiveModal, private fb: FormBuilder) {

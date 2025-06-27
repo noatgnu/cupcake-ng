@@ -123,7 +123,7 @@ export class ExportBookingsComponent implements OnDestroy {
       debounceTime(200),
       distinctUntilChanged(),
       switchMap((searchText) => {
-        return this.instrumentService.getInstruments(undefined, 10, 0, searchText).pipe(
+        return this.instrumentService.getInstruments(undefined, 10, 0, searchText, undefined, true).pipe(
           map((data) => {
             return data.results;
           })

@@ -57,7 +57,7 @@ export class InstrumentBookingModalComponent implements OnInit, AfterViewInit{
   }
 
   ngOnInit() {
-    this.instrumentService.getInstruments().subscribe(instrumentQuery => {
+    this.instrumentService.getInstruments(undefined, 5, 0, undefined, undefined, true).subscribe(instrumentQuery => {
       this.instrumentQuery = instrumentQuery
       this.getInstrumentPermission()
     })
@@ -66,7 +66,7 @@ export class InstrumentBookingModalComponent implements OnInit, AfterViewInit{
   ngAfterViewInit() {
     this.searchForm.controls.instrument.valueChanges.subscribe(value => {
       if (value) {
-        this.instrumentService.getInstruments(undefined, 5, 0, value).subscribe(instrumentQuery => {
+        this.instrumentService.getInstruments(undefined, 5, 0, value, undefined, true).subscribe(instrumentQuery => {
           this.instrumentQuery = instrumentQuery
           this.getInstrumentPermission()
         })

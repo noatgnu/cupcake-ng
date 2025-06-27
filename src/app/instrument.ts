@@ -18,6 +18,7 @@ export interface Instrument {
   annotation_folders: AnnotationFolder[];
   image: string|null;
   support_information: SupportInformation[];
+  accepts_bookings: boolean;
 }
 
 export interface InstrumentQuery {
