@@ -18,7 +18,12 @@ export class HomeComponent implements OnInit {
   baseUrl = environment.baseURL;
   logoUrl: string | null = null;
 
-  constructor(private router: Router, private siteSettings: SiteSettingsService) { }
+  constructor(private router: Router, public siteSettings: SiteSettingsService) { }
+
+  hasFooterText(): boolean {
+    const settings = this.siteSettings.getCurrentPublicSettings();
+    return !!(settings?.footer_text && settings.footer_text.trim());
+  }
 
   ngOnInit(): void {
     this.siteSettings.publicSettings$.subscribe((settings: PublicSiteSettings | null) => {

@@ -140,6 +140,9 @@ export class BookingTimeVisualizerComponent implements OnInit, AfterViewInit,  A
     })
   }
   private lastMoveTime: number | undefined;
+  private animationFrameId: number | undefined;
+  private renderCache: Map<string, ImageData> = new Map();
+  private isHighDPI = window.devicePixelRatio > 1;
   @HostListener('touchstart', ['$event'])
   onTouchStart(event: TouchEvent) {
     event.preventDefault();
@@ -327,15 +330,15 @@ export class BookingTimeVisualizerComponent implements OnInit, AfterViewInit,  A
 
       // Calculate the canvas width dynamically based on the time range and desired resolution
       const hoursInRange = (windowEnd.getTime() - windowStart.getTime()) / (60 * 60 * 1000);
-      const pixelsPerHour = 20; // Adjust this value as needed
-      this.width = hoursInRange * pixelsPerHour;
+      const pixelsPerHour = Math.max(30, Math.min(60, window.innerWidth / hoursInRange)); // Responsive pixel density
+      this.width = Math.floor(hoursInRange * pixelsPerHour);
 
-      // Set the canvas width property
-      canvas.nativeElement.width = this.width;
-      canvas.nativeElement.style.width = `${this.width}px`;
+      // Set the canvas width property with high-DPI support
+      this.setupCanvas(canvas.nativeElement);
 
       // Update the context after setting the canvas width
       this.ctx = canvas.nativeElement.getContext('2d')!;
+      this.setupCanvasRendering();
 
       const delta = windowEnd.getTime() - windowStart.getTime();
 
@@ -345,116 +348,27 @@ export class BookingTimeVisualizerComponent implements OnInit, AfterViewInit,  A
   }
 
   private drawBackground(timeBlocks: Date[], graphWidth: number, currentMarker: Date, windowTimeRange: number) {
-    this.ctx.fillStyle = 'gray'
-    let currrentDrawDate = 0
-    let uniqueDateFromTimeBlocks = timeBlocks.filter(time => {
-      if (time.getDate() !== currrentDrawDate) {
-        currrentDrawDate = time.getDate()
-        return true
-      }
-      return false
-    })
-    const totalDrawingBlock = timeBlocks.length
-    let currentStart = this.padding
-
-    const graphPixelOverTime = graphWidth/windowTimeRange
-    uniqueDateFromTimeBlocks.forEach((time, index) => {
-      this.ctx.textBaseline = 'top'
-      this.ctx.fillStyle = 'gray'
-      const filteredTimeBlocks = timeBlocks.filter(timeBlock => timeBlock.getDate() === time.getDate())
-      const xStart = currentStart
-      const xEnd = xStart + (filteredTimeBlocks.length) * this.blockSize
-      this.ctx.fillRect(xStart, 0, filteredTimeBlocks.length * this.blockSize, this.height)
-      this.ctx.fillStyle = 'white'
-      this.ctx.fillText(time.toLocaleDateString(), xStart + 50, 10)
-      // add marker for each day
-      this.ctx.beginPath()
-      this.ctx.setLineDash([])
-      // @ts-ignore
-      const pixelStart = (time.getTime() - this.form.value.windowStart.getTime()) * graphPixelOverTime
-      this.ctx.moveTo(pixelStart, 0)
-      this.ctx.lineTo(pixelStart, this.height)
-      this.ctx.stroke()
-      this.ctx.closePath()
-
-      // draw time marker for each day in 24hr format
-      filteredTimeBlocks.forEach(timeBlock => {
-        const hour = timeBlock.getHours()
-        // @ts-ignore
-        const timeBlockPixelStart = (timeBlock.getTime() - this.form.value.windowStart.getTime()) * graphPixelOverTime
-
-        // draw block every two hours
-        if (hour % 2 === 0) {
-          this.ctx.fillStyle = 'white'
-          this.ctx.textBaseline = 'bottom'
-          //const x = (timeBlock.getHours() / 24) * (filteredTimeBlocks.length) * blockSize + xStart
-          this.ctx.save()
-          this.ctx.translate(timeBlockPixelStart, this.height)
-          this.ctx.rotate(-Math.PI / 2)
-          this.ctx.fillText(timeBlock.toLocaleTimeString(), 50, this.blockSize)
-          this.ctx.restore()
-        }
-
-        // draw dashed line for each hour
-        this.ctx.beginPath()
-        this.ctx.setLineDash([5, 15])
-        this.ctx.moveTo(timeBlockPixelStart, 0)
-        this.ctx.lineTo(timeBlockPixelStart, 2)
-        this.ctx.stroke()
-        this.ctx.closePath()
-      })
-      currentStart = xEnd
-    })
-    console.log(this.instrumentUsageQuery)
-    for (const usage of this.instrumentUsageQuery!.results) {
-      usage.time_started = new Date(usage.time_started)
-      usage.time_ended = new Date(usage.time_ended)
-      const isSelectedBooking = this.selectedTimeRange.start && this.selectedTimeRange.end &&
-        usage.time_started.getTime() === this.selectedTimeRange.start.getTime() &&
-        usage.time_ended.getTime() === this.selectedTimeRange.end.getTime();
-      if (!isSelectedBooking) {
-        const start = new Date(usage.time_started)
-        const end = new Date(usage.time_ended)
-        const delta = end.getTime() - start.getTime()
-        const deltaPixel = delta * graphPixelOverTime
-        // @ts-ignore
-        const deltaStart = start.getTime() - this.form.value.windowStart.getTime()
-        const deltaStartPixel = this.padding + deltaStart * graphPixelOverTime
-        if (usage.user === this.accounts.username) {
-          this.ctx.fillStyle = 'rgba(26,121,140,0.55)'
-        } else {
-          this.ctx.fillStyle = 'rgba(146,9,207,0.26)'
-        }
-
-        this.ctx.fillRect(this.padding + deltaStartPixel, 0, deltaPixel, this.height)
-        // draw username on the block at the bottom
-        this.ctx.fillStyle = 'white'
-        this.ctx.textBaseline = 'bottom'
-        this.ctx.fillText("user: "+usage.user, this.padding + deltaStartPixel+1, this.height)
-
-      }
-
-    }
-
-    //draw selected time range accurate to seconds
-    if (this.selectedTimeRange.start && this.selectedTimeRange.end) {
-      const start = this.selectedTimeRange.start
-      const end = this.selectedTimeRange.end
-      const delta = end.getTime() - start.getTime()
-      const deltaPixel = delta * graphPixelOverTime
-      // @ts-ignore
-      const deltaStart = start.getTime() - this.form.value.windowStart.getTime()
-      const deltaStartPixel = this.padding + deltaStart * graphPixelOverTime
-      this.ctx.fillStyle = 'rgba(176,216,0,0.26)'
-      this.ctx.fillRect(this.padding + deltaStartPixel, 0, deltaPixel, this.height)
-    }
-    //draw current marker
-    this.ctx.fillStyle = 'red'
-    // get delta from before current date to current date
-    // @ts-ignore
-    const deltaTime = currentMarker.getTime() - this.form.value.windowStart.getTime()
-    const x = this.padding + deltaTime * graphPixelOverTime
-    this.ctx.fillRect(x, 0, 2, this.height)
+    // Cache key for background
+    const cacheKey = `bg_${windowTimeRange}_${graphWidth}_${this.instrumentUsageQuery?.results.length || 0}`;
+    
+    // Clear and set up for drawing
+    this.ctx.save();
+    this.ctx.fillStyle = '#f8f9fa'; // Light gray background
+    this.ctx.fillRect(0, 0, this.width, this.height);
+    
+    // Draw grid and time labels
+    this.drawTimeGrid(timeBlocks, graphWidth, windowTimeRange);
+    
+    // Draw booking blocks with improved styling
+    this.drawBookingBlocks(graphWidth, windowTimeRange);
+    
+    // Draw selected time range
+    this.drawSelectedTimeRange(graphWidth, windowTimeRange);
+    
+    // Draw current time marker
+    this.drawCurrentTimeMarker(currentMarker, graphWidth, windowTimeRange);
+    
+    this.ctx.restore();
   }
 
   clearCanvas() {
@@ -605,27 +519,30 @@ export class BookingTimeVisualizerComponent implements OnInit, AfterViewInit,  A
   }
 
   onMouseMove(event: MouseEvent) {
-    if (!this.lastMoveTime || Date.now() - this.lastMoveTime > 30) { // Keep your throttling
-      // Use your existing drawMarker which already preserves content
-      this.drawMarker(event.offsetX, 'black');
-      this.lastMoveTime = Date.now();
-
-      const currentTime = this.convertPixelToTime(event.offsetX);
-
-      if (this.enableEdit && this.dragStart) {
-        // During dragging operation
-        this.dragEnd = event.offsetX;
-        this.previewEndDate = currentTime;
-        // Your existing drawing method
-        this.draw();
-      } else if (this.enableEdit) {
-        // Just hover - don't update input fields
-        this.previewStartDate = currentTime;
-        // Don't update selectedStartDate here
+    if (!this.lastMoveTime || Date.now() - this.lastMoveTime > 16) { // 60fps throttling
+      if (this.animationFrameId) {
+        cancelAnimationFrame(this.animationFrameId);
       }
+      
+      this.animationFrameId = requestAnimationFrame(() => {
+        this.drawMarker(event.offsetX, '#333');
+        this.lastMoveTime = Date.now();
 
-      // Draw the tooltip using your existing method
-      this.drawTimeTooltip(event.offsetX, currentTime);
+        const currentTime = this.convertPixelToTime(event.offsetX);
+
+        if (this.enableEdit && this.dragStart) {
+          // During dragging operation
+          this.dragEnd = event.offsetX;
+          this.previewEndDate = currentTime;
+          this.draw();
+        } else if (this.enableEdit) {
+          // Just hover - don't update input fields
+          this.previewStartDate = currentTime;
+        }
+
+        // Draw the tooltip with improved styling
+        this.drawTimeTooltip(event.offsetX, currentTime);
+      });
     }
   }
 
@@ -755,7 +672,13 @@ export class BookingTimeVisualizerComponent implements OnInit, AfterViewInit,  A
   }
 
   ngOnDestroy() {
-    this.selectedTimeRange = {start: null, end: null}
+    this.selectedTimeRange = {start: null, end: null};
+    // Clean up animation frame
+    if (this.animationFrameId) {
+      cancelAnimationFrame(this.animationFrameId);
+    }
+    // Clear render cache
+    this.renderCache.clear();
   }
 
   handleDateNavigate(event: NgbDatepickerNavigateEvent) {
@@ -924,19 +847,50 @@ export class BookingTimeVisualizerComponent implements OnInit, AfterViewInit,  A
   }
 
   private drawTimeTooltip(x: number, time: Date) {
-    const formattedTime = time.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-    const formattedDate = time.toLocaleDateString([], {month: 'short', day: 'numeric'});
+    const formattedTime = time.toLocaleTimeString('en-US', {hour: '2-digit', minute:'2-digit', hour12: false});
+    const formattedDate = time.toLocaleDateString('en-US', {month: 'short', day: 'numeric'});
 
-    // Draw tooltip background
-    this.ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-    this.ctx.fillRect(x - 75, 40, 150, 40);
+    // Calculate tooltip dimensions
+    const tooltipWidth = 140;
+    const tooltipHeight = 50;
+    const tooltipX = Math.max(10, Math.min(x - tooltipWidth / 2, this.width - tooltipWidth - 10));
+    const tooltipY = 30;
 
-    // Draw time text
-    this.ctx.fillStyle = 'white';
-    this.ctx.font = '12px Arial';
+    // Draw tooltip background with rounded corners
+    this.ctx.fillStyle = 'rgba(33, 37, 41, 0.95)';
+    this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+    this.ctx.lineWidth = 1;
+    this.roundRect(tooltipX, tooltipY, tooltipWidth, tooltipHeight, 8);
+    this.ctx.fill();
+    this.ctx.stroke();
+
+    // Draw tooltip content
+    this.ctx.fillStyle = '#ffffff';
+    this.ctx.font = 'bold 13px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
     this.ctx.textAlign = 'center';
-    this.ctx.fillText(formattedTime, x, 55);
-    this.ctx.fillText(formattedDate, x, 70);
+    this.ctx.textBaseline = 'middle';
+    this.ctx.fillText(formattedTime, tooltipX + tooltipWidth / 2, tooltipY + 18);
+    
+    this.ctx.font = '11px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+    this.ctx.fillStyle = '#adb5bd';
+    this.ctx.fillText(formattedDate, tooltipX + tooltipWidth / 2, tooltipY + 35);
+    
+    // Reset text alignment
+    this.ctx.textAlign = 'start';
+  }
+
+  private roundRect(x: number, y: number, width: number, height: number, radius: number) {
+    this.ctx.beginPath();
+    this.ctx.moveTo(x + radius, y);
+    this.ctx.lineTo(x + width - radius, y);
+    this.ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+    this.ctx.lineTo(x + width, y + height - radius);
+    this.ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+    this.ctx.lineTo(x + radius, y + height);
+    this.ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+    this.ctx.lineTo(x, y + radius);
+    this.ctx.quadraticCurveTo(x, y, x + radius, y);
+    this.ctx.closePath();
   }
 
   private drawBookingBlock(startX: number, width: number, type: 'own'|'others'|'selected'|'maintenance', label: string) {
@@ -1168,6 +1122,177 @@ export class BookingTimeVisualizerComponent implements OnInit, AfterViewInit,  A
     }
 
     return this.padding;
+  }
+
+  private setupCanvas(canvas: HTMLCanvasElement): void {
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = this.width * dpr;
+    canvas.height = this.height * dpr;
+    canvas.style.width = `${this.width}px`;
+    canvas.style.height = `${this.height}px`;
+    
+    const ctx = canvas.getContext('2d');
+    if (ctx) {
+      ctx.scale(dpr, dpr);
+    }
+  }
+
+  private setupCanvasRendering(): void {
+    if (this.ctx) {
+      // Enable antialiasing and smooth rendering
+      this.ctx.imageSmoothingEnabled = true;
+      this.ctx.imageSmoothingQuality = 'high';
+      this.ctx.lineCap = 'round';
+      this.ctx.lineJoin = 'round';
+    }
+  }
+
+  private drawTimeGrid(timeBlocks: Date[], graphWidth: number, windowTimeRange: number): void {
+    const graphPixelOverTime = graphWidth / windowTimeRange;
+    let currentDrawDate = 0;
+    const uniqueDateFromTimeBlocks = timeBlocks.filter(time => {
+      if (time.getDate() !== currentDrawDate) {
+        currentDrawDate = time.getDate();
+        return true;
+      }
+      return false;
+    });
+
+    // Draw day backgrounds with alternating colors
+    uniqueDateFromTimeBlocks.forEach((time, index) => {
+      const filteredTimeBlocks = timeBlocks.filter(timeBlock => timeBlock.getDate() === time.getDate());
+      const pixelStart = (time.getTime() - this.form.value.windowStart!.getTime()) * graphPixelOverTime;
+      const dayWidth = filteredTimeBlocks.length * (graphPixelOverTime * 60 * 60 * 1000);
+
+      // Alternating day background colors
+      this.ctx.fillStyle = index % 2 === 0 ? '#f8f9fa' : '#e9ecef';
+      this.ctx.fillRect(pixelStart, 0, dayWidth, this.height);
+
+      // Day separator line
+      this.ctx.strokeStyle = '#dee2e6';
+      this.ctx.lineWidth = 1;
+      this.ctx.beginPath();
+      this.ctx.moveTo(pixelStart, 0);
+      this.ctx.lineTo(pixelStart, this.height);
+      this.ctx.stroke();
+
+      // Date label with better typography
+      this.ctx.fillStyle = '#495057';
+      this.ctx.font = 'bold 11px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+      this.ctx.textBaseline = 'top';
+      this.ctx.fillText(time.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }), pixelStart + 5, 8);
+
+      // Hour markers with improved styling
+      filteredTimeBlocks.forEach(timeBlock => {
+        const hour = timeBlock.getHours();
+        const timeBlockPixelStart = (timeBlock.getTime() - this.form.value.windowStart!.getTime()) * graphPixelOverTime;
+
+        // Major hour markers (every 2 hours)
+        if (hour % 2 === 0) {
+          this.ctx.fillStyle = '#6c757d';
+          this.ctx.font = '10px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+          this.ctx.textBaseline = 'bottom';
+          this.ctx.save();
+          this.ctx.translate(timeBlockPixelStart + 2, this.height - 5);
+          this.ctx.rotate(-Math.PI / 2);
+          this.ctx.fillText(timeBlock.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false }), 0, 0);
+          this.ctx.restore();
+        }
+
+        // Hour grid lines
+        this.ctx.strokeStyle = hour % 2 === 0 ? '#adb5bd' : '#dee2e6';
+        this.ctx.lineWidth = hour % 2 === 0 ? 1 : 0.5;
+        this.ctx.setLineDash(hour % 2 === 0 ? [] : [3, 3]);
+        this.ctx.beginPath();
+        this.ctx.moveTo(timeBlockPixelStart, 0);
+        this.ctx.lineTo(timeBlockPixelStart, hour % 2 === 0 ? 10 : 5);
+        this.ctx.stroke();
+        this.ctx.setLineDash([]);
+      });
+    });
+  }
+
+  private drawBookingBlocks(graphWidth: number, windowTimeRange: number): void {
+    if (!this.instrumentUsageQuery) return;
+
+    const graphPixelOverTime = graphWidth / windowTimeRange;
+    
+    for (const usage of this.instrumentUsageQuery.results) {
+      usage.time_started = new Date(usage.time_started);
+      usage.time_ended = new Date(usage.time_ended);
+      
+      const isSelectedBooking = this.selectedTimeRange.start && this.selectedTimeRange.end &&
+        usage.time_started.getTime() === this.selectedTimeRange.start.getTime() &&
+        usage.time_ended.getTime() === this.selectedTimeRange.end.getTime();
+      
+      if (!isSelectedBooking) {
+        const start = new Date(usage.time_started);
+        const end = new Date(usage.time_ended);
+        const delta = end.getTime() - start.getTime();
+        const deltaPixel = delta * graphPixelOverTime;
+        const deltaStart = start.getTime() - this.form.value.windowStart!.getTime();
+        const deltaStartPixel = this.padding + deltaStart * graphPixelOverTime;
+
+        // Determine booking type and color
+        let bookingType: 'own' | 'others' | 'maintenance';
+        if (usage.maintenance) {
+          bookingType = 'maintenance';
+        } else if (usage.user === this.accounts.username) {
+          bookingType = 'own';
+        } else {
+          bookingType = 'others';
+        }
+
+        this.drawBookingBlock(
+          this.padding + deltaStartPixel, 
+          deltaPixel, 
+          bookingType, 
+          usage.maintenance ? 'Maintenance' : `${usage.user}`
+        );
+      }
+    }
+  }
+
+  private drawSelectedTimeRange(graphWidth: number, windowTimeRange: number): void {
+    if (this.selectedTimeRange.start && this.selectedTimeRange.end) {
+      const graphPixelOverTime = graphWidth / windowTimeRange;
+      const start = this.selectedTimeRange.start;
+      const end = this.selectedTimeRange.end;
+      const delta = end.getTime() - start.getTime();
+      const deltaPixel = delta * graphPixelOverTime;
+      const deltaStart = start.getTime() - this.form.value.windowStart!.getTime();
+      const deltaStartPixel = this.padding + deltaStart * graphPixelOverTime;
+      
+      this.drawBookingBlock(
+        this.padding + deltaStartPixel, 
+        deltaPixel, 
+        'selected', 
+        'Selected'
+      );
+    }
+  }
+
+  private drawCurrentTimeMarker(currentMarker: Date, graphWidth: number, windowTimeRange: number): void {
+    const graphPixelOverTime = graphWidth / windowTimeRange;
+    const deltaTime = currentMarker.getTime() - this.form.value.windowStart!.getTime();
+    const x = this.padding + deltaTime * graphPixelOverTime;
+    
+    // Draw current time line with better styling
+    this.ctx.strokeStyle = '#dc3545';
+    this.ctx.lineWidth = 3;
+    this.ctx.setLineDash([]);
+    this.ctx.beginPath();
+    this.ctx.moveTo(x, 0);
+    this.ctx.lineTo(x, this.height);
+    this.ctx.stroke();
+    
+    // Add current time label
+    this.ctx.fillStyle = '#dc3545';
+    this.ctx.font = 'bold 10px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+    this.ctx.textAlign = 'center';
+    this.ctx.textBaseline = 'top';
+    this.ctx.fillText('NOW', x, 25);
+    this.ctx.textAlign = 'start';
   }
 
 }

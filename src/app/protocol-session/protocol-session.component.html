@@ -38,6 +38,9 @@
           } @else if (viewMode==='folder') {
             <app-folder-list [sessionID]="sessionID" (selectedFolderChange)="handleFolderClick($event)"></app-folder-list>
           }
+          @if (hasFooterText()) {
+            <div class="footer-spacer"></div>
+          }
         </div>
       </div>
     }
@@ -70,4 +73,7 @@
       }
     </div>
   </div>
+  @if (hasFooterText()) {
+    <div class="footer-spacer"></div>
+  }
 </div>

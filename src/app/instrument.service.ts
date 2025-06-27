@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from "@angular/common/http";
-import { Observable, Subject } from "rxjs";
+import {map, Observable, Subject, switchMap} from "rxjs";
 import { environment } from "../environments/environment";
 import { Instrument, InstrumentQuery, InstrumentUsage, InstrumentUsageQuery, MaintenanceStatus } from "./instrument";
 import { InstrumentJob, InstrumentJobQuery } from "./instrument-job";
@@ -168,6 +168,10 @@ export class InstrumentService {
       payload,
       {responseType: 'json', observe: 'body'}
     );
+  }
+
+  userCanManageAnyInstruments(): Observable<{can_manage: boolean}> {
+    return this.http.get<{can_manage: boolean}>(`${this.baseURL}/api/instruments/can_manage_instruments/`, {responseType: 'json', observe: 'body'})
   }
 
 }

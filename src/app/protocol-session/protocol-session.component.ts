@@ -28,6 +28,7 @@ import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {AddSimpleCounterModalComponent} from "./add-simple-counter-modal/add-simple-counter-modal.component";
 import {AddChecklistModalComponent} from "./add-checklist-modal/add-checklist-modal.component";
 import {WebrtcService} from "../webrtc.service";
+import {SiteSettingsService} from "../site-settings.service";
 import {AddTableModalComponent} from "./add-table-modal/add-table-modal.component";
 import {AlignmentAnnotationComponent} from "./alignment-annotation/alignment-annotation.component";
 import {CalculatorAnnotationComponent} from "./calculator-annotation/calculator-annotation.component";
@@ -125,9 +126,14 @@ export class ProtocolSessionComponent implements OnInit{
 
 
 
-  constructor(private webrtc: WebrtcService, private ws: WebsocketService, private modalConfig: NgbModalConfig, private toastService: ToastService, private accounts: AccountsService, private speech: SpeechService , public dataService: DataService, public web: WebService, public timer: TimerService, private modal: NgbModal) {
+  constructor(private webrtc: WebrtcService, private ws: WebsocketService, private modalConfig: NgbModalConfig, private toastService: ToastService, private accounts: AccountsService, private speech: SpeechService , public dataService: DataService, public web: WebService, public timer: TimerService, private modal: NgbModal, public siteSettings: SiteSettingsService) {
     this.modalConfig.backdrop = 'static';
     this.modalConfig.keyboard = false;
+  }
+
+  hasFooterText(): boolean {
+    const settings = this.siteSettings.getCurrentPublicSettings();
+    return !!(settings?.footer_text && settings.footer_text.trim());
   }
 
 

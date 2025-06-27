@@ -1,19 +1,20 @@
 .protocol-session-container {
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  height: 100vh;
   padding-top: 70px;
 }
 
 .protocol-session-header {
   padding: 0.75rem 1rem;
   border-bottom: 1px solid rgba(0,0,0,0.1);
+  flex-shrink: 0;
 }
 
 .protocol-session-content {
   display: flex;
   flex: 1;
-  overflow: hidden;
+  min-height: 0;
 }
 
 .protocol-sidebar {
@@ -21,22 +22,26 @@
   border-right: 1px solid rgba(0,0,0,0.1);
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  flex-shrink: 0;
 }
 
 .sidebar-header {
   padding: 0.75rem 1rem;
   border-bottom: 1px solid rgba(0,0,0,0.1);
+  flex-shrink: 0;
 }
 
 .sidebar-content {
   flex: 1;
+  min-height: 0;
   overflow-y: auto;
 }
 
 .protocol-main-content {
   flex: 1;
-  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
   padding: 1rem;
 }
 
@@ -56,6 +61,10 @@
   p {
     font-size: 1.2rem;
   }
+}
+
+.footer-spacer {
+  height: 80px;
 }
 
 @media (max-width: 768px) {

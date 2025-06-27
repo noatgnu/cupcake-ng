@@ -7,6 +7,7 @@ import {InstrumentJobManagementComponent} from "./instrument-job-management/inst
 import {WebsocketService} from "../websocket.service";
 import {WebService} from "../web.service";
 import {NgClass} from "@angular/common";
+import {SiteSettingsService} from "../site-settings.service";
 
 @Component({
     selector: 'app-instruments',
@@ -32,8 +33,13 @@ export class InstrumentsComponent {
 
   selectedSection = 'jobs'
   hideSection = false
-  constructor(private ws: WebsocketService, private web: WebService) {
+  constructor(private ws: WebsocketService, private web: WebService, public siteSettings: SiteSettingsService) {
     this.ws.connectInstrumentJobWS(this.web.cupcakeInstanceID)
+  }
+
+  hasFooterText(): boolean {
+    const settings = this.siteSettings.getCurrentPublicSettings();
+    return !!(settings?.footer_text && settings.footer_text.trim());
   }
 
 }

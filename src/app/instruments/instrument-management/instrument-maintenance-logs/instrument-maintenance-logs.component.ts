@@ -10,6 +10,7 @@ import {DatePipe, NgClass} from "@angular/common";
 import {Instrument, MaintenanceStatus} from "../../../instrument";
 import {WebService} from "../../../web.service";
 import {InstrumentService} from "../../../instrument.service";
+import {SiteSettingsService} from "../../../site-settings.service";
 
 @Component({
   selector: 'app-instrument-maintenance-logs',
@@ -41,7 +42,8 @@ export class InstrumentMaintenanceLogsComponent {
     private modalService: NgbModal,
     private fb: FormBuilder,
     private web: WebService,
-    private instrumentService: InstrumentService
+    private instrumentService: InstrumentService,
+    public siteSettings: SiteSettingsService
   ) {
     this.filterForm = this.fb.group({
       search: [''],
@@ -50,6 +52,11 @@ export class InstrumentMaintenanceLogsComponent {
       start_date: [''],
       end_date: ['']
     });
+  }
+
+  hasFooterText(): boolean {
+    const settings = this.siteSettings.getCurrentPublicSettings();
+    return !!(settings?.footer_text && settings.footer_text.trim());
   }
 
   ngOnInit(): void {

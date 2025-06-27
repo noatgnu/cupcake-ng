@@ -73,7 +73,7 @@ export class LaboratoryNotebookComponent implements OnInit, AfterViewInit {
   logoUrl: string | null = null;
 
 
-  constructor(public accounts: AccountsService, private router: Router, private fb: FormBuilder, private web: WebService, private dataService: DataService, private toastService: ToastService, private siteSettings: SiteSettingsService) {
+  constructor(public accounts: AccountsService, private router: Router, private fb: FormBuilder, private web: WebService, private dataService: DataService, private toastService: ToastService, public siteSettings: SiteSettingsService) {
     this.siteSettings.publicSettings$.subscribe((data) => {
       console.log(data)
       if (data) {
@@ -112,6 +112,11 @@ export class LaboratoryNotebookComponent implements OnInit, AfterViewInit {
       })
     })
 
+  }
+
+  hasFooterText(): boolean {
+    const settings = this.siteSettings.getCurrentPublicSettings();
+    return !!(settings?.footer_text && settings.footer_text.trim());
   }
 
   ngOnInit() {

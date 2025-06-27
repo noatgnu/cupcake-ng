@@ -24,17 +24,16 @@ import {AccountsService} from "../../accounts/accounts.service";
     templateUrl: './instrument-booking-modal.component.html',
     styleUrl: './instrument-booking-modal.component.scss'
 })
-export class InstrumentBookingModalComponent implements OnInit, AfterViewInit{
-
+export class InstrumentBookingModalComponent implements OnInit, AfterViewInit {
   instrumentQuery!: InstrumentQuery
-
   instrumentUsageQuery!: InstrumentUsageQuery
 
   @Input() selectedInstrument!: Instrument
   @Input() enableSearch: boolean = true
-  selectedInstrumentUsage!: InstrumentUsage|undefined
+  
+  selectedInstrumentUsage: InstrumentUsage | undefined = undefined
   repeat: number = 0
-  repeatUntil: NgbDateStruct|undefined = undefined
+  repeatUntil: NgbDateStruct | undefined = undefined
 
   searchForm = this.fb.group({
     instrument: [""]
@@ -45,11 +44,36 @@ export class InstrumentBookingModalComponent implements OnInit, AfterViewInit{
     description: ["", Validators.required],
   })
 
-  selectedRange: {started: Date|undefined, ended: Date|undefined} = {started: undefined, ended: undefined}
+  selectedRange: {started: Date | undefined, ended: Date | undefined, hasMaintenance?: boolean} = {
+    started: undefined, 
+    ended: undefined
+  }
 
   usageDescription: string = ""
   maintenance: boolean = false
   hasMaintenance: boolean = false
+  
+  // Loading and error states
+  isLoading: boolean = false
+  searchLoading: boolean = false
+  submitLoading: boolean = false
+  errorMessage: string = ""
+
+  // Form validation
+  get isFormValid(): boolean {
+    return !!(
+      this.selectedInstrument &&
+      this.selectedRange.started &&
+      this.selectedRange.ended &&
+      this.usageDescription.trim() &&
+      !this.hasMaintenance
+    )
+  }
+
+  get submitButtonText(): string {
+    if (this.submitLoading) return 'Submitting...';
+    return this.maintenance ? 'Schedule Maintenance' : 'Submit Booking';
+  }
 
   constructor(private activeModal: NgbActiveModal, private web: WebService, private fb: FormBuilder, private toastService: ToastService, public dataService: DataService, private instrumentService: InstrumentService, public accounts: AccountsService) {
 
@@ -57,27 +81,74 @@ export class InstrumentBookingModalComponent implements OnInit, AfterViewInit{
   }
 
   ngOnInit() {
-    this.instrumentService.getInstruments(undefined, 5, 0, undefined, undefined, true).subscribe(instrumentQuery => {
-      this.instrumentQuery = instrumentQuery
-      this.getInstrumentPermission()
-    })
+    this.loadInitialInstruments()
   }
 
   ngAfterViewInit() {
-    this.searchForm.controls.instrument.valueChanges.subscribe(value => {
-      if (value) {
-        this.instrumentService.getInstruments(undefined, 5, 0, value, undefined, true).subscribe(instrumentQuery => {
-          this.instrumentQuery = instrumentQuery
-          this.getInstrumentPermission()
-        })
+    this.setupSearchSubscription()
+  }
+
+  private loadInitialInstruments(): void {
+    this.isLoading = true
+    this.errorMessage = ""
+    
+    this.instrumentService.getInstruments(undefined, 5, 0, undefined, undefined, true).subscribe({
+      next: (instrumentQuery) => {
+        this.instrumentQuery = instrumentQuery
+        this.getInstrumentPermission()
+        this.isLoading = false
+      },
+      error: (error) => {
+        this.errorMessage = "Failed to load instruments. Please try again."
+        this.isLoading = false
+        this.toastService.show("Error", "Failed to load instruments")
       }
     })
   }
 
-  getInstruments(url: string) {
-    this.instrumentService.getInstruments(url).subscribe(instrumentQuery => {
-      this.instrumentQuery = instrumentQuery
-      this.getInstrumentPermission()
+  private setupSearchSubscription(): void {
+    this.searchForm.controls.instrument.valueChanges.subscribe(value => {
+      if (value && value.trim()) {
+        this.searchInstruments(value.trim())
+      } else if (!value) {
+        this.loadInitialInstruments()
+      }
+    })
+  }
+
+  private searchInstruments(searchTerm: string): void {
+    this.searchLoading = true
+    this.errorMessage = ""
+    
+    this.instrumentService.getInstruments(undefined, 5, 0, searchTerm, undefined, true).subscribe({
+      next: (instrumentQuery) => {
+        this.instrumentQuery = instrumentQuery
+        this.getInstrumentPermission()
+        this.searchLoading = false
+      },
+      error: (error) => {
+        this.errorMessage = "Search failed. Please try again."
+        this.searchLoading = false
+        this.toastService.show("Search Error", "Failed to search instruments")
+      }
+    })
+  }
+
+  getInstruments(url: string): void {
+    this.isLoading = true
+    this.errorMessage = ""
+    
+    this.instrumentService.getInstruments(url).subscribe({
+      next: (instrumentQuery) => {
+        this.instrumentQuery = instrumentQuery
+        this.getInstrumentPermission()
+        this.isLoading = false
+      },
+      error: (error) => {
+        this.errorMessage = "Failed to load instruments. Please try again."
+        this.isLoading = false
+        this.toastService.show("Error", "Failed to load instruments")
+      }
     })
   }
 
@@ -91,38 +162,81 @@ export class InstrumentBookingModalComponent implements OnInit, AfterViewInit{
     })
   }
 
-  clickInstrument(instrument: Instrument) {
-    if (this.dataService.instrumentPermissions[instrument.id].can_book) {
-      this.web.getInstrumentUsage(instrument.id, undefined, undefined, undefined, 100).subscribe(instrumentUsageQuery => {
-        this.instrumentUsageQuery = instrumentUsageQuery
-        this.selectedInstrument = instrument
-      })
-    } else {
-      this.toastService.show("Instrument permission", "You do not have permission to book this instrument")
+  clickInstrument(instrument: Instrument): void {
+    this.errorMessage = ""
+    
+    if (!this.dataService.instrumentPermissions[instrument.id]?.can_book) {
+      this.toastService.show("Access Denied", "You do not have permission to book this instrument")
+      return
     }
 
-  }
-
-  handleSelectedRange(range: {started: Date, ended: Date, hasMaintenance: boolean}) {
-    this.selectedRange = range
-    this.hasMaintenance = range.hasMaintenance
-    console.log(this.selectedRange)
-  }
-
-
-  submit() {
-    this.activeModal.close({
-      instrument: this.selectedInstrument,
-      selectedRange: this.selectedRange,
-      usageDescription: this.usageDescription,
-      maintenance: this.maintenance,
-      repeat: this.repeat,
-      repeatUntil: this.repeatUntil,
+    this.isLoading = true
+    this.web.getInstrumentUsage(instrument.id, undefined, undefined, undefined, 100).subscribe({
+      next: (instrumentUsageQuery) => {
+        this.instrumentUsageQuery = instrumentUsageQuery
+        this.selectedInstrument = instrument
+        this.isLoading = false
+        // Reset form state when selecting new instrument
+        this.resetBookingForm()
+      },
+      error: (error) => {
+        this.errorMessage = "Failed to load instrument booking data."
+        this.isLoading = false
+        this.toastService.show("Error", "Failed to load instrument booking information")
+      }
     })
   }
 
-  cancel() {
+  handleSelectedRange(range: {started: Date, ended: Date, hasMaintenance: boolean}): void {
+    this.selectedRange = range
+    this.hasMaintenance = range.hasMaintenance
+    this.errorMessage = ""
+    
+    // Validate the selected range
+    if (range.started && range.ended && range.started >= range.ended) {
+      this.errorMessage = "End time must be after start time."
+      this.hasMaintenance = true
+    }
+  }
+
+  submit(): void {
+    if (!this.isFormValid) {
+      this.errorMessage = "Please fill in all required fields and select a valid time range."
+      return
+    }
+
+    this.submitLoading = true
+    this.errorMessage = ""
+
+    try {
+      this.activeModal.close({
+        instrument: this.selectedInstrument,
+        selectedRange: this.selectedRange,
+        usageDescription: this.usageDescription.trim(),
+        maintenance: this.maintenance,
+        repeat: this.repeat,
+        repeatUntil: this.repeatUntil,
+      })
+    } catch (error) {
+      this.submitLoading = false
+      this.errorMessage = "Failed to submit booking request."
+      this.toastService.show("Error", "Failed to submit booking")
+    }
+  }
+
+  cancel(): void {
     this.activeModal.dismiss()
+  }
+
+  private resetBookingForm(): void {
+    this.selectedRange = { started: undefined, ended: undefined }
+    this.usageDescription = ""
+    this.maintenance = false
+    this.hasMaintenance = false
+    this.repeat = 0
+    this.repeatUntil = undefined
+    this.selectedInstrumentUsage = undefined
+    this.errorMessage = ""
   }
 
   getInstrumentPermission() {
