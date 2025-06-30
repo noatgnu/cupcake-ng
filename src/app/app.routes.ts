@@ -12,6 +12,7 @@ import {HomeModule} from "./home/home.module";
 import {SiteSettingsComponent} from "./site-settings/site-settings.component";
 import {LaboratoryNotebookComponent} from "./laboratory-notebook/laboratory-notebook.component";
 import {SharedDocumentsModule} from "./shared-documents/shared-documents.module";
+import {BackupModule} from "./backup/backup.module";
 
 export const routes: Routes = [
   {
@@ -57,6 +58,10 @@ export const routes: Routes = [
   },{
     path: 'documents',
     loadChildren: () => SharedDocumentsModule
+  },
+  {
+    path: 'backup',
+    loadChildren: () => BackupModule
   },
   {
     path: 'laboratory-notebook',

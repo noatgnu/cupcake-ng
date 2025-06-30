@@ -1,0 +1,357 @@
+<!-- Main Container -->
+<div class="container-fluid p-0 d-flex flex-column vh-100">
+  <!-- Header -->
+  <header class="border-bottom shadow-sm py-3 px-4">
+    <div class="d-flex align-items-center justify-content-center">
+      <h4 class="m-0 text-primary fw-bold">
+        <i class="bi bi-shield-check me-2"></i>
+        Backup Log Viewer
+      </h4>
+    </div>
+  </header>
+
+  <!-- Access Denied Message -->
+  @if (!hasAccess && !loading) {
+    <div class="flex-grow-1 d-flex align-items-center justify-content-center">
+      <div class="text-center">
+        <i class="bi bi-shield-x text-danger" style="font-size: 4rem;"></i>
+        <h3 class="text-danger mt-3">Access Denied</h3>
+        <p class="text-muted">{{ error }}</p>
+      </div>
+    </div>
+  }
+
+  <!-- Main Content -->
+  @if (hasAccess) {
+    <div class="flex-grow-1 d-flex flex-column overflow-hidden">
+
+      <!-- Status Summary Cards -->
+      @if (statusSummary && !loading) {
+        <div class="p-4 border-bottom bg-light">
+          <div class="row g-3">
+            <!-- Success Rate Card -->
+            <div class="col-md-3">
+              <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                  <i class="bi bi-check-circle text-success" style="font-size: 2rem;"></i>
+                  <h5 class="card-title mt-2 mb-1">Success Rate</h5>
+                  <h3 class="text-success mb-0">{{ getSuccessRatePercentage() }}%</h3>
+                  <small class="text-muted">Last {{ statusSummary.period_days }} days</small>
+                </div>
+              </div>
+            </div>
+
+            <!-- Total Backups Card -->
+            <div class="col-md-3">
+              <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                  <i class="bi bi-database text-primary" style="font-size: 2rem;"></i>
+                  <h5 class="card-title mt-2 mb-1">Total Backups</h5>
+                  <h3 class="text-primary mb-0">{{ statusSummary.total_backups }}</h3>
+                  <small class="text-muted">Last {{ statusSummary.period_days }} days</small>
+                </div>
+              </div>
+            </div>
+
+            <!-- Running Backups Card -->
+            <div class="col-md-3">
+              <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                  <i class="bi bi-arrow-clockwise text-warning" style="font-size: 2rem;"></i>
+                  <h5 class="card-title mt-2 mb-1">Running</h5>
+                  <h3 class="text-warning mb-0">{{ statusSummary.status_counts.running }}</h3>
+                  <small class="text-muted">Active backups</small>
+                </div>
+              </div>
+            </div>
+
+            <!-- Failed Backups Card -->
+            <div class="col-md-3">
+              <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                  <i class="bi bi-x-circle text-danger" style="font-size: 2rem;"></i>
+                  <h5 class="card-title mt-2 mb-1">Failed</h5>
+                  <h3 class="text-danger mb-0">{{ statusSummary.status_counts.failed }}</h3>
+                  <small class="text-muted">Failed backups</small>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- Filters and Search -->
+      <div class="p-4 border-bottom">
+        <div class="row g-3 align-items-end">
+          <!-- Search -->
+          <div class="col-md-4">
+            <label for="search" class="form-label">Search</label>
+            <div class="input-group">
+              <span class="input-group-text">
+                <i class="bi bi-search"></i>
+              </span>
+              <input
+                type="text"
+                class="form-control"
+                id="search"
+                placeholder="Search backup logs..."
+                [(ngModel)]="searchQuery"
+                (keyup.enter)="onSearchChange()">
+            </div>
+          </div>
+
+          <!-- Backup Type Filter -->
+          <div class="col-md-2">
+            <label for="backupType" class="form-label">Backup Type</label>
+            <select
+              class="form-select"
+              id="backupType"
+              [(ngModel)]="filters.backup_type"
+              (change)="onFilterChange()">
+              <option [value]="undefined">All Types</option>
+              @for (choice of backupTypeChoices; track choice.value) {
+                <option [value]="choice.value">{{ choice.label }}</option>
+              }
+            </select>
+          </div>
+
+          <!-- Status Filter -->
+          <div class="col-md-2">
+            <label for="status" class="form-label">Status</label>
+            <select
+              class="form-select"
+              id="status"
+              [(ngModel)]="filters.status"
+              (change)="onFilterChange()">
+              <option [value]="undefined">All Statuses</option>
+              @for (choice of statusChoices; track choice.value) {
+                <option [value]="choice.value">{{ choice.label }}</option>
+              }
+            </select>
+          </div>
+
+          <!-- Triggered By Filter -->
+          <div class="col-md-2">
+            <label for="triggeredBy" class="form-label">Triggered By</label>
+            <input
+              type="text"
+              class="form-control"
+              id="triggeredBy"
+              placeholder="User or system"
+              [(ngModel)]="filters.triggered_by"
+              (keyup.enter)="onFilterChange()">
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="col-md-2">
+            <div class="d-flex gap-2">
+              <button
+                type="button"
+                class="btn btn-outline-primary"
+                (click)="onSearchChange()">
+                <i class="bi bi-search me-1"></i>
+                Search
+              </button>
+              <button
+                type="button"
+                class="btn btn-outline-secondary"
+                (click)="clearFilters()">
+                <i class="bi bi-x-circle me-1"></i>
+                Clear
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Content Body -->
+      <div class="flex-grow-1 overflow-auto p-4">
+        <!-- Loading -->
+        @if (loading) {
+          <div class="d-flex justify-content-center align-items-center" style="height: 300px;">
+            <div class="text-center">
+              <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+              <p class="mt-2 text-muted">Loading backup logs...</p>
+            </div>
+          </div>
+        } @else if (error) {
+          <div class="alert alert-danger" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            {{ error }}
+            <button
+              type="button"
+              class="btn btn-outline-danger btn-sm ms-3"
+              (click)="loadData()">
+              <i class="bi bi-arrow-clockwise me-1"></i>
+              Retry
+            </button>
+          </div>
+        } @else if (backupLogs.length > 0) {
+          <div class="table-responsive">
+            <table class="table table-hover">
+              <thead class="table-dark">
+                <tr>
+                  <th scope="col" class="sortable" (click)="sortBy('backup_type')">
+                    Type
+                    <i class="bi ms-1" [ngClass]="getSortIcon('backup_type')"></i>
+                  </th>
+                  <th scope="col" class="sortable" (click)="sortBy('status')">
+                    Status
+                    <i class="bi ms-1" [ngClass]="getSortIcon('status')"></i>
+                  </th>
+                  <th scope="col" class="sortable" (click)="sortBy('started_at')">
+                    Started
+                    <i class="bi ms-1" [ngClass]="getSortIcon('started_at')"></i>
+                  </th>
+                  <th scope="col" class="d-none d-md-table-cell">Duration</th>
+                  <th scope="col" class="d-none d-lg-table-cell">File Size</th>
+                  <th scope="col" class="d-none d-lg-table-cell sortable" (click)="sortBy('triggered_by')">
+                    Triggered By
+                    <i class="bi ms-1" [ngClass]="getSortIcon('triggered_by')"></i>
+                  </th>
+                  <th scope="col" class="d-none d-xl-table-cell">Details</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (log of backupLogs; track log.id) {
+                  <tr [ngClass]="getStatusColorClass(log.status)">
+                    <!-- Type -->
+                    <td>
+                      <i class="bi me-2" [ngClass]="getBackupTypeIcon(log.backup_type)"></i>
+                      {{ log.backup_type_display }}
+                    </td>
+
+                    <!-- Status -->
+                    <td>
+                      <span class="badge" [ngClass]="getStatusColorClass(log.status)">
+                        <i class="bi me-1" [ngClass]="getStatusIcon(log.status)"></i>
+                        {{ log.status_display }}
+                      </span>
+                    </td>
+
+                    <!-- Started -->
+                    <td>
+                      <div>{{ log.started_at | date:'medium' }}</div>
+                      <small class="text-muted">{{ getRelativeTime(log.started_at) }}</small>
+                    </td>
+
+                    <!-- Duration -->
+                    <td class="d-none d-md-table-cell">
+                      @if (log.duration_seconds !== null) {
+                        {{ formatDuration(log.duration_seconds) }}
+                      } @else if (isBackupActive(log)) {
+                        <span class="text-warning">
+                          <i class="bi bi-arrow-clockwise"></i>
+                          Running...
+                        </span>
+                      } @else {
+                        <span class="text-muted">-</span>
+                      }
+                    </td>
+
+                    <!-- File Size -->
+                    <td class="d-none d-lg-table-cell">
+                      @if (log.file_size_bytes) {
+                        {{ formatFileSize(log.file_size_bytes) }}
+                      } @else {
+                        <span class="text-muted">-</span>
+                      }
+                    </td>
+
+                    <!-- Triggered By -->
+                    <td class="d-none d-lg-table-cell">
+                      <span class="badge bg-secondary">{{ log.triggered_by }}</span>
+                    </td>
+
+                    <!-- Details -->
+                    <td class="d-none d-xl-table-cell">
+                      @if (log.error_message) {
+                        <div class="text-danger small">
+                          <i class="bi bi-exclamation-triangle me-1"></i>
+                          {{ log.error_message | slice:0:50 }}@if (log.error_message.length > 50) {...}
+                        </div>
+                      } @else if (log.success_message) {
+                        <div class="text-success small">
+                          <i class="bi bi-check-circle me-1"></i>
+                          {{ log.success_message | slice:0:50 }}@if (log.success_message.length > 50) {...}
+                        </div>
+                      } @else if (log.backup_file_path) {
+                        <div class="text-info small">
+                          <i class="bi bi-file-earmark me-1"></i>
+                          {{ log.backup_file_path | slice:0:30 }}@if (log.backup_file_path.length > 30) {...}
+                        </div>
+                      } @else {
+                        <span class="text-muted">-</span>
+                      }
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pagination -->
+          @if (totalPages > 1) {
+            <nav aria-label="Backup logs pagination" class="mt-4">
+              <div class="d-flex justify-content-between align-items-center">
+                <div class="text-muted">
+                  Showing {{ (currentPage - 1) * itemsPerPage + 1 }} to
+                  {{ Math.min(currentPage * itemsPerPage, totalCount) }} of {{ totalCount }} logs
+                </div>
+
+                <ul class="pagination mb-0">
+                  <li class="page-item" [class.disabled]="!hasPreviousPage">
+                    <button
+                      class="page-link"
+                      (click)="onPageChange(currentPage - 1)"
+                      [disabled]="!hasPreviousPage">
+                      <i class="bi bi-chevron-left"></i>
+                      Previous
+                    </button>
+                  </li>
+
+                  @for (page of [].constructor(Math.min(5, totalPages)); track $index; let i = $index) {
+                    @let pageNum = Math.max(1, Math.min(totalPages - 4, currentPage - 2)) + i;
+                    @if (pageNum <= totalPages) {
+                      <li class="page-item" [class.active]="pageNum === currentPage">
+                        <button
+                          class="page-link"
+                          (click)="onPageChange(pageNum)">
+                          {{ pageNum }}
+                        </button>
+                      </li>
+                    }
+                  }
+
+                  <li class="page-item" [class.disabled]="!hasNextPage">
+                    <button
+                      class="page-link"
+                      (click)="onPageChange(currentPage + 1)"
+                      [disabled]="!hasNextPage">
+                      Next
+                      <i class="bi bi-chevron-right"></i>
+                    </button>
+                  </li>
+                </ul>
+              </div>
+            </nav>
+          }
+        } @else {
+          <div class="text-center py-5">
+            <i class="bi bi-inbox text-muted" style="font-size: 4rem;"></i>
+            <h5 class="text-muted mt-3">No backup logs found</h5>
+            <p class="text-muted">
+              @if (filters.backup_type || filters.status || filters.search) {
+                Try adjusting your filters to see more results.
+              } @else {
+                No backup logs are available.
+              }
+            </p>
+          </div>
+        }
+      </div>
+    </div>
+  }
+</div>
