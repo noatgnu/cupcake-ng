@@ -1,4 +1,4 @@
-import {ApplicationConfig, importProvidersFrom, inject, provideAppInitializer} from '@angular/core';
+import {ApplicationConfig, importProvidersFrom, inject, provideAppInitializer, DOCUMENT} from '@angular/core';
 import {
   provideRouter,
   withComponentInputBinding,
@@ -9,7 +9,7 @@ import { routes } from './app.routes';
 import { provideHttpClient, withInterceptors } from "@angular/common/http";
 import {authInterceptor} from "./auth.interceptor";
 import {QuillModule} from "ngx-quill";
-import {DOCUMENT} from "@angular/common";
+
 
 
 
