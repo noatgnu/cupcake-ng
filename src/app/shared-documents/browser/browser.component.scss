@@ -1,0 +1,353 @@
+:host {
+  display: block;
+}
+
+.sidebar {
+  width: 280px;
+  transition: transform 0.3s ease;
+  border-right: 1px solid rgba(0,0,0,0.1);
+  overflow-y: auto;
+  flex-shrink: 0;
+  position: relative;
+}
+
+.sidebar-collapsed {
+  transform: translateX(-280px);
+  margin-right: -280px;
+}
+
+.content-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  width: calc(100% - 280px);
+}
+
+.content-expanded {
+  width: 100%;
+}
+
+.content-body {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.footer-spacer {
+  height: 80px;
+  width: 100%;
+  flex-shrink: 0;
+}
+
+.list-group-item.active {
+  border-left: 4px solid #FFD6A5;
+  font-weight: 500;
+}
+
+.list-group-item:hover:not(.active) {
+  border-left: 4px solid #dee2e6;
+}
+
+.sidebar-toggle {
+  width: 42px;
+  height: 38px;
+  padding: 0.375rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.list-group-item {
+  border-left: 4px solid transparent;
+  border-right: 0;
+  border-top: 0;
+  transition: all 0.2s;
+}
+
+.search-container {
+  width: 300px;
+}
+
+.folder-card {
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid rgba(0,0,0,0.125);
+  position: relative;
+}
+
+.folder-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  border-color: #FFD6A5;
+}
+
+.folder-card:hover .btn {
+  opacity: 1;
+}
+
+.document-card {
+  transition: all 0.2s ease;
+  border: 1px solid rgba(0,0,0,0.125);
+}
+
+.document-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.document-card:hover .btn {
+  opacity: 1;
+}
+
+// Action buttons on cards
+.folder-card .btn,
+.document-card .btn {
+  opacity: 0.7;
+  transition: opacity 0.2s ease;
+}
+
+.folder-card .btn:hover,
+.document-card .btn:hover {
+  opacity: 1;
+}
+
+// Delete button specific styling
+.btn-outline-danger:hover {
+  background-color: #dc3545;
+  border-color: #dc3545;
+  color: white;
+}
+
+// Prevent folder navigation when clicking action buttons
+.folder-card .btn {
+  z-index: 10;
+  position: relative;
+}
+
+.quick-actions .btn {
+  opacity: 0.7;
+  transition: opacity 0.2s ease;
+}
+
+.document-card:hover .quick-actions .btn,
+.folder-card:hover .quick-actions .btn {
+  opacity: 1;
+}
+
+// Badge spacing
+.folder-info .badge {
+  font-size: 0.7rem;
+}
+
+// Fix long name overflow issues
+.folder-card .card-title,
+.document-card .card-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+  word-break: break-all;
+  line-height: 1.2;
+}
+
+// Ensure parent containers don't expand beyond card bounds
+.folder-card .flex-grow-1,
+.document-card .flex-grow-1 {
+  min-width: 0; // Allows flex item to shrink below content size
+  overflow: hidden;
+}
+
+// Additional protection for very long filenames
+.folder-card .card-body,
+.document-card .card-body {
+  overflow: hidden;
+  word-wrap: break-word;
+}
+
+// List view styling
+.list-view-table {
+  margin-bottom: 0;
+
+  thead th {
+    font-weight: 600;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 1rem 0.75rem;
+    background-color: #f8f9fa !important;
+  }
+
+  tbody td {
+    padding: 0.75rem;
+    vertical-align: middle;
+    border-top: 1px solid #dee2e6;
+  }
+
+  .list-item-row {
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+
+    &:hover {
+      background-color: #f8f9fa;
+    }
+
+    &.folder-row:hover {
+      background-color: #fff3cd;
+    }
+  }
+
+  .document-name {
+    max-width: 300px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  // Ensure action buttons are visible on hover
+  .list-item-row .btn {
+    opacity: 0.7;
+    transition: opacity 0.2s ease;
+  }
+
+  .list-item-row:hover .btn {
+    opacity: 1;
+  }
+
+  // Badge styling in list view
+  .badge {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+  }
+}
+
+// Responsive list view adjustments
+@media (max-width: 768px) {
+  .list-view-table {
+    font-size: 0.875rem;
+
+    .document-name {
+      max-width: 200px;
+    }
+
+    thead th {
+      padding: 0.75rem 0.5rem;
+      font-size: 0.8rem;
+    }
+
+    tbody td {
+      padding: 0.5rem;
+    }
+  }
+}
+
+@media (max-width: 576px) {
+  .list-view-table {
+    .document-name {
+      max-width: 150px;
+    }
+
+    .btn {
+      padding: 0.25rem 0.5rem;
+      font-size: 0.875rem;
+    }
+  }
+}
+
+.breadcrumb {
+  background: none;
+  padding: 0;
+}
+
+.breadcrumb .btn-link {
+  color: #6c757d;
+  text-decoration: none;
+  border: none;
+  background: none;
+  padding: 0;
+  font-size: inherit;
+}
+
+.breadcrumb .btn-link:hover {
+  color: #495057;
+  text-decoration: underline;
+}
+
+.breadcrumb .btn-link.active {
+  color: #495057;
+  font-weight: 500;
+  pointer-events: none;
+}
+
+.breadcrumb-item + .breadcrumb-item::before {
+  content: "/";
+  color: #6c757d;
+}
+
+.breadcrumb-item.active {
+  color: #6c757d;
+}
+
+.breadcrumb-item.active span {
+  color: #495057;
+}
+
+// Action buttons styling
+.btn-group .btn {
+  border-radius: 0.375rem;
+}
+
+.btn-group .btn:not(:last-child) {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+  border-right: 0;
+}
+
+.btn-group .btn:not(:first-child) {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  .search-container {
+    width: 200px;
+  }
+
+  .sidebar {
+    width: 250px;
+  }
+
+  .content-wrapper {
+    width: calc(100% - 250px);
+  }
+
+  .sidebar-collapsed {
+    transform: translateX(-250px);
+    margin-right: -250px;
+  }
+}
+
+@media (max-width: 576px) {
+  .search-container {
+    width: 150px;
+  }
+
+  .content-header > div {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: stretch !important;
+  }
+
+  .breadcrumb {
+    font-size: 0.875rem;
+  }
+
+  .btn-group {
+    width: 100%;
+  }
+
+  .btn-group .btn {
+    flex: 1;
+  }
+}

@@ -1,0 +1,545 @@
+<div class="container-fluid p-0 d-flex flex-column vh-100">
+  <!-- Main header -->
+  <header class="border-bottom shadow-sm py-3 px-4">
+    <div class="d-flex align-items-center justify-content-center">
+      <h4 class="m-0 text-primary fw-bold">Shared Documents</h4>
+    </div>
+  </header>
+
+  <div class="flex-grow-1 d-flex">
+    <!-- Sidebar -->
+    <div class="sidebar" [ngClass]="{'sidebar-collapsed': hideSection}">
+      <div class="sidebar-header border-bottom p-3">
+        <div class="d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">Filters</h5>
+          <button type="button" class="btn-close d-md-none" aria-label="Close sidebar" (click)="hideSection = true"></button>
+        </div>
+      </div>
+      <div class="list-group list-group-flush">
+        <button type="button" class="list-group-item list-group-item-action py-3 d-flex align-items-center"
+                [ngClass]="{'active': selectedFilter === 'all'}"
+                (click)="onFilterChange('all')">
+          <i class="bi bi-files me-2"></i> All Documents
+        </button>
+        <button type="button" class="list-group-item list-group-item-action py-3 d-flex align-items-center"
+                [ngClass]="{'active': selectedFilter === 'personal'}"
+                (click)="onFilterChange('personal')">
+          <i class="bi bi-person-fill me-2"></i> Personal
+        </button>
+        <button type="button" class="list-group-item list-group-item-action py-3 d-flex align-items-center"
+                [ngClass]="{'active': selectedFilter === 'shared'}"
+                (click)="onFilterChange('shared')">
+          <i class="bi bi-people-fill me-2"></i> Shared with Me
+        </button>
+      </div>
+    </div>
+
+    <!-- Main content area -->
+    <div class="content-wrapper" [ngClass]="{'content-expanded': hideSection}">
+      <!-- Content header with breadcrumbs -->
+      <div class="content-header border-bottom p-3 shadow-sm">
+        <div class="d-flex align-items-center justify-content-between">
+          <div class="d-flex align-items-center">
+            <button type="button" class="btn btn-outline-primary sidebar-toggle me-3"
+                    (click)="hideSection = !hideSection"
+                    aria-label="Toggle sidebar">
+              <i class="bi" [ngClass]="hideSection ? 'bi-layout-sidebar-inset' : 'bi-layout-sidebar'"></i>
+            </button>
+            <h5 class="mb-0 d-flex align-items-center">
+              <i class="bi me-2" [ngClass]="getFilterIcon()"></i>
+              {{ getFilterDisplayName() }}
+            </h5>
+          </div>
+
+          <!-- Action buttons and Search -->
+          <div class="d-flex align-items-center gap-2">
+            <!-- Action Buttons -->
+            <div class="btn-group" role="group">
+              <button type="button" class="btn btn-outline-primary btn-sm"
+                      (click)="openCreateFolderModal()"
+                      title="Create New Folder">
+                <i class="bi bi-folder-plus"></i>
+                <span class="d-none d-md-inline ms-1">New Folder</span>
+              </button>
+              <button type="button" class="btn btn-outline-success btn-sm"
+                      (click)="openUploadFileModal()"
+                      title="Upload Files">
+                <i class="bi bi-cloud-upload"></i>
+                <span class="d-none d-md-inline ms-1">Upload</span>
+              </button>
+            </div>
+
+            <!-- View Toggle -->
+            <button type="button" class="btn btn-outline-secondary btn-sm"
+                    (click)="toggleViewMode()"
+                    [title]="getViewModeTooltip()">
+              <i class="bi" [ngClass]="getViewModeIcon()"></i>
+            </button>
+
+            <!-- Search -->
+            <div class="search-container">
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-search"></i></span>
+                <input type="text" class="form-control" placeholder="Search documents..."
+                       [(ngModel)]="searchQuery"
+                       (keyup.enter)="loadDocuments()">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Breadcrumbs -->
+        @if (browseData) {
+          <nav aria-label="breadcrumb" class="mt-2">
+            <ol class="breadcrumb mb-0">
+              <!-- Always show Root as first item -->
+              <li class="breadcrumb-item">
+                <button type="button" class="btn btn-link p-0 text-decoration-none"
+                        (click)="navigateToFolder(null)"
+                        [ngClass]="{'active': currentFolderId === null}">
+                  <i class="bi bi-house-fill me-1"></i>Root
+                </button>
+              </li>
+
+              <!-- Show breadcrumbs from API (excluding Root if present) -->
+              @if (browseData.breadcrumbs && browseData.breadcrumbs.length > 0) {
+                @for (breadcrumb of browseData.breadcrumbs; track breadcrumb.id; let isLast = $last) {
+                  @if (breadcrumb.name !== 'Root' && breadcrumb.name !== 'root') {
+                    <li class="breadcrumb-item" [ngClass]="{'active': isLast}" [attr.aria-current]="isLast ? 'page' : null">
+                      @if (isLast) {
+                        <!-- Last breadcrumb is the current folder, show as text -->
+                        <span class="fw-medium">{{ breadcrumb.name }}</span>
+                      } @else {
+                        <!-- Previous breadcrumbs are clickable -->
+                        <button type="button" class="btn btn-link p-0 text-decoration-none"
+                                (click)="navigateToBreadcrumb(breadcrumb)">
+                          {{ breadcrumb.name }}
+                        </button>
+                      }
+                    </li>
+                  }
+                }
+              }
+            </ol>
+
+            <!-- Back button -->
+            @if (currentFolderId !== null) {
+              <button type="button" class="btn btn-outline-secondary btn-sm mt-2"
+                      (click)="goToParent()"
+                      title="Go back to parent folder">
+                <i class="bi bi-arrow-left me-1"></i>Back
+              </button>
+            }
+          </nav>
+        }
+
+      </div>
+
+      <!-- Main content body -->
+      <div class="content-body p-3 overflow-hidden">
+        @if (loading) {
+          <div class="d-flex justify-content-center align-items-center" style="height: 200px;">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+          </div>
+        } @else if (error) {
+          <div class="alert alert-danger" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            {{ error }}
+            <button type="button" class="btn btn-outline-danger btn-sm ms-2" (click)="loadDocuments()">
+              <i class="bi bi-arrow-clockwise me-1"></i>Retry
+            </button>
+          </div>
+        } @else if (browseData) {
+          <!-- Folders -->
+          @if (browseData.folders && browseData.folders.length > 0) {
+            <div class="mb-4">
+              <h6 class="text-muted mb-3">
+                <i class="bi bi-folder-fill me-2"></i>
+                Folders ({{ browseData.total_folders }})
+              </h6>
+
+              <!-- Card View -->
+              @if (viewMode === 'card') {
+                <div class="row g-3">
+                  @for (folder of browseData.folders; track folder.id) {
+                    <div class="col-lg-3 col-md-4 col-sm-6">
+                      <div class="card h-100 folder-card" (click)="navigateToFolder(folder.id)">
+                        <div class="card-body">
+                          <div class="d-flex align-items-center mb-2">
+                            <i class="bi bi-folder-fill text-warning me-2" style="font-size: 1.5rem;"></i>
+                            <div class="flex-grow-1">
+                              <h6 class="card-title mb-1 text-truncate">{{ folder.name }}</h6>
+                              @if (folder.document_count !== undefined) {
+                                <small class="text-muted d-block">{{ folder.document_count }} items</small>
+                              }
+                              @if (getFolderSharingInfo(folder)) {
+                                <small class="text-info d-block">{{ getFolderSharingInfo(folder) }}</small>
+                              }
+                            </div>
+                          </div>
+
+                          <!-- Folder actions -->
+                          <div class="d-flex justify-content-between align-items-center mt-2">
+                            <div class="folder-info">
+                              @if (isFolderOwned(folder)) {
+                                <span class="badge bg-warning me-1">Owner</span>
+                              } @else if (isFolderShared(folder)) {
+                                <span class="badge bg-info me-1">Shared</span>
+                              }
+                            </div>
+
+                            <div ngbDropdown container="body">
+                              <button class="btn btn-outline-secondary btn-sm"
+                                      ngbDropdownToggle
+                                      (click)="$event.stopPropagation()"
+                                      [title]="'Actions for ' + folder.name"
+                                      id="folderDropdown{{ folder.id }}">
+                                <i class="bi bi-three-dots-vertical"></i>
+                              </button>
+                              <div ngbDropdownMenu [attr.aria-labelledby]="'folderDropdown' + folder.id">
+                                @if (hasFolderPermission(folder, 'can_share')) {
+                                  <button ngbDropdownItem (click)="openShareFolderModal(folder, $event)">
+                                    <i class="bi bi-share me-2"></i>Share Folder
+                                  </button>
+                                }
+                                @if (hasFolderPermission(folder, 'can_edit')) {
+                                  <button ngbDropdownItem (click)="openDocumentRenameModal(folder.id, true, folder.name)">
+                                    <i class="bi bi-pencil me-2"></i>Rename Folder
+                                  </button>
+                                }
+                                @if (hasFolderPermission(folder, 'can_delete')) {
+                                  <div class="dropdown-divider"></div>
+                                  <button ngbDropdownItem (click)="deleteFolder(folder, $event)">
+                                    <i class="bi bi-trash me-2"></i>Delete Folder
+                                  </button>
+                                }
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  }
+                </div>
+              } @else {
+                <!-- List View -->
+                <div class="table-responsive">
+                  <table class="table table-hover list-view-table">
+                    <thead class="table-primary">
+                      <tr>
+                        <th scope="col" class="border-0">Name</th>
+                        <th scope="col" class="border-0 d-none d-md-table-cell">Items</th>
+                        <th scope="col" class="border-0 d-none d-lg-table-cell">Owner</th>
+                        <th scope="col" class="border-0 d-none d-lg-table-cell">Created</th>
+                        <th scope="col" class="border-0 d-none d-lg-table-cell">Sharing</th>
+                        <th scope="col" class="border-0 text-end">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @for (folder of browseData.folders; track folder.id) {
+                        <tr class="list-item-row folder-row" (click)="navigateToFolder(folder.id)">
+                          <td class="align-middle">
+                            <div class="d-flex align-items-center">
+                              <i class="bi bi-folder-fill text-warning me-3" style="font-size: 1.2rem;"></i>
+                              <div class="flex-grow-1">
+                                <div class="fw-medium text-truncate" [title]="folder.name">{{ folder.name }}</div>
+                                <div class="d-md-none">
+                                  <small class="text-muted">{{ folder.document_count || 0 }} items</small>
+                                  @if (getFolderSharingInfo(folder)) {
+                                    <small class="text-info d-block">{{ getFolderSharingInfo(folder) }}</small>
+                                  }
+                                </div>
+                              </div>
+                            </div>
+                          </td>
+                          <td class="align-middle d-none d-md-table-cell">
+                            <span class="text-muted">{{ folder.document_count || 0 }}</span>
+                          </td>
+                          <td class="align-middle d-none d-lg-table-cell">
+                            <span class="text-muted">{{ getOwnerDisplayName(folder) }}</span>
+                          </td>
+                          <td class="align-middle d-none d-lg-table-cell">
+                            <span class="text-muted">{{ formatDate(folder.created_at) }}</span>
+                          </td>
+                          <td class="align-middle d-none d-lg-table-cell">
+                            @if (isFolderOwned(folder)) {
+                              <span class="badge bg-warning">Owner</span>
+                            } @else if (isFolderShared(folder)) {
+                              <span class="badge bg-info">Shared</span>
+                            }
+                          </td>
+                          <td class="align-middle text-end">
+                            <div ngbDropdown container="body">
+                              <button class="btn btn-outline-secondary btn-sm"
+                                      ngbDropdownToggle
+                                      (click)="$event.stopPropagation()"
+                                      [title]="'Actions for ' + folder.name"
+                                      id="folderListDropdown{{ folder.id }}">
+                                <i class="bi bi-three-dots-vertical"></i>
+                              </button>
+                              <div ngbDropdownMenu [attr.aria-labelledby]="'folderListDropdown' + folder.id">
+                                @if (hasFolderPermission(folder, 'can_share')) {
+                                  <button ngbDropdownItem (click)="openShareFolderModal(folder, $event)">
+                                    <i class="bi bi-share me-2"></i>Share Folder
+                                  </button>
+                                }
+                                @if (hasFolderPermission(folder, "can_edit")) {
+                                  <button ngbDropdownItem (click)="openDocumentRenameModal(folder.id, true, folder.name)">
+                                    <i class="bi bi-pencil me-2"></i>Rename Folder
+                                  </button>
+                                }
+                                @if (hasFolderPermission(folder, 'can_delete')) {
+                                  <div class="dropdown-divider"></div>
+                                  <button ngbDropdownItem (click)="deleteFolder(folder, $event)">
+                                    <i class="bi bi-trash me-2"></i>Delete Folder
+                                  </button>
+                                }
+                              </div>
+                            </div>
+                          </td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
+              }
+            </div>
+          }
+
+          <!-- Documents -->
+          @if (browseData.documents && browseData.documents.length > 0) {
+            <div>
+              <h6 class="text-muted mb-3">
+                <i class="bi bi-file-earmark-fill me-2"></i>
+                Documents ({{ browseData.total_documents }})
+              </h6>
+
+              <!-- Card View -->
+              @if (viewMode === 'card') {
+                <div class="row g-3">
+                  @for (document of browseData.documents; track document.id) {
+                    <div class="col-lg-3 col-md-4 col-sm-6">
+                      <div class="card h-100 document-card">
+                        <div class="card-body">
+                          <div class="d-flex align-items-start mb-2">
+                            <i class="bi me-2 text-primary" [ngClass]="'bi-' + getFileIcon(document)" style="font-size: 1.5rem;"></i>
+                            <div class="flex-grow-1">
+                              <h6 class="card-title mb-1 text-truncate" [title]="document.annotation_name">
+                                {{ document.annotation_name }}
+                              </h6>
+                              @if (document.file_info?.size) {
+                                <small class="text-muted d-block">{{ formatFileSize(document) }}</small>
+                              }
+                              @if (document.created_at) {
+                                <small class="text-muted d-block">{{ document.created_at | date:'short' }}</small>
+                              }
+                            </div>
+                          </div>
+
+                          <!-- Document actions -->
+                          <div class="d-flex justify-content-between align-items-center mt-2">
+                            <!-- Quick Actions -->
+                            <div class="quick-actions">
+                              @if (hasPermission(document, 'can_download')) {
+                                <button type="button" class="btn btn-outline-primary btn-sm me-1"
+                                        (click)="downloadDocument(document)"
+                                        [title]="'Download ' + document.annotation_name">
+                                  <i class="bi bi-download"></i>
+                                </button>
+                              }
+                            </div>
+
+                            <!-- Dropdown Menu -->
+                            <div ngbDropdown container="body">
+                              <button class="btn btn-outline-secondary btn-sm"
+                                      ngbDropdownToggle
+                                      [title]="'Actions for ' + document.annotation_name"
+                                      id="documentDropdown{{ document.id }}">
+                                <i class="bi bi-three-dots-vertical"></i>
+                              </button>
+                              <div ngbDropdownMenu [attr.aria-labelledby]="'documentDropdown' + document.id">
+                                @if (hasPermission(document, 'can_download')) {
+                                  <button ngbDropdownItem (click)="downloadDocument(document)">
+                                    <i class="bi bi-download me-2"></i>Download
+                                  </button>
+                                }
+                                @if (hasPermission(document, 'can_edit')) {
+                                  <button ngbDropdownItem (click)="openDocumentRenameModal(document.id, false, document.annotation_name)">
+                                    <i class="bi bi-pencil me-2"></i>Rename
+                                  </button>
+                                }
+                                @if (hasPermission(document, 'can_share')) {
+                                  <div class="dropdown-divider"></div>
+                                  <button ngbDropdownItem (click)="openShareDocumentModal(document, $event)">
+                                    <i class="bi bi-share me-2"></i>Share Document
+                                  </button>
+                                }
+                                @if (hasPermission(document, 'can_delete')) {
+                                  <div class="dropdown-divider"></div>
+                                  <button ngbDropdownItem (click)="deleteDocument(document, $event)">
+                                    <i class="bi bi-trash me-2"></i>Delete Document
+                                  </button>
+                                }
+                                @if (!hasPermission(document, 'can_view') && !hasPermission(document, 'can_download') && !hasPermission(document, 'can_share') && !hasPermission(document, 'can_delete')) {
+                                  <button ngbDropdownItem disabled>
+                                    <i class="bi bi-info-circle me-2"></i>No actions available
+                                  </button>
+                                }
+                              </div>
+                            </div>
+                          </div>
+
+                          <div class="mt-2">
+                            @if (isDocumentOwned(document)) {
+                              <span class="badge bg-warning me-1">Owner</span>
+                            } @else if (isDocumentShared(document)) {
+                              <span class="badge bg-info me-1">Shared</span>
+                            }
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  }
+                </div>
+              } @else {
+                <!-- List View -->
+                <div class="table-responsive">
+                  <table class="table table-hover list-view-table">
+                    <thead class="table-primary">
+                      <tr>
+                        <th scope="col" class="border-0">Name</th>
+                        <th scope="col" class="border-0 d-none d-md-table-cell">Size</th>
+                        <th scope="col" class="border-0 d-none d-md-table-cell">Type</th>
+                        <th scope="col" class="border-0 d-none d-lg-table-cell">Owner</th>
+                        <th scope="col" class="border-0 d-none d-lg-table-cell">Created</th>
+                        <th scope="col" class="border-0 d-none d-lg-table-cell">Sharing</th>
+                        <th scope="col" class="border-0 text-end">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @for (document of browseData.documents; track document.id) {
+                        <tr class="list-item-row document-row">
+                          <td class="align-middle">
+                            <div class="d-flex align-items-center">
+                              <i class="bi me-3 text-primary" [ngClass]="'bi-' + getFileIcon(document)" style="font-size: 1.2rem;"></i>
+                              <div class="flex-grow-1">
+                                <div class="fw-medium document-name" [title]="document.annotation_name">{{ document.annotation_name }}</div>
+                                <div class="d-md-none">
+                                  <small class="text-muted">{{ formatFileSize(document) }}</small>
+                                  @if (getFileExtension(document)) {
+                                    <span class="text-muted"> • {{ getFileExtension(document).toUpperCase() }}</span>
+                                  }
+                                </div>
+                              </div>
+                            </div>
+                          </td>
+                          <td class="align-middle d-none d-md-table-cell">
+                            <span class="text-muted">{{ formatFileSize(document) }}</span>
+                          </td>
+                          <td class="align-middle d-none d-md-table-cell">
+                            <span class="text-muted">{{ getFileExtension(document).toUpperCase() || 'FILE' }}</span>
+                          </td>
+                          <td class="align-middle d-none d-lg-table-cell">
+                            <span class="text-muted">{{ getOwnerDisplayName(document) }}</span>
+                          </td>
+                          <td class="align-middle d-none d-lg-table-cell">
+                            <span class="text-muted">{{ formatDate(document.created_at) }}</span>
+                          </td>
+                          <td class="align-middle d-none d-lg-table-cell">
+                            @if (isDocumentOwned(document)) {
+                              <span class="badge bg-warning">Owner</span>
+                            } @else if (isDocumentShared(document)) {
+                              <span class="badge bg-info">Shared</span>
+                            }
+                          </td>
+                          <td class="align-middle text-end">
+                            <div class="d-flex align-items-center justify-content-end gap-1">
+                              @if (hasPermission(document, 'can_download')) {
+                                <button type="button" class="btn btn-outline-primary btn-sm"
+                                        (click)="downloadDocument(document)"
+                                        [title]="'Download ' + document.annotation_name">
+                                  <i class="bi bi-download"></i>
+                                </button>
+                              }
+                              <div ngbDropdown container="body">
+                                <button class="btn btn-outline-secondary btn-sm"
+                                        ngbDropdownToggle
+                                        [title]="'Actions for ' + document.annotation_name"
+                                        id="documentListDropdown{{ document.id }}">
+                                  <i class="bi bi-three-dots-vertical"></i>
+                                </button>
+                                <div ngbDropdownMenu [attr.aria-labelledby]="'documentListDropdown' + document.id">
+                                  @if (hasPermission(document, 'can_download')) {
+                                    <button ngbDropdownItem (click)="downloadDocument(document)">
+                                      <i class="bi bi-download me-2"></i>Download
+                                    </button>
+                                  }
+                                  @if (hasPermission(document, 'can_edit')) {
+                                    <button ngbDropdownItem (click)="openDocumentRenameModal(
+                                    document.id,
+                                    false,
+                                    document.annotation_name
+                                    )">
+                                      <i class="bi bi-pencil me-2"></i>Rename
+                                    </button>
+                                  }
+                                  @if (hasPermission(document, 'can_share')) {
+                                    <div class="dropdown-divider"></div>
+                                    <button ngbDropdownItem (click)="openShareDocumentModal(document, $event)">
+                                      <i class="bi bi-share me-2"></i>Share Document
+                                    </button>
+                                  }
+                                  @if (hasPermission(document, 'can_delete')) {
+                                    <div class="dropdown-divider"></div>
+                                    <button ngbDropdownItem (click)="deleteDocument(document, $event)">
+                                      <i class="bi bi-trash me-2"></i>Delete Document
+                                    </button>
+                                  }
+                                  <!-- Fallback item to ensure dropdown is never empty -->
+                                  @if (!hasPermission(document, 'can_view') && !hasPermission(document, 'can_download') && !hasPermission(document, 'can_share') && !hasPermission(document, 'can_delete')) {
+                                    <button ngbDropdownItem disabled>
+                                      <i class="bi bi-info-circle me-2"></i>No actions available
+                                    </button>
+                                  }
+                                </div>
+                              </div>
+                            </div>
+                          </td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
+              }
+            </div>
+          }
+
+          <!-- Empty state -->
+          @if (browseData.folders.length === 0 && browseData.documents.length === 0) {
+            <div class="text-center py-5">
+              <div class="mb-3">
+                <i class="bi bi-inbox text-muted" style="font-size: 3rem;"></i>
+              </div>
+              <h5 class="text-muted">No documents found</h5>
+              <p class="text-muted mb-0">
+                @if (selectedFilter === 'personal') {
+                  You don't have any personal documents yet.
+                } @else if (selectedFilter === 'shared') {
+                  No documents have been shared with you yet.
+                } @else {
+                  This folder is empty.
+                }
+              </p>
+            </div>
+          }
+        }
+
+        @if (hasFooterText()) {
+          <div class="footer-spacer"></div>
+        }
+      </div>
+    </div>
+  </div>
+</div>

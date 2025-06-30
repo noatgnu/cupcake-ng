@@ -11,6 +11,7 @@ import {ProtocolSessionModule} from "./protocol-session/protocol-session.module"
 import {HomeModule} from "./home/home.module";
 import {SiteSettingsComponent} from "./site-settings/site-settings.component";
 import {LaboratoryNotebookComponent} from "./laboratory-notebook/laboratory-notebook.component";
+import {SharedDocumentsModule} from "./shared-documents/shared-documents.module";
 
 export const routes: Routes = [
   {
@@ -53,6 +54,9 @@ export const routes: Routes = [
   {
     path: 'sdrf-playground',
     loadChildren: () => MetadataPlaygroundModule
+  },{
+    path: 'documents',
+    loadChildren: () => SharedDocumentsModule
   },
   {
     path: 'laboratory-notebook',

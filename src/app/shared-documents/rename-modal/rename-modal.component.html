@@ -1,0 +1,53 @@
+<div class="modal-header">
+  <h4 class="modal-title">
+    <i class="bi bi-folder-plus me-2"></i>
+    Rename @if (isFolder) { Folder } @else { Document }
+  </h4>
+  <button type="button" class="btn-close" aria-label="Close" (click)="close()"></button>
+</div>
+<div class="modal-body">
+  <form (ngSubmit)="renameDocument()" #newNameForm="ngForm">
+    <div class="mb-3">
+      <label for="newName" class="form-label">
+        New Name <span class="text-danger">*</span>
+      </label>
+      <input
+        type="text"
+        id="newName"
+        class="form-control"
+        [(ngModel)]="newName"
+        name="newName"
+        placeholder="Enter new name"
+        maxlength="255"
+        required
+        [disabled]="renaming"
+        (keypress)="onKeyPress($event)"
+        #newNameInput="ngModel">
+
+      @if (newNameInput.invalid && newNameInput.touched) {
+        <div class="text-danger mt-1">
+          <small>New name is required</small>
+        </div>
+      }
+    </div>
+
+    @if (error) {
+      <div class="alert alert-danger" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        {{ error }}
+      </div>
+    }
+  </form>
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn btn-secondary" (click)="close()">Cancel</button>
+  <button type="button" class="btn btn-primary" (click)="renameDocument()"
+          [disabled]="renaming || !newName.trim()">
+    @if (renaming) {
+      <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+    } @else {
+      <i class="bi bi-pen me-2"></i>
+    }
+    {{ renaming ? 'Renaming...' : 'Rename' }}
+  </button>
+</div>

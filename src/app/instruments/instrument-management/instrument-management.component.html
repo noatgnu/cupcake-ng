@@ -1,73 +1,146 @@
 <div class="container">
   <div class="scrollable-content">
-    <form [formGroup]="form">
-      <div class="form-floating">
-        <input class="form-control" id="searchTerm" formControlName="searchTerm" placeholder="Search Term">
-        <label for="searchTerm">Instrument/Equipment Search Term</label>
+    <!-- Header Section -->
+    <div class="header-section">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="page-title mb-0">
+          <i class="bi bi-gear me-2 text-primary"></i>
+          Instrument Management
+        </h4>
+        @if (accounts.is_staff) {
+          <button class="btn btn-primary" (click)="openInstrumentCreateModal()">
+            <i class="bi bi-plus-circle me-1"></i>
+            Add Instrument
+          </button>
+        }
       </div>
-    </form>
 
-    <div class="legend-container">
-      <h6 class="mb-2"><i class="bi bi-info-circle me-1"></i>Legend</h6>
-      <div class="d-flex flex-wrap gap-2">
-        <small><i class="bi bi-eye"></i> View Permission</small>
-        <small><i class="bi bi-eye text-danger"></i> No View Permission</small>
-        <small><i class="bi bi-pencil"></i> Manage Permission</small>
-        <small><i class="bi bi-pencil text-danger"></i> No Manage Permission</small>
+      <!-- Search Section -->
+      <div class="search-section mb-4">
+        <form [formGroup]="form">
+          <div class="input-group">
+            <span class="input-group-text">
+              <i class="bi bi-search"></i>
+            </span>
+            <div class="form-floating">
+              <input class="form-control" id="searchTerm" formControlName="searchTerm" placeholder="Search instruments...">
+              <label for="searchTerm">Search instruments by name or description</label>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <!-- Legend Section -->
+      <div class="legend-section">
+        <div class="card border-0">
+          <div class="card-body py-2">
+            <div class="d-flex align-items-center">
+              <h6 class="mb-0 me-3">
+                <i class="bi bi-info-circle text-primary me-1"></i>
+                Permissions:
+              </h6>
+              <div class="d-flex flex-wrap gap-3">
+                <small class="permission-legend">
+                  <i class="bi bi-eye text-success me-1"></i>View
+                </small>
+                <small class="permission-legend">
+                  <i class="bi bi-eye-slash text-danger me-1"></i>No View
+                </small>
+                <small class="permission-legend">
+                  <i class="bi bi-pen-fill text-success me-1"></i>Manage
+                </small>
+                <small class="permission-legend">
+                  <i class="bi bi-pen text-danger me-1"></i>No Manage
+                </small>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
+    <!-- Instruments List -->
     @if (instrumentQuery) {
       @if (instrumentQuery.results.length > 0) {
-        <div class="list-group">
+        <!-- Results Summary -->
+        <div class="results-summary mb-3">
+          <small class="text-muted">
+            <i class="bi bi-list-ul me-1"></i>
+            Showing {{instrumentQuery.results.length}} of {{instrumentQuery.count}} instruments
+          </small>
+        </div>
+
+        <div class="instruments-grid">
           @for (result of instrumentQuery.results; track result.id) {
-            <div class="list-group-item">
-              <div class="d-flex align-items-start mb-2">
-                <div class="me-3" style="min-width: 60px; flex-shrink: 0;">
-                  @if (result.image) {
-                    <img [src]="result.image" class="img-thumbnail cursor-pointer" alt="{{result.instrument_name}}"
-                         style="width: 60px; height: 60px; object-fit: cover;" loading="lazy"
-                         (click)="openImageViewModal(result.image, result.instrument_name)">
-                  } @else {
-                    <div class="d-flex align-items-center justify-content-center"
-                         style="width: 60px; height: 60px;">
-                      <i class="bi bi-camera text-muted" style="font-size: 1.5rem;"></i>
-                    </div>
-                  }
-                </div>
-
-                <div class="flex-grow-1">
-                  <h5 class="mb-1">{{result.instrument_name}}</h5>
-                  <p class="mb-1 text-secondary">{{result.instrument_description}}</p>
-                </div>
-              </div>
-              <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
-                @if (dataService.instrumentPermissions[result.id]) {
-                  <div class="me-3">
-                    <span class="me-2" [ngClass]="dataService.instrumentPermissions[result.id]['can_view'] ? 'text-success' : 'text-danger'">
-                      <i class="bi" [ngClass]="dataService.instrumentPermissions[result.id]['can_view'] ? 'bi-eye' : 'bi-eye-slash'"></i>
-                    </span>
-                    <span [ngClass]="dataService.instrumentPermissions[result.id]['can_manage'] ? 'text-success' : 'text-danger'">
-                      <i class="bi" [ngClass]="dataService.instrumentPermissions[result.id]['can_manage'] ? 'bi-pen-fill' : 'bi-pen'"></i>
-                    </span>
+            <div class="instrument-card">
+              <!-- Card Header -->
+              <div class="card-header-section">
+                <div class="d-flex align-items-start">
+                  <!-- Image Section -->
+                  <div class="instrument-image-container me-3">
+                    @if (result.image) {
+                      <img [src]="result.image"
+                           class="instrument-image cursor-pointer"
+                           alt="{{result.instrument_name}}"
+                           loading="lazy"
+                           (click)="openImageViewModal(result.image, result.instrument_name)">
+                    } @else {
+                      <div class="instrument-image-placeholder">
+                        <i class="bi bi-camera text-muted"></i>
+                      </div>
+                    }
                   </div>
-                }
 
+                  <!-- Info Section -->
+                  <div class="flex-grow-1 min-width-0">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                      <h5 class="instrument-title mb-1">{{result.instrument_name}}</h5>
+
+                      <!-- Permissions Badge -->
+                      @if (dataService.instrumentPermissions[result.id]) {
+                        <div class="permissions-badge">
+                          <span class="permission-icon me-1"
+                                [ngClass]="dataService.instrumentPermissions[result.id]['can_view'] ? 'text-success' : 'text-danger'"
+                                [ngbTooltip]="dataService.instrumentPermissions[result.id]['can_view'] ? 'Can View' : 'Cannot View'">
+                            <i class="bi" [ngClass]="dataService.instrumentPermissions[result.id]['can_view'] ? 'bi-eye' : 'bi-eye-slash'"></i>
+                          </span>
+                          <span class="permission-icon"
+                                [ngClass]="dataService.instrumentPermissions[result.id]['can_manage'] ? 'text-success' : 'text-danger'"
+                                [ngbTooltip]="dataService.instrumentPermissions[result.id]['can_manage'] ? 'Can Manage' : 'Cannot Manage'">
+                            <i class="bi" [ngClass]="dataService.instrumentPermissions[result.id]['can_manage'] ? 'bi-pen-fill' : 'bi-pen'"></i>
+                          </span>
+                        </div>
+                      }
+                    </div>
+
+                    <p class="instrument-description text-muted mb-2">{{result.instrument_description}}</p>
+                  </div>
+                </div>
+
+                <!-- Metadata Tags -->
                 @if (result.metadata_columns.length > 0) {
-                  <div class="d-flex flex-wrap gap-1">
+                  <div class="metadata-tags mt-2">
                     @for (m of result.metadata_columns; track m.id) {
                       @switch (m.type) {
                         @case ('Characteristics') {
-                          <span class="badge bg-primary" ngbTooltip="Characteristics">{{m.name}}: {{m.value}}</span>
+                          <span class="badge bg-primary bg-opacity-75" ngbTooltip="Characteristics">
+                            <i class="bi bi-info-circle me-1"></i>{{m.name}}: {{m.value}}
+                          </span>
                         }
                         @case ('Comment') {
-                          <span class="badge bg-secondary" ngbTooltip="Comment">{{m.name}}: {{m.value}}</span>
+                          <span class="badge bg-secondary bg-opacity-75" ngbTooltip="Comment">
+                            <i class="bi bi-chat-text me-1"></i>{{m.name}}: {{m.value}}
+                          </span>
                         }
                         @case ('Factor value') {
-                          <span class="badge bg-success" ngbTooltip="Factor value">{{m.name}}: {{m.value}}</span>
+                          <span class="badge bg-success bg-opacity-75" ngbTooltip="Factor value">
+                            <i class="bi bi-graph-up me-1"></i>{{m.name}}: {{m.value}}
+                          </span>
                         }
                         @default {
-                          <span class="badge bg-danger" ngbTooltip="Other">{{m.name}}: {{m.value}}</span>
+                          <span class="badge bg-warning bg-opacity-75" ngbTooltip="Other">
+                            <i class="bi bi-tag me-1"></i>{{m.name}}: {{m.value}}
+                          </span>
                         }
                       }
                     }
@@ -75,101 +148,170 @@
                 }
               </div>
 
+              <!-- Action Buttons -->
               @if (dataService.instrumentPermissions[result.id]) {
-                <div class="d-flex justify-content-end flex-wrap gap-1">
+                <div class="card-actions-section mt-3 pt-3 border-top">
                   @if (dataService.instrumentPermissions[result.id]['can_view'] ||
                   dataService.instrumentPermissions[result.id]['can_book'] ||
                   dataService.instrumentPermissions[result.id]['can_manage']) {
-                    @if (dataService.instrumentPermissions[result.id]['can_manage']) {
-                      <div class="btn-group me-2">
-                        <div ngbDropdown container="body" class="d-inline-block">
-                          <button class="btn btn-sm btn-outline-secondary" ngbTooltip="Attaching documents"
-                                  ngbDropdownToggle id="{{result.id}}instrumentAttachingDoc">
-                            <i class="bi bi-file-plus"></i> <span class="d-none d-sm-inline">Attach</span>
-                          </button>
-                          <div ngbDropdownMenu>
-                            @for (folder of result.annotation_folders; track folder.id) {
-                              <button ngbDropdownItem (click)="addFileToAnnotationFolder(folder)">
-                                {{folder.folder_name}}
+
+                    <div class="action-buttons-row">
+                      <!-- View Actions -->
+                      <div class="action-group">
+                        <span class="action-group-label">Documents</span>
+                        <div class="btn-group btn-group-sm">
+                          @if (dataService.instrumentPermissions[result.id]['can_manage']) {
+                            <div ngbDropdown container="body" class="d-inline-block">
+                              <button class="btn btn-sm btn-outline-secondary"
+                                      ngbDropdownToggle
+                                      id="{{result.id}}instrumentAttachingDoc"
+                                      ngbTooltip="Attach documents">
+                                <i class="bi bi-file-plus me-1"></i>Attach
                               </button>
-                            }
+                              <div ngbDropdownMenu>
+                                @for (folder of result.annotation_folders; track folder.id) {
+                                  <button ngbDropdownItem (click)="addFileToAnnotationFolder(folder)">
+                                    <i class="bi bi-folder me-2"></i>{{folder.folder_name}}
+                                  </button>
+                                }
+                              </div>
+                            </div>
+                          }
+
+                          <div ngbDropdown container="body" class="d-inline-block">
+                            <button class="btn btn-sm btn-outline-secondary"
+                                    ngbDropdownToggle
+                                    id="{{result.id}}instrumentAttachedDoc"
+                                    ngbTooltip="View documents">
+                              <i class="bi bi-paperclip me-1"></i>View
+                            </button>
+                            <div ngbDropdownMenu>
+                              @for (folder of result.annotation_folders; track folder.id) {
+                                @if (folder.folder_name === 'Maintenance' || folder.folder_name === 'Certificates') {
+                                  @if (dataService.instrumentPermissions[result.id]['can_manage'] || accounts.is_staff) {
+                                    <button ngbDropdownItem (click)="openAnnotationFolder(folder)">
+                                      <i class="bi bi-folder me-2"></i>{{folder.folder_name}}
+                                    </button>
+                                  }
+                                } @else {
+                                  <button ngbDropdownItem (click)="openAnnotationFolder(folder)">
+                                    <i class="bi bi-folder me-2"></i>{{folder.folder_name}}
+                                  </button>
+                                }
+                              }
+                            </div>
                           </div>
                         </div>
                       </div>
-                    }
 
 
-                    <div class="btn-group me-2">
-                      <div ngbDropdown container="body" class="d-inline-block">
-                        <button class="btn btn-sm btn-outline-secondary" ngbTooltip="View attached documents"
-                                ngbDropdownToggle id="{{result.id}}instrumentAttachedDoc">
-                          <i class="bi bi-paperclip"></i> <span class="d-none d-sm-inline">View</span>
-                        </button>
-                        <div ngbDropdownMenu>
-                          @for (folder of result.annotation_folders; track folder.id) {
-                            @if (folder.folder_name === 'Maintenance' || folder.folder_name === 'Certificates') {
-                              @if (dataService.instrumentPermissions[result.id]['can_manage'] || accounts.is_staff) {
-                                <button ngbDropdownItem (click)="openAnnotationFolder(folder)">
-                                  {{folder.folder_name}}
-                                </button>
-                              }
-                            } @else {
-                              <button ngbDropdownItem (click)="openAnnotationFolder(folder)">
-                                {{folder.folder_name}}
+                      @if (dataService.instrumentPermissions[result.id]['can_manage'] || accounts.is_staff) {
+                        <!-- Maintenance Actions -->
+                        <div class="action-group">
+                          <span class="action-group-label">Maintenance</span>
+                          <div class="btn-group btn-group-sm">
+                            <div ngbDropdown container="body" class="d-inline-block">
+                              <button class="btn btn-sm btn-outline-info"
+                                      ngbDropdownToggle
+                                      id="{{result.id}}supportOptions"
+                                      ngbTooltip="Maintenance options">
+                                <i class="bi bi-tools me-1"></i>Options
                               </button>
-                            }
-                          }
+                              <div ngbDropdownMenu>
+                                <button ngbDropdownItem (click)="manageSupportInfo(result)">
+                                  <i class="bi bi-info-circle me-2"></i>Support Information
+                                </button>
+                                <button ngbDropdownItem (click)="createInstrumentMaintenanceLog(result)">
+                                  <i class="bi bi-journal-plus me-2"></i>New Log Entry
+                                </button>
+                                <div class="dropdown-divider"></div>
+                                <a ngbDropdownItem [routerLink]="['/instruments', result.id, 'maintenance-logs']">
+                                  <i class="bi bi-list-ul me-2"></i>View History
+                                </a>
+                              </div>
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                    </div>
-                  }
 
-                  @if (dataService.instrumentPermissions[result.id]['can_manage'] || accounts.is_staff) {
-                    <div class="btn-group">
-                      <div ngbDropdown container="body" class="d-inline-block">
-                        <button class="btn btn-sm btn-outline-info"
-                                ngbDropdownToggle
-                                id="{{result.id}}supportOptions"
-                                ngbTooltip="Support & Maintenance">
-                          <i class="bi bi-tools"></i>
-                        </button>
-                        <div ngbDropdownMenu>
-                          <button ngbDropdownItem (click)="manageSupportInfo(result)">
-                            <i class="bi bi-info-circle me-2"></i>Manage Support Information
-                          </button>
-                          <button ngbDropdownItem (click)="createInstrumentMaintenanceLog(result)">
-                            <i class="bi bi-journal-plus me-2"></i>Create Maintenance Log
-                          </button>
-                          <a ngbDropdownItem class="btn btn-outline-info" [routerLink]="['/instruments', result.id, 'maintenance-logs']">
-                            <i class="bi bi-tools me-1"></i>View Maintenance History
-                          </a>
+                        <!-- Management Actions -->
+                        <div class="action-group">
+                          <span class="action-group-label">Management</span>
+                          <div class="btn-group btn-group-sm">
+                            <button class="btn btn-outline-primary"
+                                    (click)="editInstrument(result)"
+                                    ngbTooltip="Edit instrument">
+                              <i class="bi bi-pencil-fill"></i>
+                            </button>
+                            <button class="btn btn-outline-secondary"
+                                    (click)="openImageModal(result)"
+                                    ngbTooltip="Upload image">
+                              <i class="bi bi-camera"></i>
+                            </button>
+                            <button class="btn btn-outline-secondary"
+                                    (click)="clickInstrument(result)"
+                                    ngbTooltip="Manage access">
+                              <i class="bi bi-people"></i>
+                            </button>
+                            <button class="btn btn-outline-secondary"
+                                    (click)="manageMetadata(result)"
+                                    ngbTooltip="Manage metadata">
+                              <i class="bi bi-database"></i>
+                            </button>
+                            <button class="btn btn-outline-warning"
+                                    (click)="delayUsage(result)"
+                                    ngbTooltip="Delay bookings">
+                              <i class="bi bi-clock-history"></i>
+                            </button>
+                            <button class="btn btn-outline-danger"
+                                    (click)="deleteInstrument(result)"
+                                    ngbTooltip="Delete instrument">
+                              <i class="bi bi-trash"></i>
+                            </button>
+                          </div>
+                        </div>
+                      }
+                    </div>
+                  } @else {
+                    @if (accounts.is_staff) {
+                      <div class="action-buttons-row">
+                        <div class="action-group">
+                          <span class="action-group-label">Management</span>
+                          <div class="btn-group btn-group-sm">
+                            <button class="btn btn-outline-primary"
+                                    (click)="editInstrument(result)"
+                                    ngbTooltip="Edit instrument">
+                              <i class="bi bi-pencil-fill"></i>
+                            </button>
+                            <button class="btn btn-outline-secondary"
+                                    (click)="openImageModal(result)"
+                                    ngbTooltip="Upload image">
+                              <i class="bi bi-camera"></i>
+                            </button>
+                            <button class="btn btn-outline-secondary"
+                                    (click)="clickInstrument(result)"
+                                    ngbTooltip="Manage access">
+                              <i class="bi bi-people"></i>
+                            </button>
+                            <button class="btn btn-outline-secondary"
+                                    (click)="manageMetadata(result)"
+                                    ngbTooltip="Manage metadata">
+                              <i class="bi bi-database"></i>
+                            </button>
+                            <button class="btn btn-outline-warning"
+                                    (click)="delayUsage(result)"
+                                    ngbTooltip="Delay bookings">
+                              <i class="bi bi-clock-history"></i>
+                            </button>
+                            <button class="btn btn-outline-danger"
+                                    (click)="deleteInstrument(result)"
+                                    ngbTooltip="Delete instrument">
+                              <i class="bi bi-trash"></i>
+                            </button>
+                          </div>
                         </div>
                       </div>
-                      <button class="btn btn-sm btn-outline-secondary" (click)="openImageModal(result)"
-                              ngbTooltip="Upload instrument image">
-                        <i class="bi bi-camera"></i>
-                      </button>
-                      <button class="btn btn-sm btn-outline-warning" (click)="delayUsage(result)"
-                              ngbTooltip="Delay all booking usages">
-                        <i class="bi bi-clock-history"></i>
-                      </button>
-                      <button class="btn btn-sm btn-outline-primary" (click)="editInstrument(result)"
-                              ngbTooltip="Edit instrument information">
-                        <i class="bi bi-pencil-fill"></i>
-                      </button>
-                      <button class="btn btn-sm btn-outline-secondary" (click)="clickInstrument(result)"
-                              ngbTooltip="Manage instrument access">
-                        <i class="bi bi-people"></i>
-                      </button>
-                      <button class="btn btn-sm btn-outline-secondary" (click)="manageMetadata(result)"
-                              ngbTooltip="Manage instrument metadata">
-                        <i class="bi bi-database"></i>
-                      </button>
-                      <button class="btn btn-sm btn-outline-danger" (click)="deleteInstrument(result)"
-                              ngbTooltip="Delete instrument">
-                        <i class="bi bi-trash"></i>
-                      </button>
-                    </div>
+
+                    }
                   }
                 </div>
               }
@@ -188,14 +330,36 @@
           </ngb-pagination>
         </div>
       } @else {
-        <div class="alert alert-warning my-3">
-          <i class="bi bi-exclamation-triangle-fill me-2"></i> No instruments/equipments found.
+        <!-- Empty State -->
+        <div class="empty-state text-center py-5">
+          <div class="empty-state-icon mb-3">
+            <i class="bi bi-inbox display-1 text-muted"></i>
+          </div>
+          <h5 class="text-muted mb-2">No instruments found</h5>
+          <p class="text-muted mb-4">
+            @if (form.get('searchTerm')?.value) {
+              No instruments match your search criteria. Try adjusting your search terms.
+            } @else {
+              There are no instruments available in the system.
+            }
+          </p>
+          @if (accounts.is_staff && !form.get('searchTerm')?.value) {
+            <button class="btn btn-primary" (click)="openInstrumentCreateModal()">
+              <i class="bi bi-plus-circle me-1"></i>
+              Add First Instrument
+            </button>
+          }
         </div>
       }
     } @else {
-      <div class="d-flex justify-content-center my-5">
-        <div class="spinner-border text-primary" role="status">
-          <span class="visually-hidden">Loading...</span>
+      <!-- Loading State -->
+      <div class="loading-state text-center py-5">
+        <div class="d-flex flex-column align-items-center">
+          <div class="spinner-border text-primary mb-3" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+          <h6 class="text-muted">Loading instruments...</h6>
+          <small class="text-muted">Please wait while we fetch the instrument data</small>
         </div>
       </div>
     }

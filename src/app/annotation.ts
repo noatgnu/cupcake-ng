@@ -40,4 +40,16 @@ export interface AnnotationFolder {
   folder_name: string;
   created_at: Date;
   updated_at: Date;
+  parent_folder?: number;
+  session?: number;
+  instrument?: number;
+  stored_reagent?: number;
+  is_shared_document_folder?: boolean;
+  owner?: {
+    id: number;
+    username: string;
+    first_name: string;
+    last_name: string;
+  } | null;
+  is_personal?: boolean;
 }
