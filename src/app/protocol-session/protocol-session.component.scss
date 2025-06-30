@@ -1,8 +1,8 @@
 .protocol-session-container {
   display: flex;
   flex-direction: column;
-  height: 100vh;
-  padding-top: 70px;
+  height: calc(100vh - 56px);
+  margin-top: 56px;
 }
 
 .protocol-session-header {

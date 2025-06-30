@@ -1,9 +1,11 @@
 :host {
   display: block;
-  height: 100vh;
+  height: calc(100vh - 56px);
   overflow: hidden;
 }
-
+.footer-spacer {
+  height: 80px;
+}
 .sidebar {
   width: 280px;
   height: 100%;

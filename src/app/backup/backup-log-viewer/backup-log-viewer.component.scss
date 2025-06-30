@@ -90,15 +90,15 @@
   .row.g-3 {
     gap: 0.5rem !important;
   }
-  
+
   .card-body {
     padding: 1rem;
   }
-  
+
   .table-responsive {
     font-size: 0.875rem;
   }
-  
+
   .btn {
     padding: 0.25rem 0.5rem;
     font-size: 0.875rem;
@@ -110,15 +110,15 @@
     flex-direction: column;
     gap: 0.5rem !important;
   }
-  
+
   .btn {
     width: 100%;
   }
-  
+
   .pagination {
     justify-content: center;
   }
-  
+
   .table {
     font-size: 0.8rem;
   }
@@ -190,15 +190,7 @@
   transform: translateY(-1px);
 }
 
-// Header styling
-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-}
 
-header h4 {
-  color: white !important;
-}
 
 // Table styling improvements
 .table {
