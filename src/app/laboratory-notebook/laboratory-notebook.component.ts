@@ -1,11 +1,9 @@
 import {AfterViewInit, Component, ElementRef, OnInit, ViewChild} from '@angular/core';
 import {FormBuilder, FormControl, FormsModule, ReactiveFormsModule, Validators} from "@angular/forms";
 import {WebService} from "../web.service";
-import {error} from "@angular/compiler-cli/src/transformers/util";
 import {DataService} from "../data.service";
 import {Router} from "@angular/router";
 import {DatePipe, NgOptimizedImage} from "@angular/common";
-import {resolve} from "@angular/compiler-cli";
 import {Protocol, ProtocolQuery} from "../protocol";
 import {ToastService} from "../toast.service";
 import {AccountsService} from "../accounts/accounts.service";
@@ -17,12 +15,9 @@ import {
   NgbNavLinkButton,
   NgbNavOutlet,
   NgbPagination,
-  NgbRating
 } from "@ng-bootstrap/ng-bootstrap";
-import {SessionAnnotationComponent} from "../protocol-session/session-annotation/session-annotation.component";
 import {ProtocolListComponent} from "../protocol-list/protocol-list.component";
 import {Project, ProjectQuery} from "../project";
-import {FlapTextComponent} from "../flap-text/flap-text.component";
 import {SiteSettingsService} from "../site-settings.service";
 import {environment} from "../../environments/environment";
 
@@ -30,7 +25,6 @@ import {environment} from "../../environments/environment";
     selector: 'app-laboratory-notebook',
   imports: [
     ReactiveFormsModule,
-    NgOptimizedImage,
     DatePipe,
     NgbNav,
     NgbNavContent,

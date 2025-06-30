@@ -19,9 +19,10 @@
     "@angular/platform-browser-dynamic": "^20.0.5",
     "@angular/router": "^20.0.5",
     "@ericblade/quagga2": "^1.8.4",
-    "@ng-bootstrap/ng-bootstrap": "^18.0.0",
+    "@ng-bootstrap/ng-bootstrap": "^19.0.0",
     "@plussub/srt-vtt-parser": "^1.1.1",
     "@popperjs/core": "^2.11.8",
+
     "atrament": "^4.0.0",
     "bootstrap": "^5.3.3",
     "bootstrap-icons": "^1.11.3",
@@ -29,7 +30,7 @@
     "exceljs": "^4.4.0",
     "jsbarcode": "^3.11.6",
     "jssha": "^3.3.1",
-    "ngx-quill": "^27.0.1",
+    "ngx-quill": "^28.0.1",
     "parchment": "^3.0.0",
     "qr-code-styling": "^1.9.1",
     "rxjs": "~7.8.0",
@@ -51,6 +52,7 @@
     "karma-coverage": "~2.2.0",
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
-    "typescript": "~5.8.2"
+    "typescript": "~5.8.2",
+    "@rollup/rollup-win32-x64-msvc": "^4.44.1"
   }
 }
