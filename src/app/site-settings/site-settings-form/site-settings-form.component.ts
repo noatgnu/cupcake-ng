@@ -78,7 +78,19 @@ export class SiteSettingsFormComponent implements OnInit, OnChanges {
       banner_dismissible: [true],
       primary_color: ['#0066cc', [Validators.required, Validators.pattern(/^#[0-9A-Fa-f]{6}$/)]],
       secondary_color: ['#6c757d', [Validators.required, Validators.pattern(/^#[0-9A-Fa-f]{6}$/)]],
-      footer_text: ['']
+      footer_text: [''],
+      // Import restrictions
+      allow_import_protocols: [true],
+      allow_import_sessions: [true],
+      allow_import_annotations: [true],
+      allow_import_projects: [true],
+      allow_import_reagents: [true],
+      allow_import_instruments: [true],
+      allow_import_lab_groups: [true],
+      allow_import_messaging: [true],
+      allow_import_support_models: [true],
+      staff_only_import_override: [false],
+      import_archive_size_limit_mb: [100, [Validators.required, Validators.min(1), Validators.max(10000)]]
     });
   }
 
@@ -94,7 +106,19 @@ export class SiteSettingsFormComponent implements OnInit, OnChanges {
         banner_dismissible: this.settings.banner_dismissible !== false,
         primary_color: this.settings.primary_color || '#0066cc',
         secondary_color: this.settings.secondary_color || '#6c757d',
-        footer_text: this.settings.footer_text || ''
+        footer_text: this.settings.footer_text || '',
+        // Import restrictions
+        allow_import_protocols: this.settings.allow_import_protocols !== false,
+        allow_import_sessions: this.settings.allow_import_sessions !== false,
+        allow_import_annotations: this.settings.allow_import_annotations !== false,
+        allow_import_projects: this.settings.allow_import_projects !== false,
+        allow_import_reagents: this.settings.allow_import_reagents !== false,
+        allow_import_instruments: this.settings.allow_import_instruments !== false,
+        allow_import_lab_groups: this.settings.allow_import_lab_groups !== false,
+        allow_import_messaging: this.settings.allow_import_messaging !== false,
+        allow_import_support_models: this.settings.allow_import_support_models !== false,
+        staff_only_import_override: this.settings.staff_only_import_override || false,
+        import_archive_size_limit_mb: this.settings.import_archive_size_limit_mb || 100
       });
 
       // Set image previews if available
@@ -233,6 +257,34 @@ export class SiteSettingsFormComponent implements OnInit, OnChanges {
     return labels[fieldName] || fieldName;
   }
 
+  selectAllImportTypes(): void {
+    this.settingsForm.patchValue({
+      allow_import_protocols: true,
+      allow_import_sessions: true,
+      allow_import_annotations: true,
+      allow_import_projects: true,
+      allow_import_reagents: true,
+      allow_import_instruments: true,
+      allow_import_lab_groups: true,
+      allow_import_messaging: true,
+      allow_import_support_models: true
+    });
+  }
+
+  deselectAllImportTypes(): void {
+    this.settingsForm.patchValue({
+      allow_import_protocols: false,
+      allow_import_sessions: false,
+      allow_import_annotations: false,
+      allow_import_projects: false,
+      allow_import_reagents: false,
+      allow_import_instruments: false,
+      allow_import_lab_groups: false,
+      allow_import_messaging: false,
+      allow_import_support_models: false
+    });
+  }
+
   resetToDefaults(): void {
     if (confirm('Are you sure you want to reset all settings to default values? This cannot be undone.')) {
       this.settingsForm.reset({
@@ -245,7 +297,19 @@ export class SiteSettingsFormComponent implements OnInit, OnChanges {
         banner_dismissible: true,
         primary_color: '#0066cc',
         secondary_color: '#6c757d',
-        footer_text: ''
+        footer_text: '',
+        // Import restrictions defaults
+        allow_import_protocols: true,
+        allow_import_sessions: true,
+        allow_import_annotations: true,
+        allow_import_projects: true,
+        allow_import_reagents: true,
+        allow_import_instruments: true,
+        allow_import_lab_groups: true,
+        allow_import_messaging: true,
+        allow_import_support_models: true,
+        staff_only_import_override: false,
+        import_archive_size_limit_mb: 100
       });
       this.removeImage('logo');
       this.removeImage('favicon');

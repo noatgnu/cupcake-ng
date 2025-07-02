@@ -163,7 +163,19 @@ export class SiteSettingsService {
       banner_dismissible: true,
       primary_color: '#0066cc',
       secondary_color: '#6c757d',
-      footer_text: ''
+      footer_text: '',
+      // Import restriction defaults
+      allow_import_protocols: true,
+      allow_import_sessions: true,
+      allow_import_annotations: true,
+      allow_import_projects: true,
+      allow_import_reagents: true,
+      allow_import_instruments: true,
+      allow_import_lab_groups: true,
+      allow_import_messaging: true,
+      allow_import_support_models: true,
+      staff_only_import_override: false,
+      import_archive_size_limit_mb: 100
     };
   }
 

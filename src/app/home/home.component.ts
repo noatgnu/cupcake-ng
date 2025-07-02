@@ -67,8 +67,8 @@ export class HomeComponent implements OnInit {
     this.router.navigate(['/laboratory-notebook']);
   }
 
-  navigateToProtocolEditor() {
-    this.router.navigate(['/protocol-editor']);
+  navigateToDocuments() {
+    this.router.navigate(['/documents']);
   }
 
   navigateToInstruments() {

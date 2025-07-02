@@ -1,28 +1,110 @@
-import { Component } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import {WebService} from "../../web.service";
 import {ToastService} from "../../toast.service";
 import {NgbProgressbar} from "@ng-bootstrap/ng-bootstrap";
+import {FormsModule} from "@angular/forms";
 import jsSHA from "jssha";
+import {environment} from "../../../environments/environment";
+import {WebsocketService} from "../../websocket.service";
+import { Subscription } from 'rxjs';
+import {DecimalPipe} from "@angular/common";
 
 @Component({
     selector: 'app-user-data',
     imports: [
-        NgbProgressbar
+        NgbProgressbar,
+        FormsModule,
+      DecimalPipe
     ],
     templateUrl: './user-data.component.html',
     styleUrl: './user-data.component.scss'
 })
-export class UserDataComponent {
+export class UserDataComponent implements OnDestroy {
   chunkUploadProgress = 0;
   chunkUploadTotal = 0;
+  selectedFormat: 'zip' | 'tar.gz' = 'zip';
+  webSubscription?: Subscription;
+  progress = 0;
+  exportInProgress = false;
+  downloadReady = false;
+  downloadUrl = '';
+  fileName = '';
+  
+  // Import options
+  importOptions = {
+    protocols: true,
+    sessions: true,
+    annotations: true,
+    projects: true,
+    reagents: true,
+    instruments: true,
+    lab_groups: true,
+    messaging: true,
+    support_models: true
+  };
 
-  constructor(private web: WebService, private toastService: ToastService) {
+  constructor(private web: WebService, private toastService: ToastService, private ws: WebsocketService) {
+    this.webSubscription = this.ws.userWSConnection?.subscribe((data) => {
+      if (data) {
+        // Handle progress updates
+        if ("export_type" in data && "instance_id" in data && "progress" in data) {
+          if (data["progress"] > this.progress) {
+            this.progress = data["progress"];
+            this.exportInProgress = this.progress < 100;
+          }
+        }
+
+        // Handle download ready (separate check, not in else)
+        if ("signed_value" in data && "instance_id" in data) {
+          if (data["instance_id"] === this.web.cupcakeInstanceID) {
+            console.log("Received data from websocket:", data);
+            if (data["signed_value"].startsWith("cupcake_export")) {
+              this.toastService.show("Export File", "Download ready for user data file");
+              this.exportInProgress = false;
+              this.downloadReady = true;
+              this.downloadUrl = environment.baseURL + "/api/protocol/download_temp_file/?token=" + data["signed_value"];
+              this.fileName = data["signed_value"].split(":")[0];
+              this.toastService.show("Export File", "Export completed! Ready for download.");
+            }
+          }
+        }
+      }
+    })
   }
 
   exportUserData() {
-    this.web.exportUserData().subscribe((data: any) => {
-      this.toastService.show("User Data", "Processing export user data request...")
+    this.progress = 0;
+    this.exportInProgress = true;
+    this.downloadReady = false;
+    this.downloadUrl = '';
+    this.fileName = '';
+    this.web.exportUserData({ format: this.selectedFormat }).subscribe((data: any) => {
+      this.toastService.show("User Data", `Processing export user data request (${this.selectedFormat})...`)
     })
+  }
+
+  downloadFile() {
+    if (this.downloadReady && this.downloadUrl) {
+      this.toastService.show("Export File", "Downloading file...")
+      const link = document.createElement('a');
+      link.href = this.downloadUrl;
+      link.download = this.fileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  }
+
+  selectAllImportOptions() {
+    Object.keys(this.importOptions).forEach(key => {
+      (this.importOptions as any)[key] = true;
+    });
+  }
+
+  deselectAllImportOptions() {
+    Object.keys(this.importOptions).forEach(key => {
+      (this.importOptions as any)[key] = false;
+    });
   }
 
   async importUserData(event: Event){
@@ -42,7 +124,7 @@ export class UserDataComponent {
         if (result?.completed_at) {
           this.toastService.show("User Data", "Upload complete")
           this.toastService.show("User Data", "Importing user data...")
-          this.web.importUserData(result.id).subscribe((data) => {
+          this.web.importUserData(result.id, this.importOptions).subscribe((data) => {
             this.toastService.show("User Data", "Import complete")
           })
         }
@@ -74,12 +156,18 @@ export class UserDataComponent {
           if (result?.completed_at) {
             this.toastService.show("User Data", "Upload complete")
             this.toastService.show("User Data", "Importing user data...")
-            this.web.importUserData(result.id).subscribe((data) => {
+            this.web.importUserData(result.id, this.importOptions).subscribe((data) => {
               this.toastService.show("User Data", "Import complete")
             })
           }
         }
       }
+    }
+  }
+
+  ngOnDestroy() {
+    if (this.webSubscription) {
+      this.webSubscription.unsubscribe();
     }
   }
 }

@@ -36,6 +36,7 @@ import {UnimodQuery} from "./unimod";
 import {InstrumentJob, InstrumentJobQuery} from "./instrument-job";
 import {FavouriteMetadataOption, FavouriteMetadataOptionQuery} from "./favourite-metadata-option";
 import {Preset, PresetQuery} from "./preset";
+import {SiteSettings, PublicSiteSettings, ImportOptions, AvailableImportOptionsResponse, ImportDataPayload, ExportDataPayload, ExportOptions, DryRunResponse} from "./site-settings";
 
 
 @Injectable({
@@ -452,10 +453,54 @@ export class WebService {
     );
   }
 
-  exportUserData() {
-    return this.http.post(
+  exportUserData(options: {
+    format?: 'zip' | 'tar.gz',
+    protocol_ids?: number[],
+    session_ids?: number[],
+    export_options?: ExportOptions
+  } = {}): Observable<any> {
+    const payload: ExportDataPayload = {
+      export_options: {
+        format: options.format || 'zip',
+        ...options.export_options
+      },
+      ...(options.protocol_ids && { protocol_id: options.protocol_ids[0] }),
+      ...(options.session_ids && { session_id: options.session_ids[0] })
+    };
+
+    return this.http.post<any>(
       `${this.baseURL}/api/user/export_data/`,
-      {},
+      payload,
+      {responseType: 'json', observe: 'body'}
+    );
+  }
+
+  /**
+   * Enhanced export method for protocol/session specific exports with format options
+   */
+  exportDataAdvanced(options: {
+    type: 'complete' | 'protocol' | 'session',
+    format?: 'zip' | 'tar.gz',
+    protocol_ids?: number[],
+    session_ids?: number[],
+    export_options?: ExportOptions
+  }): Observable<any> {
+    const payload: ExportDataPayload = {
+      export_options: {
+        format: options.format || 'zip',
+        ...options.export_options
+      }
+    };
+
+    if (options.type === 'protocol' && options.protocol_ids?.length) {
+      payload.protocol_id = options.protocol_ids[0];
+    } else if (options.type === 'session' && options.session_ids?.length) {
+      payload.session_id = options.session_ids[0];
+    }
+
+    return this.http.post<any>(
+      `${this.baseURL}/api/user/export_data/`,
+      payload,
       {responseType: 'json', observe: 'body'}
     );
   }
@@ -759,12 +804,36 @@ export class WebService {
     }
   }
 
-  importUserData(uploadID: string) {
-    return this.http.post(
+  importUserData(uploadID: string, importOptions?: ImportOptions): Observable<any> {
+    const payload: ImportDataPayload = {
+      upload_id: uploadID
+    };
+
+    if (importOptions) {
+      payload.import_options = importOptions;
+    }
+
+    return this.http.post<any>(
       `${this.baseURL}/api/user/import_user_data/`,
-      {upload_id: uploadID},
+      payload,
       {responseType: 'json', observe: 'body'}
-    )
+    );
+  }
+
+  dryRunImportUserData(uploadID: string, importOptions?: ImportOptions): Observable<{message: string, instance_id: string}> {
+    const payload: ImportDataPayload = {
+      upload_id: uploadID
+    };
+
+    if (importOptions) {
+      payload.import_options = importOptions;
+    }
+
+    return this.http.post<any>(
+      `${this.baseURL}/api/user/dry_run_import_user_data/`,
+      payload,
+      {responseType: 'json', observe: 'body'}
+    );
   }
 
   searchReagents(search: string) {
@@ -2357,32 +2426,39 @@ export class WebService {
   }
 
   // Site Settings API methods
-  getSiteSettings() {
-    return this.http.get(
+  getSiteSettings(): Observable<SiteSettings[]> {
+    return this.http.get<SiteSettings[]>(
       `${this.baseURL}/api/site_settings/`,
       {responseType: 'json', observe: 'body'}
     );
   }
 
-  getPublicSiteSettings() {
-    return this.http.get(
+  getPublicSiteSettings(): Observable<PublicSiteSettings> {
+    return this.http.get<PublicSiteSettings>(
       `${this.baseURL}/api/site_settings/public/`,
       {responseType: 'json', observe: 'body'}
     );
   }
 
-  createSiteSettings(settings: any) {
-    return this.http.post(
+  createSiteSettings(settings: Partial<SiteSettings>): Observable<SiteSettings> {
+    return this.http.post<SiteSettings>(
       `${this.baseURL}/api/site_settings/`,
       settings,
       {responseType: 'json', observe: 'body'}
     );
   }
 
-  updateSiteSettings(id: number, settings: any) {
-    return this.http.patch(
+  updateSiteSettings(id: number, settings: Partial<SiteSettings>): Observable<SiteSettings> {
+    return this.http.patch<SiteSettings>(
       `${this.baseURL}/api/site_settings/${id}/`,
       settings,
+      {responseType: 'json', observe: 'body'}
+    );
+  }
+
+  getAvailableImportOptions(): Observable<AvailableImportOptionsResponse> {
+    return this.http.get<AvailableImportOptionsResponse>(
+      `${this.baseURL}/api/site_settings/available_import_options/`,
       {responseType: 'json', observe: 'body'}
     );
   }

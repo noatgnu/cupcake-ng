@@ -1,19 +1,19 @@
 :host {
   display: block;
-  position: fixed;
-  top: 56px; // Start below navbar
-  left: 0;
-  right: 0;
-  bottom: 0; // Take remaining viewport height
+  height: calc(100vh - 56px);
+  margin-top: 56px;
 }
 
 .sidebar {
   width: 280px;
+  height: 100%;
   transition: transform 0.3s ease;
   border-right: 1px solid rgba(0,0,0,0.1);
   overflow-y: auto;
   flex-shrink: 0;
   position: relative;
+  z-index: 1030;
+  box-shadow: 0 0 20px rgba(0,0,0,0.1);
 }
 
 .sidebar-collapsed {
@@ -28,15 +28,24 @@
   overflow: hidden;
   transition: all 0.3s ease;
   width: calc(100% - 280px);
+  height: 100%;
 }
 
 .content-expanded {
   width: 100%;
 }
 
+.content-header {
+  flex-shrink: 0;
+  z-index: 1020;
+}
+
 .content-body {
   flex: 1;
   overflow-y: auto;
+  overflow-x: hidden;
+  height: 0;
+  padding-bottom: 2rem;
 }
 
 .list-group-item.active {
@@ -64,15 +73,21 @@
   transition: all 0.2s;
 }
 
-.sidebar {
-  left: 0;
+@media (max-width: 768px) {
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100%;
+    z-index: 1050;
+  }
 
-  height: calc(100vh - 56px);
-  z-index: 1050;
-  box-shadow: 0 0 20px rgba(0,0,0,0.1);
-}
+  .content-wrapper {
+    width: 100%;
+  }
 
-.content-wrapper {
-  width: 100%;
+  .content-expanded {
+    width: 100%;
+  }
 }
 
