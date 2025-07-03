@@ -1,0 +1,251 @@
+<div class="container-fluid">
+  <!-- Welcome Header -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card bg-gradient bg-primary text-white shadow">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h2 class="mb-1">{{ getGreeting() }}, {{ dashboardData?.user_info?.full_name || dashboardData?.user_info?.username || 'User' }}!</h2>
+              <p class="mb-0 opacity-75">Welcome to your CUPCAKE LIMS dashboard</p>
+            </div>
+            <div class="text-end">
+              <button class="btn btn-outline-light" (click)="refreshDashboard()" [disabled]="loading">
+                <i class="bi bi-arrow-clockwise me-2"></i>Refresh
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  @if (loading) {
+    <div class="text-center py-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+      <div class="mt-2">Loading dashboard...</div>
+    </div>
+  }
+
+  <!-- Error -->
+  @if (error) {
+    <div class="alert alert-danger">
+      <i class="bi bi-exclamation-triangle me-2"></i>{{ error }}
+    </div>
+  }
+
+  <!-- Dashboard Content -->
+  @if (!loading && !error && dashboardData) {
+    <div>
+    <!-- Quick Stats -->
+    <div class="row mb-4">
+      <div class="col-md-3 mb-3">
+        <div class="card border-0 shadow-sm bg-primary text-white">
+          <div class="card-body text-center">
+            <i class="bi bi-file-text display-4 mb-2"></i>
+            <h3 class="mb-1">{{ dashboardData.quick_stats.total_protocols }}</h3>
+            <p class="mb-0">Protocols</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3 mb-3">
+        <div class="card border-0 shadow-sm bg-success text-white">
+          <div class="card-body text-center">
+            <i class="bi bi-play-circle display-4 mb-2"></i>
+            <h3 class="mb-1">{{ dashboardData.quick_stats.total_sessions }}</h3>
+            <p class="mb-0">Sessions</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3 mb-3">
+        <div class="card border-0 shadow-sm bg-info text-white">
+          <div class="card-body text-center">
+            <i class="bi bi-chat-dots display-4 mb-2"></i>
+            <h3 class="mb-1">{{ dashboardData.quick_stats.total_annotations }}</h3>
+            <p class="mb-0">Annotations</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3 mb-3">
+        <div class="card border-0 shadow-sm bg-warning text-dark">
+          <div class="card-body text-center">
+            <i class="bi bi-people display-4 mb-2"></i>
+            <h3 class="mb-1">{{ dashboardData.quick_stats.lab_groups_count }}</h3>
+            <p class="mb-0">Lab Groups</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Activity and Lab Groups -->
+    <div class="row">
+      <!-- Recent Activity -->
+      <div class="col-lg-8">
+        <div class="card shadow-sm mb-4">
+          <div class="card-header">
+            <h5 class="mb-0">
+              <i class="bi bi-clock-history me-2"></i>Recent Activity
+            </h5>
+          </div>
+          <div class="card-body">
+            <!-- Activity Tabs -->
+            <ul ngbNav #nav="ngbNav" [(activeId)]="activeTab" class="nav-tabs mb-3" [destroyOnHide]="false">
+              <li [ngbNavItem]="'protocols'" [destroyOnHide]="false">
+                <button ngbNavLink>
+                  <i class="bi bi-file-text me-1"></i>Protocols
+                  <span class="badge bg-primary rounded-pill ms-1">{{ dashboardData.recent_activity.protocols.length }}</span>
+                </button>
+                <ng-template ngbNavContent>
+                  @if (dashboardData.recent_activity.protocols.length === 0) {
+                    <div class="text-center text-muted py-3">
+                      <i class="bi bi-file-text display-4 mb-2"></i>
+                      <p>No recent protocols</p>
+                    </div>
+                  }
+                  @for (protocol of dashboardData.recent_activity.protocols; track protocol.id) {
+                    <div class="d-flex align-items-center mb-2 p-2 border rounded hover-shadow cursor-pointer"
+                         (click)="navigateToProtocol(protocol.id)">
+                      <i class="bi bi-file-text text-primary me-3"></i>
+                      <div class="flex-grow-1">
+                        <h6 class="mb-1">{{ protocol.title }}</h6>
+                        <small class="text-muted">Created: {{ formatDateTime(protocol.created) }}</small>
+                      </div>
+                      <i class="bi bi-chevron-right text-muted"></i>
+                    </div>
+                  }
+                </ng-template>
+              </li>
+
+              <li [ngbNavItem]="'sessions'" [destroyOnHide]="false">
+                <button ngbNavLink>
+                  <i class="bi bi-play-circle me-1"></i>Sessions
+                  <span class="badge bg-success rounded-pill ms-1">{{ dashboardData.recent_activity.sessions.length }}</span>
+                </button>
+                <ng-template ngbNavContent>
+                  @if (dashboardData.recent_activity.sessions.length === 0) {
+                    <div class="text-center text-muted py-3">
+                      <i class="bi bi-play-circle display-4 mb-2"></i>
+                      <p>No recent sessions</p>
+                    </div>
+                  }
+                  @for (session of dashboardData.recent_activity.sessions; track session.id) {
+                    <div class="d-flex align-items-center mb-2 p-2 border rounded hover-shadow cursor-pointer"
+                         (click)="navigateToSession(session.id)">
+                      <i class="bi bi-play-circle text-success me-3"></i>
+                      <div class="flex-grow-1">
+                        <h6 class="mb-1">{{ session.name || 'Unnamed Session' }}</h6>
+                        <small class="text-muted">Created: {{ formatDateTime(session.created) }}</small>
+                      </div>
+                      <i class="bi bi-chevron-right text-muted"></i>
+                    </div>
+                  }
+                </ng-template>
+              </li>
+
+              <li [ngbNavItem]="'annotations'" [destroyOnHide]="false">
+                <button ngbNavLink>
+                  <i class="bi bi-chat-dots me-1"></i>Annotations
+                  <span class="badge bg-info rounded-pill ms-1">{{ dashboardData.recent_activity.annotations.length }}</span>
+                </button>
+                <ng-template ngbNavContent>
+                  @if (dashboardData.recent_activity.annotations.length === 0) {
+                    <div class="text-center text-muted py-3">
+                      <i class="bi bi-chat-dots display-4 mb-2"></i>
+                      <p>No recent annotations</p>
+                    </div>
+                  }
+                  @for (annotation of dashboardData.recent_activity.annotations; track annotation.id) {
+                    <div class="d-flex align-items-start mb-2 p-2 border rounded hover-shadow">
+                      <i class="bi bi-chat-dots text-info me-3 mt-1"></i>
+                      <div class="flex-grow-1">
+                        <p class="mb-1">{{ annotation.annotation }}</p>
+                        <small class="text-muted">{{ formatDateTime(annotation.created) }}</small>
+                      </div>
+                    </div>
+                  }
+                </ng-template>
+              </li>
+            </ul>
+
+            <div [ngbNavOutlet]="nav" class="mt-2"></div>
+          </div>
+        </div>
+
+        <!-- Activity Summary (if available) -->
+        @if (activitySummary) {
+          <div class="card shadow-sm">
+          <div class="card-header">
+            <h5 class="mb-0">
+              <i class="bi bi-graph-up me-2"></i>30-Day Activity Summary
+            </h5>
+          </div>
+          <div class="card-body">
+            <div class="row text-center">
+              <div class="col-4">
+                <div class="border-end">
+                  <h4 class="text-primary">{{ activitySummary.recent_activity.protocols_last_30_days }}</h4>
+                  <small class="text-muted">Protocols</small>
+                </div>
+              </div>
+              <div class="col-4">
+                <div class="border-end">
+                  <h4 class="text-success">{{ activitySummary.recent_activity.sessions_last_30_days }}</h4>
+                  <small class="text-muted">Sessions</small>
+                </div>
+              </div>
+              <div class="col-4">
+                <h4 class="text-info">{{ activitySummary.recent_activity.annotations_last_30_days }}</h4>
+                <small class="text-muted">Annotations</small>
+              </div>
+            </div>
+          </div>
+          </div>
+        }
+      </div>
+
+      <!-- Lab Groups Sidebar -->
+      <div class="col-lg-4">
+        <div class="card shadow-sm">
+          <div class="card-header">
+            <h5 class="mb-0">
+              <i class="bi bi-people me-2"></i>Lab Groups
+            </h5>
+          </div>
+          <div class="card-body">
+            @if (dashboardData.lab_groups.length === 0) {
+              <div class="text-center text-muted py-3">
+                <i class="bi bi-people display-4 mb-2"></i>
+                <p>No lab groups</p>
+              </div>
+            }
+            @for (labGroup of dashboardData.lab_groups; track labGroup.id) {
+              <div class="d-flex align-items-center mb-3 p-2 border rounded hover-shadow cursor-pointer"
+                   (click)="navigateToLabGroup(labGroup.id)">
+              <div class="me-3">
+                <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center"
+                     style="width: 40px; height: 40px;">
+                  <i class="bi bi-people"></i>
+                </div>
+              </div>
+              <div class="flex-grow-1">
+                <h6 class="mb-1">{{ labGroup.name }}</h6>
+                <small class="text-muted">{{ labGroup.member_count }} members</small>
+                @if (labGroup.is_professional) {
+                  <div class="mt-1">
+                    <span class="badge bg-success">Professional</span>
+                  </div>
+                }
+              </div>
+              <i class="bi bi-chevron-right text-muted"></i>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+    </div>
+  }
+</div>

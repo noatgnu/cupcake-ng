@@ -3,6 +3,7 @@ import {AccountsService} from "../accounts.service";
 import {WebService} from "../../web.service";
 import {AsyncPipe} from "@angular/common";
 import {LabGroup, LabGroupQuery} from "../../lab-group";
+import {User} from "../../user";
 import {NgbAlert, NgbModal, NgbPagination, NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {EditLabGroupModalComponent} from "./edit-lab-group-modal/edit-lab-group-modal.component";
 import {
@@ -26,6 +27,7 @@ import {ToastService} from "../../toast.service";
 export class LabGroupComponent implements OnInit {
 
   labGroupQuery!: LabGroupQuery
+  currentUser: User | null = null
 
   labGroupPage = 1
   labGroupPageSize = 10
@@ -65,6 +67,27 @@ export class LabGroupComponent implements OnInit {
     this.web.getLabGroups().subscribe((data) => {
       this.labGroupQuery = data
     })
+
+    // Load current user information including managed lab groups
+    this.accountsService.getCurrentUser().subscribe({
+      next: (user) => {
+        this.currentUser = user
+      },
+      error: (error) => {
+        console.error('Error loading current user:', error)
+      }
+    })
+  }
+
+  // Check if current user can manage a specific lab group
+  canManageLabGroup(labGroup: LabGroup): boolean {
+    // Staff can manage all lab groups
+    if (this.accountsService.is_staff) {
+      return true
+    }
+
+    // Check if user is a manager of this specific lab group
+    return this.currentUser?.managed_lab_groups?.some(managedGroup => managedGroup.id === labGroup.id) || false
   }
 
   editLabGroup(labGroup: LabGroup) {

@@ -31,7 +31,19 @@ import {Tissue, TissueQuery} from "./tissue";
 import {Species, SpeciesQuery} from "./species";
 import {MsVocabQuery} from "./ms-vocab";
 import {NgbDateStruct} from "@ng-bootstrap/ng-bootstrap";
-import {User, UserQuery} from "./user";
+import {
+  User,
+  UserQuery,
+  UserActivitySummary,
+  UserStatistics,
+  UserDashboardData,
+  UserPreferences,
+  LabGroupManagement,
+  PlatformAnalytics,
+  UserPermissionMatrix,
+  UserSearchQuery,
+  UserBasicQuery
+} from "./user";
 import {UnimodQuery} from "./unimod";
 import {InstrumentJob, InstrumentJobQuery} from "./instrument-job";
 import {FavouriteMetadataOption, FavouriteMetadataOptionQuery} from "./favourite-metadata-option";
@@ -2096,6 +2108,93 @@ export class WebService {
       {email: email, lab_group: lab_group},
       {responseType: 'json', observe: 'body'}
     )
+  }
+
+  // Enhanced User Management Endpoints
+
+  getUserActivitySummary(): Observable<UserActivitySummary> {
+    return this.http.get<UserActivitySummary>(
+      `${this.baseURL}/api/user/user_activity_summary/`,
+      {responseType: 'json', observe: 'body'}
+    );
+  }
+
+  searchUsers(query: UserSearchQuery, limit: number = 20, offset: number = 0): Observable<UserQuery> {
+    let params = new HttpParams();
+    if (query.q) params = params.set('q', query.q);
+    if (query.lab_group) params = params.set('lab_group', query.lab_group.toString());
+    if (query.role) params = params.set('role', query.role);
+    if (query.active !== undefined) params = params.set('active', query.active.toString());
+    params = params.set('limit', limit.toString());
+    params = params.set('offset', offset.toString());
+
+    return this.http.get<UserQuery>(
+      `${this.baseURL}/api/user/search_users/`,
+      {responseType: 'json', observe: 'body', params}
+    );
+  }
+
+  getUserStatistics(userId: number): Observable<UserStatistics> {
+    return this.http.get<UserStatistics>(
+      `${this.baseURL}/api/user/${userId}/user_statistics/`,
+      {responseType: 'json', observe: 'body'}
+    );
+  }
+
+  getUserDashboardData(): Observable<UserDashboardData> {
+    return this.http.get<UserDashboardData>(
+      `${this.baseURL}/api/user/user_dashboard_data/`,
+      {responseType: 'json', observe: 'body'}
+    );
+  }
+
+  bulkUserPermissionsCheck(userIds: number[], resourceType: string, resourceIds: number[]): Observable<UserPermissionMatrix[]> {
+    return this.http.post<UserPermissionMatrix[]>(
+      `${this.baseURL}/api/user/bulk_user_permissions_check/`,
+      {
+        user_ids: userIds,
+        resource_type: resourceType,
+        resource_ids: resourceIds
+      },
+      {responseType: 'json', observe: 'body'}
+    );
+  }
+
+  getUserPreferences(): Observable<UserPreferences> {
+    return this.http.get<UserPreferences>(
+      `${this.baseURL}/api/user/user_preferences/`,
+      {responseType: 'json', observe: 'body'}
+    );
+  }
+
+  deactivateUser(userId: number, reason: string = ''): Observable<{message: string}> {
+    return this.http.post<{message: string}>(
+      `${this.baseURL}/api/user/deactivate_user/`,
+      {user_id: userId, reason},
+      {responseType: 'json', observe: 'body'}
+    );
+  }
+
+  reactivateUser(userId: number): Observable<{message: string}> {
+    return this.http.post<{message: string}>(
+      `${this.baseURL}/api/user/reactivate_user/`,
+      {user_id: userId},
+      {responseType: 'json', observe: 'body'}
+    );
+  }
+
+  getUserLabGroupManagement(): Observable<LabGroupManagement> {
+    return this.http.get<LabGroupManagement>(
+      `${this.baseURL}/api/user/user_lab_group_management/`,
+      {responseType: 'json', observe: 'body'}
+    );
+  }
+
+  getPlatformAnalytics(): Observable<PlatformAnalytics> {
+    return this.http.get<PlatformAnalytics>(
+      `${this.baseURL}/api/user/platform_analytics/`,
+      {responseType: 'json', observe: 'body'}
+    );
   }
 
   instrumentJobSubmit(job_id: number) {

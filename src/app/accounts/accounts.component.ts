@@ -13,6 +13,10 @@ import {FavouritesComponent} from "./favourites/favourites.component";
 import {NgClass} from "@angular/common";
 import {MessagingComponent} from "../messaging/messaging.component";
 import {ActivatedRoute, Router} from "@angular/router";
+import {UserStatisticsComponent} from "./user-statistics/user-statistics.component";
+import {UserSearchComponent} from "./user-search/user-search.component";
+import {UserDashboardComponent} from "./user-dashboard/user-dashboard.component";
+import {UserManagementComponent} from "./user-management/user-management.component";
 
 @Component({
     selector: 'app-accounts',
@@ -28,7 +32,11 @@ import {ActivatedRoute, Router} from "@angular/router";
     ProfileComponent,
     FavouritesComponent,
     NgClass,
-    MessagingComponent
+    MessagingComponent,
+    UserStatisticsComponent,
+    UserSearchComponent,
+    UserDashboardComponent,
+    UserManagementComponent
   ],
     templateUrl: './accounts.component.html',
     styleUrl: './accounts.component.scss'

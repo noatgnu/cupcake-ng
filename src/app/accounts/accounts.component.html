@@ -51,6 +51,39 @@
            (click)="selectedSection='favourite'">
           <i class="bi bi-star me-2"></i> Favourites
         </a>
+        @if (accountService.loggedIn) {
+          <hr class="my-2">
+          <div class="px-3 py-2">
+            <small class="text-muted fw-bold">USER ANALYTICS</small>
+          </div>
+          <a class="list-group-item list-group-item-action py-3 d-flex align-items-center"
+             [ngClass]="{'active': selectedSection==='user-dashboard'}"
+             (click)="selectedSection='user-dashboard'">
+            <i class="bi bi-speedometer2 me-2"></i> Dashboard
+          </a>
+          <a class="list-group-item list-group-item-action py-3 d-flex align-items-center"
+             [ngClass]="{'active': selectedSection==='user-statistics'}"
+             (click)="selectedSection='user-statistics'">
+            <i class="bi bi-graph-up me-2"></i> Statistics
+          </a>
+          <a class="list-group-item list-group-item-action py-3 d-flex align-items-center"
+             [ngClass]="{'active': selectedSection==='user-search'}"
+             (click)="selectedSection='user-search'">
+            <i class="bi bi-search me-2"></i> Search Users
+          </a>
+          @if (accountService.is_staff) {
+            <hr class="my-2">
+            <div class="px-3 py-2">
+              <small class="text-muted fw-bold">ADMIN TOOLS</small>
+            </div>
+            <a class="list-group-item list-group-item-action py-3 d-flex align-items-center"
+               [ngClass]="{'active': selectedSection==='user-management'}"
+               (click)="selectedSection='user-management'">
+              <i class="bi bi-people-fill me-2"></i> User Management
+              <span class="badge bg-warning text-dark ms-auto">Staff</span>
+            </a>
+          }
+        }
       </div>
     </div>
 
@@ -78,6 +111,14 @@
             <i class="bi bi-person-plus me-2"></i> Signup
           } @else if (selectedSection === 'messaging') {
             <i class="bi bi-chat-dots me-2"></i> Messages
+          } @else if (selectedSection === 'user-dashboard') {
+            <i class="bi bi-speedometer2 me-2"></i> Dashboard
+          } @else if (selectedSection === 'user-statistics') {
+            <i class="bi bi-graph-up me-2"></i> Statistics
+          } @else if (selectedSection === 'user-search') {
+            <i class="bi bi-search me-2"></i> Search Users
+          } @else if (selectedSection === 'user-management') {
+            <i class="bi bi-people-fill me-2"></i> User Management
           }
         </h5>
       </div>
@@ -149,6 +190,14 @@
           <app-favourites></app-favourites>
         } @else if (selectedSection === 'messaging') {
           <app-messaging></app-messaging>
+        } @else if (selectedSection === 'user-dashboard') {
+          <app-user-dashboard></app-user-dashboard>
+        } @else if (selectedSection === 'user-statistics') {
+          <app-user-statistics></app-user-statistics>
+        } @else if (selectedSection === 'user-search') {
+          <app-user-search></app-user-search>
+        } @else if (selectedSection === 'user-management') {
+          <app-user-management></app-user-management>
         } @else {
           <div class="container py-4">
             <div class="card shadow-sm mb-4">
@@ -221,6 +270,65 @@
                   </div>
                 </div>
               </div>
+
+              @if (accountService.loggedIn) {
+                <div class="col-md-4">
+                  <div class="card h-100 shadow-sm">
+                    <div class="card-body">
+                      <h4 class="card-title d-flex align-items-center mb-3">
+                        <i class="bi bi-speedometer2 text-success me-2"></i>
+                        Dashboard
+                      </h4>
+                      <p class="card-text">
+                        View your activity summary and get personalized insights.
+                      </p>
+                    </div>
+                    <div class="card-footer bg-transparent border-0">
+                      <button class="btn btn-outline-success" (click)="selectedSection='user-dashboard'">
+                        Go to Dashboard <i class="bi bi-arrow-right ms-1"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="col-md-4">
+                  <div class="card h-100 shadow-sm">
+                    <div class="card-body">
+                      <h4 class="card-title d-flex align-items-center mb-3">
+                        <i class="bi bi-graph-up text-info me-2"></i>
+                        Statistics
+                      </h4>
+                      <p class="card-text">
+                        Analyze your usage patterns and track your progress.
+                      </p>
+                    </div>
+                    <div class="card-footer bg-transparent border-0">
+                      <button class="btn btn-outline-info" (click)="selectedSection='user-statistics'">
+                        Go to Statistics <i class="bi bi-arrow-right ms-1"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="col-md-4">
+                  <div class="card h-100 shadow-sm">
+                    <div class="card-body">
+                      <h4 class="card-title d-flex align-items-center mb-3">
+                        <i class="bi bi-search text-warning me-2"></i>
+                        Search Users
+                      </h4>
+                      <p class="card-text">
+                        Find and connect with other users in your organization.
+                      </p>
+                    </div>
+                    <div class="card-footer bg-transparent border-0">
+                      <button class="btn btn-outline-warning" (click)="selectedSection='user-search'">
+                        Go to Search <i class="bi bi-arrow-right ms-1"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              }
             </div>
           </div>
         }

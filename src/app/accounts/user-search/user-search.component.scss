@@ -1,0 +1,59 @@
+.hover-card {
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.hover-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.rounded-circle {
+  flex-shrink: 0;
+}
+
+.card {
+  min-height: 200px;
+}
+
+.spinner-border-sm {
+  width: 1rem;
+  height: 1rem;
+}
+
+.display-1 {
+  font-size: 4rem;
+  opacity: 0.5;
+}
+
+.badge {
+  font-size: 0.75em;
+}
+
+.form-text {
+  font-size: 0.8rem;
+}
+
+.input-group-text {
+  background-color: #f8f9fa;
+  border-color: #ced4da;
+}
+
+.btn-outline-primary:disabled,
+.btn-outline-secondary:disabled {
+  opacity: 0.6;
+}
+
+@media (max-width: 768px) {
+  .col-md-4 {
+    margin-bottom: 1rem;
+  }
+  
+  .d-flex.gap-2 {
+    flex-direction: column;
+    gap: 0.5rem !important;
+  }
+  
+  .d-flex.gap-2 .btn {
+    width: 100%;
+  }
+}

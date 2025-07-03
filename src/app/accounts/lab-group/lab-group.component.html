@@ -71,9 +71,7 @@
                   <tr>
                     <th scope="col" class="ps-3">Name</th>
                     <th scope="col">Description</th>
-                    @if (accountsService.is_staff) {
-                      <th scope="col" class="text-end pe-3">Actions</th>
-                    }
+                    <th scope="col" class="text-end pe-3">Actions</th>
                   </tr>
                   </thead>
                   <tbody>
@@ -85,8 +83,8 @@
                         <td class="align-middle">
                           <span class="text-secondary">{{l.description || 'No description available'}}</span>
                         </td>
-                        @if (accountsService.is_staff) {
-                          <td class="align-middle text-end pe-3">
+                        <td class="align-middle text-end pe-3">
+                          @if (canManageLabGroup(l)) {
                             <div class="btn-group">
                               <button class="btn btn-sm btn-outline-primary" (click)="editLabGroup(l)" ngbTooltip="Edit this lab group">
                                 <i class="bi bi-pencil"></i>
@@ -97,12 +95,16 @@
                               <button class="btn btn-sm btn-outline-warning" (click)="createLabGroupUser(l)" ngbTooltip="Create new user">
                                 <i class="bi bi-person-plus"></i>
                               </button>
-                              <button class="btn btn-sm btn-outline-danger" (click)="deleteLabGroup(l)" ngbTooltip="Delete lab group">
-                                <i class="bi bi-trash"></i>
-                              </button>
+                              @if (accountsService.is_staff) {
+                                <button class="btn btn-sm btn-outline-danger" (click)="deleteLabGroup(l)" ngbTooltip="Delete lab group">
+                                  <i class="bi bi-trash"></i>
+                                </button>
+                              }
                             </div>
-                          </td>
-                        }
+                          } @else {
+                            <span class="text-muted small">No management permissions</span>
+                          }
+                        </td>
                       </tr>
                     }
                   </tbody>

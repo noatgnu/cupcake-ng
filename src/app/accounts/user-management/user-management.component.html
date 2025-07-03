@@ -1,0 +1,378 @@
+<div class="container-fluid">
+  <!-- Header -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 class="mb-0">
+      <i class="bi bi-people-fill me-2"></i>User Management
+      <span class="badge bg-warning text-dark ms-2">Staff Only</span>
+    </h3>
+    <div class="d-flex gap-2">
+      <button class="btn btn-outline-primary" (click)="navigateToUserSearch()">
+        <i class="bi bi-search me-2"></i>Search Users
+      </button>
+      <button class="btn btn-outline-success" (click)="generateSignupToken()">
+        <i class="bi bi-person-plus me-2"></i>Invite User
+      </button>
+      <button class="btn btn-outline-secondary" (click)="refreshData()" [disabled]="loading">
+        <i class="bi bi-arrow-clockwise me-2"></i>Refresh
+      </button>
+    </div>
+  </div>
+
+  <!-- Access Denied -->
+  @if (error && error.includes('Access denied')) {
+    <div class="alert alert-danger">
+      <i class="bi bi-shield-exclamation me-2"></i>
+      {{ error }}
+    </div>
+  }
+
+  <!-- Loading -->
+  @if (loading) {
+    <div class="text-center py-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+      <div class="mt-2">Loading platform analytics...</div>
+    </div>
+  }
+
+  <!-- Error -->
+  @if (error && !error.includes('Access denied')) {
+    <div class="alert alert-danger">
+      <i class="bi bi-exclamation-triangle me-2"></i>{{ error }}
+    </div>
+  }
+
+  <!-- Platform Analytics -->
+  @if (!loading && !error && analytics) {
+    <div>
+    <!-- Overview Cards -->
+    <div class="row mb-4">
+      <div class="col-md-3 mb-3">
+        <div class="card border-0 shadow-sm bg-primary text-white">
+          <div class="card-body text-center">
+            <i class="bi bi-people display-4 mb-2"></i>
+            <h3 class="mb-1">{{ analytics.users.total }}</h3>
+            <p class="mb-0">Total Users</p>
+            <small class="opacity-75">{{ analytics.users.active }} active</small>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3 mb-3">
+        <div class="card border-0 shadow-sm bg-success text-white">
+          <div class="card-body text-center">
+            <i class="bi bi-person-plus display-4 mb-2"></i>
+            <h3 class="mb-1">{{ analytics.users.new_last_30_days }}</h3>
+            <p class="mb-0">New Users</p>
+            <small class="opacity-75">Last 30 days</small>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3 mb-3">
+        <div class="card border-0 shadow-sm bg-warning text-dark">
+          <div class="card-body text-center">
+            <i class="bi bi-shield-check display-4 mb-2"></i>
+            <h3 class="mb-1">{{ analytics.users.staff }}</h3>
+            <p class="mb-0">Staff Users</p>
+            <small class="opacity-75">{{ Math.round((analytics.users.staff / analytics.users.total) * 100) }}% of total</small>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3 mb-3">
+        <div class="card border-0 shadow-sm bg-info text-white">
+          <div class="card-body text-center">
+            <i class="bi bi-graph-up display-4 mb-2"></i>
+            <h3 class="mb-1">{{ Math.round((analytics.users.active / analytics.users.total) * 100) }}%</h3>
+            <p class="mb-0">Active Rate</p>
+            <small class="opacity-75">{{ analytics.users.active }}/{{ analytics.users.total }}</small>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Platform Resources Overview -->
+    <div class="row mb-4">
+      <div class="col-md-8">
+        <div class="card shadow-sm">
+          <div class="card-header ">
+            <h6 class="mb-0">
+              <i class="bi bi-database me-2"></i>Platform Resources
+            </h6>
+          </div>
+          <div class="card-body">
+            <div class="row text-center">
+              <div class="col">
+                <h4 class="text-primary">{{ analytics.resources.protocols }}</h4>
+                <small class="text-muted">Protocols</small>
+                <div class="mt-1">
+                  <small class="text-success">+{{ analytics.recent_activity.protocols_last_30_days }} this month</small>
+                </div>
+              </div>
+              <div class="col border-start">
+                <h4 class="text-success">{{ analytics.resources.sessions }}</h4>
+                <small class="text-muted">Sessions</small>
+                <div class="mt-1">
+                  <small class="text-success">+{{ analytics.recent_activity.sessions_last_30_days }} this month</small>
+                </div>
+              </div>
+              <div class="col border-start">
+                <h4 class="text-info">{{ analytics.resources.annotations }}</h4>
+                <small class="text-muted">Annotations</small>
+                <div class="mt-1">
+                  <small class="text-success">+{{ analytics.recent_activity.annotations_last_30_days }} this month</small>
+                </div>
+              </div>
+              <div class="col border-start">
+                <h4 class="text-warning">{{ analytics.resources.projects }}</h4>
+                <small class="text-muted">Projects</small>
+              </div>
+              <div class="col border-start">
+                <h4 class="text-secondary">{{ analytics.resources.lab_groups }}</h4>
+                <small class="text-muted">Lab Groups</small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="card shadow-sm">
+          <div class="card-header ">
+            <h6 class="mb-0">
+              <i class="bi bi-graph-up me-2"></i>Growth Metrics
+            </h6>
+          </div>
+          <div class="card-body">
+            <div class="mb-3">
+              <div class="d-flex justify-content-between">
+                <span>User Growth</span>
+                <span class="text-success">{{ getActivityGrowth(analytics.users.new_last_30_days, analytics.users.total) }}%</span>
+              </div>
+              <div class="progress mt-1" style="height: 6px;">
+                <div class="progress-bar bg-success"
+                     [style.width.%]="getActivityGrowth(analytics.users.new_last_30_days, analytics.users.total)">
+                </div>
+              </div>
+            </div>
+            <div class="mb-3">
+              <div class="d-flex justify-content-between">
+                <span>Activity Rate</span>
+                <span class="text-info">{{ Math.round((analytics.users.active / analytics.users.total) * 100) }}%</span>
+              </div>
+              <div class="progress mt-1" style="height: 6px;">
+                <div class="progress-bar bg-info"
+                     [style.width.%]="Math.round((analytics.users.active / analytics.users.total) * 100)">
+                </div>
+              </div>
+            </div>
+            <div>
+              <div class="d-flex justify-content-between">
+                <span>Staff Ratio</span>
+                <span class="text-warning">{{ Math.round((analytics.users.staff / analytics.users.total) * 100) }}%</span>
+              </div>
+              <div class="progress mt-1" style="height: 6px;">
+                <div class="progress-bar bg-warning"
+                     [style.width.%]="Math.round((analytics.users.staff / analytics.users.total) * 100)">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Top Active Users and Recent Users -->
+    <div class="row">
+      <div class="col-md-6">
+        <div class="card shadow-sm">
+          <div class="card-header ">
+            <h6 class="mb-0">
+              <i class="bi bi-trophy me-2"></i>Top Active Users
+            </h6>
+          </div>
+          <div class="card-body">
+            @if (analytics.top_active_users.length === 0) {
+              <div class="text-center text-muted py-3">
+                <i class="bi bi-person display-4 mb-2"></i>
+                <p>No active users found</p>
+              </div>
+            }
+            @for (user of analytics.top_active_users; track user.id; let i = $index) {
+              <div class="d-flex align-items-center mb-3">
+              <div class="me-3">
+                <span class="badge"
+                      [ngClass]="i === 0 ? 'bg-warning' : i === 1 ? 'bg-secondary' : 'bg-success'"
+                      style="width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                  {{ i + 1 }}
+                </span>
+              </div>
+              <div class="flex-grow-1">
+                <h6 class="mb-1">{{ user.username }}</h6>
+                <small class="text-muted">
+                  {{ user.total_activity }} total activities
+                  ({{ user.protocols }}p, {{ user.sessions }}s, {{ user.annotations }}a)
+                </small>
+              </div>
+              <div class="text-end">
+                <button class="btn btn-sm btn-outline-primary"
+                        (click)="openDeactivateModal(user.id)"
+                        title="Manage User">
+                  <i class="bi bi-gear"></i>
+                </button>
+              </div>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="card shadow-sm">
+          <div class="card-header ">
+            <h6 class="mb-0">
+              <i class="bi bi-clock-history me-2"></i>Recent Users
+            </h6>
+          </div>
+          <div class="card-body">
+            @if (recentUsers.length === 0) {
+              <div class="text-center text-muted py-3">
+                <i class="bi bi-person-plus display-4 mb-2"></i>
+                <p>No recent users</p>
+              </div>
+            }
+            @for (user of recentUsers; track user.id) {
+              <div class="d-flex align-items-center mb-3">
+              <div class="me-3">
+                <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center"
+                     style="width: 32px; height: 32px;">
+                  <i class="bi bi-person"></i>
+                </div>
+              </div>
+              <div class="flex-grow-1">
+                <h6 class="mb-1">{{ getUserFullName(user) }}</h6>
+                <small class="text-muted">
+                  {{ user.username }}
+                  @if (user.is_staff) {
+                    <span class="badge bg-warning text-dark ms-1">Staff</span>
+                  }
+                </small>
+              </div>
+              <div class="text-end">
+                <button class="btn btn-sm btn-outline-danger"
+                        (click)="openDeactivateModal(user.id)"
+                        title="Deactivate User">
+                  <i class="bi bi-person-x"></i>
+                </button>
+              </div>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="card shadow-sm mt-4">
+      <div class="card-header">
+        <h6 class="mb-0">
+          <i class="bi bi-lightning me-2"></i>Quick Actions
+        </h6>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-3 mb-2">
+            <button class="btn btn-primary w-100" (click)="generateSignupToken()">
+              <i class="bi bi-person-plus me-2"></i>Invite New User
+            </button>
+          </div>
+          <div class="col-md-3 mb-2">
+            <button class="btn btn-outline-primary w-100" (click)="navigateToUserSearch()">
+              <i class="bi bi-search me-2"></i>Search Users
+            </button>
+          </div>
+          <div class="col-md-3 mb-2">
+            <button class="btn btn-outline-secondary w-100" (click)="exportUserData()">
+              <i class="bi bi-download me-2"></i>Export Data
+            </button>
+          </div>
+          <div class="col-md-3 mb-2">
+            <button class="btn btn-outline-info w-100" (click)="refreshData()">
+              <i class="bi bi-arrow-clockwise me-2"></i>Refresh Analytics
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    @if (signupToken) {
+      <div class="alert alert-success d-flex align-items-center mt-3" role="alert">
+        <i class="bi bi-key me-2"></i>
+        <div>
+          <strong>Signup Token:</strong> <code>{{ signupToken }}</code>
+        </div>
+      </div>
+    }
+    </div>
+  }
+</div>
+
+<!-- Deactivate User Modal -->
+<div class="modal fade" [class.show]="showDeactivateModal" [style.display]="showDeactivateModal ? 'block' : 'none'" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <i class="bi bi-person-x me-2"></i>Deactivate User
+        </h5>
+        <button type="button" class="btn-close" (click)="closeModals()"></button>
+      </div>
+      <div class="modal-body">
+        <p>Are you sure you want to deactivate this user? This action will prevent them from logging in.</p>
+        <div class="mb-3">
+          <label for="deactivationReason" class="form-label">Reason (optional)</label>
+          <textarea
+            id="deactivationReason"
+            class="form-control"
+            rows="3"
+            placeholder="Enter reason for deactivation..."
+            [(ngModel)]="deactivationReason">
+          </textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="closeModals()">Cancel</button>
+        <button type="button" class="btn btn-danger" (click)="confirmDeactivateUser()">
+          <i class="bi bi-person-x me-2"></i>Deactivate User
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Reactivate User Modal -->
+<div class="modal fade" [class.show]="showReactivateModal" [style.display]="showReactivateModal ? 'block' : 'none'" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <i class="bi bi-person-check me-2"></i>Reactivate User
+        </h5>
+        <button type="button" class="btn-close" (click)="closeModals()"></button>
+      </div>
+      <div class="modal-body">
+        <p>Are you sure you want to reactivate this user? This will restore their access to the system.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="closeModals()">Cancel</button>
+        <button type="button" class="btn btn-success" (click)="confirmReactivateUser()">
+          <i class="bi bi-person-check me-2"></i>Reactivate User
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal backdrop -->
+@if (showDeactivateModal || showReactivateModal) {
+  <div class="modal-backdrop fade" [class.show]="showDeactivateModal || showReactivateModal" (click)="closeModals()"></div>
+}

@@ -1,0 +1,314 @@
+<div class="modal-header">
+  <h4 class="modal-title">
+    <i class="bi bi-search me-2"></i>User Search
+  </h4>
+  <button type="button" class="btn-close" (click)="close()"></button>
+</div>
+
+<div class="modal-body">
+  <!-- Search and Filters -->
+  <div class="row g-3 mb-4">
+    <!-- Search Query -->
+    <div class="col-md-4">
+      <label for="searchQuery" class="form-label">Search Users</label>
+      <div class="input-group">
+        <span class="input-group-text">
+          <i class="bi bi-search"></i>
+        </span>
+        <input
+          id="searchQuery"
+          type="text"
+          class="form-control"
+          placeholder="Username, name, or email..."
+          [(ngModel)]="searchQuery"
+          (input)="onSearchChange()"
+        >
+      </div>
+    </div>
+
+    <!-- Lab Group Filter -->
+    <div class="col-md-3">
+      <label for="labGroupFilter" class="form-label">Lab Group</label>
+      <select
+        id="labGroupFilter"
+        class="form-select"
+        [(ngModel)]="selectedLabGroup"
+        (change)="onFilterChange()"
+      >
+        <option [value]="null">All Lab Groups</option>
+        @for (labGroup of labGroups; track labGroup.id) {
+          <option [value]="labGroup.id">
+            {{ labGroup.name }}
+          </option>
+        }
+      </select>
+    </div>
+
+    <!-- Role Filter -->
+    <div class="col-md-2">
+      <label for="roleFilter" class="form-label">Role</label>
+      <select
+        id="roleFilter"
+        class="form-select"
+        [(ngModel)]="selectedRole"
+        (change)="onFilterChange()"
+      >
+        <option value="">All Roles</option>
+        <option value="staff">Staff</option>
+        <option value="regular">Regular</option>
+      </select>
+    </div>
+
+    <!-- Active Filter -->
+    <div class="col-md-3">
+      <label class="form-label d-block">Status</label>
+      <div class="form-check form-switch">
+        <input
+          class="form-check-input"
+          type="checkbox"
+          id="activeOnlyFilter"
+          [(ngModel)]="activeOnly"
+          (change)="onFilterChange()"
+        >
+        <label class="form-check-label" for="activeOnlyFilter">
+          Active only
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <!-- Results Summary -->
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <span class="text-muted">
+      Found {{ totalCount }} user{{ totalCount !== 1 ? 's' : '' }}
+      @if (batchMode && selectedUsers.size > 0) {
+        <span class="badge bg-primary ms-2">{{ selectedUsers.size }} selected</span>
+      }
+    </span>
+    <div class="d-flex align-items-center gap-2">
+      @if (loading) {
+        <div class="d-flex align-items-center">
+          <div class="spinner-border spinner-border-sm me-2" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+          Searching...
+        </div>
+      }
+      <button
+        class="btn btn-sm btn-outline-secondary"
+        (click)="toggleBatchMode()"
+        [class.active]="batchMode"
+      >
+        <i class="bi bi-check-square me-1"></i>
+        {{ batchMode ? 'Exit Batch' : 'Batch Select' }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Batch Actions Bar -->
+  @if (batchMode && selectedUsers.size > 0) {
+    <div class="alert alert-info">
+      <div class="row g-3 align-items-center">
+        <div class="col-auto">
+          <strong>{{ selectedUsers.size }} user{{ selectedUsers.size !== 1 ? 's' : '' }} selected</strong>
+        </div>
+        <div class="col-md-4">
+          <label for="targetLabGroup" class="form-label mb-1">Add to Lab Group:</label>
+          <div class="position-relative">
+            <input
+              id="targetLabGroup"
+              type="text"
+              class="form-control form-control-sm"
+              placeholder="Search lab groups..."
+              [(ngModel)]="labGroupSearchQuery"
+              (input)="onLabGroupSearchChange()"
+              (focus)="onLabGroupInputFocus()"
+              (blur)="onLabGroupInputBlur()"
+              autocomplete="off"
+            >
+            @if (targetLabGroup && labGroupSearchQuery) {
+              <button
+                type="button"
+                class="btn btn-sm btn-outline-secondary position-absolute top-0 end-0 h-100"
+                (click)="clearLabGroupSelection()"
+                style="border-top-left-radius: 0; border-bottom-left-radius: 0;"
+              >
+                <i class="bi bi-x"></i>
+              </button>
+            }
+
+            <!-- Typeahead Dropdown -->
+            @if (showLabGroupDropdown && filteredLabGroups.length > 0) {
+              <div class="dropdown-menu show position-absolute w-100" style="top: 100%; z-index: 1000;">
+                @for (labGroup of filteredLabGroups; track labGroup.id) {
+                  <button
+                    type="button"
+                    class="dropdown-item d-flex align-items-center"
+                    (click)="selectLabGroup(labGroup)"
+                  >
+                    <div class="flex-grow-1">
+                      <div class="fw-bold">{{ labGroup.name }}</div>
+                      @if (labGroup.description) {
+                        <small class="text-muted">{{ labGroup.description }}</small>
+                      }
+                    </div>
+                  </button>
+                }
+                @if (filteredLabGroups.length === 0 && labGroupSearchQuery) {
+                  <div class="dropdown-item-text text-muted">
+                    <i class="bi bi-search me-2"></i>No lab groups found
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        </div>
+        <div class="col-auto">
+          <button
+            class="btn btn-sm btn-primary"
+            (click)="applyBatchAction()"
+            [disabled]="!targetLabGroup || batchActionLoading"
+          >
+            @if (batchActionLoading) {
+              <span class="spinner-border spinner-border-sm me-1"></span>
+            }
+            <i class="bi bi-plus-circle me-1"></i>
+            Add to Group
+          </button>
+        </div>
+        <div class="col-auto">
+          <button class="btn btn-sm btn-outline-secondary" (click)="selectAllUsers()">
+            <i class="bi bi-check-all me-1"></i>
+            Select All
+          </button>
+          <button class="btn btn-sm btn-outline-secondary ms-1" (click)="deselectAllUsers()">
+            <i class="bi bi-x-circle me-1"></i>
+            Clear
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Loading -->
+  @if (loading && users.length === 0) {
+    <div class="text-center py-4">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+      <div class="mt-2">Searching users...</div>
+    </div>
+  }
+
+  <!-- No Results -->
+  @if (!loading && users.length === 0) {
+    <div class="text-center py-4">
+      <i class="bi bi-person-x display-4 text-muted mb-3"></i>
+      <h6 class="text-muted">No users found</h6>
+      <p class="text-muted">Try adjusting your search criteria</p>
+      <button class="btn btn-outline-primary btn-sm" (click)="clearFilters()">
+        Clear Filters
+      </button>
+    </div>
+  }
+
+  <!-- Results -->
+  @if (!loading && users.length > 0) {
+    <div class="user-list" style="max-height: 400px; overflow-y: auto;">
+      @for (user of users; track user.id) {
+        <div class="card mb-2 hover-card" [ngClass]="{'border-primary': isCurrentUser(user), 'border-success': batchMode && isUserSelected(user.id)}">
+          <div class="card-body py-2">
+            <div class="d-flex align-items-center">
+              @if (batchMode) {
+                <div class="form-check me-3">
+                  <input
+                    class="form-check-input"
+                    type="checkbox"
+                    [id]="'user-' + user.id"
+                    [checked]="isUserSelected(user.id)"
+                    (change)="toggleUserSelection(user.id)"
+                  >
+                </div>
+              }
+              <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center me-3"
+                   style="width: 40px; height: 40px;">
+                <i class="bi bi-person"></i>
+              </div>
+              <div class="flex-grow-1">
+                <h6 class="mb-1">
+                  {{ getUserFullName(user) }}
+                  @if (isCurrentUser(user)) {
+                    <span class="badge bg-success ms-2">You</span>
+                  }
+                  @if (user.is_staff) {
+                    <span class="badge bg-warning text-dark ms-1">Staff</span>
+                  }
+                </h6>
+                <small class="text-muted d-block">{{ user.username }}</small>
+                @if (user.email) {
+                  <small class="text-muted d-block">
+                    <i class="bi bi-envelope me-1"></i>{{ user.email }}
+                  </small>
+                }
+                @if (user.lab_groups && user.lab_groups.length > 0) {
+                  <div class="mt-1">
+                    @for (labGroup of user.lab_groups; track labGroup.id) {
+                      <span class="badge bg-secondary me-1">{{ labGroup.name }}</span>
+                    }
+                  </div>
+                }
+              </div>
+              @if (!batchMode) {
+                <div>
+                  <button
+                    class="btn btn-sm btn-outline-primary"
+                    (click)="selectUser(user)"
+                    title="Select User"
+                  >
+                    <i class="bi bi-check-circle me-1"></i>
+                    Select
+                  </button>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Pagination -->
+  @if (!loading && totalCount > pageSize) {
+    <div class="d-flex justify-content-between align-items-center mt-3">
+      <small class="text-muted">
+        Showing {{ (currentPage - 1) * pageSize + 1 }} to {{ Math.min(currentPage * pageSize, totalCount) }} of {{ totalCount }} users
+      </small>
+      <nav aria-label="User search pagination">
+        <ul class="pagination pagination-sm mb-0">
+          <li class="page-item" [ngClass]="{'disabled': !hasPrevious}">
+            <button class="page-link" (click)="previousPage()" [disabled]="!hasPrevious">
+              <i class="bi bi-chevron-left"></i>
+            </button>
+          </li>
+          <li class="page-item active">
+            <span class="page-link">{{ currentPage }} of {{ getTotalPages() }}</span>
+          </li>
+          <li class="page-item" [ngClass]="{'disabled': !hasNext}">
+            <button class="page-link" (click)="nextPage()" [disabled]="!hasNext">
+              <i class="bi bi-chevron-right"></i>
+            </button>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  }
+</div>
+
+<div class="modal-footer">
+  <button type="button" class="btn btn-outline-secondary" (click)="clearFilters()">
+    <i class="bi bi-x-circle me-2"></i>Clear Filters
+  </button>
+  <button type="button" class="btn btn-secondary" (click)="close()">
+    Close
+  </button>
+</div>
