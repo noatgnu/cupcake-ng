@@ -30,6 +30,7 @@ export class AddRemoveUserFromGroupModalComponent {
       this.getUsers(undefined)
     }
   }
+  @Input() readOnlyPermission: boolean = false
 
   get labGroup(): LabGroup|undefined {
     return this._labGroup

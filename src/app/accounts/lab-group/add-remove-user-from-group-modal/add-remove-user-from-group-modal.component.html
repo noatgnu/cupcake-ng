@@ -49,7 +49,9 @@
           <tr>
             <th scope="col">ID</th>
             <th scope="col">Username</th>
-            <th scope="col" class="text-end">Actions</th>
+            @if (!readOnlyPermission) {
+              <th scope="col" class="text-end">Actions</th>
+            }
           </tr>
           </thead>
           <tbody>
@@ -62,29 +64,31 @@
                     <strong>{{ user.username }}</strong>
                   </div>
                 </td>
-                <td class="text-end">
-                  @if (inThisLabGroupMap[user.id]) {
-                    <button
-                      class="btn btn-sm btn-outline-danger"
-                      ngbTooltip="Remove from lab group"
-                      (click)="removeUserFromLabGroup(user)"
-                      [disabled]="isActionPending"
-                    >
-                      <i class="bi bi-person-dash me-1"></i>
-                      Remove
-                    </button>
-                  } @else {
-                    <button
-                      class="btn btn-sm btn-outline-primary"
-                      ngbTooltip="Add to lab group"
-                      (click)="addUserToLabGroup(user)"
-                      [disabled]="isActionPending"
-                    >
-                      <i class="bi bi-person-add me-1"></i>
-                      Add
-                    </button>
-                  }
-                </td>
+                @if (!readOnlyPermission) {
+                  <td class="text-end">
+                    @if (inThisLabGroupMap[user.id]) {
+                      <button
+                        class="btn btn-sm btn-outline-danger"
+                        ngbTooltip="Remove from lab group"
+                        (click)="removeUserFromLabGroup(user)"
+                        [disabled]="isActionPending"
+                      >
+                        <i class="bi bi-person-dash me-1"></i>
+                        Remove
+                      </button>
+                    } @else {
+                      <button
+                        class="btn btn-sm btn-outline-primary"
+                        ngbTooltip="Add to lab group"
+                        (click)="addUserToLabGroup(user)"
+                        [disabled]="isActionPending"
+                      >
+                        <i class="bi bi-person-add me-1"></i>
+                        Add
+                      </button>
+                    }
+                  </td>
+                }
               </tr>
             }
             @if (userQuery.results.length === 0) {

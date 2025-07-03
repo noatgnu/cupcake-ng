@@ -92,17 +92,20 @@
                               <button class="btn btn-sm btn-outline-info" (click)="openAddRemoveUserFromGroupModel(l)" ngbTooltip="Manage users">
                                 <i class="bi bi-people"></i>
                               </button>
-                              <button class="btn btn-sm btn-outline-warning" (click)="createLabGroupUser(l)" ngbTooltip="Create new user">
-                                <i class="bi bi-person-plus"></i>
-                              </button>
                               @if (accountsService.is_staff) {
+                                <button class="btn btn-sm btn-outline-warning" (click)="createLabGroupUser(l)" ngbTooltip="Create new user">
+                                  <i class="bi bi-person-plus"></i>
+                                </button>
                                 <button class="btn btn-sm btn-outline-danger" (click)="deleteLabGroup(l)" ngbTooltip="Delete lab group">
                                   <i class="bi bi-trash"></i>
                                 </button>
                               }
                             </div>
                           } @else {
-                            <span class="text-muted small">No management permissions</span>
+                            <span class="text-muted small"><button class="btn btn-sm btn-outline-info" (click)="openAddRemoveUserFromGroupModel(l, true)" ngbTooltip="Manage users">
+                                <i class="bi bi-people"></i>
+                              </button>
+                            </span>
                           }
                         </td>
                       </tr>

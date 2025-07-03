@@ -129,9 +129,10 @@ export class LabGroupComponent implements OnInit {
     })
   }
 
-  openAddRemoveUserFromGroupModel(labGroup: LabGroup) {
+  openAddRemoveUserFromGroupModel(labGroup: LabGroup, readOnly: boolean = false) {
     const ref = this.modal.open(AddRemoveUserFromGroupModalComponent)
     ref.componentInstance.labGroup = labGroup
+    ref.componentInstance.readOnlyPermission = readOnly
 
   }
 
