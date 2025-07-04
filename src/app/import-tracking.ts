@@ -1,23 +1,25 @@
 export interface ImportedObject {
   id: number;
-  object_type: string;
+  model_name: string;
   object_id: number;
-  object_repr: string;
+  original_id: number | null;
+  object_data: any;
   created_at: string;
 }
 
 export interface ImportedFile {
   id: number;
   file_path: string;
+  original_name: string;
   file_size_bytes: number;
   created_at: string;
 }
 
 export interface ImportedRelationship {
   id: number;
-  from_object_type: string;
+  from_model: string;
   from_object_id: number;
-  to_object_type: string;
+  to_model: string;
   to_object_id: number;
   relationship_field: string;
   created_at: string;
@@ -30,10 +32,10 @@ export interface ImportTracker {
   user_username: string;
   user_full_name: string;
   archive_path: string;
-  archive_size_bytes: number;
   archive_size_mb: number;
   import_status: 'in_progress' | 'completed' | 'failed' | 'reverted';
-  status_color: string;
+  import_options: any;
+  metadata: any;
   import_started_at: string;
   import_completed_at: string | null;
   duration: {
@@ -44,9 +46,9 @@ export interface ImportTracker {
   total_files_imported: number;
   total_relationships_created: number;
   can_revert: boolean;
+  revert_reason: string | null;
   reverted_at: string | null;
   reverted_by: number | null;
-  error_message: string | null;
   imported_objects: ImportedObject[];
   imported_files: ImportedFile[];
   imported_relationships: ImportedRelationship[];
@@ -54,6 +56,7 @@ export interface ImportTracker {
     objects_by_type: { [key: string]: number };
     files_by_type: { [key: string]: number };
     relationships_by_field: { [key: string]: number };
+    status_color: string;
   };
 }
 

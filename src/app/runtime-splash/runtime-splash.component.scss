@@ -1,0 +1,195 @@
+.runtime-splash-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 9999;
+  cursor: pointer;
+  animation: fadeIn 0.3s ease-in;
+  outline: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.loading-content {
+  cursor: default;
+  animation: slideInUp 0.5s ease-out;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  position: relative;
+  /* Remove min-height since parent handles centering */
+}
+
+/* Override global logo styles to prevent jumping */
+.loading-content .logo-glow {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 2rem;
+}
+
+.loading-content .logo {
+  width: 120px !important;
+  height: 120px !important;
+  position: static !important;
+  top: auto !important;
+  left: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+  margin: 0 !important;
+  /* Keep floating animation but prevent position changes */
+  animation: logoFloat 3s ease-in-out infinite;
+}
+
+/* Ensure stable positioning for all theme variations */
+:host ::ng-deep .loading-overlay .logo {
+  position: static !important;
+  top: auto !important;
+  left: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+}
+
+.instructions-panel {
+  position: absolute;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+  font-size: 0.75rem;
+  line-height: 1.3;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  animation: fadeInRight 0.6s ease-out 0.3s both;
+}
+
+.instruction-line {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.25rem;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.instruction-line:last-of-type {
+  margin-bottom: 0.5rem;
+}
+
+.theme-info {
+  font-size: 0.65rem;
+  opacity: 0.6;
+  text-align: center;
+  padding-top: 0.25rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.instructions-panel kbd {
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 0.2rem;
+  padding: 0.1rem 0.25rem;
+  font-size: 0.7em;
+  font-family: monospace;
+  color: rgba(255, 255, 255, 0.95);
+  min-width: 4ch;
+  text-align: center;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideInUp {
+  from { 
+    transform: translateY(30px); 
+    opacity: 0; 
+  }
+  to { 
+    transform: translateY(0); 
+    opacity: 1; 
+  }
+}
+
+@keyframes fadeInRight {
+  from { 
+    transform: translateX(20px); 
+    opacity: 0; 
+  }
+  to { 
+    transform: translateX(0); 
+    opacity: 1; 
+  }
+}
+
+/* Loading dots animation */
+.loading-dots {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 2rem;
+}
+
+.loading-dots span {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.4;
+  animation: loadingPulse 1.5s ease-in-out infinite;
+}
+
+.loading-dots span:nth-child(1) { animation-delay: 0s; }
+.loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+.loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes loadingPulse {
+  0%, 100% { 
+    opacity: 0.4; 
+    transform: scale(1); 
+  }
+  50% { 
+    opacity: 1; 
+    transform: scale(1.2); 
+  }
+}
+
+/* Accessibility improvements */
+.runtime-splash-overlay:focus {
+  outline: 2px solid rgba(255, 255, 255, 0.5);
+  outline-offset: -2px;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .loading-content {
+    padding: 1rem;
+    min-height: 50vh;
+  }
+  
+  .app-title {
+    font-size: 2rem;
+  }
+  
+  .instructions-panel {
+    bottom: 1rem;
+    right: 1rem;
+    padding: 0.5rem;
+    font-size: 0.7rem;
+  }
+  
+  .instructions-panel kbd {
+    font-size: 0.65em;
+    padding: 0.05rem 0.2rem;
+    min-width: 3ch;
+  }
+}

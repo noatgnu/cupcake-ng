@@ -126,7 +126,7 @@
                   <th 
                     scope="col" 
                     class="sortable" 
-                    (click)="onSort('archive_size_bytes')">
+                    (click)="onSort('archive_size_mb')">
                     Size
                     <i class="fas fa-sort ml-1"></i>
                   </th>
@@ -149,7 +149,7 @@
                     </div>
                   </td>
                   <td>
-                    <span class="badge" [ngClass]="getStatusBadgeClass(importItem.import_status)">
+                    <span class="badge" [ngClass]="getStatusBadgeClass(importItem.import_status)" [style.background-color]="importItem.status_color || null">
                       {{ importItem.import_status | titlecase }}
                     </span>
                   </td>

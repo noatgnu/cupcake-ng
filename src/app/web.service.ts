@@ -1021,11 +1021,11 @@ export class WebService {
     )
   }
 
-  getServerSettings() {
+  getServerSettings(): Observable<{use_ocr: boolean, use_llm: boolean, use_whisper: boolean, use_coturn: boolean, allow_overlap_bookings: boolean, default_service_lab_group: string}> {
     return this.http.get<{use_ocr: boolean, use_llm: boolean, use_whisper: boolean, use_coturn: boolean, allow_overlap_bookings: boolean, default_service_lab_group: string}>(
       `${this.baseURL}/api/user/get_server_settings/`,
       {responseType: 'json', observe: 'body'}
-    )
+    );
   }
   bindUploadedFile(session_id: string|undefined|null, upload_id: string, file_name: string, annotation_name: string, step: number = 0, folder: number = 0, instrument_job_id: number|null|undefined = null, instrument_user_type: null|'user_annotation'|'staff_annotation' = null, stored_reagent_id: number|null = null) {
     const payload: any = {upload_id: upload_id, file_name: file_name, annotation_name: annotation_name}
@@ -1186,12 +1186,11 @@ export class WebService {
     )
   }
 
-  getStaffStatus() {
+  getStaffStatus(): Observable<{is_staff: boolean}> {
     return this.http.get<{is_staff: boolean}>(
       `${this.baseURL}/api/user/is_staff/`,
       {responseType: 'json', observe: 'body'}
-    )
-
+    );
   }
 
 

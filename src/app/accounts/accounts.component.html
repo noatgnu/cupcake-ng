@@ -157,7 +157,7 @@
           </div>
         } @else if (selectedSection === 'appearance') {
           <div class="container">
-            <div class="card shadow-sm">
+            <div class="card shadow-sm mb-4">
               <div class="card-body">
                 <h3 class="fs-5 mb-3">Theme Settings</h3>
                 <div class="mb-3">
@@ -179,6 +179,76 @@
                     </label>
                   </div>
                   <div class="form-text">Switch between light and dark appearance</div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="card shadow-sm">
+              <div class="card-body">
+                <h3 class="fs-5 mb-3">Splash Screen</h3>
+                <div class="mb-3">
+                  <label for="splashThemeSelect" class="form-label">
+                    <i class="bi bi-lightning me-2"></i> Loading Screen Theme
+                  </label>
+                  <select class="form-select" id="splashThemeSelect" 
+                          [(ngModel)]="selectedSplashTheme" (change)="onSplashThemeChange()">
+                    <option value="random">Random (Safe themes only)</option>
+                    <option value="default">Default</option>
+                    <option value="scifi">Sci-Fi (Portal)</option>
+                    <option value="space">Space Galaxy</option>
+                    <option value="matrix">Matrix ⚠️ Contains flashing lights</option>
+                  </select>
+                  <div class="form-text">
+                    Choose your preferred loading screen theme. Matrix theme contains flashing effects and is excluded from random selection.
+                  </div>
+                </div>
+                
+                @if (selectedSplashTheme === 'matrix') {
+                  <div class="alert alert-warning d-flex align-items-center" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    <div>
+                      <strong>Photosensitivity Warning:</strong> This theme contains flashing lights and effects that may trigger seizures for people with photosensitive epilepsy.
+                    </div>
+                  </div>
+                }
+                
+                <div class="row g-3">
+                  <div class="col-6 col-md-3">
+                    <div class="card theme-preview" [ngClass]="{'selected': selectedSplashTheme === 'default'}" 
+                         (click)="selectSplashTheme('default')">
+                      <div class="theme-preview-gradient theme-default"></div>
+                      <div class="card-body text-center p-2">
+                        <small class="fw-bold">Default</small>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-6 col-md-3">
+                    <div class="card theme-preview" [ngClass]="{'selected': selectedSplashTheme === 'scifi'}" 
+                         (click)="selectSplashTheme('scifi')">
+                      <div class="theme-preview-gradient theme-scifi"></div>
+                      <div class="card-body text-center p-2">
+                        <small class="fw-bold">Sci-Fi</small>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-6 col-md-3">
+                    <div class="card theme-preview" [ngClass]="{'selected': selectedSplashTheme === 'space'}" 
+                         (click)="selectSplashTheme('space')">
+                      <div class="theme-preview-gradient theme-space"></div>
+                      <div class="card-body text-center p-2">
+                        <small class="fw-bold">Space</small>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-6 col-md-3">
+                    <div class="card theme-preview" [ngClass]="{'selected': selectedSplashTheme === 'matrix'}" 
+                         (click)="selectSplashTheme('matrix')">
+                      <div class="theme-preview-gradient theme-matrix"></div>
+                      <div class="card-body text-center p-2">
+                        <small class="fw-bold">Matrix ⚠️</small>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>

@@ -1,0 +1,35 @@
+@if (visible) {
+  <div 
+    class="runtime-splash-overlay loading-overlay d-flex flex-column justify-content-center align-items-center"
+    [ngClass]="'theme-' + theme"
+    (click)="onClose()"
+    (keydown)="onKeydown($event)"
+    tabindex="0"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="splash-title">
+    
+    <div class="loading-content" (click)="$event.stopPropagation()">
+      <div class="logo-glow">
+        <img src="assets/cupcake_logo.png" alt="Cupcake Logo" class="logo">
+      </div>
+      
+      <h1 id="splash-title" class="app-title">CUPCAKE</h1>
+      <div class="app-subtitle">Laboratory Information Management System</div>
+      
+      <div class="loading-dots">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    </div>
+
+    <!-- Instructions in bottom right corner -->
+    <div class="instructions-panel">
+      <div class="instruction-line"><kbd>Ctrl+Alt+S</kbd> Toggle</div>
+      <div class="instruction-line"><kbd>Esc</kbd> Close</div>
+      <div class="instruction-line">Click to close</div>
+      <div class="theme-info">{{ theme | titlecase }}</div>
+    </div>
+  </div>
+}

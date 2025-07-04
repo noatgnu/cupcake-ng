@@ -85,7 +85,7 @@
                 <code class="text-primary">{{ importItem.import_id }}</code>
               </td>
               <td>
-                <span class="badge" [ngClass]="getStatusBadgeClass(importItem.import_status)">
+                <span class="badge" [ngClass]="getStatusBadgeClass(importItem.import_status)" [style.background-color]="importItem.status_color || null">
                   {{ importItem.import_status | titlecase }}
                 </span>
               </td>

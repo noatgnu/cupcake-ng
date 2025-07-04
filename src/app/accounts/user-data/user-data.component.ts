@@ -27,6 +27,7 @@ import { AccountsService } from '../accounts.service';
 export class UserDataComponent implements OnInit, OnDestroy {
   chunkUploadProgress = 0;
   chunkUploadTotal = 0;
+  uploadInProgress = false;
   selectedFormat: 'zip' | 'tar.gz' = 'zip';
   webSubscription?: Subscription;
   progress = 0;
@@ -77,22 +78,35 @@ export class UserDataComponent implements OnInit, OnDestroy {
   dryRunCompleted = false;
   dryRunProgress = 0;
   dryRunMessage = '';
+  dryRunError: string | null = null;
   currentUploadId: string | null = null;
 
+  // Import process states
+  importProcessStep: 'upload' | 'analyzing' | 'review' | 'importing' | 'completed' | 'error' = 'upload';
+  importCompleted = false;
+  importError: string | null = null;
+  importSuccessMessage = '';
+
   dryRunAnalysisReport: {
-    'archive_info': {[key: string]: number},
+    'archive_info': {[key: string]: any},
     'data_summary': {[key: string]: number},
-    'potential_conflicts': Array<string>,
-    'size_analysis': {'total_media_files': number,
+    'potential_conflicts': Array<{
+      type: string;
+      description: string;
+      items: string[];
+      total_conflicts: number;
+    }>,
+    'size_analysis': {
+      'total_media_files': number,
       'total_media_size_bytes': number,
       'total_media_size_mb': number,
       'large_files': {'name': string, 'size_mb': number}[],
       'file_types': {[key: string]: number}
-    }| null,
-    'import_plan': {},
+    } | null,
+    'import_plan': any,
     'warnings': Array<string>,
     'errors': Array<string>
-  }| null = null;
+  } | null = null;
 
 
   constructor(
@@ -117,23 +131,45 @@ export class UserDataComponent implements OnInit, OnDestroy {
         if ("import_type" in data && "instance_id" in data && "progress" in data) {
           if (data["import_type"] === "dry_run_analysis") {
             // Handle dry run progress
-            if (data["progress"] > this.dryRunProgress && data["status"] !== "error") {
+            if (data["status"] === "error") {
+              this.dryRunInProgress = false;
+              this.dryRunError = data["error_details"] || data["message"] || "Analysis failed";
+              this.importProcessStep = 'error';
+              this.toastService.show("Import Analysis", `Analysis failed: ${this.dryRunError}`, undefined,"error");
+            } else if (data["progress"] >= this.dryRunProgress) {
               this.dryRunProgress = data["progress"];
-              this.dryRunInProgress = this.dryRunProgress < 100;
               this.dryRunMessage = data["message"];
+              this.dryRunInProgress = this.dryRunProgress < 100;
+              this.importProcessStep = 'analyzing';
 
-              if ("analysis_report" in data) {
+              if (data["progress"] === 100 && "analysis_report" in data) {
                 this.dryRunAnalysisReport = data["analysis_report"];
                 this.dryRunCompleted = true;
                 this.dryRunInProgress = false;
+                this.importProcessStep = 'review';
+                this.toastService.show("Import Analysis", "Analysis completed successfully!");
               }
             }
           } else if (data["import_type"] === "user_data") {
             // Handle actual import progress
-            if (data["progress"] > this.progressImport && data["status"] !== "error") {
+            if (data["status"] === "error") {
+              this.importInProgress = false;
+              this.importError = data["error_details"] || data["message"] || "Import failed";
+              this.importProcessStep = 'error';
+              this.toastService.show("Import", `Import failed: ${this.importError}`, undefined, "danger");
+            } else if (data["progress"] >= this.progressImport) {
               this.progressImport = data["progress"];
-              this.importInProgress = this.progressImport < 100;
               this.importMessage = data["message"];
+              this.importInProgress = this.progressImport < 100;
+              this.importProcessStep = 'importing';
+
+              if (data["progress"] === 100) {
+                this.importInProgress = false;
+                this.importCompleted = true;
+                this.importProcessStep = 'completed';
+                this.importSuccessMessage = data["message"] || "Import completed successfully!";
+                this.toastService.show("Import", this.importSuccessMessage, undefined,"success");
+              }
             }
           }
         }
@@ -239,114 +275,172 @@ export class UserDataComponent implements OnInit, OnDestroy {
     return 'This option has been disabled by site administrator';
   }
 
-  async importUserData(event: Event){
+  async importUserData(event: Event) {
     const file = (event.target as HTMLInputElement).files?.[0];
     if (file) {
-      // Reset dry run state
-      this.resetDryRunState();
+      try {
+        // Reset all import state
+        this.resetImportState();
+        this.importProcessStep = 'upload';
+        
+        // Set upload progress immediately
+        this.uploadInProgress = true;
+        this.chunkUploadTotal = file.size;
+        this.chunkUploadProgress = 0;
 
-      const chunkSize = 1024 * 1024;
-      const fileSize = file.size;
-      this.chunkUploadTotal = fileSize
-      const hashObj = new jsSHA("SHA-256", "ARRAYBUFFER");
-      if (chunkSize > fileSize) {
-        console.log("Uploading single chunk")
-        const chunk = await file.arrayBuffer();
-        hashObj.update(chunk)
-        const hashDigest = hashObj.getHash("HEX");
-        const result = await this.web.uploadDataChunkComplete("", hashDigest, file, file.name).toPromise()
-        this.chunkUploadProgress = fileSize;
-        if (result?.completed_at) {
-          this.toastService.show("User Data", "Upload complete")
-          this.currentUploadId = result.id;
-          this.startDryRunAnalysis();
-        }
-      } else {
-        console.log("Uploading multiple chunks")
-        let currentURL = "";
-        let currentOffset = 0;
-        while (fileSize > currentOffset) {
-          let end = currentOffset + chunkSize;
-          if (end >= fileSize) {
-            end = fileSize;
-          }
-          const chunk = await file.slice(currentOffset, end).arrayBuffer();
-          hashObj.update(chunk)
-          const filePart = new File([chunk], file.name, {type: file.type})
-          console.log(filePart.size)
-          const contentRange = `bytes ${currentOffset}-${end-1}/${fileSize}`;
-          console.log(contentRange)
-          const result = await this.web.uploadDataChunk(currentURL, filePart,file.name, contentRange).toPromise()
-          if (result) {
-            currentURL = result.url;
-            currentOffset = result.offset;
-            this.chunkUploadProgress = currentOffset;
+        // Validate file size if limit is set
+        if (this.maxArchiveSizeMB) {
+          const fileSizeMB = file.size / (1024 * 1024);
+          if (fileSizeMB > this.maxArchiveSizeMB) {
+            this.uploadInProgress = false;
+            this.toastService.show("Import", `File size (${fileSizeMB.toFixed(1)} MB) exceeds maximum allowed size (${this.maxArchiveSizeMB} MB)`, undefined,"danger");
+            this.importProcessStep = 'error';
+            this.importError = `File too large: ${fileSizeMB.toFixed(1)} MB (max: ${this.maxArchiveSizeMB} MB)`;
+            return;
           }
         }
-        if (currentURL !== "") {
+
+        const chunkSize = 1024 * 1024;
+        const fileSize = file.size;
+        const hashObj = new jsSHA("SHA-256", "ARRAYBUFFER");
+
+        this.toastService.show("Import", "Starting file upload...");
+
+        if (chunkSize > fileSize) {
+          // Single chunk upload
+          const chunk = await file.arrayBuffer();
+          hashObj.update(chunk);
           const hashDigest = hashObj.getHash("HEX");
-          const result = await this.web.uploadDataChunkComplete(currentURL, hashDigest).toPromise()
+          const result = await this.web.uploadDataChunkComplete("", hashDigest, file, file.name).toPromise();
+          this.chunkUploadProgress = fileSize;
+
           if (result?.completed_at) {
-            this.toastService.show("User Data", "Upload complete")
             this.currentUploadId = result.id;
-            this.startDryRunAnalysis();
+            this.uploadInProgress = false;
+            this.toastService.show("Import", "Upload completed, starting analysis...");
+            await this.startDryRunAnalysis();
+          }
+        } else {
+          // Multi-chunk upload
+          let currentURL = "";
+          let currentOffset = 0;
+
+          while (fileSize > currentOffset) {
+            let end = currentOffset + chunkSize;
+            if (end >= fileSize) {
+              end = fileSize;
+            }
+
+            const chunk = await file.slice(currentOffset, end).arrayBuffer();
+            hashObj.update(chunk);
+            const filePart = new File([chunk], file.name, { type: file.type });
+            const contentRange = `bytes ${currentOffset}-${end - 1}/${fileSize}`;
+
+            const result = await this.web.uploadDataChunk(currentURL, filePart, file.name, contentRange).toPromise();
+            if (result) {
+              currentURL = result.url;
+              currentOffset = result.offset;
+              this.chunkUploadProgress = currentOffset;
+            }
+          }
+
+          if (currentURL !== "") {
+            const hashDigest = hashObj.getHash("HEX");
+            const result = await this.web.uploadDataChunkComplete(currentURL, hashDigest).toPromise();
+
+            if (result?.completed_at) {
+              this.currentUploadId = result.id;
+              this.uploadInProgress = false;
+              this.toastService.show("Import", "Upload completed, starting analysis...");
+              await this.startDryRunAnalysis();
+            }
           }
         }
+      } catch (error) {
+        console.error('Error during file upload:', error);
+        this.uploadInProgress = false;
+        this.importProcessStep = 'error';
+        this.importError = 'Failed to upload file. Please try again.';
+        this.toastService.show("Import", "Upload failed", undefined,"danger");
       }
     }
   }
 
-  startDryRunAnalysis() {
+  async startDryRunAnalysis() {
     if (!this.currentUploadId) return;
 
     this.dryRunInProgress = true;
     this.dryRunProgress = 0;
     this.dryRunCompleted = false;
     this.dryRunAnalysisReport = null;
+    this.dryRunError = null;
+    this.importProcessStep = 'analyzing';
 
-    this.web.dryRunImportUserData(this.currentUploadId, this.importOptions).subscribe({
-      next: (response) => {
-        this.toastService.show("User Data", "Starting dry run analysis...");
-      },
-      error: (error) => {
-        console.error('Error starting dry run analysis:', error);
-        this.toastService.show("User Data", "Failed to start dry run analysis");
-        this.dryRunInProgress = false;
-      }
-    });
+    try {
+      const response = await this.web.dryRunImportUserData(this.currentUploadId, this.importOptions).toPromise();
+      this.toastService.show("Import Analysis", "Analysis started...");
+    } catch (error) {
+      console.error('Error starting dry run analysis:', error);
+      this.dryRunInProgress = false;
+      this.importProcessStep = 'error';
+      this.dryRunError = 'Failed to start analysis. Please try again.';
+      this.toastService.show("Import Analysis", "Failed to start analysis", undefined, "danger");
+    }
   }
 
-  proceedWithImport() {
-    if (!this.currentUploadId) return;
+  async proceedWithImport() {
+    if (!this.currentUploadId || this.hasErrors()) return;
 
     this.progressImport = 0;
     this.importInProgress = true;
+    this.importError = null;
+    this.importProcessStep = 'importing';
 
-    this.web.importUserData(this.currentUploadId, this.importOptions).subscribe({
-      next: (response) => {
-        this.toastService.show("User Data", "Starting import process...");
-      },
-      error: (error) => {
-        console.error('Error starting import:', error);
-        this.toastService.show("User Data", "Failed to start import");
-        this.importInProgress = false;
-      }
-    });
+    try {
+      const response = await this.web.importUserData(this.currentUploadId, this.importOptions).toPromise();
+      this.toastService.show("Import", "Import process started...");
+    } catch (error) {
+      console.error('Error starting import:', error);
+      this.importInProgress = false;
+      this.importProcessStep = 'error';
+      this.importError = 'Failed to start import. Please try again.';
+      this.toastService.show("Import", "Failed to start import", undefined, "danger");
+    }
   }
 
-  resetDryRunState() {
+  resetImportState() {
+    // Reset all import-related state
     this.dryRunInProgress = false;
     this.dryRunCompleted = false;
     this.dryRunProgress = 0;
     this.dryRunMessage = '';
+    this.dryRunError = null;
     this.dryRunAnalysisReport = null;
     this.currentUploadId = null;
+    this.chunkUploadProgress = 0;
+    this.chunkUploadTotal = 0;
+    this.uploadInProgress = false;
+    this.progressImport = 0;
+    this.importInProgress = false;
+    this.importMessage = '';
+    this.importCompleted = false;
+    this.importError = null;
+    this.importSuccessMessage = '';
+    this.importProcessStep = 'upload';
   }
 
   cancelImport() {
-    this.resetDryRunState();
-    this.chunkUploadProgress = 0;
-    this.chunkUploadTotal = 0;
+    this.resetImportState();
+    this.toastService.show("Import", "Import cancelled");
+  }
+
+  startNewImport() {
+    this.resetImportState();
+    // Reset file input
+    const fileInput = document.getElementById('importUserData') as HTMLInputElement;
+    if (fileInput) {
+      fileInput.value = '';
+    }
   }
 
   hasErrors(): boolean {
@@ -363,6 +457,64 @@ export class UserDataComponent implements OnInit, OnDestroy {
     if (!this.dryRunAnalysisReport?.size_analysis?.file_types) return [];
     return Object.entries(this.dryRunAnalysisReport.size_analysis.file_types)
       .map(([type, count]) => ({type, count}));
+  }
+
+  // Helper methods for better UI display
+  getImportSummaryStats(): {label: string, value: number, icon: string, color: string}[] {
+    if (!this.dryRunAnalysisReport?.data_summary) return [];
+
+    const statsConfig = [
+      { key: 'protocols', label: 'Protocols', icon: 'bi-file-text', color: 'text-primary' },
+      { key: 'sessions', label: 'Sessions', icon: 'bi-play-circle', color: 'text-success' },
+      { key: 'annotations', label: 'Annotations', icon: 'bi-pencil', color: 'text-info' },
+      { key: 'projects', label: 'Projects', icon: 'bi-folder', color: 'text-warning' },
+      { key: 'reagents', label: 'Reagents', icon: 'bi-flask', color: 'text-danger' },
+      { key: 'instruments', label: 'Instruments', icon: 'bi-cpu', color: 'text-secondary' }
+    ];
+
+    return statsConfig
+      .filter(config => this.dryRunAnalysisReport!.data_summary[config.key] > 0)
+      .map(config => ({
+        label: config.label,
+        value: this.dryRunAnalysisReport!.data_summary[config.key],
+        icon: config.icon,
+        color: config.color
+      }));
+  }
+
+  getAnalysisStatusIcon(): string {
+    if (this.importProcessStep === 'error' || this.hasErrors()) return 'bi-exclamation-triangle';
+    if (this.hasWarnings()) return 'bi-info-circle';
+    if (this.dryRunCompleted) return 'bi-check-circle';
+    return 'bi-clock';
+  }
+
+  getAnalysisStatusColor(): string {
+    if (this.importProcessStep === 'error' || this.hasErrors()) return 'text-danger';
+    if (this.hasWarnings()) return 'text-warning';
+    if (this.dryRunCompleted) return 'text-success';
+    return 'text-info';
+  }
+
+  getProcessStepText(): string {
+    switch (this.importProcessStep) {
+      case 'upload': return 'Ready to upload';
+      case 'analyzing': return 'Analyzing import file...';
+      case 'review': return 'Review and confirm';
+      case 'importing': return 'Importing data...';
+      case 'completed': return 'Import completed!';
+      case 'error': return 'Error occurred';
+      default: return 'Unknown state';
+    }
+  }
+
+  isImportDisabled(): boolean {
+    return this.uploadInProgress ||
+           this.chunkUploadProgress > 0 && this.chunkUploadProgress < this.chunkUploadTotal ||
+           this.dryRunInProgress ||
+           this.importInProgress ||
+           this.importProcessStep === 'importing' ||
+           this.importProcessStep === 'analyzing';
   }
 
   ngOnDestroy() {

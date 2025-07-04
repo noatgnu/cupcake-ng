@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import {NgbModal, NgbPagination} from '@ng-bootstrap/ng-bootstrap';
 import { WebService } from '../../web.service';
 import { ToastService } from '../../toast.service';
+import { AccountsService } from '../../accounts/accounts.service';
 import {
   ImportTrackerList,
   ImportTrackerQuery,
@@ -44,34 +45,36 @@ export class ImportTrackingListComponent implements OnInit {
     private webService: WebService,
     private toastService: ToastService,
     private modalService: NgbModal,
-    private router: Router
+    private router: Router,
+    private accountsService: AccountsService
   ) { }
 
   ngOnInit(): void {
-    // Wait for accounts service to be initialized
-    if (this.webService && (this.webService as any).accountsService?.loggedIn !== undefined) {
+    // Check if user is logged in before loading data
+    if (this.accountsService.loggedIn) {
       this.loadImports();
       this.loadStats();
     } else {
-      // Check every 100ms until accounts are loaded
-      const checkAccounts = () => {
-        if (this.webService && (this.webService as any).accountsService?.loggedIn !== undefined) {
+      // Wait for authentication to complete
+      const checkAuth = () => {
+        if (this.accountsService.loggedIn) {
           this.loadImports();
           this.loadStats();
         } else {
-          setTimeout(checkAccounts, 100);
+          setTimeout(checkAuth, 100);
         }
       };
-      checkAccounts();
+      checkAuth();
     }
   }
 
   loadImports(): void {
     this.loading = true;
 
+    const offset = (this.currentPage - 1) * this.pageSize;
     const params = {
-      page: this.currentPage,
-      page_size: this.pageSize,
+      limit: this.pageSize,
+      offset: offset,
       ordering: this.sortDirection === 'desc' ? `-${this.sortField}` : this.sortField
     };
 

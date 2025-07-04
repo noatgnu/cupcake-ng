@@ -46,6 +46,7 @@ import {ImportTrackingSummaryComponent} from "./import-tracking-summary/import-t
 export class AccountsComponent implements OnInit{
   selectedSection = 'security'
   hideSidebar: boolean = false
+  selectedSplashTheme: string = 'random'
   @Input() set section(value: string) {
     this.selectedSection = value
   }
@@ -69,6 +70,12 @@ export class AccountsComponent implements OnInit{
         this.selectedSection = params['section']
       }
     })
+    
+    // Load saved splash screen theme
+    const savedTheme = localStorage.getItem('cupcake-splash-theme');
+    if (savedTheme) {
+      this.selectedSplashTheme = savedTheme;
+    }
   }
 
   changePassword() {
@@ -121,5 +128,19 @@ export class AccountsComponent implements OnInit{
       document.getElementsByTagName('body')[0].classList.add('dark-theme')
       this.dataService.darkMode = true
     }
+  }
+
+  selectSplashTheme(theme: string) {
+    this.selectedSplashTheme = theme;
+    this.saveSplashTheme();
+  }
+
+  onSplashThemeChange() {
+    this.saveSplashTheme();
+  }
+
+  private saveSplashTheme() {
+    localStorage.setItem('cupcake-splash-theme', this.selectedSplashTheme);
+    this.toastService.show('Splash Screen', `Theme changed to ${this.selectedSplashTheme}. You'll see it on the next page load.`);
   }
 }

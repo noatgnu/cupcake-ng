@@ -2,11 +2,12 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { WebService } from '../../web.service';
 import { ToastService } from '../../toast.service';
-import { 
-  ImportTrackerList, 
-  ImportTrackerQuery, 
+import { AccountsService } from '../accounts.service';
+import {
+  ImportTrackerList,
+  ImportTrackerQuery,
   UserImportStatsResponse,
-  ImportStats 
+  ImportStats
 } from '../../import-tracking';
 import { NgClass, TitleCasePipe, DecimalPipe } from '@angular/common';
 
@@ -17,7 +18,6 @@ import { NgClass, TitleCasePipe, DecimalPipe } from '@angular/common';
   imports: [
     NgClass,
     TitleCasePipe,
-    DecimalPipe
   ]
 })
 export class ImportTrackingSummaryComponent implements OnInit {
@@ -28,40 +28,43 @@ export class ImportTrackingSummaryComponent implements OnInit {
   constructor(
     private webService: WebService,
     private toastService: ToastService,
-    private router: Router
+    private router: Router,
+    private accountsService: AccountsService
   ) { }
 
   ngOnInit(): void {
-    // Wait for accounts service to be initialized
-    if (this.webService && (this.webService as any).accountsService?.loggedIn !== undefined) {
+    // Check if user is logged in before loading data
+    if (this.accountsService.loggedIn) {
       this.loadRecentImports();
       this.loadStats();
     } else {
-      // Check every 100ms until accounts are loaded
-      const checkAccounts = () => {
-        if (this.webService && (this.webService as any).accountsService?.loggedIn !== undefined) {
+      // Wait for authentication to complete
+      const checkAuth = () => {
+        if (this.accountsService.loggedIn) {
           this.loadRecentImports();
           this.loadStats();
         } else {
-          setTimeout(checkAccounts, 100);
+          setTimeout(checkAuth, 100);
         }
       };
-      checkAccounts();
+      checkAuth();
     }
   }
 
   loadRecentImports(): void {
+    console.log('Loading recent imports...');
     this.loading = true;
-    
+
     const params = {
-      page: 1,
-      page_size: 5,
+      limit: 5,
+      offset: 0,
       ordering: '-import_started_at'
     };
 
     this.webService.getImportTracking(params).subscribe({
       next: (response: ImportTrackerQuery) => {
-        this.recentImports = response.results;
+        console.log('Recent imports loaded:', response);
+        this.recentImports = response.results || [];
         this.loading = false;
       },
       error: (error) => {
@@ -73,12 +76,15 @@ export class ImportTrackingSummaryComponent implements OnInit {
   }
 
   loadStats(): void {
+    console.log('Loading import stats...');
     this.webService.getUserImportStats().subscribe({
       next: (response: UserImportStatsResponse) => {
+        console.log('Import stats loaded:', response);
         this.stats = response.stats;
       },
       error: (error) => {
         console.error('Error loading import stats:', error);
+        // Don't show error toast for stats as it's not critical
       }
     });
   }
@@ -118,7 +124,7 @@ export class ImportTrackingSummaryComponent implements OnInit {
 
   getSuccessRateColor(): string {
     if (!this.stats) return 'text-secondary';
-    
+
     if (this.stats.success_rate >= 90) return 'text-success';
     if (this.stats.success_rate >= 70) return 'text-warning';
     return 'text-danger';

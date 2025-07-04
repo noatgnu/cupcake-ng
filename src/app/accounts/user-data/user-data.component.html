@@ -84,273 +84,308 @@
           <div class="col-lg-6">
             <div class="card shadow-sm h-100">
               <div class="card-header">
-                <h5 class="card-title mb-0">
-                  <i class="bi bi-box-arrow-in-down me-2 text-success"></i>Import User Data
-                </h5>
+                <div class="d-flex justify-content-between align-items-center">
+                  <h5 class="card-title mb-0">
+                    <i class="bi bi-box-arrow-in-down me-2 text-success"></i>Import User Data
+                  </h5>
+                  <small class="badge bg-light text-dark">{{ getProcessStepText() }}</small>
+                </div>
               </div>
               <div class="card-body">
-                <div class="mb-3">
-                  <p class="text-muted">
-                    <i class="bi bi-info-circle me-1"></i>
-                    Upload a previously exported user data file to restore your data
-                  </p>
-                </div>
-
-                <!-- Import Options -->
-                <div class="mb-3">
-                  <div class="d-flex justify-content-between align-items-center">
-                    <h6 class="fw-semibold mb-0">
-                      <i class="bi bi-gear me-1"></i>Import Options
-                      @if (loadingOptions) {
-                        <span class="spinner-border spinner-border-sm ms-2" role="status" aria-hidden="true"></span>
-                      }
-                    </h6>
-                    <button
-                      class="btn btn-sm btn-outline-secondary"
-                      type="button"
-                      (click)="importOptionsCollapsed = !importOptionsCollapsed"
-                      [attr.aria-expanded]="!importOptionsCollapsed">
-                      <i class="bi" [ngClass]="importOptionsCollapsed ? 'bi-chevron-right' : 'bi-chevron-down'"></i>
-                    </button>
-                  </div>
-                  <div [ngbCollapse]="importOptionsCollapsed">
-                    <div class="mt-2 p-3 rounded">
-                      <div class="row g-2">
-                        <div class="col-md-6">
-                          <div class="form-check">
-                            <input class="form-check-input"
-                                   type="checkbox"
-                                   id="protocols"
-                                   [(ngModel)]="importOptions.protocols"
-                                   [disabled]="isImportOptionDisabled('protocols')"
-                                   [title]="isImportOptionDisabled('protocols') ? getDisabledOptionTooltip('protocols') : ''">
-                            <label class="form-check-label"
-                                   for="protocols"
-                                   [class.text-muted]="isImportOptionDisabled('protocols')">
-                              <i class="bi bi-file-text me-1"></i>Protocols
-                              @if (isImportOptionDisabled('protocols')) {
-                                <i class="bi bi-lock-fill ms-1 text-warning" [title]="getDisabledOptionTooltip('protocols')"></i>
-                              }
-                            </label>
-                          </div>
-                          <div class="form-check">
-                            <input class="form-check-input"
-                                   type="checkbox"
-                                   id="sessions"
-                                   [(ngModel)]="importOptions.sessions"
-                                   [disabled]="isImportOptionDisabled('sessions')"
-                                   [title]="isImportOptionDisabled('sessions') ? getDisabledOptionTooltip('sessions') : ''">
-                            <label class="form-check-label"
-                                   for="sessions"
-                                   [class.text-muted]="isImportOptionDisabled('sessions')">
-                              <i class="bi bi-play-circle me-1"></i>Sessions
-                              @if (isImportOptionDisabled('sessions')) {
-                                <i class="bi bi-lock-fill ms-1 text-warning" [title]="getDisabledOptionTooltip('sessions')"></i>
-                              }
-                            </label>
-                          </div>
-                          <div class="form-check">
-                            <input class="form-check-input"
-                                   type="checkbox"
-                                   id="annotations"
-                                   [(ngModel)]="importOptions.annotations"
-                                   [disabled]="isImportOptionDisabled('annotations')"
-                                   [title]="isImportOptionDisabled('annotations') ? getDisabledOptionTooltip('annotations') : ''">
-                            <label class="form-check-label"
-                                   for="annotations"
-                                   [class.text-muted]="isImportOptionDisabled('annotations')">
-                              <i class="bi bi-pencil me-1"></i>Annotations
-                              @if (isImportOptionDisabled('annotations')) {
-                                <i class="bi bi-lock-fill ms-1 text-warning" [title]="getDisabledOptionTooltip('annotations')"></i>
-                              }
-                            </label>
-                          </div>
-                          <div class="form-check">
-                            <input class="form-check-input"
-                                   type="checkbox"
-                                   id="projects"
-                                   [(ngModel)]="importOptions.projects"
-                                   [disabled]="isImportOptionDisabled('projects')"
-                                   [title]="isImportOptionDisabled('projects') ? getDisabledOptionTooltip('projects') : ''">
-                            <label class="form-check-label"
-                                   for="projects"
-                                   [class.text-muted]="isImportOptionDisabled('projects')">
-                              <i class="bi bi-folder me-1"></i>Projects
-                              @if (isImportOptionDisabled('projects')) {
-                                <i class="bi bi-lock-fill ms-1 text-warning" [title]="getDisabledOptionTooltip('projects')"></i>
-                              }
-                            </label>
-                          </div>
-                          <div class="form-check">
-                            <input class="form-check-input"
-                                   type="checkbox"
-                                   id="reagents"
-                                   [(ngModel)]="importOptions.reagents"
-                                   [disabled]="isImportOptionDisabled('reagents')"
-                                   [title]="isImportOptionDisabled('reagents') ? getDisabledOptionTooltip('reagents') : ''">
-                            <label class="form-check-label"
-                                   for="reagents"
-                                   [class.text-muted]="isImportOptionDisabled('reagents')">
-                              <i class="bi bi-flask me-1"></i>Reagents
-                              @if (isImportOptionDisabled('reagents')) {
-                                <i class="bi bi-lock-fill ms-1 text-warning" [title]="getDisabledOptionTooltip('reagents')"></i>
-                              }
-                            </label>
-                          </div>
-                        </div>
-                        <div class="col-md-6">
-                          <div class="form-check">
-                            <input class="form-check-input"
-                                   type="checkbox"
-                                   id="instruments"
-                                   [(ngModel)]="importOptions.instruments"
-                                   [disabled]="isImportOptionDisabled('instruments')"
-                                   [title]="isImportOptionDisabled('instruments') ? getDisabledOptionTooltip('instruments') : ''">
-                            <label class="form-check-label"
-                                   for="instruments"
-                                   [class.text-muted]="isImportOptionDisabled('instruments')">
-                              <i class="bi bi-cpu me-1"></i>Instruments
-                              @if (isImportOptionDisabled('instruments')) {
-                                <i class="bi bi-lock-fill ms-1 text-warning" [title]="getDisabledOptionTooltip('instruments')"></i>
-                              }
-                            </label>
-                          </div>
-                          <div class="form-check">
-                            <input class="form-check-input"
-                                   type="checkbox"
-                                   id="lab_groups"
-                                   [(ngModel)]="importOptions.lab_groups"
-                                   [disabled]="isImportOptionDisabled('lab_groups')"
-                                   [title]="isImportOptionDisabled('lab_groups') ? getDisabledOptionTooltip('lab_groups') : ''">
-                            <label class="form-check-label"
-                                   for="lab_groups"
-                                   [class.text-muted]="isImportOptionDisabled('lab_groups')">
-                              <i class="bi bi-people me-1"></i>Lab Groups
-                              @if (isImportOptionDisabled('lab_groups')) {
-                                <i class="bi bi-lock-fill ms-1 text-warning" [title]="getDisabledOptionTooltip('lab_groups')"></i>
-                              }
-                            </label>
-                          </div>
-                          <div class="form-check">
-                            <input class="form-check-input"
-                                   type="checkbox"
-                                   id="messaging"
-                                   [(ngModel)]="importOptions.messaging"
-                                   [disabled]="isImportOptionDisabled('messaging')"
-                                   [title]="isImportOptionDisabled('messaging') ? getDisabledOptionTooltip('messaging') : ''">
-                            <label class="form-check-label"
-                                   for="messaging"
-                                   [class.text-muted]="isImportOptionDisabled('messaging')">
-                              <i class="bi bi-chat me-1"></i>Messaging
-                              @if (isImportOptionDisabled('messaging')) {
-                                <i class="bi bi-lock-fill ms-1 text-warning" [title]="getDisabledOptionTooltip('messaging')"></i>
-                              }
-                            </label>
-                          </div>
-                          <div class="form-check">
-                            <input class="form-check-input"
-                                   type="checkbox"
-                                   id="support_models"
-                                   [(ngModel)]="importOptions.support_models"
-                                   [disabled]="isImportOptionDisabled('support_models')"
-                                   [title]="isImportOptionDisabled('support_models') ? getDisabledOptionTooltip('support_models') : ''">
-                            <label class="form-check-label"
-                                   for="support_models"
-                                   [class.text-muted]="isImportOptionDisabled('support_models')">
-                              <i class="bi bi-database me-1"></i>Support Models
-                              @if (isImportOptionDisabled('support_models')) {
-                                <i class="bi bi-lock-fill ms-1 text-warning" [title]="getDisabledOptionTooltip('support_models')"></i>
-                              }
-                            </label>
-                          </div>
-                        </div>
+                <!-- Import Process Steps Indicator -->
+                <div class="mb-4">
+                  <div class="d-flex justify-content-between">
+                    <div class="step" [class.active]="importProcessStep === 'upload'" [class.completed]="importProcessStep !== 'upload' && importProcessStep !== 'error'">
+                      <div class="step-circle">
+                        <i class="bi bi-upload"></i>
                       </div>
-                      <div class="mt-2">
-                        <button class="btn btn-sm btn-outline-primary me-2"
-                                (click)="selectAllImportOptions()"
-                                [disabled]="loadingOptions">
-                          <i class="bi bi-check-all me-1"></i>Select All Available
-                        </button>
-                        <button class="btn btn-sm btn-outline-secondary"
-                                (click)="deselectAllImportOptions()"
-                                [disabled]="loadingOptions">
-                          <i class="bi bi-x me-1"></i>Deselect All
-                        </button>
+                      <div class="step-label">Upload</div>
+                    </div>
+                    <div class="step-line" [class.active]="importProcessStep !== 'upload' && importProcessStep !== 'error'"></div>
+                    <div class="step" [class.active]="importProcessStep === 'analyzing'" [class.completed]="importProcessStep === 'review' || importProcessStep === 'importing' || importProcessStep === 'completed'">
+                      <div class="step-circle">
+                        <i class="bi bi-search"></i>
                       </div>
-
-                      @if (isStaffOverride && accountsService.is_staff) {
-                        <div class="alert alert-info mt-2 py-2 px-3">
-                          <i class="bi bi-shield-check me-1"></i>
-                          <small>You have staff override privileges. You can import disabled options.</small>
-                        </div>
-                      }
-
-                      @if (maxArchiveSizeMB) {
-                        <div class="alert alert-warning mt-2 py-2 px-3">
-                          <i class="bi bi-info-circle me-1"></i>
-                          <small>Maximum archive size: {{ maxArchiveSizeMB }} MB</small>
-                        </div>
-                      }
+                      <div class="step-label">Analyze</div>
+                    </div>
+                    <div class="step-line" [class.active]="importProcessStep === 'review' || importProcessStep === 'importing' || importProcessStep === 'completed'"></div>
+                    <div class="step" [class.active]="importProcessStep === 'review'" [class.completed]="importProcessStep === 'importing' || importProcessStep === 'completed'">
+                      <div class="step-circle">
+                        <i class="bi bi-eye"></i>
+                      </div>
+                      <div class="step-label">Review</div>
+                    </div>
+                    <div class="step-line" [class.active]="importProcessStep === 'importing' || importProcessStep === 'completed'"></div>
+                    <div class="step" [class.active]="importProcessStep === 'importing'" [class.completed]="importProcessStep === 'completed'">
+                      <div class="step-circle">
+                        <i class="bi bi-download"></i>
+                      </div>
+                      <div class="step-label">Import</div>
                     </div>
                   </div>
                 </div>
 
-                <div class="d-grid mb-3">
-                  <button
-                    class="btn btn-success btn-lg"
-                    (click)="importFile.click()"
-                    [disabled]="chunkUploadProgress > 0 && chunkUploadProgress < chunkUploadTotal || dryRunInProgress || importInProgress">
-                    <i class="bi bi-upload me-2"></i>
-                    Select Import File
-                  </button>
-                  <input
-                    hidden
-                    type="file"
-                    #importFile
-                    id="importUserData"
-                    accept=".zip,.tar.gz,.tar"
-                    (change)="importUserData($event)">
-                </div>
+                <!-- Import Options (only show if not in progress) -->
+                @if (importProcessStep === 'upload') {
+                  <div class="mb-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                      <h6 class="fw-semibold mb-0">
+                        <i class="bi bi-gear me-1"></i>Import Options
+                        @if (loadingOptions) {
+                          <span class="spinner-border spinner-border-sm ms-2" role="status" aria-hidden="true"></span>
+                        }
+                      </h6>
+                      <button
+                        class="btn btn-sm btn-outline-secondary"
+                        type="button"
+                        (click)="importOptionsCollapsed = !importOptionsCollapsed"
+                        [attr.aria-expanded]="!importOptionsCollapsed">
+                        <i class="bi" [ngClass]="importOptionsCollapsed ? 'bi-chevron-right' : 'bi-chevron-down'"></i>
+                      </button>
+                    </div>
+                    <div [ngbCollapse]="importOptionsCollapsed">
+                      <div class="mt-2 p-3 border rounded">
+                        <div class="row g-2">
+                          <div class="col-md-6">
+                            <div class="form-check">
+                              <input class="form-check-input"
+                                     type="checkbox"
+                                     id="protocols"
+                                     [(ngModel)]="importOptions.protocols"
+                                     [disabled]="isImportOptionDisabled('protocols')"
+                                     [title]="isImportOptionDisabled('protocols') ? getDisabledOptionTooltip('protocols') : ''">
+                              <label class="form-check-label"
+                                     for="protocols"
+                                     [class.text-muted]="isImportOptionDisabled('protocols')">
+                                <i class="bi bi-file-text me-1"></i>Protocols
+                                @if (isImportOptionDisabled('protocols')) {
+                                  <i class="bi bi-lock-fill ms-1 text-warning" [title]="getDisabledOptionTooltip('protocols')"></i>
+                                }
+                              </label>
+                            </div>
+                            <div class="form-check">
+                              <input class="form-check-input"
+                                     type="checkbox"
+                                     id="sessions"
+                                     [(ngModel)]="importOptions.sessions"
+                                     [disabled]="isImportOptionDisabled('sessions')"
+                                     [title]="isImportOptionDisabled('sessions') ? getDisabledOptionTooltip('sessions') : ''">
+                              <label class="form-check-label"
+                                     for="sessions"
+                                     [class.text-muted]="isImportOptionDisabled('sessions')">
+                                <i class="bi bi-play-circle me-1"></i>Sessions
+                                @if (isImportOptionDisabled('sessions')) {
+                                  <i class="bi bi-lock-fill ms-1 text-warning" [title]="getDisabledOptionTooltip('sessions')"></i>
+                                }
+                              </label>
+                            </div>
+                            <div class="form-check">
+                              <input class="form-check-input"
+                                     type="checkbox"
+                                     id="annotations"
+                                     [(ngModel)]="importOptions.annotations"
+                                     [disabled]="isImportOptionDisabled('annotations')"
+                                     [title]="isImportOptionDisabled('annotations') ? getDisabledOptionTooltip('annotations') : ''">
+                              <label class="form-check-label"
+                                     for="annotations"
+                                     [class.text-muted]="isImportOptionDisabled('annotations')">
+                                <i class="bi bi-pencil me-1"></i>Annotations
+                                @if (isImportOptionDisabled('annotations')) {
+                                  <i class="bi bi-lock-fill ms-1 text-warning" [title]="getDisabledOptionTooltip('annotations')"></i>
+                                }
+                              </label>
+                            </div>
+                            <div class="form-check">
+                              <input class="form-check-input"
+                                     type="checkbox"
+                                     id="projects"
+                                     [(ngModel)]="importOptions.projects"
+                                     [disabled]="isImportOptionDisabled('projects')"
+                                     [title]="isImportOptionDisabled('projects') ? getDisabledOptionTooltip('projects') : ''">
+                              <label class="form-check-label"
+                                     for="projects"
+                                     [class.text-muted]="isImportOptionDisabled('projects')">
+                                <i class="bi bi-folder me-1"></i>Projects
+                                @if (isImportOptionDisabled('projects')) {
+                                  <i class="bi bi-lock-fill ms-1 text-warning" [title]="getDisabledOptionTooltip('projects')"></i>
+                                }
+                              </label>
+                            </div>
+                            <div class="form-check">
+                              <input class="form-check-input"
+                                     type="checkbox"
+                                     id="reagents"
+                                     [(ngModel)]="importOptions.reagents"
+                                     [disabled]="isImportOptionDisabled('reagents')"
+                                     [title]="isImportOptionDisabled('reagents') ? getDisabledOptionTooltip('reagents') : ''">
+                              <label class="form-check-label"
+                                     for="reagents"
+                                     [class.text-muted]="isImportOptionDisabled('reagents')">
+                                <i class="bi bi-flask me-1"></i>Reagents
+                                @if (isImportOptionDisabled('reagents')) {
+                                  <i class="bi bi-lock-fill ms-1 text-warning" [title]="getDisabledOptionTooltip('reagents')"></i>
+                                }
+                              </label>
+                            </div>
+                          </div>
+                          <div class="col-md-6">
+                            <div class="form-check">
+                              <input class="form-check-input"
+                                     type="checkbox"
+                                     id="instruments"
+                                     [(ngModel)]="importOptions.instruments"
+                                     [disabled]="isImportOptionDisabled('instruments')"
+                                     [title]="isImportOptionDisabled('instruments') ? getDisabledOptionTooltip('instruments') : ''">
+                              <label class="form-check-label"
+                                     for="instruments"
+                                     [class.text-muted]="isImportOptionDisabled('instruments')">
+                                <i class="bi bi-cpu me-1"></i>Instruments
+                                @if (isImportOptionDisabled('instruments')) {
+                                  <i class="bi bi-lock-fill ms-1 text-warning" [title]="getDisabledOptionTooltip('instruments')"></i>
+                                }
+                              </label>
+                            </div>
+                            <div class="form-check">
+                              <input class="form-check-input"
+                                     type="checkbox"
+                                     id="lab_groups"
+                                     [(ngModel)]="importOptions.lab_groups"
+                                     [disabled]="isImportOptionDisabled('lab_groups')"
+                                     [title]="isImportOptionDisabled('lab_groups') ? getDisabledOptionTooltip('lab_groups') : ''">
+                              <label class="form-check-label"
+                                     for="lab_groups"
+                                     [class.text-muted]="isImportOptionDisabled('lab_groups')">
+                                <i class="bi bi-people me-1"></i>Lab Groups
+                                @if (isImportOptionDisabled('lab_groups')) {
+                                  <i class="bi bi-lock-fill ms-1 text-warning" [title]="getDisabledOptionTooltip('lab_groups')"></i>
+                                }
+                              </label>
+                            </div>
+                            <div class="form-check">
+                              <input class="form-check-input"
+                                     type="checkbox"
+                                     id="messaging"
+                                     [(ngModel)]="importOptions.messaging"
+                                     [disabled]="isImportOptionDisabled('messaging')"
+                                     [title]="isImportOptionDisabled('messaging') ? getDisabledOptionTooltip('messaging') : ''">
+                              <label class="form-check-label"
+                                     for="messaging"
+                                     [class.text-muted]="isImportOptionDisabled('messaging')">
+                                <i class="bi bi-chat me-1"></i>Messaging
+                                @if (isImportOptionDisabled('messaging')) {
+                                  <i class="bi bi-lock-fill ms-1 text-warning" [title]="getDisabledOptionTooltip('messaging')"></i>
+                                }
+                              </label>
+                            </div>
+                            <div class="form-check">
+                              <input class="form-check-input"
+                                     type="checkbox"
+                                     id="support_models"
+                                     [(ngModel)]="importOptions.support_models"
+                                     [disabled]="isImportOptionDisabled('support_models')"
+                                     [title]="isImportOptionDisabled('support_models') ? getDisabledOptionTooltip('support_models') : ''">
+                              <label class="form-check-label"
+                                     for="support_models"
+                                     [class.text-muted]="isImportOptionDisabled('support_models')">
+                                <i class="bi bi-database me-1"></i>Support Models
+                                @if (isImportOptionDisabled('support_models')) {
+                                  <i class="bi bi-lock-fill ms-1 text-warning" [title]="getDisabledOptionTooltip('support_models')"></i>
+                                }
+                              </label>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="mt-2">
+                          <button class="btn btn-sm btn-outline-primary me-2"
+                                  (click)="selectAllImportOptions()"
+                                  [disabled]="loadingOptions">
+                            <i class="bi bi-check-all me-1"></i>Select All Available
+                          </button>
+                          <button class="btn btn-sm btn-outline-secondary"
+                                  (click)="deselectAllImportOptions()"
+                                  [disabled]="loadingOptions">
+                            <i class="bi bi-x me-1"></i>Deselect All
+                          </button>
+                        </div>
 
-                @if(chunkUploadProgress > 0 && chunkUploadProgress < chunkUploadTotal) {
-                  <div class="alert alert-warning d-flex align-items-center">
+                        @if (isStaffOverride && accountsService.is_staff) {
+                          <div class="alert alert-info mt-2 py-2 px-3">
+                            <i class="bi bi-shield-check me-1"></i>
+                            <small>You have staff override privileges. You can import disabled options.</small>
+                          </div>
+                        }
+
+                        @if (maxArchiveSizeMB) {
+                          <div class="alert alert-warning mt-2 py-2 px-3">
+                            <i class="bi bi-info-circle me-1"></i>
+                            <small>Maximum archive size: {{ maxArchiveSizeMB }} MB</small>
+                          </div>
+                        }
+                      </div>
+                    </div>
+                  </div>
+                }
+
+                <!-- File Selection -->
+                @if (importProcessStep === 'upload') {
+                  <div class="d-grid mb-3">
+                    <button
+                      class="btn btn-success btn-lg"
+                      (click)="importFile.click()"
+                      [disabled]="isImportDisabled()">
+                      <i class="bi bi-upload me-2"></i>
+                      Select Import File
+                    </button>
+                    <input
+                      hidden
+                      type="file"
+                      #importFile
+                      id="importUserData"
+                      accept=".zip,.tar.gz,.tar"
+                      (change)="importUserData($event)">
+                  </div>
+
+                  <div class="mt-3">
+                    <h6 class="text-muted">Supported Formats</h6>
+                    <div class="d-flex gap-2 flex-wrap">
+                      <span class="badge bg-secondary">.zip</span>
+                      <span class="badge bg-secondary">.tar.gz</span>
+                    </div>
+                  </div>
+                }
+
+                <!-- Upload Progress -->
+                @if (uploadInProgress || (chunkUploadProgress > 0 && chunkUploadProgress < chunkUploadTotal)) {
+                  <div class="alert alert-info d-flex align-items-center">
                     <i class="bi bi-upload me-2"></i>
                     <div class="flex-grow-1">
-                      <strong>Upload in Progress</strong>
+                      <strong>Uploading File</strong>
                       <div class="mt-2">
                         <div class="d-flex justify-content-between mb-1">
-                          <small>Uploading</small>
+                          <small>Uploading...</small>
                           <small class="fw-bold">{{((chunkUploadProgress / chunkUploadTotal) * 100) | number:'1.0-1'}}%</small>
                         </div>
                         <ngb-progressbar
                           [value]="chunkUploadProgress"
                           [max]="chunkUploadTotal"
-                          [type]="'warning'"
+                          [type]="'info'"
                           [striped]="true"
                           [animated]="true">
                         </ngb-progressbar>
                       </div>
                     </div>
                   </div>
-                } @else if(chunkUploadProgress == chunkUploadTotal && chunkUploadTotal > 0 && !dryRunCompleted) {
-                  <div class="alert alert-success d-flex align-items-center">
-                    <i class="bi bi-check-circle-fill me-2"></i>
-                    <div>
-                      <strong>Upload Complete!</strong>
-                      <div class="small">Starting analysis...</div>
-                    </div>
-                  </div>
                 }
 
-                <!-- Dry Run Analysis Progress -->
+                <!-- Analysis Progress -->
                 @if (dryRunInProgress) {
                   <div class="alert alert-info d-flex align-items-center">
-                    <i class="bi bi-search me-2"></i>
+                    <div class="spinner-border spinner-border-sm me-2" role="status"></div>
                     <div class="flex-grow-1">
                       <strong>Analyzing Import File</strong>
                       <div class="mt-2">
                         <div class="d-flex justify-content-between mb-1">
-                          <small>{{ dryRunMessage }}</small>
+                          <small>{{ dryRunMessage || 'Analyzing...' }}</small>
                           <small class="fw-bold">{{ dryRunProgress }}%</small>
                         </div>
                         <ngb-progressbar
@@ -365,67 +400,70 @@
                   </div>
                 }
 
-                <!-- Dry Run Analysis Results -->
-                @if (dryRunCompleted && dryRunAnalysisReport) {
-                  <div class="card border-0 shadow-sm mt-3">
+                <!-- Analysis Results -->
+                @if (importProcessStep === 'review' && dryRunAnalysisReport) {
+                  <div class="card border-0 shadow-sm">
                     <div class="card-header" [ngClass]="hasErrors() ? 'bg-danger text-white' : hasWarnings() ? 'bg-warning' : 'bg-success text-white'">
-                      <h6 class="mb-0">
+                      <h6 class="mb-0 d-flex align-items-center">
+                        <i class="{{ getAnalysisStatusIcon() }} me-2"></i>
                         @if (hasErrors()) {
-                          <i class="bi bi-exclamation-triangle me-2"></i>Import Analysis - Errors Found
+                          Import Analysis - Errors Found
                         } @else if (hasWarnings()) {
-                          <i class="bi bi-info-circle me-2"></i>Import Analysis - Warnings
+                          Import Analysis - Warnings
                         } @else {
-                          <i class="bi bi-check-circle me-2"></i>Import Analysis - Ready to Import
+                          Import Analysis - Ready to Import
                         }
                       </h6>
                     </div>
                     <div class="card-body">
-                      <!-- Summary Stats -->
-                      <div class="row mb-3">
-                        <div class="col-md-4">
-                          <div class="text-center">
-                            <h5 class="text-primary mb-1">{{ dryRunAnalysisReport.data_summary['protocols'] || 0 }}</h5>
-                            <small class="text-muted">Protocols</small>
-                          </div>
+                      <!-- Import Summary Stats -->
+                      @if (getImportSummaryStats().length > 0) {
+                        <div class="row mb-3">
+                          @for (stat of getImportSummaryStats(); track stat.label) {
+                            <div class="col-md-4 col-6 mb-2">
+                              <div class="text-center">
+                                <h5 class="mb-1" [ngClass]="stat.color">
+                                  <i class="{{ stat.icon }} me-1"></i>{{ stat.value }}
+                                </h5>
+                                <small class="text-muted">{{ stat.label }}</small>
+                              </div>
+                            </div>
+                          }
                         </div>
-                        <div class="col-md-4">
-                          <div class="text-center">
-                            <h5 class="text-success mb-1">{{ dryRunAnalysisReport.data_summary['sessions'] || 0 }}</h5>
-                            <small class="text-muted">Sessions</small>
-                          </div>
-                        </div>
-                        <div class="col-md-4">
-                          <div class="text-center">
-                            <h5 class="text-info mb-1">{{ dryRunAnalysisReport.data_summary['annotations'] || 0 }}</h5>
-                            <small class="text-muted">Annotations</small>
-                          </div>
-                        </div>
-                      </div>
+                      }
 
-                      <!-- File Size Analysis -->
+                      <!-- Archive Information -->
                       @if (dryRunAnalysisReport.size_analysis) {
                         <div class="mb-3">
-                          <h6>Archive Information</h6>
-                          <div class="small text-muted">
-                            <div>Total Media Files: {{ dryRunAnalysisReport.size_analysis.total_media_files }}</div>
-                            <div>Total Media Size: {{ dryRunAnalysisReport.size_analysis.total_media_size_mb }} MB</div>
-                            @if (dryRunAnalysisReport.size_analysis) {
-                              @if (dryRunAnalysisReport.size_analysis.large_files) {
-                                @if (dryRunAnalysisReport.size_analysis.large_files.length > 0) {
-                                  <div class="mt-2">
-                                    <strong>Large Files:</strong>
-                                    <ul class="mb-0">
-                                      @for (file of dryRunAnalysisReport.size_analysis.large_files; track file.name) {
-                                        <li>{{ file.name }} ({{ file.size_mb }} MB)</li>
-                                      }
-                                    </ul>
-                                  </div>
-                                }
-                              }
-
-                            }
-
+                          <h6><i class="bi bi-archive me-1"></i>Archive Information</h6>
+                          <div class="row">
+                            <div class="col-md-4">
+                              <div class="small">
+                                <strong>Archive Format:</strong> {{ dryRunAnalysisReport.archive_info['format'] || 'Unknown' }}
+                              </div>
+                            </div>
+                            <div class="col-md-4">
+                              <div class="small">
+                                <strong>Media Files:</strong> {{ dryRunAnalysisReport.size_analysis.total_media_files }}
+                              </div>
+                            </div>
+                            <div class="col-md-4">
+                              <div class="small">
+                                <strong>Media Size:</strong> {{ dryRunAnalysisReport.size_analysis.total_media_size_mb | number:'1.1-1' }} MB
+                              </div>
+                            </div>
                           </div>
+
+                          @if (dryRunAnalysisReport.size_analysis.large_files && dryRunAnalysisReport.size_analysis.large_files.length > 0) {
+                            <div class="mt-2">
+                              <strong class="small">Large Files:</strong>
+                              <div class="small text-muted">
+                                @for (file of dryRunAnalysisReport.size_analysis.large_files; track file.name) {
+                                  <div>• {{ file.name }} ({{ file.size_mb | number:'1.1-1' }} MB)</div>
+                                }
+                              </div>
+                            </div>
+                          }
                         </div>
                       }
 
@@ -453,20 +491,28 @@
                         </div>
                       }
 
-
-                      @if (dryRunAnalysisReport.potential_conflicts) {
-                        @if (dryRunAnalysisReport.potential_conflicts.length > 0) {
-                          <div class="alert alert-info">
-                            <h6><i class="bi bi-info-circle me-2"></i>Potential Conflicts</h6>
-                            <ul class="mb-0">
-                              @for (conflict of dryRunAnalysisReport.potential_conflicts; track conflict) {
-                                <li>{{ conflict }}</li>
+                      <!-- Potential Conflicts -->
+                      @if (dryRunAnalysisReport.potential_conflicts && dryRunAnalysisReport.potential_conflicts.length > 0) {
+                        <div class="alert alert-info">
+                          <h6><i class="bi bi-info-circle me-2"></i>Potential Conflicts</h6>
+                          @for (conflict of dryRunAnalysisReport.potential_conflicts; track conflict.type) {
+                            <div class="mb-3">
+                              <div class="fw-bold">
+                                <i class="bi bi-exclamation-triangle me-1"></i>{{ conflict.type }} 
+                                <span class="badge bg-secondary ms-2">{{ conflict.total_conflicts }} conflicts</span>
+                              </div>
+                              <div class="small text-muted mb-2">{{ conflict.description }}</div>
+                              @if (conflict.items && conflict.items.length > 0) {
+                                <ul class="mb-0 small">
+                                  @for (item of conflict.items; track item) {
+                                    <li>{{ item }}</li>
+                                  }
+                                </ul>
                               }
-                            </ul>
-                          </div>
-                        }
+                            </div>
+                          }
+                        </div>
                       }
-
 
                       <!-- Action Buttons -->
                       <div class="d-flex gap-2 mt-3">
@@ -476,9 +522,9 @@
                                   [disabled]="importInProgress">
                             @if (importInProgress) {
                               <span class="spinner-border spinner-border-sm me-2" role="status"></span>
-                              Importing...
+                              Starting Import...
                             } @else {
-                              <i class="bi bi-download me-2"></i>Proceed with Import
+                              <i class="bi bi-check me-2"></i>Proceed with Import
                             }
                           </button>
                         }
@@ -492,13 +538,13 @@
 
                 <!-- Import Progress -->
                 @if (importInProgress) {
-                  <div class="alert alert-primary d-flex align-items-center mt-3">
-                    <i class="bi bi-download me-2"></i>
+                  <div class="alert alert-primary d-flex align-items-center">
+                    <div class="spinner-border spinner-border-sm me-2" role="status"></div>
                     <div class="flex-grow-1">
-                      <strong>Import in Progress</strong>
+                      <strong>Importing Data</strong>
                       <div class="mt-2">
                         <div class="d-flex justify-content-between mb-1">
-                          <small>{{ importMessage }}</small>
+                          <small>{{ importMessage || 'Processing...' }}</small>
                           <small class="fw-bold">{{ progressImport }}%</small>
                         </div>
                         <ngb-progressbar
@@ -513,13 +559,38 @@
                   </div>
                 }
 
-                @if (!dryRunCompleted) {
-                  <div class="mt-3">
-                    <h6 class="text-muted">Supported Formats</h6>
-                    <div class="d-flex gap-2 flex-wrap">
-                      <span class="badge bg-secondary">.zip</span>
-                      <span class="badge bg-secondary">.tar.gz</span>
+                <!-- Import Completed -->
+                @if (importProcessStep === 'completed') {
+                  <div class="alert alert-success d-flex align-items-center">
+                    <i class="bi bi-check-circle-fill me-2 text-success fs-4"></i>
+                    <div class="flex-grow-1">
+                      <strong>Import Completed Successfully!</strong>
+                      <div class="small">{{ importSuccessMessage }}</div>
                     </div>
+                  </div>
+                  <div class="d-grid">
+                    <button class="btn btn-primary" (click)="startNewImport()">
+                      <i class="bi bi-plus me-2"></i>Import Another File
+                    </button>
+                  </div>
+                }
+
+                <!-- Error State -->
+                @if (importProcessStep === 'error') {
+                  <div class="alert alert-danger d-flex align-items-center">
+                    <i class="bi bi-exclamation-triangle me-2 text-danger fs-4"></i>
+                    <div class="flex-grow-1">
+                      <strong>Import Error</strong>
+                      <div class="small">{{ dryRunError || importError || 'An unknown error occurred' }}</div>
+                    </div>
+                  </div>
+                  <div class="d-flex gap-2">
+                    <button class="btn btn-outline-primary" (click)="startNewImport()">
+                      <i class="bi bi-arrow-clockwise me-2"></i>Try Again
+                    </button>
+                    <button class="btn btn-outline-secondary" (click)="cancelImport()">
+                      <i class="bi bi-x me-2"></i>Cancel
+                    </button>
                   </div>
                 }
               </div>

@@ -5,6 +5,7 @@ import { WebService } from '../../web.service';
 import { ToastService } from '../../toast.service';
 import { ImportTracker } from '../../import-tracking';
 import { AreYouSureModalComponent } from '../../are-you-sure-modal/are-you-sure-modal.component';
+import { AccountsService } from '../../accounts/accounts.service';
 import {KeyValuePipe, NgClass, TitleCasePipe} from "@angular/common";
 
 @Component({
@@ -34,12 +35,13 @@ export class ImportTrackingDetailComponent implements OnInit {
     private router: Router,
     private webService: WebService,
     private toastService: ToastService,
-    private modalService: NgbModal
+    private modalService: NgbModal,
+    private accountsService: AccountsService
   ) { }
 
   ngOnInit(): void {
-    // Wait for accounts service to be initialized
-    if (this.webService && (this.webService as any).accountsService?.loggedIn !== undefined) {
+    // Check if user is logged in before loading data
+    if (this.accountsService.loggedIn) {
       this.route.params.subscribe(params => {
         const id = params['id'];
         if (id) {
@@ -47,9 +49,9 @@ export class ImportTrackingDetailComponent implements OnInit {
         }
       });
     } else {
-      // Check every 100ms until accounts are loaded
-      const checkAccounts = () => {
-        if (this.webService && (this.webService as any).accountsService?.loggedIn !== undefined) {
+      // Wait for authentication to complete
+      const checkAuth = () => {
+        if (this.accountsService.loggedIn) {
           this.route.params.subscribe(params => {
             const id = params['id'];
             if (id) {
@@ -57,10 +59,10 @@ export class ImportTrackingDetailComponent implements OnInit {
             }
           });
         } else {
-          setTimeout(checkAccounts, 100);
+          setTimeout(checkAuth, 100);
         }
       };
-      checkAccounts();
+      checkAuth();
     }
   }
 

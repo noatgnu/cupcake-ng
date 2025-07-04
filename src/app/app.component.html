@@ -24,4 +24,11 @@
     <app-loading></app-loading>
   }
   <app-toast-container></app-toast-container>
+  
+  <!-- Runtime Splash Screen -->
+  <app-runtime-splash 
+    [visible]="splashVisible" 
+    [theme]="splashTheme" 
+    (close)="onSplashClose()">
+  </app-runtime-splash>
 </ng-template>

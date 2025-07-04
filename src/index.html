@@ -39,64 +39,66 @@
   </div>
   <script>
     (() => {
-      // Randomly select splash screen theme
-      const themes = ['default', 'scifi', 'space'];
-      const selectedTheme = themes[Math.floor(Math.random() * themes.length)];
+      // Check for saved splash screen preference
+      const savedTheme = localStorage.getItem('cupcake-splash-theme');
+      let selectedTheme;
+      
+      if (savedTheme && savedTheme !== 'random') {
+        selectedTheme = savedTheme;
+      } else {
+        // Safe themes for random selection (no flashing lights)
+        const safeThemes = ['default', 'scifi', 'space'];
+        selectedTheme = safeThemes[Math.floor(Math.random() * safeThemes.length)];
+      }
       document.getElementById('loading-screen').className = `loading-overlay theme-${selectedTheme}`;
       
-      if (!window.PerformanceObserver) {
-        return;
-      }
-
       const loadList = document.querySelector('#app-loading-list');
-      const observer = new PerformanceObserver(logEntries);
-      const appStartedKey = '_appStarted';
-      let resource_count = 0;
-      let loadingStage = 'Initializing application...';
+      let currentStage = 0;
+      let stageInterval;
 
+      // More meaningful Angular loading stages
       const loadingStages = [
-        'Loading core modules...',
-        'Connecting to server...',
-        'Loading user interface...',
-        'Preparing workspace...',
-        'Almost ready...'
+        'Initializing Angular framework...',
+        'Loading application modules...',
+        'Establishing server connection...',
+        'Authenticating user session...',
+        'Loading user preferences...',
+        'Configuring workspace...',
+        'Finalizing setup...'
       ];
 
       function updateLoadingStage() {
-        if (resource_count < loadingStages.length) {
-          loadingStage = loadingStages[resource_count];
+        if (currentStage < loadingStages.length) {
+          loadList.innerHTML = loadingStages[currentStage];
+          currentStage++;
         } else {
-          loadingStage = `Loading resources (${resource_count})...`;
-        }
-        loadList.innerHTML = loadingStage;
-      }
-
-      function logEntries(entries) {
-        const appStarted = window[appStartedKey];
-        if (appStarted) {
-          delete window[appStartedKey];
-          observer.disconnect();
           loadList.innerHTML = 'Starting application...';
-          return;
         }
-
-        const data = entries.getEntries().map((entry) => {
-          return entry.name;
-        });
-        resource_count += data.length;
-        updateLoadingStage();
       }
 
-      // Update loading stage every 800ms for better UX
-      const stageInterval = setInterval(() => {
-        if (window[appStartedKey]) {
+      // Update stage every 600ms for smoother progression
+      updateLoadingStage();
+      stageInterval = setInterval(() => {
+        if (window._appStarted) {
           clearInterval(stageInterval);
+          loadList.innerHTML = 'Application ready!';
           return;
         }
         updateLoadingStage();
-      }, 800);
+      }, 600);
 
-      observer.observe({ type: 'resource', buffered: true });
+      // Listen for Angular app readiness signals
+      window.angularAppProgress = function(stage) {
+        if (stage && loadList) {
+          loadList.innerHTML = stage;
+        }
+      };
+
+      // Cleanup when app starts
+      window.addEventListener('angular-app-ready', () => {
+        clearInterval(stageInterval);
+        loadList.innerHTML = 'Application ready!';
+      });
     })();
   </script>
 </body>
