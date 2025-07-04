@@ -22,6 +22,7 @@ import {FloatingChatComponent} from "./chat/floating-chat/floating-chat.componen
 import {FooterComponent} from "./footer/footer.component";
 import {SiteSettingsService} from "./site-settings.service";
 import {PublicSiteSettings} from "./site-settings";
+import {BehaviorSubject} from "rxjs";
 
 @Component({
     selector: 'app-root',
@@ -104,19 +105,38 @@ export class AppComponent {
         this.ws.connectUserWS()
         this.ws.connectSummaryWS()
 
+        // Wait for both server settings and staff status before setting ready
+        let serverSettingsLoaded = false;
+        let staffStatusLoaded = false;
+
+        const checkIfReady = () => {
+          if (serverSettingsLoaded && staffStatusLoaded) {
+            this.ready = true;
+          }
+        };
+
         this.web.getServerSettings().subscribe((data) => {
           if (data) {
             this.dataService.serverSettings = data
           }
+          serverSettingsLoaded = true;
+          checkIfReady();
         })
         this.web.getStaffStatus().subscribe((data) => {
           this.accounts.is_staff = data.is_staff
           console.log(data.is_staff)
+          staffStatusLoaded = true;
+          checkIfReady();
         })
+      } else {
+        // No token found, user is not logged in - app is ready
+        this.ready = true;
       }
+    } else {
+      // Token already exists, app is ready
+      this.ready = true;
     }
     console.log(this.accounts.token)
-    this.ready = true
     this.ws.userWSConnection?.subscribe((data) => {
       if (data) {
         console.log(data)

@@ -13,6 +13,7 @@ import {SiteSettingsComponent} from "./site-settings/site-settings.component";
 import {LaboratoryNotebookComponent} from "./laboratory-notebook/laboratory-notebook.component";
 import {SharedDocumentsModule} from "./shared-documents/shared-documents.module";
 import {BackupModule} from "./backup/backup.module";
+import {ImportTrackingModule} from "./import-tracking/import-tracking.module";
 
 export const routes: Routes = [
   {
@@ -62,6 +63,10 @@ export const routes: Routes = [
   {
     path: 'backup',
     loadChildren: () => BackupModule
+  },
+  {
+    path: 'import-tracking',
+    loadChildren: () => ImportTrackingModule
   },
   {
     path: 'laboratory-notebook',

@@ -1,0 +1,82 @@
+@if (stats) {
+<div class="container-fluid p-0 d-flex flex-column" style="height: calc(100vh - 56px); margin-top: 56px;">
+  <header class="border-bottom py-3 px-4">
+    <div class="d-flex align-items-center justify-content-center">
+      <h4 class="m-0 fw-bold">Import Statistics</h4>
+    </div>
+  </header>
+
+  <div class="flex-grow-1 overflow-auto">
+    <div class="container-fluid p-4">
+<div class="import-stats">
+  <div class="row">
+    <div class="col-md-2">
+      <div class="stat-card">
+        <div class="stat-value text-primary">{{ stats.total_imports }}</div>
+        <div class="stat-label">Total Imports</div>
+      </div>
+    </div>
+    
+    <div class="col-md-2">
+      <div class="stat-card">
+        <div class="stat-value text-success">{{ stats.completed_imports }}</div>
+        <div class="stat-label">Completed</div>
+      </div>
+    </div>
+    
+    <div class="col-md-2">
+      <div class="stat-card">
+        <div class="stat-value text-danger">{{ stats.failed_imports }}</div>
+        <div class="stat-label">Failed</div>
+      </div>
+    </div>
+    
+    <div class="col-md-2">
+      <div class="stat-card">
+        <div class="stat-value text-warning">{{ stats.reverted_imports }}</div>
+        <div class="stat-label">Reverted</div>
+      </div>
+    </div>
+    
+    <div class="col-md-2">
+      <div class="stat-card">
+        <div class="stat-value text-info">{{ stats.in_progress_imports }}</div>
+        <div class="stat-label">In Progress</div>
+      </div>
+    </div>
+    
+    <div class="col-md-2">
+      <div class="stat-card">
+        <div class="stat-value" [ngClass]="getSuccessRateColor()">{{ stats.success_rate }}%</div>
+        <div class="stat-label">Success Rate</div>
+        <div class="progress mt-1" style="height: 4px;">
+          <div 
+            class="progress-bar" 
+            [ngClass]="getProgressBarClass()"
+            [style.width.%]="stats.success_rate">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="row mt-3">
+    <div class="col-md-6">
+      <div class="stat-card">
+        <div class="stat-value text-info">{{ stats.total_objects_created | number }}</div>
+        <div class="stat-label">Total Objects Created</div>
+      </div>
+    </div>
+    
+    <div class="col-md-6">
+      <div class="stat-card">
+        <div class="stat-value text-success">{{ stats.total_files_imported | number }}</div>
+        <div class="stat-label">Total Files Imported</div>
+      </div>
+    </div>
+  </div>
+</div>
+    </div>
+  </div>
+</div>
+}

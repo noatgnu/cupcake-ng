@@ -17,6 +17,7 @@ import {UserStatisticsComponent} from "./user-statistics/user-statistics.compone
 import {UserSearchComponent} from "./user-search/user-search.component";
 import {UserDashboardComponent} from "./user-dashboard/user-dashboard.component";
 import {UserManagementComponent} from "./user-management/user-management.component";
+import {ImportTrackingSummaryComponent} from "./import-tracking-summary/import-tracking-summary.component";
 
 @Component({
     selector: 'app-accounts',
@@ -36,7 +37,8 @@ import {UserManagementComponent} from "./user-management/user-management.compone
     UserStatisticsComponent,
     UserSearchComponent,
     UserDashboardComponent,
-    UserManagementComponent
+    UserManagementComponent,
+    ImportTrackingSummaryComponent
   ],
     templateUrl: './accounts.component.html',
     styleUrl: './accounts.component.scss'

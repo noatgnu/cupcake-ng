@@ -1,0 +1,249 @@
+<div class="container-fluid p-0 d-flex flex-column" style="height: calc(100vh - 56px); margin-top: 56px;">
+  <header class="border-bottom py-3 px-4">
+    <div class="d-flex align-items-center justify-content-center">
+      <h4 class="m-0 fw-bold">Import Tracking</h4>
+    </div>
+  </header>
+
+  <div class="flex-grow-1 overflow-auto">
+    <div class="container-fluid p-4">
+      
+      <!-- Statistics Cards -->
+      @if (stats) {
+      <div class="row mb-4">
+        <div class="col-md-3">
+          <div class="card">
+            <div class="card-body text-center">
+              <h5 class="card-title">Total Imports</h5>
+              <h3 class="text-primary">{{ stats.total_imports }}</h3>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="card">
+            <div class="card-body text-center">
+              <h5 class="card-title">Success Rate</h5>
+              <h3 class="text-success">{{ stats.success_rate }}%</h3>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="card">
+            <div class="card-body text-center">
+              <h5 class="card-title">Objects Created</h5>
+              <h3 class="text-info">{{ stats.total_objects_created }}</h3>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="card">
+            <div class="card-body text-center">
+              <h5 class="card-title">Files Imported</h5>
+              <h3 class="text-warning">{{ stats.total_files_imported }}</h3>
+            </div>
+          </div>
+        </div>
+      </div>
+      }
+
+      <!-- Filters and Search -->
+      <div class="row mb-3">
+        <div class="col-md-4">
+          <div class="form-group">
+            <label for="statusFilter">Filter by Status:</label>
+            <select 
+              id="statusFilter" 
+              class="form-control" 
+              [(ngModel)]="statusFilter" 
+              (ngModelChange)="onFilterChange()">
+              <option value="">All Statuses</option>
+              <option value="completed">Completed</option>
+              <option value="in_progress">In Progress</option>
+              <option value="failed">Failed</option>
+              <option value="reverted">Reverted</option>
+            </select>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="form-group">
+            <label for="searchTerm">Search:</label>
+            <input 
+              type="text" 
+              id="searchTerm" 
+              class="form-control" 
+              placeholder="Search by import ID or username..."
+              [(ngModel)]="searchTerm" 
+              (keyup.enter)="onFilterChange()">
+          </div>
+        </div>
+        <div class="col-md-4 d-flex align-items-end">
+          <button class="btn btn-primary" (click)="onFilterChange()">
+            <i class="fas fa-search"></i> Search
+          </button>
+          <button class="btn btn-secondary ml-2" (click)="searchTerm=''; statusFilter=''; onFilterChange()">
+            <i class="fas fa-times"></i> Clear
+          </button>
+        </div>
+      </div>
+
+      <!-- Loading Spinner -->
+      @if (loading) {
+      <div class="text-center my-4">
+        <div class="spinner-border" role="status">
+          <span class="sr-only">Loading...</span>
+        </div>
+      </div>
+      }
+
+      <!-- Import List Table -->
+      @if (!loading) {
+      <div class="card">
+        <div class="card-header">
+          <h5 class="mb-0">Import History</h5>
+        </div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover mb-0">
+              <thead>
+                <tr>
+                  <th 
+                    scope="col" 
+                    class="sortable" 
+                    (click)="onSort('import_id')">
+                    Import ID
+                    <i class="fas fa-sort ml-1"></i>
+                  </th>
+                  <th scope="col">User</th>
+                  <th scope="col">Status</th>
+                  <th 
+                    scope="col" 
+                    class="sortable" 
+                    (click)="onSort('import_started_at')">
+                    Started
+                    <i class="fas fa-sort ml-1"></i>
+                  </th>
+                  <th scope="col">Duration</th>
+                  <th 
+                    scope="col" 
+                    class="sortable" 
+                    (click)="onSort('archive_size_bytes')">
+                    Size
+                    <i class="fas fa-sort ml-1"></i>
+                  </th>
+                  <th scope="col">Objects</th>
+                  <th scope="col">Files</th>
+                  <th scope="col">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (importItem of imports; track importItem.import_id) {
+                <tr class="clickable-row">
+                  <td>
+                    <code>{{ importItem.import_id }}</code>
+                  </td>
+                  <td>
+                    <div>
+                      <strong>{{ importItem.user_full_name || importItem.user_username }}</strong>
+                      <br>
+                      <small class="text-muted">{{ importItem.user_username }}</small>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="badge" [ngClass]="getStatusBadgeClass(importItem.import_status)">
+                      {{ importItem.import_status | titlecase }}
+                    </span>
+                  </td>
+                  <td>
+                    <div>
+                      {{ formatDate(importItem.import_started_at) }}
+                      @if (importItem.import_completed_at) {
+                      <div class="small text-muted">
+                        Completed: {{ formatDate(importItem.import_completed_at) }}
+                      </div>
+                      }
+                    </div>
+                  </td>
+                  <td>
+                    @if (importItem.duration) {
+                    <span class="badge badge-info">
+                      {{ importItem.duration.formatted }}
+                    </span>
+                    }
+                    @if (!importItem.duration && importItem.import_status === 'in_progress') {
+                    <span class="badge badge-primary">
+                      In Progress
+                    </span>
+                    }
+                  </td>
+                  <td>
+                    {{ formatFileSize(importItem.archive_size_mb) }}
+                  </td>
+                  <td>
+                    <span class="badge badge-secondary">
+                      {{ importItem.total_objects_created }}
+                    </span>
+                  </td>
+                  <td>
+                    <span class="badge badge-secondary">
+                      {{ importItem.total_files_imported }}
+                    </span>
+                  </td>
+                  <td>
+                    <div class="btn-group" role="group">
+                      <button 
+                        class="btn btn-sm btn-outline-primary" 
+                        (click)="viewImportDetail(importItem)"
+                        title="View Details">
+                        <i class="fas fa-eye"></i>
+                      </button>
+                      @if (importItem.can_revert && importItem.import_status === 'completed') {
+                      <button 
+                        class="btn btn-sm btn-outline-warning" 
+                        (click)="revertImport(importItem)"
+                        title="Revert Import">
+                        <i class="fas fa-undo"></i>
+                      </button>
+                      }
+                      <button 
+                        class="btn btn-sm btn-outline-danger" 
+                        (click)="deleteImport(importItem)"
+                        title="Delete Record">
+                        <i class="fas fa-trash"></i>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+        
+        <!-- Pagination -->
+        @if (totalCount > pageSize) {
+        <div class="card-footer">
+          <ngb-pagination 
+            [(page)]="currentPage" 
+            [pageSize]="pageSize" 
+            [collectionSize]="totalCount"
+            [maxSize]="10"
+            [rotate]="true"
+            [boundaryLinks]="true"
+            (pageChange)="onPageChange($event)">
+          </ngb-pagination>
+        </div>
+        }
+      </div>
+      }
+
+      <!-- Empty State -->
+      @if (!loading && imports.length === 0) {
+      <div class="text-center my-5">
+        <i class="fas fa-file-import fa-3x text-muted mb-3"></i>
+        <h4>No imports found</h4>
+        <p class="text-muted">No import tracking records match your current filters.</p>
+      </div>
+      }
+    </div>
+  </div>
+</div>

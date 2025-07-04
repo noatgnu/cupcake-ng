@@ -1,0 +1,49 @@
+.card {
+  border: none;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: box-shadow 0.2s ease;
+}
+
+.card:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.table tbody tr:hover {
+  background-color: var(--bs-light);
+}
+
+.badge {
+  font-size: 0.75rem;
+}
+
+.btn-sm {
+  padding: 0.25rem 0.5rem;
+}
+
+.text-primary {
+  color: var(--bs-primary) !important;
+}
+
+.text-success {
+  color: var(--bs-success) !important;
+}
+
+.text-danger {
+  color: var(--bs-danger) !important;
+}
+
+.text-warning {
+  color: var(--bs-warning) !important;
+}
+
+.spinner-border {
+  width: 2rem;
+  height: 2rem;
+}
+
+code {
+  font-size: 0.9rem;
+  background-color: var(--bs-light);
+  padding: 0.2rem 0.4rem;
+  border-radius: 0.25rem;
+}

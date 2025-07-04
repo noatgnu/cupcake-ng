@@ -49,6 +49,13 @@ import {InstrumentJob, InstrumentJobQuery} from "./instrument-job";
 import {FavouriteMetadataOption, FavouriteMetadataOptionQuery} from "./favourite-metadata-option";
 import {Preset, PresetQuery} from "./preset";
 import {SiteSettings, PublicSiteSettings, ImportOptions, AvailableImportOptionsResponse, ImportDataPayload, ExportDataPayload, ExportOptions, DryRunResponse} from "./site-settings";
+import {
+  ImportTracker,
+  ImportTrackerList,
+  ImportTrackerQuery,
+  UserImportStatsResponse,
+  RevertImportResponse
+} from "./import-tracking";
 
 
 @Injectable({
@@ -2558,6 +2565,54 @@ export class WebService {
   getAvailableImportOptions(): Observable<AvailableImportOptionsResponse> {
     return this.http.get<AvailableImportOptionsResponse>(
       `${this.baseURL}/api/site_settings/available_import_options/`,
+      {responseType: 'json', observe: 'body'}
+    );
+  }
+
+  // Import Tracking API methods
+
+  getImportTracking(params?: any): Observable<ImportTrackerQuery> {
+    let httpParams = new HttpParams();
+    
+    if (params) {
+      Object.keys(params).forEach(key => {
+        if (params[key] !== null && params[key] !== undefined) {
+          httpParams = httpParams.set(key, params[key].toString());
+        }
+      });
+    }
+
+    return this.http.get<ImportTrackerQuery>(
+      `${this.baseURL}/api/import_tracking/`,
+      { params: httpParams, responseType: 'json', observe: 'body' }
+    );
+  }
+
+  getImportTrackingById(id: number): Observable<ImportTracker> {
+    return this.http.get<ImportTracker>(
+      `${this.baseURL}/api/import_tracking/${id}/`,
+      {responseType: 'json', observe: 'body'}
+    );
+  }
+
+  getUserImportStats(): Observable<UserImportStatsResponse> {
+    return this.http.get<UserImportStatsResponse>(
+      `${this.baseURL}/api/import_tracking/user_import_stats/`,
+      {responseType: 'json', observe: 'body'}
+    );
+  }
+
+  revertImport(importId: number): Observable<RevertImportResponse> {
+    return this.http.post<RevertImportResponse>(
+      `${this.baseURL}/api/import_tracking/${importId}/revert_import/`,
+      {},
+      {responseType: 'json', observe: 'body'}
+    );
+  }
+
+  deleteImportTracking(id: number): Observable<any> {
+    return this.http.delete(
+      `${this.baseURL}/api/import_tracking/${id}/`,
       {responseType: 'json', observe: 'body'}
     );
   }

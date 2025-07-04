@@ -1,0 +1,414 @@
+<div class="container-fluid p-0 d-flex flex-column" style="height: calc(100vh - 56px); margin-top: 56px;">
+  <header class="border-bottom py-3 px-4">
+    <div class="d-flex align-items-center justify-content-center">
+      <h4 class="m-0 fw-bold">Import Details</h4>
+    </div>
+  </header>
+
+  <div class="flex-grow-1 overflow-auto">
+    <div class="container-fluid p-4">
+      <!-- Header -->
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+          <button class="btn btn-outline-secondary mr-3" (click)="goBack()">
+            <i class="fas fa-arrow-left"></i> Back to Import List
+          </button>
+        </div>
+        @if (importTracker) {
+        <div>
+          @if (importTracker.can_revert && importTracker.import_status === 'completed') {
+          <button
+            class="btn btn-warning"
+            (click)="revertImport()"
+            [disabled]="loading">
+            <i class="fas fa-undo"></i> Revert Import
+          </button>
+          }
+        </div>
+        }
+      </div>
+
+      <!-- Loading Spinner -->
+      @if (loading) {
+      <div class="text-center my-5">
+        <div class="spinner-border" role="status">
+          <span class="sr-only">Loading...</span>
+        </div>
+      </div>
+      }
+
+      <!-- Import Details -->
+      @if (!loading && importTracker) {
+      <div>
+        <!-- Basic Information Card -->
+        <div class="card mb-4">
+          <div class="card-header">
+            <h5 class="mb-0">
+              <i class="fas fa-info-circle"></i> Basic Information
+            </h5>
+          </div>
+          <div class="card-body">
+            <div class="row">
+              <div class="col-md-6">
+                <table class="table table-borderless">
+                  <tr>
+                    <td class="font-weight-bold">Import ID:</td>
+                    <td><code>{{ importTracker.import_id }}</code></td>
+                  </tr>
+                  <tr>
+                    <td class="font-weight-bold">User:</td>
+                    <td>
+                      {{ importTracker.user_full_name || importTracker.user_username }}
+                      <small class="text-muted d-block">{{ importTracker.user_username }}</small>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="font-weight-bold">Status:</td>
+                    <td>
+                      <span class="badge" [ngClass]="getStatusBadgeClass(importTracker.import_status)">
+                        {{ importTracker.import_status | titlecase }}
+                      </span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="font-weight-bold">Archive Path:</td>
+                    <td><code>{{ importTracker.archive_path }}</code></td>
+                  </tr>
+                </table>
+              </div>
+              <div class="col-md-6">
+                <table class="table table-borderless">
+                  <tr>
+                    <td class="font-weight-bold">Archive Size:</td>
+                    <td>{{ formatFileSize(importTracker.archive_size_bytes) }}</td>
+                  </tr>
+                  <tr>
+                    <td class="font-weight-bold">Started:</td>
+                    <td>{{ formatDate(importTracker.import_started_at) }}</td>
+                  </tr>
+                  <tr>
+                    <td class="font-weight-bold">Completed:</td>
+                    <td>
+                      @if (importTracker.import_completed_at) {
+                      <span>
+                        {{ formatDate(importTracker.import_completed_at) }}
+                      </span>
+                      }
+                      @if (!importTracker.import_completed_at) {
+                      <span class="text-muted">
+                        Not completed
+                      </span>
+                      }
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="font-weight-bold">Duration:</td>
+                    <td>
+                      @if (importTracker.duration) {
+                      <span class="badge badge-info">
+                        {{ importTracker.duration.formatted }}
+                      </span>
+                      }
+                      @if (!importTracker.duration) {
+                      <span class="text-muted">
+                        N/A
+                      </span>
+                      }
+                    </td>
+                  </tr>
+                </table>
+              </div>
+            </div>
+
+            <!-- Revert Information -->
+            @if (importTracker.reverted_at) {
+            <div class="alert alert-warning mt-3">
+              <h6><i class="fas fa-exclamation-triangle"></i> Import Reverted</h6>
+              <p class="mb-0">
+                This import was reverted on {{ formatDate(importTracker.reverted_at) }}
+                @if (importTracker.reverted_by) {<span>by user ID {{ importTracker.reverted_by }}</span>}.
+              </p>
+            </div>
+            }
+
+            <!-- Error Information -->
+            @if (importTracker.error_message) {
+            <div class="alert alert-danger mt-3">
+              <h6><i class="fas fa-exclamation-circle"></i> Import Error</h6>
+              <p class="mb-0">{{ importTracker.error_message }}</p>
+            </div>
+            }
+          </div>
+        </div>
+
+        <!-- Statistics Card -->
+        <div class="card mb-4">
+          <div class="card-header">
+            <h5 class="mb-0">
+              <i class="fas fa-chart-bar"></i> Import Statistics
+            </h5>
+          </div>
+          <div class="card-body">
+            <div class="row">
+              <div class="col-md-4">
+                <div class="text-center">
+                  <h3 class="text-primary">{{ importTracker.total_objects_created }}</h3>
+                  <p class="text-muted">Objects Created</p>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="text-center">
+                  <h3 class="text-success">{{ importTracker.total_files_imported }}</h3>
+                  <p class="text-muted">Files Imported</p>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="text-center">
+                  <h3 class="text-info">{{ importTracker.total_relationships_created }}</h3>
+                  <p class="text-muted">Relationships Created</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Detailed Tabs -->
+        <div class="card">
+          <div class="card-header">
+            <ul class="nav nav-tabs card-header-tabs" role="tablist">
+              <li class="nav-item">
+                <a
+                  class="nav-link"
+                  [class.active]="activeTab === 'overview'"
+                  (click)="setActiveTab('overview')"
+                  role="tab">
+                  <i class="fas fa-eye"></i> Overview
+                </a>
+              </li>
+              <li class="nav-item">
+                <a
+                  class="nav-link"
+                  [class.active]="activeTab === 'objects'"
+                  (click)="setActiveTab('objects')"
+                  role="tab">
+                  <i class="fas fa-cube"></i> Objects ({{ importTracker.imported_objects.length }})
+                </a>
+              </li>
+              <li class="nav-item">
+                <a
+                  class="nav-link"
+                  [class.active]="activeTab === 'files'"
+                  (click)="setActiveTab('files')"
+                  role="tab">
+                  <i class="fas fa-file"></i> Files ({{ importTracker.imported_files.length }})
+                </a>
+              </li>
+              <li class="nav-item">
+                <a
+                  class="nav-link"
+                  [class.active]="activeTab === 'relationships'"
+                  (click)="setActiveTab('relationships')"
+                  role="tab">
+                  <i class="fas fa-link"></i> Relationships ({{ importTracker.imported_relationships.length }})
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          <div class="card-body">
+            <!-- Overview Tab -->
+            @if (activeTab === 'overview') {
+            <div>
+              @if (importTracker) {
+                <div class="row">
+                  <div class="col-md-4">
+                    <h6>Objects by Type</h6>
+                    @if (getObjectsByType().length > 0) {
+                      <ul class="list-group list-group-flush">
+                        @for (item of getObjectsByType(); track item.key) {
+                          <li class="list-group-item d-flex justify-content-between align-items-center">
+                            {{ item.key }}
+                            <span class="badge badge-primary badge-pill">{{ item.value }}</span>
+                          </li>
+                        }
+                      </ul>
+                    } @else {
+                      <p class="text-muted">No object statistics available</p>
+                    }
+                  </div>
+                  <div class="col-md-4">
+                    <h6>Files by Type</h6>
+                    @if (getFilesByType().length > 0) {
+                      <ul class="list-group list-group-flush">
+                        @for (item of getFilesByType(); track item.key) {
+                          <li class="list-group-item d-flex justify-content-between align-items-center">
+                            .{{ item.key }}
+                            <span class="badge badge-success badge-pill">{{ item.value }}</span>
+                          </li>
+                        }
+                      </ul>
+                    } @else {
+                      <p class="text-muted">No file statistics available</p>
+                    }
+                  </div>
+                  <div class="col-md-4">
+                    <h6>Relationships by Field</h6>
+                    @if (getRelationshipsByField().length > 0) {
+                      <ul class="list-group list-group-flush">
+                        @for (item of getRelationshipsByField(); track item.key) {
+                          <li class="list-group-item d-flex justify-content-between align-items-center">
+                            {{ item.key }}
+                            <span class="badge badge-info badge-pill">{{ item.value }}</span>
+                          </li>
+                        }
+                      </ul>
+                    } @else {
+                      <p class="text-muted">No relationship statistics available</p>
+                    }
+                  </div>
+                </div>
+              }
+
+            </div>
+            }
+
+            <!-- Objects Tab -->
+            @if (activeTab === 'objects') {
+            <div>
+              <div class="table-responsive">
+                <table class="table table-striped">
+                  <thead>
+                    <tr>
+                      <th>Object Type</th>
+                      <th>Object ID</th>
+                      <th>Object Description</th>
+                      <th>Created At</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (obj of getPaginatedObjects(); track obj.object_id) {
+                    <tr>
+                      <td>
+                        <span class="badge" [ngClass]="getObjectTypeBadgeClass(obj.object_type)">
+                          {{ obj.object_type }}
+                        </span>
+                      </td>
+                      <td><code>{{ obj.object_id }}</code></td>
+                      <td>{{ obj.object_repr }}</td>
+                      <td>{{ formatDate(obj.created_at) }}</td>
+                    </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+
+              <!-- Objects Pagination -->
+              @if (importTracker.imported_objects.length > pageSize) {
+              <div class="d-flex justify-content-center">
+                <ngb-pagination
+                  [(page)]="objectsPage"
+                  [pageSize]="pageSize"
+                  [collectionSize]="importTracker.imported_objects.length"
+                  [maxSize]="5">
+                </ngb-pagination>
+              </div>
+              }
+            </div>
+            }
+
+            <!-- Files Tab -->
+            @if (activeTab === 'files') {
+            <div>
+              <div class="table-responsive">
+                <table class="table table-striped">
+                  <thead>
+                    <tr>
+                      <th>File Path</th>
+                      <th>File Size</th>
+                      <th>Created At</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (file of getPaginatedFiles(); track file.file_path) {
+                    <tr>
+                      <td><code>{{ file.file_path }}</code></td>
+                      <td>{{ formatFileSize(file.file_size_bytes) }}</td>
+                      <td>{{ formatDate(file.created_at) }}</td>
+                    </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+
+              @if (importTracker) {
+                @if (importTracker.imported_files.length > pageSize) {
+                  <div class="d-flex justify-content-center">
+                    <ngb-pagination
+                      [(page)]="filesPage"
+                      [pageSize]="pageSize"
+                      [collectionSize]="importTracker.imported_files.length"
+                      [maxSize]="5">
+                    </ngb-pagination>
+                  </div>
+                }
+              }
+
+            </div>
+            }
+
+            <!-- Relationships Tab -->
+            @if (activeTab === 'relationships') {
+            <div>
+              <div class="table-responsive">
+                <table class="table table-striped">
+                  <thead>
+                    <tr>
+                      <th>From Object</th>
+                      <th>To Object</th>
+                      <th>Relationship Field</th>
+                      <th>Created At</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (rel of getPaginatedRelationships(); track rel.from_object_id + '-' + rel.to_object_id) {
+                    <tr>
+                      <td>
+                        <span class="badge" [ngClass]="getObjectTypeBadgeClass(rel.from_object_type)">
+                          {{ rel.from_object_type }}
+                        </span>
+                        <code class="ml-1">{{ rel.from_object_id }}</code>
+                      </td>
+                      <td>
+                        <span class="badge" [ngClass]="getObjectTypeBadgeClass(rel.to_object_type)">
+                          {{ rel.to_object_type }}
+                        </span>
+                        <code class="ml-1">{{ rel.to_object_id }}</code>
+                      </td>
+                      <td><code>{{ rel.relationship_field }}</code></td>
+                      <td>{{ formatDate(rel.created_at) }}</td>
+                    </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+
+              <!-- Relationships Pagination -->
+              @if (importTracker.imported_relationships.length > pageSize) {
+              <div class="d-flex justify-content-center">
+                <ngb-pagination
+                  [(page)]="relationshipsPage"
+                  [pageSize]="pageSize"
+                  [collectionSize]="importTracker.imported_relationships.length"
+                  [maxSize]="5">
+                </ngb-pagination>
+              </div>
+              }
+            </div>
+            }
+          </div>
+        </div>
+      </div>
+      }
+    </div>
+  </div>
+</div>

@@ -51,6 +51,11 @@
            (click)="selectedSection='favourite'">
           <i class="bi bi-star me-2"></i> Favourites
         </a>
+        <a class="list-group-item list-group-item-action py-3 d-flex align-items-center"
+           [ngClass]="{'active': selectedSection==='import-tracking'}"
+           (click)="selectedSection='import-tracking'">
+          <i class="bi bi-file-earmark-arrow-up me-2"></i> Import Tracking
+        </a>
         @if (accountService.loggedIn) {
           <hr class="my-2">
           <div class="px-3 py-2">
@@ -119,6 +124,8 @@
             <i class="bi bi-search me-2"></i> Search Users
           } @else if (selectedSection === 'user-management') {
             <i class="bi bi-people-fill me-2"></i> User Management
+          } @else if (selectedSection === 'import-tracking') {
+            <i class="bi bi-file-earmark-arrow-up me-2"></i> Import Tracking
           }
         </h5>
       </div>
@@ -198,6 +205,8 @@
           <app-user-search></app-user-search>
         } @else if (selectedSection === 'user-management') {
           <app-user-management></app-user-management>
+        } @else if (selectedSection === 'import-tracking') {
+          <app-import-tracking-summary></app-import-tracking-summary>
         } @else {
           <div class="container py-4">
             <div class="card shadow-sm mb-4">

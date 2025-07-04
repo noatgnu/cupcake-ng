@@ -1,0 +1,97 @@
+.sortable {
+  cursor: pointer;
+  user-select: none;
+  
+  i {
+    color: var(--bs-secondary);
+    font-size: 0.8em;
+  }
+}
+
+.clickable-row {
+  cursor: pointer;
+}
+
+.badge {
+  font-size: 0.75em;
+  
+  &.badge-success {
+    background-color: #28a745;
+  }
+  
+  &.badge-primary {
+    background-color: #007bff;
+  }
+  
+  &.badge-danger {
+    background-color: #dc3545;
+  }
+  
+  &.badge-warning {
+    background-color: #ffc107;
+    color: #212529;
+  }
+  
+  &.badge-secondary {
+    background-color: #6c757d;
+  }
+  
+  &.badge-info {
+    background-color: #17a2b8;
+  }
+}
+
+.card {
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+  border: 1px solid rgba(0, 0, 0, 0.125);
+  
+  .card-body {
+    padding: 1.25rem;
+  }
+}
+
+.btn-group {
+  .btn {
+    margin-right: 2px;
+    
+    &:last-child {
+      margin-right: 0;
+    }
+  }
+}
+
+.spinner-border {
+  width: 3rem;
+  height: 3rem;
+}
+
+code {
+  padding: 0.2rem 0.4rem;
+  border-radius: 0.25rem;
+  font-size: 87.5%;
+}
+
+.form-group {
+  margin-bottom: 1rem;
+  
+  label {
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+  }
+}
+
+.table {
+  th {
+    border-top: none;
+    font-weight: 600;
+  }
+  
+  td {
+    vertical-align: middle;
+  }
+}
+
+.card-footer {
+  display: flex;
+  justify-content: center;
+}

@@ -1,0 +1,144 @@
+<div class="container-fluid">
+  <!-- Quick Stats Cards -->
+  @if (stats) {
+  <div class="row mb-4">
+    <div class="col-md-3">
+      <div class="card text-center">
+        <div class="card-body">
+          <i class="bi bi-file-earmark-arrow-up text-primary mb-2" style="font-size: 2rem;"></i>
+          <h4 class="text-primary">{{ stats.total_imports }}</h4>
+          <p class="card-text text-muted">Total Imports</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card text-center">
+        <div class="card-body">
+          <i class="bi bi-check-circle text-success mb-2" style="font-size: 2rem;"></i>
+          <h4 class="text-success">{{ stats.completed_imports }}</h4>
+          <p class="card-text text-muted">Completed</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card text-center">
+        <div class="card-body">
+          <i class="bi bi-x-circle text-danger mb-2" style="font-size: 2rem;"></i>
+          <h4 class="text-danger">{{ stats.failed_imports }}</h4>
+          <p class="card-text text-muted">Failed</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card text-center">
+        <div class="card-body">
+          <i class="bi bi-percent" [ngClass]="getSuccessRateColor()" style="font-size: 2rem;"></i>
+          <h4 [ngClass]="getSuccessRateColor()">{{ stats.success_rate }}%</h4>
+          <p class="card-text text-muted">Success Rate</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  }
+
+  <!-- Recent Imports Section -->
+  <div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <h5 class="mb-0">
+        <i class="bi bi-clock-history me-2"></i>Recent Imports
+      </h5>
+      <button class="btn btn-outline-primary btn-sm" (click)="viewFullImportTracking()">
+        <i class="bi bi-arrow-right me-1"></i>View All
+      </button>
+    </div>
+    <div class="card-body">
+      @if (loading) {
+      <div class="text-center py-4">
+        <div class="spinner-border text-primary" role="status">
+          <span class="sr-only">Loading...</span>
+        </div>
+        <p class="mt-2 text-muted">Loading recent imports...</p>
+      </div>
+      } @else if (recentImports.length === 0) {
+      <div class="text-center py-5">
+        <i class="bi bi-file-earmark-x text-muted mb-3" style="font-size: 3rem;"></i>
+        <h6 class="text-muted">No Recent Imports</h6>
+        <p class="text-muted">You haven't performed any imports recently.</p>
+      </div>
+      } @else {
+      <div class="table-responsive">
+        <table class="table table-hover">
+          <thead class="table-light">
+            <tr>
+              <th>Import ID</th>
+              <th>Status</th>
+              <th>Started</th>
+              <th>Size</th>
+              <th>Objects Created</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (importItem of recentImports; track importItem.id) {
+            <tr>
+              <td>
+                <code class="text-primary">{{ importItem.import_id }}</code>
+              </td>
+              <td>
+                <span class="badge" [ngClass]="getStatusBadgeClass(importItem.import_status)">
+                  {{ importItem.import_status | titlecase }}
+                </span>
+              </td>
+              <td>
+                <small>{{ formatDate(importItem.import_started_at) }}</small>
+              </td>
+              <td>
+                <small>{{ formatFileSize(importItem.archive_size_mb) }}</small>
+              </td>
+              <td>
+                <span class="badge bg-secondary">{{ importItem.total_objects_created }}</span>
+              </td>
+              <td>
+                <button 
+                  class="btn btn-sm btn-outline-primary" 
+                  (click)="viewImportDetail(importItem)"
+                  title="View Details">
+                  <i class="bi bi-eye"></i>
+                </button>
+              </td>
+            </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      }
+    </div>
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="card mt-4">
+    <div class="card-header">
+      <h5 class="mb-0">
+        <i class="bi bi-lightning me-2"></i>Quick Actions
+      </h5>
+    </div>
+    <div class="card-body">
+      <div class="row">
+        <div class="col-md-6">
+          <div class="d-grid">
+            <button class="btn btn-primary" (click)="viewFullImportTracking()">
+              <i class="bi bi-list-ul me-2"></i>View Full Import History
+            </button>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="d-grid">
+            <button class="btn btn-outline-secondary" disabled>
+              <i class="bi bi-upload me-2"></i>New Import (Coming Soon)
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
