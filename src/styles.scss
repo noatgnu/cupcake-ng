@@ -101,80 +101,118 @@ html, body { height: 100vh; width: 100%; margin: 0 }
   }
 }
 
-/* Sci-Fi Theme */
+/* Sci-Fi Theme - Portal Style */
 .loading-overlay.theme-scifi {
-  background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 50%, #1a1a1a 100%);
   overflow: hidden;
+  font-family: 'Courier New', monospace;
 }
 
 .loading-overlay.theme-scifi::before {
+  content: 'SCIENTIFIC PORTAL';
+  position: absolute;
+  top: 10%;
+  left: 50%;
+  transform: translateX(-50%);
+  color: rgba(255, 136, 0, 0.7);
+  font-size: 0.8rem;
+  letter-spacing: 0.2em;
+  animation: portalTextFlicker 3s ease-in-out infinite;
+}
+
+.loading-overlay.theme-scifi::after {
   content: '';
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: 
-    radial-gradient(circle at 20% 20%, rgba(0, 255, 255, 0.1) 0%, transparent 50%),
-    radial-gradient(circle at 80% 80%, rgba(255, 0, 255, 0.1) 0%, transparent 50%),
-    radial-gradient(circle at 40% 60%, rgba(0, 255, 0, 0.05) 0%, transparent 50%);
-  animation: scifiGlow 4s ease-in-out infinite;
+  background:
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(255, 136, 0, 0.03) 2px,
+      rgba(255, 136, 0, 0.03) 4px
+    );
+  pointer-events: none;
+}
+
+.loading-overlay.theme-scifi .logo {
+  border: 2px solid rgba(255, 136, 0, 0.8);
+  box-shadow:
+    0 0 20px rgba(255, 136, 0, 0.4),
+    inset 0 0 20px rgba(255, 136, 0, 0.1);
 }
 
 .loading-overlay.theme-scifi .logo-glow {
-  background: linear-gradient(45deg, #00ffff, #ff00ff, #00ff00);
-  animation: scifiPulse 2s ease-in-out infinite;
+  background: radial-gradient(circle, rgba(255, 136, 0, 0.3) 0%, transparent 70%);
+  animation: portalGlow 2s ease-in-out infinite;
 }
 
 .loading-overlay.theme-scifi .spinner-ring {
-  border-top-color: #00ffff;
-  box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+  border-top-color: #ff8800;
+  border-right-color: rgba(255, 136, 0, 0.3);
+  border-bottom-color: rgba(255, 136, 0, 0.1);
+  border-left-color: rgba(255, 136, 0, 0.3);
+  box-shadow: 0 0 15px rgba(255, 136, 0, 0.3);
 }
 
 .loading-overlay.theme-scifi .spinner-ring:nth-child(2) {
-  border-top-color: #ff00ff;
-  box-shadow: 0 0 20px rgba(255, 0, 255, 0.5);
+  border-top-color: rgba(255, 136, 0, 0.8);
+  box-shadow: 0 0 10px rgba(255, 136, 0, 0.2);
 }
 
 .loading-overlay.theme-scifi .spinner-ring:nth-child(3) {
-  border-top-color: #00ff00;
-  box-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
+  border-top-color: rgba(255, 136, 0, 0.6);
+  box-shadow: 0 0 5px rgba(255, 136, 0, 0.1);
 }
 
 .loading-overlay.theme-scifi .app-title {
-  color: #00ffff;
-  text-shadow: 0 0 20px rgba(0, 255, 255, 0.8);
+  color: #ff8800;
+  text-shadow: 0 0 15px rgba(255, 136, 0, 0.6);
   font-family: 'Courier New', monospace;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.05em;
+  font-weight: 400;
 }
 
 .loading-overlay.theme-scifi .app-subtitle {
-  color: rgba(0, 255, 255, 0.7);
+  color: rgba(255, 136, 0, 0.8);
   font-family: 'Courier New', monospace;
+  font-weight: 300;
+}
+
+.loading-overlay.theme-scifi .loading-status {
+  color: rgba(255, 136, 0, 0.9);
+  font-family: 'Courier New', monospace;
+  font-size: 0.9rem;
+}
+
+.loading-overlay.theme-scifi .loading-dots span {
+  background: rgba(255, 136, 0, 0.7);
 }
 
 /* Space Theme */
 .loading-overlay.theme-space {
-  background: radial-gradient(ellipse at bottom, #1b2735 0%, #090a0f 100%);
+  background: radial-gradient(ellipse at center, #1b2735 0%, #090a0f 100%);
   overflow: hidden;
 }
 
 .loading-overlay.theme-space::before {
   content: '';
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-image: 
-    radial-gradient(2px 2px at 20px 30px, #eee, transparent),
-    radial-gradient(2px 2px at 40px 70px, rgba(255,255,255,0.8), transparent),
-    radial-gradient(1px 1px at 90px 40px, #fff, transparent),
-    radial-gradient(1px 1px at 130px 80px, rgba(255,255,255,0.6), transparent),
-    radial-gradient(2px 2px at 160px 30px, #fff, transparent);
-  background-repeat: repeat;
-  background-size: 200px 100px;
-  animation: starMove 20s linear infinite;
+  top: 50%;
+  left: 50%;
+  width: 300px;
+  height: 300px;
+  margin: -150px 0 0 -150px;
+  background:
+    radial-gradient(ellipse 100px 20px at center, rgba(255,255,255,0.8) 0%, transparent 100%),
+    radial-gradient(ellipse 80px 15px at center, rgba(173,216,230,0.6) 0%, transparent 100%),
+    radial-gradient(ellipse 60px 10px at center, rgba(255,215,0,0.4) 0%, transparent 100%);
+  border-radius: 50%;
+  animation: galaxySpin 20s linear infinite;
+  opacity: 0.7;
 }
 
 .loading-overlay.theme-space .logo {
@@ -367,34 +405,49 @@ html, body { height: 100vh; width: 100%; margin: 0 }
   }
 }
 
-@keyframes scifiGlow {
+@keyframes portalTextFlicker {
+  0%, 100% {
+    opacity: 0.7;
+    text-shadow: 0 0 5px rgba(255, 136, 0, 0.3);
+  }
+  20% {
+    opacity: 1;
+    text-shadow: 0 0 10px rgba(255, 136, 0, 0.8);
+  }
+  21% {
+    opacity: 0.3;
+    text-shadow: 0 0 2px rgba(255, 136, 0, 0.2);
+  }
+  22% {
+    opacity: 1;
+    text-shadow: 0 0 10px rgba(255, 136, 0, 0.8);
+  }
+  50% {
+    opacity: 0.9;
+    text-shadow: 0 0 8px rgba(255, 136, 0, 0.6);
+  }
+}
+
+@keyframes portalGlow {
   0%, 100% {
     opacity: 0.3;
     transform: scale(1);
   }
   50% {
     opacity: 0.6;
-    transform: scale(1.1);
+    transform: scale(1.05);
   }
 }
 
-@keyframes scifiPulse {
-  0%, 100% {
-    opacity: 0.3;
-    transform: scale(1);
+@keyframes galaxySpin {
+  0% {
+    transform: rotate(0deg) scale(1);
   }
   50% {
-    opacity: 0.8;
-    transform: scale(1.15);
-  }
-}
-
-@keyframes starMove {
-  0% {
-    transform: translateY(0px);
+    transform: rotate(180deg) scale(1.1);
   }
   100% {
-    transform: translateY(-100px);
+    transform: rotate(360deg) scale(1);
   }
 }
 
