@@ -432,7 +432,7 @@
                         </div>
                       }
 
-                      <!-- Archive Information -->
+
                       @if (dryRunAnalysisReport.size_analysis) {
                         <div class="mb-3">
                           <h6><i class="bi bi-archive me-1"></i>Archive Information</h6>
@@ -498,7 +498,7 @@
                           @for (conflict of dryRunAnalysisReport.potential_conflicts; track conflict.type) {
                             <div class="mb-3">
                               <div class="fw-bold">
-                                <i class="bi bi-exclamation-triangle me-1"></i>{{ conflict.type }} 
+                                <i class="bi bi-exclamation-triangle me-1"></i>{{ conflict.type }}
                                 <span class="badge bg-secondary ms-2">{{ conflict.total_conflicts }} conflicts</span>
                               </div>
                               <div class="small text-muted mb-2">{{ conflict.description }}</div>
@@ -514,12 +514,71 @@
                         </div>
                       }
 
+                      <!-- Storage Object Nomination -->
+                      @if (storageObjectNominationRequired && dryRunAnalysisReport?.storage_object_requirements) {
+                        <div class="alert alert-warning">
+                          <h6><i class="bi bi-exclamation-triangle me-2"></i>Storage Object Nomination Required</h6>
+                          @if (dryRunAnalysisReport.storage_object_requirements) {
+                            @if (dryRunAnalysisReport.storage_object_requirements.description) {
+                              <p class="mb-3">{{ dryRunAnalysisReport.storage_object_requirements.description }}</p>
+                            }
+                          }
+
+
+                          @if (loadingStorageObjects) {
+                            <div class="text-center">
+                              <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+                              Loading available storage objects...
+                            </div>
+                          } @else {
+                            <div class="row">
+                              @if (dryRunAnalysisReport.storage_object_requirements) {
+                                @if (dryRunAnalysisReport.storage_object_requirements.required_storage_objects) {
+                                  @for (requirement of dryRunAnalysisReport.storage_object_requirements.required_storage_objects; track requirement.id) {
+                                    <div class="col-md-6 mb-3">
+                                      <div class="card">
+                                        <div class="card-body">
+                                          <h6 class="card-title">{{ requirement.object_name }}</h6>
+                                          <p class="card-text small text-muted">
+                                            Type: {{ requirement.object_type }}<br>
+                                            Reagents: {{ requirement.reagent_count }}
+                                          </p>
+
+                                          <label class="form-label">Nominate storage location:</label>
+                                          <select
+                                            class="form-select form-select-sm"
+                                            [value]="storageObjectMappings[requirement.id.toString()]"
+                                            (change)="onStorageObjectMappingChange(requirement.id.toString(), $event)">
+                                            <option value="0">Select storage location...</option>
+                                            @for (storage of availableStorageObjects; track storage.id) {
+                                              <option [value]="storage.id">
+                                                {{ storage.object_name }} ({{ storage.object_type }})
+                                              </option>
+                                            }
+                                          </select>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  }
+                                }
+                              }
+                            </div>
+                            @if (!isStorageObjectMappingComplete()) {
+                              <div class="alert alert-info py-2 px-3 mt-2">
+                                <i class="bi bi-info-circle me-1"></i>
+                                <small>Please select storage locations for all stored reagents before proceeding.</small>
+                              </div>
+                            }
+                          }
+                        </div>
+                      }
+
                       <!-- Action Buttons -->
                       <div class="d-flex gap-2 mt-3">
                         @if (!hasErrors()) {
                           <button class="btn btn-success"
                                   (click)="proceedWithImport()"
-                                  [disabled]="importInProgress">
+                                  [disabled]="importInProgress || !isStorageObjectMappingComplete()">
                             @if (importInProgress) {
                               <span class="spinner-border spinner-border-sm me-2" role="status"></span>
                               Starting Import...

@@ -48,7 +48,7 @@ import {UnimodQuery} from "./unimod";
 import {InstrumentJob, InstrumentJobQuery} from "./instrument-job";
 import {FavouriteMetadataOption, FavouriteMetadataOptionQuery} from "./favourite-metadata-option";
 import {Preset, PresetQuery} from "./preset";
-import {SiteSettings, PublicSiteSettings, ImportOptions, AvailableImportOptionsResponse, ImportDataPayload, ExportDataPayload, ExportOptions, DryRunResponse} from "./site-settings";
+import {SiteSettings, PublicSiteSettings, ImportOptions, AvailableImportOptionsResponse, ImportDataPayload, ExportDataPayload, ExportOptions, DryRunResponse, AvailableStorageObjectResponse} from "./site-settings";
 import {
   ImportTracker,
   ImportTrackerList,
@@ -823,13 +823,21 @@ export class WebService {
     }
   }
 
-  importUserData(uploadID: string, importOptions?: ImportOptions): Observable<any> {
+  importUserData(uploadID: string, importOptions?: ImportOptions, storageObjectMappings?: { [originalStorageId: string]: number }, bulkTransferMode?: boolean): Observable<any> {
     const payload: ImportDataPayload = {
       upload_id: uploadID
     };
 
     if (importOptions) {
       payload.import_options = importOptions;
+    }
+
+    if (storageObjectMappings) {
+      payload.storage_object_mappings = storageObjectMappings;
+    }
+
+    if (bulkTransferMode) {
+      payload.bulk_transfer_mode = bulkTransferMode;
     }
 
     return this.http.post<any>(
@@ -839,7 +847,7 @@ export class WebService {
     );
   }
 
-  dryRunImportUserData(uploadID: string, importOptions?: ImportOptions): Observable<{message: string, instance_id: string}> {
+  dryRunImportUserData(uploadID: string, importOptions?: ImportOptions, bulkTransferMode?: boolean): Observable<{message: string, instance_id: string}> {
     const payload: ImportDataPayload = {
       upload_id: uploadID
     };
@@ -848,9 +856,20 @@ export class WebService {
       payload.import_options = importOptions;
     }
 
+    if (bulkTransferMode) {
+      payload.bulk_transfer_mode = bulkTransferMode;
+    }
+
     return this.http.post<any>(
       `${this.baseURL}/api/user/dry_run_import_user_data/`,
       payload,
+      {responseType: 'json', observe: 'body'}
+    );
+  }
+
+  getAvailableStorageObjects(): Observable<AvailableStorageObjectResponse> {
+    return this.http.get<AvailableStorageObjectResponse>(
+      `${this.baseURL}/api/user/get_available_storage_objects/`,
       {responseType: 'json', observe: 'body'}
     );
   }

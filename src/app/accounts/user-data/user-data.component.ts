@@ -9,7 +9,7 @@ import {WebsocketService} from "../../websocket.service";
 import { Subscription } from 'rxjs';
 import {DecimalPipe, NgClass} from "@angular/common";
 import {keyBy} from "lodash-es";
-import { AvailableImportOptionsResponse, ImportOptions } from '../../site-settings';
+import { AvailableImportOptionsResponse, ImportOptions, AvailableStorageObject } from '../../site-settings';
 import { AccountsService } from '../accounts.service';
 
 @Component({
@@ -105,8 +105,24 @@ export class UserDataComponent implements OnInit, OnDestroy {
     } | null,
     'import_plan': any,
     'warnings': Array<string>,
-    'errors': Array<string>
+    'errors': Array<string>,
+    'storage_object_requirements'?: {
+      'total_stored_reagents': number,
+      'required_storage_objects': Array<{
+        id: number,
+        object_name: string,
+        object_type: string,
+        reagent_count: number
+      }>,
+      'description': string
+    }
   } | null = null;
+
+  // Storage object nomination
+  availableStorageObjects: AvailableStorageObject[] = [];
+  storageObjectMappings: { [originalStorageId: string]: number } = {};
+  loadingStorageObjects = false;
+  storageObjectNominationRequired = false;
 
 
   constructor(
@@ -147,6 +163,10 @@ export class UserDataComponent implements OnInit, OnDestroy {
                 this.dryRunCompleted = true;
                 this.dryRunInProgress = false;
                 this.importProcessStep = 'review';
+
+                // Check if storage object nomination is required
+                this.checkStorageObjectRequirements();
+
                 this.toastService.show("Import Analysis", "Analysis completed successfully!");
               }
             }
@@ -282,7 +302,7 @@ export class UserDataComponent implements OnInit, OnDestroy {
         // Reset all import state
         this.resetImportState();
         this.importProcessStep = 'upload';
-        
+
         // Set upload progress immediately
         this.uploadInProgress = true;
         this.chunkUploadTotal = file.size;
@@ -397,7 +417,11 @@ export class UserDataComponent implements OnInit, OnDestroy {
     this.importProcessStep = 'importing';
 
     try {
-      const response = await this.web.importUserData(this.currentUploadId, this.importOptions).toPromise();
+      const response = await this.web.importUserData(
+        this.currentUploadId,
+        this.importOptions,
+        this.storageObjectMappings
+      ).toPromise();
       this.toastService.show("Import", "Import process started...");
     } catch (error) {
       console.error('Error starting import:', error);
@@ -427,6 +451,12 @@ export class UserDataComponent implements OnInit, OnDestroy {
     this.importError = null;
     this.importSuccessMessage = '';
     this.importProcessStep = 'upload';
+
+    // Reset storage object nomination state
+    this.storageObjectNominationRequired = false;
+    this.storageObjectMappings = {};
+    this.availableStorageObjects = [];
+    this.loadingStorageObjects = false;
   }
 
   cancelImport() {
@@ -515,6 +545,50 @@ export class UserDataComponent implements OnInit, OnDestroy {
            this.importInProgress ||
            this.importProcessStep === 'importing' ||
            this.importProcessStep === 'analyzing';
+  }
+
+  checkStorageObjectRequirements() {
+    if (this.dryRunAnalysisReport?.storage_object_requirements) {
+      this.storageObjectNominationRequired = true;
+      this.loadAvailableStorageObjects();
+
+      // Initialize mappings with default empty values
+      const requiredObjects = this.dryRunAnalysisReport.storage_object_requirements.required_storage_objects;
+      requiredObjects.forEach(obj => {
+        this.storageObjectMappings[obj.id.toString()] = 0; // Default to unselected
+      });
+    }
+  }
+
+  loadAvailableStorageObjects() {
+    this.loadingStorageObjects = true;
+    this.web.getAvailableStorageObjects().subscribe({
+      next: (response) => {
+        this.availableStorageObjects = response.storage_objects;
+        this.loadingStorageObjects = false;
+      },
+      error: (error) => {
+        console.error('Error loading storage objects:', error);
+        this.toastService.show('Storage Objects', 'Failed to load available storage objects', undefined, 'error');
+        this.loadingStorageObjects = false;
+      }
+    });
+  }
+
+  isStorageObjectMappingComplete(): boolean {
+    if (!this.storageObjectNominationRequired) return true;
+
+    const requiredObjects = this.dryRunAnalysisReport?.storage_object_requirements?.required_storage_objects || [];
+    return requiredObjects.every(obj => {
+      const mappedId = this.storageObjectMappings[obj.id.toString()];
+      return mappedId && mappedId > 0;
+    });
+  }
+
+  onStorageObjectMappingChange(originalStorageId: string, event: Event) {
+    if (!(event.target instanceof HTMLSelectElement)) return;
+    const nominatedStorageId = parseInt(event.target.value, 10);
+    this.storageObjectMappings[originalStorageId] = nominatedStorageId;
   }
 
   ngOnDestroy() {

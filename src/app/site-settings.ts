@@ -93,6 +93,19 @@ export interface ExportOptions {
 export interface ImportDataPayload {
   upload_id: string;
   import_options?: ImportOptions;
+  storage_object_mappings?: { [originalStorageId: string]: number };
+  bulk_transfer_mode?: boolean;
+}
+
+export interface AvailableStorageObject {
+  id: number;
+  object_name: string;
+  object_type: string;
+  description?: string;
+}
+
+export interface AvailableStorageObjectResponse {
+  storage_objects: AvailableStorageObject[];
 }
 
 export interface ExportDataPayload {
