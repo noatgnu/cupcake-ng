@@ -143,4 +143,17 @@ export class AccountsComponent implements OnInit{
     localStorage.setItem('cupcake-splash-theme', this.selectedSplashTheme);
     this.toastService.show('Splash Screen', `Theme changed to ${this.selectedSplashTheme}. You'll see it on the next page load.`);
   }
+
+  activateRuntimeSplash() {
+    let theme = this.selectedSplashTheme;
+    
+    if (theme === 'random') {
+      const safeThemes = ['default', 'scifi', 'space'];
+      theme = safeThemes[Math.floor(Math.random() * safeThemes.length)];
+    }
+    
+    window.dispatchEvent(new CustomEvent('toggle-splash-screen', { 
+      detail: { theme, show: true } 
+    }));
+  }
 }

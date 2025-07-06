@@ -99,6 +99,21 @@ export class AppComponent {
 
     this.web.getCSRFToken().subscribe(resp => {})
 
+    // Listen for custom splash screen activation events
+    window.addEventListener('toggle-splash-screen', (event: any) => {
+      if (event.detail) {
+        if (event.detail.theme) {
+          this.splashTheme = event.detail.theme;
+        }
+        if (event.detail.show) {
+          this.splashVisible = true;
+          this.toastService.show('Splash Screen', 'Press Ctrl+Alt+S, Esc, or click anywhere to close', 3000);
+        } else {
+          this.toggleSplashScreen();
+        }
+      }
+    });
+
     if (this.accounts.token === "") {
       const token = localStorage.getItem("cupcakeToken")
       console.log(localStorage)
