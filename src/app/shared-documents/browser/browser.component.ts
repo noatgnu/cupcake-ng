@@ -458,9 +458,31 @@ export class BrowserComponent implements OnInit, OnDestroy {
 
   // Get owner display name
   getOwnerDisplayName(item: SharedDocument | SharedFolder): string {
+    // Check for folder owner property first
     if ('owner' in item && item.owner) {
-      return item.owner.username;
+      const owner = item.owner;
+      if ('first_name' in owner && owner.first_name && owner.last_name) {
+        return `${owner.first_name} ${owner.last_name}`.trim();
+      }
+      return owner.username;
     }
+    
+    // Check for document user property
+    if ('user' in item && item.user) {
+      return item.user.username;
+    }
+    
+    // For shared documents, check the shared_by in permissions
+    if ('document_permissions' in item && item.document_permissions?.length > 0) {
+      const sharedBy = item.document_permissions[0].shared_by;
+      if (sharedBy) {
+        if (sharedBy.first_name && sharedBy.last_name) {
+          return `${sharedBy.first_name} ${sharedBy.last_name}`.trim();
+        }
+        return sharedBy.username;
+      }
+    }
+    
     return 'Unknown';
   }
 
