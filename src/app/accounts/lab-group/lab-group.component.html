@@ -92,6 +92,9 @@
                               <button class="btn btn-sm btn-outline-info" (click)="openAddRemoveUserFromGroupModel(l)" ngbTooltip="Manage users">
                                 <i class="bi bi-people"></i>
                               </button>
+                              <button class="btn btn-sm btn-outline-success" (click)="openManageManagersModal(l)" ngbTooltip="Manage managers">
+                                <i class="bi bi-person-gear"></i>
+                              </button>
                               @if (accountsService.is_staff) {
                                 <button class="btn btn-sm btn-outline-warning" (click)="createLabGroupUser(l)" ngbTooltip="Create new user">
                                   <i class="bi bi-person-plus"></i>

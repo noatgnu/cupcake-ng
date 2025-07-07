@@ -9,6 +9,14 @@ export interface LabGroup {
   default_storage: StorageObject|null;
   is_professional: boolean;
   service_storage: StorageObject|null;
+  managers?: LabGroupManager[];
+}
+
+export interface LabGroupManager {
+  id: number;
+  username: string;
+  first_name: string;
+  last_name: string;
 }
 
 export interface LabGroupQuery {

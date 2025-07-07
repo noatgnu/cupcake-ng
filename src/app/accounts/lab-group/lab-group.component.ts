@@ -9,6 +9,7 @@ import {EditLabGroupModalComponent} from "./edit-lab-group-modal/edit-lab-group-
 import {
   AddRemoveUserFromGroupModalComponent
 } from "./add-remove-user-from-group-modal/add-remove-user-from-group-modal.component";
+import { ManageManagersModalComponent } from "./manage-managers-modal/manage-managers-modal.component";
 import {FormBuilder, ReactiveFormsModule} from "@angular/forms";
 import {LabUserCreationModalComponent} from "../lab-user-creation-modal/lab-user-creation-modal.component";
 import {ToastService} from "../../toast.service";
@@ -71,10 +72,11 @@ export class LabGroupComponent implements OnInit {
     // Load current user information including managed lab groups
     this.accountsService.getCurrentUser().subscribe({
       next: (user) => {
-        this.currentUser = user
+        this.currentUser = user;
+        this.accountsService.setCurrentUserId(user.id);
       },
       error: (error) => {
-        console.error('Error loading current user:', error)
+        console.error('Error loading current user:', error);
       }
     })
   }
@@ -134,6 +136,20 @@ export class LabGroupComponent implements OnInit {
     ref.componentInstance.labGroup = labGroup
     ref.componentInstance.readOnlyPermission = readOnly
 
+  }
+
+  openManageManagersModal(labGroup: LabGroup) {
+    const ref = this.modal.open(ManageManagersModalComponent, {
+      size: 'xl',
+      backdrop: 'static'
+    });
+    ref.componentInstance.labGroup = labGroup;
+    ref.closed.subscribe(() => {
+      // Refresh the lab groups list to show updated manager information
+      this.web.getLabGroups().subscribe((data) => {
+        this.labGroupQuery = data;
+      });
+    });
   }
 
   createLabGroupUser(lab_group: LabGroup) {

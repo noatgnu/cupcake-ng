@@ -468,7 +468,7 @@ export class BrowserComponent implements OnInit, OnDestroy {
     }
     
     // Check for document user property
-    if ('user' in item && item.user) {
+    if ('user' in item && item.user && item.user.username) {
       return item.user.username;
     }
     

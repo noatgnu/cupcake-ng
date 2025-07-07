@@ -61,6 +61,10 @@ export interface SharedDocument {
   instrument_usage: any[];
   metadata_columns: any[];
   fixed: boolean;
+  user: {
+    id: number;
+    username: string;
+  } | null;
   owner: {
     id: number;
     username: string;

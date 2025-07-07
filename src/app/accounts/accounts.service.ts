@@ -15,6 +15,7 @@ export class AccountsService {
   lastVisited: Date = new Date()
   triggerLoginSubject: Subject<boolean> = new Subject<boolean>()
   is_staff: boolean = false
+  private currentUserId: number | null = null
 
 
   constructor(private http: HttpClient) { }
@@ -60,6 +61,14 @@ export class AccountsService {
 
   getCurrentUser(): Observable<User> {
     return this.http.get<User>(`${this.baseURL}/api/user/current/`)
+  }
+
+  getCurrentUserId(): number | null {
+    return this.currentUserId;
+  }
+
+  setCurrentUserId(userId: number) {
+    this.currentUserId = userId;
   }
 
   updateCurrentUser(data: any): Observable<User> {

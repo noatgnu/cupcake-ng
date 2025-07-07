@@ -1,0 +1,35 @@
+.modal-body {
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.card {
+  border: 1px solid rgba(0, 0, 0, 0.125);
+}
+
+.badge {
+  font-size: 0.75em;
+}
+
+.table th {
+  border-bottom: 2px solid var(--bs-border-color);
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.table td {
+  vertical-align: middle;
+}
+
+.btn-sm {
+  font-size: 0.75rem;
+}
+
+.text-success {
+  color: var(--bs-success) !important;
+}
+
+.bg-success {
+  background-color: var(--bs-success) !important;
+}
+

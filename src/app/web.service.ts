@@ -1615,6 +1615,29 @@ export class WebService {
     )
   }
 
+  addLabGroupManager(lab_group_id: number, manager_id: number) {
+    return this.http.post<LabGroup>(
+      `${this.baseURL}/api/lab_groups/${lab_group_id}/add_manager/`,
+      {user: manager_id},
+      {responseType: 'json', observe: 'body'}
+    )
+  }
+
+  removeLabGroupManager(lab_group_id: number, manager_id: number) {
+    return this.http.post<LabGroup>(
+      `${this.baseURL}/api/lab_groups/${lab_group_id}/remove_manager/`,
+      {user: manager_id},
+      {responseType: 'json', observe: 'body'}
+    )
+  }
+
+  getLabGroupManagers(lab_group_id: number) {
+    return this.http.get<any[]>(
+      `${this.baseURL}/api/lab_groups/${lab_group_id}/get_managers/`,
+      {responseType: 'json', observe: 'body'}
+    )
+  }
+
   getSpecies(url?: string, limit: number = 10, offset: number = 0, search?: string, search_type: string = "startswith", official_name: string|null|undefined = null, taxon_id: string|null|undefined = null) {
     if (url) {
       return this.http.get<SpeciesQuery>(url, {responseType: 'json', observe: 'body'})
