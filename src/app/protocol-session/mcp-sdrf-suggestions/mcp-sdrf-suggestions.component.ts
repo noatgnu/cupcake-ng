@@ -13,7 +13,7 @@ interface DisplaySuggestion extends SDRFSuggestion {
 @Component({
   selector: 'app-mcp-sdrf-suggestions',
   standalone: true,
-  imports: [CommonModule, FormsModule, NgbTooltip, NgbNav, NgbNavContent, NgbNavItem, NgbNavItemRole, NgbNavLink, NgbNavLinkBase, NgbNavOutlet],
+  imports: [CommonModule, FormsModule, NgbTooltip, NgbNav, NgbNavContent, NgbNavItem, NgbNavLink, NgbNavLinkBase, NgbNavOutlet],
   templateUrl: './mcp-sdrf-suggestions.component.html',
   styleUrls: ['./mcp-sdrf-suggestions.component.scss']
 })
@@ -97,9 +97,9 @@ export class McpSdrfSuggestionsComponent implements OnInit, OnDestroy {
   }
 
   getAiValidCount(): number {
-    return this.aiResults.flatSuggestions.filter(s => 
-      s.ontology_type && 
-      s.ontology_name && 
+    return this.aiResults.flatSuggestions.filter(s =>
+      s.ontology_type &&
+      s.ontology_name &&
       s.confidence >= 0.5
     ).length;
   }
@@ -124,7 +124,7 @@ export class McpSdrfSuggestionsComponent implements OnInit, OnDestroy {
 
   formatKeyValue(keyValueFormat: any): { key: string; value: string }[] {
     if (!keyValueFormat) return [];
-    
+
     return Object.entries(keyValueFormat).map(([key, value]) => ({
       key,
       value: String(value)
@@ -147,14 +147,14 @@ export class McpSdrfSuggestionsComponent implements OnInit, OnDestroy {
     if (!this.step || this.isAnalyzing) return;
 
     this.isAnalyzing = true;
-    
+
     // Determine which analyzer type to use based on active tab
     const analyzerType = this.activeTabId === 'standard' ? 'standard_nlp' : 'mcp_claude';
     this.selectedAnalyzerType = analyzerType as 'standard_nlp' | 'mcp_claude';
-    
+
     // Get current results object
     const currentResults = this.activeTabId === 'standard' ? this.standardResults : this.aiResults;
-    
+
     // Clear current results
     currentResults.error = null;
     currentResults.suggestions = {};
@@ -197,15 +197,15 @@ export class McpSdrfSuggestionsComponent implements OnInit, OnDestroy {
 
   private handleAsyncTask(response: any, currentResults: any) {
     console.log('Starting async task:', response.task_id);
-    
+
     // Connect to WebSocket for progress updates
     this.mcpSdrfService.connectAnalysisWebSocket();
-    
+
     // Subscribe to task updates for this specific task
     this.mcpSdrfService.getTaskUpdatesForTask(response.task_id).subscribe({
       next: (update: any) => {
         console.log('Task update:', update);
-        
+
         if (update.status === 'completed') {
           // Task completed successfully
           if (update.data && update.data.result) {
@@ -330,7 +330,7 @@ export class McpSdrfSuggestionsComponent implements OnInit, OnDestroy {
             high_confidence_suggestions: this.getHighConfidenceSuggestions()
           }
         };
-        
+
         this.metadataCreated.emit(enrichedMetadata);
       },
       error: (error) => {
@@ -356,9 +356,9 @@ export class McpSdrfSuggestionsComponent implements OnInit, OnDestroy {
       size: 'lg',
       backdrop: 'static'
     });
-    
+
     modalRef.componentInstance.suggestion = suggestion;
-    
+
     modalRef.result.then((result) => {
       if (result && result.length > 0) {
         // Create metadata columns from the modification parameters
@@ -467,7 +467,7 @@ export class McpSdrfSuggestionsComponent implements OnInit, OnDestroy {
           ...metadata,
           bulk_acceptance_summary: bulkAcceptanceSummary
         };
-        
+
         this.metadataCreated.emit(enrichedMetadata);
       },
       error: (error) => {
@@ -572,7 +572,7 @@ export class McpSdrfSuggestionsComponent implements OnInit, OnDestroy {
 
   removeSuggestionFromList(suggestion: DisplaySuggestion) {
     const currentResults = this.activeTabId === 'standard' ? this.standardResults : this.aiResults;
-    
+
     // Find and remove the suggestion from the grouped suggestions
     for (const [columnType, columnSuggestions] of Object.entries(currentResults.suggestions)) {
       const index = columnSuggestions.findIndex(s =>
@@ -609,7 +609,7 @@ export class McpSdrfSuggestionsComponent implements OnInit, OnDestroy {
   }
 
   isEnhancedOntology(suggestion: DisplaySuggestion): boolean {
-    return suggestion.ontology_source === 'enhanced' || 
+    return suggestion.ontology_source === 'enhanced' ||
            ['mondo_disease', 'uberon_anatomy', 'ncbi_taxonomy', 'chebi_compound', 'psims_ontology', 'cell_type'].includes(suggestion.ontology_type);
   }
 
@@ -621,7 +621,7 @@ export class McpSdrfSuggestionsComponent implements OnInit, OnDestroy {
   }
 
   hasClaudeAnalysis(): boolean {
-    return this.analysisResult?.analyzer_type === 'mcp_claude' && 
+    return this.analysisResult?.analyzer_type === 'mcp_claude' &&
            this.analysisResult?.claude_analysis !== undefined;
   }
 
@@ -647,7 +647,7 @@ export class McpSdrfSuggestionsComponent implements OnInit, OnDestroy {
 
   getCacheInfo(result: MCPAnalysisResponse | null): string {
     if (!result?.cached) return '';
-    
+
     const cacheDate = result.cache_updated_at || result.cache_created_at;
     if (cacheDate) {
       const date = new Date(cacheDate);
@@ -664,7 +664,7 @@ export class McpSdrfSuggestionsComponent implements OnInit, OnDestroy {
   getOntologyDatabasesUsed(): string[] {
     const ontologyTypes = new Set(this.flatSuggestions.map(s => s.ontology_type));
     const databases: string[] = [];
-    
+
     if (ontologyTypes.has('organism') || ontologyTypes.has('ncbi_taxonomy')) databases.push('NCBI Taxonomy');
     if (ontologyTypes.has('disease') || ontologyTypes.has('mondo_disease')) databases.push('MONDO');
     if (ontologyTypes.has('organism part') || ontologyTypes.has('uberon_anatomy')) databases.push('UBERON');
@@ -673,14 +673,14 @@ export class McpSdrfSuggestionsComponent implements OnInit, OnDestroy {
     if (ontologyTypes.has('subcellular localization')) databases.push('GO Cellular Component');
     if (ontologyTypes.has('instrument') || ontologyTypes.has('psims_ontology')) databases.push('PSI-MS');
     if (ontologyTypes.has('chebi_compound')) databases.push('ChEBI');
-    
+
     return databases.length > 0 ? databases : ['None detected'];
   }
 
   getValidSdrfSuggestions(): number {
-    return this.flatSuggestions.filter(s => 
-      s.ontology_type && 
-      s.ontology_name && 
+    return this.flatSuggestions.filter(s =>
+      s.ontology_type &&
+      s.ontology_name &&
       s.confidence >= 0.5
     ).length;
   }
@@ -689,15 +689,15 @@ export class McpSdrfSuggestionsComponent implements OnInit, OnDestroy {
     let tooltip = `${this.getOntologyDisplayName(suggestion.ontology_type)}\n`;
     tooltip += `Confidence: ${(suggestion.confidence * 100).toFixed(1)}%\n`;
     tooltip += `Match: ${suggestion.match_type || 'unknown'}\n`;
-    
+
     if (suggestion.definition) {
       tooltip += `Definition: ${suggestion.definition}\n`;
     }
-    
+
     if (suggestion.synonyms) {
       tooltip += `Synonyms: ${suggestion.synonyms}\n`;
     }
-    
+
     // Add UniMod-specific information to tooltip
     if (this.isUniModSuggestion(suggestion)) {
       tooltip += `\n--- UniMod Details ---\n`;
@@ -707,13 +707,13 @@ export class McpSdrfSuggestionsComponent implements OnInit, OnDestroy {
       if (suggestion.position) tooltip += `Position: ${suggestion.position}\n`;
       if (suggestion.chemical_formula) tooltip += `Formula: ${suggestion.chemical_formula}\n`;
     }
-    
+
     if (this.isEnhancedOntology(suggestion)) {
       tooltip += 'Enhanced Ontology';
     } else {
       tooltip += 'Legacy Ontology';
     }
-    
+
     return tooltip;
   }
 
@@ -721,7 +721,7 @@ export class McpSdrfSuggestionsComponent implements OnInit, OnDestroy {
    * Check if suggestion is a UniMod modification
    */
   isUniModSuggestion(suggestion: DisplaySuggestion): boolean {
-    return suggestion.ontology_type === 'modification parameters' || 
+    return suggestion.ontology_type === 'modification parameters' ||
            suggestion.sdrf_column === 'modification parameters' ||
            (suggestion.key_value_format && (suggestion.target_aa || suggestion.monoisotopic_mass));
   }

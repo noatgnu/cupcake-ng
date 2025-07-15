@@ -1,8 +1,10 @@
-import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable, BehaviorSubject, Subject } from 'rxjs';
+import { Injectable, OnDestroy } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable, BehaviorSubject, Subject, Subscription, takeUntil } from 'rxjs';
 import { filter } from 'rxjs/operators';
+import { WebSocketSubject } from 'rxjs/internal/observable/dom/WebSocketSubject';
 import { environment } from '../environments/environment';
+import { AccountsService } from './accounts/accounts.service';
 
 export interface MCPAnalysisRequest {
   step_id: number;
@@ -124,24 +126,52 @@ export interface SDRFSuggestion {
 @Injectable({
   providedIn: 'root'
 })
-export class McpSdrfService {
+export class McpSdrfService implements OnDestroy {
   private baseURL = environment.baseURL;
-  
+  private wsBaseURL = environment.baseURL.replace('http', 'ws');
+
   // Observable for real-time analysis updates
   private analysisUpdates = new BehaviorSubject<any>(null);
   public analysisUpdates$ = this.analysisUpdates.asObservable();
 
-  // WebSocket connections for different task types
-  private analysisWebSocket: WebSocket | null = null;
-  private metadataWebSocket: WebSocket | null = null;
-  private validationWebSocket: WebSocket | null = null;
-  private exportWebSocket: WebSocket | null = null;
+  // WebSocketSubject connections for different task types
+  private analysisWSConnection?: WebSocketSubject<any>;
+  private metadataWSConnection?: WebSocketSubject<any>;
+  private validationWSConnection?: WebSocketSubject<any>;
+  private exportWSConnection?: WebSocketSubject<any>;
+
+  // Connection status tracking
+  private analysisConnected = false;
+  private metadataConnected = false;
+  private validationConnected = false;
+  private exportConnected = false;
+
+  // Intentional disconnect flags
+  private analysisIntentionalDisconnect = false;
+  private metadataIntentionalDisconnect = false;
+  private validationIntentionalDisconnect = false;
+  private exportIntentionalDisconnect = false;
 
   // Subject for task updates
   private taskUpdates = new Subject<MCPTaskUpdate>();
   public taskUpdates$ = this.taskUpdates.asObservable();
 
-  constructor(private http: HttpClient) {}
+  // Memory management
+  private destroy$ = new Subject<void>();
+  private subscriptions: Subscription[] = [];
+  private maxRetries = 5;
+
+  constructor(
+    private http: HttpClient,
+    private accounts: AccountsService
+  ) {}
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+    this.subscriptions.forEach(sub => sub.unsubscribe());
+    this.disconnectAllWebSockets();
+  }
 
   /**
    * Analyze a protocol step using MCP SDRF analysis
@@ -161,7 +191,7 @@ export class McpSdrfService {
     if (jobId) {
       params.job_id = jobId;
     }
-    
+
     return this.http.get(`${this.baseURL}/api/mcp/task-status/`, { params });
   }
 
@@ -184,7 +214,7 @@ export class McpSdrfService {
       ontology_types,
       min_confidence: min_confidence || 0.5
     };
-    
+
     return this.http.post(
       `${this.baseURL}/api/mcp/match-terms/`,
       request
@@ -222,7 +252,7 @@ export class McpSdrfService {
         request.anthropic_api_key = anthropic_api_key;
       }
     }
-    
+
     return this.http.post(
       `${this.baseURL}/api/mcp/analyze-protocol/`,
       request
@@ -240,7 +270,7 @@ export class McpSdrfService {
   ): Observable<any> {
     // Format the suggestions into a readable annotation
     const annotationText = this.formatSuggestionsAsText(suggestions, analyzer_type);
-    
+
     // Use the existing annotation service method
     const form = new FormData();
     form.append('annotation', annotationText);
@@ -251,7 +281,7 @@ export class McpSdrfService {
     }
     // Add metadata to indicate this is an MCP-generated annotation
     form.append('annotation_name', `SDRF Analysis (${analyzer_type})`);
-    
+
     return this.http.post(
       `${this.baseURL}/api/annotation/`,
       form,
@@ -276,8 +306,7 @@ export class McpSdrfService {
     const highConfidence = allSuggestions.filter(s => s.confidence >= 0.8).length;
     const mediumConfidence = allSuggestions.filter(s => s.confidence >= 0.6 && s.confidence < 0.8).length;
     const lowConfidence = allSuggestions.filter(s => s.confidence < 0.6).length;
-    const enhancedSuggestions = allSuggestions.filter(s => s.ontology_source === 'enhanced').length;
-    
+
     // Add summary section
     text += `### 📊 Acceptance Summary\n`;
     text += `- **Total Accepted:** ${totalSuggestions} suggestion${totalSuggestions !== 1 ? 's' : ''}\n`;
@@ -289,7 +318,7 @@ export class McpSdrfService {
 
     // Group suggestions by SDRF column type
     const columnTypes = Object.keys(suggestions);
-    
+
     if (columnTypes.length === 0) {
       text += "No SDRF suggestions found for this protocol step.\n";
       return text;
@@ -301,7 +330,7 @@ export class McpSdrfService {
       const ontologyType = suggestion.ontology_type;
       ontologyBreakdown[ontologyType] = (ontologyBreakdown[ontologyType] || 0) + 1;
     });
-    
+
     text += `### 🔬 Ontology Breakdown\n`;
     Object.entries(ontologyBreakdown).forEach(([ontology, count]) => {
       text += `- **${ontology}:** ${count} suggestion${count !== 1 ? 's' : ''}\n`;
@@ -310,48 +339,47 @@ export class McpSdrfService {
 
     // Detailed suggestions
     text += `### 📋 Detailed Accepted Suggestions\n\n`;
-    
+
     for (const columnType of columnTypes) {
       const columnSuggestions = suggestions[columnType];
       if (columnSuggestions.length === 0) continue;
 
       text += `#### ${columnType.toUpperCase()}\n`;
-      
+
       for (const suggestion of columnSuggestions) {
         text += `- **${suggestion.ontology_name}**\n`;
         text += `  - **Extracted Term:** "${suggestion.extracted_term}"\n`;
         text += `  - **Ontology:** ${suggestion.ontology_type}\n`;
         text += `  - **Accession:** ${suggestion.accession}\n`;
         text += `  - **Confidence Score:** ${(suggestion.confidence * 100).toFixed(1)}%\n`;
-        
+
         if (suggestion.match_type) {
           text += `  - **Match Type:** ${suggestion.match_type}\n`;
         }
-        
-        
+
         // Add key-value format for modification parameters
         if (suggestion.key_value_format) {
           text += `  - **SDRF Format:** `;
           const kvPairs = Object.entries(suggestion.key_value_format).map(([k, v]) => `${k}=${v}`);
           text += kvPairs.join('; ') + '\n';
         }
-        
+
         if (suggestion.definition) {
           text += `  - **Definition:** ${suggestion.definition}\n`;
         }
-        
+
         if (suggestion.reasoning || suggestion.claude_reasoning) {
           text += `  - **Reasoning:** ${suggestion.reasoning || suggestion.claude_reasoning}\n`;
         }
-        
+
         if (suggestion.biological_context) {
           text += `  - **Biological Context:** ${suggestion.biological_context}\n`;
         }
-        
+
         if (suggestion.synonyms) {
           text += `  - **Synonyms:** ${suggestion.synonyms}\n`;
         }
-        
+
         text += '\n';
       }
     }
@@ -360,7 +388,7 @@ export class McpSdrfService {
     text += `*This annotation represents accepted SDRF suggestions from the MCP analysis system.*\n`;
     text += `*Analyzer: ${analyzer_type}*\n`;
     text += `*${totalSuggestions} suggestion${totalSuggestions !== 1 ? 's' : ''} accepted*\n`;
-    
+
     return text;
   }
 
@@ -379,35 +407,327 @@ export class McpSdrfService {
   }
 
   /**
-   * Create WebSocket connection for real-time analysis
+   * Connect to MCP analysis WebSocket for real-time updates
    */
-  connectWebSocket(): WebSocket | null {
-    if (typeof WebSocket === 'undefined') {
-      console.warn('WebSocket not supported in this environment');
-      return null;
+  connectAnalysisWebSocket(): void {
+    this.analysisIntentionalDisconnect = false;
+
+    console.log('Connecting to MCP analysis websocket');
+    const url = `${this.wsBaseURL}/ws/mcp/analysis/?token=${this.accounts.token}`;
+    console.log(url);
+
+    this.analysisWSConnection = new WebSocketSubject({
+      url,
+      openObserver: {
+        next: () => {
+          console.log('Connected to MCP analysis websocket');
+          this.analysisConnected = true;
+        }
+      },
+      closeObserver: {
+        next: () => {
+          console.log('Closed connection to MCP analysis websocket');
+          this.analysisConnected = false;
+          if (!this.analysisIntentionalDisconnect) {
+            this.reconnectAnalysisWS();
+          }
+        }
+      }
+    });
+
+    const sub = this.analysisWSConnection
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (data) => {
+          if (data.type === 'analysis_update') {
+            this.taskUpdates.next(data.data);
+            this.updateAnalysisStatus(data.data);
+          }
+        },
+        error: (err) => {
+          console.error('MCP Analysis WS error:', err);
+          if (!this.analysisIntentionalDisconnect) {
+            this.reconnectAnalysisWS();
+          }
+        }
+      });
+
+    this.subscriptions.push(sub);
+  }
+
+  private reconnectAnalysisWS(retryCount = 0): void {
+    if (this.analysisIntentionalDisconnect || retryCount >= this.maxRetries) return;
+
+    const delay = Math.min(1000 * Math.pow(2, retryCount), 30000);
+    console.log(`Attempting to reconnect MCP Analysis WS in ${delay}ms (attempt ${retryCount + 1})`);
+
+    setTimeout(() => {
+      if (!this.analysisIntentionalDisconnect) {
+        this.connectAnalysisWebSocket();
+      }
+    }, delay);
+  }
+
+  private closeAnalysisWS(): void {
+    this.analysisIntentionalDisconnect = true;
+    if (this.analysisWSConnection) {
+      this.analysisWSConnection.complete();
+      this.analysisWSConnection = undefined;
     }
+  }
 
-    const wsUrl = `${environment.baseURL.replace('http', 'ws')}/ws/mcp/analysis/`;
-    const ws = new WebSocket(wsUrl);
+  /**
+   * Connect to MCP metadata WebSocket for real-time updates
+   */
+  connectMetadataWebSocket(): void {
+    this.metadataIntentionalDisconnect = false;
 
-    ws.onopen = () => {
-      console.log('MCP WebSocket connected');
-    };
+    console.log('Connecting to MCP metadata websocket');
+    const url = `${this.wsBaseURL}/ws/mcp/metadata/?token=${this.accounts.token}`;
+    console.log(url);
 
-    ws.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      this.updateAnalysisStatus(data);
-    };
+    this.metadataWSConnection = new WebSocketSubject({
+      url,
+      openObserver: {
+        next: () => {
+          console.log('Connected to MCP metadata websocket');
+          this.metadataConnected = true;
+        }
+      },
+      closeObserver: {
+        next: () => {
+          console.log('Closed connection to MCP metadata websocket');
+          this.metadataConnected = false;
+          if (!this.metadataIntentionalDisconnect) {
+            this.reconnectMetadataWS();
+          }
+        }
+      }
+    });
 
-    ws.onerror = (error) => {
-      console.error('MCP WebSocket error:', error);
-    };
+    const sub = this.metadataWSConnection
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (data) => {
+          if (data.type === 'metadata_update') {
+            this.taskUpdates.next(data.data);
+          }
+        },
+        error: (err) => {
+          console.error('MCP Metadata WS error:', err);
+          if (!this.metadataIntentionalDisconnect) {
+            this.reconnectMetadataWS();
+          }
+        }
+      });
 
-    ws.onclose = () => {
-      console.log('MCP WebSocket disconnected');
-    };
+    this.subscriptions.push(sub);
+  }
 
-    return ws;
+  private reconnectMetadataWS(retryCount = 0): void {
+    if (this.metadataIntentionalDisconnect || retryCount >= this.maxRetries) return;
+
+    const delay = Math.min(1000 * Math.pow(2, retryCount), 30000);
+    console.log(`Attempting to reconnect MCP Metadata WS in ${delay}ms (attempt ${retryCount + 1})`);
+
+    setTimeout(() => {
+      if (!this.metadataIntentionalDisconnect) {
+        this.connectMetadataWebSocket();
+      }
+    }, delay);
+  }
+
+  private closeMetadataWS(): void {
+    this.metadataIntentionalDisconnect = true;
+    if (this.metadataWSConnection) {
+      this.metadataWSConnection.complete();
+      this.metadataWSConnection = undefined;
+    }
+  }
+
+  /**
+   * Connect to MCP validation WebSocket for real-time updates
+   */
+  connectValidationWebSocket(): void {
+    this.validationIntentionalDisconnect = false;
+
+    console.log('Connecting to MCP validation websocket');
+    const url = `${this.wsBaseURL}/ws/mcp/validation/?token=${this.accounts.token}`;
+    console.log(url);
+
+    this.validationWSConnection = new WebSocketSubject({
+      url,
+      openObserver: {
+        next: () => {
+          console.log('Connected to MCP validation websocket');
+          this.validationConnected = true;
+        }
+      },
+      closeObserver: {
+        next: () => {
+          console.log('Closed connection to MCP validation websocket');
+          this.validationConnected = false;
+          if (!this.validationIntentionalDisconnect) {
+            this.reconnectValidationWS();
+          }
+        }
+      }
+    });
+
+    const sub = this.validationWSConnection
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (data) => {
+          if (data.type === 'validation_update') {
+            this.taskUpdates.next(data.data);
+          }
+        },
+        error: (err) => {
+          console.error('MCP Validation WS error:', err);
+          if (!this.validationIntentionalDisconnect) {
+            this.reconnectValidationWS();
+          }
+        }
+      });
+
+    this.subscriptions.push(sub);
+  }
+
+  private reconnectValidationWS(retryCount = 0): void {
+    if (this.validationIntentionalDisconnect || retryCount >= this.maxRetries) return;
+
+    const delay = Math.min(1000 * Math.pow(2, retryCount), 30000);
+    console.log(`Attempting to reconnect MCP Validation WS in ${delay}ms (attempt ${retryCount + 1})`);
+
+    setTimeout(() => {
+      if (!this.validationIntentionalDisconnect) {
+        this.connectValidationWebSocket();
+      }
+    }, delay);
+  }
+
+  private closeValidationWS(): void {
+    this.validationIntentionalDisconnect = true;
+    if (this.validationWSConnection) {
+      this.validationWSConnection.complete();
+      this.validationWSConnection = undefined;
+    }
+  }
+
+  /**
+   * Connect to MCP export WebSocket for real-time updates
+   */
+  connectExportWebSocket(): void {
+    this.exportIntentionalDisconnect = false;
+
+    console.log('Connecting to MCP export websocket');
+    const url = `${this.wsBaseURL}/ws/mcp/export/?token=${this.accounts.token}`;
+    console.log(url);
+
+    this.exportWSConnection = new WebSocketSubject({
+      url,
+      openObserver: {
+        next: () => {
+          console.log('Connected to MCP export websocket');
+          this.exportConnected = true;
+        }
+      },
+      closeObserver: {
+        next: () => {
+          console.log('Closed connection to MCP export websocket');
+          this.exportConnected = false;
+          if (!this.exportIntentionalDisconnect) {
+            this.reconnectExportWS();
+          }
+        }
+      }
+    });
+
+    const sub = this.exportWSConnection
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (data) => {
+          if (data.type === 'export_update') {
+            this.taskUpdates.next(data.data);
+          }
+        },
+        error: (err) => {
+          console.error('MCP Export WS error:', err);
+          if (!this.exportIntentionalDisconnect) {
+            this.reconnectExportWS();
+          }
+        }
+      });
+
+    this.subscriptions.push(sub);
+  }
+
+  private reconnectExportWS(retryCount = 0): void {
+    if (this.exportIntentionalDisconnect || retryCount >= this.maxRetries) return;
+
+    const delay = Math.min(1000 * Math.pow(2, retryCount), 30000);
+    console.log(`Attempting to reconnect MCP Export WS in ${delay}ms (attempt ${retryCount + 1})`);
+
+    setTimeout(() => {
+      if (!this.exportIntentionalDisconnect) {
+        this.connectExportWebSocket();
+      }
+    }, delay);
+  }
+
+  private closeExportWS(): void {
+    this.exportIntentionalDisconnect = true;
+    if (this.exportWSConnection) {
+      this.exportWSConnection.complete();
+      this.exportWSConnection = undefined;
+    }
+  }
+
+  /**
+   * Disconnect all WebSocket connections
+   */
+  disconnectAllWebSockets(): void {
+    this.closeAnalysisWS();
+    this.closeMetadataWS();
+    this.closeValidationWS();
+    this.closeExportWS();
+  }
+
+  /**
+   * Check if analysis WebSocket is connected
+   */
+  isAnalysisWebSocketConnected(): boolean {
+    return this.analysisConnected;
+  }
+
+  /**
+   * Check if metadata WebSocket is connected
+   */
+  isMetadataWebSocketConnected(): boolean {
+    return this.metadataConnected;
+  }
+
+  /**
+   * Check if validation WebSocket is connected
+   */
+  isValidationWebSocketConnected(): boolean {
+    return this.validationConnected;
+  }
+
+  /**
+   * Check if export WebSocket is connected
+   */
+  isExportWebSocketConnected(): boolean {
+    return this.exportConnected;
+  }
+
+  /**
+   * Filter task updates by task ID
+   */
+  getTaskUpdatesForTask(taskId: string): Observable<MCPTaskUpdate> {
+    return this.taskUpdates$.pipe(
+      filter((update: MCPTaskUpdate) => update.task_id === taskId)
+    );
   }
 
   /**
@@ -424,11 +744,10 @@ export class McpSdrfService {
   getSuggestedAnnotationName(suggestions: { [key: string]: SDRFSuggestion[] }, analyzer_type: string): string {
     const suggestionCount = Object.values(suggestions).reduce((total, arr) => total + arr.length, 0);
     const mainTypes = Object.keys(suggestions).slice(0, 2).join(', ');
-    
+
     // Count enhanced vs legacy ontologies
     const enhancedCount = Object.values(suggestions).flat().filter(s => s.ontology_source === 'enhanced').length;
-    const legacyCount = suggestionCount - enhancedCount;
-    
+
     if (suggestionCount === 0) {
       return `SDRF Analysis (${analyzer_type}) - No matches`;
     } else if (mainTypes) {
@@ -444,13 +763,13 @@ export class McpSdrfService {
    */
   normalizeSdrfSuggestions(suggestions: { [key: string]: any[] }): { [key: string]: SDRFSuggestion[] } {
     const normalized: { [key: string]: SDRFSuggestion[] } = {};
-    
+
     for (const [columnType, columnSuggestions] of Object.entries(suggestions)) {
       normalized[columnType] = columnSuggestions.map((suggestion, index) => {
         // Handle SDRF-specific format (like modification parameters)
         if (suggestion.key_value_format) {
           const keyValueFormat = suggestion.key_value_format;
-          
+
           // Create display name with amino acid and mass info for modifications
           let displayName = keyValueFormat.NT || 'Unknown';
           if (keyValueFormat.TA && keyValueFormat.MM) {
@@ -458,7 +777,7 @@ export class McpSdrfService {
           } else if (keyValueFormat.TA) {
             displayName += ` (${keyValueFormat.TA})`;
           }
-          
+
           return {
             ontology_type: columnType,  // Use exact SDRF column name
             ontology_id: keyValueFormat.AC || `${columnType}_${index}`,
@@ -478,7 +797,7 @@ export class McpSdrfService {
             unimod_specs: suggestion.unimod_specs
           };
         }
-        
+
         // Handle direct suggested_value format
         if (suggestion.suggested_value) {
           return {
@@ -494,7 +813,7 @@ export class McpSdrfService {
             ontology_source: 'enhanced' as 'enhanced'
           };
         }
-        
+
         // Handle standard ontology match format
         if (suggestion.ontology_name) {
           // Use the columnType (e.g., "modification parameters") as the ontology_type if not provided
@@ -506,7 +825,7 @@ export class McpSdrfService {
             ontology_source: this.isEnhancedOntologyType(mappedType) ? 'enhanced' as 'enhanced' : 'legacy' as 'legacy'
           };
         }
-        
+
         // Fallback for unknown formats
         return {
           ontology_type: columnType,  // Use exact SDRF column name
@@ -521,7 +840,7 @@ export class McpSdrfService {
         };
       });
     }
-    
+
     return normalized;
   }
 
@@ -539,15 +858,15 @@ export class McpSdrfService {
       'unimod': 'modification parameters',
       'ms_vocabularies': 'instrument',  // Default fallback
       'ms_mod': 'modification parameters',
-      
-      // Enhanced ontology types -> SDRF column names  
+
+      // Enhanced ontology types -> SDRF column names
       'mondo_disease': 'disease',
       'uberon_anatomy': 'organism part',
       'ncbi_taxonomy': 'organism',
       'chebi_compound': 'reduction reagent',  // Default fallback
       'psims_ontology': 'instrument'  // Default fallback
     };
-    
+
     return mapping[ontologyType] || ontologyType;
   }
 
@@ -559,7 +878,7 @@ export class McpSdrfService {
       // Enhanced ontology SDRF columns
       'disease',  // mondo_disease -> disease
       'organism part',  // uberon_anatomy -> organism part
-      'organism',  // ncbi_taxonomy -> organism  
+      'organism',  // ncbi_taxonomy -> organism
       'cell type',  // cell_type -> cell type
       'modification parameters',  // unimod -> modification parameters
       'cleavage agent details',  // for cleavage agents
@@ -635,7 +954,7 @@ export class McpSdrfService {
         color: 'text-info',
         description: 'Sample enrichment methods'
       },
-      
+
       // SDRF comment columns
       'instrument': {
         name: 'Instrument',
@@ -727,7 +1046,7 @@ export class McpSdrfService {
         color: 'text-info',
         description: 'Fragment mass tolerance'
       },
-      
+
       // Legacy ontology types (backward compatibility)
       'species': {
         name: 'Species (Legacy)',
@@ -773,167 +1092,5 @@ export class McpSdrfService {
       color: 'text-muted',
       description: 'Unknown ontology type'
     };
-  }
-
-  /**
-   * Connect to MCP analysis WebSocket for real-time updates
-   */
-  connectAnalysisWebSocket(): void {
-    if (this.analysisWebSocket) {
-      this.analysisWebSocket.close();
-    }
-
-    const wsUrl = `${environment.baseURL.replace('http', 'ws')}/ws/mcp/analysis/`;
-    this.analysisWebSocket = new WebSocket(wsUrl);
-
-    this.analysisWebSocket.onopen = () => {
-      console.log('MCP Analysis WebSocket connected');
-    };
-
-    this.analysisWebSocket.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      if (data.type === 'analysis_update') {
-        this.taskUpdates.next(data.data);
-      }
-    };
-
-    this.analysisWebSocket.onerror = (error) => {
-      console.error('MCP Analysis WebSocket error:', error);
-    };
-
-    this.analysisWebSocket.onclose = () => {
-      console.log('MCP Analysis WebSocket disconnected');
-    };
-  }
-
-  /**
-   * Connect to MCP metadata WebSocket for real-time updates
-   */
-  connectMetadataWebSocket(): void {
-    if (this.metadataWebSocket) {
-      this.metadataWebSocket.close();
-    }
-
-    const wsUrl = `${environment.baseURL.replace('http', 'ws')}/ws/mcp/metadata/`;
-    this.metadataWebSocket = new WebSocket(wsUrl);
-
-    this.metadataWebSocket.onopen = () => {
-      console.log('MCP Metadata WebSocket connected');
-    };
-
-    this.metadataWebSocket.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      if (data.type === 'metadata_update') {
-        this.taskUpdates.next(data.data);
-      }
-    };
-
-    this.metadataWebSocket.onerror = (error) => {
-      console.error('MCP Metadata WebSocket error:', error);
-    };
-
-    this.metadataWebSocket.onclose = () => {
-      console.log('MCP Metadata WebSocket disconnected');
-    };
-  }
-
-  /**
-   * Connect to MCP validation WebSocket for real-time updates
-   */
-  connectValidationWebSocket(): void {
-    if (this.validationWebSocket) {
-      this.validationWebSocket.close();
-    }
-
-    const wsUrl = `${environment.baseURL.replace('http', 'ws')}/ws/mcp/validation/`;
-    this.validationWebSocket = new WebSocket(wsUrl);
-
-    this.validationWebSocket.onopen = () => {
-      console.log('MCP Validation WebSocket connected');
-    };
-
-    this.validationWebSocket.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      if (data.type === 'validation_update') {
-        this.taskUpdates.next(data.data);
-      }
-    };
-
-    this.validationWebSocket.onerror = (error) => {
-      console.error('MCP Validation WebSocket error:', error);
-    };
-
-    this.validationWebSocket.onclose = () => {
-      console.log('MCP Validation WebSocket disconnected');
-    };
-  }
-
-  /**
-   * Connect to MCP export WebSocket for real-time updates
-   */
-  connectExportWebSocket(): void {
-    if (this.exportWebSocket) {
-      this.exportWebSocket.close();
-    }
-
-    const wsUrl = `${environment.baseURL.replace('http', 'ws')}/ws/mcp/export/`;
-    this.exportWebSocket = new WebSocket(wsUrl);
-
-    this.exportWebSocket.onopen = () => {
-      console.log('MCP Export WebSocket connected');
-    };
-
-    this.exportWebSocket.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      if (data.type === 'export_update') {
-        this.taskUpdates.next(data.data);
-      }
-    };
-
-    this.exportWebSocket.onerror = (error) => {
-      console.error('MCP Export WebSocket error:', error);
-    };
-
-    this.exportWebSocket.onclose = () => {
-      console.log('MCP Export WebSocket disconnected');
-    };
-  }
-
-  /**
-   * Disconnect all WebSocket connections
-   */
-  disconnectAllWebSockets(): void {
-    if (this.analysisWebSocket) {
-      this.analysisWebSocket.close();
-      this.analysisWebSocket = null;
-    }
-    if (this.metadataWebSocket) {
-      this.metadataWebSocket.close();
-      this.metadataWebSocket = null;
-    }
-    if (this.validationWebSocket) {
-      this.validationWebSocket.close();
-      this.validationWebSocket = null;
-    }
-    if (this.exportWebSocket) {
-      this.exportWebSocket.close();
-      this.exportWebSocket = null;
-    }
-  }
-
-  /**
-   * Check if analysis WebSocket is connected
-   */
-  isAnalysisWebSocketConnected(): boolean {
-    return this.analysisWebSocket?.readyState === WebSocket.OPEN;
-  }
-
-  /**
-   * Filter task updates by task ID
-   */
-  getTaskUpdatesForTask(taskId: string): Observable<MCPTaskUpdate> {
-    return this.taskUpdates$.pipe(
-      filter((update: MCPTaskUpdate) => update.task_id === taskId)
-    );
   }
 }
