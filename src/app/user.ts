@@ -136,7 +136,7 @@ export interface LabGroupInfo {
   id: number;
   name: string;
   member_count: number;
-  is_professional: boolean;
+  can_perform_ms_analysis: boolean;
 }
 
 export interface UserPreferences {

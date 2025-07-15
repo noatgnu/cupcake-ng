@@ -101,4 +101,16 @@ export class StepDescriptionEditorComponent implements AfterViewInit{
   hasScalableReagents(step: ProtocolStep): boolean {
     return step.reagents.some(r => r.scalable === true);
   }
+
+  onAnnotationCreated(annotation: any) {
+    console.log('MCP annotation created:', annotation);
+    // Emit event or handle annotation creation
+    // This could trigger a refresh of annotations in the parent component
+  }
+
+  onMetadataCreated(metadata: any) {
+    console.log('MCP metadata created:', metadata);
+    // Emit event or handle metadata creation
+    // This could trigger a refresh of metadata columns in the parent component
+  }
 }

@@ -208,16 +208,25 @@ export class MetadataService {
         const selectedData = this.optionsArray.find((option) => option.name === data)
         if (selectedData) {
           const mapData: any = {}
+          let deltaMonoMass = 0
           formDetails["metadataAC"] = selectedData.accession
+          
+          // First pass: get the main delta_mono_mass
           for (const a of selectedData.additional_data) {
             if (a["id"] === "delta_mono_mass") {
-              formDetails["metadataMM"] = parseFloat(a["description"])
+              deltaMonoMass = parseFloat(a["description"])
+              formDetails["metadataMM"] = deltaMonoMass
+              break
             }
+          }
+          
+          // Second pass: process specs with the main delta_mono_mass
+          for (const a of selectedData.additional_data) {
             if (a["id"].startsWith("spec_")) {
               const nameSplitted = a["id"].split("_")
               const name = `spec_${nameSplitted[1]}`
               if (!mapData[name]) {
-                mapData[name] = {name: name, target_site: ""}
+                mapData[name] = {name: name, target_site: "", mono_mass: deltaMonoMass}
               }
               if (a["id"].endsWith("position")) {
                 // check if position include Anywhere, N-term, C-term
@@ -228,12 +237,10 @@ export class MetadataService {
                 mapData[name]["aa"] = a["description"]
               } else if (a["id"].endsWith("classification")) {
                 mapData[name]["classification"] = a["description"].split(",")[0]
-              } else if (a["id"].endsWith("mono_mass")) {
-                const mm = parseFloat(a["description"].split(",")[0])
-                if (mm > 0) {
-                  mapData[name]["mono_mass"] = mm
-                }
               }
+              // Note: Removed mono_mass handling here since we use delta_mono_mass for all specs
+              // Ensure all specs use the main delta_mono_mass, not individual spec masses
+              mapData[name]["mono_mass"] = deltaMonoMass
             }
           }
           this.availableSpecs = Object.values(mapData)

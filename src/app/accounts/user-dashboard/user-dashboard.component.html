@@ -233,7 +233,7 @@
               <div class="flex-grow-1">
                 <h6 class="mb-1">{{ labGroup.name }}</h6>
                 <small class="text-muted">{{ labGroup.member_count }} members</small>
-                @if (labGroup.is_professional) {
+                @if (labGroup.can_perform_ms_analysis) {
                   <div class="mt-1">
                     <span class="badge bg-success">Professional</span>
                   </div>

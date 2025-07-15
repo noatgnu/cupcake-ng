@@ -1,0 +1,518 @@
+<div class="modal-header">
+  <h5 class="modal-title">
+    <i class="bi bi-lightbulb text-warning"></i>
+    SDRF Analysis Results
+  </h5>
+  <button type="button" class="btn-close" aria-label="Close" (click)="close()"></button>
+</div>
+
+<div class="modal-body">
+  <!-- Navigation Tabs -->
+  <nav ngbNav #nav="ngbNav" [(activeId)]="activeTabId" (navChange)="onTabChange($event)" class="nav-tabs mb-3">
+    
+    <!-- Standard Analysis Tab -->
+    <ng-container [ngbNavItem]="'standard'">
+      <a ngbNavLink>
+        <i class="bi bi-gear me-2"></i>
+        Standard Analysis
+      </a>
+      <ng-template ngbNavContent>
+        <div class="tab-content-wrapper">
+          <!-- Standard Analysis Control -->
+          <div class="analysis-control mb-3">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <h6 class="mb-1">
+                  <i class="bi bi-gear text-secondary"></i>
+                  Standard Ontology Matching
+                </h6>
+                <small class="text-muted">Uses regex patterns to match terms against ontology databases</small>
+              </div>
+              <button 
+                class="btn btn-secondary btn-sm"
+                (click)="analyzeStep()"
+                [disabled]="isAnalyzing || !step.step_description"
+                ngbTooltip="Analyze with standard ontology matching"
+              >
+                <i class="bi" 
+                   [class.bi-search]="!isAnalyzing"
+                   [class.bi-arrow-clockwise]="isAnalyzing"></i>
+              </button>
+            </div>
+
+            <!-- Standard Analysis Results Summary -->
+            @if (standardResults.analysisResult && !isAnalyzing) {
+              <div class="analysis-summary mt-2 p-2 rounded">
+                <div class="d-flex align-items-center justify-content-between">
+                  <div>
+                    <i class="bi bi-info-circle text-info me-1"></i>
+                    <small class="fw-semibold">
+                      {{ standardResults.flatSuggestions.length }} suggestion{{ standardResults.flatSuggestions.length !== 1 ? 's' : '' }} found
+                    </small>
+                  </div>
+                  <div class="d-flex gap-2">
+                    <span class="badge bg-success" [ngbTooltip]="getSummaryBadgeTooltip('high')">
+                      {{ getStandardHighConfidenceCount() }} high
+                    </span>
+                    @if (getStandardUniModCount() > 0) {
+                      <span class="badge bg-warning" [ngbTooltip]="getSummaryBadgeTooltip('unimod')">
+                        {{ getStandardUniModCount() }} UniMod
+                      </span>
+                    }
+                  </div>
+                </div>
+                <div class="mt-1">
+                  <small class="text-muted">
+                    {{ getAnalyzerDisplayName(standardResults.analysisResult?.analysis_metadata?.analyzer_type) }} analysis completed
+                    <i class="bi bi-gear text-secondary ms-1"></i>
+                    @if (isCachedResult(standardResults.analysisResult)) {
+                      <span class="badge bg-info ms-1" [title]="getCacheInfo(standardResults.analysisResult)">
+                        <i class="bi bi-lightning-fill"></i> Cached
+                      </span>
+                    }
+                  </small>
+                </div>
+              </div>
+            }
+          </div>
+
+          <!-- Standard Error Display -->
+          @if (standardResults.error) {
+            <div class="alert alert-danger alert-sm" role="alert">
+              <i class="bi bi-exclamation-triangle"></i>
+              {{ standardResults.error }}
+            </div>
+          }
+
+          <!-- Standard Suggestions Content -->
+          <ng-container *ngTemplateOutlet="suggestionsTemplate; context: { $implicit: standardResults }"></ng-container>
+
+          <!-- Standard No Results -->
+          @if (!isAnalyzing && standardResults.flatSuggestions.length === 0 && standardResults.analysisResult) {
+            <div class="no-suggestions text-center py-3">
+              <i class="bi bi-info-circle text-muted"></i>
+              <p class="text-muted mb-0">No SDRF suggestions found with standard analysis.</p>
+              <small class="text-muted">Try updating the step description or use AI Enhanced analysis.</small>
+            </div>
+          }
+
+          <!-- Standard Initial State -->
+          @if (!standardResults.analysisResult && !isAnalyzing) {
+            <div class="initial-state text-center py-3">
+              <i class="bi bi-gear text-muted"></i>
+              <p class="text-muted mb-0">Click the analyze button to get standard ontology-based SDRF suggestions.</p>
+              <small class="text-muted">Standard analysis uses regex patterns to match terms against ontology databases.</small>
+            </div>
+          }
+        </div>
+      </ng-template>
+    </ng-container>
+
+    <!-- AI Enhanced Analysis Tab -->
+    <ng-container [ngbNavItem]="'ai'">
+      <a ngbNavLink>
+        <i class="bi bi-robot me-2"></i>
+        AI Enhanced
+      </a>
+      <ng-template ngbNavContent>
+        <div class="tab-content-wrapper">
+          <!-- AI Analysis Control -->
+          <div class="analysis-control mb-3">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <h6 class="mb-1">
+                  <i class="bi bi-robot text-primary"></i>
+                  AI Enhanced Analysis
+                </h6>
+                <small class="text-muted">AI-powered SDRF metadata extraction with direct database access (MCP)</small>
+              </div>
+              <button 
+                class="btn btn-primary btn-sm"
+                (click)="analyzeStep()"
+                [disabled]="isAnalyzing || !step.step_description"
+                ngbTooltip="Analyze with AI enhanced processing"
+              >
+                <i class="bi" 
+                   [class.bi-robot]="!isAnalyzing"
+                   [class.bi-arrow-clockwise]="isAnalyzing"></i>
+              </button>
+            </div>
+
+            <!-- AI Analysis Results Summary -->
+            @if (aiResults.analysisResult && !isAnalyzing) {
+              <div class="analysis-summary mt-2 p-2 rounded">
+                <div class="d-flex align-items-center justify-content-between">
+                  <div>
+                    <i class="bi bi-info-circle text-info me-1"></i>
+                    <small class="fw-semibold">
+                      {{ aiResults.flatSuggestions.length }} suggestion{{ aiResults.flatSuggestions.length !== 1 ? 's' : '' }} found
+                    </small>
+                  </div>
+                  <div class="d-flex gap-2">
+                    <span class="badge bg-success" [ngbTooltip]="getSummaryBadgeTooltip('high')">
+                      {{ getAiHighConfidenceCount() }} high
+                    </span>
+                    @if (getAiUniModCount() > 0) {
+                      <span class="badge bg-warning" [ngbTooltip]="getSummaryBadgeTooltip('unimod')">
+                        {{ getAiUniModCount() }} UniMod
+                      </span>
+                    }
+                    @if (getAiEnhancedCount() > 0) {
+                      <span class="badge bg-info" [ngbTooltip]="getSummaryBadgeTooltip('enhanced')">
+                        {{ getAiEnhancedCount() }} enhanced
+                      </span>
+                    }
+                  </div>
+                </div>
+                <div class="mt-1">
+                  <small class="text-muted">
+                    {{ getAnalyzerDisplayName(aiResults.analysisResult?.analysis_metadata?.analyzer_type) }} analysis completed
+                    <i class="bi bi-robot text-primary ms-1"></i>
+                    @if (isCachedResult(aiResults.analysisResult)) {
+                      <span class="badge bg-info ms-1" [title]="getCacheInfo(aiResults.analysisResult)">
+                        <i class="bi bi-lightning-fill"></i> Cached
+                      </span>
+                    }
+                  </small>
+                </div>
+              </div>
+            }
+          </div>
+
+          <!-- AI Error Display -->
+          @if (aiResults.error) {
+            <div class="alert alert-danger alert-sm" role="alert">
+              <i class="bi bi-exclamation-triangle"></i>
+              {{ aiResults.error }}
+            </div>
+          }
+
+          <!-- AI Suggestions Content -->
+          <ng-container *ngTemplateOutlet="suggestionsTemplate; context: { $implicit: aiResults }"></ng-container>
+
+          <!-- SDRF Compliance Information for AI -->
+          @if (aiResults.analysisResult && !isAnalyzing) {
+            <div class="sdrf-compliance-info mt-3">
+              <div class="card">
+                <div class="card-header">
+                  <h6 class="mb-0">
+                    <i class="bi bi-shield-check text-success"></i>
+                    SDRF Compliance Analysis
+                  </h6>
+                </div>
+                <div class="card-body">
+                  <div class="mb-2">
+                    <strong>Analysis Focus:</strong>
+                    <span class="ms-1">Terms identified specifically from available ontology databases</span>
+                  </div>
+                  <div class="mb-2">
+                    <strong>Ontology Coverage:</strong>
+                    <span class="ms-1">{{ getOntologyDatabasesUsed().join(', ') }}</span>
+                  </div>
+                  @if (aiResults.flatSuggestions.length > 0) {
+                    <div class="mb-2">
+                      <strong>SDRF Compliance:</strong>
+                      <div class="d-flex align-items-center">
+                        <span class="badge bg-success me-2" [ngbTooltip]="getSummaryBadgeTooltip('valid')">
+                          {{ getAiValidCount() }} valid
+                        </span>
+                        <span class="text-muted">suggestions ready for SDRF annotation</span>
+                      </div>
+                    </div>
+                  }
+                  <small class="text-muted">
+                    <i class="bi bi-info-circle me-1"></i>
+                    AI analysis focused exclusively on SDRF-Proteomics specification compliance
+                  </small>
+                </div>
+              </div>
+            </div>
+          }
+
+          <!-- AI No Results -->
+          @if (!isAnalyzing && aiResults.flatSuggestions.length === 0 && aiResults.analysisResult) {
+            <div class="no-suggestions text-center py-3">
+              <i class="bi bi-info-circle text-muted"></i>
+              <p class="text-muted mb-0">No SDRF suggestions found with AI analysis.</p>
+              <small class="text-muted">Try analyzing again after updating the step description.</small>
+            </div>
+          }
+
+          <!-- AI Initial State -->
+          @if (!aiResults.analysisResult && !isAnalyzing) {
+            <div class="initial-state text-center py-3">
+              <i class="bi bi-robot text-muted"></i>
+              <p class="text-muted mb-0">Click the analyze button to get SDRF-compliant metadata suggestions.</p>
+              <small class="text-muted">AI analysis identifies specific terms from protocol text that exist in ontology databases (MONDO, UBERON, NCBI, ChEBI, PSI-MS, UniMod) for SDRF compliance.</small>
+            </div>
+          }
+        </div>
+      </ng-template>
+    </ng-container>
+  </nav>
+
+  <!-- Tab Content -->
+  <div [ngbNavOutlet]="nav"></div>
+
+  <!-- Loading State -->
+  @if (isAnalyzing) {
+    <div class="text-center py-3">
+      <div class="spinner-border spinner-border-sm text-primary" role="status">
+        <span class="visually-hidden">Analyzing...</span>
+      </div>
+      <small class="text-muted ms-2">Analyzing step for SDRF suggestions...</small>
+    </div>
+  }
+
+  <!-- Loading State for Annotation Creation -->
+  @if (isCreatingAnnotation) {
+    <div class="text-center py-3">
+      <div class="spinner-border spinner-border-sm text-primary" role="status">
+        <span class="visually-hidden">Creating annotation...</span>
+      </div>
+      <small class="text-muted ms-2">Creating annotation and metadata...</small>
+    </div>
+  }
+</div>
+
+<!-- Suggestions Template (Shared between tabs) -->
+<ng-template #suggestionsTemplate let-results>
+  @if (results.flatSuggestions.length > 0) {
+    <div class="suggestions-panel card">
+      <!-- Panel Header -->
+      <div class="card-header">
+        <div class="d-flex justify-content-between align-items-center">
+          <h6 class="mb-0">
+            <i class="bi bi-lightbulb text-warning"></i>
+            SDRF Suggestions ({{ results.flatSuggestions.length }})
+          </h6>
+          <div class="header-actions">
+            <button 
+              class="btn btn-success btn-sm me-2"
+              (click)="acceptAllSuggestions(); close()"
+              [disabled]="isCreatingAnnotation"
+              ngbTooltip="Accept all suggestions"
+            >
+              <i class="bi bi-check-all"></i>
+            </button>
+            <button 
+              class="btn btn-outline-secondary btn-sm me-2"
+              (click)="dismissAllSuggestions()"
+              ngbTooltip="Dismiss all suggestions"
+            >
+              <i class="bi bi-x"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Suggestions List -->
+      <div class="card-body" style="max-height: 400px; overflow-y: auto;">
+        @for (suggestion of results.flatSuggestions; track trackBySuggestion($index, suggestion)) {
+          <div class="suggestion-item card mb-2">
+            <div class="card-body p-3">
+            <div class="d-flex justify-content-between align-items-start">
+              <div class="suggestion-content flex-grow-1">
+                <!-- Ontology Info -->
+                <div class="ontology-info mb-2">
+                  <span class="badge me-2"
+                        [class]="getSuggestionColor(suggestion.ontology_type)"
+                        [ngbTooltip]="getOntologyDescription(suggestion.ontology_type)">
+                    <i [class]="getSuggestionIcon(suggestion.ontology_type)"></i>
+                    {{ getOntologyDisplayName(suggestion.ontology_type) }}
+                  </span>
+                  <span 
+                    class="confidence-badge badge"
+                    [class.bg-success]="suggestion.confidence >= 0.8"
+                    [class.bg-warning]="suggestion.confidence >= 0.6 && suggestion.confidence < 0.8"
+                    [class.bg-danger]="suggestion.confidence < 0.6"
+                    [ngbTooltip]="'Confidence score: ' + (suggestion.confidence * 100).toFixed(1) + '% - ' + 
+                                 (suggestion.confidence >= 0.8 ? 'High confidence match' : 
+                                  suggestion.confidence >= 0.6 ? 'Medium confidence match' : 'Low confidence match')"
+                  >
+                    {{ getConfidenceLabel(suggestion.confidence) }} ({{ (suggestion.confidence * 100).toFixed(0) }}%)
+                  </span>
+                </div>
+
+                <!-- Term Details -->
+                <div class="term-details mb-2">
+                  <strong [ngbTooltip]="getSuggestionTooltip(suggestion)">
+                    {{ suggestion.ontology_name || 'Unknown' }}
+                  </strong>
+                  <small class="text-muted ms-2">({{ suggestion.accession || 'N/A' }})</small>
+                  @if (suggestion.match_type) {
+                    <span class="badge bg-secondary text-light badge-sm ms-1" ngbTooltip="Type of ontology match found">
+                      {{ suggestion.match_type }}
+                    </span>
+                  }
+                </div>
+
+                <!-- SDRF Column -->
+                <div class="sdrf-info mb-2">
+                  <small class="text-muted">SDRF Column:</small>
+                  <code class="ms-1">{{ formatSdrfColumn(suggestion.sdrf_column || suggestion.ontology_type) }}</code>
+                  <small class="text-muted ms-2">→</small>
+                  <span class="ms-1">{{ suggestion.extracted_term || '' }}</span>
+                </div>
+
+                <!-- Rich UniMod Information -->
+                @if (isUniModSuggestion(suggestion)) {
+                  <div class="unimod-details mb-2 p-2 rounded">
+                    <div class="d-flex align-items-center mb-1">
+                      <i class="bi bi-atom text-warning me-1"></i>
+                      <small class="fw-semibold text-primary">Modification Details</small>
+                    </div>
+                    
+                    <!-- Core UniMod Properties -->
+                    <div class="row g-2 text-sm">
+                      @if (suggestion.target_aa) {
+                        <div class="col-6 col-md-3">
+                          <small class="text-muted d-block">Target AA:</small>
+                          <span class="badge bg-primary" [ngbTooltip]="getUniModDetailTooltip('target_aa')">{{ suggestion.target_aa }}</span>
+                        </div>
+                      }
+                      
+                      @if (suggestion.monoisotopic_mass) {
+                        <div class="col-6 col-md-3">
+                          <small class="text-muted d-block">Mass:</small>
+                          <span class="badge bg-info" [ngbTooltip]="getUniModDetailTooltip('mass')">{{ suggestion.monoisotopic_mass }} Da</span>
+                        </div>
+                      }
+                      
+                      @if (suggestion.modification_type) {
+                        <div class="col-6 col-md-3">
+                          <small class="text-muted d-block">Type:</small>
+                          <span class="badge bg-success" [ngbTooltip]="getUniModDetailTooltip('modification_type')">{{ suggestion.modification_type }}</span>
+                        </div>
+                      }
+                      
+                      @if (suggestion.position) {
+                        <div class="col-6 col-md-3">
+                          <small class="text-muted d-block">Position:</small>
+                          <span class="badge bg-secondary" [ngbTooltip]="getUniModDetailTooltip('position')">{{ suggestion.position }}</span>
+                        </div>
+                      }
+                    </div>
+                    
+                    <!-- Chemical Formula -->
+                    @if (suggestion.chemical_formula) {
+                      <div class="mt-2">
+                        <small class="text-muted d-block">Chemical Formula:</small>
+                        <code class="small">{{ suggestion.chemical_formula }}</code>
+                      </div>
+                    }
+                  </div>
+                }
+
+                <!-- Enhanced Key-Value Format for SDRF -->
+                @if (suggestion.key_value_format) {
+                  <div class="key-value-info mb-2">
+                    <div class="d-flex align-items-center mb-1">
+                      <i class="bi bi-code-square text-success me-1"></i>
+                      <small class="fw-semibold text-success">SDRF Format</small>
+                      <button 
+                        class="btn btn-sm btn-outline-secondary ms-auto"
+                        type="button"
+                        (click)="copyToClipboard(formatKeyValueString(suggestion.key_value_format))"
+                        ngbTooltip="Copy SDRF format to clipboard"
+                      >
+                        <i class="bi bi-clipboard"></i>
+                      </button>
+                    </div>
+                    <div class="sdrf-format-container p-2 border rounded">
+                      @for (kv of formatKeyValue(suggestion.key_value_format); track kv.key) {
+                        <span class="badge me-1 mb-1"
+                              [class.bg-primary]="kv.key === 'NT'"
+                              [class.bg-info]="kv.key === 'AC'"
+                              [class.bg-success]="kv.key === 'TA'"
+                              [class.bg-warning]="kv.key === 'MM'"
+                              [class.bg-secondary]="!['NT', 'AC', 'TA', 'MM'].includes(kv.key)"
+                              [ngbTooltip]="getKeyValueTooltip(kv.key)"
+                        >
+                          {{ kv.key }}={{ kv.value }}
+                        </span>
+                      }
+                      <div class="mt-1">
+                        <small class="text-muted font-monospace">{{ formatKeyValueString(suggestion.key_value_format) }}</small>
+                      </div>
+                    </div>
+                  </div>
+                }
+
+                <!-- Context and Definition -->
+                @if (suggestion.definition) {
+                  <div class="definition-info mb-1">
+                    <small class="text-muted">Definition:</small>
+                    <small class="ms-1">{{ suggestion.definition }}</small>
+                  </div>
+                }
+                @if (suggestion.reasoning || suggestion.claude_reasoning || suggestion.biological_context) {
+                  <div class="context-info">
+                    <small class="text-muted">Context:</small>
+                    <em class="ms-1">{{ suggestion.reasoning || suggestion.claude_reasoning || suggestion.biological_context }}</em>
+                  </div>
+                }
+              </div>
+
+              <!-- Action Buttons -->
+              <div class="suggestion-actions ms-3">
+                @if (suggestion.ontology_type === 'modification parameters' || suggestion.key_value_format) {
+                  <div class="btn-group-vertical" role="group">
+                    <button 
+                      class="btn btn-success btn-sm"
+                      (click)="acceptSuggestion(suggestion, true); close()"
+                      [disabled]="isCreatingAnnotation"
+                      ngbTooltip="Accept suggested parameters as-is"
+                    >
+                      <i class="bi bi-check"></i>
+                    </button>
+                    <button 
+                      class="btn btn-primary btn-sm"
+                      (click)="acceptSuggestion(suggestion)"
+                      [disabled]="isCreatingAnnotation"
+                      ngbTooltip="Configure and select multiple specifications"
+                    >
+                      <i class="bi bi-gear"></i>
+                    </button>
+                    <button 
+                      class="btn btn-outline-secondary btn-sm"
+                      (click)="dismissSuggestion(suggestion)"
+                      ngbTooltip="Dismiss this suggestion"
+                    >
+                      <i class="bi bi-x"></i>
+                    </button>
+                  </div>
+                } @else {
+                  <div class="btn-group-vertical" role="group">
+                    <button 
+                      class="btn btn-success btn-sm"
+                      (click)="acceptSuggestion(suggestion); close()"
+                      [disabled]="isCreatingAnnotation"
+                      ngbTooltip="Accept this suggestion and create annotation"
+                    >
+                      <i class="bi bi-check"></i>
+                    </button>
+                    <button 
+                      class="btn btn-outline-secondary btn-sm"
+                      (click)="dismissSuggestion(suggestion)"
+                      ngbTooltip="Dismiss this suggestion"
+                    >
+                      <i class="bi bi-x"></i>
+                    </button>
+                  </div>
+                }
+              </div>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  }
+</ng-template>
+
+<div class="modal-footer">
+  <button type="button" class="btn btn-secondary" (click)="close()" ngbTooltip="Close modal">
+    <i class="bi bi-x-lg"></i>
+  </button>
+</div>

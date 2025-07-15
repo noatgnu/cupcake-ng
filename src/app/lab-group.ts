@@ -7,7 +7,7 @@ export interface LabGroup {
   created_at: string;
   updated_at: string;
   default_storage: StorageObject|null;
-  is_professional: boolean;
+  can_perform_ms_analysis: boolean;
   service_storage: StorageObject|null;
   managers?: LabGroupManager[];
 }

@@ -33,7 +33,7 @@ describe('UserSearchModalComponent', () => {
           created_at: '2023-01-01T00:00:00Z',
           updated_at: '2023-01-01T00:00:00Z',
           default_storage: null,
-          is_professional: false,
+          can_perform_ms_analysis: false,
           service_storage: null
         }
       ]

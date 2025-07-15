@@ -33,6 +33,7 @@ import {
   StepMetadataExporterModalComponent
 } from "./step-metadata-exporter-modal/step-metadata-exporter-modal.component";
 import {AnnotationInputComponent} from "../annotation-input/annotation-input.component";
+import {McpSdrfSuggestionsComponent} from "../mcp-sdrf-suggestions/mcp-sdrf-suggestions.component";
 import {MediaDeviceService} from "../../media-device.service";
 
 @Component({
@@ -49,7 +50,8 @@ import {MediaDeviceService} from "../../media-device.service";
     NgbProgressbar,
     ReagentTableComponent,
     NgbTooltip,
-    AnnotationInputComponent
+    AnnotationInputComponent,
+    McpSdrfSuggestionsComponent
   ],
     templateUrl: './step-view.component.html',
     styleUrl: './step-view.component.scss'
@@ -566,6 +568,42 @@ export class StepViewComponent {
         this.toastService.show('Export', 'Metadata Exported Successfully')
       })
     }
+  }
+
+  onMcpAnnotationCreated(annotation: any) {
+    this.toastService.show('MCP SDRF', 'Annotation created from SDRF suggestion');
+    this.refreshAnnotations();
+  }
+
+  onMcpMetadataCreated(metadata: any) {
+    if (metadata.type === 'modification_parameters') {
+      // Handle modification parameters specifically
+      this.toastService.show('MCP SDRF', `${metadata.data.length} modification parameter column(s) configured`);
+      console.log('Modification metadata created:', metadata);
+      
+      // You could integrate with existing metadata creation APIs here
+      // For example, create actual metadata columns via the metadata service
+      
+    } else {
+      this.toastService.show('MCP SDRF', 'Metadata columns created from SDRF suggestion');
+    }
+  }
+
+  openSdrfModal() {
+    const ref = this.modal.open(McpSdrfSuggestionsComponent, {
+      size: 'lg',
+      centered: true
+    });
+    ref.componentInstance.step = this.currentStep;
+    ref.componentInstance.sessionId = this.dataService.currentSession?.unique_id;
+    
+    ref.componentInstance.annotationCreated.subscribe((annotation: any) => {
+      this.onMcpAnnotationCreated(annotation);
+    });
+    
+    ref.componentInstance.metadataCreated.subscribe((metadata: any) => {
+      this.onMcpMetadataCreated(metadata);
+    });
   }
 
 }

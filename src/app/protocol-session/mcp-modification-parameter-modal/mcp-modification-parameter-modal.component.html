@@ -1,0 +1,177 @@
+<div class="modal-header">
+  <h5 class="modal-title">
+    <i class="bi bi-atom text-primary"></i>
+    Configure Modification Parameters
+  </h5>
+  <button type="button" class="btn-close" aria-label="Close" (click)="close()"></button>
+</div>
+
+<div class="modal-body">
+  <div class="alert alert-info">
+    <i class="bi bi-info-circle"></i>
+    <strong>Suggestion:</strong> {{ suggestion.ontology_name }}
+    @if (suggestion.accession) {
+      <small class="text-muted ms-2">({{ suggestion.accession }})</small>
+    }
+    <br>
+    <small>Configure the modification parameters below to create metadata columns.</small>
+  </div>
+
+  <form [formGroup]="form">
+    <!-- Modification Type -->
+    <div class="mb-3">
+      <label for="metadataMT" class="form-label">Modification Type</label>
+      <select class="form-select" id="metadataMT" formControlName="metadataMT">
+        <option value="Fixed">Fixed</option>
+        <option value="Variable">Variable</option>
+        <option value="Annotated">Annotated</option>
+      </select>
+    </div>
+
+    <!-- Available Specs Selection -->
+    @if (availableSpecs.length > 0) {
+      <div class="mb-3">
+        <label class="form-label">Select from Available UniMod Specifications</label>
+        <select 
+          size="4" 
+          multiple 
+          class="form-select"
+          (change)="onSpecSelectionChange($event)">
+          @for (spec of availableSpecs; track spec.id) {
+            <option [value]="spec.id">
+              {{ spec.id }} AA:{{ spec.aa }} {{ spec.classification }} {{ spec.mono_mass }}
+            </option>
+          }
+        </select>
+        <small class="form-text text-muted">Hold Ctrl/Cmd to select multiple specifications</small>
+      </div>
+    }
+
+    <!-- Add Custom Spec Button -->
+    <div class="mb-3">
+      <button type="button" class="btn btn-outline-secondary btn-sm" (click)="addSpec()">
+        <i class="bi bi-plus"></i>
+        Add Custom Specification
+      </button>
+    </div>
+  </form>
+
+  <!-- Selected Specifications -->
+  @if (selectedSpecs.length > 0) {
+    <div class="specifications-section">
+      <h6>Selected Specifications ({{ selectedSpecs.length }})</h6>
+      
+      @for (spec of selectedSpecs; track $index; let i = $index) {
+        <div class="card mb-3">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <h6 class="mb-0">
+              <i class="bi bi-gear"></i>
+              Spec {{ i + 1 }}: {{ spec.classification }}
+            </h6>
+            <button 
+              type="button" 
+              class="btn btn-outline-danger btn-sm"
+              (click)="removeSpec(i)"
+              [disabled]="selectedSpecs.length === 1">
+              <i class="bi bi-trash"></i>
+            </button>
+          </div>
+          <div class="card-body">
+            <div class="row">
+              <!-- Position -->
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Modification Position</label>
+                <select class="form-select" [(ngModel)]="spec.position">
+                  @for (position of modificationPositions; track position) {
+                    <option [value]="position">{{ position }}</option>
+                  }
+                </select>
+              </div>
+
+              <!-- Amino Acid -->
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Target Amino Acid</label>
+                <input 
+                  type="text" 
+                  class="form-control" 
+                  [(ngModel)]="spec.aa"
+                  placeholder="e.g., M, C, K"
+                  maxlength="3">
+              </div>
+
+              <!-- Monoisotopic Mass -->
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Monoisotopic Mass</label>
+                <input 
+                  type="number" 
+                  class="form-control" 
+                  [(ngModel)]="spec.mono_mass"
+                  placeholder="e.g., 15.994915"
+                  step="0.000001">
+              </div>
+
+              <!-- Target Site -->
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Target Site <small class="text-muted">(optional)</small></label>
+                <input 
+                  type="text" 
+                  class="form-control" 
+                  [(ngModel)]="spec.target_site"
+                  placeholder="Specific target site">
+              </div>
+
+              <!-- Modification Name with Typeahead -->
+              <div class="col-12 mb-3">
+                <label class="form-label">Modification Name</label>
+                <input 
+                  type="text" 
+                  class="form-control" 
+                  [(ngModel)]="spec.classification"
+                  [ngbTypeahead]="searchModifications"
+                  (selectItem)="onModificationSelect($event, spec, i)"
+                  placeholder="Search for UniMod modifications">
+                <small class="form-text text-muted">Type to search UniMod database</small>
+              </div>
+
+              <!-- Accession -->
+              <div class="col-12 mb-3">
+                <label class="form-label">Accession/ID</label>
+                <input 
+                  type="text" 
+                  class="form-control" 
+                  [(ngModel)]="spec.accession"
+                  placeholder="e.g., UNIMOD:35">
+              </div>
+
+              <!-- Preview -->
+              <div class="col-12">
+                <div class="alert alert-light">
+                  <small><strong>Preview:</strong> {{ buildModificationString(spec) }}</small>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  @if (selectedSpecs.length === 0) {
+    <div class="alert alert-warning">
+      <i class="bi bi-exclamation-triangle"></i>
+      Please select or add at least one modification specification.
+    </div>
+  }
+</div>
+
+<div class="modal-footer">
+  <button type="button" class="btn btn-secondary" (click)="close()">Cancel</button>
+  <button 
+    type="button" 
+    class="btn btn-primary" 
+    (click)="save()"
+    [disabled]="selectedSpecs.length === 0">
+    <i class="bi bi-check"></i>
+    Create Metadata ({{ selectedSpecs.length }} columns)
+  </button>
+</div>

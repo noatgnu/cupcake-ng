@@ -1584,10 +1584,10 @@ export class WebService {
     )
   }
 
-  createLabGroup(name: string, description: string, is_professional: boolean = false) {
+  createLabGroup(name: string, description: string, can_perform_ms_analysis: boolean = false) {
     return this.http.post<any>(
       `${this.baseURL}/api/lab_groups/`,
-      {name: name, description: description, is_professional: is_professional},
+      {name: name, description: description, can_perform_ms_analysis: can_perform_ms_analysis},
       {responseType: 'json', observe: 'body'}
     )
   }
@@ -1806,7 +1806,7 @@ export class WebService {
     )
   }
 
-  getLabGroups(search_term: string = "", limit: number = 10, offset: number = 0, is_professional: boolean|undefined = undefined) {
+  getLabGroups(search_term: string = "", limit: number = 10, offset: number = 0, can_perform_ms_analysis: boolean|undefined = undefined) {
     let params = new HttpParams()
     if (search_term && search_term !== "") {
       params = params.append('search', search_term)
@@ -1817,8 +1817,8 @@ export class WebService {
     if (offset) {
       params = params.append('offset', offset.toString())
     }
-    if (is_professional) {
-      params = params.append('is_professional', is_professional.toString())
+    if (can_perform_ms_analysis) {
+      params = params.append('can_perform_ms_analysis', can_perform_ms_analysis.toString())
     }
     return this.http.get<LabGroupQuery>(
       `${this.baseURL}/api/lab_groups/`,
@@ -1826,7 +1826,7 @@ export class WebService {
     )
   }
 
-  updateLabGroup(lab_group_id: number, name: string, description: string, default_storage: number|null = null, service_storage: number|null = null, is_professional: undefined|boolean = undefined) {
+  updateLabGroup(lab_group_id: number, name: string, description: string, default_storage: number|null = null, service_storage: number|null = null, can_perform_ms_analysis: undefined|boolean = undefined) {
     const payload: any = {name: name, description: description}
     if (default_storage) {
       payload['default_storage'] = default_storage
@@ -1836,8 +1836,8 @@ export class WebService {
       payload['service_storage'] = service_storage
     }
 
-    if (is_professional !== undefined) {
-      payload['is_professional'] = is_professional
+    if (can_perform_ms_analysis !== undefined) {
+      payload['can_perform_ms_analysis'] = can_perform_ms_analysis
     }
     return this.http.put<LabGroup>(
       `${this.baseURL}/api/lab_groups/${lab_group_id}/`,
@@ -2099,7 +2099,7 @@ export class WebService {
     )
   }
 
-  getUserLabGroups(search_term: string = "", limit: number = 10, offset: number = 0, is_professional: boolean|undefined = undefined) {
+  getUserLabGroups(search_term: string = "", limit: number = 10, offset: number = 0, can_perform_ms_analysis: boolean|undefined = undefined) {
     let params = new HttpParams()
     if (search_term && search_term !== "") {
       params = params.append('search', search_term)
@@ -2110,8 +2110,8 @@ export class WebService {
     if (offset) {
       params = params.append('offset', offset.toString())
     }
-    if (is_professional) {
-      params = params.append('is_professional', is_professional.toString())
+    if (can_perform_ms_analysis) {
+      params = params.append('can_perform_ms_analysis', can_perform_ms_analysis.toString())
     }
     return this.http.get<LabGroupQuery>(
       `${this.baseURL}/api/user/get_user_lab_groups/`,

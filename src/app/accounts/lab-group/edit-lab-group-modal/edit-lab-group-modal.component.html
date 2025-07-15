@@ -29,9 +29,9 @@
         </div>
 
         <div class="form-check">
-          <input type="checkbox" class="form-check-input" id="isProfessional" formControlName="is_professional">
-          <label class="form-check-label" for="isProfessional">Professional Lab Group</label>
-          <div class="form-text">Professional groups have access to additional features</div>
+          <input type="checkbox" class="form-check-input" id="isProfessional" formControlName="can_perform_ms_analysis">
+          <label class="form-check-label" for="isProfessional">Can Perform MS Analysis</label>
+          <div class="form-text">Allow group to process submitted MS job</div>
         </div>
       </div>
     </div>
@@ -71,7 +71,7 @@
           </div>
 
           <!-- Service Storage (conditional) -->
-          @if (labGroup.is_professional) {
+          @if (labGroup.can_perform_ms_analysis) {
             <div class="mb-3">
               <label class="form-label">Service Storage</label>
               @if (labGroup.service_storage) {
@@ -145,7 +145,7 @@
                                 <i class="bi bi-hdd-fill"></i>
                               </button>
                             }
-                            @if (labGroup.is_professional && s.id !== labGroup.service_storage?.id) {
+                            @if (labGroup.can_perform_ms_analysis && s.id !== labGroup.service_storage?.id) {
                               <button class="btn btn-sm btn-outline-secondary"
                                       ngbTooltip="Assign as service storage"
                                       (click)="assignServiceStorage(s)">
