@@ -134,23 +134,14 @@ export class McpSdrfService implements OnDestroy {
   private analysisUpdates = new BehaviorSubject<any>(null);
   public analysisUpdates$ = this.analysisUpdates.asObservable();
 
-  // WebSocketSubject connections for different task types
+  // WebSocketSubject connection for analysis task progress
   private analysisWSConnection?: WebSocketSubject<any>;
-  private metadataWSConnection?: WebSocketSubject<any>;
-  private validationWSConnection?: WebSocketSubject<any>;
-  private exportWSConnection?: WebSocketSubject<any>;
 
   // Connection status tracking
   private analysisConnected = false;
-  private metadataConnected = false;
-  private validationConnected = false;
-  private exportConnected = false;
 
-  // Intentional disconnect flags
+  // Intentional disconnect flag
   private analysisIntentionalDisconnect = false;
-  private metadataIntentionalDisconnect = false;
-  private validationIntentionalDisconnect = false;
-  private exportIntentionalDisconnect = false;
 
   // Subject for task updates
   private taskUpdates = new Subject<MCPTaskUpdate>();
@@ -174,88 +165,60 @@ export class McpSdrfService implements OnDestroy {
   }
 
   /**
-   * Analyze a protocol step using MCP SDRF analysis
+   * Analyze a protocol step using SDRF analysis
    */
   analyzeProtocolStep(request: MCPAnalysisRequest): Observable<MCPAnalysisResponse | MCPTaskResponse> {
+    const stepId = request.step_id;
+    const requestBody = {
+      use_anthropic: request.use_anthropic || false,
+      use_async: request.use_async !== false, // Default to true
+      anthropic_api_key: request.anthropic_api_key
+    };
+    
     return this.http.post<MCPAnalysisResponse | MCPTaskResponse>(
-      `${this.baseURL}/api/mcp/analyze-step/`,
-      request
+      `${this.baseURL}/api/steps/${stepId}/suggest_sdrf/`,
+      requestBody
     );
   }
 
   /**
    * Get task status for async operations
    */
-  getTaskStatus(taskId: string, jobId?: string): Observable<any> {
-    const params: any = { task_id: taskId };
+  getTaskStatus(taskId: string, jobId?: string, queue: string = 'mcp'): Observable<any> {
+    const params: any = { task_id: taskId, queue: queue };
     if (jobId) {
       params.job_id = jobId;
     }
 
-    return this.http.get(`${this.baseURL}/api/mcp/task-status/`, { params });
+    return this.http.get(`${this.baseURL}/api/job-status/status/`, { params });
   }
 
   /**
-   * Generate SDRF metadata columns from analysis
+   * Generate SDRF metadata columns from analysis (deprecated)
+   * Use existing annotation and metadata column creation instead
    */
   generateMetadata(request: GenerateMetadataRequest): Observable<GenerateMetadataResponse> {
-    return this.http.post<GenerateMetadataResponse>(
-      `${this.baseURL}/api/mcp/generate-metadata/`,
-      request
-    );
-  }
-
-  /**
-   * Match terms to ontology vocabularies
-   */
-  matchTerms(terms: string[], ontology_types?: string[], min_confidence?: number): Observable<any> {
-    const request = {
-      terms,
-      ontology_types,
-      min_confidence: min_confidence || 0.5
-    };
-
-    return this.http.post(
-      `${this.baseURL}/api/mcp/match-terms/`,
-      request
-    );
-  }
-
-  /**
-   * Validate SDRF compliance for a protocol step
-   */
-  validateCompliance(step_id: number): Observable<any> {
-    return this.http.post(
-      `${this.baseURL}/api/mcp/validate-compliance/`,
-      { step_id }
-    );
-  }
-
-  /**
-   * Export protocol as SDRF file
-   */
-  exportSDRF(protocol_id: number): Observable<any> {
-    return this.http.post(
-      `${this.baseURL}/api/mcp/export-sdrf/`,
-      { protocol_id }
-    );
+    console.warn('generateMetadata is deprecated. Use existing annotation and metadata creation APIs instead.');
+    // This method is no longer supported - functionality moved to suggest_sdrf + annotation creation
+    throw new Error('generateMetadata is no longer supported. Use suggest_sdrf with annotation creation instead.');
   }
 
   /**
    * Analyze full protocol (all steps)
    */
-  analyzeFullProtocol(protocol_id: number, use_anthropic?: boolean, anthropic_api_key?: string): Observable<any> {
-    const request: any = { protocol_id };
-    if (use_anthropic) {
-      request.use_anthropic = true;
-      if (anthropic_api_key) {
-        request.anthropic_api_key = anthropic_api_key;
-      }
+  analyzeFullProtocol(protocol_id: number, use_anthropic?: boolean, anthropic_api_key?: string, use_async: boolean = true): Observable<any> {
+    const requestBody: any = {
+      use_anthropic: use_anthropic || false,
+      use_async: use_async
+    };
+    
+    if (use_anthropic && anthropic_api_key) {
+      requestBody.anthropic_api_key = anthropic_api_key;
     }
 
     return this.http.post(
-      `${this.baseURL}/api/mcp/analyze-protocol/`,
-      request
+      `${this.baseURL}/api/protocols/${protocol_id}/suggest_sdrf/`,
+      requestBody
     );
   }
 
@@ -476,221 +439,13 @@ export class McpSdrfService implements OnDestroy {
     }
   }
 
-  /**
-   * Connect to MCP metadata WebSocket for real-time updates
-   */
-  connectMetadataWebSocket(): void {
-    this.metadataIntentionalDisconnect = false;
 
-    console.log('Connecting to MCP metadata websocket');
-    const url = `${this.wsBaseURL}/ws/mcp/metadata/?token=${this.accounts.token}`;
-    console.log(url);
-
-    this.metadataWSConnection = new WebSocketSubject({
-      url,
-      openObserver: {
-        next: () => {
-          console.log('Connected to MCP metadata websocket');
-          this.metadataConnected = true;
-        }
-      },
-      closeObserver: {
-        next: () => {
-          console.log('Closed connection to MCP metadata websocket');
-          this.metadataConnected = false;
-          if (!this.metadataIntentionalDisconnect) {
-            this.reconnectMetadataWS();
-          }
-        }
-      }
-    });
-
-    const sub = this.metadataWSConnection
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (data) => {
-          if (data.type === 'metadata_update') {
-            this.taskUpdates.next(data.data);
-          }
-        },
-        error: (err) => {
-          console.error('MCP Metadata WS error:', err);
-          if (!this.metadataIntentionalDisconnect) {
-            this.reconnectMetadataWS();
-          }
-        }
-      });
-
-    this.subscriptions.push(sub);
-  }
-
-  private reconnectMetadataWS(retryCount = 0): void {
-    if (this.metadataIntentionalDisconnect || retryCount >= this.maxRetries) return;
-
-    const delay = Math.min(1000 * Math.pow(2, retryCount), 30000);
-    console.log(`Attempting to reconnect MCP Metadata WS in ${delay}ms (attempt ${retryCount + 1})`);
-
-    setTimeout(() => {
-      if (!this.metadataIntentionalDisconnect) {
-        this.connectMetadataWebSocket();
-      }
-    }, delay);
-  }
-
-  private closeMetadataWS(): void {
-    this.metadataIntentionalDisconnect = true;
-    if (this.metadataWSConnection) {
-      this.metadataWSConnection.complete();
-      this.metadataWSConnection = undefined;
-    }
-  }
-
-  /**
-   * Connect to MCP validation WebSocket for real-time updates
-   */
-  connectValidationWebSocket(): void {
-    this.validationIntentionalDisconnect = false;
-
-    console.log('Connecting to MCP validation websocket');
-    const url = `${this.wsBaseURL}/ws/mcp/validation/?token=${this.accounts.token}`;
-    console.log(url);
-
-    this.validationWSConnection = new WebSocketSubject({
-      url,
-      openObserver: {
-        next: () => {
-          console.log('Connected to MCP validation websocket');
-          this.validationConnected = true;
-        }
-      },
-      closeObserver: {
-        next: () => {
-          console.log('Closed connection to MCP validation websocket');
-          this.validationConnected = false;
-          if (!this.validationIntentionalDisconnect) {
-            this.reconnectValidationWS();
-          }
-        }
-      }
-    });
-
-    const sub = this.validationWSConnection
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (data) => {
-          if (data.type === 'validation_update') {
-            this.taskUpdates.next(data.data);
-          }
-        },
-        error: (err) => {
-          console.error('MCP Validation WS error:', err);
-          if (!this.validationIntentionalDisconnect) {
-            this.reconnectValidationWS();
-          }
-        }
-      });
-
-    this.subscriptions.push(sub);
-  }
-
-  private reconnectValidationWS(retryCount = 0): void {
-    if (this.validationIntentionalDisconnect || retryCount >= this.maxRetries) return;
-
-    const delay = Math.min(1000 * Math.pow(2, retryCount), 30000);
-    console.log(`Attempting to reconnect MCP Validation WS in ${delay}ms (attempt ${retryCount + 1})`);
-
-    setTimeout(() => {
-      if (!this.validationIntentionalDisconnect) {
-        this.connectValidationWebSocket();
-      }
-    }, delay);
-  }
-
-  private closeValidationWS(): void {
-    this.validationIntentionalDisconnect = true;
-    if (this.validationWSConnection) {
-      this.validationWSConnection.complete();
-      this.validationWSConnection = undefined;
-    }
-  }
-
-  /**
-   * Connect to MCP export WebSocket for real-time updates
-   */
-  connectExportWebSocket(): void {
-    this.exportIntentionalDisconnect = false;
-
-    console.log('Connecting to MCP export websocket');
-    const url = `${this.wsBaseURL}/ws/mcp/export/?token=${this.accounts.token}`;
-    console.log(url);
-
-    this.exportWSConnection = new WebSocketSubject({
-      url,
-      openObserver: {
-        next: () => {
-          console.log('Connected to MCP export websocket');
-          this.exportConnected = true;
-        }
-      },
-      closeObserver: {
-        next: () => {
-          console.log('Closed connection to MCP export websocket');
-          this.exportConnected = false;
-          if (!this.exportIntentionalDisconnect) {
-            this.reconnectExportWS();
-          }
-        }
-      }
-    });
-
-    const sub = this.exportWSConnection
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (data) => {
-          if (data.type === 'export_update') {
-            this.taskUpdates.next(data.data);
-          }
-        },
-        error: (err) => {
-          console.error('MCP Export WS error:', err);
-          if (!this.exportIntentionalDisconnect) {
-            this.reconnectExportWS();
-          }
-        }
-      });
-
-    this.subscriptions.push(sub);
-  }
-
-  private reconnectExportWS(retryCount = 0): void {
-    if (this.exportIntentionalDisconnect || retryCount >= this.maxRetries) return;
-
-    const delay = Math.min(1000 * Math.pow(2, retryCount), 30000);
-    console.log(`Attempting to reconnect MCP Export WS in ${delay}ms (attempt ${retryCount + 1})`);
-
-    setTimeout(() => {
-      if (!this.exportIntentionalDisconnect) {
-        this.connectExportWebSocket();
-      }
-    }, delay);
-  }
-
-  private closeExportWS(): void {
-    this.exportIntentionalDisconnect = true;
-    if (this.exportWSConnection) {
-      this.exportWSConnection.complete();
-      this.exportWSConnection = undefined;
-    }
-  }
 
   /**
    * Disconnect all WebSocket connections
    */
   disconnectAllWebSockets(): void {
     this.closeAnalysisWS();
-    this.closeMetadataWS();
-    this.closeValidationWS();
-    this.closeExportWS();
   }
 
   /**
@@ -698,27 +453,6 @@ export class McpSdrfService implements OnDestroy {
    */
   isAnalysisWebSocketConnected(): boolean {
     return this.analysisConnected;
-  }
-
-  /**
-   * Check if metadata WebSocket is connected
-   */
-  isMetadataWebSocketConnected(): boolean {
-    return this.metadataConnected;
-  }
-
-  /**
-   * Check if validation WebSocket is connected
-   */
-  isValidationWebSocketConnected(): boolean {
-    return this.validationConnected;
-  }
-
-  /**
-   * Check if export WebSocket is connected
-   */
-  isExportWebSocketConnected(): boolean {
-    return this.exportConnected;
   }
 
   /**

@@ -5,6 +5,8 @@ import { NgbActiveModal, NgbTooltip, NgbModal, NgbNav, NgbNavContent, NgbNavItem
 import { McpSdrfService, MCPAnalysisResponse, SDRFSuggestion } from '../../mcp-sdrf.service';
 import { ProtocolStep } from '../../protocol';
 import { McpModificationParameterModalComponent } from '../mcp-modification-parameter-modal/mcp-modification-parameter-modal.component';
+import { WebService } from '../../web.service';
+import { forkJoin } from 'rxjs';
 
 interface DisplaySuggestion extends SDRFSuggestion {
   sdrf_column: string;
@@ -107,7 +109,8 @@ export class McpSdrfSuggestionsComponent implements OnInit, OnDestroy {
   constructor(
     private mcpSdrfService: McpSdrfService,
     public activeModal: NgbActiveModal,
-    private modalService: NgbModal
+    private modalService: NgbModal,
+    private webService: WebService
   ) {}
 
   ngOnInit() {
@@ -284,7 +287,7 @@ export class McpSdrfSuggestionsComponent implements OnInit, OnDestroy {
         this.annotationCreated.emit(annotation);
 
         // Create SDRF metadata columns from the accepted suggestions
-        this.createSdrfMetadataColumns(acceptedSuggestion, suggestions);
+        this.createSdrfMetadataColumns(annotation, acceptedSuggestion, suggestions);
 
         // Remove accepted suggestion from list
         this.removeSuggestionFromList(acceptedSuggestion);
@@ -299,21 +302,28 @@ export class McpSdrfSuggestionsComponent implements OnInit, OnDestroy {
     });
   }
 
-  private createSdrfMetadataColumns(acceptedSuggestion: DisplaySuggestion, suggestions: { [key: string]: SDRFSuggestion[] }) {
-    // Generate SDRF metadata columns using existing method
-    const metadataRequest = {
-      step_id: this.step.id,
-      auto_create: true,
-      use_anthropic: this.analysisResult?.analyzer_type === 'mcp_claude',
-      // Include the specific suggestions for targeted metadata creation
-      suggestions: suggestions
-    };
+  private createSdrfMetadataColumns(annotation: any, acceptedSuggestion: DisplaySuggestion, suggestions: { [key: string]: SDRFSuggestion[] }) {
+    // Create metadata columns using existing metadata column creation API
+    // Convert SDRF suggestions to metadata column format
+    const metadataColumns = this.convertSuggestionsToMetadataColumns(acceptedSuggestion, suggestions);
+    
+    if (metadataColumns.length === 0) {
+      console.warn('No metadata columns to create from suggestions');
+      this.emitMetadataCreatedEvent(acceptedSuggestion, false, 'No metadata columns could be created from suggestions');
+      return;
+    }
 
-    this.mcpSdrfService.generateMetadata(metadataRequest).subscribe({
-      next: (metadata) => {
-        // Add summary information to the metadata response
+    // Use existing WebService to create metadata columns
+    const creationObservables = metadataColumns.map(column => 
+      this.webService.createMetaDataColumn(annotation.id, column, 'annotation')
+    );
+
+    forkJoin(creationObservables).subscribe({
+      next: (createdColumns) => {
         const enrichedMetadata = {
-          ...metadata,
+          success: true,
+          created_columns: createdColumns.length,
+          columns: createdColumns,
           acceptance_summary: {
             accepted_suggestion: {
               ontology_name: acceptedSuggestion.ontology_name,
@@ -334,19 +344,51 @@ export class McpSdrfSuggestionsComponent implements OnInit, OnDestroy {
         this.metadataCreated.emit(enrichedMetadata);
       },
       error: (error) => {
-        console.error('Error generating SDRF metadata:', error);
-        // Still emit basic metadata creation event even if SDRF generation fails
-        this.metadataCreated.emit({
-          success: false,
-          error: 'Failed to generate SDRF metadata columns',
-          acceptance_summary: {
-            accepted_suggestion: {
-              ontology_name: acceptedSuggestion.ontology_name,
-              sdrf_column: acceptedSuggestion.sdrf_column,
-              confidence: acceptedSuggestion.confidence
-            }
-          }
-        });
+        console.error('Error creating metadata columns:', error);
+        this.emitMetadataCreatedEvent(acceptedSuggestion, false, 'Failed to create metadata columns: ' + error.message);
+      }
+    });
+  }
+
+  private convertSuggestionsToMetadataColumns(acceptedSuggestion: DisplaySuggestion, suggestions: { [key: string]: SDRFSuggestion[] }) {
+    const metadataColumns: any[] = [];
+    
+    // Convert each SDRF suggestion to a metadata column
+    for (const [sdrfColumn, suggestionList] of Object.entries(suggestions)) {
+      for (const suggestion of suggestionList) {
+        const metadataColumn = {
+          name: sdrfColumn.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+          value: suggestion.ontology_name || suggestion.extracted_term || '',
+          type: 'text', // Default type, could be enhanced based on suggestion type
+          // Add SDRF-specific metadata in the description field
+          description: `SDRF ${sdrfColumn} | ${suggestion.ontology_type} | Confidence: ${(suggestion.confidence * 100).toFixed(1)}% | Analyzer: ${this.analysisResult?.analyzer_type || 'standard'}`,
+          // Add special handling for modification parameters (WebService handles MM, PP, TA, TS, MT fields)
+          ...(suggestion.key_value_format && {
+            MM: suggestion.key_value_format.MM,
+            PP: suggestion.key_value_format.PP,
+            TA: suggestion.key_value_format.TA,
+            TS: suggestion.key_value_format.TS,
+            MT: suggestion.key_value_format.MT
+          })
+        };
+        
+        metadataColumns.push(metadataColumn);
+      }
+    }
+    
+    return metadataColumns;
+  }
+
+  private emitMetadataCreatedEvent(acceptedSuggestion: DisplaySuggestion, success: boolean, errorMessage?: string) {
+    this.metadataCreated.emit({
+      success: success,
+      error: errorMessage,
+      acceptance_summary: {
+        accepted_suggestion: {
+          ontology_name: acceptedSuggestion.ontology_name,
+          sdrf_column: acceptedSuggestion.sdrf_column,
+          confidence: acceptedSuggestion.confidence
+        }
       }
     });
   }
@@ -411,7 +453,7 @@ export class McpSdrfSuggestionsComponent implements OnInit, OnDestroy {
         this.annotationCreated.emit(annotation);
 
         // Create SDRF metadata columns for all suggestions
-        this.createBulkSdrfMetadataColumns();
+        this.createBulkSdrfMetadataColumns(annotation);
 
         // Clear all suggestions
         const currentResults = this.activeTabId === 'standard' ? this.standardResults : this.aiResults;
@@ -428,7 +470,7 @@ export class McpSdrfSuggestionsComponent implements OnInit, OnDestroy {
     });
   }
 
-  private createBulkSdrfMetadataColumns() {
+  private createBulkSdrfMetadataColumns(annotation: any) {
     // Generate SDRF metadata columns for all suggestions
     const metadataRequest = {
       step_id: this.step.id,
@@ -438,8 +480,49 @@ export class McpSdrfSuggestionsComponent implements OnInit, OnDestroy {
       suggestions: this.suggestions
     };
 
-    this.mcpSdrfService.generateMetadata(metadataRequest).subscribe({
-      next: (metadata) => {
+    // Create metadata columns for all suggestions using existing WebService
+    const allMetadataColumns: any[] = [];
+    
+    // Convert all suggestions to metadata column format
+    for (const [sdrfColumn, suggestionList] of Object.entries(this.suggestions)) {
+      for (const suggestion of suggestionList) {
+        const metadataColumn = {
+          name: sdrfColumn.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+          value: suggestion.ontology_name || suggestion.extracted_term || '',
+          type: 'text',
+          description: `SDRF ${sdrfColumn} | ${suggestion.ontology_type} | Confidence: ${(suggestion.confidence * 100).toFixed(1)}% | Analyzer: ${this.analysisResult?.analyzer_type || 'standard'}`,
+          // Add special handling for modification parameters
+          ...(suggestion.key_value_format && {
+            MM: suggestion.key_value_format.MM,
+            PP: suggestion.key_value_format.PP,
+            TA: suggestion.key_value_format.TA,
+            TS: suggestion.key_value_format.TS,
+            MT: suggestion.key_value_format.MT
+          })
+        };
+        allMetadataColumns.push(metadataColumn);
+      }
+    }
+
+    if (allMetadataColumns.length === 0) {
+      this.metadataCreated.emit({
+        success: false,
+        error: 'No metadata columns to create from suggestions',
+        bulk_acceptance_summary: {
+          total_accepted: 0,
+          analyzer_type: this.analysisResult?.analyzer_type || 'standard'
+        }
+      });
+      return;
+    }
+
+    // Use existing WebService to create all metadata columns
+    const creationObservables = allMetadataColumns.map(column => 
+      this.webService.createMetaDataColumn(annotation.id, column, 'annotation')
+    );
+
+    forkJoin(creationObservables).subscribe({
+      next: (createdColumns) => {
         // Create comprehensive acceptance summary for bulk operation
         const bulkAcceptanceSummary = {
           accepted_suggestions: this.flatSuggestions.map(suggestion => ({
@@ -462,20 +545,21 @@ export class McpSdrfSuggestionsComponent implements OnInit, OnDestroy {
           ontology_breakdown: this.getOntologyBreakdown()
         };
 
-        // Add comprehensive summary to metadata response
+        // Create enriched metadata response
         const enrichedMetadata = {
-          ...metadata,
+          success: true,
+          created_columns: createdColumns.length,
+          columns: createdColumns,
           bulk_acceptance_summary: bulkAcceptanceSummary
         };
 
         this.metadataCreated.emit(enrichedMetadata);
       },
       error: (error) => {
-        console.error('Error generating bulk SDRF metadata:', error);
-        // Still emit basic metadata creation event even if SDRF generation fails
+        console.error('Error creating bulk SDRF metadata columns:', error);
         this.metadataCreated.emit({
           success: false,
-          error: 'Failed to generate SDRF metadata columns',
+          error: 'Failed to create SDRF metadata columns: ' + error.message,
           bulk_acceptance_summary: {
             total_accepted: this.flatSuggestions.length,
             analyzer_type: this.analysisResult?.analyzer_type || 'standard'
