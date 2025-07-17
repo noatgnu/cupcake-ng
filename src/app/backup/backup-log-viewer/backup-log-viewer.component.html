@@ -231,8 +231,8 @@
 
                     <!-- Started -->
                     <td>
-                      <div>{{ log.started_at | date:'medium' }}</div>
-                      <small class="text-muted">{{ getRelativeTime(log.started_at) }}</small>
+                      <div>{{ log.created_at | date:'medium' }}</div>
+                      <small class="text-muted">{{ getRelativeTime(log.created_at) }}</small>
                     </td>
 
                     <!-- Duration -->

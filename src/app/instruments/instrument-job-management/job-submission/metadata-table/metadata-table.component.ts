@@ -1,4 +1,4 @@
-import {Component, EventEmitter, HostListener, Input, OnChanges, Output, SimpleChanges} from '@angular/core';
+import {Component, EventEmitter, HostListener, Input, OnChanges, Output, SimpleChanges, ViewChild, ElementRef} from '@angular/core';
 import {MetadataColumn, MetadataTableTemplate} from "../../../../metadata-column";
 import {
   DisplayModificationParametersMetadataComponent
@@ -7,7 +7,7 @@ import {NgbDropdown, NgbDropdownMenu, NgbDropdownToggle, NgbModal, NgbTooltip} f
 import {
   JobMetadataCreationModalComponent
 } from "../../job-metadata-creation-modal/job-metadata-creation-modal.component";
-import {FormArray} from "@angular/forms";
+import {FormArray, FormsModule} from "@angular/forms";
 import {NgClass} from "@angular/common";
 import {AddFavouriteModalComponent} from "../../../../add-favourite-modal/add-favourite-modal.component";
 import {
@@ -22,7 +22,8 @@ import {MetadataService} from "../../../../metadata.service";
     NgbDropdown,
     NgbDropdownMenu,
     NgbDropdownToggle,
-    NgClass
+    NgClass,
+    FormsModule
   ],
   templateUrl: './metadata-table.component.html',
   styleUrl: './metadata-table.component.scss'
@@ -58,6 +59,21 @@ export class MetadataTableComponent implements OnChanges{
   @Input() staffModeActive: boolean = false
 
   tableData: any[] = []
+  
+  // Pagination properties
+  currentPage: number = 1
+  pageSize: number = 10
+  pageSizeOptions: number[] = [5, 10, 25, 50, 100]
+  
+  // Make Math available in template
+  Math = Math
+  
+  // Horizontal scroll properties
+  @ViewChild('tableContainer', { static: false }) tableContainer!: ElementRef<HTMLDivElement>
+  canScrollLeft: boolean = false
+  canScrollRight: boolean = false
+  scrollAmount: number = 200 // pixels to scroll per click
+  scrollProgress: number = 0 // Cache the scroll progress
 
   @Output() metadataUpdated: EventEmitter<any[]> = new EventEmitter<any[]>()
   @Output() removeMetadata: EventEmitter<{ metadata: MetadataColumn, index: number, data_type: 'user_metadata'|'staff_metadata' }> = new EventEmitter<{ metadata: MetadataColumn, index: number, data_type: 'user_metadata'|'staff_metadata' }>()
@@ -80,6 +96,24 @@ export class MetadataTableComponent implements OnChanges{
 
   get template(): MetadataTableTemplate|undefined|null {
     return this._template
+  }
+
+  // Pagination getters
+  get totalPages(): number {
+    return Math.ceil(this.tableData.length / this.pageSize)
+  }
+
+  get paginatedTableData(): any[] {
+    const startIndex = (this.currentPage - 1) * this.pageSize
+    return this.tableData.slice(startIndex, startIndex + this.pageSize)
+  }
+
+  get startItemNumber(): number {
+    return (this.currentPage - 1) * this.pageSize + 1
+  }
+
+  get endItemNumber(): number {
+    return Math.min(this.currentPage * this.pageSize, this.tableData.length)
   }
 
   onCellClick(event: MouseEvent, rowIndex: number, colIndex: number) {
@@ -123,6 +157,10 @@ export class MetadataTableComponent implements OnChanges{
   ngOnChanges(changes: SimpleChanges) {
     if (changes["sampleNumber"] || changes["userMetadata"] || changes["staffMetadata"]) {
       this.generateTableData()
+      // Update scroll state after table data changes
+      setTimeout(() => {
+        this.onTableScroll()
+      }, 100) // Slightly longer timeout to ensure DOM is ready
     }
   }
 
@@ -579,5 +617,94 @@ export class MetadataTableComponent implements OnChanges{
       }
     })
 
+  }
+
+  // Pagination methods
+  onPageChange(page: number): void {
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page
+    }
+  }
+
+  onPageSizeChange(newPageSize: number): void {
+    this.pageSize = newPageSize
+    this.currentPage = 1 // Reset to first page when changing page size
+  }
+
+  goToFirstPage(): void {
+    this.currentPage = 1
+  }
+
+  goToLastPage(): void {
+    this.currentPage = this.totalPages
+  }
+
+  goToPreviousPage(): void {
+    if (this.currentPage > 1) {
+      this.currentPage--
+    }
+  }
+
+  goToNextPage(): void {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++
+    }
+  }
+
+  // Horizontal scroll methods
+  onTableScroll(): void {
+    if (this.tableContainer) {
+      const element = this.tableContainer.nativeElement
+      this.canScrollLeft = element.scrollLeft > 0
+      this.canScrollRight = element.scrollLeft < (element.scrollWidth - element.clientWidth)
+      
+      // Cache the scroll progress to prevent ExpressionChangedAfterItHasBeenCheckedError
+      const maxScroll = element.scrollWidth - element.clientWidth
+      this.scrollProgress = maxScroll <= 0 ? 100 : (element.scrollLeft / maxScroll) * 100
+    }
+  }
+
+  scrollLeft(): void {
+    if (this.tableContainer) {
+      const element = this.tableContainer.nativeElement
+      element.scrollBy({
+        left: -this.scrollAmount,
+        behavior: 'smooth'
+      })
+    }
+  }
+
+  scrollRight(): void {
+    if (this.tableContainer) {
+      const element = this.tableContainer.nativeElement
+      element.scrollBy({
+        left: this.scrollAmount,
+        behavior: 'smooth'
+      })
+    }
+  }
+
+  scrollToStart(): void {
+    if (this.tableContainer) {
+      const element = this.tableContainer.nativeElement
+      element.scrollTo({
+        left: 0,
+        behavior: 'smooth'
+      })
+    }
+  }
+
+  scrollToEnd(): void {
+    if (this.tableContainer) {
+      const element = this.tableContainer.nativeElement
+      element.scrollTo({
+        left: element.scrollWidth,
+        behavior: 'smooth'
+      })
+    }
+  }
+
+  getScrollProgress(): number {
+    return this.scrollProgress
   }
 }

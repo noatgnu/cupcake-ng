@@ -4,7 +4,7 @@ export interface BackupLog {
   backup_type_display: string;
   status: 'running' | 'completed' | 'failed' | 'cancelled';
   status_display: string;
-  started_at: string; // ISO date string
+  created_at: string; // ISO date string
   completed_at: string | null; // ISO date string
   duration_seconds: number | null;
   backup_file_path: string | null;
@@ -72,3 +72,50 @@ export const BACKUP_STATUS_CHOICES: BackupStatusChoice[] = [
   { value: 'failed', label: 'Failed' },
   { value: 'cancelled', label: 'Cancelled' }
 ];
+
+// New interfaces for the BackupViewSet API endpoints
+
+export interface BackupTriggerRequest {
+  triggered_by: string;
+}
+
+export interface BackupTriggerResponse {
+  success: boolean;
+  message: string;
+  backup_id: string;
+}
+
+export interface BackupStatus {
+  status: 'idle' | 'in_progress' | 'completed' | 'failed' | 'error';
+  message: string;
+  details?: string;
+  progress?: number;
+  backup_id?: string;
+}
+
+export interface BackupHistoryResponse {
+  backups: BackupHistoryItem[];
+  total_count: number;
+  period_days: number;
+}
+
+export interface BackupHistoryItem {
+  id: string;
+  backup_type: 'database' | 'media' | 'full';
+  status: 'created' | 'in_progress' | 'completed' | 'failed';
+  triggered_by: string;
+  created_at: string;
+  completed_at: string | null;
+  file_size_mb: number | null;
+  error_message: string | null;
+  duration_seconds?: number;
+}
+
+export interface BackupProgress {
+  status: 'created' | 'in_progress' | 'completed' | 'failed';
+  message: string;
+  progress: number;
+  elapsed_seconds?: number;
+  file_size_mb?: number | null;
+  error?: string;
+}

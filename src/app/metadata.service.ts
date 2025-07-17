@@ -16,10 +16,10 @@ export class MetadataService {
   labelTypes: string[] = []
   ms2AnalyzerTypes: string[] = []
   metadataTypeAutocomplete: string[] = ["Characteristics", "Comment", "Factor value", "Other"]
-  metadataNameAutocomplete: string[] = ["Disease", "Organism part", "Subcellular location", "Organism", "Instrument", "Reduction reagent", "Alkylation reagent", "Label", "Cleavage agent details", "Dissociation method", "Modification parameters", "Cell type", "Enrichment process", "MS2 analyzer type", "Proteomics data acquisition method"]
+  metadataNameAutocomplete: string[] = ["Disease", "Organism part", "Subcellular location", "Organism", "Instrument", "Reduction reagent", "Alkylation reagent", "Label", "Cleavage agent details", "Dissociation method", "Modification parameters", "Cell type", "Enrichment process", "MS2 analyzer type", "Proteomics data acquisition method", "Biological replicate", "Technical replicate", "Fraction identifier", "Data file", "File uri", "Scan window lower limit", "Scan window upper limit", "Proteomexchange accession number"]
   metadataOtherAutocomplete: string[] = ["Source name", "Material type", "Assay name", "Technology type"]
   metadataCharacteristics: string[] = ["Disease", "Organism part", "Subcellular location", "Organism", "Cell type", "Cell line", "Developmental stage", "Ancestry category", "Sex", "Age", "Biological replicate", "Enrichment process"]
-  metadataComment: string[] = ["Data file", "File URI", "Technical replicate", "Fraction identifier", "Label", "Cleavage agent details", "Instrument", "Modification parameters", "Dissociation method", "Precursor mass tolerance", "Fragment mass tolerance", "MS2 analyzer type",""]
+  metadataComment: string[] = ["Data file", "File URI", "Technical replicate", "Fraction identifier", "Label", "Cleavage agent details", "Instrument", "Modification parameters", "Dissociation method", "Precursor mass tolerance", "Fragment mass tolerance", "MS2 analyzer type", "Scan window lower limit", "Scan window upper limit", "Proteomexchange accession number", "Proteomics data acquisition method", "Collision energy", "MS1 scan range", "Position", "Enrichment process", "Depletion", "Reduction reagent", "Alkylation reagent"]
   staffMetadataSpecific: string[] =
     [
       "Fraction identifier",
@@ -33,7 +33,10 @@ export class MetadataService {
       "Instrument",
       "MS1 scan range",
       "MS2 analyzer type",
-      "Position"
+      "Position",
+      "Scan window lower limit",
+      "Scan window upper limit",
+      "Proteomexchange accession number"
     ]
   metadataTemplate = [{
     "name": "Source name", "type": ""
@@ -72,6 +75,9 @@ export class MetadataService {
 
   userMetadataTemplate = [
     {
+      "name": "Source name", "type": ""
+    },
+    {
       "name": "Organism", "type": "Characteristics"
     }, {
       "name": "Organism part", "type": "Characteristics"
@@ -79,8 +85,15 @@ export class MetadataService {
       "name": "Disease", "type": "Characteristics"
     }, {
       "name": "Cell type", "type": "Characteristics"
+    }, {
+      "name": "Biological replicate", "type": "Characteristics"
     },{
       "name": "Material type", "type": ""
+    },
+    {
+      "name": "Assay name", "type": ""
+    }, {
+      "name": "Technology type", "type": ""
     },
     {
       "name": "Developmental stage", "type": "Characteristics",
@@ -93,6 +106,11 @@ export class MetadataService {
     },
     {"name": "Phenotype", "type": "Characteristics"},
     {"name": "Age", "type": "Characteristics"},
+    {"name": "Technical replicate", "type": "Comment"},
+    {"name": "Label", "type": "Comment"},
+    {"name": "Fraction identifier", "type": "Comment"},
+    {"name": "Instrument", "type": "Comment"},
+    {"name": "Data file", "type": "Comment"},
     {"name": "Cleavage agent details", "type": "Comment"},
     {"name": "Modification parameters", "type": "Comment"},
     {"name": "Dissociation method", "type": "Comment"},
@@ -135,6 +153,17 @@ export class MetadataService {
     "Phenotype": "Samples from healthy patients or individuals normally appear in manuscripts and annotations as healthy or normal. It is recommended to use “normal” for description of the typical healthy and normal phenotype.",
     "MS1 scan range": "example 400m/z - 1200m/z",
     "Age": "Should be written in the format of 0Y-0M-0D or 0Y for just years, 0M for just months, 0D for just days. Can also be a range like 0Y-0M-0D to 0Y-0M-1D",
+    "Scan window lower limit": "Lower limit of the scan window in m/z for DIA experiments",
+    "Scan window upper limit": "Upper limit of the scan window in m/z for DIA experiments",
+    "Proteomexchange accession number": "ProteomeXchange accession number for public datasets",
+    "Depletion": "Depletion methods used to remove unwanted components from the sample",
+    "Collision energy": "Collision energy used for fragmentation in MS/MS experiments",
+    "Position": "Position of the sample in the instrument (e.g., well position in a plate)",
+    "File uri": "URI or URL to the data file location",
+    "Material type": "Type of material analyzed (e.g., cell lysate, tissue extract)",
+    "Developmental stage": "Developmental stage of the organism when the sample was collected",
+    "Ancestry category": "Ancestry or ethnicity category of the sample donor",
+    "Sex": "Biological sex of the sample donor (male, female, unknown)",
   }
 
   requiredColumnNames = [

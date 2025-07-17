@@ -35,6 +35,7 @@ import {
 import {AnnotationInputComponent} from "../annotation-input/annotation-input.component";
 import {McpSdrfSuggestionsComponent} from "../mcp-sdrf-suggestions/mcp-sdrf-suggestions.component";
 import {MediaDeviceService} from "../../media-device.service";
+import {SiteSettingsService} from "../../site-settings.service";
 
 @Component({
     selector: 'app-step-view',
@@ -92,7 +93,8 @@ export class StepViewComponent {
     private web: WebService,
     private accounts: AccountsService,
     private speech: SpeechService,
-    public mediaDevice: MediaDeviceService
+    public mediaDevice: MediaDeviceService,
+    private siteSettings: SiteSettingsService
   ) {
     this.modalConfig.backdrop = 'static';
     this.modalConfig.keyboard = false;
@@ -587,6 +589,12 @@ export class StepViewComponent {
     } else {
       this.toastService.show('MCP SDRF', 'Metadata columns created from SDRF suggestion');
     }
+  }
+
+  // Check if AI SDRF suggestions module is enabled
+  isAiSdrfSuggestionsEnabled(): boolean {
+    const settings = this.siteSettings.getCurrentPublicSettings();
+    return settings?.enable_ai_sdrf_suggestions !== false;
   }
 
   openSdrfModal() {

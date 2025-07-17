@@ -221,8 +221,9 @@
             [staffModeActive]="true"
             [sampleNumber]="5"
             [userMetadata]="selectedTemplate.user_columns"
-            [staffMetadata]="selectedTemplate.staff_columns">
-            [removeMetadata]="removeMetadata"
+            [staffMetadata]="selectedTemplate.staff_columns"
+            (removeMetadata)="removeTemplateField($event.metadata, $event.index, $event.data_type)">
+
           </app-metadata-table>
         </div>
       </div>

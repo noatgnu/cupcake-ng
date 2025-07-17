@@ -340,7 +340,7 @@
                     <small class="text-body-secondary">{{ attachments.length }} file(s) attached</small>
                     <div class="d-flex flex-wrap gap-2">
                       @for (file of attachments; track file.name; let i = $index) {
-                        <div class="badge bg-light text-dark d-flex align-items-center">
+                        <div class="badge text-dark d-flex align-items-center">
                           <i class="bi bi-paperclip me-1"></i>
                           {{ file.name }}
                           <button type="button" class="btn-close ms-2"

@@ -7,14 +7,14 @@
         Date Window
       </h3>
     </header>
-    
+
     <div class="datepicker-container d-flex justify-content-center mb-3">
-      <ngb-datepicker 
-        (navigate)="handleDateNavigate($event)" 
-        #dp 
-        (dateSelect)="onDateSelection($event)" 
-        [displayMonths]="2" 
-        [dayTemplate]="t" 
+      <ngb-datepicker
+        (navigate)="handleDateNavigate($event)"
+        #dp
+        (dateSelect)="onDateSelection($event)"
+        [displayMonths]="2"
+        [dayTemplate]="t"
         outsideDays="hidden"
         role="application"
         aria-label="Date selection calendar" />
@@ -40,14 +40,14 @@
           {{ date.day }}
         </span>
       </ng-template>
-      
+
       <div class="date-selection-summary" aria-live="polite">
         @if (fromDate || toDate) {
           <div class="card border-light">
             <div class="card-body py-2">
               @if (fromDate) {
                 <div class="selected-date mb-1">
-                  <strong>Selected Start Date:</strong> 
+                  <strong>Selected Start Date:</strong>
                   <time [attr.datetime]="fromDate.year + '-' + fromDate.month.toString().padStart(2, '0') + '-' + fromDate.day.toString().padStart(2, '0')">
                     {{fromDate.year}}.{{fromDate.month}}.{{fromDate.day}}
                   </time>
@@ -61,7 +61,7 @@
               }
               @if (toDate) {
                 <div class="selected-date">
-                  <strong>Selected End Date:</strong> 
+                  <strong>Selected End Date:</strong>
                   <time [attr.datetime]="toDate.year + '-' + toDate.month.toString().padStart(2, '0') + '-' + toDate.day.toString().padStart(2, '0')">
                     {{toDate.year}}.{{toDate.month}}.{{toDate.day}}
                   </time>
@@ -141,18 +141,18 @@
                         <td>
                           @if (accounts.is_staff || dataService.instrumentPermissions[instrument.id]['can_manage']) {
                             @if (booking.approved) {
-                              <button 
-                                type="button" 
-                                class="btn btn-link p-0 text-success fs-5" 
+                              <button
+                                type="button"
+                                class="btn btn-link p-0 text-success fs-5"
                                 (click)="toggleApproval(booking)"
                                 aria-label="Revoke approval for booking"
                                 title="Click to revoke approval">
                                 <i class="bi bi-check-circle" aria-hidden="true"></i>
                               </button>
                             } @else {
-                              <button 
-                                type="button" 
-                                class="btn btn-link p-0 text-danger fs-5" 
+                              <button
+                                type="button"
+                                class="btn btn-link p-0 text-danger fs-5"
                                 (click)="toggleApproval(booking)"
                                 aria-label="Approve booking"
                                 title="Click to approve">
@@ -177,9 +177,9 @@
                           <div class="d-flex gap-2 align-items-center">
                             @if (accounts.is_staff || dataService.instrumentPermissions[instrument.id]['can_manage']) {
                               <div ngbDropdown class="d-inline-block">
-                                <button 
-                                  class="btn btn-sm btn-outline-warning" 
-                                  id="bookingDropdownDelay-{{booking.id}}" 
+                                <button
+                                  class="btn btn-sm btn-outline-warning"
+                                  id="bookingDropdownDelay-{{booking.id}}"
                                   ngbDropdownToggle
                                   aria-label="Delay booking options"
                                   title="Delay booking">
@@ -204,8 +204,8 @@
                                   </button>
                                 </div>
                               </div>
-                              <button 
-                                class="btn btn-sm btn-outline-danger" 
+                              <button
+                                class="btn btn-sm btn-outline-danger"
                                 (click)="removeBooking(booking)"
                                 aria-label="Delete booking"
                                 title="Delete this booking">
@@ -242,7 +242,7 @@
           <div id="hourBasedBookings-panel" role="tabpanel" aria-labelledby="hourBasedBookings-tab">
             <!-- Time Configuration Panel -->
             <div class="card mt-3">
-              <div class="card-header bg-light">
+              <div class="card-header">
                 <h4 class="card-title h6 mb-0">
                   <i class="bi bi-gear me-2" aria-hidden="true"></i>
                   Time Selection Configuration
@@ -252,7 +252,7 @@
                 <div class="row g-3">
                   <!-- Start time selection -->
                   <div class="col-md-6">
-                    <fieldset class="border border-2 p-3 rounded bg-light">
+                    <fieldset class="border border-2 p-3 rounded">
                       <legend class="fs-6 fw-semibold mb-3 text-primary">
                         <i class="bi bi-play-circle me-1" aria-hidden="true"></i>
                         Start Time
@@ -274,7 +274,7 @@
                           />
                         </div>
                         @if (showStartTimepicker) {
-                          <div class="d-flex justify-content-center p-2 bg-white rounded border">
+                          <div class="d-flex justify-content-center p-2 rounded border">
                             <ngb-timepicker
                               [(ngModel)]="startTime"
                               [seconds]="false"
@@ -292,7 +292,7 @@
 
                   <!-- End time selection -->
                   <div class="col-md-6">
-                    <fieldset class="border border-2 p-3 rounded bg-light">
+                    <fieldset class="border border-2 p-3 rounded">
                       <legend class="fs-6 fw-semibold mb-3 text-danger">
                         <i class="bi bi-stop-circle me-1" aria-hidden="true"></i>
                         End Time
@@ -314,7 +314,7 @@
                           />
                         </div>
                         @if (showEndTimepicker) {
-                          <div class="d-flex justify-content-center p-2 bg-white rounded border">
+                          <div class="d-flex justify-content-center p-2 rounded border">
                             <ngb-timepicker
                               [(ngModel)]="endTime"
                               [seconds]="false"
@@ -396,12 +396,12 @@
                   </div>
                 </div>
                 <div class="card-body p-2">
-                  <div class="position-relative overflow-auto bg-light rounded p-2" style="max-width: 100%">
-                    <canvas 
-                      (mousedown)="onMouseDown($event)" 
-                      (mouseup)="onMouseUp($event)" 
+                  <div class="position-relative overflow-auto rounded p-2" style="max-width: 100%">
+                    <canvas
+                      (mousedown)="onMouseDown($event)"
+                      (mouseup)="onMouseUp($event)"
                       (mousemove)="onMouseMove($event)"
-                      #canvasEdit 
+                      #canvasEdit
                       [height]="height"
                       role="img"
                       aria-label="Interactive time booking visualization - drag to select time slots"
@@ -430,12 +430,12 @@
         </h5>
       </div>
       <div class="card-body p-2">
-        <div class="position-relative overflow-auto bg-light rounded p-2" style="max-width: 100%">
-          <canvas 
-            (mousedown)="onMouseDown($event)" 
-            (mouseup)="onMouseUp($event)" 
+        <div class="position-relative overflow-auto rounded p-2" style="max-width: 100%">
+          <canvas
+            (mousedown)="onMouseDown($event)"
+            (mouseup)="onMouseUp($event)"
             (mousemove)="onMouseMove($event)"
-            #canvasNonEdit 
+            #canvasNonEdit
             [height]="height"
             role="img"
             aria-label="Booking timeline visualization"

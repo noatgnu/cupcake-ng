@@ -1,4 +1,64 @@
 @if (job) {
+  <!-- Quick Access Column Addition Controls for List View -->
+  <div class="d-flex flex-wrap gap-2 align-items-center p-3 rounded border mb-3">
+    <span class="text-muted fw-medium">Quick Add Columns:</span>
+    
+    <!-- User Columns Quick Access -->
+    @if (userCanEdit || staffModeAvailable) {
+      <div ngbDropdown display="dynamic" class="d-inline-block">
+        <button class="btn btn-outline-primary btn-sm" id="quickAddUserColumnsListView" ngbDropdownToggle>
+          <i class="bi bi-plus-circle me-1"></i>
+          + User Columns
+        </button>
+        <div ngbDropdownMenu aria-labelledby="quickAddUserColumnsListView">
+          @for (m of metadataService.userMetadataTemplate; track m.name) {
+            <button ngbDropdownItem (click)="jobSubmission.addMetadata(m, 'user_metadata', job)">
+              {{selectedTemplateFieldMap[m.name] || m.name}}
+            </button>
+          }
+          <div class="dropdown-divider"></div>
+          <button ngbDropdownItem (click)="jobSubmission.addMetadata({name: 'Sample type', type: 'Characteristics'}, 'user_metadata', job)">
+            <i class="bi bi-tag me-1"></i> Sample Type
+          </button>
+          <button ngbDropdownItem (click)="jobSubmission.addMetadata({name: '', type: ''}, 'user_metadata', job)">
+            <i class="bi bi-plus-square me-1"></i> Custom Metadata
+          </button>
+        </div>
+      </div>
+    }
+
+    <!-- Staff Columns Quick Access -->
+    @if (staffModeAvailable) {
+      <div ngbDropdown display="dynamic" class="d-inline-block">
+        <button class="btn btn-outline-warning btn-sm" id="quickAddStaffColumnsListView" ngbDropdownToggle>
+          <i class="bi bi-plus-circle me-1"></i>
+          + Staff Columns
+        </button>
+        <div ngbDropdownMenu aria-labelledby="quickAddStaffColumnsListView">
+          @for (m of metadataService.staffMetadataSpecific; track m) {
+            <button ngbDropdownItem (click)="jobSubmission.addMetadata({name: m, type: 'Comment'}, 'staff_metadata', job)">
+              {{selectedTemplateFieldMap[m] || m}}
+            </button>
+          }
+          <div class="dropdown-divider"></div>
+          <button ngbDropdownItem (click)="jobSubmission.addMetadata({name: '', type: 'Factor value'}, 'staff_metadata', job)">
+            <i class="bi bi-diagram-3 me-1"></i> Factor Value
+          </button>
+          <button ngbDropdownItem (click)="jobSubmission.addMetadata({name: '', type: ''}, 'staff_metadata', job)">
+            <i class="bi bi-plus-square me-1"></i> Custom Metadata
+          </button>
+        </div>
+      </div>
+    }
+    
+    <div class="ms-auto d-flex align-items-center gap-2">
+      <small class="text-muted">
+        <i class="bi bi-info-circle me-1"></i>
+        Add metadata columns quickly from here
+      </small>
+    </div>
+  </div>
+
   <div [formGroup]="jobSubmission.metadata">
     <!-- User Metadata Section -->
     <div [formArrayName]="'user_metadata'" class="d-flex gap-2 flex-column">

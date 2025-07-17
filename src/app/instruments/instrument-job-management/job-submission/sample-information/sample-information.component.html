@@ -4,6 +4,16 @@
       <h5 class="mb-0">Sample Details</h5>
     </div>
     <div class="card-body">
+      <!-- Warning for incomplete sample information -->
+      @if (job && (!job.sample_number || job.sample_number === 0 || !job.selected_template)) {
+        <div class="alert alert-danger d-flex align-items-center mb-3">
+          <i class="bi bi-exclamation-triangle-fill me-2 fs-5"></i>
+          <div>
+            <strong>Required Information Missing</strong>
+            <p class="mb-0">This job cannot proceed without complete sample information. Please provide the required details below.</p>
+          </div>
+        </div>
+      }
       <!-- Reagent information -->
       <form [formGroup]="reagentForm" class="mb-3">
         @if (selectedStoredReagent) {

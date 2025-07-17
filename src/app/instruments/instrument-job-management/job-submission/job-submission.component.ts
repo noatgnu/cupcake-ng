@@ -605,6 +605,46 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit, OnDestroy 
     }
   }
 
+  async updateJobWithSampleInfo() {
+    if (this.job && this.sampleInformation) {
+      // Check if sample information is valid
+      if (!this.job.sample_number || this.job.sample_number === 0) {
+        await this.toast.show('Validation Error', 'Please set a sample number greater than 0');
+        return;
+      }
+
+      if (!this.job.selected_template) {
+        await this.toast.show('Validation Error', 'Please select a metadata template');
+        return;
+      }
+
+      // Validate the sample information form
+      this.sampleInformation.formSampleExtraData.markAllAsTouched();
+      
+      if (this.sampleInformation.formSampleExtraData.valid) {
+        try {
+          // Force update the job to ensure all sample information is saved
+          await this.update();
+          
+          if (this.job && this.job.sample_number > 0 && this.job.selected_template) {
+            await this.toast.show('Job Updated', 'Sample information has been updated successfully. You can now proceed with template configuration.');
+            
+            // Optionally scroll to the template section
+            const templateSection = document.querySelector('[data-template-section]');
+            if (templateSection) {
+              templateSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+          }
+        } catch (error) {
+          console.error('Error updating job with sample info:', error);
+          await this.toast.show('Update Error', 'Failed to update job information. Please try again.');
+        }
+      } else {
+        await this.toast.show('Validation Error', 'Please provide valid sample information before updating');
+      }
+    }
+  }
+
   async updateStaffData() {
     if (this.job) {
       if (this.staffModeAvailable) {

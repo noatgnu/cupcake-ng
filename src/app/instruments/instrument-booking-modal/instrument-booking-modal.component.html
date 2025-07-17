@@ -33,14 +33,14 @@
           Find Instrument
         </h5>
       </header>
-      
+
       <form [formGroup]="searchForm" class="search-form">
         <div class="form-floating">
-          <input 
-            type="search" 
-            class="form-control" 
-            formControlName="instrument" 
-            id="instrumentSearch" 
+          <input
+            type="search"
+            class="form-control"
+            formControlName="instrument"
+            id="instrumentSearch"
             placeholder="Search instruments"
             aria-describedby="search-help"
             autocomplete="off">
@@ -53,13 +53,13 @@
           <i class="bi bi-info-circle me-1" aria-hidden="true"></i>
           Type to search for available instruments by name or description
         </div>
-        
+
         <!-- Search Results -->
         @if (instrumentQuery) {
           @if (instrumentQuery.results.length > 0) {
             <div class="search-results mt-3" role="region" aria-label="Search results">
               <div class="card border-0 shadow-sm">
-                <div class="card-header bg-light py-2">
+                <div class="card-header py-2">
                   <small class="text-muted fw-semibold">
                     <i class="bi bi-list-ul me-1" aria-hidden="true"></i>
                     Found {{instrumentQuery.results.length}} instruments
@@ -67,7 +67,7 @@
                 </div>
                 <div class="list-group list-group-flush">
                   @for (result of instrumentQuery.results; track result.id) {
-                    <button 
+                    <button
                       type="button"
                       class="list-group-item list-group-item-action p-3 border-0"
                       (click)="clickInstrument(result)"
@@ -98,13 +98,13 @@
                     </button>
                   }
                 </div>
-                
+
                 <!-- Pagination -->
                 @if (instrumentQuery.previous || instrumentQuery.next) {
                   <div class="card-footer d-flex justify-content-between align-items-center py-2">
                     @if (instrumentQuery.previous) {
-                      <button 
-                        class="btn btn-sm btn-outline-primary" 
+                      <button
+                        class="btn btn-sm btn-outline-primary"
                         (click)="getInstruments(instrumentQuery.previous)"
                         aria-label="Go to previous page">
                         <i class="bi bi-chevron-left me-1" aria-hidden="true"></i>Previous
@@ -112,10 +112,10 @@
                     } @else {
                       <div></div>
                     }
-                    
+
                     @if (instrumentQuery.next) {
-                      <button 
-                        class="btn btn-sm btn-outline-primary" 
+                      <button
+                        class="btn btn-sm btn-outline-primary"
                         (click)="getInstruments(instrumentQuery.next)"
                         aria-label="Go to next page">
                         Next<i class="bi bi-chevron-right ms-1" aria-hidden="true"></i>
@@ -140,7 +140,7 @@
   @if (selectedInstrument) {
     <section class="selected-instrument mb-4" role="region" aria-labelledby="selected-instrument-heading">
       <div class="card border-0 shadow-sm">
-        <div class="card-header bg-light border-bottom">
+        <div class="card-header border-bottom">
           <h5 id="selected-instrument-heading" class="mb-0 fw-semibold">
             <i class="bi bi-device-hdd me-2 text-primary" aria-hidden="true"></i>
             Selected Instrument
@@ -155,7 +155,7 @@
               <div class="alert alert-info d-flex align-items-start py-2 mb-2" role="note">
                 <i class="bi bi-calendar-range me-2 mt-1 flex-shrink-0" aria-hidden="true"></i>
                 <div>
-                  <strong>Auto-approval Duration Limit:</strong> 
+                  <strong>Auto-approval Duration Limit:</strong>
                   Bookings up to <strong>{{selectedInstrument.max_days_within_usage_pre_approval}} days</strong> will be automatically approved.
                 </div>
               </div>
@@ -165,7 +165,7 @@
               <div class="alert alert-info d-flex align-items-start py-2 mb-0" role="note">
                 <i class="bi bi-calendar-plus me-2 mt-1 flex-shrink-0" aria-hidden="true"></i>
                 <div>
-                  <strong>Auto-approval Advance Booking:</strong> 
+                  <strong>Auto-approval Advance Booking:</strong>
                   Bookings up to <strong>{{selectedInstrument.max_days_ahead_pre_approval}} days</strong> in advance will be automatically approved.
                 </div>
               </div>
@@ -221,14 +221,14 @@
             </div>
 
             <div class="d-flex gap-2 justify-content-end">
-              <button 
-                class="btn btn-outline-danger" 
+              <button
+                class="btn btn-outline-danger"
                 (click)="deleteUsage(selectedInstrumentUsage)"
                 aria-label="Delete this booking">
                 <i class="bi bi-trash me-1" aria-hidden="true"></i>Delete
               </button>
-              <button 
-                class="btn btn-outline-secondary" 
+              <button
+                class="btn btn-outline-secondary"
                 (click)="selectedInstrumentUsage=undefined"
                 aria-label="Cancel selection">
                 <i class="bi bi-x me-1" aria-hidden="true"></i>Cancel
@@ -243,7 +243,7 @@
         <!-- Booking Time Visualizer -->
         <section class="calendar-section mb-4" role="region" aria-labelledby="calendar-heading">
           <div class="card border-0 shadow-sm">
-            <div class="card-header bg-light border-bottom">
+            <div class="card-header border-bottom">
               <h5 id="calendar-heading" class="mb-0 fw-semibold">
                 <i class="bi bi-calendar-week me-2 text-primary" aria-hidden="true"></i>
                 Booking Calendar
@@ -266,7 +266,7 @@
         <!-- Booking Form -->
         <section class="booking-form" role="region" aria-labelledby="booking-form-heading">
           <div class="card border-0 shadow-sm">
-            <div class="card-header bg-light border-bottom">
+            <div class="card-header border-bottom">
               <h5 id="booking-form-heading" class="mb-0 fw-semibold">
                 <i class="bi bi-pencil me-2 text-primary" aria-hidden="true"></i>
                 Booking Details
@@ -275,11 +275,11 @@
             <div class="card-body">
               <!-- Description Field -->
               <div class="form-floating mb-4">
-                <textarea 
-                  class="form-control" 
-                  [(ngModel)]="usageDescription" 
+                <textarea
+                  class="form-control"
+                  [(ngModel)]="usageDescription"
                   id="bookingDescription"
-                  style="height: 120px" 
+                  style="height: 120px"
                   placeholder="Enter booking description"
                   aria-describedby="description-help"
                   maxlength="500"></textarea>
@@ -296,17 +296,17 @@
               <!-- Staff/Manager Options -->
               @if (dataService.instrumentPermissions[selectedInstrument.id]) {
                 @if (accounts.is_staff || dataService.instrumentPermissions[selectedInstrument.id].can_manage) {
-                  <div class="staff-options border rounded p-3 bg-light">
+                  <div class="staff-options border rounded p-3">
                     <h6 class="fw-semibold mb-3 text-primary">
                       <i class="bi bi-shield-check me-2" aria-hidden="true"></i>
                       Staff Options
                     </h6>
-                    
+
                     <div class="form-check mb-3">
-                      <input 
-                        type="checkbox" 
-                        class="form-check-input" 
-                        id="maintenanceCheck" 
+                      <input
+                        type="checkbox"
+                        class="form-check-input"
+                        id="maintenanceCheck"
                         [(ngModel)]="maintenance"
                         aria-describedby="maintenance-help">
                       <label class="form-check-label fw-semibold" for="maintenanceCheck">
@@ -332,12 +332,12 @@
                             <div class="row g-3">
                               <div class="col-md-6">
                                 <div class="form-floating">
-                                  <input 
-                                    type="number" 
-                                    class="form-control" 
-                                    [(ngModel)]="repeat" 
+                                  <input
+                                    type="number"
+                                    class="form-control"
+                                    [(ngModel)]="repeat"
                                     id="repeatDays"
-                                    min="0" 
+                                    min="0"
                                     max="365"
                                     placeholder="Enter number of days"
                                     aria-describedby="repeat-help">
@@ -369,9 +369,9 @@
                                     [(ngModel)]="repeatUntil"
                                     aria-label="Select end date for recurring maintenance"
                                   />
-                                  <button 
-                                    class="btn btn-outline-secondary" 
-                                    (click)="d.toggle()" 
+                                  <button
+                                    class="btn btn-outline-secondary"
+                                    (click)="d.toggle()"
                                     type="button"
                                     aria-label="Open calendar">
                                     <i class="bi bi-calendar3" aria-hidden="true"></i>
@@ -398,32 +398,32 @@
 </div>
 
 <!-- Modal Footer -->
-<div class="modal-footer bg-light">
+<div class="modal-footer">
   <!-- Maintenance Conflict Warning -->
   @if (hasMaintenance) {
     <div class="alert alert-danger d-flex align-items-start w-100 mb-2 py-2" role="alert">
       <i class="bi bi-exclamation-triangle-fill me-2 mt-1 flex-shrink-0" aria-hidden="true"></i>
       <div>
-        <strong>Booking Conflict:</strong> This booking overlaps with a scheduled maintenance period and cannot be submitted. 
+        <strong>Booking Conflict:</strong> This booking overlaps with a scheduled maintenance period and cannot be submitted.
         Please select a different time slot.
       </div>
     </div>
   }
-  
+
   <!-- Action Buttons -->
   <div class="d-flex gap-2 w-100 justify-content-end">
-    <button 
-      type="button" 
-      class="btn btn-outline-secondary" 
+    <button
+      type="button"
+      class="btn btn-outline-secondary"
       (click)="cancel()"
       aria-label="Cancel booking and close modal">
       <i class="bi bi-x-circle me-1" aria-hidden="true"></i>
       Cancel
     </button>
-    <button 
-      type="button" 
-      class="btn btn-primary" 
-      (click)="submit()" 
+    <button
+      type="button"
+      class="btn btn-primary"
+      (click)="submit()"
       [disabled]="!isFormValid || submitLoading"
       [attr.aria-label]="!isFormValid ? 'Please complete all required fields' : 'Submit booking request'">
       @if (submitLoading) {

@@ -17,6 +17,13 @@ export class HomeComponent implements OnInit {
   hasLogo = false;
   baseUrl = environment.baseURL;
   logoUrl: string | null = null;
+  
+  // Module availability flags
+  enableDocuments = true;
+  enableLabNotebook = true;
+  enableInstruments = true;
+  enableStorage = true;
+  enableBilling = true;
 
   constructor(private router: Router, public siteSettings: SiteSettingsService) { }
 
@@ -41,6 +48,13 @@ export class HomeComponent implements OnInit {
           this.hasLogo = false;
           this.logoUrl = null;
         }
+        
+        // Update module availability based on settings
+        this.enableDocuments = settings.enable_documents_module;
+        this.enableLabNotebook = settings.enable_lab_notebook_module;
+        this.enableInstruments = settings.enable_instruments_module;
+        this.enableStorage = settings.enable_storage_module;
+        this.enableBilling = settings.enable_billing_module;
       }
     });
   }
@@ -86,5 +100,9 @@ export class HomeComponent implements OnInit {
 
   navigateToMetadataPlayground() {
     this.router.navigate(['/metadata-playground']);
+  }
+
+  navigateToBilling() {
+    this.router.navigate(['/billing']);
   }
 }

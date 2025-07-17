@@ -1,0 +1,340 @@
+<div class="modal-header">
+  <h4 class="modal-title">
+    <i class="bi bi-calculator me-2"></i>
+    Request Service Quote
+  </h4>
+  <button type="button" class="btn-close" aria-label="Close" (click)="close()"></button>
+</div>
+
+<div class="modal-body">
+  <!-- Loading State -->
+  @if (loading) {
+    <div class="text-center py-4">
+      <div class="spinner-border" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+      <p class="mt-3 text-muted">Loading form configuration...</p>
+    </div>
+  }
+
+  <!-- Error State -->
+  @if (error && !loading) {
+    <div class="alert alert-danger" role="alert">
+      <i class="bi bi-exclamation-triangle me-2"></i>
+      {{ error }}
+    </div>
+  }
+
+  <!-- Quote Form -->
+  @if (!loading && !error && !quote) {
+    <div class="quote-form">
+      <form [formGroup]="quoteForm" (ngSubmit)="generateQuote()">
+        <div class="row">
+          <!-- Instrument Selection -->
+          <div class="col-md-6">
+            <div class="mb-3">
+              <label for="instrument_id" class="form-label">
+                Instrument <span class="text-danger">*</span>
+              </label>
+              <select
+                class="form-select"
+                id="instrument_id"
+                formControlName="instrument_id"
+                (change)="onInstrumentChange()"
+              >
+                <option value="">Select an instrument...</option>
+                @for (instrument of formConfig?.form_config?.instruments || []; track instrument.id) {
+                  <option [value]="instrument.id">
+                    {{ instrument.instrument_name }}
+                  </option>
+                }
+              </select>
+              @if (getFieldError('instrument_id')) {
+                <div class="text-danger small mt-1">
+                  {{ getFieldError('instrument_id') }}
+                </div>
+              }
+            </div>
+          </div>
+
+          <!-- Service Tier Selection -->
+          <div class="col-md-6">
+            <div class="mb-3">
+              <label for="service_tier_id" class="form-label">
+                Service Tier <span class="text-danger">*</span>
+              </label>
+              <select
+                class="form-select"
+                id="service_tier_id"
+                formControlName="service_tier_id"
+                (change)="onServiceTierChange()"
+              >
+                <option value="">Select a service tier...</option>
+                @for (tier of formConfig?.form_config?.service_tiers || []; track tier.id) {
+                  <option [value]="tier.id">
+                    {{ tier.name }}
+                  </option>
+                }
+              </select>
+              @if (getFieldError('service_tier_id')) {
+                <div class="text-danger small mt-1">
+                  {{ getFieldError('service_tier_id') }}
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <!-- Number of Samples -->
+          <div class="col-md-6">
+            <div class="mb-3">
+              <label for="samples" class="form-label">
+                Number of Samples <span class="text-danger">*</span>
+              </label>
+              <input
+                type="number"
+                class="form-control"
+                id="samples"
+                formControlName="samples"
+                min="1"
+                placeholder="Enter number of samples"
+              >
+              @if (getFieldError('samples')) {
+                <div class="text-danger small mt-1">
+                  {{ getFieldError('samples') }}
+                </div>
+              }
+            </div>
+          </div>
+
+          <!-- Injections per Sample -->
+          <div class="col-md-6">
+            <div class="mb-3">
+              <label for="injections_per_sample" class="form-label">
+                Injections per Sample
+                <i class="bi bi-info-circle ms-1"
+                   ngbTooltip="Number of injections per sample (if applicable)"
+                   placement="top"></i>
+              </label>
+              <input
+                type="number"
+                class="form-control"
+                id="injections_per_sample"
+                formControlName="injections_per_sample"
+                min="1"
+                placeholder="1"
+              >
+              @if (getFieldError('injections_per_sample')) {
+                <div class="text-danger small mt-1">
+                  {{ getFieldError('injections_per_sample') }}
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <!-- Estimated Instrument Hours -->
+          <div class="col-md-6">
+            <div class="mb-3">
+              <label for="estimated_instrument_hours" class="form-label">
+                Estimated Instrument Hours
+                <i class="bi bi-info-circle ms-1"
+                   ngbTooltip="Estimated instrument time in hours"
+                   placement="top"></i>
+              </label>
+              <input
+                type="number"
+                class="form-control"
+                id="estimated_instrument_hours"
+                formControlName="estimated_instrument_hours"
+                min="0"
+                step="0.5"
+                placeholder="0.0"
+              >
+              @if (getFieldError('estimated_instrument_hours')) {
+                <div class="text-danger small mt-1">
+                  {{ getFieldError('estimated_instrument_hours') }}
+                </div>
+              }
+            </div>
+          </div>
+
+          <!-- Estimated Personnel Hours -->
+          <div class="col-md-6">
+            <div class="mb-3">
+              <label for="estimated_personnel_hours" class="form-label">
+                Estimated Personnel Hours
+                <i class="bi bi-info-circle ms-1"
+                   ngbTooltip="Estimated personnel time in hours"
+                   placement="top"></i>
+              </label>
+              <input
+                type="number"
+                class="form-control"
+                id="estimated_personnel_hours"
+                formControlName="estimated_personnel_hours"
+                min="0"
+                step="0.5"
+                placeholder="0.0"
+              >
+              @if (getFieldError('estimated_personnel_hours')) {
+                <div class="text-danger small mt-1">
+                  {{ getFieldError('estimated_personnel_hours') }}
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+
+        <!-- Contact Email -->
+        <div class="mb-3">
+          <label for="contact_email" class="form-label">
+            Contact Email
+            <i class="bi bi-info-circle ms-1"
+               ngbTooltip="Email address for follow-up communication"
+               placement="top"></i>
+          </label>
+          <input
+            type="email"
+            class="form-control"
+            id="contact_email"
+            formControlName="contact_email"
+            placeholder="your.email@example.com"
+          >
+          @if (getFieldError('contact_email')) {
+            <div class="text-danger small mt-1">
+              {{ getFieldError('contact_email') }}
+            </div>
+          }
+        </div>
+
+        <!-- Notes -->
+        <div class="mb-3">
+          <label for="notes" class="form-label">
+            Additional Notes
+          </label>
+          <textarea
+            class="form-control"
+            id="notes"
+            formControlName="notes"
+            rows="3"
+            placeholder="Any additional information or special requirements..."
+          ></textarea>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="d-grid">
+          <button
+            type="submit"
+            class="btn btn-primary"
+            [disabled]="quoteForm.invalid || submitting"
+          >
+            @if (submitting) {
+              <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+            } @else {
+              <i class="bi bi-calculator me-2"></i>
+            }
+            {{ submitting ? 'Generating Quote...' : 'Generate Quote' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  }
+
+  <!-- Quote Display -->
+  @if (quote) {
+    <div class="quote-display">
+      <div class="alert alert-success" role="alert">
+        <i class="bi bi-check-circle me-2"></i>
+        Quote generated successfully!
+      </div>
+
+      <!-- Quote Header -->
+      <div class="card mb-3">
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-8">
+              <h5 class="card-title">
+                <i class="bi bi-cpu me-2"></i>
+                {{ quote.instrument.name }}
+              </h5>
+              <p class="card-text text-muted">{{ quote.instrument.description }}</p>
+              <p class="mb-0">
+                <strong>Service Tier:</strong> {{ quote.service_tier.name }}
+              </p>
+              <p class="text-muted small">{{ quote.service_tier.description }}</p>
+            </div>
+            <div class="col-md-4 text-end">
+              <div class="mb-2">
+                <small class="text-muted">Generated:</small><br>
+                <strong>{{ formatDate(quote.generated_at) }}</strong>
+              </div>
+              <div>
+                <small class="text-muted">Valid Until:</small><br>
+                <strong>{{ formatDate(quote.valid_until) }}</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quote Line Items -->
+      <div class="card mb-3">
+        <div class="card-body">
+          <h6 class="card-title">Quote Details</h6>
+          <div class="table-responsive">
+            <table class="table table-sm">
+              <thead>
+                <tr>
+                  <th>Description</th>
+                  <th class="text-end">Quantity</th>
+                  <th class="text-end">Unit Price</th>
+                  <th class="text-end">Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (item of quote.line_items; track $index) {
+                  <tr>
+                    <td>
+                      {{ item.description }}
+                      <small class="text-muted d-block">{{ item.billing_unit }}</small>
+                    </td>
+                    <td class="text-end">{{ item.quantity }}</td>
+                    <td class="text-end">{{ formatPrice(item.unit_price, quote.currency) }}</td>
+                    <td class="text-end">{{ formatPrice(item.total_price, quote.currency) }}</td>
+                  </tr>
+                }
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th colspan="3" class="text-end">Total:</th>
+                  <th class="text-end">{{ formatPrice(quote.total, quote.currency) }}</th>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quote Actions -->
+      <div class="d-flex justify-content-between">
+        <button class="btn btn-outline-secondary" (click)="downloadQuote()">
+          <i class="bi bi-download me-2"></i>
+          Download Quote
+        </button>
+        <div>
+          <button class="btn btn-secondary me-2" (click)="quote = null">
+            <i class="bi bi-arrow-left me-2"></i>
+            Back to Form
+          </button>
+          <button class="btn btn-primary" (click)="acceptQuote()">
+            <i class="bi bi-check-lg me-2"></i>
+            Accept Quote
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

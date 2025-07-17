@@ -154,6 +154,12 @@ export class SiteSettingsService {
   private getDefaultSettings(): SiteSettings {
     console.log('Using default site settings');
     return {
+      enable_ai_sdrf_suggestions: false,
+      enable_billing_module: false,
+      enable_documents_module: true,
+      enable_instruments_module: true,
+      enable_lab_notebook_module: true,
+      enable_storage_module: true,
       site_name: 'CUPCAKE',
       site_tagline: '',
       banner_enabled: false,
@@ -175,7 +181,10 @@ export class SiteSettingsService {
       allow_import_messaging: true,
       allow_import_support_models: true,
       staff_only_import_override: false,
-      import_archive_size_limit_mb: 100
+      import_archive_size_limit_mb: 100,
+      // Backup module defaults
+      enable_backup_module: true,
+      backup_frequency_days: 7
     };
   }
 
@@ -207,25 +216,25 @@ export class SiteSettingsService {
    */
   applyThemeColors(settings: PublicSiteSettings): void {
     const root = document.documentElement;
-    
+
     // Set cupcake-specific custom properties
     root.style.setProperty('--cupcake-primary-color', settings.primary_color);
     root.style.setProperty('--cupcake-secondary-color', settings.secondary_color);
     root.style.setProperty('--cupcake-banner-color', settings.banner_color);
     root.style.setProperty('--cupcake-banner-text-color', settings.banner_text_color);
-    
+
     // Override Bootstrap's primary and secondary color variables
     root.style.setProperty('--bs-primary', settings.primary_color);
     root.style.setProperty('--bs-primary-rgb', this.hexToRgb(settings.primary_color));
     root.style.setProperty('--bs-secondary', settings.secondary_color);
     root.style.setProperty('--bs-secondary-rgb', this.hexToRgb(settings.secondary_color));
-    
+
     // Generate lighter and darker variants for Bootstrap
     const primaryDark = this.adjustBrightness(settings.primary_color, -20);
     const primaryLight = this.adjustBrightness(settings.primary_color, 20);
     const secondaryDark = this.adjustBrightness(settings.secondary_color, -20);
     const secondaryLight = this.adjustBrightness(settings.secondary_color, 20);
-    
+
     root.style.setProperty('--bs-primary-dark', primaryDark);
     root.style.setProperty('--bs-primary-light', primaryLight);
     root.style.setProperty('--bs-secondary-dark', secondaryDark);
@@ -255,7 +264,7 @@ export class SiteSettingsService {
     const R = (num >> 16) + amt;
     const G = (num >> 8 & 0x00FF) + amt;
     const B = (num & 0x0000FF) + amt;
-    
+
     return '#' + (0x1000000 + (R < 255 ? R < 1 ? 0 : R : 255) * 0x10000 +
       (G < 255 ? G < 1 ? 0 : G : 255) * 0x100 +
       (B < 255 ? B < 1 ? 0 : B : 255)).toString(16).slice(1);
@@ -280,7 +289,7 @@ export class SiteSettingsService {
   private updateFavicon(): void {
     // Construct the favicon URL from the API
     const faviconUrl = `${environment.baseURL}/api/site_settings/download_favicon/`;
-    
+
     // Find existing favicon link or create one
     let favicon = document.querySelector('link[rel="icon"]') as HTMLLinkElement;
     if (!favicon) {
@@ -288,10 +297,10 @@ export class SiteSettingsService {
       favicon.rel = 'icon';
       document.head.appendChild(favicon);
     }
-    
+
     // Update the favicon href
     favicon.href = faviconUrl;
-    
+
     // Also update shortcut icon if it exists
     const shortcutIcon = document.querySelector('link[rel="shortcut icon"]') as HTMLLinkElement;
     if (shortcutIcon) {

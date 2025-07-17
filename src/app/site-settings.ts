@@ -32,6 +32,16 @@ export interface SiteSettings {
   allow_import_support_models: boolean;
   staff_only_import_override: boolean;
   import_archive_size_limit_mb: number;
+  // Module availability fields
+  enable_documents_module: boolean;
+  enable_lab_notebook_module: boolean;
+  enable_instruments_module: boolean;
+  enable_storage_module: boolean;
+  enable_billing_module: boolean;
+  enable_ai_sdrf_suggestions: boolean;
+  enable_backup_module: boolean;
+  // Backup configuration
+  backup_frequency_days: number;
   // Metadata fields
   created_at?: string;
   updated_at?: string;
@@ -57,6 +67,13 @@ export interface PublicSiteSettings {
   primary_color: string;
   secondary_color: string;
   footer_text?: string;
+  enable_documents_module: boolean;
+  enable_lab_notebook_module: boolean;
+  enable_instruments_module: boolean;
+  enable_storage_module: boolean;
+  enable_billing_module: boolean;
+  enable_ai_sdrf_suggestions: boolean;
+  enable_backup_module: boolean;
 }
 
 export interface ImportOptions {

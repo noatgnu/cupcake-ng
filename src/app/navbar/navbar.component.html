@@ -61,17 +61,46 @@
           </li>
         }
 
-        @if (accounts.loggedIn) {
+        @if (accounts.loggedIn && isModuleEnabled('lab_notebook')) {
           <li class="nav-item"><a class="nav-link" href="/#/laboratory-notebook"><i class="bi bi-journal-text me-1"></i> Laboratory Notebook</a></li>
+        }
+        @if (accounts.loggedIn && isModuleEnabled('documents')) {
           <li class="nav-item"><a class="nav-link" href="/#/documents/browser"><i class="bi bi-files me-1"></i> Documents</a></li>
         }
-        <li class="nav-item"><a class="nav-link" href="/#/instruments"><i class="bi bi-radioactive me-1"></i> Instruments/Equipments</a></li>
-        <li class="nav-item"><a class="nav-link" href="/#/reagent-store"><i class="bi bi-box-seam me-1"></i> Store</a></li>
+        @if (isModuleEnabled('instruments')) {
+          <li class="nav-item"><a class="nav-link" href="/#/instruments"><i class="bi bi-radioactive me-1"></i> Instruments/Equipments</a></li>
+        }
+        @if (isModuleEnabled('storage')) {
+          <li class="nav-item"><a class="nav-link" href="/#/reagent-store"><i class="bi bi-box-seam me-1"></i> Store</a></li>
+        }
         <li class="nav-item"><a class="nav-link" href="/#/sdrf-playground"><i class="bi bi-puzzle me-1"></i> SDRF Playground</a></li>
+        @if (accounts.loggedIn && isModuleEnabled('billing')) {
+          <li class="nav-item dropdown" ngbDropdown>
+            <a class="nav-link" id="billingDropdown" ngbDropdownToggle>
+              <i class="bi bi-currency-dollar me-1"></i> Billing
+            </a>
+            <div ngbDropdownMenu aria-labelledby="billingDropdown">
+              <a class="dropdown-item" href="/#/billing">
+                <i class="bi bi-house me-2"></i> Dashboard
+              </a>
+              <a class="dropdown-item" href="/#/billing/pricing">
+                <i class="bi bi-tag me-2"></i> Service Pricing
+              </a>
+              @if (accounts.is_staff) {
+                <a class="dropdown-item" href="/#/billing/management">
+                  <i class="bi bi-gear me-2"></i> Billing Management
+                </a>
+                <a class="dropdown-item" href="/#/billing/reports">
+                  <i class="bi bi-graph-up me-2"></i> Reports
+                </a>
+              }
+            </div>
+          </li>
+        }
         @if (accounts.loggedIn) {
           <li class="nav-item"><a class="nav-link" href="/#/calendar" target="_blank"><i class="bi bi-calendar3 me-1"></i> Calendar</a></li>
         }
-        @if (accounts.is_staff) {
+        @if (accounts.is_staff && isModuleEnabled('backup')) {
           <li class="nav-item"><a class="nav-link" href="/#/backup"><i class="bi bi-shield-check me-1"></i> Backup</a></li>
         }
 

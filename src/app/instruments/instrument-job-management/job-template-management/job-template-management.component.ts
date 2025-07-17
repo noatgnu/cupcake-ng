@@ -392,4 +392,26 @@ export class JobTemplateManagementComponent {
       })
     }
   }
+
+  removeTemplateField(field: MetadataColumn, index: number, data_type: 'user_metadata' | 'staff_metadata') {
+    if (this.selectedTemplate) {
+      if (data_type === 'user_metadata') {
+        this.selectedTemplate.user_columns.splice(index, 1)
+      } else {
+        this.selectedTemplate.staff_columns.splice(index-this.selectedTemplate.user_columns.length, 1)
+      }
+
+      this.web.updateMetadataTableTemplate(this.selectedTemplate.id, this.selectedTemplate).subscribe(data => {
+        this.selectedTemplate = data;
+        if (this.tableTemplateQuery && this.selectedTemplate) {
+          // @ts-ignore
+          const d = this.tableTemplateQuery.results.findIndex((c) => c.id === this.selectedTemplate.id)
+          if (d >= 0) {
+            this.tableTemplateQuery.results[d] = this.selectedTemplate
+          }
+        }
+      })
+    }
+
+  }
 }

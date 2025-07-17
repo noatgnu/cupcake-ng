@@ -33,58 +33,84 @@
 
       <div class="row g-4">
         <!-- Laboratory Notebook -->
-        <div class="col-md-6 col-lg-4">
-          <div class="feature-card h-100" (click)="navigateToNotebook()">
-            <div class="feature-icon">
-              <i class="bi bi-journal-text"></i>
-            </div>
-            <h3>Laboratory Notebook</h3>
-            <p class="text-muted">Manage your protocols, sessions, and projects in one centralized workspace. Import from Protocols.io or create custom procedures.</p>
-            <div class="feature-actions">
-              <span class="text-primary">Access Notebook <i class="bi bi-arrow-right"></i></span>
+        @if (enableLabNotebook) {
+          <div class="col-md-6 col-lg-4">
+            <div class="feature-card h-100" (click)="navigateToNotebook()">
+              <div class="feature-icon">
+                <i class="bi bi-journal-text"></i>
+              </div>
+              <h3>Laboratory Notebook</h3>
+              <p class="text-muted">Manage your protocols, sessions, and projects in one centralized workspace. Import from Protocols.io or create custom procedures.</p>
+              <div class="feature-actions">
+                <span class="text-primary">Access Notebook <i class="bi bi-arrow-right"></i></span>
+              </div>
             </div>
           </div>
-        </div>
+        }
 
-        <div class="col-md-6 col-lg-4">
-          <div class="feature-card h-100" (click)="navigateToDocuments()">
-            <div class="feature-icon">
-              <i class="bi bi-file-earmark-text"></i>
-            </div>
-            <h3>Documents</h3>
-            <p class="text-muted">Upload and share important documents about experiements, instruments, softwares, protocols... and more.</p>
-            <div class="feature-actions">
-              <span class="text-primary">Access Documents <i class="bi bi-arrow-right"></i></span>
+        <!-- Documents -->
+        @if (enableDocuments) {
+          <div class="col-md-6 col-lg-4">
+            <div class="feature-card h-100" (click)="navigateToDocuments()">
+              <div class="feature-icon">
+                <i class="bi bi-file-earmark-text"></i>
+              </div>
+              <h3>Documents</h3>
+              <p class="text-muted">Upload and share important documents about experiements, instruments, softwares, protocols... and more.</p>
+              <div class="feature-actions">
+                <span class="text-primary">Access Documents <i class="bi bi-arrow-right"></i></span>
+              </div>
             </div>
           </div>
-        </div>
+        }
 
-        <div class="col-md-6 col-lg-4">
-          <div class="feature-card h-100" (click)="navigateToInstruments()">
-            <div class="feature-icon">
-              <i class="bi bi-gear"></i>
-            </div>
-            <h3>Instrument Management</h3>
-            <p class="text-muted">Book laboratory instruments, manage availability, track usage, and handle job submissions for specialized equipment.</p>
-            <div class="feature-actions">
-              <span class="text-primary">Manage Instruments <i class="bi bi-arrow-right"></i></span>
+        <!-- Instrument Management -->
+        @if (enableInstruments) {
+          <div class="col-md-6 col-lg-4">
+            <div class="feature-card h-100" (click)="navigateToInstruments()">
+              <div class="feature-icon">
+                <i class="bi bi-gear"></i>
+              </div>
+              <h3>Instrument Management</h3>
+              <p class="text-muted">Book laboratory instruments, manage availability, track usage, and handle job submissions for specialized equipment.</p>
+              <div class="feature-actions">
+                <span class="text-primary">Manage Instruments <i class="bi bi-arrow-right"></i></span>
+              </div>
             </div>
           </div>
-        </div>
+        }
 
         <!-- Reagent Store -->
-        <div class="col-md-6 col-lg-4">
-          <div class="feature-card h-100" (click)="navigateToReagentStore()">
-            <div class="feature-icon">
-              <i class="bi bi-box-seam me-1"></i>
-            </div>
-            <h3>Reagent Store</h3>
-            <p class="text-muted">Track chemical inventory, manage stock levels, record usage actions, and maintain safety documentation for all reagents.</p>
-            <div class="feature-actions">
-              <span class="text-primary">View Inventory <i class="bi bi-arrow-right"></i></span>
+        @if (enableStorage) {
+          <div class="col-md-6 col-lg-4">
+            <div class="feature-card h-100" (click)="navigateToReagentStore()">
+              <div class="feature-icon">
+                <i class="bi bi-box-seam me-1"></i>
+              </div>
+              <h3>Reagent Store</h3>
+              <p class="text-muted">Track chemical inventory, manage stock levels, record usage actions, and maintain safety documentation for all reagents.</p>
+              <div class="feature-actions">
+                <span class="text-primary">View Inventory <i class="bi bi-arrow-right"></i></span>
+              </div>
             </div>
           </div>
-        </div>
+        }
+
+        <!-- Billing Module -->
+        @if (enableBilling) {
+          <div class="col-md-6 col-lg-4">
+            <div class="feature-card h-100" (click)="navigateToBilling()">
+              <div class="feature-icon">
+                <i class="bi bi-currency-dollar"></i>
+              </div>
+              <h3>Billing Management</h3>
+              <p class="text-muted">Manage service pricing, track usage costs, generate billing reports, and handle payment processing for laboratory services.</p>
+              <div class="feature-actions">
+                <span class="text-primary">Access Billing <i class="bi bi-arrow-right"></i></span>
+              </div>
+            </div>
+          </div>
+        }
 
         <!-- User & Lab Groups -->
         <div class="col-md-6 col-lg-4">

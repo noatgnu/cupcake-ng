@@ -1584,10 +1584,10 @@ export class WebService {
     )
   }
 
-  createLabGroup(name: string, description: string, can_perform_ms_analysis: boolean = false) {
+  createLabGroup(name: string, description: string, can_perform_ms_analysis: boolean = false, is_core_facility: boolean = false) {
     return this.http.post<any>(
       `${this.baseURL}/api/lab_groups/`,
-      {name: name, description: description, can_perform_ms_analysis: can_perform_ms_analysis},
+      {name: name, description: description, can_perform_ms_analysis: can_perform_ms_analysis, is_core_facility: is_core_facility},
       {responseType: 'json', observe: 'body'}
     )
   }
@@ -1806,7 +1806,7 @@ export class WebService {
     )
   }
 
-  getLabGroups(search_term: string = "", limit: number = 10, offset: number = 0, can_perform_ms_analysis: boolean|undefined = undefined) {
+  getLabGroups(search_term: string = "", limit: number = 10, offset: number = 0, can_perform_ms_analysis: boolean|undefined = undefined, is_core_facility: boolean|undefined = undefined) {
     let params = new HttpParams()
     if (search_term && search_term !== "") {
       params = params.append('search', search_term)
@@ -1820,13 +1820,16 @@ export class WebService {
     if (can_perform_ms_analysis) {
       params = params.append('can_perform_ms_analysis', can_perform_ms_analysis.toString())
     }
+    if (is_core_facility !== undefined) {
+      params = params.append('is_core_facility', is_core_facility.toString())
+    }
     return this.http.get<LabGroupQuery>(
       `${this.baseURL}/api/lab_groups/`,
       {responseType: 'json', observe: 'body', params: params}
     )
   }
 
-  updateLabGroup(lab_group_id: number, name: string, description: string, default_storage: number|null = null, service_storage: number|null = null, can_perform_ms_analysis: undefined|boolean = undefined) {
+  updateLabGroup(lab_group_id: number, name: string, description: string, default_storage: number|null = null, service_storage: number|null = null, can_perform_ms_analysis: undefined|boolean = undefined, is_core_facility: undefined|boolean = undefined) {
     const payload: any = {name: name, description: description}
     if (default_storage) {
       payload['default_storage'] = default_storage
@@ -1839,6 +1842,11 @@ export class WebService {
     if (can_perform_ms_analysis !== undefined) {
       payload['can_perform_ms_analysis'] = can_perform_ms_analysis
     }
+
+    if (is_core_facility !== undefined) {
+      payload['is_core_facility'] = is_core_facility
+    }
+    
     return this.http.put<LabGroup>(
       `${this.baseURL}/api/lab_groups/${lab_group_id}/`,
       payload,

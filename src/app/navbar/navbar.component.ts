@@ -163,4 +163,29 @@ export class NavbarComponent implements OnInit {
   openWebsocketStatusModal() {
     const ref = this.modal.open(WebsocketStatusModalComponent)
   }
+
+  // Check if a module is enabled based on site settings
+  isModuleEnabled(moduleName: string): boolean {
+    const settings = this.siteSettings.getCurrentPublicSettings();
+    if (!settings) return true; // Default to enabled if settings not loaded
+    
+    switch (moduleName) {
+      case 'documents':
+        return settings.enable_documents_module !== false;
+      case 'lab_notebook':
+        return settings.enable_lab_notebook_module !== false;
+      case 'instruments':
+        return settings.enable_instruments_module !== false;
+      case 'storage':
+        return settings.enable_storage_module !== false;
+      case 'billing':
+        return settings.enable_billing_module !== false;
+      case 'ai_sdrf_suggestions':
+        return settings.enable_ai_sdrf_suggestions !== false;
+      case 'backup':
+        return settings.enable_backup_module !== false;
+      default:
+        return true;
+    }
+  }
 }

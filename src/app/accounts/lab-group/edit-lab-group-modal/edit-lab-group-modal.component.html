@@ -28,10 +28,16 @@
                     placeholder="Enter a description of this lab group"></textarea>
         </div>
 
-        <div class="form-check">
+        <div class="form-check mb-3">
           <input type="checkbox" class="form-check-input" id="isProfessional" formControlName="can_perform_ms_analysis">
           <label class="form-check-label" for="isProfessional">Can Perform MS Analysis</label>
           <div class="form-text">Allow group to process submitted MS job</div>
+        </div>
+
+        <div class="form-check">
+          <input type="checkbox" class="form-check-input" id="isCoreFacility" formControlName="is_core_facility">
+          <label class="form-check-label" for="isCoreFacility">Core Facility</label>
+          <div class="form-text">Designate this group as a core facility with billing management capabilities</div>
         </div>
       </div>
     </div>

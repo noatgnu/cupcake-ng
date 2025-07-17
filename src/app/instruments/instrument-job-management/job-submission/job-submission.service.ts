@@ -191,7 +191,10 @@ export class JobSubmissionService {
         const formArray = this.metadata.get(arrayName) as FormArray;
 
         for (const r of result) {
-          if (r.type !== 'Factor value') {
+          console.log('Modal result:', r)
+          console.log('Modal result type:', r.type)
+          console.log('Modal result metadataType:', r.metadataType)
+          if (r.metadataType !== 'Factor value') {
             let value = r.metadataValue
             value = this.metadataService.tranformMetadataValue(r, value);
             let group: any = {}
@@ -206,9 +209,9 @@ export class JobSubmissionService {
                 readonly: r.readonly
               })
             } else {
-              if (r.charateristic) {
+              if (r.characteristics) {
                 r.metadataType = "Characteristics"
-              } else {
+              } else if (!r.metadataType) {
                 r.metadataType = "Comment"
               }
               group = this.fb.group({
@@ -225,7 +228,10 @@ export class JobSubmissionService {
             this.subscribeToFormGroupChanges(group)
           } else {
             if (job) {
-              const selectedFactorValueColumn = [...job.user_metadata, ...job.staff_metadata].find((c: MetadataColumn) => c.name === r.metadataValue && c.type !== "Factor value")
+              console.log('Factor value creation - looking for column:', r.metadataName)
+              console.log('Available columns:', [...job.user_metadata, ...job.staff_metadata].map(c => ({name: c.name, type: c.type})))
+              const selectedFactorValueColumn = [...job.user_metadata, ...job.staff_metadata].find((c: MetadataColumn) => c.name === r.metadataName && c.type !== "Factor value")
+              console.log('Found column:', selectedFactorValueColumn)
               if (selectedFactorValueColumn) {
                 const group = this.fb.group({
                   name: selectedFactorValueColumn.name,

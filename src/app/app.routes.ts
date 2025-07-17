@@ -77,6 +77,10 @@ export const routes: Routes = [
     component: SiteSettingsComponent
   },
   {
+    path: 'billing',
+    loadChildren: () => import('./billing/billing.module').then(m => m.BillingModule)
+  },
+  {
     path: '**',
     redirectTo: 'home'
   },

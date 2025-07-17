@@ -8,7 +8,7 @@
             <!-- Logo Section -->
             <div class="text-center">
               @if (hasLogo && logoUrl) {
-                <img class="logo_home" [src]="logoUrl" alt="Site Logo" width="128" height="128" 
+                <img class="logo_home" [src]="logoUrl" alt="Site Logo" width="128" height="128"
                      (error)="onImageError($event)" (load)="onImageLoad($event)">
               }
             </div>
@@ -207,7 +207,7 @@
                               <p class="text-muted small mb-2">Created: {{project.created_at | date : "medium"}}</p>
 
                               @if (currentProjectID === project.id && project.project_description) {
-                                <div class="card bg-light mb-2">
+                                <div class="card mb-2">
                                   <div class="card-body py-2">
                                     <p class="card-text small mb-0">{{project.project_description}}</p>
                                   </div>

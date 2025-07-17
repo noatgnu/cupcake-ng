@@ -33,7 +33,7 @@ export class BackupLogViewerComponent implements OnInit, OnDestroy {
   filters: BackupFilterParams = {
     limit: 50,
     offset: 0,
-    ordering: '-started_at'
+    ordering: '-created_at'
   };
   searchQuery = '';
 
@@ -110,7 +110,7 @@ export class BackupLogViewerComponent implements OnInit, OnDestroy {
 
   private loadStatusSummary(): Promise<void> {
     return new Promise((resolve, reject) => {
-      this.backupService.getBackupStatus().pipe(
+      this.backupService.getBackupStatusSummary().pipe(
         takeUntil(this.destroy$)
       ).subscribe({
         next: (data: BackupStatusSummary) => {
@@ -142,7 +142,7 @@ export class BackupLogViewerComponent implements OnInit, OnDestroy {
     this.filters = {
       limit: this.itemsPerPage,
       offset: 0,
-      ordering: '-started_at'
+      ordering: '-created_at'
     };
     this.searchQuery = '';
     this.currentPage = 1;

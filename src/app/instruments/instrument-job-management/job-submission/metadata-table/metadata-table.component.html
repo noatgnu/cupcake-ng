@@ -1,125 +1,163 @@
 @if (sampleNumber > 0 && (userMetadata.length > 0 || staffMetadata.length > 0)) {
-  <div class="table-responsive">
-    <div class="d-flex justify-content-end mb-2">
+  <div class="metadata-table-wrapper">
+    <!-- Top Scroll Controls -->
+    <div class="d-flex justify-content-between align-items-center mb-2">
+      <div class="d-flex align-items-center gap-2">
+        <button 
+          class="btn btn-sm btn-outline-secondary" 
+          (click)="scrollToStart()" 
+          [disabled]="!canScrollLeft"
+          title="Scroll to start">
+          <i class="bi bi-chevron-double-left"></i>
+        </button>
+        <button 
+          class="btn btn-sm btn-outline-secondary" 
+          (click)="scrollLeft()" 
+          [disabled]="!canScrollLeft"
+          title="Scroll left">
+          <i class="bi bi-chevron-left"></i>
+        </button>
+        <div class="scroll-progress-container">
+          <div class="scroll-progress-bar">
+            <div class="scroll-progress-indicator" [style.width.%]="getScrollProgress()"></div>
+          </div>
+        </div>
+        <button 
+          class="btn btn-sm btn-outline-secondary" 
+          (click)="scrollRight()" 
+          [disabled]="!canScrollRight"
+          title="Scroll right">
+          <i class="bi bi-chevron-right"></i>
+        </button>
+        <button 
+          class="btn btn-sm btn-outline-secondary" 
+          (click)="scrollToEnd()" 
+          [disabled]="!canScrollRight"
+          title="Scroll to end">
+          <i class="bi bi-chevron-double-right"></i>
+        </button>
+      </div>
+      
       <button class="btn btn-sm btn-outline-secondary" (click)="exportTableToTSV()">
         <i class="bi bi-download me-1"></i> Export to TSV
       </button>
     </div>
 
-    <table class="table table-bordered table-hover metadata-table">
-      <thead class="sticky-header">
-      <tr>
-        <th scope="col" class="sticky-column text-center">Sample</th>
-        @for (col of userMetadata; track col.id; let index = $index) {
-          @if (visibleColumnNames.includes(col.name) && (!col.hidden || showHidden)) {
-            <th scope="col"
-                class="table-primary metadata-header"
-                [ngbTooltip]="metadataService.helpData[col.name]"
-                placement="top"
-                container="body"
-                (mouseover)="currentCell = {row: -1, col: index}">
-              <div class="d-flex justify-content-between align-items-center">
-                  <span class="header-text">
-                    {{field_mask[col.name] || col.name}}
-                    @if (col.mandatory) {
-                      <i class="bi bi-asterisk text-danger small"></i>
-                    }
-                  </span>
+    <div class="table-responsive-custom" #tableContainer (scroll)="onTableScroll()">
+      <table class="table table-bordered table-hover metadata-table">
+        <thead class="sticky-header">
+        <tr>
+          <th scope="col" class="sticky-column text-center">Sample</th>
+          @for (col of userMetadata; track col.id; let index = $index) {
+            @if (visibleColumnNames.includes(col.name) && (!col.hidden || showHidden)) {
+              <th scope="col"
+                  class="table-primary metadata-header"
+                  [ngbTooltip]="metadataService.helpData[col.name]"
+                  placement="top"
+                  container="body"
+                  (mouseover)="currentCell = {row: -1, col: index}">
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="header-text">
+                      {{field_mask[col.name] || col.name}}
+                      @if (col.mandatory) {
+                        <i class="bi bi-asterisk text-danger small"></i>
+                      }
+                    </span>
 
-                @if (currentCell?.row === -1 && currentCell?.col === index && (userCanEdit||staffModeActive)) {
-                  <div ngbDropdown class="d-inline-block" placement="bottom-right">
-                    <button class="btn btn-xs btn-outline-primary" id="metadataColumnDropdownUser" ngbDropdownToggle>
-                      <i class="bi bi-gear-fill"></i>
-                    </button>
-                    <div ngbDropdownMenu aria-labelledby="metadataColumnDropdownUser" class="shadow-sm">
-                      <button class="dropdown-item" (click)="editDefaultMetadataValue(col, 'user_metadata')">
-                        <i class="bi bi-pen me-2"></i> Edit Default Value
+                  @if (currentCell?.row === -1 && currentCell?.col === index && (userCanEdit||staffModeActive)) {
+                    <div ngbDropdown class="d-inline-block" placement="bottom-right">
+                      <button class="btn btn-xs btn-outline-primary" id="metadataColumnDropdownUser" ngbDropdownToggle>
+                        <i class="bi bi-gear-fill"></i>
                       </button>
-                      @if (!templateMode) {
-                        <button class="dropdown-item" (click)="replaceEntireMetadataColumn(col, 'user_metadata')">
-                          <i class="bi bi-columns me-2"></i> Replace Entire Column
+                      <div ngbDropdownMenu aria-labelledby="metadataColumnDropdownUser" class="shadow-sm">
+                        <button class="dropdown-item" (click)="editDefaultMetadataValue(col, 'user_metadata')">
+                          <i class="bi bi-pen me-2"></i> Edit Default Value
                         </button>
-                      }
-                      @if (!col.mandatory) {
-                        <button class="dropdown-item text-danger" (click)="removeMetadataCol(index, col, 'user_metadata')">
-                          <i class="bi bi-trash2 me-2"></i> Remove Column
-                        </button>
-                      }
+                        @if (!templateMode) {
+                          <button class="dropdown-item" (click)="replaceEntireMetadataColumn(col, 'user_metadata')">
+                            <i class="bi bi-columns me-2"></i> Replace Entire Column
+                          </button>
+                        }
+                        @if (!col.mandatory) {
+                          <button class="dropdown-item text-danger" (click)="removeMetadataCol(index, col, 'user_metadata')">
+                            <i class="bi bi-trash2 me-2"></i> Remove Column
+                          </button>
+                        }
+                      </div>
                     </div>
-                  </div>
+                  }
+                </div>
+                @if (col.hidden) {
+                  <span class="badge bg-secondary small">Hidden</span>
                 }
-              </div>
-              @if (col.hidden) {
-                <span class="badge bg-secondary small">Hidden</span>
-              }
-            </th>
+              </th>
+            }
           }
-        }
 
-        @for (col of staffMetadata; track col.id; let index = $index) {
-          @if (visibleColumnNames.includes(col.name) && (!col.hidden || showHidden) && (templateMode || staffModeActive)) {
-            <th scope="col"
-                [class]="col.type != 'Factor value' ? 'table-warning' : 'table-danger'"
-                class="metadata-header"
-                [ngbTooltip]="metadataService.helpData[col.name]"
-                placement="top"
-                container="body"
-                (mouseover)="currentCell = {row: -1, col: (userMetadata.length+index)}">
-              <div class="d-flex justify-content-between align-items-center">
-                  <span class="header-text">
-                    {{field_mask[col.name] || col.name}}
-                    @if (col.mandatory) {
-                      <i class="bi bi-asterisk text-danger small"></i>
-                    }
-                  </span>
+          @for (col of staffMetadata; track col.id; let index = $index) {
+            @if (visibleColumnNames.includes(col.name) && (!col.hidden || showHidden) && (templateMode || staffModeActive)) {
+              <th scope="col"
+                  [class]="col.type != 'Factor value' ? 'table-warning' : 'table-danger'"
+                  class="metadata-header"
+                  [ngbTooltip]="metadataService.helpData[col.name]"
+                  placement="top"
+                  container="body"
+                  (mouseover)="currentCell = {row: -1, col: (userMetadata.length+index)}">
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="header-text">
+                      {{field_mask[col.name] || col.name}}
+                      @if (col.mandatory) {
+                        <i class="bi bi-asterisk text-danger small"></i>
+                      }
+                    </span>
 
-                @if (currentCell?.row === -1 && currentCell?.col === (userMetadata.length+index) && staffModeActive) {
-                  <div ngbDropdown class="d-inline-block" placement="bottom-right">
-                    <button class="btn btn-xs btn-outline-primary" id="metadataColumnDropdownStaff" ngbDropdownToggle>
-                      <i class="bi bi-gear-fill"></i>
-                    </button>
-                    <div ngbDropdownMenu aria-labelledby="metadataColumnDropdownStaff" class="shadow-sm">
-                      <button class="dropdown-item" (click)="editDefaultMetadataValue(col, 'staff_metadata')">
-                        <i class="bi bi-pen me-2"></i> Edit Default Value
+                  @if (currentCell?.row === -1 && currentCell?.col === (userMetadata.length+index) && staffModeActive) {
+                    <div ngbDropdown class="d-inline-block" placement="bottom-right">
+                      <button class="btn btn-xs btn-outline-primary" id="metadataColumnDropdownStaff" ngbDropdownToggle>
+                        <i class="bi bi-gear-fill"></i>
                       </button>
-                      @if (!templateMode && !col.readonly) {
-                        <button class="dropdown-item" (click)="replaceEntireMetadataColumn(col, 'staff_metadata')">
-                          <i class="bi bi-columns me-2"></i> Replace Entire Column
+                      <div ngbDropdownMenu aria-labelledby="metadataColumnDropdownStaff" class="shadow-sm">
+                        <button class="dropdown-item" (click)="editDefaultMetadataValue(col, 'staff_metadata')">
+                          <i class="bi bi-pen me-2"></i> Edit Default Value
                         </button>
-                      }
-                      @if (!col.mandatory) {
-                        <button class="dropdown-item text-danger" (click)="removeMetadataCol(index, col, 'staff_metadata')">
-                          <i class="bi bi-trash2 me-2"></i> Remove Column
-                        </button>
-                      }
+                        @if (!templateMode && !col.readonly) {
+                          <button class="dropdown-item" (click)="replaceEntireMetadataColumn(col, 'staff_metadata')">
+                            <i class="bi bi-columns me-2"></i> Replace Entire Column
+                          </button>
+                        }
+                        @if (!col.mandatory) {
+                          <button class="dropdown-item text-danger" (click)="removeMetadataCol(index, col, 'staff_metadata')">
+                            <i class="bi bi-trash2 me-2"></i> Remove Column
+                          </button>
+                        }
+                      </div>
                     </div>
-                  </div>
+                  }
+                </div>
+                @if (col.hidden) {
+                  <span class="badge bg-secondary small">Hidden</span>
                 }
-              </div>
-              @if (col.hidden) {
-                <span class="badge bg-secondary small">Hidden</span>
-              }
-              @if (col.readonly) {
-                <span class="badge bg-danger small">Read-only</span>
-              }
-            </th>
+                @if (col.readonly) {
+                  <span class="badge bg-danger small">Read-only</span>
+                }
+              </th>
+            }
           }
-        }
-      </tr>
-      </thead>
+        </tr>
+        </thead>
       <tbody>
-        @for (row of tableData; track $index; let rowIndex = $index) {
+        @for (row of paginatedTableData; track $index; let rowIndex = $index) {
           <tr>
             <td class="sticky-column text-center fw-bold">{{ row.sample }}</td>
 
             <!-- User Metadata Cells -->
             @for (col of userMetadata; track col.id; let index = $index) {
               @if (visibleColumnNames.includes(col.name) && (!col.hidden || showHidden)) {
-                <td (mouseover)="moveOverCell(rowIndex, index)"
+                <td (mouseover)="moveOverCell(row.sample - 1, index)"
                     [ngClass]="{'selection-active': selectionMode && selectionModeColIndex === index,
-                               'table-danger': (selectionMode && isSelectedCell(rowIndex, index)) || col.readonly,
+                               'table-danger': (selectionMode && isSelectedCell(row.sample - 1, index)) || col.readonly,
                                'table-secondary': col.hidden,
-                               'cell-selected': originCell?.row === rowIndex && originCell?.col === index}"
+                               'cell-selected': originCell?.row === row.sample - 1 && originCell?.col === index}"
                     class="metadata-cell">
                   <div class="d-flex justify-content-between align-items-center cell-content">
                     <span [ngClass]="{'text-pre-wrap': col.name === 'Modification parameters'}">
@@ -131,7 +169,7 @@
                     </span>
 
                     @if (currentCell && !templateMode && !col.readonly) {
-                      @if (currentCell.row === rowIndex && currentCell.col === index) {
+                      @if (currentCell.row === row.sample - 1 && currentCell.col === index) {
                         @if (!selectionMode) {
                           <div ngbDropdown class="d-inline-block" placement="bottom-right">
                             <button class="btn btn-xs btn-outline-primary cell-action" id="metadataCellDropdownUser" ngbDropdownToggle>
@@ -157,7 +195,7 @@
                       }
                     }
 
-                    @if (originCell && !col.readonly && originCell.row === rowIndex && originCell.col === index) {
+                    @if (originCell && !col.readonly && originCell.row === row.sample - 1 && originCell.col === index) {
                       <div ngbDropdown class="d-inline-block" placement="bottom-right">
                         <button class="btn btn-xs btn-primary cell-action" id="metadataCellOriginDropdown" ngbDropdownToggle>
                           <i class="bi bi-clipboard-data"></i>
@@ -177,17 +215,17 @@
             <!-- Staff Metadata Cells -->
             @for (col of staffMetadata; track col.id; let index = $index) {
               @if (visibleColumnNames.includes(col.name) && (!col.hidden || showHidden) && (templateMode || staffModeActive)) {
-                <td (mouseover)="moveOverCell(rowIndex, (userMetadata.length+index))"
+                <td (mouseover)="moveOverCell(row.sample - 1, (userMetadata.length+index))"
                     [ngClass]="{'selection-active': selectionMode && selectionModeColIndex === (userMetadata.length+index),
-                               'table-danger': (selectionMode && isSelectedCell(rowIndex, (userMetadata.length+index))) || col.readonly,
+                               'table-danger': (selectionMode && isSelectedCell(row.sample - 1, (userMetadata.length+index))) || col.readonly,
                                'table-secondary': col.hidden,
-                               'cell-selected': originCell?.row === rowIndex && originCell?.col === (userMetadata.length+index)}"
+                               'cell-selected': originCell?.row === row.sample - 1 && originCell?.col === (userMetadata.length+index)}"
                     class="metadata-cell">
                   <div class="d-flex justify-content-between align-items-center cell-content">
                     <span>{{ row['col_' + (userMetadata.length+index)] || '-' }}</span>
 
                     @if (currentCell && !templateMode && !col.readonly) {
-                      @if (currentCell.row === rowIndex && currentCell.col === (userMetadata.length+index)) {
+                      @if (currentCell.row === row.sample - 1 && currentCell.col === (userMetadata.length+index)) {
                         @if (!selectionMode) {
                           <div ngbDropdown class="d-inline-block" placement="bottom-right">
                             <button class="btn btn-xs btn-outline-primary cell-action" id="metadataCellDropdownStaff" ngbDropdownToggle>
@@ -212,7 +250,7 @@
                         }
                       }
 
-                      @if (originCell && !col.readonly && originCell.row === rowIndex && originCell.col === (userMetadata.length+index)) {
+                      @if (originCell && !col.readonly && originCell.row === row.sample - 1 && originCell.col === (userMetadata.length+index)) {
                         <div ngbDropdown class="d-inline-block" placement="bottom-right">
                           <button class="btn btn-xs btn-primary cell-action" id="metadataCellOriginStaffDropdown" ngbDropdownToggle>
                             <i class="bi bi-clipboard-data"></i>
@@ -233,7 +271,104 @@
         }
       </tbody>
     </table>
+    </div>
+
+    <!-- Bottom Scroll Controls -->
+    <div class="d-flex align-items-center gap-2 mt-2">
+      <button 
+        class="btn btn-sm btn-outline-secondary" 
+        (click)="scrollToStart()" 
+        [disabled]="!canScrollLeft"
+        title="Scroll to start">
+        <i class="bi bi-chevron-double-left"></i>
+      </button>
+      <button 
+        class="btn btn-sm btn-outline-secondary" 
+        (click)="scrollLeft()" 
+        [disabled]="!canScrollLeft"
+        title="Scroll left">
+        <i class="bi bi-chevron-left"></i>
+      </button>
+      <div class="scroll-progress-container">
+        <div class="scroll-progress-bar">
+          <div class="scroll-progress-indicator" [style.width.%]="getScrollProgress()"></div>
+        </div>
+      </div>
+      <button 
+        class="btn btn-sm btn-outline-secondary" 
+        (click)="scrollRight()" 
+        [disabled]="!canScrollRight"
+        title="Scroll right">
+        <i class="bi bi-chevron-right"></i>
+      </button>
+      <button 
+        class="btn btn-sm btn-outline-secondary" 
+        (click)="scrollToEnd()" 
+        [disabled]="!canScrollRight"
+        title="Scroll to end">
+        <i class="bi bi-chevron-double-right"></i>
+      </button>
+    </div>
   </div>
+
+  <!-- Pagination Controls -->
+  @if (tableData.length > pageSize) {
+    <div class="d-flex justify-content-between align-items-center mt-3">
+      <div class="d-flex align-items-center">
+        <span class="text-muted me-3">
+          Showing {{ startItemNumber }} to {{ endItemNumber }} of {{ tableData.length }} entries
+        </span>
+        <div class="d-flex align-items-center">
+          <label for="pageSize" class="form-label me-2 mb-0">Show:</label>
+          <select id="pageSize" class="form-select form-select-sm" [(ngModel)]="pageSize" (change)="onPageSizeChange(pageSize)" style="width: auto;">
+            @for (option of pageSizeOptions; track option) {
+              <option [value]="option">{{ option }}</option>
+            }
+          </select>
+          <span class="ms-2">entries</span>
+        </div>
+      </div>
+      
+      <nav aria-label="Table pagination">
+        <ul class="pagination pagination-sm mb-0">
+          <li class="page-item" [class.disabled]="currentPage === 1">
+            <button class="page-link" (click)="goToFirstPage()" [disabled]="currentPage === 1">
+              <i class="bi bi-chevron-double-left"></i>
+            </button>
+          </li>
+          <li class="page-item" [class.disabled]="currentPage === 1">
+            <button class="page-link" (click)="goToPreviousPage()" [disabled]="currentPage === 1">
+              <i class="bi bi-chevron-left"></i>
+            </button>
+          </li>
+          
+          <!-- Page numbers -->
+          @for (page of [].constructor(totalPages); track $index; let i = $index) {
+            @if (i + 1 === currentPage || Math.abs(i + 1 - currentPage) <= 2 || i + 1 === 1 || i + 1 === totalPages) {
+              <li class="page-item" [class.active]="currentPage === i + 1">
+                <button class="page-link" (click)="onPageChange(i + 1)">{{ i + 1 }}</button>
+              </li>
+            } @else if (Math.abs(i + 1 - currentPage) === 3) {
+              <li class="page-item disabled">
+                <span class="page-link">...</span>
+              </li>
+            }
+          }
+          
+          <li class="page-item" [class.disabled]="currentPage === totalPages">
+            <button class="page-link" (click)="goToNextPage()" [disabled]="currentPage === totalPages">
+              <i class="bi bi-chevron-right"></i>
+            </button>
+          </li>
+          <li class="page-item" [class.disabled]="currentPage === totalPages">
+            <button class="page-link" (click)="goToLastPage()" [disabled]="currentPage === totalPages">
+              <i class="bi bi-chevron-double-right"></i>
+            </button>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  }
 
   @if (selectionMode) {
     <div class="selection-helper alert alert-info">

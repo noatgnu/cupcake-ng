@@ -1,0 +1,614 @@
+<div class="container billing-management-container">
+  <div class="row">
+    <div class="col-12">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0">
+          <i class="bi bi-gear me-2"></i>
+          Billing Management
+        </h1>
+        <div class="d-flex align-items-center gap-3">
+          <div class="dropdown">
+            <select 
+              class="form-select" 
+              [(ngModel)]="selectedLabGroup" 
+              (change)="onLabGroupChange()"
+              [disabled]="loading"
+            >
+              <option [value]="undefined">Select Lab Group</option>
+              @for (group of (labGroups || []); track group.id) {
+                <option [value]="group.id">
+                  {{ group.name }}
+                </option>
+              }
+            </select>
+          </div>
+          <button 
+            class="btn btn-outline-secondary" 
+            (click)="refreshData()"
+            [disabled]="loading"
+          >
+            <i class="bi bi-arrow-clockwise me-2"></i>
+            Refresh
+          </button>
+        </div>
+      </div>
+
+      <!-- Loading State -->
+      @if (loading) {
+        <div class="text-center py-5">
+          <div class="spinner-border" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+          <p class="mt-3 text-muted">Loading billing management data...</p>
+        </div>
+      }
+
+      <!-- Error State -->
+      @if (error && !loading) {
+        <div class="alert alert-danger" role="alert">
+          <i class="bi bi-exclamation-triangle me-2"></i>
+          {{ error }}
+          <button class="btn btn-sm btn-outline-danger ms-2" (click)="refreshData()">
+            Try Again
+          </button>
+        </div>
+      }
+
+      <!-- Pricing Summary -->
+      @if (pricingSummary && !loading && !error) {
+        <div class="mb-4">
+        <div class="row">
+          <div class="col-md-4">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title">
+                  <i class="bi bi-layers me-2"></i>
+                  Service Tiers
+                </h5>
+                <p class="card-text display-6">{{ pricingSummary?.service_tiers?.length || 0 }}</p>
+                <small class="text-muted">Active service tiers</small>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title">
+                  <i class="bi bi-cpu me-2"></i>
+                  Instruments
+                </h5>
+                <p class="card-text display-6">{{ pricingSummary?.instruments?.length || 0 }}</p>
+                <small class="text-muted">Available instruments</small>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title">
+                  <i class="bi bi-currency-dollar me-2"></i>
+                  Pricing Entries
+                </h5>
+                <p class="card-text display-6">{{ pricingSummary?.total_pricing_entries || 0 }}</p>
+                <small class="text-muted">Total price configurations</small>
+              </div>
+            </div>
+          </div>
+        </div>
+        </div>
+      }
+
+      <!-- Management Sections -->
+      @if (!loading && !error) {
+        <div class="accordion">
+          <!-- Service Tier Management -->
+          <div class="accordion-item">
+            <h2 class="accordion-header">
+              <button class="accordion-button" 
+                      [class.collapsed]="isServiceTiersCollapsed"
+                      type="button" 
+                      (click)="isServiceTiersCollapsed = !isServiceTiersCollapsed">
+                <i class="bi bi-layers me-2"></i>
+                Service Tier Management
+              </button>
+            </h2>
+            <div #serviceTiersCollapse="ngbCollapse" [(ngbCollapse)]="isServiceTiersCollapsed">
+              <div class="accordion-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                  <h6>Service Tiers</h6>
+                  <button 
+                    class="btn btn-primary btn-sm"
+                    (click)="showAddServiceTierForm()"
+                    [disabled]="showServiceTierForm"
+                  >
+                    <i class="bi bi-plus me-1"></i>
+                    Add Service Tier
+                  </button>
+                </div>
+
+                <!-- Add/Edit Service Tier Form -->
+                @if (showServiceTierForm) {
+                  <div class="card mb-3">
+                  <div class="card-body">
+                    <h6 class="card-title">
+                      {{ editingServiceTier ? 'Edit' : 'Add' }} Service Tier
+                    </h6>
+                    <form [formGroup]="serviceTierForm" (ngSubmit)="saveServiceTier()">
+                      <div class="row">
+                        <div class="col-md-6">
+                          <div class="mb-3">
+                            <label for="tier-name" class="form-label">
+                              Name <span class="text-danger">*</span>
+                            </label>
+                            <input 
+                              type="text" 
+                              class="form-control" 
+                              id="tier-name"
+                              formControlName="name"
+                              placeholder="Enter service tier name"
+                            >
+                            @if (getFieldError(serviceTierForm, 'name')) {
+                              <div class="text-danger small mt-1">
+                                {{ getFieldError(serviceTierForm, 'name') }}
+                              </div>
+                            }
+                          </div>
+                        </div>
+                        <div class="col-md-6">
+                          <div class="mb-3">
+                            <label for="tier-lab-group" class="form-label">
+                              Lab Group <span class="text-danger">*</span>
+                            </label>
+                            <select 
+                              class="form-select" 
+                              id="tier-lab-group"
+                              formControlName="lab_group"
+                            >
+                              <option value="">Select lab group...</option>
+                              @for (group of (labGroups || []); track group.id) {
+                                <option [value]="group.id">
+                                  {{ group.name }}
+                                </option>
+                              }
+                            </select>
+                            @if (getFieldError(serviceTierForm, 'lab_group')) {
+                              <div class="text-danger small mt-1">
+                                {{ getFieldError(serviceTierForm, 'lab_group') }}
+                              </div>
+                            }
+                          </div>
+                        </div>
+                      </div>
+                      <div class="mb-3">
+                        <label for="tier-description" class="form-label">Description</label>
+                        <textarea 
+                          class="form-control" 
+                          id="tier-description"
+                          formControlName="description"
+                          rows="3"
+                          placeholder="Enter service tier description"
+                        ></textarea>
+                      </div>
+                      <div class="form-check mb-3">
+                        <input 
+                          class="form-check-input" 
+                          type="checkbox" 
+                          id="tier-active"
+                          formControlName="is_active"
+                        >
+                        <label class="form-check-label" for="tier-active">
+                          Active
+                        </label>
+                      </div>
+                      <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                          <i class="bi bi-check-lg me-1"></i>
+                          Save
+                        </button>
+                        <button type="button" class="btn btn-secondary" (click)="cancelServiceTierForm()">
+                          <i class="bi bi-x-lg me-1"></i>
+                          Cancel
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+                  </div>
+                }
+
+                <!-- Service Tiers List -->
+                <div class="table-responsive">
+                  <table class="table table-striped">
+                    <thead>
+                      <tr>
+                        <th>Name</th>
+                        <th>Lab Group</th>
+                        <th>Description</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @for (tier of serviceTiers || []; track tier.id) {
+                        <tr>
+                          <td>{{ tier.name }}</td>
+                          <td>{{ getLabGroupById(tier.lab_group)?.name }}</td>
+                          <td>{{ tier.description || 'No description' }}</td>
+                          <td>
+                            <span class="badge" [class]="tier.is_active ? 'bg-success' : 'bg-secondary'">
+                              {{ tier.is_active ? 'Active' : 'Inactive' }}
+                            </span>
+                          </td>
+                          <td>
+                            <button 
+                              class="btn btn-sm btn-outline-primary me-2"
+                              (click)="editServiceTier(tier)"
+                              [disabled]="showServiceTierForm"
+                            >
+                              <i class="bi bi-pencil"></i>
+                            </button>
+                            <button 
+                              class="btn btn-sm btn-outline-danger"
+                              (click)="deleteServiceTier(tier)"
+                              [disabled]="showServiceTierForm"
+                            >
+                              <i class="bi bi-trash"></i>
+                            </button>
+                          </td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Service Price Management -->
+          <div class="accordion-item">
+            <h2 class="accordion-header">
+              <button class="accordion-button" 
+                      [class.collapsed]="isServicePricesCollapsed"
+                      type="button" 
+                      (click)="isServicePricesCollapsed = !isServicePricesCollapsed">
+                <i class="bi bi-currency-dollar me-2"></i>
+                Service Price Management
+              </button>
+            </h2>
+            <div #servicePricesCollapse="ngbCollapse" [(ngbCollapse)]="isServicePricesCollapsed">
+              <div class="accordion-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                  <h6>Service Prices</h6>
+                  <div class="d-flex gap-2">
+                    <button 
+                      class="btn btn-outline-secondary btn-sm"
+                      (click)="bulkEditMode ? exitBulkEditMode() : enterBulkEditMode()"
+                      [disabled]="showServicePriceForm || servicePrices.length === 0"
+                    >
+                      <i class="bi bi-pencil-square me-1"></i>
+                      {{ bulkEditMode ? 'Exit' : 'Bulk Edit' }}
+                    </button>
+                    <button 
+                      class="btn btn-primary btn-sm"
+                      (click)="showAddServicePriceForm()"
+                      [disabled]="showServicePriceForm || bulkEditMode"
+                    >
+                      <i class="bi bi-plus me-1"></i>
+                      Add Service Price
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Add/Edit Service Price Form -->
+                @if (showServicePriceForm) {
+                  <div class="card mb-3">
+                  <div class="card-body">
+                    <h6 class="card-title">
+                      {{ editingServicePrice ? 'Edit' : 'Add' }} Service Price
+                    </h6>
+                    <form [formGroup]="servicePriceForm" (ngSubmit)="saveServicePrice()">
+                      <div class="row">
+                        <div class="col-md-6">
+                          <div class="mb-3">
+                            <label for="price-service-tier" class="form-label">
+                              Service Tier <span class="text-danger">*</span>
+                            </label>
+                            <select 
+                              class="form-select" 
+                              id="price-service-tier"
+                              formControlName="service_tier"
+                            >
+                              <option value="">Select service tier...</option>
+                              @for (tier of serviceTiers || []; track tier.id) {
+                                <option [value]="tier.id">
+                                  {{ tier.name }}
+                                </option>
+                              }
+                            </select>
+                            @if (getFieldError(servicePriceForm, 'service_tier')) {
+                              <div class="text-danger small mt-1">
+                                {{ getFieldError(servicePriceForm, 'service_tier') }}
+                              </div>
+                            }
+                          </div>
+                        </div>
+                        <div class="col-md-6">
+                          <div class="mb-3">
+                            <label for="price-instrument" class="form-label">
+                              Instrument <span class="text-danger">*</span>
+                            </label>
+                            <select 
+                              class="form-select" 
+                              id="price-instrument"
+                              formControlName="instrument"
+                            >
+                              <option value="">Select instrument...</option>
+                              @for (instrument of instruments || []; track instrument.id) {
+                                <option [value]="instrument.id">
+                                  {{ instrument.instrument_name }}
+                                </option>
+                              }
+                            </select>
+                            @if (getFieldError(servicePriceForm, 'instrument')) {
+                              <div class="text-danger small mt-1">
+                                {{ getFieldError(servicePriceForm, 'instrument') }}
+                              </div>
+                            }
+                          </div>
+                        </div>
+                      </div>
+                      <div class="row">
+                        <div class="col-md-4">
+                          <div class="mb-3">
+                            <label for="price-amount" class="form-label">
+                              Price <span class="text-danger">*</span>
+                            </label>
+                            <input 
+                              type="number" 
+                              class="form-control" 
+                              id="price-amount"
+                              formControlName="price"
+                              min="0"
+                              step="0.01"
+                              placeholder="0.00"
+                            >
+                            @if (getFieldError(servicePriceForm, 'price')) {
+                              <div class="text-danger small mt-1">
+                                {{ getFieldError(servicePriceForm, 'price') }}
+                              </div>
+                            }
+                          </div>
+                        </div>
+                        <div class="col-md-4">
+                          <div class="mb-3">
+                            <label for="price-billing-unit" class="form-label">
+                              Billing Unit <span class="text-danger">*</span>
+                            </label>
+                            <select 
+                              class="form-select" 
+                              id="price-billing-unit"
+                              formControlName="billing_unit"
+                            >
+                              <option value="">Select billing unit...</option>
+                              @for (unit of billingUnits || []; track unit.value) {
+                                <option [value]="unit.value">
+                                  {{ unit.display }}
+                                </option>
+                              }
+                            </select>
+                            @if (getFieldError(servicePriceForm, 'billing_unit')) {
+                              <div class="text-danger small mt-1">
+                                {{ getFieldError(servicePriceForm, 'billing_unit') }}
+                              </div>
+                            }
+                          </div>
+                        </div>
+                        <div class="col-md-4">
+                          <div class="mb-3">
+                            <label for="price-currency" class="form-label">
+                              Currency <span class="text-danger">*</span>
+                            </label>
+                            <select 
+                              class="form-select" 
+                              id="price-currency"
+                              formControlName="currency"
+                            >
+                              <option value="USD">USD</option>
+                              <option value="EUR">EUR</option>
+                              <option value="GBP">GBP</option>
+                            </select>
+                            @if (getFieldError(servicePriceForm, 'currency')) {
+                              <div class="text-danger small mt-1">
+                                {{ getFieldError(servicePriceForm, 'currency') }}
+                              </div>
+                            }
+                          </div>
+                        </div>
+                      </div>
+                      <div class="row">
+                        <div class="col-md-6">
+                          <div class="mb-3">
+                            <label for="price-effective-date" class="form-label">
+                              Effective Date <span class="text-danger">*</span>
+                            </label>
+                            <input 
+                              type="date" 
+                              class="form-control" 
+                              id="price-effective-date"
+                              formControlName="effective_date"
+                            >
+                            @if (getFieldError(servicePriceForm, 'effective_date')) {
+                              <div class="text-danger small mt-1">
+                                {{ getFieldError(servicePriceForm, 'effective_date') }}
+                              </div>
+                            }
+                          </div>
+                        </div>
+                        <div class="col-md-6">
+                          <div class="mb-3">
+                            <label for="price-expiry-date" class="form-label">
+                              Expiry Date
+                            </label>
+                            <input 
+                              type="date" 
+                              class="form-control" 
+                              id="price-expiry-date"
+                              formControlName="expiry_date"
+                            >
+                          </div>
+                        </div>
+                      </div>
+                      <div class="form-check mb-3">
+                        <input 
+                          class="form-check-input" 
+                          type="checkbox" 
+                          id="price-active"
+                          formControlName="is_active"
+                        >
+                        <label class="form-check-label" for="price-active">
+                          Active
+                        </label>
+                      </div>
+                      <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                          <i class="bi bi-check-lg me-1"></i>
+                          Save
+                        </button>
+                        <button type="button" class="btn btn-secondary" (click)="cancelServicePriceForm()">
+                          <i class="bi bi-x-lg me-1"></i>
+                          Cancel
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+                  </div>
+                }
+
+                <!-- Bulk Edit Controls -->
+                @if (bulkEditMode) {
+                  <div class="card mb-3">
+                  <div class="card-body">
+                    <h6 class="card-title">
+                      <i class="bi bi-pencil-square me-2"></i>
+                      Bulk Edit Mode
+                    </h6>
+                    <p class="card-text">You can edit multiple prices at once. Changes will be saved when you click "Save All Changes".</p>
+                    <div class="d-flex gap-2">
+                      <button class="btn btn-success" (click)="saveBulkEdits()">
+                        <i class="bi bi-check-lg me-1"></i>
+                        Save All Changes
+                      </button>
+                      <button class="btn btn-secondary" (click)="exitBulkEditMode()">
+                        <i class="bi bi-x-lg me-1"></i>
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                  </div>
+                }
+
+                <!-- Service Prices List -->
+                <div class="table-responsive">
+                  <table class="table table-striped">
+                    <thead>
+                      <tr>
+                        <th>Service Tier</th>
+                        <th>Instrument</th>
+                        <th>Price</th>
+                        <th>Billing Unit</th>
+                        <th>Effective Date</th>
+                        <th>Status</th>
+                        @if (!bulkEditMode) {
+                          <th>Actions</th>
+                        }
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <!-- Normal View -->
+                      @for (price of servicePrices || []; track price.id) {
+                        @if (!bulkEditMode) {
+                          <tr>
+                        <td>{{ price.service_tier_name }}</td>
+                        <td>{{ price.instrument_name }}</td>
+                        <td>{{ formatPrice(price.price, price.currency) }}</td>
+                        <td>{{ price.billing_unit_display }}</td>
+                        <td>{{ formatDate(price.effective_date) }}</td>
+                        <td>
+                          <span class="badge" [class]="price.is_active ? 'bg-success' : 'bg-secondary'">
+                            {{ price.is_active ? 'Active' : 'Inactive' }}
+                          </span>
+                        </td>
+                        <td>
+                          <button 
+                            class="btn btn-sm btn-outline-primary me-2"
+                            (click)="editServicePrice(price)"
+                            [disabled]="showServicePriceForm"
+                          >
+                            <i class="bi bi-pencil"></i>
+                          </button>
+                          <button 
+                            class="btn btn-sm btn-outline-danger"
+                            (click)="deleteServicePrice(price)"
+                            [disabled]="showServicePriceForm"
+                          >
+                            <i class="bi bi-trash"></i>
+                          </button>
+                        </td>
+                          </tr>
+                        }
+                      }
+                      <!-- Bulk Edit View -->
+                      @for (price of bulkEditPrices || []; track $index) {
+                        @if (bulkEditMode) {
+                          <tr>
+                        <td>{{ price.service_tier_name }}</td>
+                        <td>{{ price.instrument_name }}</td>
+                        <td>
+                          <input 
+                            type="number" 
+                            class="form-control form-control-sm"
+                            [(ngModel)]="price.price"
+                            min="0"
+                            step="0.01"
+                            style="width: 120px;"
+                          >
+                        </td>
+                        <td>{{ price.billing_unit }}</td>
+                        <td>-</td>
+                        <td>
+                          <div class="form-check">
+                            <input 
+                              class="form-check-input" 
+                              type="checkbox" 
+                              [(ngModel)]="price.is_active"
+                            >
+                          </div>
+                        </td>
+                          </tr>
+                        }
+                      }
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- Empty State -->
+      @if (!selectedLabGroup && !loading && !error) {
+        <div class="text-center py-5">
+        <i class="bi bi-building display-1 text-muted"></i>
+        <h3 class="mt-3">Select a Lab Group</h3>
+        <p class="text-muted">
+          Please select a lab group to manage billing settings.
+        </p>
+        </div>
+      }
+    </div>
+  </div>
+</div>
+
+@if (hasFooterText()) {
+  <div class="footer-spacer"></div>
+}

@@ -66,7 +66,8 @@ export class EditLabGroupModalComponent {
       default_storage_id: [''],
       search_storage_name: [''],
       service_storage_id: [''],
-      can_perform_ms_analysis: [false]
+      can_perform_ms_analysis: [false],
+      is_core_facility: [false]
     });
   }
 
@@ -75,6 +76,7 @@ export class EditLabGroupModalComponent {
       name: labGroup.name || '',
       description: labGroup.description || '',
       can_perform_ms_analysis: !!labGroup.can_perform_ms_analysis,
+      is_core_facility: !!labGroup.is_core_facility,
       default_storage_id: labGroup.default_storage?.id || '',
       service_storage_id: labGroup.service_storage?.id || ''
     });
@@ -152,7 +154,8 @@ export class EditLabGroupModalComponent {
       description: this.form.value.description,
       default_storage_id: this.form.value.default_storage_id,
       service_storage_id: this.form.value.service_storage_id,
-      can_perform_ms_analysis: this.form.value.can_perform_ms_analysis
+      can_perform_ms_analysis: this.form.value.can_perform_ms_analysis,
+      is_core_facility: this.form.value.is_core_facility
     };
 
     setTimeout(() => {
