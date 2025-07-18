@@ -6,51 +6,102 @@
   <button type="button" class="btn-close" aria-label="Close" (click)="onCancel()"></button>
 </div>
 
-<div class="modal-body bg-transparent p-3 d-flex flex-column" style="height: 70vh; max-width: 100%; overflow: hidden;">
-  <!-- Top Controls Section -->
-  <div class="flex-shrink-0 p-2 mb-2 border-bottom border-light">
-    <form [formGroup]="poolForm">
-      <div class="row g-3">
-        <div class="col-md-6">
-          <label for="pool_name" class="form-label fw-medium small">
-            <i class="bi bi-tag me-1"></i>
-            Pool Name
-          </label>
-          <input 
-            type="text" 
-            class="form-control form-control-sm" 
-            id="pool_name" 
-            formControlName="pool_name"
-            placeholder="Enter pool name"
-            [class.is-invalid]="poolForm.get('pool_name')?.invalid && poolForm.get('pool_name')?.touched">
-          @if (poolForm.get('pool_name')?.invalid && poolForm.get('pool_name')?.touched) {
-            <div class="invalid-feedback small">
-              <i class="bi bi-exclamation-circle me-1"></i>
-              Required
-            </div>
-          }
-        </div>
-        <div class="col-md-6">
-          <label class="form-label fw-medium small">
-            <i class="bi bi-info-circle me-1"></i>
-            Summary
-          </label>
-          <div class="small text-muted">
-            <span class="badge bg-primary me-1">{{ selectedPooledOnly.length + selectedPooledAndIndependent.length }}</span>
-            total samples selected
-            @if (existingPools.length > 0) {
-              <span class="ms-2">
-                <span class="badge bg-warning">{{ existingPools.length }}</span>
-                existing pools
-              </span>
+<div class="modal-body bg-transparent p-3 d-flex" style="height: 80vh; max-width: 100%; overflow: hidden;">
+  <!-- Left Column - Sample Selection -->
+  <div class="flex-grow-1 me-3" style="overflow-y: auto;">
+    <!-- Pool Name Input -->
+    <div class="mb-3">
+      <form [formGroup]="poolForm">
+        <div class="row g-3">
+          <div class="col-md-8">
+            <label for="pool_name" class="form-label fw-medium">
+              <i class="bi bi-tag me-1"></i>
+              Pool Name
+            </label>
+            <input 
+              type="text" 
+              class="form-control" 
+              id="pool_name" 
+              formControlName="pool_name"
+              placeholder="Enter pool name"
+              [class.is-invalid]="poolForm.get('pool_name')?.invalid && poolForm.get('pool_name')?.touched">
+            @if (poolForm.get('pool_name')?.invalid && poolForm.get('pool_name')?.touched) {
+              <div class="invalid-feedback">
+                <i class="bi bi-exclamation-circle me-1"></i>
+                Required
+              </div>
             }
           </div>
+          <div class="col-md-4">
+            <label class="form-label fw-medium">
+              <i class="bi bi-info-circle me-1"></i>
+              Selection Summary
+            </label>
+            <div class="small text-muted">
+              <span class="badge bg-primary me-1">{{ selectedPooledOnly.length + selectedPooledAndIndependent.length }}</span>
+              total samples selected
+            </div>
+          </div>
         </div>
-      </div>
-    </form>
-  </div>
+        
+        <!-- Template Sample Selection -->
+        <div class="row g-3 mt-2">
+          <div class="col-md-12">
+            <label for="template_sample" class="form-label fw-medium">
+              <i class="bi bi-copy me-1"></i>
+              Template Sample (Optional)
+            </label>
+            <select 
+              class="form-select" 
+              id="template_sample" 
+              formControlName="template_sample">
+              <option value="">Select a sample to copy metadata from</option>
+              @for (sampleIndex of getSampleOptions(); track sampleIndex) {
+                <option [value]="sampleIndex">
+                  Sample {{ sampleIndex }} - {{ getSampleName(sampleIndex) }}
+                </option>
+              }
+            </select>
+            <div class="form-text">
+              <i class="bi bi-info-circle me-1"></i>
+              The pool will inherit all metadata from the selected sample (except Source Name)
+            </div>
+          </div>
+        </div>
+        
+        <!-- Reference Pool Selection -->
+        <div class="row g-3 mt-2">
+          <div class="col-md-12">
+            <div class="form-check">
+              <input 
+                class="form-check-input" 
+                type="checkbox" 
+                id="is_reference" 
+                formControlName="is_reference">
+              <label class="form-check-label fw-medium" for="is_reference">
+                <i class="bi bi-star me-1"></i>
+                Reference Pool for SDRF Export
+              </label>
+            </div>
+            <div class="form-text">
+              <i class="bi bi-info-circle me-1"></i>
+              <strong>What is a Reference Pool?</strong> Reference pools are used for channel normalization in proteomics workflows.
+            </div>
+            <div class="form-text mt-1">
+              <i class="bi bi-file-earmark-spreadsheet me-1"></i>
+              <strong>SDRF Export:</strong> Only pools marked as "Reference" will be included in SDRF (Sample and Data Relationship Format) exports. Regular pools are excluded from SDRF files.
+            </div>
+            <div class="form-text mt-1">
+              <i class="bi bi-upload me-1"></i>
+              <strong>Auto-Detection:</strong> When importing SDRF files, pools with SN= format (e.g., "SN=Sample1,Sample2") are automatically marked as reference pools.
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
 
-    <div class="mb-4">
+    <!-- Sample Selection Section -->
+    <div class="mb-3">
       <h5 class="fw-semibold mb-3">
         <i class="bi bi-list-check me-2"></i>
         Sample Selection
@@ -60,338 +111,468 @@
         Select which samples to include in the pool and their processing type:
       </p>
       
-  <!-- Batch Selection Controls -->
-  <div class="flex-shrink-0 p-2 mb-2 bg-light bg-opacity-25 rounded">
-    <div class="row g-2 align-items-end">
-      <div class="col-md-3">
-        <label class="form-label small fw-medium mb-1">Batch Select:</label>
-        <div class="input-group input-group-sm">
-          <input 
-            type="text" 
-            class="form-control" 
-            placeholder="1-5, 8, 10-12"
-            #batchInput
-            (keyup.enter)="applyBatchSelection(batchInput.value, batchSelectionType.value)">
-          <button 
-            class="btn btn-outline-primary" 
-            type="button"
-            (click)="applyBatchSelection(batchInput.value, batchSelectionType.value)">
-            <i class="bi bi-check2"></i>
-          </button>
+      <!-- Batch Selection Controls -->
+      <div class="flex-shrink-0 p-2 mb-2 bg-light bg-opacity-25 rounded">
+        <div class="row g-2 align-items-end">
+          <div class="col-md-3">
+            <label class="form-label small fw-medium mb-1">Batch Select:</label>
+            <div class="input-group input-group-sm">
+              <input 
+                type="text" 
+                class="form-control" 
+                placeholder="1-5, 8, 10-12"
+                #batchInput
+                (keyup.enter)="applyBatchSelection(batchInput.value, batchSelectionType.value)">
+              <button 
+                class="btn btn-outline-primary" 
+                type="button"
+                (click)="applyBatchSelection(batchInput.value, batchSelectionType.value)">
+                <i class="bi bi-check2"></i>
+              </button>
+            </div>
+          </div>
+          <div class="col-md-2">
+            <select class="form-select form-select-sm" #batchSelectionType>
+              <option value="pooled_only">Pooled Only</option>
+              <option value="pooled_and_independent">Pooled + Independent</option>
+              <option value="independent">Independent</option>
+            </select>
+          </div>
+          <div class="col-md-5">
+            <div class="btn-group btn-group-sm" role="group">
+              <button 
+                type="button" 
+                class="btn btn-outline-warning btn-sm"
+                (click)="selectAll('pooled_only')"
+                title="Select all as Pooled Only">
+                <i class="bi bi-check-all"></i> P.Only
+              </button>
+              <button 
+                type="button" 
+                class="btn btn-outline-info btn-sm"
+                (click)="selectAll('pooled_and_independent')"
+                title="Select all as Pooled + Independent">
+                <i class="bi bi-check-all"></i> P.+Ind
+              </button>
+              <button 
+                type="button" 
+                class="btn btn-outline-secondary btn-sm"
+                (click)="clearAll()"
+                title="Clear all selections">
+                <i class="bi bi-x-circle"></i> Clear
+              </button>
+            </div>
+          </div>
+          <div class="col-md-2 text-end">
+            <small class="text-muted">
+              Page {{ currentPage }} of {{ totalPages }}
+            </small>
+          </div>
         </div>
       </div>
-      <div class="col-md-2">
-        <select class="form-select form-select-sm" #batchSelectionType>
-          <option value="pooled_only">Pooled Only</option>
-          <option value="pooled_and_independent">Pooled + Independent</option>
-          <option value="independent">Independent</option>
-        </select>
-      </div>
-      <div class="col-md-5">
-        <div class="btn-group btn-group-sm" role="group">
-          <button 
-            type="button" 
-            class="btn btn-outline-warning btn-sm"
-            (click)="selectAll('pooled_only')"
-            title="Select all as Pooled Only">
-            <i class="bi bi-check-all"></i> P.Only
-          </button>
-          <button 
-            type="button" 
-            class="btn btn-outline-info btn-sm"
-            (click)="selectAll('pooled_and_independent')"
-            title="Select all as Pooled + Independent">
-            <i class="bi bi-check-all"></i> P.+Ind
-          </button>
-          <button 
-            type="button" 
-            class="btn btn-outline-secondary btn-sm"
-            (click)="clearAll()"
-            title="Clear all selections">
-            <i class="bi bi-x-circle"></i> Clear
-          </button>
-        </div>
-      </div>
-      <div class="col-md-2 text-end">
-        <small class="text-muted">
-          Page {{ currentPage }} of {{ totalPages }}
-        </small>
-      </div>
-    </div>
-  </div>
 
-  <!-- Sample Table Section -->
-  <div class="flex-grow-1 d-flex flex-column overflow-hidden border rounded">
-    <!-- Table Header -->
-    <div class="flex-shrink-0 border-bottom bg-light bg-opacity-50">
-      <div class="row fw-medium text-muted small py-2 px-3 mb-0">
-        <div class="col-4">Sample</div>
-        <div class="col-3">Pooled Only</div>
-        <div class="col-3">Pooled + Independent</div>
-        <div class="col-2">Status</div>
-      </div>
-    </div>
-    
-    <!-- Table Body -->
-    <div class="flex-grow-1 overflow-auto" style="max-height: calc(70vh - 300px);">
-      @for (sampleIndex of getPaginatedSamples(); track sampleIndex) {
-        <div class="row align-items-center py-2 px-3 border-bottom sample-row"
-             [class.selected-row]="!isIndependent(sampleIndex)">
-          <div class="col-4">
-            <div class="d-flex align-items-center">
-              <input 
-                class="form-check-input me-2" 
-                type="checkbox"
-                [id]="'select_' + sampleIndex"
-                [checked]="!isIndependent(sampleIndex)"
-                (change)="onSampleCheckboxChange(sampleIndex, $event)">
-              <label class="fw-medium mb-0 small" [for]="'select_' + sampleIndex">
-                <i class="bi bi-vial me-1 text-muted"></i>
-                {{ getSampleName(sampleIndex) }}
-                @if (getSampleName(sampleIndex) !== 'Sample ' + sampleIndex) {
-                  <span class="text-muted small">(#{{ sampleIndex }})</span>
-                }
-              </label>
-            </div>
-          </div>
-          <div class="col-3">
-            <div class="form-check">
-              <input 
-                class="form-check-input" 
-                type="radio" 
-                [name]="'sample_' + sampleIndex"
-                [id]="'pooled_only_' + sampleIndex"
-                [checked]="isPooledOnly(sampleIndex)"
-                [disabled]="isIndependent(sampleIndex)"
-                (change)="onSampleSelectionChange(sampleIndex, 'pooled_only', $event)">
-              <label class="form-check-label small" [for]="'pooled_only_' + sampleIndex">
-                Pooled Only
-              </label>
-            </div>
-          </div>
-          <div class="col-3">
-            <div class="form-check">
-              <input 
-                class="form-check-input" 
-                type="radio" 
-                [name]="'sample_' + sampleIndex"
-                [id]="'pooled_and_independent_' + sampleIndex"
-                [checked]="isPooledAndIndependent(sampleIndex)"
-                [disabled]="isIndependent(sampleIndex)"
-                (change)="onSampleSelectionChange(sampleIndex, 'pooled_and_independent', $event)">
-              <label class="form-check-label small" [for]="'pooled_and_independent_' + sampleIndex">
-                Pooled + Independent
-              </label>
-            </div>
-          </div>
-          <div class="col-2">
-            <span class="badge badge-sm" [ngClass]="getSampleStatusClass(sampleIndex)">
-              {{ getStatusAbbreviation(sampleIndex) }}
-            </span>
+      <!-- Sample Table Section -->
+      <div class="flex-grow-1 d-flex flex-column overflow-hidden border rounded">
+        <!-- Table Header -->
+        <div class="flex-shrink-0 border-bottom bg-light bg-opacity-50">
+          <div class="row fw-medium text-muted small py-2 px-3 mb-0">
+            <div class="col-1 text-center">#</div>
+            <div class="col-4">Sample Name</div>
+            <div class="col-3">Pooled Only</div>
+            <div class="col-2">Pooled + Independent</div>
+            <div class="col-2">Status</div>
           </div>
         </div>
-      }
-    </div>
-    
-    <!-- Pagination -->
-    <div class="flex-shrink-0 border-top p-2 bg-light bg-opacity-25">
-      <nav aria-label="Sample pagination">
-        <ul class="pagination pagination-sm justify-content-center mb-0">
-          <li class="page-item" [class.disabled]="currentPage === 1">
-            <button class="page-link" (click)="goToPage(currentPage - 1)" [disabled]="currentPage === 1">
-              <i class="bi bi-chevron-left"></i>
-            </button>
-          </li>
-          @for (page of getVisiblePages(); track page) {
-            <li class="page-item" [class.active]="page === currentPage">
-              <button class="page-link" (click)="goToPage(page)">{{ page }}</button>
-            </li>
+        
+        <!-- Table Body -->
+        <div class="flex-grow-1 overflow-auto" style="max-height: calc(70vh - 300px);">
+          @for (sampleIndex of getPaginatedSamples(); track sampleIndex) {
+            <div class="row align-items-center py-2 px-3 border-bottom sample-row"
+                 [class.selected-row]="!isIndependent(sampleIndex)">
+              <div class="col-1 text-center">
+                <span class="badge bg-secondary text-white fw-bold">{{ sampleIndex }}</span>
+              </div>
+              <div class="col-4">
+                <div class="d-flex align-items-center">
+                  <input 
+                    class="form-check-input me-2" 
+                    type="checkbox"
+                    [id]="'select_' + sampleIndex"
+                    [checked]="!isIndependent(sampleIndex)"
+                    (change)="onSampleCheckboxChange(sampleIndex, $event)">
+                  <label class="fw-medium mb-0 small" [for]="'select_' + sampleIndex">
+                    <i class="bi bi-vial me-1 text-muted"></i>
+                    {{ getSampleName(sampleIndex) }}
+                  </label>
+                </div>
+              </div>
+              <div class="col-3">
+                <div class="form-check">
+                  <input 
+                    class="form-check-input" 
+                    type="radio" 
+                    [name]="'sample_' + sampleIndex"
+                    [id]="'pooled_only_' + sampleIndex"
+                    [checked]="isPooledOnly(sampleIndex)"
+                    [disabled]="isIndependent(sampleIndex)"
+                    (change)="onSampleSelectionChange(sampleIndex, 'pooled_only', $event)">
+                  <label class="form-check-label small" [for]="'pooled_only_' + sampleIndex">
+                    Pooled Only
+                  </label>
+                </div>
+              </div>
+              <div class="col-2">
+                <div class="form-check">
+                  <input 
+                    class="form-check-input" 
+                    type="radio" 
+                    [name]="'sample_' + sampleIndex"
+                    [id]="'pooled_and_independent_' + sampleIndex"
+                    [checked]="isPooledAndIndependent(sampleIndex)"
+                    [disabled]="isIndependent(sampleIndex)"
+                    (change)="onSampleSelectionChange(sampleIndex, 'pooled_and_independent', $event)">
+                  <label class="form-check-label small" [for]="'pooled_and_independent_' + sampleIndex">
+                    Pooled + Independent
+                  </label>
+                </div>
+              </div>
+              <div class="col-2">
+                <span class="badge badge-sm" [ngClass]="getSampleStatusClass(sampleIndex)">
+                  {{ getStatusAbbreviation(sampleIndex) }}
+                </span>
+              </div>
+            </div>
           }
-          <li class="page-item" [class.disabled]="currentPage === totalPages">
-            <button class="page-link" (click)="goToPage(currentPage + 1)" [disabled]="currentPage === totalPages">
-              <i class="bi bi-chevron-right"></i>
-            </button>
-          </li>
-        </ul>
-      </nav>
-    </div>
-  </div>
+        </div>
+        
+        <!-- Pagination -->
+        <div class="flex-shrink-0 border-top p-2 bg-light bg-opacity-25">
+          <nav aria-label="Sample pagination">
+            <ul class="pagination pagination-sm justify-content-center mb-0">
+              <li class="page-item" [class.disabled]="currentPage === 1">
+                <button class="page-link" (click)="goToPage(currentPage - 1)" [disabled]="currentPage === 1">
+                  <i class="bi bi-chevron-left"></i>
+                </button>
+              </li>
+              @for (page of getVisiblePages(); track page) {
+                <li class="page-item" [class.active]="page === currentPage">
+                  <button class="page-link" (click)="goToPage(page)">{{ page }}</button>
+                </li>
+              }
+              <li class="page-item" [class.disabled]="currentPage === totalPages">
+                <button class="page-link" (click)="goToPage(currentPage + 1)" [disabled]="currentPage === totalPages">
+                  <i class="bi bi-chevron-right"></i>
+                </button>
+              </li>
+            </ul>
+          </nav>
+        </div>
+      </div>
     </div>
 
-  <!-- Bottom Summary Section -->
-  <div class="flex-shrink-0 p-2 mt-2 border-top border-light">
-    <div class="row g-2">
-      @if (selectedPooledOnly.length > 0 || selectedPooledAndIndependent.length > 0) {
-        <div class="col-md-6">
-          <div class="small">
-            <div class="fw-medium text-primary mb-1">
-              <i class="bi bi-info-circle me-1"></i>
-              Pool Summary ({{ selectedPooledOnly.length + selectedPooledAndIndependent.length }} samples)
-            </div>
-            @if (selectedPooledOnly.length > 0) {
-              <div class="mb-1">
-                <span class="badge bg-warning text-dark badge-sm me-1">P.Only {{ selectedPooledOnly.length }}</span>
-                <span class="text-muted small">{{ formatSampleRange(selectedPooledOnly) }}</span>
+    <!-- Bottom Summary Section -->
+    <div class="flex-shrink-0 p-2 mt-2">
+      <div class="row g-2">
+        @if (selectedPooledOnly.length > 0 || selectedPooledAndIndependent.length > 0) {
+          <div class="col-md-6">
+            <div class="small">
+              <div class="fw-medium text-primary mb-1">
+                <i class="bi bi-info-circle me-1"></i>
+                Pool Summary ({{ selectedPooledOnly.length + selectedPooledAndIndependent.length }} samples)
               </div>
-            }
-            @if (selectedPooledAndIndependent.length > 0) {
-              <div>
-                <span class="badge bg-info text-dark badge-sm me-1">P.+Ind {{ selectedPooledAndIndependent.length }}</span>
-                <span class="text-muted small">{{ formatSampleRange(selectedPooledAndIndependent) }}</span>
-              </div>
-            }
-          </div>
-        </div>
-      }
-      @if (existingPools.length > 0) {
-        <div class="col-md-6">
-          <div class="small">
-            <div class="fw-medium text-warning mb-1">
-              <i class="bi bi-collection me-1"></i>
-              Existing Pools ({{ existingPools.length }})
-            </div>
-            <div style="max-height: 60px; overflow-y: auto;">
-              @for (pool of existingPools; track pool.id) {
-                <div class="text-muted small mb-1">
-                  <strong>{{ pool.pool_name }}:</strong>
-                  @if (pool.pooled_only_samples.length > 0) {
-                    <span class="badge bg-warning text-dark badge-sm me-1">{{ pool.pooled_only_samples.length }}</span>
-                  }
-                  @if (pool.pooled_and_independent_samples.length > 0) {
-                    <span class="badge bg-info text-dark badge-sm">{{ pool.pooled_and_independent_samples.length }}</span>
-                  }
+              @if (selectedPooledOnly.length > 0) {
+                <div class="mb-1">
+                  <span class="badge bg-warning text-dark badge-sm me-1">P.Only {{ selectedPooledOnly.length }}</span>
+                  <span class="text-muted small">{{ formatSampleRange(selectedPooledOnly) }}</span>
+                </div>
+              }
+              @if (selectedPooledAndIndependent.length > 0) {
+                <div>
+                  <span class="badge bg-info text-dark badge-sm me-1">P.+Ind {{ selectedPooledAndIndependent.length }}</span>
+                  <span class="text-muted small">{{ formatSampleRange(selectedPooledAndIndependent) }}</span>
                 </div>
               }
             </div>
           </div>
+        }
+      </div>
+      
+      <!-- SDRF Preview Section -->
+      @if (shouldShowPreview()) {
+        <div class="mt-3 pt-2 border-top border-light">
+          <div class="small">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <div class="fw-medium text-success">
+                <i class="bi bi-file-earmark-spreadsheet me-1"></i>
+                SDRF Preview
+              </div>
+              <button 
+                type="button" 
+                class="btn btn-outline-primary btn-sm"
+                (click)="togglePreviewMode()">
+                <i class="bi" [class.bi-table]="!showFullPreview" [class.bi-list-ul]="showFullPreview"></i>
+                {{ showFullPreview ? 'Simple View' : 'Full SDRF View' }}
+              </button>
+            </div>
+            @if (!poolForm.get('is_reference')?.value) {
+              <div class="alert alert-warning py-2 px-2 mb-2" style="font-size: 0.75rem;">
+                <i class="bi bi-exclamation-triangle me-1"></i>
+                <strong>Note:</strong> This pool is not marked as Reference and will NOT be included in SDRF exports.
+              </div>
+            }
+            <div class="text-muted small mb-2">
+              {{ getPoolPreviewSummary() }}
+            </div>
+            
+            <!-- Simple Preview Table -->
+            @if (!showFullPreview) {
+              <div class="table-responsive" style="max-height: 120px; overflow-y: auto;">
+                <table class="table table-sm table-borderless">
+                  <thead class="table-light">
+                    <tr class="small">
+                      <th style="width: 20%;">Sample</th>
+                      <th style="width: 35%;">Source Name</th>
+                      <th style="width: 25%;">Status</th>
+                      <th style="width: 20%;">SDRF Value</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (sample of getPooledSamplesPreview(); track sample.sampleIndex) {
+                      <tr class="small">
+                        <td class="text-muted">#{{ sample.sampleIndex }}</td>
+                        <td class="fw-medium">{{ sample.sourceName }}</td>
+                        <td>
+                          <span class="badge badge-sm" 
+                                [class.bg-warning]="sample.status === 'Pooled Only'"
+                                [class.bg-info]="sample.status === 'Pooled + Independent'"
+                                [class.text-dark]="sample.status === 'Pooled Only' || sample.status === 'Pooled + Independent'">
+                            {{ sample.status }}
+                          </span>
+                        </td>
+                        <td class="font-monospace small text-muted" style="font-size: 0.75rem;">
+                          {{ sample.sdrfValue }}
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            }
+            
+            <!-- Full SDRF Preview Table -->
+            @if (showFullPreview) {
+              <div class="table-responsive" style="max-height: 200px; overflow: auto;">
+                <table class="table table-sm table-bordered">
+                  <thead class="table-light sticky-top">
+                    <tr class="small">
+                      <th style="min-width: 60px;" class="text-center">#</th>
+                      @for (columnName of getMetadataColumnNames(); track columnName) {
+                        <th style="min-width: 120px;" class="text-nowrap">{{ columnName }}</th>
+                      }
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (row of getFullSdrfPreview(); track row.sample.index) {
+                      <tr class="small">
+                        <td class="text-center text-muted fw-medium">{{ row.sample.index }}</td>
+                        @for (columnName of getMetadataColumnNames(); track columnName) {
+                          <td class="font-monospace" 
+                              style="font-size: 0.75rem;"
+                              [class.text-primary]="columnName === 'characteristics[pooled sample]'"
+                              [class.fw-bold]="columnName === 'characteristics[pooled sample]'"
+                              [class.bg-warning]="columnName === 'characteristics[pooled sample]' && row.metadata[columnName] !== 'not pooled'"
+                              [class.bg-opacity-25]="columnName === 'characteristics[pooled sample]' && row.metadata[columnName] !== 'not pooled'">
+                            {{ row.metadata[columnName] }}
+                          </td>
+                        }
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+              
+              <div class="mt-2 p-2 bg-info bg-opacity-10 rounded">
+                <div class="small text-info">
+                  <i class="bi bi-info-circle me-1"></i>
+                  <strong>Full SDRF View:</strong> This shows how the pooled samples will appear in the complete SDRF export with all metadata columns. 
+                  The "characteristics[pooled sample]" column is highlighted to show the pooling effect.
+                </div>
+              </div>
+            }
+            
+            @if (selectedPooledOnly.length > 0) {
+              <div class="mt-2 p-2 bg-light bg-opacity-50 rounded">
+                <div class="small text-muted">
+                  <strong>Pool SDRF Value:</strong> 
+                  <span class="font-monospace">{{ generatePoolSdrfValue() }}</span>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+  
+  <!-- Right Column - Existing Pools & Preview -->
+  <div class="flex-shrink-0 border-start ps-3" style="width: 400px; overflow-y: auto;">
+    <!-- Existing Pools Section -->
+    <div class="mb-4">
+      <h5 class="fw-semibold mb-3">
+        <i class="bi bi-collection me-2"></i>
+        Existing Pools
+        @if (existingPools.length > 0) {
+          <span class="badge bg-warning text-dark">{{ existingPools.length }}</span>
+        }
+      </h5>
+      
+      <!-- Reference Pool Info Banner -->
+      @if (existingPools.length > 0) {
+        <div class="alert alert-info py-2 px-3 mb-3" style="font-size: 0.85rem;">
+          <div class="d-flex align-items-start">
+            <i class="bi bi-info-circle me-2 mt-1 flex-shrink-0"></i>
+            <div>
+              <strong>Reference Pool Export:</strong> 
+              Pools with <span class="badge bg-primary"><i class="bi bi-star"></i> Reference</span> badges will be included in SDRF exports. 
+              Regular pools are used internally but excluded from SDRF files.
+            </div>
+          </div>
+        </div>
+      }
+      
+      @if (existingPools.length === 0) {
+        <div class="text-muted text-center py-4">
+          <i class="bi bi-collection display-6 opacity-25"></i>
+          <p class="mb-0 small">No pools created yet</p>
+        </div>
+      } @else {
+        <div class="d-flex flex-column gap-2">
+          @for (pool of existingPools; track pool.id) {
+            <div class="card border-0 bg-light">
+              <div class="card-body p-3">
+                <h6 class="card-title mb-2 d-flex align-items-center">
+                  <i class="bi bi-collection-fill me-2 text-warning"></i>
+                  {{ pool.pool_name }}
+                  @if (pool.is_reference) {
+                    <span class="badge bg-primary ms-2">
+                      <i class="bi bi-star me-1"></i>
+                      Reference
+                    </span>
+                  }
+                </h6>
+                <div class="d-flex gap-2 mb-2">
+                  @if (pool.pooled_only_samples.length > 0) {
+                    <span class="badge bg-warning text-dark">
+                      <i class="bi bi-droplet me-1"></i>
+                      P.Only {{ pool.pooled_only_samples.length }}
+                    </span>
+                  }
+                  @if (pool.pooled_and_independent_samples.length > 0) {
+                    <span class="badge bg-info text-dark">
+                      <i class="bi bi-droplet-half me-1"></i>
+                      P.+Ind {{ pool.pooled_and_independent_samples.length }}
+                    </span>
+                  }
+                </div>
+                <div class="small text-muted">
+                  <strong>Samples:</strong>
+                  @if (pool.pooled_only_samples.length > 0) {
+                    <span class="d-block">P.Only: {{ formatSampleRange(pool.pooled_only_samples) }}</span>
+                  }
+                  @if (pool.pooled_and_independent_samples.length > 0) {
+                    <span class="d-block">P.+Ind: {{ formatSampleRange(pool.pooled_and_independent_samples) }}</span>
+                  }
+                </div>
+              </div>
+            </div>
+          }
         </div>
       }
     </div>
     
-    <!-- SDRF Preview Section -->
-    @if (shouldShowPreview()) {
-      <div class="mt-3 pt-2 border-top border-light">
-        <div class="small">
-          <div class="d-flex justify-content-between align-items-center mb-2">
-            <div class="fw-medium text-success">
-              <i class="bi bi-file-earmark-spreadsheet me-1"></i>
-              SDRF Preview
-            </div>
-            <button 
-              type="button" 
-              class="btn btn-outline-primary btn-sm"
-              (click)="togglePreviewMode()">
-              <i class="bi" [class.bi-table]="!showFullPreview" [class.bi-list-ul]="showFullPreview"></i>
-              {{ showFullPreview ? 'Simple View' : 'Full SDRF View' }}
-            </button>
-          </div>
-          <div class="text-muted small mb-2">
-            {{ getPoolPreviewSummary() }}
-          </div>
-          
-          <!-- Simple Preview Table -->
-          @if (!showFullPreview) {
-            <div class="table-responsive" style="max-height: 120px; overflow-y: auto;">
-              <table class="table table-sm table-borderless">
-                <thead class="table-light">
-                  <tr class="small">
-                    <th style="width: 20%;">Sample</th>
-                    <th style="width: 35%;">Source Name</th>
-                    <th style="width: 25%;">Status</th>
-                    <th style="width: 20%;">SDRF Value</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  @for (sample of getPooledSamplesPreview(); track sample.sampleIndex) {
-                    <tr class="small">
-                      <td class="text-muted">#{{ sample.sampleIndex }}</td>
-                      <td class="fw-medium">{{ sample.sourceName }}</td>
-                      <td>
-                        <span class="badge badge-sm" 
-                              [class.bg-warning]="sample.status === 'Pooled Only'"
-                              [class.bg-info]="sample.status === 'Pooled + Independent'"
-                              [class.text-dark]="sample.status === 'Pooled Only' || sample.status === 'Pooled + Independent'">
-                          {{ sample.status }}
-                        </span>
-                      </td>
-                      <td class="font-monospace small text-muted" style="font-size: 0.75rem;">
-                        {{ sample.sdrfValue }}
-                      </td>
-                    </tr>
-                  }
-                </tbody>
-              </table>
-            </div>
-          }
-          
-          <!-- Full SDRF Preview Table -->
-          @if (showFullPreview) {
-            <div class="table-responsive" style="max-height: 200px; overflow: auto;">
-              <table class="table table-sm table-bordered">
-                <thead class="table-light sticky-top">
-                  <tr class="small">
-                    <th style="min-width: 60px;" class="text-center">#</th>
-                    @for (columnName of getMetadataColumnNames(); track columnName) {
-                      <th style="min-width: 120px;" class="text-nowrap">{{ columnName }}</th>
-                    }
-                  </tr>
-                </thead>
-                <tbody>
-                  @for (row of getFullSdrfPreview(); track row.sample.index) {
-                    <tr class="small">
-                      <td class="text-center text-muted fw-medium">{{ row.sample.index }}</td>
-                      @for (columnName of getMetadataColumnNames(); track columnName) {
-                        <td class="font-monospace" 
-                            style="font-size: 0.75rem;"
-                            [class.text-primary]="columnName === 'characteristics[pooled sample]'"
-                            [class.fw-bold]="columnName === 'characteristics[pooled sample]'"
-                            [class.bg-warning]="columnName === 'characteristics[pooled sample]' && row.metadata[columnName] !== 'not pooled'"
-                            [class.bg-opacity-25]="columnName === 'characteristics[pooled sample]' && row.metadata[columnName] !== 'not pooled'">
-                          {{ row.metadata[columnName] }}
-                        </td>
-                      }
-                    </tr>
-                  }
-                </tbody>
-              </table>
+    <!-- Current Selection Preview -->
+    @if (selectedPooledOnly.length > 0 || selectedPooledAndIndependent.length > 0) {
+      <div class="mb-4">
+        <h5 class="fw-semibold mb-3">
+          <i class="bi bi-eye me-2"></i>
+          Current Selection Preview
+        </h5>
+        
+        <div class="card border-primary">
+          <div class="card-body p-3">
+            <h6 class="card-title text-primary mb-2">
+              <i class="bi bi-plus-circle me-2"></i>
+              {{ poolForm.get('pool_name')?.value || 'New Pool' }}
+              @if (poolForm.get('is_reference')?.value) {
+                <span class="badge bg-primary ms-2">
+                  <i class="bi bi-star me-1"></i>
+                  Reference
+                </span>
+              }
+            </h6>
+            
+            <div class="d-flex gap-2 mb-3">
+              @if (selectedPooledOnly.length > 0) {
+                <span class="badge bg-warning text-dark">
+                  <i class="bi bi-droplet me-1"></i>
+                  P.Only {{ selectedPooledOnly.length }}
+                </span>
+              }
+              @if (selectedPooledAndIndependent.length > 0) {
+                <span class="badge bg-info text-dark">
+                  <i class="bi bi-droplet-half me-1"></i>
+                  P.+Ind {{ selectedPooledAndIndependent.length }}
+                </span>
+              }
             </div>
             
-            <div class="mt-2 p-2 bg-info bg-opacity-10 rounded">
-              <div class="small text-info">
-                <i class="bi bi-info-circle me-1"></i>
-                <strong>Full SDRF View:</strong> This shows how the pooled samples will appear in the complete SDRF export with all metadata columns. 
-                The "characteristics[pooled sample]" column is highlighted to show the pooling effect.
-              </div>
+            <div class="small text-muted">
+              <strong>Selected Samples:</strong>
+              @if (selectedPooledOnly.length > 0) {
+                <span class="d-block">P.Only: {{ formatSampleRange(selectedPooledOnly) }}</span>
+              }
+              @if (selectedPooledAndIndependent.length > 0) {
+                <span class="d-block">P.+Ind: {{ formatSampleRange(selectedPooledAndIndependent) }}</span>
+              }
             </div>
-          }
-          
-          @if (selectedPooledOnly.length > 0) {
-            <div class="mt-2 p-2 bg-light bg-opacity-50 rounded">
-              <div class="small text-muted">
-                <strong>Pool SDRF Value:</strong> 
-                <span class="font-monospace">{{ generatePoolSdrfValue() }}</span>
+            
+            <!-- SDRF Preview -->
+            @if (selectedPooledOnly.length > 0) {
+              <div class="mt-3 pt-2 border-top">
+                <div class="small">
+                  <strong class="text-success">SDRF Value:</strong>
+                  <div class="font-monospace text-success bg-light p-2 rounded mt-1">
+                    {{ generatePoolSdrfValue() }}
+                  </div>
+                </div>
               </div>
-            </div>
-          }
+            }
+          </div>
         </div>
       </div>
     }
+    
+    <!-- Action Buttons -->
+    <div class="d-grid gap-2">
+      <button 
+        type="button" 
+        class="btn btn-primary" 
+        (click)="onSubmit()"
+        [disabled]="poolForm.invalid || (selectedPooledOnly.length === 0 && selectedPooledAndIndependent.length === 0)">
+        <i class="bi bi-plus-circle me-2"></i>
+        Create Pool
+        @if (selectedPooledOnly.length > 0 || selectedPooledAndIndependent.length > 0) {
+          <span class="badge bg-light text-primary ms-2">
+            {{ selectedPooledOnly.length + selectedPooledAndIndependent.length }}
+          </span>
+        }
+      </button>
+      
+      <button type="button" class="btn btn-outline-secondary" (click)="onCancel()">
+        <i class="bi bi-x-circle me-2"></i>
+        Close
+      </button>
+    </div>
   </div>
 </div>
 
-<div class="modal-footer bg-transparent border-0 pt-3">
-  <div class="d-flex gap-2 w-100">
-    <button type="button" class="btn btn-outline-secondary" (click)="onCancel()">
-      <i class="bi bi-x-circle me-1"></i>
-      Cancel
-    </button>
-    <button 
-      type="button" 
-      class="btn btn-primary ms-auto" 
-      (click)="onSubmit()"
-      [disabled]="poolForm.invalid || (selectedPooledOnly.length === 0 && selectedPooledAndIndependent.length === 0)">
-      <i class="bi bi-plus-circle me-1"></i>
-      Create Pool ({{ selectedPooledOnly.length + selectedPooledAndIndependent.length }} samples)
-    </button>
-  </div>
-</div>

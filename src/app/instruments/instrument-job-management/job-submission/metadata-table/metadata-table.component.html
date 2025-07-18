@@ -1,5 +1,241 @@
 @if (sampleNumber > 0 && (userMetadata.length > 0 || staffMetadata.length > 0)) {
   <div class="metadata-table-wrapper">
+    <!-- Sample Pools SDRF Metadata Table -->
+    @if (existingPools && existingPools.length > 0) {
+      <div class="pools-display-section mb-3">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <h6 class="mb-0 text-muted">
+            <i class="bi bi-collection me-2"></i>
+            Sample Pools SDRF Metadata ({{ existingPools.length }})
+          </h6>
+          <small class="text-muted">Pool-specific metadata for SDRF export</small>
+        </div>
+        
+        <div class="table-responsive-custom">
+          <table class="table table-bordered table-hover pool-metadata-table">
+            <thead class="sticky-header">
+              <tr>
+                <th scope="col" class="sticky-column text-center">Pool</th>
+                
+                <!-- User Metadata Columns -->
+                @for (col of userMetadata; track col.id; let index = $index) {
+                  @if (visibleColumnNames.includes(col.name) && (!col.hidden || showHidden) && col.name !== 'characteristics[pooled sample]') {
+                    <th scope="col"
+                        class="table-primary metadata-header"
+                        [ngbTooltip]="metadataService.helpData[col.name]"
+                        placement="top"
+                        container="body"
+                        (mouseover)="currentPoolCell = {row: -1, col: index + 0}">
+                      <div class="d-flex justify-content-between align-items-center">
+                        <span class="header-text">
+                          {{field_mask[col.name] || col.name}}
+                          @if (col.mandatory) {
+                            <i class="bi bi-asterisk text-danger small"></i>
+                          }
+                        </span>
+                        
+                        @if (currentPoolCell?.row === -1 && currentPoolCell?.col === index + 0 && (userCanEdit||staffModeActive)) {
+                          <div ngbDropdown class="d-inline-block" placement="bottom-right">
+                            <button class="btn btn-xs btn-outline-primary" ngbDropdownToggle>
+                              <i class="bi bi-gear-fill"></i>
+                            </button>
+                            <div ngbDropdownMenu class="shadow-sm">
+                              <button class="dropdown-item" (click)="editPoolColumnDefault(col, index)">
+                                <i class="bi bi-pen me-2"></i> Edit Default Value
+                              </button>
+                            </div>
+                          </div>
+                        }
+                      </div>
+                      @if (col.hidden) {
+                        <span class="badge bg-secondary small">Hidden</span>
+                      }
+                    </th>
+                  }
+                }
+
+                <!-- Staff Metadata Columns -->
+                @for (col of staffMetadata; track col.id; let index = $index) {
+                  @if (visibleColumnNames.includes(col.name) && (!col.hidden || showHidden) && (templateMode || staffModeActive)) {
+                    <th scope="col"
+                        [class]="col.type != 'Factor value' ? 'table-warning' : 'table-danger'"
+                        class="metadata-header"
+                        [ngbTooltip]="metadataService.helpData[col.name]"
+                        placement="top"
+                        container="body"
+                        (mouseover)="currentPoolCell = {row: -1, col: (userMetadata.length + index + 0)}">
+                      <div class="d-flex justify-content-between align-items-center">
+                        <span class="header-text">
+                          {{field_mask[col.name] || col.name}}
+                          @if (col.mandatory) {
+                            <i class="bi bi-asterisk text-danger small"></i>
+                          }
+                        </span>
+
+                        @if (currentPoolCell?.row === -1 && currentPoolCell?.col === (userMetadata.length + index + 0) && staffModeActive) {
+                          <div ngbDropdown class="d-inline-block" placement="bottom-right">
+                            <button class="btn btn-xs btn-outline-primary" ngbDropdownToggle>
+                              <i class="bi bi-gear-fill"></i>
+                            </button>
+                            <div ngbDropdownMenu class="shadow-sm">
+                              <button class="dropdown-item" (click)="editPoolColumnDefault(col, index)">
+                                <i class="bi bi-pen me-2"></i> Edit Default Value
+                              </button>
+                            </div>
+                          </div>
+                        }
+                      </div>
+                      @if (col.hidden) {
+                        <span class="badge bg-secondary small">Hidden</span>
+                      }
+                      @if (col.readonly) {
+                        <span class="badge bg-danger small">Read-only</span>
+                      }
+                    </th>
+                  }
+                }
+              </tr>
+            </thead>
+            <tbody>
+              @for (pool of existingPools; track pool.id; let poolIndex = $index) {
+                <tr>
+                  <td class="sticky-column text-center fw-bold">
+                    <div class="d-flex align-items-center justify-content-center">
+                      <i class="bi bi-collection-fill text-primary me-1"></i>
+                      <span class="me-2">{{ poolIndex + 1 }}</span>
+                      
+                      @if (userCanEdit || staffModeActive) {
+                        <button 
+                          class="btn btn-xs btn-outline-danger" 
+                          (click)="deletePool(pool, poolIndex)"
+                          title="Delete pool"
+                          style="font-size: 0.7rem; padding: 0.1rem 0.25rem;">
+                          <i class="bi bi-trash"></i>
+                        </button>
+                      }
+                    </div>
+                  </td>
+
+
+                  <!-- User Metadata Cells -->
+                  @for (col of userMetadata; track col.id; let colIndex = $index) {
+                    @if (visibleColumnNames.includes(col.name) && (!col.hidden || showHidden) && col.name !== 'characteristics[pooled sample]') {
+                      <td (mouseover)="moveOverPoolCell(poolIndex, colIndex + 0)"
+                          [ngClass]="{'selection-active': poolSelectionMode && poolSelectionModeColIndex === colIndex + 0,
+                                     'table-danger': (poolSelectionMode && isSelectedPoolCell(poolIndex, colIndex + 0)) || col.readonly,
+                                     'table-secondary': col.hidden,
+                                     'cell-selected': currentPoolCell?.row === poolIndex && currentPoolCell?.col === colIndex + 0}"
+                          class="pool-metadata-cell">
+                        <div class="d-flex justify-content-between align-items-center cell-content">
+                          <span>{{ getPoolMetadataValue(pool, col.name) || '-' }}</span>
+
+                          @if (currentPoolCell?.row === poolIndex && currentPoolCell?.col === colIndex + 0 && !col.readonly && (userCanEdit || staffModeActive)) {
+                            @if (!poolSelectionMode) {
+                              <div ngbDropdown class="d-inline-block" placement="bottom-right">
+                                <button class="btn btn-xs btn-outline-primary cell-action" ngbDropdownToggle>
+                                  <i class="bi bi-three-dots-vertical"></i>
+                                </button>
+                                <div ngbDropdownMenu class="shadow-sm">
+                                  <button class="dropdown-item" (click)="editPoolCell(pool, poolIndex, colIndex + 0, col.name)">
+                                    <i class="bi bi-pen me-2"></i> Edit
+                                  </button>
+                                  <button class="dropdown-item" (click)="copyPoolCellAndEnableSelectionMode(pool, poolIndex, colIndex + 0, col.name)">
+                                    <i class="bi bi-copy me-2"></i> Copy To Adjacent Cells
+                                  </button>
+                                  <button class="dropdown-item" (click)="addPoolToFavourite(pool, col, colIndex + 0)">
+                                    <i class="bi bi-star me-2"></i> Favourite
+                                  </button>
+                                </div>
+                              </div>
+                            } @else {
+                              <button class="btn btn-xs btn-outline-danger cell-action" 
+                                      title="Apply to selected cells" 
+                                      (click)="pastePoolContentFromOriginToCells(col.name)">
+                                <i class="bi bi-clipboard-check"></i>
+                              </button>
+                            }
+                          }
+
+                          @if (poolOriginCell && !col.readonly && poolOriginCell.row === poolIndex && poolOriginCell.col === colIndex + 1) {
+                            <div ngbDropdown class="d-inline-block" placement="bottom-right">
+                              <button class="btn btn-xs btn-primary cell-action" ngbDropdownToggle>
+                                <i class="bi bi-clipboard-data"></i>
+                              </button>
+                              <div ngbDropdownMenu class="shadow-sm">
+                                <button class="dropdown-item" (click)="exitPoolSelectionMode()">
+                                  <i class="bi bi-x-circle me-2"></i> Exit Selection Mode
+                                </button>
+                              </div>
+                            </div>
+                          }
+                        </div>
+                      </td>
+                    }
+                  }
+
+                  <!-- Staff Metadata Cells -->
+                  @for (col of staffMetadata; track col.id; let colIndex = $index) {
+                    @if (visibleColumnNames.includes(col.name) && (!col.hidden || showHidden) && (templateMode || staffModeActive)) {
+                      <td (mouseover)="moveOverPoolCell(poolIndex, (userMetadata.length + colIndex + 0))"
+                          [ngClass]="{'selection-active': poolSelectionMode && poolSelectionModeColIndex === (userMetadata.length + colIndex + 0),
+                                     'table-danger': (poolSelectionMode && isSelectedPoolCell(poolIndex, (userMetadata.length + colIndex + 0))) || col.readonly,
+                                     'table-secondary': col.hidden,
+                                     'cell-selected': currentPoolCell?.row === poolIndex && currentPoolCell?.col === (userMetadata.length + colIndex + 0)}"
+                          class="pool-metadata-cell">
+                        <div class="d-flex justify-content-between align-items-center cell-content">
+                          <span>{{ getPoolMetadataValue(pool, col.name) || '-' }}</span>
+
+                          @if (currentPoolCell?.row === poolIndex && currentPoolCell?.col === (userMetadata.length + colIndex + 0) && !col.readonly && staffModeActive) {
+                            @if (!poolSelectionMode) {
+                              <div ngbDropdown class="d-inline-block" placement="bottom-right">
+                                <button class="btn btn-xs btn-outline-primary cell-action" ngbDropdownToggle>
+                                  <i class="bi bi-three-dots-vertical"></i>
+                                </button>
+                                <div ngbDropdownMenu class="shadow-sm">
+                                  <button class="dropdown-item" (click)="editPoolCell(pool, poolIndex, (userMetadata.length + colIndex + 0), col.name)">
+                                    <i class="bi bi-pen me-2"></i> Edit
+                                  </button>
+                                  <button class="dropdown-item" (click)="copyPoolCellAndEnableSelectionMode(pool, poolIndex, (userMetadata.length + colIndex + 0), col.name)">
+                                    <i class="bi bi-copy me-2"></i> Copy To Adjacent Cells
+                                  </button>
+                                  <button class="dropdown-item" (click)="addPoolToFavourite(pool, col, (userMetadata.length + colIndex + 0))">
+                                    <i class="bi bi-star me-2"></i> Favourite
+                                  </button>
+                                </div>
+                              </div>
+                            } @else {
+                              <button class="btn btn-xs btn-outline-danger cell-action" 
+                                      title="Apply to selected cells" 
+                                      (click)="pastePoolContentFromOriginToCells(col.name)">
+                                <i class="bi bi-clipboard-check"></i>
+                              </button>
+                            }
+                          }
+
+                          @if (poolOriginCell && !col.readonly && poolOriginCell.row === poolIndex && poolOriginCell.col === (userMetadata.length + colIndex + 1)) {
+                            <div ngbDropdown class="d-inline-block" placement="bottom-right">
+                              <button class="btn btn-xs btn-primary cell-action" ngbDropdownToggle>
+                                <i class="bi bi-clipboard-data"></i>
+                              </button>
+                              <div ngbDropdownMenu class="shadow-sm">
+                                <button class="dropdown-item" (click)="exitPoolSelectionMode()">
+                                  <i class="bi bi-x-circle me-2"></i> Exit Selection Mode
+                                </button>
+                              </div>
+                            </div>
+                          }
+                        </div>
+                      </td>
+                    }
+                  }
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    }
+    
     <!-- Top Scroll Controls -->
     <div class="d-flex justify-content-between align-items-center mb-2">
       <div class="d-flex align-items-center gap-2">

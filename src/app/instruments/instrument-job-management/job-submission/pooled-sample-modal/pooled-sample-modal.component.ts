@@ -38,12 +38,18 @@ export class PooledSampleModalComponent implements OnInit {
     private toast: ToastService
   ) {
     this.poolForm = this.fb.group({
-      pool_name: ['', Validators.required]
+      pool_name: ['', Validators.required],
+      template_sample: [''],
+      is_reference: [false]
     });
   }
 
   ngOnInit(): void {
     this.calculatePagination();
+    this.refreshData();
+  }
+
+  refreshData(): void {
     this.loadExistingPools();
     this.loadSampleStatusOverview();
   }
@@ -82,6 +88,10 @@ export class PooledSampleModalComponent implements OnInit {
   }
 
   getSampleNumbers(): number[] {
+    return Array.from({ length: this.sampleNumber }, (_, i) => i + 1);
+  }
+
+  getSampleOptions(): number[] {
     return Array.from({ length: this.sampleNumber }, (_, i) => i + 1);
   }
 
@@ -218,13 +228,22 @@ export class PooledSampleModalComponent implements OnInit {
       const poolData: SamplePoolCreateRequest = {
         pool_name: this.poolForm.value.pool_name,
         pooled_only_samples: this.selectedPooledOnly,
-        pooled_and_independent_samples: this.selectedPooledAndIndependent
+        pooled_and_independent_samples: this.selectedPooledAndIndependent,
+        template_sample: this.poolForm.value.template_sample ? parseInt(this.poolForm.value.template_sample) : undefined,
+        is_reference: this.poolForm.value.is_reference
       };
 
       this.jobSubmissionService.createSamplePool(this.instrumentJobId, poolData).subscribe({
         next: (response) => {
           this.toast.show('Success', 'Sample pool created successfully', 2000, 'success');
-          this.activeModal.close(response);
+          // Refresh the existing pools list to show the newly created pool
+          this.refreshData();
+          // Reset the form but keep the modal open
+          this.poolForm.reset();
+          this.selectedPooledOnly = [];
+          this.selectedPooledAndIndependent = [];
+          // Signal success to parent component so it can reload job metadata
+          this.activeModal.close({ success: true, pool: response });
         },
         error: (error) => {
           console.error('Error creating sample pool:', error);

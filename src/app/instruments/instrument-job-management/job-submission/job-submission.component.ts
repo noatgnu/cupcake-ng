@@ -139,6 +139,7 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit, OnDestroy 
   activeTab: 'user'|'staff' = 'user'
   isPanelOpen = false;
   staffModeAvailable = false;
+  existingPools: any[] = [];
   togglePanel(): void {
     this.isPanelOpen = !this.isPanelOpen;
   }
@@ -180,6 +181,7 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit, OnDestroy 
     this.staffModeAvailable = false
     this.staffDataForm.disable()
     this.protocolForm.disable()
+    this.loadExistingPools(value.id)
     if (value.protocol) {
       // @ts-ignore
       this.protocolForm.patchValue({id: value.protocol.id,
@@ -841,10 +843,31 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit, OnDestroy 
     })
   }
 
+  handlePoolDeleted(deletedPool: any) {
+    // Call the backend service to actually delete the pool
+    this.jobSubmission.deleteSamplePool(deletedPool.id).subscribe({
+      next: () => {
+        // Remove the pool from the existingPools array only after successful deletion
+        this.existingPools = this.existingPools.filter(pool => pool.id !== deletedPool.id);
+        this.toast.show("Pool Deleted", `Pool "${deletedPool.pool_name || 'Pool'}" has been permanently deleted`, 3000, 'success');
+      },
+      error: (error) => {
+        console.error('Error deleting pool:', error);
+        this.toast.show("Error", "Failed to delete pool. Please try again.", 3000, 'error');
+        // Re-add the pool to the existingPools array since deletion failed
+        // Note: The pool was already removed from the UI in the metadata-table component
+        // We need to reload the pools to restore the UI state
+        if (this.job && this.job.id) {
+          this.loadExistingPools(this.job.id);
+        }
+      }
+    });
+  }
+
   openPooledSampleModal() {
     if (this.job && this.job.sample_number && this.job.sample_number > 0) {
       const ref = this.modal.open(PooledSampleModalComponent, {
-        size: 'lg',
+        size: 'xl',
         backdrop: 'static'
       });
       
@@ -854,7 +877,12 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit, OnDestroy 
       ref.result.then((result) => {
         if (result) {
           this.toast.show('Success', 'Sample pool created successfully', 2000, 'success');
-          // Optionally refresh the job data or update the UI
+          // Refresh the pools data
+          this.loadExistingPools(this.job!.id);
+          // Reload the job metadata to get the newly created "pooled sample" column
+          this.web.getInstrumentJob(this.job!.id).subscribe((job) => {
+            this.job = job;
+          });
         }
       }).catch((error) => {
         // Modal was dismissed
@@ -863,6 +891,17 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit, OnDestroy 
     } else {
       this.toast.show('Error', 'Please ensure the job has a valid sample number before creating pools', 2000, 'error');
     }
+  }
+
+  loadExistingPools(instrumentJobId: number) {
+    this.jobSubmission.getSamplePools(instrumentJobId).subscribe({
+      next: (response: any) => {
+        this.existingPools = response;
+      },
+      error: (error: any) => {
+        console.error('Error loading existing pools:', error);
+      }
+    });
   }
 
 

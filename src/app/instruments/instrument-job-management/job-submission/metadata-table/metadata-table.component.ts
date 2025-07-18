@@ -14,6 +14,7 @@ import {
   MultipleLineInputModalComponent
 } from "../../../../multiple-line-input-modal/multiple-line-input-modal.component";
 import {MetadataService} from "../../../../metadata.service";
+import {ToastService} from "../../../../toast.service";
 
 @Component({
   selector: 'app-metadata-table',
@@ -57,6 +58,14 @@ export class MetadataTableComponent implements OnChanges{
   @Input() staffMetadata: MetadataColumn[] = []
 
   @Input() staffModeActive: boolean = false
+  @Input() existingPools: any[] = []
+  
+  // Pool table interaction properties
+  currentPoolCell: { row: number, col: number } | null = null
+  poolSelectionMode: boolean = false
+  poolSelectionModeColIndex: number = -1
+  poolOriginCell: { row: number, col: number } | null = null
+  selectedPoolCells: { row: number, col: number }[] = []
 
   tableData: any[] = []
   
@@ -78,6 +87,7 @@ export class MetadataTableComponent implements OnChanges{
   @Output() metadataUpdated: EventEmitter<any[]> = new EventEmitter<any[]>()
   @Output() removeMetadata: EventEmitter<{ metadata: MetadataColumn, index: number, data_type: 'user_metadata'|'staff_metadata' }> = new EventEmitter<{ metadata: MetadataColumn, index: number, data_type: 'user_metadata'|'staff_metadata' }>()
   @Output() metadataFavouriteAdded: EventEmitter<any> = new EventEmitter<any>()
+  @Output() poolDeleted: EventEmitter<any> = new EventEmitter<any>()
   selectedCells: { row: number, col: number }[] = [];
   isShiftSelecting: boolean = false;
 
@@ -164,7 +174,7 @@ export class MetadataTableComponent implements OnChanges{
     }
   }
 
-  constructor(private modal: NgbModal, public metadataService: MetadataService) {
+  constructor(private modal: NgbModal, public metadataService: MetadataService, private toastService: ToastService) {
 
   }
 
@@ -707,4 +717,343 @@ export class MetadataTableComponent implements OnChanges{
   getScrollProgress(): number {
     return this.scrollProgress
   }
+
+  // Pool display helper methods
+  formatSampleRange(samples: number[]): string {
+    if (samples.length === 0) return 'None';
+    
+    const sorted = [...samples].sort((a, b) => a - b);
+    const ranges: string[] = [];
+    let start = sorted[0];
+    let end = sorted[0];
+    
+    for (let i = 1; i < sorted.length; i++) {
+      if (sorted[i] === end + 1) {
+        end = sorted[i];
+      } else {
+        if (start === end) {
+          ranges.push(start.toString());
+        } else if (end === start + 1) {
+          ranges.push(`${start}, ${end}`);
+        } else {
+          ranges.push(`${start}-${end}`);
+        }
+        start = sorted[i];
+        end = sorted[i];
+      }
+    }
+    
+    // Add the last range
+    if (start === end) {
+      ranges.push(start.toString());
+    } else if (end === start + 1) {
+      ranges.push(`${start}, ${end}`);
+    } else {
+      ranges.push(`${start}-${end}`);
+    }
+    
+    return ranges.join(', ');
+  }
+
+  generatePoolSdrfValue(pool: any): string {
+    if (!pool || !pool.pooled_only_samples || pool.pooled_only_samples.length === 0) {
+      return 'not pooled';
+    }
+    
+    // Generate the SDRF SN= value format using actual source names from samples
+    const sourceNames = pool.pooled_only_samples.map((sampleIndex: number) => {
+      return this.getSourceNameForSample(sampleIndex);
+    });
+    return `SN=${sourceNames.join(',')}`;
+  }
+
+  private getSourceNameForSample(sampleIndex: number): string {
+    // Get the source name from the sample's metadata
+    // Look for the source name in the sample's row data
+    const sampleRow = this.tableData.find(row => row.sample === sampleIndex);
+    if (sampleRow) {
+      // Find the source name column index
+      const sourceNameColumn = this.userMetadata.findIndex(col => col.name.toLowerCase() === 'source name');
+      if (sourceNameColumn !== -1) {
+        return sampleRow[`col_${sourceNameColumn}`] || `sample_${sampleIndex}`;
+      }
+      
+      // Also check staff metadata for source name
+      const staffSourceNameColumn = this.staffMetadata.findIndex(col => col.name.toLowerCase() === 'source name');
+      if (staffSourceNameColumn !== -1) {
+        return sampleRow[`col_${this.userMetadata.length + staffSourceNameColumn}`] || `sample_${sampleIndex}`;
+      }
+    }
+    
+    // Fallback to generic sample name if source name not found
+    return `sample_${sampleIndex}`;
+  }
+
+  // Pool metadata editing methods
+  moveOverPoolCell(rowIndex: number, colIndex: number) {
+    this.currentPoolCell = { row: rowIndex, col: colIndex };
+  }
+
+  getPoolMetadataValue(pool: any, metadataName: string): string {
+    // Special handling for Source Name (pool name)
+    if (metadataName === 'Source name' || metadataName === 'Source Name') {
+      return pool.pool_name || '';
+    }
+    
+    // Look for the metadata value in pool's user_metadata and staff_metadata
+    if (pool.user_metadata) {
+      const userMetadataColumn = pool.user_metadata.find((col: any) => col.name === metadataName);
+      if (userMetadataColumn) {
+        return userMetadataColumn.value || '';
+      }
+    }
+    
+    if (pool.staff_metadata) {
+      const staffMetadataColumn = pool.staff_metadata.find((col: any) => col.name === metadataName);
+      if (staffMetadataColumn) {
+        return staffMetadataColumn.value || '';
+      }
+    }
+    
+    return '';
+  }
+
+  setPoolMetadataValue(pool: any, metadataName: string, value: string) {
+    // Special handling for Source Name (pool name)
+    if (metadataName === 'Source name' || metadataName === 'Source Name') {
+      pool.pool_name = value;
+    }
+    
+    // Look for the metadata column in pool's user_metadata and staff_metadata
+    if (pool.user_metadata) {
+      const userMetadataColumn = pool.user_metadata.find((col: any) => col.name === metadataName);
+      if (userMetadataColumn) {
+        userMetadataColumn.value = value;
+        return;
+      }
+    }
+    
+    if (pool.staff_metadata) {
+      const staffMetadataColumn = pool.staff_metadata.find((col: any) => col.name === metadataName);
+      if (staffMetadataColumn) {
+        staffMetadataColumn.value = value;
+        return;
+      }
+    }
+    
+    // If metadata column doesn't exist, we'll need to create it
+    // This would typically be handled by the backend when saving
+    console.warn(`Metadata column "${metadataName}" not found in pool metadata`);
+  }
+
+  editPoolCell(pool: any, poolIndex: number, colIndex: number, metadataName: string) {
+    // Use the same modal system as the regular metadata table
+    const ref = this.modal.open(JobMetadataCreationModalComponent);
+    
+    // Handle metadata column editing
+    const column = this.userMetadata.find(col => col.name === metadataName) || 
+                  this.staffMetadata.find(col => col.name === metadataName);
+    
+    ref.componentInstance.name = column?.name || metadataName;
+    ref.componentInstance.type = column?.type || 'Characteristics';
+    ref.componentInstance.value = this.getPoolMetadataValue(pool, metadataName);
+    
+    ref.componentInstance.sampleNumber = 1; // Pool is treated as a single "sample"
+    ref.componentInstance.service_lab_group_id = this.service_lab_group_id;
+    
+    ref.result.then((result: any) => {
+      if (result && result.value !== undefined) {
+        this.setPoolMetadataValue(pool, metadataName, result.value);
+        
+        // Special handling for Source Name (pool name)
+        if (metadataName === 'Source name' || metadataName === 'Source Name') {
+          pool.pool_name = result.value;
+        }
+        
+        this.toastService.show('Pool Updated', `${metadataName} updated successfully`, 2000, 'success');
+      }
+    }).catch((error) => {
+      console.log('Pool cell edit cancelled');
+    });
+  }
+
+  editPoolSamples(pool: any, poolIndex: number) {
+    // Open the pooled sample modal for editing this specific pool
+    this.toastService.show('Edit Pool', 'Opening pool samples editor...', 2000, 'info');
+  }
+
+  editPoolColumnDefault(col: any, index: number) {
+    // Edit default value for a pool metadata column using the same modal system
+    const ref = this.modal.open(JobMetadataCreationModalComponent);
+    
+    ref.componentInstance.name = col.name;
+    ref.componentInstance.type = col.type;
+    ref.componentInstance.value = col.value || '';
+    ref.componentInstance.sampleNumber = 1;
+    ref.componentInstance.service_lab_group_id = this.service_lab_group_id;
+    
+    ref.result.then((result: any) => {
+      if (result && result.value !== undefined) {
+        col.value = result.value;
+        this.toastService.show('Column Updated', `Default value for ${col.name} updated`, 2000, 'success');
+        
+        // Apply the new default to all existing pools that don't have a value for this column
+        this.existingPools.forEach(pool => {
+          if (!this.getPoolMetadataValue(pool, col.name)) {
+            this.setPoolMetadataValue(pool, col.name, result.value);
+          }
+        });
+      }
+    }).catch((error) => {
+      console.log('Column default edit cancelled');
+    });
+  }
+
+  addPoolToFavourite(pool: any, col: any, index: number) {
+    const value = this.getPoolMetadataValue(pool, col.name);
+    const ref = this.modal.open(AddFavouriteModalComponent);
+    ref.componentInstance.name = col.name;
+    ref.componentInstance.type = col.type;
+    ref.componentInstance.value = value;
+    ref.result.then((result: any) => {
+      if (result) {
+        this.metadataFavouriteAdded.emit({
+          name: col.name,
+          type: col.type,
+          value: value,
+          ...result
+        });
+      }
+    }).catch((error) => {
+      console.log(error);
+    });
+  }
+
+  // Pool selection mode methods (similar to regular metadata table)
+  copyPoolCellAndEnableSelectionMode(pool: any, poolIndex: number, colIndex: number, metadataName: string) {
+    this.currentPoolCell = { row: poolIndex, col: colIndex };
+    this.poolSelectionMode = true;
+    this.poolSelectionModeColIndex = colIndex;
+    this.poolOriginCell = { row: poolIndex, col: colIndex };
+    this.selectedPoolCells = [{ row: poolIndex, col: colIndex }];
+  }
+
+  isSelectedPoolCell(rowIndex: number, colIndex: number): boolean {
+    return this.selectedPoolCells.some(cell => cell.row === rowIndex && cell.col === colIndex);
+  }
+
+  selectPoolCellsInRange(startRow: number, startCol: number, endRow: number, endCol: number) {
+    this.selectedPoolCells = [];
+    const minRow = Math.min(startRow, endRow);
+    const maxRow = Math.max(startRow, endRow);
+    
+    // Only select cells in the same column for pool metadata
+    if (startCol === endCol) {
+      for (let row = minRow; row <= maxRow; row++) {
+        this.selectedPoolCells.push({ row, col: startCol });
+      }
+    }
+  }
+
+  pastePoolContentFromOriginToCells(metadataName: string) {
+    if (this.poolOriginCell) {
+      const originPool = this.existingPools[this.poolOriginCell.row];
+      const originValue = this.getPoolMetadataValue(originPool, metadataName);
+      
+      // Apply the value to all selected cells
+      this.selectedPoolCells.forEach(cell => {
+        const targetPool = this.existingPools[cell.row];
+        if (targetPool && cell.row !== this.poolOriginCell!.row) {
+          this.setPoolMetadataValue(targetPool, metadataName, originValue);
+          
+          // Special handling for Source Name (pool name)
+          if (metadataName === 'Source name' || metadataName === 'Source Name') {
+            targetPool.pool_name = originValue;
+          }
+        }
+      });
+      
+      this.toastService.show('Pools Updated', `${metadataName} copied to ${this.selectedPoolCells.length} pools`, 2000, 'success');
+      this.exitPoolSelectionMode();
+    }
+  }
+
+  exitPoolSelectionMode() {
+    this.poolOriginCell = null;
+    this.poolSelectionMode = false;
+    this.selectedPoolCells = [];
+    this.poolSelectionModeColIndex = -1;
+  }
+
+  replaceEntirePoolMetadataColumn(col: any, metadataName: string) {
+    // Use the MultipleLineInputModal for bulk editing pool metadata
+    const ref = this.modal.open(MultipleLineInputModalComponent);
+    ref.componentInstance.sampleNumber = this.existingPools.length;
+    ref.result.then((result: string | undefined | null) => {
+      if (result) {
+        const lines = result.trim().split('\n');
+        this.existingPools.forEach((pool, index) => {
+          if (index < lines.length) {
+            const value = lines[index].trim();
+            this.setPoolMetadataValue(pool, metadataName, value);
+          }
+        });
+        this.toastService.show('Pools Updated', `${metadataName} updated for all pools`, 2000, 'success');
+      }
+    });
+  }
+
+  copyPoolSdrfValue(pool: any) {
+    const sdrfValue = this.generatePoolSdrfValue(pool);
+    navigator.clipboard.writeText(sdrfValue).then(() => {
+      this.toastService.show('Copied', 'SDRF value copied to clipboard', 2000, 'success');
+    }).catch(() => {
+      this.toastService.show('Error', 'Failed to copy to clipboard', 2000, 'error');
+    });
+  }
+
+  deletePool(pool: any, poolIndex: number) {
+    if (confirm(`Are you sure you want to delete the pool "${pool.pool_name || 'Pool ' + (poolIndex + 1)}"? This action cannot be undone.`)) {
+      // Clear any selection mode related to this pool
+      this.exitPoolSelectionMode();
+      
+      // Emit an event to notify parent component about the deletion
+      // The parent component will handle the actual backend call and UI updates
+      this.poolDeleted.emit(pool);
+    }
+  }
+
+  private parseSampleRange(input: string): number[] {
+    const result: number[] = [];
+    const trimmed = input.trim();
+    
+    if (!trimmed) return result;
+    
+    const parts = trimmed.split(',');
+    
+    for (const part of parts) {
+      const trimmedPart = part.trim();
+      
+      if (trimmedPart.includes('-')) {
+        // Handle range like "1-5"
+        const [start, end] = trimmedPart.split('-').map(s => parseInt(s.trim()));
+        if (!isNaN(start) && !isNaN(end) && start <= end) {
+          for (let i = start; i <= end; i++) {
+            if (!result.includes(i)) {
+              result.push(i);
+            }
+          }
+        }
+      } else {
+        // Handle single number
+        const num = parseInt(trimmedPart);
+        if (!isNaN(num) && !result.includes(num)) {
+          result.push(num);
+        }
+      }
+    }
+    
+    return result.sort((a, b) => a - b);
+  }
+
 }

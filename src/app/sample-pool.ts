@@ -1,3 +1,5 @@
+import { MetadataColumn } from './metadata-column';
+
 export interface SamplePool {
   id: number;
   pool_name: string;
@@ -7,12 +9,17 @@ export interface SamplePool {
   created_by: number;
   created_at: string;
   updated_at: string;
+  is_reference: boolean;
+  user_metadata?: MetadataColumn[];
+  staff_metadata?: MetadataColumn[];
 }
 
 export interface SamplePoolCreateRequest {
   pool_name: string;
   pooled_only_samples: number[];
   pooled_and_independent_samples: number[];
+  template_sample?: number;
+  is_reference?: boolean;
 }
 
 export interface SamplePoolUpdateRequest {

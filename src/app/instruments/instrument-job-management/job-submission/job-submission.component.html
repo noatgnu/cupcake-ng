@@ -243,11 +243,13 @@
                         (removeMetadata)="jobSubmission.removeMetadata($event.index, $event.data_type)"
                         #metadataTable
                         (metadataUpdated)="jobSubmission.handleMetadataUpdated($event)"
+                        (poolDeleted)="handlePoolDeleted($event)"
                         [userCanEdit]="userCanEdit"
                         [sampleNumber]="job.sample_number"
                         [userMetadata]="job.user_metadata"
                         [staffMetadata]="job.staff_metadata"
-                        [staffModeActive]="staffModeAvailable">
+                        [staffModeActive]="staffModeAvailable"
+                        [existingPools]="existingPools">
                       </app-metadata-table>
                     }
                   </div>
