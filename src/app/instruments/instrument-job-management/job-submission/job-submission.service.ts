@@ -7,6 +7,16 @@ import {MetadataColumn} from "../../../metadata-column";
 import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import {AddFavouriteModalComponent} from "../../../add-favourite-modal/add-favourite-modal.component";
 import {ToastService} from "../../../toast.service";
+import {
+  SamplePool,
+  SamplePoolCreateRequest,
+  SamplePoolUpdateRequest,
+  SamplePoolOverview,
+  SampleStatusOverview,
+  AddSampleResponse,
+  RemoveSampleResponse
+} from "../../../sample-pool";
+import {Observable} from "rxjs";
 
 @Injectable({
   providedIn: 'root'
@@ -349,7 +359,7 @@ export class JobSubmissionService {
       if (result) {
         // @ts-ignore
         this.metadataService.addMetadataToFavourite(name, type, value, result.display_name, result.mode, result.lab_group).subscribe((response) => {
-          this.toast.show("Favourite", "Favourite option added")
+          this.toast.show("Favourite", "Favourite option added", 2000)
         })
       }
     }).catch((error) => {
@@ -412,6 +422,39 @@ export class JobSubmissionService {
     this.setMetadataFormArray('user_metadata', value.user_metadata);
     this.setMetadataFormArray('staff_metadata', value.staff_metadata);
     console.log("create form arrays", this.metadata)
+  }
+
+  // Pooled sample methods
+  getSamplePools(instrumentJobId: number): Observable<SamplePool[]> {
+    return this.metadataService.getSamplePools(instrumentJobId);
+  }
+
+  createSamplePool(instrumentJobId: number, poolData: SamplePoolCreateRequest): Observable<SamplePool> {
+    return this.metadataService.createSamplePool(instrumentJobId, poolData);
+  }
+
+  getSamplePoolOverview(instrumentJobId: number): Observable<SamplePoolOverview> {
+    return this.metadataService.getSamplePoolOverview(instrumentJobId);
+  }
+
+  updateSamplePool(poolId: number, poolData: SamplePoolUpdateRequest): Observable<SamplePool> {
+    return this.metadataService.updateSamplePool(poolId, poolData);
+  }
+
+  deleteSamplePool(poolId: number): Observable<void> {
+    return this.metadataService.deleteSamplePool(poolId);
+  }
+
+  addSampleToPool(poolId: number, sampleIndex: number, status: string): Observable<AddSampleResponse> {
+    return this.metadataService.addSampleToPool(poolId, sampleIndex, status);
+  }
+
+  removeSampleFromPool(poolId: number, sampleIndex: number): Observable<RemoveSampleResponse> {
+    return this.metadataService.removeSampleFromPool(poolId, sampleIndex);
+  }
+
+  getSampleStatusOverview(instrumentJobId: number): Observable<SampleStatusOverview[]> {
+    return this.metadataService.getSampleStatusOverview(instrumentJobId);
   }
 
 

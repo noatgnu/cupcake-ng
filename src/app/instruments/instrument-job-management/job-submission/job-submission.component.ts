@@ -76,6 +76,7 @@ import {environment} from "../../../../environments/environment";
 import {UploadLargeFileModalComponent} from "../../../upload-large-file-modal/upload-large-file-modal.component";
 import {MetadataColumn, MetadataTableTemplate} from "../../../metadata-column";
 import {AddFavouriteModalComponent} from "../../../add-favourite-modal/add-favourite-modal.component";
+import {PooledSampleModalComponent} from "./pooled-sample-modal/pooled-sample-modal.component";
 import {
   MetadataTemplateSelectionComponent
 } from "../../../metadata-template-selection/metadata-template-selection.component";
@@ -264,7 +265,7 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit, OnDestroy 
       this.instrumentJobWebsocketSubscription = this.ws.instrumentJobWSConnection.subscribe((message: any) => {
         if ("signed_value" in message && "instance_id" in message) {
           if (message['instance_id'] === this.web.cupcakeInstanceID) {
-            this.toast.show("Export File", "Downloading file...")
+            this.toast.show("Export File", "Downloading file...", 2000)
             const downloadURL = environment.baseURL + "/api/protocol/download_temp_file/?token=" + message["signed_value"]
             const link = document.createElement('a');
             link.href = downloadURL;
@@ -278,19 +279,19 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit, OnDestroy 
             console.log(message)
             if (message['status'] === 'error') {
               if (message['message'] === 'Validation failed') {
-                this.toast.show("SDRF Validation", "Validation failed. Please check the errors.")
+                this.toast.show("SDRF Validation", "Validation failed. Please check the errors.", 2000)
                 const errors: string[] = message['errors']
                 const ref = this.modal.open(SdrfValidationResultsModalComponent, {scrollable: true})
                 ref.componentInstance.errors = errors
 
               } else {
-                this.toast.show("Export File", message['message'])
+                this.toast.show("Export File", message['message'], 2000)
               }
             } else if (message['status'] === 'completed') {
               if (message['message'] === "Validation successful") {
-                this.toast.show("SDRF Validation", "Validation successful.")
+                this.toast.show("SDRF Validation", "Validation successful.", 2000)
               } else {
-                this.toast.show("Export File", message['message'])
+                this.toast.show("Export File", message['message'], 2000)
                 if (this.job) {
                   this.web.getInstrumentJob(this.job.id).subscribe((job) => {
                     this.job = job
@@ -459,7 +460,7 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit, OnDestroy 
 
     if (this.job) {
       if (!this.userCanEdit && !this.staffModeAvailable && this.job.status === 'submitted') {
-        await this.toast.show('Job', 'You do not have permission to edit this job. Please use annotation if there is any additional files or information needed to be uploaded.');
+        await this.toast.show('Job', 'You do not have permission to edit this job. Please use annotation if there is any additional files or information needed to be uploaded.', 2000);
         return
       }
       const payload: any = {}
@@ -521,7 +522,7 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit, OnDestroy 
             }
           }
         } else {
-          await this.toast.show('Lab Group', 'Please select a lab group before update with reagent information');
+          await this.toast.show('Lab Group', 'Please select a lab group before update with reagent information', 2000);
         }
       }
 
@@ -590,12 +591,12 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit, OnDestroy 
 
       // check if payload is empty
       if (Object.keys(payload).length === 0) {
-        await this.toast.show('Job', 'No changes detected in user data');
+        await this.toast.show('Job', 'No changes detected in user data', 2000);
       } else {
         // @ts-ignore
         const response = await this.web.updateInstrumentJob(this.job.id, payload).toPromise()
         if (response) {
-          await this.toast.show('Job', 'Job updated successfully');
+          await this.toast.show('Job', 'Job updated successfully', 2000);
           this.job = response
         }
       }
@@ -609,12 +610,12 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit, OnDestroy 
     if (this.job && this.sampleInformation) {
       // Check if sample information is valid
       if (!this.job.sample_number || this.job.sample_number === 0) {
-        await this.toast.show('Validation Error', 'Please set a sample number greater than 0');
+        await this.toast.show('Validation Error', 'Please set a sample number greater than 0', 2000);
         return;
       }
 
       if (!this.job.selected_template) {
-        await this.toast.show('Validation Error', 'Please select a metadata template');
+        await this.toast.show('Validation Error', 'Please select a metadata template', 2000);
         return;
       }
 
@@ -627,7 +628,7 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit, OnDestroy 
           await this.update();
           
           if (this.job && this.job.sample_number > 0 && this.job.selected_template) {
-            await this.toast.show('Job Updated', 'Sample information has been updated successfully. You can now proceed with template configuration.');
+            await this.toast.show('Job Updated', 'Sample information has been updated successfully. You can now proceed with template configuration.', 2000);
             
             // Optionally scroll to the template section
             const templateSection = document.querySelector('[data-template-section]');
@@ -637,10 +638,10 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit, OnDestroy 
           }
         } catch (error) {
           console.error('Error updating job with sample info:', error);
-          await this.toast.show('Update Error', 'Failed to update job information. Please try again.');
+          await this.toast.show('Update Error', 'Failed to update job information. Please try again.', 2000);
         }
       } else {
-        await this.toast.show('Validation Error', 'Please provide valid sample information before updating');
+        await this.toast.show('Validation Error', 'Please provide valid sample information before updating', 2000);
       }
     }
   }
@@ -702,12 +703,12 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit, OnDestroy 
           }
 
           if (Object.keys(payload).length === 0) {
-            await this.toast.show('Job', 'No changes detected in staff data');
+            await this.toast.show('Job', 'No changes detected in staff data', 2000);
           } else {
             // @ts-ignore
             const response = await this.web.instrumentJobUpdateStaffData(this.job.id, payload).toPromise()
             if (response) {
-              await this.toast.show('Job', 'Staff data updated successfully');
+              await this.toast.show('Job', 'Staff data updated successfully', 2000);
               this.job = response
             }
           }
@@ -734,7 +735,7 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit, OnDestroy 
           if (this.job) {
             this.web.instrumentJobUpdateStatus(this.job.id, result.status).subscribe((response) => {
               this.job = response
-              this.toast.show('Job', 'Job status updated successfully')
+              this.toast.show('Job', 'Job status updated successfully', 2000)
             })
           }
         }
@@ -836,8 +837,32 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit, OnDestroy 
 
   handleFavouriteAdded(event: any) {
     this.metadataService.addMetadataToFavourite(event.name, event.type, event.value, event.display_name, event.mode, event.lab_group).subscribe((response) => {
-      this.toast.show("Favourite", "Favourite option added")
+      this.toast.show("Favourite", "Favourite option added", 2000)
     })
+  }
+
+  openPooledSampleModal() {
+    if (this.job && this.job.sample_number && this.job.sample_number > 0) {
+      const ref = this.modal.open(PooledSampleModalComponent, {
+        size: 'lg',
+        backdrop: 'static'
+      });
+      
+      ref.componentInstance.instrumentJobId = this.job.id;
+      ref.componentInstance.sampleNumber = this.job.sample_number;
+      
+      ref.result.then((result) => {
+        if (result) {
+          this.toast.show('Success', 'Sample pool created successfully', 2000, 'success');
+          // Optionally refresh the job data or update the UI
+        }
+      }).catch((error) => {
+        // Modal was dismissed
+        console.log('Modal dismissed');
+      });
+    } else {
+      this.toast.show('Error', 'Please ensure the job has a valid sample number before creating pools', 2000, 'error');
+    }
   }
 
 
@@ -956,7 +981,7 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit, OnDestroy 
             export_type = 'staff_annotation'
           }
           this.web.saveAnnotationFile(undefined, undefined, file, 'file', this.job.id, export_type, "Randomized Injection List").subscribe((data: any) => {
-            this.toast.show('Annotation', 'File Saved Successfully')
+            this.toast.show('Annotation', 'File Saved Successfully', 2000)
             this.annotationService.refreshAnnotation.next(true);
           })
           const url = window.URL.createObjectURL(blob);
@@ -967,10 +992,10 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit, OnDestroy 
           window.URL.revokeObjectURL(url);
         } else {
           if (!dataFileCol) {
-            this.toast.show("Injection List", "Data file column not found")
+            this.toast.show("Injection List", "Data file column not found", 2000)
           }
           if (!positionCol) {
-            this.toast.show("Injection List", "Position column not found")
+            this.toast.show("Injection List", "Position column not found", 2000)
           }
         }
       }

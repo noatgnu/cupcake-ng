@@ -10,12 +10,14 @@
           <i class="bi bi-plus-circle me-1"></i>
           + User Columns
         </button>
-        <div ngbDropdownMenu aria-labelledby="quickAddUserColumnsListView">
-          @for (m of metadataService.userMetadataTemplate; track m.name) {
-            <button ngbDropdownItem (click)="jobSubmission.addMetadata(m, 'user_metadata', job)">
-              {{selectedTemplateFieldMap[m.name] || m.name}}
-            </button>
-          }
+        <div ngbDropdownMenu aria-labelledby="quickAddUserColumnsListView" class="scrollable-dropdown">
+          <div class="dropdown-scrollable-content">
+            @for (m of metadataService.userMetadataTemplate; track m.name) {
+              <button ngbDropdownItem (click)="jobSubmission.addMetadata(m, 'user_metadata', job)">
+                {{selectedTemplateFieldMap[m.name] || m.name}}
+              </button>
+            }
+          </div>
           <div class="dropdown-divider"></div>
           <button ngbDropdownItem (click)="jobSubmission.addMetadata({name: 'Sample type', type: 'Characteristics'}, 'user_metadata', job)">
             <i class="bi bi-tag me-1"></i> Sample Type
@@ -34,12 +36,14 @@
           <i class="bi bi-plus-circle me-1"></i>
           + Staff Columns
         </button>
-        <div ngbDropdownMenu aria-labelledby="quickAddStaffColumnsListView">
-          @for (m of metadataService.staffMetadataSpecific; track m) {
-            <button ngbDropdownItem (click)="jobSubmission.addMetadata({name: m, type: 'Comment'}, 'staff_metadata', job)">
-              {{selectedTemplateFieldMap[m] || m}}
-            </button>
-          }
+        <div ngbDropdownMenu aria-labelledby="quickAddStaffColumnsListView" class="scrollable-dropdown">
+          <div class="dropdown-scrollable-content">
+            @for (m of metadataService.staffMetadataSpecific; track m) {
+              <button ngbDropdownItem (click)="jobSubmission.addMetadata({name: m, type: 'Comment'}, 'staff_metadata', job)">
+                {{selectedTemplateFieldMap[m] || m}}
+              </button>
+            }
+          </div>
           <div class="dropdown-divider"></div>
           <button ngbDropdownItem (click)="jobSubmission.addMetadata({name: '', type: 'Factor value'}, 'staff_metadata', job)">
             <i class="bi bi-diagram-3 me-1"></i> Factor Value
@@ -275,12 +279,14 @@
         <button class="btn btn-primary" ngbDropdownToggle>
           <i class="bi bi-plus-circle me-1"></i> User Columns
         </button>
-        <div ngbDropdownMenu aria-labelledby="addMetadata">
-          @for (m of metadataService.userMetadataTemplate; track m.name) {
-            <a class="dropdown-item" (click)="jobSubmission.addMetadata(m, 'user_metadata', job)">
-              {{selectedTemplateFieldMap[m.name] || m.name}}
-            </a>
-          }
+        <div ngbDropdownMenu aria-labelledby="addMetadata" class="scrollable-dropdown">
+          <div class="dropdown-scrollable-content">
+            @for (m of metadataService.userMetadataTemplate; track m.name) {
+              <a class="dropdown-item" (click)="jobSubmission.addMetadata(m, 'user_metadata', job)">
+                {{selectedTemplateFieldMap[m.name] || m.name}}
+              </a>
+            }
+          </div>
           <div class="dropdown-divider"></div>
           <a class="dropdown-item" (click)="jobSubmission.addMetadata({name: 'Sample type', type: 'Characteristics'}, 'user_metadata', job)">
             <i class="bi bi-tag me-1"></i> Sample Type
@@ -300,12 +306,14 @@
           <button class="btn btn-primary" ngbDropdownToggle>
             <i class="bi bi-plus-circle me-1"></i> User Columns
           </button>
-          <div ngbDropdownMenu aria-labelledby="addMetadata">
-            @for (m of metadataService.userMetadataTemplate; track m.name) {
-              <a class="dropdown-item" (click)="jobSubmission.addMetadata(m, 'user_metadata', job)">
-                {{selectedTemplateFieldMap[m.name] || m.name}}
-              </a>
-            }
+          <div ngbDropdownMenu aria-labelledby="addMetadata" class="scrollable-dropdown">
+            <div class="dropdown-scrollable-content">
+              @for (m of metadataService.userMetadataTemplate; track m.name) {
+                <a class="dropdown-item" (click)="jobSubmission.addMetadata(m, 'user_metadata', job)">
+                  {{selectedTemplateFieldMap[m.name] || m.name}}
+                </a>
+              }
+            </div>
             <div class="dropdown-divider"></div>
             <a class="dropdown-item" (click)="jobSubmission.addMetadata({name: 'Sample type', type: 'Characteristics'}, 'user_metadata', job)">
               <i class="bi bi-tag me-1"></i> Sample Type
@@ -322,12 +330,14 @@
         <button class="btn btn-warning" ngbDropdownToggle>
           <i class="bi bi-plus-circle me-1"></i> Staff Columns
         </button>
-        <div ngbDropdownMenu aria-labelledby="addStaffMetadata">
-          @for (m of metadataService.staffMetadataSpecific; track m) {
-            <a class="dropdown-item" (click)="jobSubmission.addMetadata({name: m, type: 'Comment'}, 'staff_metadata', job)">
-              {{selectedTemplateFieldMap[m] || m}}
-            </a>
-          }
+        <div ngbDropdownMenu aria-labelledby="addStaffMetadata" class="scrollable-dropdown">
+          <div class="dropdown-scrollable-content">
+            @for (m of metadataService.staffMetadataSpecific; track m) {
+              <a class="dropdown-item" (click)="jobSubmission.addMetadata({name: m, type: 'Comment'}, 'staff_metadata', job)">
+                {{selectedTemplateFieldMap[m] || m}}
+              </a>
+            }
+          </div>
           <div class="dropdown-divider"></div>
           <a class="dropdown-item" (click)="jobSubmission.addMetadata({name: '', type: 'Factor value'}, 'staff_metadata', job)">
             <i class="bi bi-diagram-3 me-1"></i> Factor Value

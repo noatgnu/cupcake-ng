@@ -4,6 +4,15 @@ import {Unimod} from "./unimod";
 import {WebService} from "./web.service";
 import {MetadataColumn} from "./metadata-column";
 import {Workbook, Column, Worksheet, CellValue} from "exceljs";
+import {
+  SamplePool,
+  SamplePoolCreateRequest,
+  SamplePoolUpdateRequest,
+  SamplePoolOverview,
+  SampleStatusOverview,
+  AddSampleResponse,
+  RemoveSampleResponse
+} from "./sample-pool";
 
 @Injectable({
   providedIn: 'root'
@@ -2524,5 +2533,38 @@ export class MetadataService {
       }
     });
     return result;
+  }
+
+  // Pooled sample methods
+  getSamplePools(instrumentJobId: number): Observable<SamplePool[]> {
+    return this.web.getSamplePools(instrumentJobId);
+  }
+
+  createSamplePool(instrumentJobId: number, poolData: SamplePoolCreateRequest): Observable<SamplePool> {
+    return this.web.createSamplePool(instrumentJobId, poolData);
+  }
+
+  getSamplePoolOverview(instrumentJobId: number): Observable<SamplePoolOverview> {
+    return this.web.getSamplePoolOverview(instrumentJobId);
+  }
+
+  updateSamplePool(poolId: number, poolData: SamplePoolUpdateRequest): Observable<SamplePool> {
+    return this.web.updateSamplePool(poolId, poolData);
+  }
+
+  deleteSamplePool(poolId: number): Observable<void> {
+    return this.web.deleteSamplePool(poolId);
+  }
+
+  addSampleToPool(poolId: number, sampleIndex: number, status: string): Observable<AddSampleResponse> {
+    return this.web.addSampleToPool(poolId, sampleIndex, status);
+  }
+
+  removeSampleFromPool(poolId: number, sampleIndex: number): Observable<RemoveSampleResponse> {
+    return this.web.removeSampleFromPool(poolId, sampleIndex);
+  }
+
+  getSampleStatusOverview(instrumentJobId: number): Observable<SampleStatusOverview[]> {
+    return this.web.getSampleStatusOverview(instrumentJobId);
   }
 }

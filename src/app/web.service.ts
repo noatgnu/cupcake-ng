@@ -48,6 +48,16 @@ import {UnimodQuery} from "./unimod";
 import {InstrumentJob, InstrumentJobQuery} from "./instrument-job";
 import {FavouriteMetadataOption, FavouriteMetadataOptionQuery} from "./favourite-metadata-option";
 import {Preset, PresetQuery} from "./preset";
+import {
+  SamplePool,
+  SamplePoolCreateRequest,
+  SamplePoolUpdateRequest,
+  SamplePoolOverview,
+  SampleStatusOverview,
+  AddSampleResponse,
+  RemoveSampleResponse,
+  SamplePoolQuery
+} from "./sample-pool";
 import {SiteSettings, PublicSiteSettings, ImportOptions, AvailableImportOptionsResponse, ImportDataPayload, ExportDataPayload, ExportOptions, DryRunResponse, AvailableStorageObjectResponse} from "./site-settings";
 import {
   ImportTracker,
@@ -2663,6 +2673,74 @@ export class WebService {
     return this.http.delete(
       `${this.baseURL}/api/import_tracking/${id}/`,
       {responseType: 'json', observe: 'body'}
+    );
+  }
+
+  // Pooled sample methods
+  getSamplePools(instrumentJobId: number): Observable<SamplePool[]> {
+    return this.http.get<SamplePool[]>(
+      `${this.baseURL}/api/instrument_jobs/${instrumentJobId}/sample_pools/`,
+      {responseType: 'json', observe: 'body'}
+    );
+  }
+
+  createSamplePool(instrumentJobId: number, poolData: SamplePoolCreateRequest): Observable<SamplePool> {
+    return this.http.post<SamplePool>(
+      `${this.baseURL}/api/instrument_jobs/${instrumentJobId}/create_sample_pool/`,
+      poolData,
+      {responseType: 'json', observe: 'body'}
+    );
+  }
+
+  getSamplePoolOverview(instrumentJobId: number): Observable<SamplePoolOverview> {
+    return this.http.get<SamplePoolOverview>(
+      `${this.baseURL}/api/instrument_jobs/${instrumentJobId}/sample_pool_overview/`,
+      {responseType: 'json', observe: 'body'}
+    );
+  }
+
+  updateSamplePool(poolId: number, poolData: SamplePoolUpdateRequest): Observable<SamplePool> {
+    return this.http.put<SamplePool>(
+      `${this.baseURL}/api/sample_pools/${poolId}/`,
+      poolData,
+      {responseType: 'json', observe: 'body'}
+    );
+  }
+
+  deleteSamplePool(poolId: number): Observable<void> {
+    return this.http.delete<void>(
+      `${this.baseURL}/api/sample_pools/${poolId}/`,
+      {responseType: 'json', observe: 'body'}
+    );
+  }
+
+  addSampleToPool(poolId: number, sampleIndex: number, status: string): Observable<AddSampleResponse> {
+    return this.http.post<AddSampleResponse>(
+      `${this.baseURL}/api/sample_pools/${poolId}/add_sample/`,
+      {
+        sample_index: sampleIndex,
+        status: status
+      },
+      {responseType: 'json', observe: 'body'}
+    );
+  }
+
+  removeSampleFromPool(poolId: number, sampleIndex: number): Observable<RemoveSampleResponse> {
+    return this.http.post<RemoveSampleResponse>(
+      `${this.baseURL}/api/sample_pools/${poolId}/remove_sample/`,
+      {
+        sample_index: sampleIndex
+      },
+      {responseType: 'json', observe: 'body'}
+    );
+  }
+
+  getSampleStatusOverview(instrumentJobId: number): Observable<SampleStatusOverview[]> {
+    return this.http.get<{sample_overview: SampleStatusOverview[]}>(
+      `${this.baseURL}/api/instrument_jobs/${instrumentJobId}/sample_pool_overview/`,
+      {responseType: 'json', observe: 'body'}
+    ).pipe(
+      map(response => response.sample_overview)
     );
   }
 }
