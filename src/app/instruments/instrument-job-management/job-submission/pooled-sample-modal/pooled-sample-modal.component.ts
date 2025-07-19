@@ -375,11 +375,10 @@ export class PooledSampleModalComponent implements OnInit {
     // Add pooled only samples
     for (const sampleIndex of this.selectedPooledOnly) {
       const sourceName = this.getSampleName(sampleIndex);
-      const sdrfValue = this.generatePoolSdrfValue();
       preview.push({
         sampleIndex,
         sourceName,
-        sdrfValue,
+        sdrfValue: 'pooled',
         status: 'Pooled Only'
       });
     }
@@ -390,7 +389,7 @@ export class PooledSampleModalComponent implements OnInit {
       preview.push({
         sampleIndex,
         sourceName,
-        sdrfValue: 'not pooled',
+        sdrfValue: 'pooled',
         status: 'Pooled + Independent'
       });
     }
@@ -439,9 +438,9 @@ export class PooledSampleModalComponent implements OnInit {
       // Basic sample information
       metadata['source name'] = sampleOverview?.sample_name || `Sample ${sample.index}`;
       
-      // Pooled sample information
-      if (sample.type === 'pooled_only') {
-        metadata['characteristics[pooled sample]'] = this.generatePoolSdrfValue();
+      // Pooled sample information - show actual pooled status for this individual sample
+      if (sample.type === 'pooled_only' || sample.type === 'pooled_and_independent') {
+        metadata['characteristics[pooled sample]'] = 'pooled';
       } else {
         metadata['characteristics[pooled sample]'] = 'not pooled';
       }

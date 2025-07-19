@@ -1,4 +1,4 @@
-import {Component, EventEmitter, HostListener, Input, OnChanges, Output, SimpleChanges, ViewChild, ElementRef} from '@angular/core';
+import {Component, EventEmitter, HostListener, Input, OnChanges, OnInit, OnDestroy, Output, SimpleChanges, ViewChild, ElementRef} from '@angular/core';
 import {MetadataColumn, MetadataTableTemplate} from "../../../../metadata-column";
 import {
   DisplayModificationParametersMetadataComponent
@@ -29,7 +29,7 @@ import {ToastService} from "../../../../toast.service";
   templateUrl: './metadata-table.component.html',
   styleUrl: './metadata-table.component.scss'
 })
-export class MetadataTableComponent implements OnChanges{
+export class MetadataTableComponent implements OnChanges, OnInit, OnDestroy {
   currentCell: { row: number, col: number }|null = null
   selectionMode: boolean = false
   selectionModeColIndex: number = -1
@@ -83,6 +83,10 @@ export class MetadataTableComponent implements OnChanges{
   canScrollRight: boolean = false
   scrollAmount: number = 200 // pixels to scroll per click
   scrollProgress: number = 0 // Cache the scroll progress
+  
+  // State persistence properties
+  private stateKey: string = 'metadataTableState'
+  private scrollRestoreTimeout?: number
 
   @Output() metadataUpdated: EventEmitter<any[]> = new EventEmitter<any[]>()
   @Output() removeMetadata: EventEmitter<{ metadata: MetadataColumn, index: number, data_type: 'user_metadata'|'staff_metadata' }> = new EventEmitter<{ metadata: MetadataColumn, index: number, data_type: 'user_metadata'|'staff_metadata' }>()
@@ -167,15 +171,53 @@ export class MetadataTableComponent implements OnChanges{
   ngOnChanges(changes: SimpleChanges) {
     if (changes["sampleNumber"] || changes["userMetadata"] || changes["staffMetadata"]) {
       this.generateTableData()
-      // Update scroll state after table data changes
+      // Restore table state after table data changes
       setTimeout(() => {
-        this.onTableScroll()
+        this.restoreStateAfterTableUpdate()
       }, 100) // Slightly longer timeout to ensure DOM is ready
+    }
+  }
+
+  private restoreStateAfterTableUpdate(): void {
+    // Validate that current page is still valid with new data
+    if (this.currentPage > this.totalPages && this.totalPages > 0) {
+      this.currentPage = this.totalPages
+    }
+    
+    // Restore scroll position if available
+    const savedState = this.getSavedState()
+    if (savedState?.scrollLeft !== undefined) {
+      this.restoreScrollPosition(savedState.scrollLeft)
+    } else {
+      this.onTableScroll()
+    }
+  }
+
+  private getSavedState(): any {
+    try {
+      const savedState = localStorage.getItem(this.stateKey)
+      return savedState ? JSON.parse(savedState) : null
+    } catch (error) {
+      return null
     }
   }
 
   constructor(private modal: NgbModal, public metadataService: MetadataService, private toastService: ToastService) {
 
+  }
+
+  ngOnInit(): void {
+    this.loadTableState()
+  }
+
+  ngOnDestroy(): void {
+    this.saveTableState()
+    if (this.scrollRestoreTimeout) {
+      clearTimeout(this.scrollRestoreTimeout)
+    }
+    if (this.saveScrollTimeout) {
+      clearTimeout(this.saveScrollTimeout)
+    }
   }
 
   parseSampleRanges(samples: string): number[] {
@@ -633,31 +675,87 @@ export class MetadataTableComponent implements OnChanges{
   onPageChange(page: number): void {
     if (page >= 1 && page <= this.totalPages) {
       this.currentPage = page
+      this.saveTableState()
     }
   }
 
   onPageSizeChange(newPageSize: number): void {
     this.pageSize = newPageSize
     this.currentPage = 1 // Reset to first page when changing page size
+    this.saveTableState()
   }
 
   goToFirstPage(): void {
     this.currentPage = 1
+    this.saveTableState()
   }
 
   goToLastPage(): void {
     this.currentPage = this.totalPages
+    this.saveTableState()
   }
 
   goToPreviousPage(): void {
     if (this.currentPage > 1) {
       this.currentPage--
+      this.saveTableState()
     }
   }
 
   goToNextPage(): void {
     if (this.currentPage < this.totalPages) {
       this.currentPage++
+      this.saveTableState()
+    }
+  }
+
+  // State persistence methods
+  private loadTableState(): void {
+    try {
+      const savedState = localStorage.getItem(this.stateKey)
+      if (savedState) {
+        const state = JSON.parse(savedState)
+        
+        // Restore pagination state
+        if (state.currentPage) {
+          this.currentPage = state.currentPage
+        }
+        if (state.pageSize) {
+          this.pageSize = state.pageSize
+        }
+        
+        // Restore scroll position after a brief delay to ensure DOM is ready
+        if (state.scrollLeft !== undefined) {
+          this.scrollRestoreTimeout = window.setTimeout(() => {
+            this.restoreScrollPosition(state.scrollLeft)
+          }, 200)
+        }
+      }
+    } catch (error) {
+      console.warn('Failed to load table state from localStorage:', error)
+    }
+  }
+
+  private saveTableState(): void {
+    try {
+      const scrollLeft = this.tableContainer?.nativeElement?.scrollLeft || 0
+      const state = {
+        currentPage: this.currentPage,
+        pageSize: this.pageSize,
+        scrollLeft: scrollLeft,
+        timestamp: Date.now()
+      }
+      localStorage.setItem(this.stateKey, JSON.stringify(state))
+    } catch (error) {
+      console.warn('Failed to save table state to localStorage:', error)
+    }
+  }
+
+  private restoreScrollPosition(scrollLeft: number): void {
+    if (this.tableContainer?.nativeElement) {
+      this.tableContainer.nativeElement.scrollLeft = scrollLeft
+      // Update scroll indicators after restoring position
+      this.onTableScroll()
     }
   }
 
@@ -671,7 +769,20 @@ export class MetadataTableComponent implements OnChanges{
       // Cache the scroll progress to prevent ExpressionChangedAfterItHasBeenCheckedError
       const maxScroll = element.scrollWidth - element.clientWidth
       this.scrollProgress = maxScroll <= 0 ? 100 : (element.scrollLeft / maxScroll) * 100
+      
+      // Save scroll position (with debouncing to avoid excessive saves)
+      this.debouncedSaveScrollState()
     }
+  }
+
+  private saveScrollTimeout?: number
+  private debouncedSaveScrollState(): void {
+    if (this.saveScrollTimeout) {
+      clearTimeout(this.saveScrollTimeout)
+    }
+    this.saveScrollTimeout = window.setTimeout(() => {
+      this.saveTableState()
+    }, 100)
   }
 
   scrollLeft(): void {
