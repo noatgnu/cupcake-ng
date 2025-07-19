@@ -457,5 +457,9 @@ export class JobSubmissionService {
     return this.metadataService.getSampleStatusOverview(instrumentJobId);
   }
 
+  updatePoolMetadata(poolId: number, metadataColumnId: number, value: string): Observable<any> {
+    return this.metadataService.updatePoolMetadata(poolId, metadataColumnId, value);
+  }
+
 
 }

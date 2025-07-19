@@ -92,6 +92,7 @@ export class MetadataTableComponent implements OnChanges, OnInit, OnDestroy {
   @Output() removeMetadata: EventEmitter<{ metadata: MetadataColumn, index: number, data_type: 'user_metadata'|'staff_metadata' }> = new EventEmitter<{ metadata: MetadataColumn, index: number, data_type: 'user_metadata'|'staff_metadata' }>()
   @Output() metadataFavouriteAdded: EventEmitter<any> = new EventEmitter<any>()
   @Output() poolDeleted: EventEmitter<any> = new EventEmitter<any>()
+  @Output() poolUpdated: EventEmitter<any> = new EventEmitter<any>()
   selectedCells: { row: number, col: number }[] = [];
   isShiftSelecting: boolean = false;
 
@@ -952,9 +953,50 @@ export class MetadataTableComponent implements OnChanges, OnInit, OnDestroy {
       }
     }
     
-    // If metadata column doesn't exist, we'll need to create it
-    // This would typically be handled by the backend when saving
-    console.warn(`Metadata column "${metadataName}" not found in pool metadata`);
+    // If metadata column doesn't exist, create it
+    console.log(`Creating new metadata column "${metadataName}" for pool`);
+    
+    // Find the original metadata column from the template
+    const originalColumn = this.userMetadata.find(col => col.name === metadataName) || 
+                          this.staffMetadata.find(col => col.name === metadataName);
+    
+    if (originalColumn) {
+      // Create a copy of the metadata column for the pool
+      const newMetadataColumn = {
+        id: originalColumn.id, // Use same ID as template column
+        name: metadataName,
+        type: originalColumn.type,
+        value: value,
+        column_position: originalColumn.column_position,
+        stored_reagent: null,
+        created_at: new Date(),
+        updated_at: new Date(),
+        not_applicable: false,
+        mandatory: originalColumn.mandatory || false,
+        modifiers: [],
+        hidden: originalColumn.hidden || false,
+        auto_generated: false,
+        readonly: false
+      };
+      
+      // Add to appropriate metadata array
+      const isUserMetadata = this.userMetadata.some(col => col.name === metadataName);
+      if (isUserMetadata) {
+        if (!pool.user_metadata) {
+          pool.user_metadata = [];
+        }
+        pool.user_metadata.push(newMetadataColumn);
+      } else {
+        if (!pool.staff_metadata) {
+          pool.staff_metadata = [];
+        }
+        pool.staff_metadata.push(newMetadataColumn);
+      }
+      
+      console.log(`Created new ${isUserMetadata ? 'user' : 'staff'} metadata column for pool:`, newMetadataColumn);
+    } else {
+      console.warn(`Template metadata column "${metadataName}" not found, cannot create pool metadata`);
+    }
   }
 
   editPoolCell(pool: any, poolIndex: number, colIndex: number, metadataName: string) {
@@ -965,21 +1007,58 @@ export class MetadataTableComponent implements OnChanges, OnInit, OnDestroy {
     const column = this.userMetadata.find(col => col.name === metadataName) || 
                   this.staffMetadata.find(col => col.name === metadataName);
     
+    // Configure modal with same settings as main metadata editing
+    ref.componentInstance.previewMode = this.templateMode;
+    
+    // Set service_lab_group_id BEFORE name to ensure favorites load properly
+    if (this.service_lab_group_id > 0) {
+      ref.componentInstance.service_lab_group_id = this.service_lab_group_id;
+      console.log('Pool modal: service_lab_group_id set to', this.service_lab_group_id);
+    } else {
+      console.log('Pool modal: service_lab_group_id not set (value:', this.service_lab_group_id, ')');
+    }
+    
     ref.componentInstance.name = column?.name || metadataName;
     ref.componentInstance.type = column?.type || 'Characteristics';
     ref.componentInstance.value = this.getPoolMetadataValue(pool, metadataName);
-    
     ref.componentInstance.sampleNumber = 1; // Pool is treated as a single "sample"
-    ref.componentInstance.service_lab_group_id = this.service_lab_group_id;
     
-    ref.result.then((result: any) => {
-      if (result && result.value !== undefined) {
-        this.setPoolMetadataValue(pool, metadataName, result.value);
+    // Add possibleColumns for Factor value types (for suggestions)
+    if (column?.type === "Factor value") {
+      ref.componentInstance.possibleColumns = [...this.userMetadata, ...this.staffMetadata].filter((m) => m.type !== "Factor value");
+    }
+    
+    // Special handling for Modification parameters
+    if (metadataName === "Modification parameters") {
+      ref.componentInstance.allowMultipleSpecSelection = false;
+    }
+    
+    ref.result.then((result: any[]) => {
+      if (result && result.length > 0) {
+        // Process result same way as main metadata editing
+        const resultItem = result[0]; // Get first result item
+        let value = resultItem.metadataValue;
+        
+        // Transform the metadata value if needed (same as main editing)
+        if (resultItem.metadataType && resultItem.metadataName) {
+          // Handle any transformations that might be needed
+          value = resultItem.metadataValue || value;
+        }
+        
+        this.setPoolMetadataValue(pool, metadataName, value);
         
         // Special handling for Source Name (pool name)
         if (metadataName === 'Source name' || metadataName === 'Source Name') {
-          pool.pool_name = result.value;
+          pool.pool_name = value;
         }
+        
+        // Emit pool update event to trigger backend save
+        this.poolUpdated.emit({
+          pool: pool,
+          metadataName: metadataName,
+          value: value,
+          action: 'update_metadata'
+        });
         
         this.toastService.show('Pool Updated', `${metadataName} updated successfully`, 2000, 'success');
       }
@@ -997,21 +1076,48 @@ export class MetadataTableComponent implements OnChanges, OnInit, OnDestroy {
     // Edit default value for a pool metadata column using the same modal system
     const ref = this.modal.open(JobMetadataCreationModalComponent);
     
+    // Configure modal with same settings as main metadata editing
+    ref.componentInstance.previewMode = this.templateMode;
+    
+    // Set service_lab_group_id BEFORE name to ensure favorites load properly
+    if (this.service_lab_group_id > 0) {
+      ref.componentInstance.service_lab_group_id = this.service_lab_group_id;
+    }
+    
     ref.componentInstance.name = col.name;
     ref.componentInstance.type = col.type;
     ref.componentInstance.value = col.value || '';
     ref.componentInstance.sampleNumber = 1;
-    ref.componentInstance.service_lab_group_id = this.service_lab_group_id;
     
-    ref.result.then((result: any) => {
-      if (result && result.value !== undefined) {
-        col.value = result.value;
+    // Add possibleColumns for Factor value types (for suggestions)
+    if (col.type === "Factor value") {
+      ref.componentInstance.possibleColumns = [...this.userMetadata, ...this.staffMetadata].filter((m) => m.type !== "Factor value");
+    }
+    
+    // Special handling for Modification parameters
+    if (col.name === "Modification parameters") {
+      ref.componentInstance.allowMultipleSpecSelection = false;
+    }
+    
+    ref.result.then((result: any[]) => {
+      if (result && result.length > 0) {
+        // Process result same way as main metadata editing
+        const resultItem = result[0]; // Get first result item
+        let value = resultItem.metadataValue;
+        
+        // Transform the metadata value if needed (same as main editing)
+        if (resultItem.metadataType && resultItem.metadataName) {
+          // Handle any transformations that might be needed
+          value = resultItem.metadataValue || value;
+        }
+        
+        col.value = value;
         this.toastService.show('Column Updated', `Default value for ${col.name} updated`, 2000, 'success');
         
         // Apply the new default to all existing pools that don't have a value for this column
         this.existingPools.forEach(pool => {
           if (!this.getPoolMetadataValue(pool, col.name)) {
-            this.setPoolMetadataValue(pool, col.name, result.value);
+            this.setPoolMetadataValue(pool, col.name, value);
           }
         });
       }

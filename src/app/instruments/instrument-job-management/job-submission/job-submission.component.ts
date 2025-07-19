@@ -864,6 +864,42 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit, OnDestroy 
     });
   }
 
+  handlePoolUpdated(updateEvent: any) {
+    const { pool, metadataName, value, action } = updateEvent;
+    
+    console.log('Pool metadata updated:', { poolId: pool.id, metadataName, value });
+    
+    // Find the specific metadata column that was updated
+    let metadataColumn: any = null;
+    
+    if (pool.user_metadata) {
+      metadataColumn = pool.user_metadata.find((col: any) => col.name === metadataName);
+    }
+    
+    if (!metadataColumn && pool.staff_metadata) {
+      metadataColumn = pool.staff_metadata.find((col: any) => col.name === metadataName);
+    }
+    
+    if (metadataColumn && metadataColumn.id) {
+      // Use the new pool metadata update endpoint
+      this.jobSubmission.updatePoolMetadata(pool.id, metadataColumn.id, value).subscribe({
+        next: (response) => {
+          console.log('Pool metadata updated successfully:', response);
+          // Update the local pool metadata with the saved value
+          metadataColumn.value = value;
+          this.toast.show("Success", `Pool metadata saved: ${metadataName}`, 2000, 'success');
+        },
+        error: (error) => {
+          console.error('Error updating pool metadata:', error);
+          this.toast.show("Error", `Failed to save pool metadata: ${metadataName}. Please try again.`, 3000, 'error');
+        }
+      });
+    } else {
+      console.error('Could not find metadata column for pool update:', { metadataName, pool });
+      this.toast.show("Error", `Could not find metadata column: ${metadataName}`, 3000, 'error');
+    }
+  }
+
   openPooledSampleModal() {
     if (this.job && this.job.sample_number && this.job.sample_number > 0) {
       const ref = this.modal.open(PooledSampleModalComponent, {
@@ -897,6 +933,14 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit, OnDestroy 
     this.jobSubmission.getSamplePools(instrumentJobId).subscribe({
       next: (response: any) => {
         this.existingPools = response;
+        console.log('Loaded existing pools:', response);
+        // Debug: Check if pools have metadata arrays
+        if (response && response.length > 0) {
+          console.log('First pool metadata structure:', {
+            user_metadata: response[0].user_metadata?.length || 0,
+            staff_metadata: response[0].staff_metadata?.length || 0
+          });
+        }
       },
       error: (error: any) => {
         console.error('Error loading existing pools:', error);

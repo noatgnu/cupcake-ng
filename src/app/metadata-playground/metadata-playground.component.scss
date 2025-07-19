@@ -1,75 +1,413 @@
 :host {
   display: block;
-  height: calc(100vh - 56px);
-  overflow: hidden;
-}
-.footer-spacer {
-  height: 80px;
-}
-.sidebar {
-  width: 280px;
-  height: 100%;
-  transition: all 0.3s ease;
-  background-color: #fff;
-  z-index: 1030;
-  border-right: 1px solid rgba(0,0,0,0.1);
-  overflow-y: auto;
-  flex-shrink: 0;
-  position: relative;
+  margin-top: 56px;
 }
 
-.sidebar-collapsed {
-  transform: translateX(-280px);
-  margin-right: -280px;
-}
-
-.content-wrapper {
-  flex: 1;
+// Modern Layout Structure
+.sdrf-playground-container {
   display: flex;
   flex-direction: column;
-  overflow: hidden;
-  transition: all 0.3s ease;
-  width: calc(100% - 280px);
+  background-color: var(--bs-body-bg);
+  min-height: calc(100vh - 56px);
 }
 
-.content-expanded {
+.footer-spacer {
+  height: 60px;
   width: 100%;
+  flex-shrink: 0;
 }
 
-.content-header {
-  background-color: #f8f9fa;
-}
-
-.content-body {
+.playground-content {
   flex: 1;
-  overflow-y: auto;
-  padding-bottom: var(--footer-height, 0px);
 }
 
-.list-group-item.active {
-  background-color: #f8f9fa;
-  color: #0d6efd;
-  border-left: 4px solid #0d6efd;
-  font-weight: 500;
+.playground-main {
+  padding: 1rem;
 }
 
-.list-group-item:hover:not(.active) {
-  background-color: #f1f3f5;
-  border-left: 4px solid #dee2e6;
+.metadata-table-container {
+  max-width: 100%;
 }
 
-.sidebar-toggle {
-  width: 42px;
-  height: 38px;
-  padding: 0.375rem;
+app-metadata-table {
+  display: block;
+  
+  .table-warning {
+    background-color: var(--bs-warning-bg-subtle) !important;
+    border-color: var(--bs-warning-border-subtle) !important;
+  }
+  
+  .table-danger {
+    background-color: var(--bs-danger-bg-subtle) !important;
+    border-color: var(--bs-danger-border-subtle) !important;
+  }
+  
+  .table-primary {
+    background-color: var(--bs-primary-bg-subtle) !important;
+    border-color: var(--bs-primary-border-subtle) !important;
+  }
+}
+
+// Pool Panel Styles (specific for pool manager)
+.pool-panel {
+  background: var(--bs-body-bg);
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  border: 1px solid var(--bs-border-color);
+  display: flex;
+  flex-direction: column;
+  height: 400px;
+}
+
+.panel-header {
+  padding: 1rem;
+  border-bottom: 1px solid var(--bs-border-color);
+  background-color: var(--bs-body-bg);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-radius: 0.5rem 0.5rem 0 0;
+  
+  h6 {
+    margin: 0;
+    color: var(--bs-body-color);
+  }
+}
+
+.panel-content {
+  flex: 1;
+  overflow: auto;
+  padding: 1rem;
+}
+
+// Template Grid
+.template-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.template-card {
+  border: 2px solid var(--bs-border-color);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: var(--bs-body-bg);
+  
+  &:hover {
+    border-color: #0d6efd;
+    box-shadow: 0 2px 8px rgba(13, 110, 253, 0.15);
+  }
+  
+  &.selected {
+    border-color: #0d6efd;
+    background-color: #f8f9ff;
+    box-shadow: 0 2px 8px rgba(13, 110, 253, 0.2);
+  }
+}
+
+.template-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.template-name {
+  font-weight: 600;
+  color: var(--bs-body-color);
+  margin: 0;
+}
+
+.template-stats {
+  display: flex;
+  gap: 1rem;
+  font-size: 0.875rem;
+}
+
+.stat-item {
   display: flex;
   align-items: center;
-  justify-content: center;
+  
+  i {
+    color: #0d6efd;
+  }
 }
 
-.list-group-item {
-  border-left: 4px solid transparent;
-  border-right: 0;
-  border-top: 0;
-  transition: all 0.2s;
+.template-pagination {
+  border-top: 1px solid var(--bs-border-color);
+  padding: 1rem;
+  margin: 0;
+}
+
+// Scrollable dropdown from job-submission
+.scrollable-dropdown .dropdown-scrollable-content {
+  max-height: 200px;
+  overflow-y: auto;
+  padding: 0;
+}
+
+.scrollable-dropdown .dropdown-item {
+  padding: 0.375rem 1rem;
+  font-size: 0.875rem;
+  border: none;
+  background: none;
+}
+
+.scrollable-dropdown .dropdown-item:hover {
+  background-color: var(--bs-dropdown-link-hover-bg);
+}
+
+// Pool Management Styles
+.pool-creation {
+  background-color: var(--bs-gray-100);
+  border-radius: 0.375rem;
+  padding: 1rem;
+  border: 1px solid var(--bs-border-color);
+}
+
+.creation-controls {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.selected-count {
+  font-size: 0.875rem;
+  padding: 0.25rem 0.5rem;
+  background-color: var(--bs-secondary-bg);
+  border-radius: 0.25rem;
+}
+
+.pool-management {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 1.5rem;
+  height: 280px;
+}
+
+.sample-selection {
+  border: 1px solid var(--bs-border-color);
+  border-radius: 0.375rem;
+  overflow: hidden;
+}
+
+.section-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem 0;
+  color: var(--bs-body-color);
+  padding: 0.75rem;
+  background-color: var(--bs-gray-100);
+  border-bottom: 1px solid var(--bs-border-color);
+}
+
+.sample-grid {
+  max-height: 200px;
+  overflow-y: auto;
+  padding: 0.5rem;
+}
+
+.sample-row {
+  display: flex;
+  align-items: center;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  transition: background-color 0.2s;
+  
+  &.pooled {
+    background-color: var(--bs-warning-bg-subtle);
+  }
+  
+  &:hover {
+    background-color: var(--bs-secondary-bg);
+  }
+}
+
+.sample-number {
+  font-size: 0.875rem;
+  font-weight: 500;
+  width: 60px;
+  flex-shrink: 0;
+}
+
+.sample-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: auto;
+}
+
+.radio-group {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.radio-option {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.75rem;
+  margin: 0;
+}
+
+.existing-pools {
+  border: 1px solid var(--bs-border-color);
+  border-radius: 0.375rem;
+  overflow: hidden;
+}
+
+.empty-pools {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 150px;
+  font-size: 0.875rem;
+  
+  i {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+    opacity: 0.5;
+  }
+}
+
+.pool-list {
+  max-height: 200px;
+  overflow-y: auto;
+  padding: 0.5rem;
+}
+
+.pool-item {
+  padding: 0.75rem;
+  border: 1px solid var(--bs-border-color);
+  border-radius: 0.375rem;
+  margin-bottom: 0.5rem;
+  background: var(--bs-body-bg);
+  
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.pool-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.pool-name {
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: var(--bs-body-color);
+}
+
+.pool-actions {
+  display: flex;
+  gap: 0.25rem;
+  align-items: center;
+}
+
+.pool-info {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.sample-badge {
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  font-weight: 500;
+  
+  &.only {
+    background-color: #fff3cd;
+    color: #664d03;
+  }
+  
+  &.both {
+    background-color: #d1ecf1;
+    color: #0c5460;
+  }
+}
+
+.pool-stats {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 150px;
+  
+  i {
+    margin-bottom: 0.5rem;
+    opacity: 0.5;
+  }
+}
+
+// Responsive Design
+@media (max-width: 1200px) {
+  .pool-management {
+    grid-template-columns: 1fr;
+    height: auto;
+  }
+  
+  .template-grid {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  :host {
+    height: calc(100vh - 56px);
+    margin-top: 56px;
+  }
+  
+  .actions-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    
+    .toolbar-section {
+      justify-content: center;
+    }
+  }
+  
+  .config-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .template-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+// Alert Customization
+.alert-sm {
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+}
+
+// Utility Classes
+.cursor-pointer {
+  cursor: pointer;
+  user-select: none;
+  transition: opacity 0.2s ease;
+  
+  &:hover {
+    opacity: 0.8;
+  }
+}
+
+.text-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }

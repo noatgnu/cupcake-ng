@@ -244,6 +244,7 @@
                         #metadataTable
                         (metadataUpdated)="jobSubmission.handleMetadataUpdated($event)"
                         (poolDeleted)="handlePoolDeleted($event)"
+                        (poolUpdated)="handlePoolUpdated($event)"
                         [userCanEdit]="userCanEdit"
                         [sampleNumber]="job.sample_number"
                         [userMetadata]="job.user_metadata"

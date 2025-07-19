@@ -1,107 +1,151 @@
-<div class="container-fluid p-0 d-flex flex-column" style="height: calc(100vh - 56px); margin-top: 56px;">
-  <!-- Main header -->
-  <header class=" border-bottom shadow-sm py-3 px-4">
-    <div class="d-flex align-items-center justify-content-center">
-      <h4 class="m-0 text-primary fw-bold">SDRF Playground</h4>
-    </div>
-  </header>
-
-  <div class="content-body p-3 overflow-auto">
+<div class="sdrf-playground-container">
+  <!-- Standard navbar header -->
+  <nav class="navbar navbar-expand-lg bg-body-tertiary shadow-sm">
     <div class="container-fluid">
-      <!-- Lab Group and Template Selection -->
-      <div class="row g-3 mb-3">
-        <!-- Lab Group Card -->
-        <div class="col-md-4 col-lg-3">
-          <div class="card shadow-sm h-100">
-            <div class="card-header ">
-              <h5 class="card-title mb-0">
-                <i class="bi bi-building me-2"></i>Lab Group
-              </h5>
+      <div class="d-flex align-items-center justify-content-between w-100">
+        <div class="d-flex align-items-center">
+          <h4 class="navbar-brand m-0 fw-bold">
+            <i class="bi bi-table me-2"></i>SDRF Playground
+          </h4>
+          @if (selectedRow) {
+            <span class="badge bg-primary ms-3">{{ selectedRow.name }}</span>
+          }
+        </div>
+        <div class="d-flex gap-2">
+          <div ngbDropdown>
+            <button class="btn btn-outline-secondary btn-sm" ngbDropdownToggle>
+              <i class="bi bi-gear me-1"></i>Settings
+            </button>
+            <div ngbDropdownMenu>
+              <button ngbDropdownItem (click)="saveState(true)">
+                <i class="bi bi-save me-1"></i>Save Configuration
+              </button>
+              <button ngbDropdownItem (click)="clearSavedState()">
+                <i class="bi bi-trash me-1"></i>Clear Saved Config
+              </button>
             </div>
-            <div class="card-body">
-              <form [formGroup]="form" class="d-flex flex-column gap-3">
-                <div class="form-floating">
-                  <input id="searchTerm" class="form-control" type="search" formControlName="searchTerm">
-                  <label for="searchTerm"><i class="bi bi-search me-1"></i> Search Lab Groups</label>
-                </div>
+          </div>
+          @if (selectedRow) {
+            <button class="btn btn-success btn-sm" (click)="validateMetadata()">
+              <i class="bi bi-check-circle me-1"></i>Validate
+            </button>
+          }
+        </div>
+      </div>
+    </div>
+  </nav>
 
-                @if (professionalLabGroupQuery) {
-                  <div class="form-group">
-                    <label class="form-label">Select Lab Group</label>
-                    <div class="select-container border rounded">
-                      <select class="form-select border-0" formControlName="lab_group_id" size="7">
-                        @for (l of professionalLabGroupQuery.results; track l.id) {
-                          <option [ngValue]="l.id">{{l.name}}</option>
-                        }
-                      </select>
-                    </div>
-                    <div class="mt-3 d-flex justify-content-center">
-                      <ngb-pagination
-                        [collectionSize]="professionalLabGroupQuery.count"
-                        [(page)]="professionalLabGroupPage"
-                        [pageSize]="professionalLabGroupPageSize"
-                        [maxSize]="3"
-                        [boundaryLinks]="true"
-                        [rotate]="true"
-                        class="pagination-sm mb-0">
-                      </ngb-pagination>
-                    </div>
+  <div class="playground-content">
+    <!-- Single column layout -->
+    <div class="playground-main">
+      
+      <!-- Lab Group Selection and Templates -->
+      <div class="card mb-3">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">
+            <i class="bi bi-building me-2"></i>Lab Group Selection & Templates
+          </h5>
+          <button class="btn btn-sm btn-outline-secondary" 
+                  (click)="templatesCollapsed = !templatesCollapsed" 
+                  [attr.aria-expanded]="!templatesCollapsed">
+            <i class="bi" [class.bi-chevron-up]="!templatesCollapsed" [class.bi-chevron-down]="templatesCollapsed"></i>
+          </button>
+        </div>
+        <div class="card-body" [ngbCollapse]="templatesCollapsed">
+          <div class="row g-4">
+            <!-- Lab Group Selection Column -->
+            <div class="col-md-4">
+              <form [formGroup]="form">
+                <div class="mb-3">
+                  <div class="form-floating">
+                    <input id="searchTerm" class="form-control" type="search" formControlName="searchTerm">
+                    <label for="searchTerm"><i class="bi bi-search me-1"></i> Search Lab Groups</label>
                   </div>
+                </div>
+                <div class="mb-3">
+                  @if (professionalLabGroupQuery) {
+                    <select class="form-select" formControlName="lab_group_id" size="5">
+                      <option [ngValue]="null">Select a lab group...</option>
+                      @for (l of professionalLabGroupQuery.results; track l.id) {
+                        <option [ngValue]="l.id">{{l.name}}</option>
+                      }
+                    </select>
+                  }
+                </div>
+                @if (professionalLabGroupQuery && professionalLabGroupQuery.count > professionalLabGroupPageSize) {
+                  <ngb-pagination
+                    [collectionSize]="professionalLabGroupQuery.count"
+                    [(page)]="professionalLabGroupPage"
+                    [pageSize]="professionalLabGroupPageSize"
+                    [maxSize]="3"
+                    [boundaryLinks]="false"
+                    [rotate]="true"
+                    (pageChange)="labGroupPageChange($event)"
+                    class="pagination-sm justify-content-center">
+                  </ngb-pagination>
                 }
               </form>
             </div>
-          </div>
-        </div>
-
-        <!-- Template List Card -->
-        <div class="col-md-8 col-lg-9">
-          <div class="card shadow-sm h-100">
-            <div class="card-header  d-flex justify-content-between align-items-center">
-              <h5 class="card-title mb-0">
-                <i class="bi bi-table me-2"></i>Template List
-              </h5>
-              @if (metadataTableTemplateQuery) {
-                <span class="badge bg-primary">
-                {{metadataTableTemplateQuery.count}} templates
-              </span>
-              }
-
-            </div>
-            <div class="card-body p-0">
+            
+            <!-- Templates Table Column -->
+            <div class="col-md-8">
+              <h6 class="mb-3">
+                <i class="bi bi-files me-2"></i>Templates
+                @if (metadataTableTemplateQuery) {
+                  <span class="badge bg-primary ms-2">{{metadataTableTemplateQuery.count}}</span>
+                }
+              </h6>
               @if (metadataTableTemplateQuery) {
                 @if (metadataTableTemplateQuery.results.length > 0) {
                   <div class="table-responsive">
-                    <table class="table table-bordered table-hover mb-0">
-                      <thead class="table-primary">
-                      <tr>
-                        <th scope="col">Template Name</th>
-                        <th scope="col">User Columns</th>
-                        <th scope="col">Staff Columns</th>
-                        <th scope="col">Field Masks</th>
-                        <th scope="col">Lab Group</th>
-                      </tr>
+                    <table class="table table-hover">
+                      <thead>
+                        <tr>
+                          <th>Template Name</th>
+                          <th>User Columns</th>
+                          <th>Staff Columns</th>
+                          <th>Field Masks</th>
+                          <th>Action</th>
+                        </tr>
                       </thead>
                       <tbody>
                         @for (t of metadataTableTemplateQuery.results; track t.id) {
-                          <tr [class.table-active]="selectedRow === t" [class.border-primary]="selectedRow === t" (click)="selectRow(t)" class="cursor-pointer">
-                            <td><strong>{{t.name}}</strong></td>
-                            <td>{{t.user_columns.length}} <small class="text-muted">({{t.hidden_user_columns}} hidden)</small></td>
-                            <td>{{t.staff_columns.length}} <small class="text-muted">({{t.hidden_staff_columns}} hidden)</small></td>
+                          <tr [class.table-primary]="selectedRow === t" (click)="selectRow(t)" style="cursor: pointer;">
                             <td>
-                              <span class="badge rounded-pill bg-info">{{t.field_mask_mapping.length}}</span>
+                              <strong>{{t.name}}</strong>
+                              @if (selectedRow === t) {
+                                <i class="bi bi-check-circle-fill text-success ms-2"></i>
+                              }
                             </td>
                             <td>
-                              @if (selectedLabGroup) {
-                                {{selectedLabGroup.name}}
+                              {{t.user_columns.length}}
+                              @if (t.hidden_user_columns > 0) {
+                                <small>({{t.hidden_user_columns}} hidden)</small>
                               }
+                            </td>
+                            <td>
+                              {{t.staff_columns.length}}
+                              @if (t.hidden_staff_columns > 0) {
+                                <small>({{t.hidden_staff_columns}} hidden)</small>
+                              }
+                            </td>
+                            <td>{{t.field_mask_mapping.length}}</td>
+                            <td>
+                              <button class="btn btn-sm btn-primary" (click)="selectRow(t); $event.stopPropagation()">
+                                @if (selectedRow === t) {
+                                  Selected
+                                } @else {
+                                  Select
+                                }
+                              </button>
                             </td>
                           </tr>
                         }
                       </tbody>
                     </table>
                   </div>
-                  <div class="card-footer ">
-                    <div class="d-flex justify-content-center">
+                  @if (metadataTableTemplateQuery.count > metadataTableTemplatePageSize) {
+                    <div class="d-flex justify-content-center mt-3">
                       <ngb-pagination
                         [collectionSize]="metadataTableTemplateQuery.count"
                         [(page)]="metadataTableTemplatePage"
@@ -109,19 +153,21 @@
                         [maxSize]="5"
                         [boundaryLinks]="true"
                         [rotate]="true"
-                        class="mb-0">
+                        (pageChange)="metadataTableTemplatePageChange($event)"
+                        class="pagination-sm">
                       </ngb-pagination>
                     </div>
-                  </div>
+                  }
                 } @else {
-                  <div class="text-center p-5">
-                    <i class="bi bi-table fs-1 text-muted mb-3 d-block"></i>
-                    <p class="text-muted">No templates found for this lab group</p>
+                  <div class="empty-state">
+                    <i class="bi bi-table fs-1 mb-3"></i>
+                    <p class="mb-0">No templates found</p>
                   </div>
                 }
               } @else {
-                <div class="text-center p-5">
-                  <p class="text-muted">Please select a lab group...</p>
+                <div class="empty-state">
+                  <i class="bi bi-arrow-left fs-1 mb-3"></i>
+                  <p class="mb-0">Select a lab group</p>
                 </div>
               }
             </div>
@@ -129,201 +175,354 @@
         </div>
       </div>
 
-      <!-- Template Editor Section -->
+      <!-- Editor and Controls Card -->
       @if (selectedRow) {
-        <div class="card shadow-sm mb-3">
-          <div class="card-header  d-flex justify-content-between align-items-center">
-            <h5 class="card-title mb-0">
-              <i class="bi bi-pencil-square me-2"></i>Template Editor: {{selectedRow.name}}
+        <div class="card mb-3">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">
+              <i class="bi bi-pencil-square me-2"></i>{{selectedRow.name}}
+              @if (missingColumns.length > 0) {
+                <span class="badge bg-danger ms-2 cursor-pointer" 
+                      [ngbTooltip]="missingColumnsTooltip"
+                      placement="bottom"
+                      container="body"
+                      (click)="showMissingColumns = !showMissingColumns">
+                  <i class="bi bi-exclamation-triangle me-1"></i>{{missingColumns.length}} missing
+                </span>
+              }
             </h5>
+            <div class="d-flex gap-2 align-items-center">
+              <button class="btn btn-sm btn-outline-info" (click)="openPooledSampleModal()" ngbTooltip="Create sample pools for SDRF metadata">
+                <i class="bi bi-collection me-1"></i>
+                Manage Sample Pools
+              </button>
+              <button class="btn btn-sm btn-outline-secondary" 
+                      (click)="editorCollapsed = !editorCollapsed" 
+                      [attr.aria-expanded]="!editorCollapsed">
+                <i class="bi" [class.bi-chevron-up]="!editorCollapsed" [class.bi-chevron-down]="editorCollapsed"></i>
+              </button>
+            </div>
           </div>
-          <div class="card-body">
+          <div class="card-body" [ngbCollapse]="editorCollapsed">
             <!-- Missing columns alert -->
-            @if (missingColumns.length > 0) {
-              <div class="alert alert-danger d-flex align-items-center" role="alert">
-                <i class="bi bi-exclamation-triangle-fill fs-5 me-2"></i>
-                <div>
-                  <strong>Missing required columns:</strong>
-                  <ul class="mb-0 ps-3">
-                    @for (c of missingColumns; track c) {
-                      <li>{{c}}</li>
-                    }
-                  </ul>
+            @if (missingColumns.length > 0 && showMissingColumns) {
+              <div class="alert alert-danger alert-sm mb-3">
+                <div class="d-flex align-items-start">
+                  <i class="bi bi-exclamation-triangle-fill me-2 mt-1"></i>
+                  <div>
+                    <strong>Missing required columns:</strong>
+                    <div class="mt-1">
+                      @for (c of missingColumns; track c) {
+                        <span class="badge bg-danger me-1">{{c}}</span>
+                      }
+                    </div>
+                  </div>
                 </div>
               </div>
             }
 
-            <!-- Template actions row -->
-            <div class="row g-3 mb-3">
-              <div class="col-md-6 col-lg-8">
-                <div class="d-flex flex-wrap gap-2">
-                  <!-- Export/Import options -->
-                  <div class="btn-group" role="group">
-
-                    <div ngbDropdown class="d-inline-block">
-                      <button class="btn btn-outline-primary" type="button" ngbDropdownToggle>
-                        <i class="bi bi-file-earmark-excel me-1"></i> Excel
-                      </button>
-                      <div ngbDropdownMenu>
-                        <button ngbDropdownItem (click)="exportExcelTemplate()">
-                          <i class="bi bi-download me-1"></i> Export Template
-                        </button>
-                        <button ngbDropdownItem (click)="importExcel.click()">
-                          <i class="bi bi-upload me-1"></i> Import From Excel
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="btn-group" role="group">
-                    <div ngbDropdown class="d-inline-block">
-                      <button class="btn btn-outline-primary" type="button" ngbDropdownToggle>
-                        <i class="bi bi-filetype-json me-1"></i> SDRF
-                      </button>
-                      <div ngbDropdownMenu>
-                        <button ngbDropdownItem (click)="exportMetadataSDRF()">
-                          <i class="bi bi-download me-1"></i> Export SDRF
-                        </button>
-                        <button ngbDropdownItem (click)="importSDRF.click()">
-                          <i class="bi bi-upload me-1"></i> Import SDRF
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="btn-group" role="group">
-
-                    <div ngbDropdown class="d-inline-block">
-                      <button class="btn btn-outline-secondary" type="button" ngbDropdownToggle>
-                        <i class="bi bi-download me-1"></i> Instrument File
-                      </button>
-                      <div ngbDropdownMenu>
-                        <button ngbDropdownItem ngbTooltip="Requires injection volume, sample number, data file column and position column" (click)="exportFile('injection')">
-                          Randomized Injection
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-
-                  <button class="btn btn-outline-info" (click)="openFieldMaskEditorModal()">
-                    <i class="bi bi-filter me-1"></i> Field Masks
-                    <span class="badge bg-info ms-1">{{selectedRow.field_mask_mapping.length}}</span>
+            <!-- Quick Actions Toolbar -->
+            <div class="d-flex flex-wrap gap-2 align-items-center p-3 rounded border mb-3">
+              <span class="fw-medium">Quick Actions:</span>
+              
+              <!-- Export/Import -->
+              <div ngbDropdown display="dynamic" class="d-inline-block">
+                <button class="btn btn-outline-primary btn-sm" ngbDropdownToggle>
+                  <i class="bi bi-file-earmark-excel me-1"></i>Excel
+                </button>
+                <div ngbDropdownMenu>
+                  <button ngbDropdownItem (click)="exportExcelTemplate()">
+                    <i class="bi bi-download me-1"></i>Export Template
+                    @if (hasPoolsEnabled) {
+                      <span class="badge bg-primary ms-1">{{ pools.length }}</span>
+                    }
                   </button>
-
-                  <button class="btn btn-outline-success" (click)="validateMetadata()">
-                    <i class="bi bi-check-circle me-1"></i> Validate
+                  <button ngbDropdownItem (click)="importExcel.click()">
+                    <i class="bi bi-upload me-1"></i>Import Excel
                   </button>
                 </div>
               </div>
-
-              <div class="col-md-6 col-lg-4">
-                <div class="d-flex gap-2 justify-content-md-end">
-                  <div ngbDropdown>
-                    <button class="btn btn-primary" ngbDropdownToggle>
-                      <i class="bi bi-plus-circle me-1"></i> User Columns
-                    </button>
-                    <div ngbDropdownMenu>
-                      @for (m of metadata.userMetadataTemplate; track m.name) {
-                        <button ngbDropdownItem (click)="addMetadata(m, 'user_metadata')">
-                          {{m.name}}
-                        </button>
-                      }
-                      <div class="dropdown-divider"></div>
-                      <button ngbDropdownItem (click)="addMetadata({name: 'Sample type', type: 'Characteristics'}, 'user_metadata')">
-                        Sample Type
-                      </button>
-                      <button ngbDropdownItem (click)="addMetadata({name: '', type: ''}, 'user_metadata')">
-                        Custom Metadata
-                      </button>
-                    </div>
-                  </div>
-
-                  <div ngbDropdown>
-                    <button class="btn btn-warning" ngbDropdownToggle>
-                      <i class="bi bi-plus-circle me-1"></i> Staff Columns
-                    </button>
-                    <div ngbDropdownMenu>
-                      @for (m of metadata.staffMetadataSpecific; track m) {
-                        <button ngbDropdownItem (click)="addMetadata({name: m, type: 'Comment'}, 'staff_metadata')">
-                          {{m}}
-                        </button>
-                      }
-                      <div class="dropdown-divider"></div>
-                      <button ngbDropdownItem (click)="addMetadata({name: '', type: 'Factor value'}, 'staff_metadata')">
-                        Factor Value
-                      </button>
-                      <button ngbDropdownItem (click)="addMetadata({name: '', type: ''}, 'staff_metadata')">
-                        Custom Metadata
-                      </button>
-                    </div>
-                  </div>
+              
+              <div ngbDropdown display="dynamic" class="d-inline-block">
+                <button class="btn btn-outline-success btn-sm" ngbDropdownToggle>
+                  <i class="bi bi-filetype-json me-1"></i>SDRF
+                </button>
+                <div ngbDropdownMenu>
+                  <button ngbDropdownItem (click)="exportMetadataSDRF()">
+                    <i class="bi bi-download me-1"></i>Export SDRF
+                    @if (hasReferencePoolsEnabled) {
+                      <span class="badge bg-success ms-1">{{ referencePoolsCount }}</span>
+                    }
+                  </button>
+                  <button ngbDropdownItem (click)="importSDRF.click()">
+                    <i class="bi bi-upload me-1"></i>Import SDRF
+                  </button>
                 </div>
+              </div>
+              
+              <div ngbDropdown display="dynamic" class="d-inline-block">
+                <button class="btn btn-outline-secondary btn-sm" ngbDropdownToggle>
+                  <i class="bi bi-download me-1"></i>Instrument
+                </button>
+                <div ngbDropdownMenu>
+                  <button ngbDropdownItem (click)="exportFile('injection')" 
+                          title="Requires injection volume, sample number, data file column and position column">
+                    Randomized Injection
+                  </button>
+                </div>
+              </div>
+              
+              <!-- Tools -->
+              <button class="btn btn-outline-info btn-sm" (click)="openFieldMaskEditorModal()">
+                <i class="bi bi-filter me-1"></i>Masks
+                <span class="badge bg-info ms-1">{{selectedRow.field_mask_mapping.length}}</span>
+              </button>
+              
+              <!-- Add Columns -->
+              <div ngbDropdown display="dynamic" class="d-inline-block">
+                <button class="btn btn-primary btn-sm" ngbDropdownToggle>
+                  <i class="bi bi-plus-circle me-1"></i>+ User Columns
+                </button>
+                <div ngbDropdownMenu class="scrollable-dropdown">
+                  <div class="dropdown-scrollable-content">
+                    @for (m of metadata.userMetadataTemplate; track m.name) {
+                      <button ngbDropdownItem (click)="addMetadata(m, 'user_metadata')">
+                        {{m.name}}
+                      </button>
+                    }
+                  </div>
+                  <div class="dropdown-divider"></div>
+                  <button ngbDropdownItem (click)="addMetadata({name: 'Sample type', type: 'Characteristics'}, 'user_metadata')">
+                    <i class="bi bi-tag me-1"></i>Sample Type
+                  </button>
+                  <button ngbDropdownItem (click)="addMetadata({name: '', type: ''}, 'user_metadata')">
+                    <i class="bi bi-plus-square me-1"></i>Custom Metadata
+                  </button>
+                </div>
+              </div>
+              
+              <div ngbDropdown display="dynamic" class="d-inline-block">
+                <button class="btn btn-warning btn-sm" ngbDropdownToggle>
+                  <i class="bi bi-plus-circle me-1"></i>+ Staff Columns
+                </button>
+                <div ngbDropdownMenu class="scrollable-dropdown">
+                  <div class="dropdown-scrollable-content">
+                    @for (m of metadata.staffMetadataSpecific; track m) {
+                      <button ngbDropdownItem (click)="addMetadata({name: m, type: 'Comment'}, 'staff_metadata')">
+                        {{m}}
+                      </button>
+                    }
+                  </div>
+                  <div class="dropdown-divider"></div>
+                  <button ngbDropdownItem (click)="addMetadata({name: '', type: 'Factor value'}, 'staff_metadata')">
+                    <i class="bi bi-diagram-3 me-1"></i>Factor Value
+                  </button>
+                  <button ngbDropdownItem (click)="addMetadata({name: '', type: ''}, 'staff_metadata')">
+                    <i class="bi bi-plus-square me-1"></i>Custom Metadata
+                  </button>
+                </div>
+              </div>
+              
+              <div class="ms-auto d-flex align-items-center gap-2">
+                <small>
+                  <i class="bi bi-info-circle me-1"></i>
+                  Add metadata columns quickly from here
+                </small>
               </div>
             </div>
 
-            <!-- Hidden inputs for file uploads -->
+            <!-- Search and Configuration -->
+            <div class="d-flex flex-column gap-2 mb-3">
+              <div class="form-floating">
+                <input id="searchMetadata" class="form-control" type="search" [(ngModel)]="searchColumn" [ngModelOptions]="{standalone: true}">
+                <label for="searchMetadata">Search Metadata Column Name</label>
+              </div>
+              
+              <!-- Configuration Controls -->
+              <form [formGroup]="form">
+                <div class="row g-3">
+                  <div class="col-md-3">
+                    <div class="form-floating">
+                      <input class="form-control" type="number" formControlName="sample_number">
+                      <label>Sample Number</label>
+                    </div>
+                  </div>
+                  <div class="col-md-3">
+                    <div class="form-floating">
+                      <input class="form-control" type="number" formControlName="injection_volume">
+                      <label>Injection Volume (µL)</label>
+                    </div>
+                  </div>
+                  <div class="col-md-3">
+                    <div class="form-check form-switch mt-3">
+                      <input class="form-check-input" type="checkbox" id="showHidden" formControlName="show_hidden">
+                      <label class="form-check-label" for="showHidden">Show Hidden</label>
+                    </div>
+                  </div>
+                  <div class="col-md-3">
+                    <div class="form-check form-switch mt-3">
+                      <input class="form-check-input" type="checkbox" id="includePools" formControlName="include_pools">
+                      <label class="form-check-label" for="includePools">Include Pools</label>
+                    </div>
+                  </div>
+                </div>
+              </form>
+            </div>
+            
+            <!-- Hidden file inputs -->
             <input type="file" hidden #importExcel accept=".xlsx" (change)="importExcelTemplate($event)">
             <input type="file" hidden #importSDRF (change)="importSDRFFile($event)">
-
-            <!-- Table controls -->
-            <form [formGroup]="form" class="row g-3 mb-3 align-items-end">
-              <div class="col-md-3 col-lg-2">
-                <div class="form-floating">
-                  <input id="searchColumn" class="form-control" type="search" [(ngModel)]="searchColumn" [ngModelOptions]="{standalone: true}">
-                  <label for="searchColumn"><i class="bi bi-search me-1"></i> Filter Columns</label>
-                </div>
-              </div>
-              <div class="col-md-3 col-lg-2">
-                <div class="form-floating">
-                  <input id="sampleNumber" class="form-control" type="number" formControlName="sample_number">
-                  <label for="sampleNumber"><i class="bi bi-123 me-1"></i> Sample Number</label>
-                </div>
-              </div>
-              <div class="col-md-3 col-lg-2">
-                <div class="form-floating">
-                  <input id="injectionVolume" class="form-control" type="number" formControlName="injection_volume">
-                  <label for="injectionVolume"><i class="bi bi-droplet me-1"></i> Injection Volume (µL)</label>
-                </div>
-              </div>
-              <div class="col-md-3 col-lg-2">
-                <div class="form-check form-switch">
-                  <input class="form-check-input" type="checkbox" id="showHidden" formControlName="show_hidden">
-                  <label class="form-check-label" for="showHidden">Show Hidden Columns</label>
-                </div>
-              </div>
-            </form>
           </div>
         </div>
+      }
 
-        <!-- Metadata Table Section -->
-        @if (selectedLabGroup && form.value.show_hidden !== null && form.value.show_hidden !== undefined &&
-        form.value.sample_number !== null && form.value.sample_number !== undefined) {
-          <div class="card shadow-sm">
-            <div class="card-header ">
-              <h5 class="card-title mb-0">
-                <i class="bi bi-table me-2"></i>Metadata Table
-              </h5>
+      <!-- Pool Management Card -->
+      @if (showPoolManager && selectedRow) {
+        <div class="card mb-3">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">
+              <i class="bi bi-collection me-2"></i>Pool Management
+            </h5>
+            <div class="d-flex gap-2">
+              @if (pools.length > 0) {
+                <div class="d-flex gap-1">
+                  <span class="badge bg-primary">{{ pools.length }} pools</span>
+                  @if (referencePoolsCount > 0) {
+                    <span class="badge bg-success">{{ referencePoolsCount }} reference</span>
+                  }
+                </div>
+              }
+              <button class="btn btn-sm btn-outline-secondary" (click)="showPoolManager = false">
+                <i class="bi bi-x"></i>
+              </button>
             </div>
-            <div class="card-body p-0">
-              <div class="metadata-table-container">
-                <app-metadata-table
-                  [template]="selectedRow"
-                  (removeMetadata)="removeMetadata($event)"
-                  [filterTableColumnName]="searchColumn"
-                  (metadataUpdated)="handleMetadataUpdate($event)"
-                  [showHidden]="form.value.show_hidden"
-                  [sampleNumber]="form.value.sample_number"
-                  [service_lab_group_id]="selectedLabGroup.id"
-                  [staffModeActive]="true"
-                  [userMetadata]="selectedRow.user_columns"
-                  [staffMetadata]="selectedRow.staff_columns">
-                </app-metadata-table>
+          </div>
+          <div class="card-body">
+            <!-- Pool Creation Form -->
+            <div class="pool-creation-form mb-4 p-3 border rounded">
+              <h6 class="mb-3">Create New Pool</h6>
+              <div class="row g-3 mb-3">
+                <div class="col-md-4">
+                  <div class="form-floating">
+                    <input type="text" class="form-control" id="poolName" [(ngModel)]="newPoolName" placeholder="Pool name">
+                    <label for="poolName">Pool Name</label>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="form-check form-switch mt-3">
+                    <input class="form-check-input" type="checkbox" id="isReference" [(ngModel)]="newPoolIsReference">
+                    <label class="form-check-label" for="isReference">Reference Pool (for SDRF export)</label>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="mt-2">
+                    <span class="text-muted small">Selected: {{ selectedPooledOnly.length + selectedPooledAndIndependent.length }} samples</span>
+                    <br>
+                    <button class="btn btn-primary btn-sm mt-1" (click)="createPool()"
+                            [disabled]="!newPoolName.trim() || (selectedPooledOnly.length === 0 && selectedPooledAndIndependent.length === 0)">
+                      <i class="bi bi-plus-circle me-1"></i>Create Pool
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="row">
+              <!-- Sample Selection -->
+              <div class="col-md-8">
+                <h6 class="mb-3">Sample Selection</h6>
+                <div class="sample-grid" style="max-height: 300px; overflow-y: auto;">
+                  @for (sampleIndex of getSampleNumbers(); track sampleIndex) {
+                    <div class="d-flex align-items-center justify-content-between p-2 border-bottom">
+                      <div class="d-flex align-items-center">
+                        <strong class="me-3">Sample {{ sampleIndex }}</strong>
+                        <input class="form-check-input me-2" type="checkbox"
+                               [checked]="!isIndependent(sampleIndex)"
+                               (change)="onSampleCheckboxChange(sampleIndex, $event)">
+                        <span class="text-muted small">Include in pool</span>
+                      </div>
+                      <div class="btn-group btn-group-sm" role="group">
+                        <input type="radio" class="btn-check" [name]="'sample_' + sampleIndex" [id]="'pooledOnly_' + sampleIndex"
+                               [checked]="isPooledOnly(sampleIndex)"
+                               [disabled]="isIndependent(sampleIndex)"
+                               (change)="onSampleSelectionChange(sampleIndex, 'pooled_only', $event)">
+                        <label class="btn btn-outline-warning" [for]="'pooledOnly_' + sampleIndex">Pooled Only</label>
+
+                        <input type="radio" class="btn-check" [name]="'sample_' + sampleIndex" [id]="'pooledBoth_' + sampleIndex"
+                               [checked]="isPooledAndIndependent(sampleIndex)"
+                               [disabled]="isIndependent(sampleIndex)"
+                               (change)="onSampleSelectionChange(sampleIndex, 'pooled_and_independent', $event)">
+                        <label class="btn btn-outline-info" [for]="'pooledBoth_' + sampleIndex">Pooled + Independent</label>
+                      </div>
+                    </div>
+                  }
+                </div>
+              </div>
+
+              <!-- Existing Pools -->
+              <div class="col-md-4">
+                <h6 class="mb-3">Existing Pools</h6>
+                @if (pools.length === 0) {
+                  <div class="text-center text-muted py-4">
+                    <i class="bi bi-collection fs-1 d-block mb-2"></i>
+                    <p class="mb-0">No pools created yet</p>
+                  </div>
+                } @else {
+                  <div class="pool-list" style="max-height: 300px; overflow-y: auto;">
+                    @for (pool of pools; track pool.id) {
+                      <div class="card mb-2">
+                        <div class="card-body p-2">
+                          <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div>
+                              <h6 class="card-title mb-1">{{ pool.pool_name }}</h6>
+                              @if (pool.is_reference) {
+                                <span class="badge bg-success mb-1">Reference</span>
+                              }
+                            </div>
+                            <button class="btn btn-sm btn-outline-danger" (click)="deletePool(pool)" title="Delete pool">
+                              <i class="bi bi-trash"></i>
+                            </button>
+                          </div>
+                          <div class="small text-muted">
+                            @if (pool.pooled_only_samples.length > 0) {
+                              <div>Only: {{ formatSampleRange(pool.pooled_only_samples) }}</div>
+                            }
+                            @if (pool.pooled_and_independent_samples.length > 0) {
+                              <div>Both: {{ formatSampleRange(pool.pooled_and_independent_samples) }}</div>
+                            }
+                          </div>
+                        </div>
+                      </div>
+                    }
+                  </div>
+                }
               </div>
             </div>
           </div>
-        }
+        </div>
+      }
+
+      <!-- Metadata Table - Integrated directly -->
+      @if (selectedLabGroup && form.value.show_hidden !== null && form.value.show_hidden !== undefined &&
+      form.value.sample_number !== null && form.value.sample_number !== undefined) {
+        <app-metadata-table
+          [template]="selectedRow"
+          (removeMetadata)="removeMetadata($event)"
+          [filterTableColumnName]="searchColumn"
+          (metadataUpdated)="handleMetadataUpdate($event)"
+          [showHidden]="form.value.show_hidden"
+          [sampleNumber]="form.value.sample_number"
+          [service_lab_group_id]="selectedLabGroup.id"
+          [staffModeActive]="true"
+          [userMetadata]="selectedRow?.user_columns || []"
+          [staffMetadata]="selectedRow?.staff_columns || []">
+        </app-metadata-table>
       }
     </div>
   </div>
-  <div class="footer-spacer"></div>
+  
+  <!-- Footer spacer -->
+  @if (hasFooterText()) {
+    <div class="footer-spacer"></div>
+  }
 </div>

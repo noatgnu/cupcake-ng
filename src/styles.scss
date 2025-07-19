@@ -1,39 +1,29 @@
+// Import external CSS first
 @import "../node_modules/cal-heatmap/dist/cal-heatmap.css";
-@import "../node_modules/bootstrap/scss/functions";
-@import "../node_modules/bootstrap/scss/variables";
+
+// Bootstrap variable customization - this must come before Bootstrap import
 $min-contrast-ratio: 3.5;
 $primary: #2E2D62;
 $secondary: #a4a4a4;
-$success:       #003632;
-$info:          #8294C4;
-$warning:       #FFD6A5;
-$danger:        #FF9B9B;
-$light:         $gray-100;
-$dark:          $gray-900;
+$success: #003632;
+$info: #8294C4;
+$warning: #FFD6A5;
+$danger: #FF9B9B;
 
-$theme-colors: (
-  "primary":    $primary,
-  "secondary":  $secondary,
-  "success":    $success,
-  "info":       $info,
-  "warning":    $warning,
-  "danger":     $danger,
-  "light":      $light,
-  "dark":       $dark
-);
-.accordion-button:not(.collapsed) {
-  color: #FFF  !important;
-  background-color: #9acad5 !important;
-}
-
-
-
+// Import Bootstrap - this will use our custom variables above
 @import '../node_modules/bootstrap/scss/bootstrap.scss';
 
+// Dark theme colors for custom dark theme implementation
 $dark-theme-colors: (
   "primary":    #24b4c6,
   "success":    #7ad800,
 );
+
+// CSS rules and mixins after Bootstrap import
+.accordion-button:not(.collapsed) {
+  color: #FFF  !important;
+  background-color: #9acad5 !important;
+}
 
 @mixin generate-dark-theme($colors) {
   .dark-theme {
@@ -69,12 +59,8 @@ $dark-theme-colors: (
   border-color: #ff0000; /* Red border for dirty controls */
 }
 
-
 @include generate-dark-theme($dark-theme-colors);
 html, body { height: 100vh; width: 100%; margin: 0 }
-
-//@import "../node_modules/bootstrap-icons/font/bootstrap-icons.css";
-
 
 .loading-overlay {
   position: fixed;
@@ -843,5 +829,3 @@ html, body { height: 100vh; width: 100%; margin: 0 }
     margin: 0.25rem 0;
   }
 }
-
-

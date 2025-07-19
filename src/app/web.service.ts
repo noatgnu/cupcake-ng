@@ -2743,6 +2743,17 @@ export class WebService {
       map(response => response.sample_overview)
     );
   }
+
+  updatePoolMetadata(poolId: number, metadataColumnId: number, value: string): Observable<any> {
+    return this.http.patch(
+      `${this.baseURL}/api/sample_pools/${poolId}/update_metadata/`,
+      {
+        metadata_column_id: metadataColumnId,
+        value: value
+      },
+      {responseType: 'json', observe: 'body'}
+    );
+  }
 }
 
 export interface ChunkUploadResponse {

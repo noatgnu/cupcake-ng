@@ -1617,10 +1617,14 @@ export class MetadataService {
     return value
   }
 
-  async convert_metadata_to_excel(user_metadata: MetadataColumn[], staff_metadata: MetadataColumn[], sample_number: number, user_id: number, service_lab_group_id: number, field_masks: {name: string, mask: string}[] = []) {
+  async convert_metadata_to_excel(user_metadata: MetadataColumn[], staff_metadata: MetadataColumn[], sample_number: number, user_id: number, service_lab_group_id: number, field_masks: {name: string, mask: string}[] = [], pools: any[] = [], progressCallback?: (progress: number, status: string) => void) {
+    if (progressCallback) progressCallback(5, 'Preparing metadata...');
+    
     const metadata = user_metadata.concat(staff_metadata)
     let main_metadata = metadata.filter((m) => !m.hidden)
     let hidden_metadata = metadata.filter((m) => m.hidden)
+    
+    if (progressCallback) progressCallback(10, 'Sorting main metadata...');
     let [result_main, id_metadata_column_map_main] = await this.sort_metadata(main_metadata, sample_number)
     let result_hidden: string[][] = []
     let id_metadata_column_map_hidden: any = {}
@@ -1629,10 +1633,12 @@ export class MetadataService {
       field_mask_map[field_mask.name] = field_mask.mask
     }
     if (hidden_metadata.length > 0) {
+      if (progressCallback) progressCallback(15, 'Sorting hidden metadata...');
       [result_hidden, id_metadata_column_map_hidden] = await this.sort_metadata(hidden_metadata, sample_number)
     }
     const favourites: any = {}
     if (service_lab_group_id > 0) {
+      if (progressCallback) progressCallback(20, 'Loading metadata favourites...');
       for (const m of main_metadata) {
         favourites[m.name.toLowerCase()] = []
         const response = await this.web.getFavouriteMetadataOptions(10, 0, undefined, 'service_lab_group', service_lab_group_id, m.name).toPromise()
@@ -1649,6 +1655,8 @@ export class MetadataService {
         }
       }
     }
+    
+    if (progressCallback) progressCallback(40, 'Creating Excel workbook...');
     const wb = new Workbook()
     const main_ws: Worksheet = wb.addWorksheet('main')
     const hidden_ws: Worksheet = wb.addWorksheet('hidden')
@@ -1721,10 +1729,18 @@ export class MetadataService {
     for (let i = 0; i < note_texts.length; i++) {
       const lastColumn = main_ws.getColumn(main_ws.columnCount).letter
       const main_ws_range = `A${start_row}:${lastColumn}${start_row}`
-      main_ws.mergeCells(main_ws_range)
+      
+      // Check if cells are already merged before attempting to merge
+      try {
+        main_ws.mergeCells(main_ws_range)
+      } catch (error) {
+        console.warn(`Skipping merge for range ${main_ws_range} - cells may already be merged:`, error)
+      }
+      
       const note_cell = main_ws.getCell(`A${start_row}`)
       note_cell.value = note_texts[i]
       note_cell.font = {bold: true}
+      start_row++ // Increment start_row for next iteration
     }
 
     if (result_hidden.length > 0) {
@@ -1856,10 +1872,162 @@ export class MetadataService {
         }
       }
     }
+
+    // Add pool worksheets if pools are provided
+    if (pools && pools.length > 0) {
+      if (progressCallback) progressCallback(70, 'Creating pool worksheets...');
+      // Create pool main worksheet
+      const pool_main_ws = wb.addWorksheet('pool_main');
+      const pool_hidden_ws = wb.addWorksheet('pool_hidden');
+      const pool_object_map_ws = wb.addWorksheet('pool_object_map');
+
+      // Create pool object mapping
+      pool_object_map_ws.addRow(['pool_id', 'pool_name', 'is_reference', 'pooled_only_samples', 'pooled_and_independent_samples']);
+      pools.forEach(pool => {
+        pool_object_map_ws.addRow([
+          pool.id || '',
+          pool.pool_name || '',
+          pool.is_reference || false,
+          (pool.pooled_only_samples || []).join(','),
+          (pool.pooled_and_independent_samples || []).join(',')
+        ]);
+      });
+
+      // Get unique pool metadata
+      const all_pool_metadata: any[] = [];
+      pools.forEach(pool => {
+        if (pool.user_metadata) all_pool_metadata.push(...pool.user_metadata);
+        if (pool.staff_metadata) all_pool_metadata.push(...pool.staff_metadata);
+      });
+
+      // Remove duplicates based on name and type
+      const unique_pool_metadata = all_pool_metadata.filter((metadata, index, self) => 
+        index === self.findIndex(m => m.name === metadata.name && m.type === metadata.type)
+      );
+
+      const pool_main_metadata = unique_pool_metadata.filter(m => !m.hidden);
+      const pool_hidden_metadata = unique_pool_metadata.filter(m => m.hidden);
+
+      // Sort pool metadata
+      if (pool_main_metadata.length > 0) {
+        const [pool_result_main, pool_id_map_main] = await this.sort_pool_metadata(pool_main_metadata, pools);
+        
+        // Add headers and data to pool main worksheet
+        pool_main_ws.addRow(pool_result_main[0]); // Headers
+        pool_result_main.slice(1).forEach(row => pool_main_ws.addRow(row)); // Data rows
+
+        // Add to id_metadata_column_map_ws
+        for (const m_id in pool_id_map_main) {
+          const row = pool_id_map_main[m_id];
+          id_metadata_column_map_ws.addRow([m_id, row.column, row.name, row.type, row.hidden]);
+        }
+      }
+
+      if (pool_hidden_metadata.length > 0) {
+        const [pool_result_hidden, pool_id_map_hidden] = await this.sort_pool_metadata(pool_hidden_metadata, pools);
+        
+        // Add headers and data to pool hidden worksheet
+        pool_hidden_ws.addRow(pool_result_hidden[0]); // Headers
+        pool_result_hidden.slice(1).forEach(row => pool_hidden_ws.addRow(row)); // Data rows
+
+        // Add to id_metadata_column_map_ws
+        for (const m_id in pool_id_map_hidden) {
+          const row = pool_id_map_hidden[m_id];
+          id_metadata_column_map_ws.addRow([m_id, row.column, row.name, row.type, row.hidden]);
+        }
+      }
+
+      // Add pooled sample information to metadata for samples
+      this.addPooledSampleColumn(result_main, pools, sample_number);
+    }
+
+    if (progressCallback) progressCallback(100, 'Excel export complete!');
     return wb
   }
 
-  async read_metadata_from_excel(data: ArrayBuffer, user_metadata: MetadataColumn[], staff_metadata: MetadataColumn[], sample_number: number, user_id: number, service_lab_group_id: number, field_masks: {name: string, mask: string}[] = []) {
+  // Helper method to sort pool metadata
+  async sort_pool_metadata(metadata_list: any[], pools: any[]): Promise<[string[][], any]> {
+    const headers: string[] = [];
+    const id_metadata_column_map: any = {};
+    
+    if (!metadata_list || metadata_list.length === 0) {
+      return [[], {}];
+    }
+    
+    const pool_count = pools.length;
+    const col_count = metadata_list.length;
+    const data: string[][] = Array(pool_count).fill(null).map(() => Array(col_count).fill(''));
+    
+    metadata_list.forEach((m, col_idx) => {
+      headers.push(m.name);
+      
+      // Fill default value for all pools
+      for (let pool_idx = 0; pool_idx < pool_count; pool_idx++) {
+        data[pool_idx][col_idx] = m.value || '';
+      }
+      
+      id_metadata_column_map[m.id] = {
+        column: col_idx,
+        name: m.name,
+        type: m.type?.toLowerCase() || '',
+        hidden: m.hidden || false
+      };
+    });
+    
+    return [[headers, ...data], id_metadata_column_map];
+  }
+
+  // Helper method to add pooled sample column to main metadata
+  addPooledSampleColumn(result_main: string[][], pools: any[], sample_number: number): void {
+    if (!result_main || result_main.length === 0) return;
+    
+    // Find or add the pooled sample column
+    const headers = result_main[0];
+    let pooled_column_index = headers.findIndex(h => h.toLowerCase().includes('pooled sample'));
+    
+    if (pooled_column_index === -1) {
+      // Add new column
+      pooled_column_index = headers.length;
+      headers.push('characteristics[pooled sample]');
+      
+      // Add empty cells for existing rows
+      for (let i = 1; i < result_main.length; i++) {
+        result_main[i].push('');
+      }
+    }
+    
+    // Populate pooled sample values
+    for (let sample_idx = 1; sample_idx <= sample_number; sample_idx++) {
+      const data_row_idx = sample_idx; // Assuming 1-based sample indexing maps to 1-based row indexing
+      if (data_row_idx < result_main.length) {
+        const pooled_status = this.getPooledStatusForSample(sample_idx, pools);
+        result_main[data_row_idx][pooled_column_index] = pooled_status;
+      }
+    }
+  }
+
+  // Helper method to determine pooled status for a sample
+  getPooledStatusForSample(sample_index: number, pools: any[]): string {
+    for (const pool of pools) {
+      if (pool.pooled_only_samples?.includes(sample_index) || 
+          pool.pooled_and_independent_samples?.includes(sample_index)) {
+        return 'pooled';
+      }
+    }
+    return 'not pooled';
+  }
+
+  // Helper method to generate SN= format for pools
+  generatePoolSdrfValue(pool: any): string {
+    if (!pool.pooled_only_samples || pool.pooled_only_samples.length === 0) {
+      return 'not pooled';
+    }
+    
+    const sampleNames = pool.pooled_only_samples.map((index: number) => `Sample${index}`);
+    return `SN=${sampleNames.join(',')}`;
+  }
+
+  async read_metadata_from_excel(data: ArrayBuffer, user_metadata: MetadataColumn[], staff_metadata: MetadataColumn[], sample_number: number, user_id: number, service_lab_group_id: number, field_masks: {name: string, mask: string}[] = [], pools: any[] = []) {
     const workbook = new Workbook();
     await workbook.xlsx.load(data)
     const main_ws = workbook.getWorksheet('main')
@@ -1907,7 +2075,15 @@ export class MetadataService {
     }
     let main_metadata: MetadataColumn[] = []
     const m_headers: string[] = []
-    let currentID = 1
+    
+    // Find the highest ID from existing user and staff metadata to avoid conflicts
+    let maxExistingId = 0;
+    [...user_metadata, ...staff_metadata].forEach(m => {
+      if (m.id > maxExistingId) {
+        maxExistingId = m.id;
+      }
+    });
+    let currentID = maxExistingId + 1;
     if (main_ws) {
       const main_headers = main_ws.getRow(1).values
       if (main_headers){
@@ -1922,9 +2098,7 @@ export class MetadataService {
                   break
                 }
               }
-              if (column_id > currentID) {
-                currentID = column_id
-              }
+              // Note: Don't update currentID with Excel mapping IDs to avoid conflicts
               if (column_id > 0) {
                 const foundCol = user_metadata.find((m) => {
                   if (m.id === column_id) {
@@ -1944,8 +2118,43 @@ export class MetadataService {
                     return false
                   })
                   if (!foundStaffCol) {
-                    console.log("Column not found in metadata", h, column_id  )
-                    console.log(user_metadata, staff_metadata)
+                    console.log("Column not found in metadata", h, column_id)
+                    console.log("Available user metadata IDs:", user_metadata.map(m => m.id))
+                    console.log("Available staff metadata IDs:", staff_metadata.map(m => m.id))
+                    
+                    // Column ID exists but no matching metadata found - create new metadata column
+                    const header = h.toLowerCase();
+                    let metadata_type = "";
+                    let metadata_name = "";
+                    if (header.includes("[")) {
+                      metadata_type = header.split("[")[0];
+                      metadata_name = header.split("[")[1].replace("]", "");
+                    } else {
+                      metadata_name = header;
+                    }
+                    const metadata_name_capitalized = (metadata_name.charAt(0).toUpperCase() + metadata_name.slice(1)).replace("Ms1", "MS1").replace("Ms2", "MS2")
+                    if (field_mask_map[metadata_name_capitalized]) {
+                      metadata_name = field_mask_map[metadata_name_capitalized]
+                    }
+                    const metadata: MetadataColumn = {
+                      name: metadata_name_capitalized,
+                      type: metadata_type.charAt(0).toUpperCase() + metadata_type.slice(1),
+                      value: "",
+                      modifiers: [],
+                      hidden: false,
+                      column_position: 0,
+                      stored_reagent: null,
+                      id: ++currentID,
+                      created_at: new Date(),
+                      updated_at: new Date(),
+                      not_applicable: false,
+                      mandatory: false,
+                      auto_generated: false,
+                      readonly: false
+                    };
+                    console.log("Creating new metadata column from mismatched ID:", metadata);
+                    main_metadata.push(metadata);
+                    m_headers.push(metadata.name);
                   }
                 }
               } else {
@@ -1970,7 +2179,7 @@ export class MetadataService {
                   hidden: false,
                   column_position: 0,
                   stored_reagent: null,
-                  id: currentID,
+                  id: ++currentID,
                   created_at: new Date(),
                   updated_at: new Date(),
                   not_applicable: false,
@@ -1978,7 +2187,7 @@ export class MetadataService {
                   auto_generated: false,
                   readonly: false
                 };
-                currentID++
+                console.log("Creating new metadata column:", metadata);
                 main_metadata.push(metadata);
                 m_headers.push(metadata.name);
               }
@@ -2002,9 +2211,7 @@ export class MetadataService {
                   break
                 }
               }
-              if (column_id > currentID) {
-                currentID = column_id
-              }
+              // Note: Don't update currentID with Excel mapping IDs to avoid conflicts
 
               if (column_id > 0) {
                 const foundCol = user_metadata.find((m) => {
@@ -2047,7 +2254,7 @@ export class MetadataService {
                   hidden: true,
                   column_position: 0,
                   stored_reagent: null,
-                  id: currentID,
+                  id: ++currentID,
                   created_at: new Date(),
                   updated_at: new Date(),
                   not_applicable: false,
@@ -2055,7 +2262,6 @@ export class MetadataService {
                   auto_generated: false,
                   readonly: false
                 };
-                currentID++
                 hidden_metadata.push(metadata);
                 h_headers.push(metadata.name);
               }
@@ -2080,7 +2286,7 @@ export class MetadataService {
     }
     let headers: string[] = []
     let fin_data: string[][] = []
-    const result: {user_metadata: MetadataColumn[], staff_metadata: MetadataColumn[]} = {
+    const result: {user_metadata: MetadataColumn[], staff_metadata: MetadataColumn[], pools?: any[]} = {
       user_metadata: [],
       staff_metadata: []
     }
@@ -2242,10 +2448,121 @@ export class MetadataService {
       }
     }
 
+    // Check for pool data if pools parameter is provided
+    if (pools && pools.length >= 0) {
+      const detected_pools = this.detectPoolsFromExcel(workbook);
+      if (detected_pools.length > 0) {
+        result.pools = detected_pools;
+      }
+    }
+
+    // Import pool data if pool worksheets exist
+    const pool_object_map_ws = workbook.getWorksheet('pool_object_map');
+    if (pool_object_map_ws) {
+      console.log("Found pool worksheets, importing pool data...");
+      const imported_pools = this.importPoolsFromExcel(workbook);
+      if (imported_pools.length > 0) {
+        result.pools = imported_pools;
+        console.log("Imported pools:", imported_pools);
+      }
+    }
+
+    console.log("Final Excel import result:", {
+      user_metadata_count: result.user_metadata.length,
+      staff_metadata_count: result.staff_metadata.length,
+      pools_count: result.pools?.length || 0,
+      user_metadata: result.user_metadata.map(m => ({ id: m.id, name: m.name, type: m.type })),
+      staff_metadata: result.staff_metadata.map(m => ({ id: m.id, name: m.name, type: m.type })),
+      pools: result.pools || []
+    });
+
     return result
   }
 
-  async export_metadata_to_sdrf(user_metadata: MetadataColumn[], staff_metadata: MetadataColumn[], sample_number: number, user_id: number = 0, service_lab_group_id: number = 0) {
+  // Helper method to import pools from Excel workbook
+  importPoolsFromExcel(workbook: any): any[] {
+    const pools: any[] = [];
+    const pool_object_map_ws = workbook.getWorksheet('pool_object_map');
+    
+    if (!pool_object_map_ws) {
+      return pools;
+    }
+    
+    // Read pool object mapping
+    pool_object_map_ws.eachRow((row: any, rowNumber: number) => {
+      if (rowNumber > 1) { // Skip header row
+        const pool_id = row.getCell(1).value;
+        const pool_name = row.getCell(2).value;
+        const is_reference = row.getCell(3).value;
+        const pooled_only_samples_str = row.getCell(4).value;
+        const pooled_and_independent_samples_str = row.getCell(5).value;
+        
+        // Parse sample arrays
+        const pooled_only_samples = pooled_only_samples_str ? 
+          pooled_only_samples_str.toString().split(',').map((s: string) => parseInt(s.trim())).filter((n: number) => !isNaN(n)) : [];
+        const pooled_and_independent_samples = pooled_and_independent_samples_str ? 
+          pooled_and_independent_samples_str.toString().split(',').map((s: string) => parseInt(s.trim())).filter((n: number) => !isNaN(n)) : [];
+        
+        const pool = {
+          id: pool_id || Date.now() + Math.random(), // Generate ID if missing
+          pool_name: pool_name || `Pool ${rowNumber - 1}`,
+          is_reference: is_reference === true || is_reference === 'true',
+          pooled_only_samples: pooled_only_samples,
+          pooled_and_independent_samples: pooled_and_independent_samples,
+          user_metadata: [],
+          staff_metadata: []
+        };
+        
+        pools.push(pool);
+      }
+    });
+    
+    console.log("Imported pools from Excel:", pools);
+    return pools;
+  }
+
+  // Helper method to detect pools from Excel workbook
+  detectPoolsFromExcel(workbook: any): any[] {
+    const pools: any[] = [];
+    
+    try {
+      const pool_object_map_ws = workbook.getWorksheet('pool_object_map');
+      if (pool_object_map_ws) {
+        const rows = pool_object_map_ws.getRows();
+        if (rows && rows.length > 1) { // Skip header row
+          for (let i = 1; i < rows.length; i++) {
+            const row = rows[i];
+            if (row.values && row.values.length >= 5) {
+              const pool = {
+                id: row.values[1] || Date.now() + i,
+                pool_name: row.values[2] || '',
+                is_reference: row.values[3] === true || row.values[3] === 'true',
+                pooled_only_samples: this.parseNumberList(row.values[4]),
+                pooled_and_independent_samples: this.parseNumberList(row.values[5]),
+                user_metadata: [],
+                staff_metadata: []
+              };
+              pools.push(pool);
+            }
+          }
+        }
+      }
+    } catch (error) {
+      console.warn('Error detecting pools from Excel:', error);
+    }
+    
+    return pools;
+  }
+
+  // Helper method to parse comma-separated number lists
+  parseNumberList(value: any): number[] {
+    if (!value || typeof value !== 'string') return [];
+    return value.split(',')
+      .map(s => parseInt(s.trim()))
+      .filter(n => !isNaN(n));
+  }
+
+  async export_metadata_to_sdrf(user_metadata: MetadataColumn[], staff_metadata: MetadataColumn[], sample_number: number, user_id: number = 0, service_lab_group_id: number = 0, pools: any[] = []) {
     const metadata = user_metadata.concat(staff_metadata)
     const [result, _] = await this.sort_metadata(metadata, sample_number)
     const headers = result[0]
@@ -2282,10 +2599,57 @@ export class MetadataService {
         data[j].pop();
       }
     }
+
+    // Add pool information to SDRF if pools are provided (only reference pools)
+    if (pools && pools.length > 0) {
+      const reference_pools = pools.filter(p => p.is_reference);
+      if (reference_pools.length > 0) {
+        this.addPooledSampleColumnToSdrf([headers, ...data], reference_pools, sample_number);
+      }
+    }
+
     return [headers, ...data]
   }
 
-  async import_metadata_from_sdrf(data_string: string, user_metadata: MetadataColumn[], staff_metadata: MetadataColumn[], sample_number: number = 0, user_id: number = 0, service_lab_group_id: number = 0) {
+  // Helper method to add pooled sample column to SDRF
+  addPooledSampleColumnToSdrf(sdrf_data: string[][], pools: any[], sample_number: number): void {
+    if (!sdrf_data || sdrf_data.length === 0) return;
+    
+    const headers = sdrf_data[0];
+    let pooled_column_index = headers.findIndex(h => h.toLowerCase().includes('pooled sample'));
+    
+    if (pooled_column_index === -1) {
+      // Add new column
+      pooled_column_index = headers.length;
+      headers.push('characteristics[pooled sample]');
+      
+      // Add empty cells for existing rows
+      for (let i = 1; i < sdrf_data.length; i++) {
+        sdrf_data[i].push('');
+      }
+    }
+    
+    // Populate pooled sample values - for reference pools, add SN= format
+    for (let sample_idx = 1; sample_idx <= sample_number; sample_idx++) {
+      const data_row_idx = sample_idx; // Assuming 1-based sample indexing
+      if (data_row_idx < sdrf_data.length) {
+        let pooled_value = 'not pooled';
+        
+        // Check if sample is in any reference pool
+        for (const pool of pools) {
+          if (pool.pooled_only_samples?.includes(sample_idx) || 
+              pool.pooled_and_independent_samples?.includes(sample_idx)) {
+            pooled_value = this.generatePoolSdrfValue(pool);
+            break;
+          }
+        }
+        
+        sdrf_data[data_row_idx][pooled_column_index] = pooled_value;
+      }
+    }
+  }
+
+  async import_metadata_from_sdrf(data_string: string, user_metadata: MetadataColumn[], staff_metadata: MetadataColumn[], sample_number: number = 0, user_id: number = 0, service_lab_group_id: number = 0, pools: any[] = []) {
     const data = data_string.split("\n")
     const headers = data[0].split("\t")
     const data_values = data.slice(1)
@@ -2422,38 +2786,130 @@ export class MetadataService {
       } else {
         metadata.modifiers = []
       }
+      // Enhanced metadata sorting logic for SDRF import
       if ("factor value" === metadata.type.toLowerCase()) {
+        // Factor value type always goes to staff metadata
         staff_columns.push(metadata)
       } else {
-        if (staff_hidden_metadata.findIndex((v) => {
+        // Check for exact match in existing hidden metadata
+        const staffHiddenMatch = staff_hidden_metadata.findIndex((v) => {
           return v.name === metadata.name && v.type === metadata.type
-        }) > -1) {
+        }) > -1;
+        
+        const userHiddenMatch = user_hidden_metadata.findIndex((v) => {
+          return v.name === metadata.name && v.type === metadata.type
+        }) > -1;
+        
+        if (staffHiddenMatch) {
           metadata.hidden = true
           staff_columns.push(metadata)
-        } else if (user_hidden_metadata.findIndex((v) => {
-          return v.name === metadata.name && v.type === metadata.type
-        }) > -1) {
+        } else if (userHiddenMatch) {
           metadata.hidden = true
           user_columns.push(metadata)
         } else {
-          if (staff_metadata_field_map[metadata.type]) {
-            if (staff_metadata_field_map[metadata.type][metadata.name]) {
+          // Check for exact match in existing staff metadata (type + name)
+          const staffExactMatch = staff_metadata_field_map[metadata.type] && 
+                                 staff_metadata_field_map[metadata.type][metadata.name];
+          
+          // Check for exact match in existing user metadata (type + name)  
+          const userExactMatch = user_metadata_field_map[metadata.type] && 
+                                user_metadata_field_map[metadata.type][metadata.name];
+          
+          if (staffExactMatch) {
+            // Exact match found in staff metadata
+            staff_columns.push(metadata)
+          } else if (userExactMatch) {
+            // Exact match found in user metadata
+            user_columns.push(metadata)
+          } else {
+            // No exact match found - check for partial matches
+            
+            // Check if same name exists in staff metadata (any type)
+            const staffNameMatch = Object.values(staff_metadata_field_map).some((typeMap: any) => 
+              typeMap[metadata.name]
+            );
+            
+            // Check if same name exists in user metadata (any type)
+            const userNameMatch = Object.values(user_metadata_field_map).some((typeMap: any) => 
+              typeMap[metadata.name]
+            );
+            
+            if (staffNameMatch && !userNameMatch) {
+              // Name exists only in staff metadata
+              staff_columns.push(metadata)
+            } else if (userNameMatch && !staffNameMatch) {
+              // Name exists only in user metadata
+              user_columns.push(metadata)
+            } else if (staff_metadata_field_map[metadata.type]) {
+              // Type exists in staff metadata but name doesn't match exactly
               staff_columns.push(metadata)
             } else {
+              // Default: new columns go to user metadata unless they are factor values
               user_columns.push(metadata)
             }
-          } else {
-            user_columns.push(metadata)
           }
         }
       }
 
     }
-    return {user_metadata: user_columns, staff_metadata: staff_columns}
+
+    // Detect pools from SDRF if pools parameter is provided
+    const result: any = {user_metadata: user_columns, staff_metadata: staff_columns};
+    if (pools !== undefined) {
+      const detected_pools = this.detectPoolsFromSdrf(headers, values);
+      if (detected_pools.length > 0) {
+        result.pools = detected_pools;
+      }
+    }
+
+    return result;
   }
 
-  async validateMetadata(user_metadata: MetadataColumn[], staff_metadata: MetadataColumn[], sample_number: number = 0, user_id: number = 0, service_lab_group_id: number = 0) {
-    const data_values = await this.export_metadata_to_sdrf(user_metadata, staff_metadata, sample_number, user_id, service_lab_group_id)
+  // Helper method to detect pools from SDRF data
+  detectPoolsFromSdrf(headers: string[], values: string[][]): any[] {
+    const pools: any[] = [];
+    
+    try {
+      // Find pooled sample column
+      const pooled_column_index = headers.findIndex(h => h.toLowerCase().includes('pooled sample'));
+      if (pooled_column_index === -1) return pools;
+      
+      // Collect samples with SN= format (indicates pooled samples)
+      const pool_map = new Map<string, any>();
+      
+      values.forEach((row, sample_index) => {
+        if (row[pooled_column_index] && row[pooled_column_index].startsWith('SN=')) {
+          const sn_value = row[pooled_column_index];
+          const sample_names = sn_value.substring(3).split(',').map(s => s.trim());
+          
+          // Create or update pool
+          if (!pool_map.has(sn_value)) {
+            pool_map.set(sn_value, {
+              id: Date.now() + Math.random(),
+              pool_name: `Pool_${pool_map.size + 1}`,
+              is_reference: true, // SN= format indicates reference pool
+              pooled_only_samples: [],
+              pooled_and_independent_samples: [],
+              user_metadata: [],
+              staff_metadata: []
+            });
+          }
+          
+          const pool = pool_map.get(sn_value);
+          pool.pooled_only_samples.push(sample_index + 1); // Convert to 1-based indexing
+        }
+      });
+      
+      pools.push(...pool_map.values());
+    } catch (error) {
+      console.warn('Error detecting pools from SDRF:', error);
+    }
+    
+    return pools;
+  }
+
+  async validateMetadata(user_metadata: MetadataColumn[], staff_metadata: MetadataColumn[], sample_number: number = 0, user_id: number = 0, service_lab_group_id: number = 0, pools: any[] = []) {
+    const data_values = await this.export_metadata_to_sdrf(user_metadata, staff_metadata, sample_number, user_id, service_lab_group_id, pools)
     const errors = await this.web.validateMetadataTemplateSDRF(data_values).toPromise()
     return errors
   }
@@ -2566,5 +3022,9 @@ export class MetadataService {
 
   getSampleStatusOverview(instrumentJobId: number): Observable<SampleStatusOverview[]> {
     return this.web.getSampleStatusOverview(instrumentJobId);
+  }
+
+  updatePoolMetadata(poolId: number, metadataColumnId: number, value: string): Observable<any> {
+    return this.web.updatePoolMetadata(poolId, metadataColumnId, value);
   }
 }

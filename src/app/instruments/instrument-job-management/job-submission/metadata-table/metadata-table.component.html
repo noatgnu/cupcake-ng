@@ -34,18 +34,6 @@
                           }
                         </span>
                         
-                        @if (currentPoolCell?.row === -1 && currentPoolCell?.col === index + 0 && (userCanEdit||staffModeActive)) {
-                          <div ngbDropdown class="d-inline-block" placement="bottom-right">
-                            <button class="btn btn-xs btn-outline-primary" ngbDropdownToggle>
-                              <i class="bi bi-gear-fill"></i>
-                            </button>
-                            <div ngbDropdownMenu class="shadow-sm">
-                              <button class="dropdown-item" (click)="editPoolColumnDefault(col, index)">
-                                <i class="bi bi-pen me-2"></i> Edit Default Value
-                              </button>
-                            </div>
-                          </div>
-                        }
                       </div>
                       @if (col.hidden) {
                         <span class="badge bg-secondary small">Hidden</span>
@@ -72,18 +60,6 @@
                           }
                         </span>
 
-                        @if (currentPoolCell?.row === -1 && currentPoolCell?.col === (userMetadata.length + index + 0) && staffModeActive) {
-                          <div ngbDropdown class="d-inline-block" placement="bottom-right">
-                            <button class="btn btn-xs btn-outline-primary" ngbDropdownToggle>
-                              <i class="bi bi-gear-fill"></i>
-                            </button>
-                            <div ngbDropdownMenu class="shadow-sm">
-                              <button class="dropdown-item" (click)="editPoolColumnDefault(col, index)">
-                                <i class="bi bi-pen me-2"></i> Edit Default Value
-                              </button>
-                            </div>
-                          </div>
-                        }
                       </div>
                       @if (col.hidden) {
                         <span class="badge bg-secondary small">Hidden</span>
