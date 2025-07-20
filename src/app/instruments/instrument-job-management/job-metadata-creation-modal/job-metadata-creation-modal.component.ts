@@ -12,7 +12,7 @@ import {FormBuilder, FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {WebService} from "../../../web.service";
 import {FavouriteMetadataOptionQuery} from "../../../favourite-metadata-option";
 import {LabGroup} from "../../../lab-group";
-import {MetadataColumn} from "../../../metadata-column";
+import {MetadataColumn, MetadataTableTemplate} from "../../../metadata-column";
 import {AccountsService} from "../../../accounts/accounts.service";
 
 @Component({
@@ -37,31 +37,68 @@ export class JobMetadataCreationModalComponent {
   service_lab_group_recommenations: FavouriteMetadataOptionQuery|undefined
   user_favourite_metadata: FavouriteMetadataOptionQuery|undefined
   global_recommendations: FavouriteMetadataOptionQuery|undefined
+  project_suggestions: string[] = []
   currentServiceLabRecommendationsPage = 1
   currentUserFavouriteMetadataPage = 1
   currentGlobalRecommendationsPage = 1
+  currentProjectSuggestionsPage = 1
   pageSize = 10
   activeID: string = "user"
+  
+  // Loading states
+  loadingGlobalRecommendations = false
+  loadingServiceLabRecommendations = false
+  loadingUserFavourites = false
+  loadingProjectSuggestions = false
   @Input() previewMode: boolean = false
   @Input() service_lab_group_id: number = -1
   @Input() possibleColumns: MetadataColumn[] = []
+  private _template: MetadataTableTemplate | null = null
+  @Input() set template(value: MetadataTableTemplate | null) {
+    this._template = value
+    this.processFieldMaskMapping()
+  }
+  
+  get template(): MetadataTableTemplate | null {
+    return this._template
+  }
   private _name: string = ""
+  private _project_id: number = -1
+  
+  // Field mask mapping for filtering recommendations
+  private fieldMaskMap: {[key: string]: string} = {}
+  private reverseFieldMaskMap: {[key: string]: string} = {}
   @Input() set hidden(value: boolean) {
     this.form.controls.hidden.setValue(value)
   }
   @Input() set readonly(value: boolean) {
     this.form.controls.readonly.setValue(value)
   }
+  
+  @Input() set project_id(value: number) {
+    console.log('Modal project_id setter:', value, 'name:', this._name)
+    this._project_id = value
+    if (value > 0 && this._name) {
+      this.getProjectSuggestions()
+    }
+  }
+  
+  get project_id(): number {
+    return this._project_id
+  }
   @Input() set name(value: string) {
     this.form.controls.metadataName.setValue(value)
     this._name = value
-    console.log(this.service_lab_group_id)
+    console.log('Modal name setter:', value, 'service_lab_group_id:', this.service_lab_group_id, 'project_id:', this.project_id)
     if (value && this.service_lab_group_id > 0) {
       this.getGlobalRecommendations()
       if (this.account.loggedIn) {
         this.getUserFavouriteMetadataOptions()
       }
       this.getServiceLabRecommendations()
+    }
+    if (value && this.project_id > 0) {
+      this.getProjectSuggestions()
     }
     if (value === "Proteomics data acquisition method") {
       this.web.getMSVocab(undefined, 100, 0, undefined, value.toLowerCase()).subscribe(
@@ -328,7 +365,48 @@ export class JobMetadataCreationModalComponent {
   selectedSpecs: any[] = []
 
   constructor(private account: AccountsService, private web: WebService, private modal: NgbActiveModal, public metadataService: MetadataService, private fb: FormBuilder) {
-
+    this.processFieldMaskMapping()
+  }
+  
+  /**
+   * Process field mask mapping to create bidirectional lookup maps
+   */
+  private processFieldMaskMapping() {
+    this.fieldMaskMap = {}
+    this.reverseFieldMaskMap = {}
+    
+    if (this.template && this.template.field_mask_mapping) {
+      for (const mapping of this.template.field_mask_mapping) {
+        // Original name -> Display name
+        this.fieldMaskMap[mapping.name] = mapping.mask
+        // Display name -> Original name  
+        this.reverseFieldMaskMap[mapping.mask] = mapping.name
+      }
+    }
+  }
+  
+  /**
+   * Check if a metadata name matches the current column considering both original and masked names
+   */
+  private isMetadataNameRelevant(metadataName: string): boolean {
+    if (!this._name) return true // If no current name set, show all
+    
+    // Direct match with current name
+    if (metadataName === this._name) return true
+    
+    // Check if current name is a mask and metadata name matches original
+    const originalName = this.reverseFieldMaskMap[this._name]
+    if (originalName && metadataName === originalName) return true
+    
+    // Check if metadata name is a mask and matches current name's mask
+    const maskedName = this.fieldMaskMap[metadataName]
+    if (maskedName && maskedName === this._name) return true
+    
+    // Check if both are masks/originals of the same underlying field
+    const currentOriginal = this.reverseFieldMaskMap[this._name] || this._name
+    const metadataOriginal = this.reverseFieldMaskMap[metadataName] || metadataName
+    
+    return currentOriginal === metadataOriginal
   }
 
   formatter = (data: any) => {
@@ -422,29 +500,115 @@ export class JobMetadataCreationModalComponent {
 
   getUserFavouriteMetadataOptions() {
     if (this.service_lab_group_id > 0) {
-      this.web.getFavouriteMetadataOptions(this.pageSize, (this.currentUserFavouriteMetadataPage-1)*this.pageSize, undefined, 'user', undefined, this.name).subscribe(
-        (response) => {
+      this.loadingUserFavourites = true
+      this.web.getFavouriteMetadataOptions(this.pageSize, (this.currentUserFavouriteMetadataPage-1)*this.pageSize, undefined, 'user', undefined, this.name).subscribe({
+        next: (response) => {
+          // Filter recommendations based on field mask relevance
+          if (response.results) {
+            response.results = response.results.filter(rec => this.isMetadataNameRelevant(rec.name || ''))
+            response.count = response.results.length
+          }
           this.user_favourite_metadata = response
+          this.loadingUserFavourites = false
+        },
+        error: (error) => {
+          console.error('Error loading user favourites:', error)
+          this.loadingUserFavourites = false
         }
-      )
+      })
     }
-
   }
 
   getServiceLabRecommendations() {
-    this.web.getFavouriteMetadataOptions(this.pageSize, (this.currentServiceLabRecommendationsPage-1)*this.pageSize, undefined, "service_lab_group", this.service_lab_group_id, this.name).subscribe(
-      (response) => {
+    this.loadingServiceLabRecommendations = true
+    this.web.getFavouriteMetadataOptions(this.pageSize, (this.currentServiceLabRecommendationsPage-1)*this.pageSize, undefined, "service_lab_group", this.service_lab_group_id, this.name).subscribe({
+      next: (response) => {
+        // Filter recommendations based on field mask relevance
+        if (response.results) {
+          response.results = response.results.filter(rec => this.isMetadataNameRelevant(rec.name || ''))
+          response.count = response.results.length
+        }
         this.service_lab_group_recommenations = response
+        this.loadingServiceLabRecommendations = false
+      },
+      error: (error) => {
+        console.error('Error loading service lab recommendations:', error)
+        this.loadingServiceLabRecommendations = false
       }
-    )
+    })
   }
 
   getGlobalRecommendations() {
-    this.web.getFavouriteMetadataOptions(this.pageSize, (this.currentGlobalRecommendationsPage-1)*this.pageSize, undefined, undefined, undefined, this.name, undefined, true).subscribe(
-      (response) => {
+    this.loadingGlobalRecommendations = true
+    this.web.getFavouriteMetadataOptions(this.pageSize, (this.currentGlobalRecommendationsPage-1)*this.pageSize, undefined, undefined, undefined, this.name, undefined, true).subscribe({
+      next: (response) => {
+        // Filter recommendations based on field mask relevance
+        if (response.results) {
+          response.results = response.results.filter(rec => this.isMetadataNameRelevant(rec.name || ''))
+          response.count = response.results.length
+        }
         this.global_recommendations = response
+        this.loadingGlobalRecommendations = false
+      },
+      error: (error) => {
+        console.error('Error loading global recommendations:', error)
+        this.loadingGlobalRecommendations = false
       }
-    )
+    })
+  }
+
+  getProjectSuggestions() {
+    console.log('getProjectSuggestions called:', {
+      project_id: this.project_id,
+      name: this.name,
+      condition: this.project_id > 0 && this.name
+    });
+    
+    if (this.project_id > 0 && this.name) {
+      console.log('Making API call to getProjectSdrfMetadataCollection...');
+      this.loadingProjectSuggestions = true
+      this.web.getProjectSdrfMetadataCollection(this.project_id, this.name, true).subscribe({
+        next: (response) => {
+          console.log('Project suggestions API response:', response);
+          this.project_suggestions = [];
+          
+          // Extract unique values from all metadata columns, filtering by field mask relevance
+          if (response.metadata_columns) {
+            for (const metadataName in response.metadata_columns) {
+              const column = response.metadata_columns[metadataName];
+              
+              console.log('Checking column:', {
+                metadataName,
+                currentName: this._name,
+                isRelevant: this.isMetadataNameRelevant(metadataName),
+                hasValues: column.unique_values && Array.isArray(column.unique_values)
+              });
+              
+              // Check relevance using metadata name
+              if (this.isMetadataNameRelevant(metadataName) && 
+                  column.unique_values && Array.isArray(column.unique_values)) {
+                this.project_suggestions.push(...column.unique_values);
+              }
+            }
+          }
+          
+          // Remove duplicates and sort
+          this.project_suggestions = [...new Set(this.project_suggestions)].sort();
+          console.log('Final project_suggestions:', this.project_suggestions);
+          this.loadingProjectSuggestions = false
+        },
+        error: (error) => {
+          console.error('Error fetching project suggestions:', error);
+          this.project_suggestions = [];
+          this.loadingProjectSuggestions = false
+        }
+      });
+    } else {
+      console.log('Not making API call. Conditions not met:', {
+        project_id_valid: this.project_id > 0,
+        name_valid: !!this.name
+      });
+    }
   }
 
   onPageChange(page: number, type: string) {
@@ -454,9 +618,24 @@ export class JobMetadataCreationModalComponent {
     } else if (type === "group") {
       this.currentServiceLabRecommendationsPage = page
       this.getServiceLabRecommendations()
+    } else if (type === "project") {
+      this.currentProjectSuggestionsPage = page
+      // Project suggestions are already loaded, no need to refetch
     } else {
       this.currentGlobalRecommendationsPage = page
       this.getGlobalRecommendations()
     }
+  }
+
+  // Helper method to get paginated project suggestions
+  getPaginatedProjectSuggestions(): string[] {
+    const startIndex = (this.currentProjectSuggestionsPage - 1) * this.pageSize;
+    const endIndex = startIndex + this.pageSize;
+    return this.project_suggestions.slice(startIndex, endIndex);
+  }
+
+  // Helper method to get total pages for project suggestions
+  getProjectSuggestionsPageCount(): number {
+    return Math.ceil(this.project_suggestions.length / this.pageSize);
   }
 }

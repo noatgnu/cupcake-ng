@@ -6,7 +6,43 @@ import {ProtocolSessionComponent} from "./protocol-session.component";
 const routes: Routes = [
   {
     path: ':protocolSessionId',
-    component: ProtocolSessionComponent
+    component: ProtocolSessionComponent,
+    children: [
+      {
+        path: 'session/:sessionId',
+        component: ProtocolSessionComponent,
+        children: [
+          {
+            path: 'section/:sectionId',
+            component: ProtocolSessionComponent
+          },
+          {
+            path: 'section/:sectionId/step/:stepId',
+            component: ProtocolSessionComponent
+          },
+          {
+            path: 'folder/:folderId',
+            component: ProtocolSessionComponent
+          },
+          {
+            path: '',
+            component: ProtocolSessionComponent
+          }
+        ]
+      },
+      {
+        path: 'section/:sectionId',
+        component: ProtocolSessionComponent
+      },
+      {
+        path: 'section/:sectionId/step/:stepId',
+        component: ProtocolSessionComponent
+      },
+      {
+        path: '',
+        component: ProtocolSessionComponent
+      }
+    ]
   },
 ];
 

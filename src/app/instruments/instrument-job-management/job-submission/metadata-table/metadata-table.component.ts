@@ -38,6 +38,7 @@ export class MetadataTableComponent implements OnChanges, OnInit, OnDestroy {
   visibleColumnNames: string[] = []
   @Input() templateMode: boolean = false
   @Input() service_lab_group_id: number = 0
+  @Input() project_id: number = -1
   @Input() set filterTableColumnName(value: string) {
     this._filterTableColumnName = value
     if (value && value.length > 0) {
@@ -266,8 +267,12 @@ export class MetadataTableComponent implements OnChanges, OnInit, OnDestroy {
   editCell(row: any, metadata: MetadataColumn, index: number, data_type: 'user_metadata' | 'staff_metadata') {
     const ref = this.modal.open(JobMetadataCreationModalComponent)
     ref.componentInstance.previewMode = this.templateMode
+    ref.componentInstance.template = this.template
     if (this.service_lab_group_id > 0) {
       ref.componentInstance.service_lab_group_id = this.service_lab_group_id
+    }
+    if (this.project_id > 0) {
+      ref.componentInstance.project_id = this.project_id
     }
     ref.componentInstance.name = metadata.name
     ref.componentInstance.type = metadata.type
@@ -485,10 +490,14 @@ export class MetadataTableComponent implements OnChanges, OnInit, OnDestroy {
   editDefaultMetadataValue(metadata: MetadataColumn, data_type: 'user_metadata' | 'staff_metadata') {
     const ref = this.modal.open(JobMetadataCreationModalComponent)
     ref.componentInstance.previewMode = this.templateMode || this.staffModeActive
+    ref.componentInstance.template = this.template
     ref.componentInstance.hidden = metadata.hidden
     ref.componentInstance.readonly = metadata.readonly
     if (this.service_lab_group_id > 0) {
       ref.componentInstance.service_lab_group_id = this.service_lab_group_id
+    }
+    if (this.project_id > 0) {
+      ref.componentInstance.project_id = this.project_id
     }
     ref.componentInstance.name = metadata.name
     ref.componentInstance.type = metadata.type
@@ -1009,6 +1018,7 @@ export class MetadataTableComponent implements OnChanges, OnInit, OnDestroy {
     
     // Configure modal with same settings as main metadata editing
     ref.componentInstance.previewMode = this.templateMode;
+    ref.componentInstance.template = this.template;
     
     // Set service_lab_group_id BEFORE name to ensure favorites load properly
     if (this.service_lab_group_id > 0) {
@@ -1016,6 +1026,14 @@ export class MetadataTableComponent implements OnChanges, OnInit, OnDestroy {
       console.log('Pool modal: service_lab_group_id set to', this.service_lab_group_id);
     } else {
       console.log('Pool modal: service_lab_group_id not set (value:', this.service_lab_group_id, ')');
+    }
+    
+    // Set project_id for project suggestions
+    if (this.project_id > 0) {
+      ref.componentInstance.project_id = this.project_id;
+      console.log('Pool modal: project_id set to', this.project_id);
+    } else {
+      console.log('Pool modal: project_id not set (value:', this.project_id, ')');
     }
     
     ref.componentInstance.name = column?.name || metadataName;
@@ -1078,10 +1096,16 @@ export class MetadataTableComponent implements OnChanges, OnInit, OnDestroy {
     
     // Configure modal with same settings as main metadata editing
     ref.componentInstance.previewMode = this.templateMode;
+    ref.componentInstance.template = this.template;
     
     // Set service_lab_group_id BEFORE name to ensure favorites load properly
     if (this.service_lab_group_id > 0) {
       ref.componentInstance.service_lab_group_id = this.service_lab_group_id;
+    }
+    
+    // Set project_id for project suggestions
+    if (this.project_id > 0) {
+      ref.componentInstance.project_id = this.project_id;
     }
     
     ref.componentInstance.name = col.name;

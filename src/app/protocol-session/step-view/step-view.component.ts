@@ -60,6 +60,7 @@ import {SiteSettingsService} from "../../site-settings.service";
 export class StepViewComponent {
   @Input() currentSection?: {data: ProtocolSection, steps: ProtocolStep[], currentStep: number}
   @Output() showSidebar: EventEmitter<boolean> = new EventEmitter<boolean>();
+  @Output() navigationChange: EventEmitter<{sectionId?: number, stepId?: number}> = new EventEmitter<{sectionId?: number, stepId?: number}>();
   private _currentStep?: ProtocolStep
   @Input() set currentStep(value: ProtocolStep) {
     this._currentStep = value
@@ -139,6 +140,8 @@ export class StepViewComponent {
       if (nextStep) {
         this.currentStep = nextStep;
         this.currentSection.currentStep = nextStep.id;
+        // Emit navigation change for URL update
+        this.navigationChange.emit({sectionId: this.currentSection.data.id, stepId: nextStep.id});
       } else {
         this.sections.find((section) => {
           const step = section.steps.find((step) => this.currentStep?.next_step.includes(step.id));
@@ -146,6 +149,8 @@ export class StepViewComponent {
             this.currentStep = step;
             this.currentSection = section;
             this.currentSection.currentStep = step.id;
+            // Emit navigation change for URL update
+            this.navigationChange.emit({sectionId: section.data.id, stepId: step.id});
             return true;
           } else {
             return false;
@@ -180,6 +185,8 @@ export class StepViewComponent {
         if (previousStep) {
           this.currentStep = previousStep;
           this.currentSection.currentStep = previousStep.id;
+          // Emit navigation change for URL update
+          this.navigationChange.emit({sectionId: this.currentSection.data.id, stepId: previousStep.id});
         } else {
           this.sections.find((section) => {
             // @ts-ignore
@@ -188,6 +195,8 @@ export class StepViewComponent {
               this.currentStep = step;
               this.currentSection = section;
               this.currentSection.currentStep = step.id;
+              // Emit navigation change for URL update
+              this.navigationChange.emit({sectionId: section.data.id, stepId: step.id});
               return true;
             } else {
               return false;

@@ -238,6 +238,7 @@
                         [template]="job.selected_template"
                         [showHidden]="showHidden"
                         [service_lab_group_id]="job.service_lab_group.id"
+                        [project_id]="job.project?.id || -1"
                         (metadataFavouriteAdded)="handleFavouriteAdded($event)"
                         [filterTableColumnName]="filterTableColumnName"
                         (removeMetadata)="jobSubmission.removeMetadata($event.index, $event.data_type)"

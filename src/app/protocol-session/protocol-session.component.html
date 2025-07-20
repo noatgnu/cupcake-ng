@@ -52,6 +52,7 @@
             [currentSection]="currentSection"
             [currentStep]="currentStep"
             [sections]="sections"
+            (navigationChange)="handleNavigationChange($event)"
           ></app-step-view>
         } @else {
           <div class="empty-state">

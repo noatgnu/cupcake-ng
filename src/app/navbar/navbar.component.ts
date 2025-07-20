@@ -90,7 +90,11 @@ export class NavbarComponent implements OnInit {
   }
 
   copyLink() {
-    navigator.clipboard.writeText(location.origin + "/#/protocol-session/" + this.dataService.protocol?.id + "&" + this.dataService.currentSession?.unique_id)
+    if (this.dataService.currentSession) {
+      navigator.clipboard.writeText(location.origin + "/#/protocol-session/" + this.dataService.protocol?.id + "/session/" + this.dataService.currentSession?.unique_id)
+    } else {
+      navigator.clipboard.writeText(location.origin + "/#/protocol-session/" + this.dataService.protocol?.id)
+    }
   }
 
   goToProtocolEditor(protocolID: number) {
@@ -99,7 +103,11 @@ export class NavbarComponent implements OnInit {
   }
   openQRCodeModal() {
     const ref = this.modal.open(QrcodeModalComponent)
-    ref.componentInstance.url = location.origin + "/#/protocol-session/" + this.dataService.protocol?.id + "&" + this.dataService.currentSession?.unique_id
+    if (this.dataService.currentSession) {
+      ref.componentInstance.url = location.origin + "/#/protocol-session/" + this.dataService.protocol?.id + "/session/" + this.dataService.currentSession?.unique_id
+    } else {
+      ref.componentInstance.url = location.origin + "/#/protocol-session/" + this.dataService.protocol?.id
+    }
   }
 
   navigateToAccount(location: string) {

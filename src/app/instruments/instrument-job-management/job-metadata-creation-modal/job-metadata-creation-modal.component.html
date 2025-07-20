@@ -39,13 +39,25 @@
         <small id="factorValueColumnHelp" class="form-text text-muted">Select an existing column that contains the factor value</small>
       </div>
     }
-    @if (service_lab_group_recommenations||user_favourite_metadata||global_recommendations) {
+    @if (service_lab_group_recommenations||user_favourite_metadata||global_recommendations||project_suggestions.length > 0) {
       <ul ngbNav #nav="ngbNav" class="nav-tabs" [(activeId)]="activeID">
-        @if (global_recommendations) {
-          @if (global_recommendations.count > 0) {
-            <li [ngbNavItem]="'global'">
-              <button ngbNavLink>Global Recommendations</button>
-              <ng-template ngbNavContent>
+        @if (loadingGlobalRecommendations || (global_recommendations && global_recommendations.count > 0)) {
+          <li [ngbNavItem]="'global'">
+            <button ngbNavLink>
+              Global Recommendations
+              @if (loadingGlobalRecommendations) {
+                <span class="spinner-border spinner-border-sm ms-1" role="status" aria-hidden="true"></span>
+              }
+            </button>
+            <ng-template ngbNavContent>
+              @if (loadingGlobalRecommendations) {
+                <div class="d-flex justify-content-center align-items-center py-4">
+                  <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                  </div>
+                  <span class="ms-2">Loading global recommendations...</span>
+                </div>
+              } @else if (global_recommendations && global_recommendations.count > 0) {
                 <div class="form-group">
                   <select class="form-select" [size]="5">
                     @for (r of global_recommendations.results; track r.id) {
@@ -60,15 +72,27 @@
                 <div class="mt-2">
                   <ngb-pagination [collectionSize]="global_recommendations.count" [rotate]="true" [(page)]="currentGlobalRecommendationsPage" [pageSize]="pageSize" (pageChange)="onPageChange($event, 'global')"></ngb-pagination>
                 </div>
-              </ng-template>
-            </li>
-          }
+              }
+            </ng-template>
+          </li>
         }
-        @if (service_lab_group_recommenations) {
-          @if (service_lab_group_recommenations.count > 0) {
-            <li [ngbNavItem]="'service_lab_group'">
-              <button ngbNavLink>Facility Recommendations</button>
-              <ng-template ngbNavContent>
+        @if (loadingServiceLabRecommendations || (service_lab_group_recommenations && service_lab_group_recommenations.count > 0)) {
+          <li [ngbNavItem]="'service_lab_group'">
+            <button ngbNavLink>
+              Facility Recommendations
+              @if (loadingServiceLabRecommendations) {
+                <span class="spinner-border spinner-border-sm ms-1" role="status" aria-hidden="true"></span>
+              }
+            </button>
+            <ng-template ngbNavContent>
+              @if (loadingServiceLabRecommendations) {
+                <div class="d-flex justify-content-center align-items-center py-4">
+                  <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                  </div>
+                  <span class="ms-2">Loading facility recommendations...</span>
+                </div>
+              } @else if (service_lab_group_recommenations && service_lab_group_recommenations.count > 0) {
                 <div class="form-group">
                   <select class="form-select" [size]="5">
                     @for (r of service_lab_group_recommenations.results; track r.id) {
@@ -83,15 +107,27 @@
                 <div class="mt-2">
                   <ngb-pagination [collectionSize]="service_lab_group_recommenations.count" [rotate]="true" [(page)]="currentServiceLabRecommendationsPage" [pageSize]="pageSize" (pageChange)="onPageChange($event, 'group')"></ngb-pagination>
                 </div>
-              </ng-template>
-            </li>
-          }
+              }
+            </ng-template>
+          </li>
         }
-        @if (user_favourite_metadata) {
-          @if (user_favourite_metadata.count > 0) {
-            <li [ngbNavItem]="'user'">
-              <button ngbNavLink>User's Favourite</button>
-              <ng-template ngbNavContent>
+        @if (loadingUserFavourites || (user_favourite_metadata && user_favourite_metadata.count > 0)) {
+          <li [ngbNavItem]="'user'">
+            <button ngbNavLink>
+              User's Favourite
+              @if (loadingUserFavourites) {
+                <span class="spinner-border spinner-border-sm ms-1" role="status" aria-hidden="true"></span>
+              }
+            </button>
+            <ng-template ngbNavContent>
+              @if (loadingUserFavourites) {
+                <div class="d-flex justify-content-center align-items-center py-4">
+                  <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                  </div>
+                  <span class="ms-2">Loading user favourites...</span>
+                </div>
+              } @else if (user_favourite_metadata && user_favourite_metadata.count > 0) {
                 <div class="form-group">
                   <select class="form-select" [size]="5">
                     @for (r of user_favourite_metadata.results; track r.id) {
@@ -106,9 +142,40 @@
                 <div class="mt-2">
                   <ngb-pagination class="mt-2" [collectionSize]="user_favourite_metadata.count" [rotate]="true" [(page)]="currentUserFavouriteMetadataPage" [pageSize]="pageSize" (pageChange)="onPageChange($event, 'user')"></ngb-pagination>
                 </div>
-              </ng-template>
-            </li>
-          }
+              }
+            </ng-template>
+          </li>
+        }
+        @if (loadingProjectSuggestions || project_suggestions.length > 0) {
+          <li [ngbNavItem]="'project'">
+            <button ngbNavLink>
+              Project Suggestions
+              @if (loadingProjectSuggestions) {
+                <span class="spinner-border spinner-border-sm ms-1" role="status" aria-hidden="true"></span>
+              }
+            </button>
+            <ng-template ngbNavContent>
+              @if (loadingProjectSuggestions) {
+                <div class="d-flex justify-content-center align-items-center py-4">
+                  <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                  </div>
+                  <span class="ms-2">Loading project suggestions...</span>
+                </div>
+              } @else if (project_suggestions.length > 0) {
+                <div class="form-group">
+                  <select class="form-select" [size]="5">
+                    @for (suggestion of getPaginatedProjectSuggestions(); track suggestion) {
+                      <option (click)="form.controls.metadataValue.setValue(suggestion)" [value]="suggestion">{{suggestion}}</option>
+                    }
+                  </select>
+                </div>
+                <div class="mt-2">
+                  <ngb-pagination [collectionSize]="project_suggestions.length" [rotate]="true" [(page)]="currentProjectSuggestionsPage" [pageSize]="pageSize" (pageChange)="onPageChange($event, 'project')"></ngb-pagination>
+                </div>
+              }
+            </ng-template>
+          </li>
         }
       </ul>
       <div [ngbNavOutlet]="nav" class="mt-2"></div>

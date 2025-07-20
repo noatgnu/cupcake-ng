@@ -887,6 +887,10 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit, OnDestroy 
           console.log('Pool metadata updated successfully:', response);
           // Update the local pool metadata with the saved value
           metadataColumn.value = value;
+          
+          // Refresh the job data to ensure we have the latest state
+          this.refreshJobData();
+          
           this.toast.show("Success", `Pool metadata saved: ${metadataName}`, 2000, 'success');
         },
         error: (error) => {
@@ -897,6 +901,22 @@ export class JobSubmissionComponent implements OnInit, AfterViewInit, OnDestroy 
     } else {
       console.error('Could not find metadata column for pool update:', { metadataName, pool });
       this.toast.show("Error", `Could not find metadata column: ${metadataName}`, 3000, 'error');
+    }
+  }
+
+  refreshJobData() {
+    if (this.job && this.job.id) {
+      // Reload the job data to get the latest pool information
+      this.web.getInstrumentJob(this.job.id).subscribe({
+        next: (updatedJob) => {
+          this.job = updatedJob;
+          // Force change detection to update the UI
+          console.log('Job data refreshed successfully');
+        },
+        error: (error) => {
+          console.error('Error refreshing job data:', error);
+        }
+      });
     }
   }
 

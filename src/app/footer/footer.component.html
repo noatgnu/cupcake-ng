@@ -1,8 +1,16 @@
-@if (settings?.footer_text) {
-  <footer class="footer mt-auto py-3 border-top">
+@if (settings?.footer_text && isVisible) {
+  <footer class="footer border-top" 
+          [class.footer-collapsed]="isCollapsed"
+          (mouseenter)="expandFooter()"
+          (mouseleave)="scheduleCollapse()">
     <div class="container-fluid">
-      <div class="text-center">
-        <span class="text-muted">{{ settings?.footer_text }}</span>
+      <div class="d-flex justify-content-between align-items-center">
+        <span class="footer-text">{{ settings?.footer_text }}</span>
+        <button class="btn btn-sm btn-outline-secondary opacity-50" 
+                (click)="hideFooter()"
+                title="Hide footer">
+          <i class="bi bi-x"></i>
+        </button>
       </div>
     </div>
   </footer>

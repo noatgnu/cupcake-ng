@@ -1,4 +1,4 @@
-import {Component, ElementRef, Input, OnInit, ViewChild} from '@angular/core';
+import {Component, ElementRef, Input, OnInit, ViewChild, OnDestroy} from '@angular/core';
 import {DataService} from "../data.service";
 import {TimerService} from "../timer.service";
 import {WebService} from "../web.service";
@@ -24,6 +24,8 @@ import {AnnotationPresenterComponent} from "./annotation-presenter/annotation-pr
 import {ToastService} from "../toast.service";
 import {WebSocketSubject} from "rxjs/internal/observable/dom/WebSocketSubject";
 import {WebsocketService} from "../websocket.service";
+import {ActivatedRoute, Router} from '@angular/router';
+import {Subscription} from 'rxjs';
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {AddSimpleCounterModalComponent} from "./add-simple-counter-modal/add-simple-counter-modal.component";
 import {AddChecklistModalComponent} from "./add-checklist-modal/add-checklist-modal.component";
@@ -51,13 +53,19 @@ import {FolderViewComponent} from "./folder-view/folder-view.component";
     templateUrl: './protocol-session.component.html',
     styleUrl: './protocol-session.component.scss'
 })
-export class ProtocolSessionComponent implements OnInit{
+export class ProtocolSessionComponent implements OnInit, OnDestroy {
 
   showSection: boolean = true;
   private _protocolSessionId: string = '';
   sections: {data: ProtocolSection, steps: ProtocolStep[], currentStep: number}[] = []
   viewAnnotationMenu: boolean = false;
   currentFolder?: AnnotationFolder;
+  
+  // URL navigation properties
+  private routeSubscription = new Subscription();
+  private currentSectionId?: number;
+  private currentStepId?: number;
+  private currentFolderId?: number;
 
   private _sessionID: string = '';
   viewMode: "section" | "folder" = "section"
@@ -126,9 +134,43 @@ export class ProtocolSessionComponent implements OnInit{
 
 
 
-  constructor(private webrtc: WebrtcService, private ws: WebsocketService, private modalConfig: NgbModalConfig, private toastService: ToastService, private accounts: AccountsService, private speech: SpeechService , public dataService: DataService, public web: WebService, public timer: TimerService, private modal: NgbModal, public siteSettings: SiteSettingsService) {
+  constructor(private webrtc: WebrtcService, private ws: WebsocketService, private modalConfig: NgbModalConfig, private toastService: ToastService, private accounts: AccountsService, private speech: SpeechService , public dataService: DataService, public web: WebService, public timer: TimerService, private modal: NgbModal, public siteSettings: SiteSettingsService, private router: Router, private route: ActivatedRoute) {
     this.modalConfig.backdrop = 'static';
     this.modalConfig.keyboard = false;
+    
+    // Subscribe to route parameter changes for URL navigation
+    this.routeSubscription.add(
+      this.route.params.subscribe(params => {
+        // Handle protocolSessionId (could be protocol only or protocol&session)
+        if (params['protocolSessionId']) {
+          const data = params['protocolSessionId'].split('&');
+          this._protocolSessionId = data[0];
+          if (data.length > 1) {
+            this.sessionID = data[1];
+          }
+        }
+        
+        // Handle separate session ID from nested routes
+        if (params['sessionId']) {
+          this.sessionID = params['sessionId'];
+        }
+        
+        this.currentSectionId = params['sectionId'] ? parseInt(params['sectionId']) : undefined;
+        this.currentStepId = params['stepId'] ? parseInt(params['stepId']) : undefined;
+        this.currentFolderId = params['folderId'] ? parseInt(params['folderId']) : undefined;
+        
+        if (this.currentFolderId) {
+          this.viewMode = 'folder';
+        } else {
+          this.viewMode = 'section';
+        }
+        
+        // Navigate to the specified section/step if URL parameters exist
+        if (this.dataService.protocol && this.sections.length > 0) {
+          this.navigateFromURL();
+        }
+      })
+    );
   }
 
   hasFooterText(): boolean {
@@ -153,7 +195,6 @@ export class ProtocolSessionComponent implements OnInit{
         localStorage.setItem('protocol', JSON.stringify(data));
       })
     }
-
   }
 
   parseProtocol() {
@@ -180,6 +221,11 @@ export class ProtocolSessionComponent implements OnInit{
           this.dataService.stepCompletionSummary[step.id] = {started: false, completed: false, content: "", promptStarted: false}
         }
       })
+      // Navigate from URL if parameters exist and protocol is loaded
+      if (this.sections.length > 0) {
+        this.navigateFromURL();
+      }
+      
       this.web.getAssociatedSessions(this.dataService.protocol.id).subscribe((data: ProtocolSession[]) => {
         if (this.sessionID !== "") {
           this.web.getProtocolSession(this.sessionID).subscribe((session: ProtocolSession) => {
@@ -239,15 +285,113 @@ export class ProtocolSessionComponent implements OnInit{
       this.currentStep = section.steps[0];
       section.currentStep = section.steps[0].id;
     }
-    //this.summarySectionPrompt()
+    
+    // Update URL when section is clicked
+    this.updateURL(section.data.id, this.currentStep.id);
   }
 
   handleFolderClick(folder: AnnotationFolder) {
     this.currentFolder = folder;
+    
+    // Update URL when folder is clicked
+    this.updateURL(undefined, undefined, folder.id);
   }
 
   annotationMenuClick() {
 
+  }
+
+  // Handle navigation changes from step-view component
+  handleNavigationChange(event: {sectionId?: number, stepId?: number}) {
+    if (event.sectionId && event.stepId) {
+      this.updateURL(event.sectionId, event.stepId);
+    }
+  }
+
+  ngOnDestroy() {
+    this.routeSubscription.unsubscribe();
+  }
+
+  // Navigate to specific section/step based on URL parameters
+  private navigateFromURL() {
+    if (this.currentFolderId) {
+      // Handle folder navigation
+      this.viewMode = 'folder';
+      // Find and set the folder (implementation depends on how folders are stored)
+      // This would need to be implemented based on your folder data structure
+    } else if (this.currentSectionId) {
+      // Handle section navigation
+      this.viewMode = 'section';
+      const section = this.sections.find(s => s.data.id === this.currentSectionId);
+      if (section) {
+        this.currentSection = section;
+        
+        if (this.currentStepId) {
+          // Navigate to specific step
+          const step = section.steps.find(s => s.id === this.currentStepId);
+          if (step) {
+            this.currentStep = step;
+            section.currentStep = step.id;
+          }
+        } else {
+          // Navigate to first step in section
+          if (section.steps.length > 0) {
+            this.currentStep = section.steps[0];
+            section.currentStep = section.steps[0].id;
+          }
+        }
+      }
+    }
+  }
+
+  // Update URL when navigation occurs
+  private updateURL(sectionId?: number, stepId?: number, folderId?: number) {
+    let urlSegments: any[];
+    
+    if (this.sessionID) {
+      // If we have a session, use the new nested structure
+      urlSegments = ['/protocol-session', this.protocolSessionId, 'session', this.sessionID];
+    } else {
+      // If no session, just use protocol ID
+      urlSegments = ['/protocol-session', this.protocolSessionId];
+    }
+    
+    if (folderId) {
+      urlSegments.push('folder', folderId.toString());
+    } else if (sectionId) {
+      urlSegments.push('section', sectionId.toString());
+      if (stepId) {
+        urlSegments.push('step', stepId.toString());
+      }
+    }
+    
+    this.router.navigate(urlSegments, { replaceUrl: true });
+  }
+
+  // Method to navigate to next step and update URL
+  navigateToNextStep() {
+    if (this.currentSection && this.currentStep) {
+      const currentStepIndex = this.currentSection.steps.findIndex(s => s.id === this.currentStep.id);
+      if (currentStepIndex < this.currentSection.steps.length - 1) {
+        const nextStep = this.currentSection.steps[currentStepIndex + 1];
+        this.currentStep = nextStep;
+        this.currentSection.currentStep = nextStep.id;
+        this.updateURL(this.currentSection.data.id, nextStep.id);
+      }
+    }
+  }
+
+  // Method to navigate to previous step and update URL
+  navigateToPreviousStep() {
+    if (this.currentSection && this.currentStep) {
+      const currentStepIndex = this.currentSection.steps.findIndex(s => s.id === this.currentStep.id);
+      if (currentStepIndex > 0) {
+        const previousStep = this.currentSection.steps[currentStepIndex - 1];
+        this.currentStep = previousStep;
+        this.currentSection.currentStep = previousStep.id;
+        this.updateURL(this.currentSection.data.id, previousStep.id);
+      }
+    }
   }
 
 }

@@ -72,22 +72,31 @@ export class MetadataPlaygroundComponent {
   missingColumns: string[] = [];
   showMissingColumns: boolean = false;
   searchColumn: string = "";
-  
+
   // Pool-related properties for playground
   pools: any[] = [];
-  
+
+  // Enhanced pool management properties
+  poolCurrentPage = 1;
+  poolPageSize = 20;
+  poolTotalPages = 1;
+  selectedTemplateSample: number = 0;
+  batchSelectionInput: string = '';
+  showFullSdrfView: boolean = false;
+  poolToEdit: any = null;
+
   // Layout state properties
   layoutMode: 'compact' | 'expanded' = 'expanded';
   sidebarCollapsed: boolean = false;
   templatesCollapsed: boolean = false;
   editorCollapsed: boolean = false;
-  
+
   // Local storage configuration
   private readonly STORAGE_KEY = 'sdrfPlaygroundState';
 
   constructor(private toast: ToastService, private modal: NgbModal, private web: WebService, public metadata: MetadataService, private fb: FormBuilder, private siteSettings: SiteSettingsService) {
     this.getLabGroups()
-    
+
     // Subscribe to lab group selection changes
     this.form.controls.lab_group_id.valueChanges.subscribe(
       (value) => {
@@ -101,7 +110,7 @@ export class MetadataPlaygroundComponent {
         }
       }
     )
-    
+
     // Subscribe to search term changes for lab groups
     this.form.controls.searchTerm.valueChanges.subscribe(
       (value) => {
@@ -109,15 +118,21 @@ export class MetadataPlaygroundComponent {
         this.getLabGroups(value)
       }
     )
-    
+
+    // Subscribe to sample number changes to recalculate pagination
+    this.form.controls.sample_number.valueChanges.subscribe(() => {
+      this.calculatePoolPagination();
+    });
+
     // Subscribe to form changes to save state
     this.form.valueChanges.subscribe(() => {
       this.saveState();
     });
-    
+
     // Load saved state on initialization
     setTimeout(() => {
       this.loadState();
+      this.calculatePoolPagination(); // Initialize pool pagination
     }, 100);
   }
 
@@ -162,6 +177,12 @@ export class MetadataPlaygroundComponent {
 
   selectRow(row: MetadataTableTemplate) {
     this.selectedRow = row;
+
+    // Ensure selectedLabGroup is set if lab_group_id is selected but selectedLabGroup is not set
+    if (this.form.value.lab_group_id && !this.selectedLabGroup && this.professionalLabGroupQuery) {
+      this.selectedLabGroup = this.professionalLabGroupQuery.results.find((labGroup) => labGroup.id === this.form.value.lab_group_id);
+    }
+
     this.missingColumns = this.metadata.checkMissingColumnMetadata(this.selectedRow.user_columns, this.selectedRow.staff_columns)
     this.showMissingColumns = false; // Reset missing columns display
     this.saveState(); // Save state when template is selected
@@ -261,23 +282,23 @@ export class MetadataPlaygroundComponent {
   async exportExcelTemplate() {
     if (this.selectedRow && this.form.value.sample_number && this.form.value.lab_group_id) {
       const includePools = this.form.value.include_pools && this.pools.length > 0;
-      
+
       // Show progress toast
       const progressToast = await this.toast.show(
-        'Excel Export', 
-        'Preparing export...', 
-        0, 
-        'info', 
+        'Excel Export',
+        'Preparing export...',
+        0,
+        'info',
         0
       );
-      
+
       try {
         const wb = await this.metadata.convert_metadata_to_excel(
-          this.selectedRow.user_columns, 
-          this.selectedRow.staff_columns, 
-          this.form.value.sample_number, 
-          0, 
-          this.form.value.lab_group_id, 
+          this.selectedRow.user_columns,
+          this.selectedRow.staff_columns,
+          this.form.value.sample_number,
+          0,
+          this.form.value.lab_group_id,
           this.selectedRow.field_mask_mapping,
           includePools ? this.pools : [],
           (progress: number, status: string) => {
@@ -288,13 +309,13 @@ export class MetadataPlaygroundComponent {
             }
           }
         );
-        
+
         // Update progress for buffer creation
         if (progressToast) {
           progressToast.progress = 95;
           progressToast.body = 'Creating download file...';
         }
-        
+
         const buffer = await wb.xlsx.writeBuffer();
         const blob = new Blob([buffer], {type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
         const url = window.URL.createObjectURL(blob);
@@ -303,14 +324,14 @@ export class MetadataPlaygroundComponent {
         a.download = `exported_${includePools ? 'with_pools_' : ''}${Date.now()}.xlsx`;
         a.click();
         window.URL.revokeObjectURL(url);
-        
+
         // Complete progress
         if (progressToast) {
           progressToast.progress = 100;
           progressToast.body = 'Download started successfully!';
           setTimeout(() => this.toast.remove(progressToast), 1000);
         }
-        
+
       } catch (error) {
         console.error('Excel export failed:', error);
         if (progressToast) {
@@ -336,14 +357,14 @@ export class MetadataPlaygroundComponent {
                 const result = await this.metadata.import_metadata_from_sdrf(data as string, this.selectedRow.user_columns, this.selectedRow.staff_columns, this.form.value.sample_number, 0, this.form.value.lab_group_id, this.pools);
                 this.selectedRow.user_columns = result.user_metadata;
                 this.selectedRow.staff_columns = result.staff_metadata;
-                
+
                 // Update pools if they were detected in SDRF
                 if (result.pools && result.pools.length > 0) {
                   this.pools = result.pools;
                   this.form.patchValue({ include_pools: true });
                   this.toast.show('Import', `Detected ${result.pools.length} pools in SDRF file`, 3000, 'info');
                 }
-                
+
                 this.missingColumns = this.metadata.checkMissingColumnMetadata(this.selectedRow.user_columns, this.selectedRow.staff_columns);
                 this.recalculateHiddenColumns();
               }
@@ -368,26 +389,26 @@ export class MetadataPlaygroundComponent {
               if (this.selectedRow) {
                 // @ts-ignore
                 const result = await this.metadata.read_metadata_from_excel(data as ArrayBuffer, this.selectedRow.user_columns, this.selectedRow.staff_columns, this.form.value.sample_number, 0, this.form.value.lab_group_id, this.selectedRow.field_mask_mapping, this.pools);
-                
+
                 console.log('Excel import result:', result);
                 console.log('Original user columns:', this.selectedRow.user_columns.length);
                 console.log('Original staff columns:', this.selectedRow.staff_columns.length);
                 console.log('Imported user columns:', result.user_metadata?.length || 0);
                 console.log('Imported staff columns:', result.staff_metadata?.length || 0);
-                
+
                 this.selectedRow.user_columns = result.user_metadata;
                 this.selectedRow.staff_columns = result.staff_metadata;
-                
+
                 // Update pools if they were detected in Excel
                 if (result.pools && result.pools.length > 0) {
                   this.pools = result.pools;
                   this.form.patchValue({ include_pools: true });
                   this.toast.show('Import', `Detected ${result.pools.length} pools in Excel file`, 3000, 'info');
                 }
-                
+
                 this.missingColumns = this.metadata.checkMissingColumnMetadata(this.selectedRow.user_columns, this.selectedRow.staff_columns);
                 this.recalculateHiddenColumns();
-                
+
                 // Show import success message
                 const totalColumns = result.user_metadata.length + result.staff_metadata.length;
                 this.toast.show('Import', `Successfully imported ${totalColumns} metadata columns from Excel`, 3000, 'success');
@@ -406,12 +427,12 @@ export class MetadataPlaygroundComponent {
       const includePools = this.form.value.include_pools && this.pools.length > 0;
       // For SDRF export, only include reference pools if pools are enabled
       const referencePools = includePools ? this.pools.filter(p => p.is_reference) : [];
-      
+
       const sdrf = await this.metadata.export_metadata_to_sdrf(
-        this.selectedRow.user_columns, 
-        this.selectedRow.staff_columns, 
-        this.form.value.sample_number, 
-        0, 
+        this.selectedRow.user_columns,
+        this.selectedRow.staff_columns,
+        this.form.value.sample_number,
+        0,
         this.form.value.lab_group_id,
         referencePools
       );
@@ -432,12 +453,12 @@ export class MetadataPlaygroundComponent {
       this.currentToast = await this.toast.show("Validation", "Validating metadata", 0, "info", 5)
       const includePools = this.form.value.include_pools && this.pools.length > 0;
       const referencePools = includePools ? this.pools.filter(p => p.is_reference) : [];
-      
+
       const errors = await this.metadata.validateMetadata(
-        this.selectedRow.user_columns, 
-        this.selectedRow.staff_columns, 
-        this.form.value.sample_number, 
-        0, 
+        this.selectedRow.user_columns,
+        this.selectedRow.staff_columns,
+        this.form.value.sample_number,
+        0,
         this.form.value.lab_group_id,
         referencePools
       );
@@ -668,7 +689,7 @@ export class MetadataPlaygroundComponent {
 
     this.pools.push(newPool);
     this.updatePoolOverview();
-    
+
     // Reset form
     this.newPoolName = '';
     this.newPoolIsReference = false;
@@ -694,20 +715,20 @@ export class MetadataPlaygroundComponent {
       pool.pooled_only_samples.forEach((s: number) => allPooledSamples.add(s));
       pool.pooled_and_independent_samples.forEach((s: number) => allPooledSamples.add(s));
     });
-    
+
     const pooledSampleCount = allPooledSamples.size;
-    const independentSampleCount = (this.form.value.sample_number || 10) - 
+    const independentSampleCount = (this.form.value.sample_number || 10) -
       this.pools.reduce((acc, pool) => acc + pool.pooled_only_samples.length, 0);
   }
 
   formatSampleRange(samples: number[]): string {
     if (samples.length === 0) return 'None';
-    
+
     const sorted = [...samples].sort((a, b) => a - b);
     const ranges: string[] = [];
     let start = sorted[0];
     let end = sorted[0];
-    
+
     for (let i = 1; i < sorted.length; i++) {
       if (sorted[i] === end + 1) {
         end = sorted[i];
@@ -723,7 +744,7 @@ export class MetadataPlaygroundComponent {
         end = sorted[i];
       }
     }
-    
+
     if (start === end) {
       ranges.push(start.toString());
     } else if (end === start + 1) {
@@ -731,7 +752,7 @@ export class MetadataPlaygroundComponent {
     } else {
       ranges.push(`${start}-${end}`);
     }
-    
+
     return ranges.join(', ');
   }
 
@@ -748,6 +769,159 @@ export class MetadataPlaygroundComponent {
     return !!(this.form.value.include_pools && this.referencePoolsCount > 0);
   }
 
+  // Enhanced pool management methods
+  calculatePoolPagination(): void {
+    const sampleNumber = this.form.value.sample_number || 10;
+    this.poolTotalPages = Math.ceil(sampleNumber / this.poolPageSize);
+    if (this.poolCurrentPage > this.poolTotalPages) {
+      this.poolCurrentPage = 1;
+    }
+  }
+
+  getPaginatedSampleNumbers(): number[] {
+    const sampleNumber = this.form.value.sample_number || 10;
+    const allSamples = Array.from({ length: sampleNumber }, (_, i) => i + 1);
+    const startIndex = (this.poolCurrentPage - 1) * this.poolPageSize;
+    const endIndex = startIndex + this.poolPageSize;
+    return allSamples.slice(startIndex, endIndex);
+  }
+
+  goToPoolPage(page: number): void {
+    if (page >= 1 && page <= this.poolTotalPages) {
+      this.poolCurrentPage = page;
+    }
+  }
+
+  parseBatchSelection(): number[] {
+    const input = this.batchSelectionInput.trim();
+    if (!input) return [];
+
+    const ranges = input.split(',').map(r => r.trim());
+    const samples: number[] = [];
+
+    for (const range of ranges) {
+      if (range.includes('-')) {
+        const [start, end] = range.split('-').map(n => parseInt(n.trim()));
+        if (!isNaN(start) && !isNaN(end) && start <= end) {
+          for (let i = start; i <= end; i++) {
+            if (i >= 1 && i <= (this.form.value.sample_number || 10)) {
+              samples.push(i);
+            }
+          }
+        }
+      } else {
+        const num = parseInt(range);
+        if (!isNaN(num) && num >= 1 && num <= (this.form.value.sample_number || 10)) {
+          samples.push(num);
+        }
+      }
+    }
+
+    return [...new Set(samples)].sort((a, b) => a - b);
+  }
+
+  applyBatchSelection(type: 'pooled_only' | 'pooled_and_independent'): void {
+    const samples = this.parseBatchSelection();
+
+    for (const sample of samples) {
+      this.removeSampleFromAllArrays(sample);
+      if (type === 'pooled_only') {
+        this.selectedPooledOnly.push(sample);
+      } else {
+        this.selectedPooledAndIndependent.push(sample);
+      }
+    }
+
+    this.batchSelectionInput = '';
+    this.toast.show('Success', `Applied ${type} selection to ${samples.length} samples`, 2000, 'success');
+  }
+
+  clearAllSelections(): void {
+    this.selectedPooledOnly = [];
+    this.selectedPooledAndIndependent = [];
+    this.toast.show('Success', 'All sample selections cleared', 2000, 'info');
+  }
+
+  copyFromTemplateSample(): void {
+    if (this.selectedTemplateSample <= 0) {
+      this.toast.show('Error', 'Please select a template sample', 2000, 'error');
+      return;
+    }
+
+    // In playground mode, we just simulate copying metadata from template sample
+    this.toast.show('Success', `Metadata copied from Sample ${this.selectedTemplateSample} (simulated)`, 2000, 'success');
+  }
+
+  editPool(pool: any): void {
+    this.poolToEdit = { ...pool };
+    this.newPoolName = pool.pool_name;
+    this.newPoolIsReference = pool.is_reference;
+    this.selectedPooledOnly = [...pool.pooled_only_samples];
+    this.selectedPooledAndIndependent = [...pool.pooled_and_independent_samples];
+  }
+
+  cancelEditPool(): void {
+    this.poolToEdit = null;
+    this.newPoolName = '';
+    this.newPoolIsReference = false;
+    this.selectedPooledOnly = [];
+    this.selectedPooledAndIndependent = [];
+  }
+
+  saveEditedPool(): void {
+    if (!this.poolToEdit) return;
+
+    const poolIndex = this.pools.findIndex(p => p.id === this.poolToEdit.id);
+    if (poolIndex > -1) {
+      this.pools[poolIndex] = {
+        ...this.poolToEdit,
+        pool_name: this.newPoolName,
+        is_reference: this.newPoolIsReference,
+        pooled_only_samples: [...this.selectedPooledOnly],
+        pooled_and_independent_samples: [...this.selectedPooledAndIndependent]
+      };
+
+      this.updatePoolOverview();
+      this.cancelEditPool();
+      this.toast.show('Success', 'Pool updated successfully', 2000, 'success');
+    }
+  }
+
+  getSampleStatus(sampleIndex: number): string {
+    const pooledOnly = this.pools.some(p => p.pooled_only_samples.includes(sampleIndex));
+    const pooledBoth = this.pools.some(p => p.pooled_and_independent_samples.includes(sampleIndex));
+
+    if (pooledOnly) return 'Pooled Only';
+    if (pooledBoth) return 'Pooled + Independent';
+    return 'Independent';
+  }
+
+  getSamplePools(sampleIndex: number): string[] {
+    return this.pools
+      .filter(p =>
+        p.pooled_only_samples.includes(sampleIndex) ||
+        p.pooled_and_independent_samples.includes(sampleIndex)
+      )
+      .map(p => p.pool_name);
+  }
+
+  toggleSdrfView(): void {
+    this.showFullSdrfView = !this.showFullSdrfView;
+  }
+
+  getPoolMetadataPreview(): any[] {
+    // Simulate pool metadata for SDRF preview
+    return this.pools.map(pool => ({
+      pool_name: pool.pool_name,
+      source_name: pool.pool_name,
+      assay_name: `${this.form.value.sample_number || 10}_${pool.pool_name}`,
+      pooled_sample: pool.pooled_only_samples.map((s: number) => `SN=${s}`).join(';') +
+                    (pool.pooled_and_independent_samples.length > 0 ? ';' : '') +
+                    pool.pooled_and_independent_samples.map((s: number) => `SN=${s}`).join(';'),
+      is_reference: pool.is_reference
+    }));
+  }
+
   // Layout control methods
   toggleLayoutMode() {
     this.layoutMode = this.layoutMode === 'compact' ? 'expanded' : 'compact';
@@ -756,7 +930,8 @@ export class MetadataPlaygroundComponent {
 
   hasFooterText(): boolean {
     const settings = this.siteSettings.getCurrentPublicSettings();
-    return !!(settings?.footer_text && settings.footer_text.trim());
+    const footerHidden = localStorage.getItem('footer-hidden') === 'true';
+    return !!(settings?.footer_text && settings.footer_text.trim() && !footerHidden);
   }
 
   // Local storage methods
@@ -780,7 +955,7 @@ export class MetadataPlaygroundComponent {
         timestamp: Date.now()
       };
       localStorage.setItem(this.STORAGE_KEY, JSON.stringify(state));
-      
+
       if (showToast) {
         this.toast.show('Playground', 'Configuration saved successfully', 2000, 'success');
       }
@@ -797,7 +972,7 @@ export class MetadataPlaygroundComponent {
       const savedState = localStorage.getItem(this.STORAGE_KEY);
       if (savedState) {
         const state = JSON.parse(savedState);
-        
+
         // Check if state is not too old (24 hours)
         if (state.timestamp && (Date.now() - state.timestamp) < 24 * 60 * 60 * 1000) {
           // Restore form values
@@ -809,24 +984,24 @@ export class MetadataPlaygroundComponent {
               include_pools: state.tableConfig.include_pools ?? false
             });
           }
-          
+
           // Restore layout config
           if (state.layoutConfig) {
             this.layoutMode = state.layoutConfig.layoutMode || 'expanded';
             this.templatesCollapsed = state.layoutConfig.templatesCollapsed ?? false;
             this.editorCollapsed = state.layoutConfig.editorCollapsed ?? false;
           }
-          
+
           // Restore search column
           if (state.searchColumn) {
             this.searchColumn = state.searchColumn;
           }
-          
+
           // Restore lab group selection (will trigger template loading)
           if (state.labGroupId) {
             setTimeout(() => {
               this.form.patchValue({ lab_group_id: state.labGroupId });
-              
+
               // Restore selected template after lab group is loaded
               if (state.selectedTemplateId) {
                 setTimeout(() => {
@@ -835,7 +1010,7 @@ export class MetadataPlaygroundComponent {
               }
             }, 100);
           }
-          
+
           this.toast.show('Playground', 'Previous configuration restored', 2000, 'info');
         }
       }
@@ -861,7 +1036,7 @@ export class MetadataPlaygroundComponent {
       console.warn('Failed to clear playground state from localStorage:', error);
     }
   }
-  
+
   get missingColumnsTooltip(): string {
     if (this.missingColumns.length === 0) return '';
     return `Missing required columns: ${this.missingColumns.join(', ')}. Click to ${this.showMissingColumns ? 'hide' : 'show'} details.`;

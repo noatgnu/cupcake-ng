@@ -1151,6 +1151,21 @@ export class WebService {
     )
   }
 
+  getProjectSdrfMetadataCollection(project_id: number, metadata_name?: string, unique_values_only: boolean = false): Observable<any> {
+    let params = new HttpParams();
+    if (metadata_name) {
+      params = params.set('metadata_name', metadata_name);
+    }
+    if (unique_values_only) {
+      params = params.set('unique_values_only', 'true');
+    }
+
+    return this.http.get<any>(
+      `${this.baseURL}/api/project/${project_id}/sdrf_metadata_collection/`,
+      { params, responseType: 'json', observe: 'body' }
+    );
+  }
+
 
 
   createInstrumentUsageAnnotation(session_id: string|undefined|null, instrument_id: number, time_started: Date|undefined, time_ended: Date|undefined, step_id: number|null = 0, annotation: string, instrument_job_id: number|null|undefined = undefined, instrument_user_type: null|'user_annotation'|'staff_annotation' = null, stored_reagent_id: number|null = null, maintenance: boolean = false, repeat: number = 0, repeatUntil: NgbDateStruct|undefined = undefined) {
