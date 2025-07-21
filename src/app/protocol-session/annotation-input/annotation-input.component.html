@@ -188,7 +188,11 @@
   @if (annotations) {
     @if (annotations.count > 0) {
       <div class="annotation-presenter-container mt-2">
-        <app-annotation-presenter [annotations]="annotations.results" (deleteAnnotation)="deleteAnnotation.emit($event)"></app-annotation-presenter>
+        <app-annotation-presenter 
+          [annotations]="annotations.results" 
+          (deleteAnnotation)="deleteAnnotation.emit($event)"
+          (refreshAnnotations)="refreshAnnotations.emit()">
+        </app-annotation-presenter>
       </div>
     }
     <div class="d-flex justify-content-end mt-3">

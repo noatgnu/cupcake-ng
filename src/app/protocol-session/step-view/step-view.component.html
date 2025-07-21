@@ -1,97 +1,266 @@
-<nav class="navbar navbar-expand-lg bg-body-tertiary">
-  <div class="container-fluid d-flex flex-row justify-content-between">
-    <div>
-      <button class="btn btn-outline-primary" (click)="showHideSidebar()"><i class="bi bi-menu-app"></i></button>
+<!-- Enhanced Step Header -->
+<div class="step-header">
+  <div class="step-header-content">
+    <!-- Left Section: Menu & Breadcrumb -->
+    <div class="step-header-left">
+      <button class="btn btn-outline-primary btn-sm me-2" 
+              (click)="showHideSidebar()" 
+              ngbTooltip="Toggle Sidebar">
+        <i class="bi bi-menu-app"></i>
+      </button>
+      
+      @if (currentSection && currentStep) {
+        <nav aria-label="breadcrumb">
+          <ol class="breadcrumb mb-0">
+            <li class="breadcrumb-item">
+              <i class="bi bi-folder2-open me-1"></i>
+              {{currentSection.data.section_description}}
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">
+              <i class="bi bi-play-circle me-1"></i>
+              Step {{getCurrentStepNumber()}} of {{getTotalSteps()}}
+            </li>
+          </ol>
+        </nav>
+      } @else {
+        <span class="navbar-brand mb-0">Select a Section</span>
+      }
     </div>
 
-    @if (currentSection) {
-      <a class="navbar-brand">{{currentSection.data.section_description}}</a>
-    } @else {
-      <a class="navbar-brand">Select a Section</a>
-    }
-
+    <!-- Right Section: Actions -->
     @if (currentStep) {
-      <div class="d-flex flex-row justify-content-end gap-2">
+      <div class="step-header-actions">
         @if (dataService.currentSession) {
-          <button class="btn btn-sm btn-outline-primary" (click)="exportMetadata()" [ngbTooltip]="'Export Metadata up to this step'"><i class="bi bi-database-down"></i></button>
-          @if (dataService.currentSessionPermissions["edit"] && isAiSdrfSuggestionsEnabled()) {
-            <button class="btn btn-sm btn-outline-primary" (click)="openSdrfModal()" [ngbTooltip]="'SDRF Analysis'">
-              <i class="bi bi-robot"></i>
+          <div class="btn-group btn-group-sm me-2" role="group">
+            <button class="btn btn-outline-primary" 
+                    (click)="exportMetadata()" 
+                    ngbTooltip="Export Metadata up to this step">
+              <i class="bi bi-database-down"></i>
             </button>
-          }
+            @if (dataService.currentSessionPermissions["edit"] && isAiSdrfSuggestionsEnabled()) {
+              <button class="btn btn-outline-primary" 
+                      (click)="openSdrfModal()" 
+                      ngbTooltip="SDRF Analysis">
+                <i class="bi bi-robot"></i>
+              </button>
+            }
+          </div>
         }
-        @if(timer.timeKeeper[currentStep.id.toString()]){
+        
+        @if(timer.timeKeeper[currentStep.id.toString()]) {
           @if (dataService.currentSessionPermissions["edit"]) {
-            <button class="btn btn-outline-primary" (click)="cauldronConnect(currentStep)"><i class="bi bi-intersect"></i> Cauldron</button>
-            @if (mediaDevice.recording) {
-              <button class="btn btn-outline-danger" (click)="mediaDevice.stopRecording()"><i class="bi bi-stop"></i></button>
-            } @else {
-              <button class="btn btn-outline-danger" (click)="clickedElement='Audio';mediaDevice.startRecording(true, false)"><i class="bi bi-record"></i></button>
-            }
-            <button class="btn btn-outline-primary">{{timer.convertTime(timer.timeKeeper[currentStep.id.toString()].current)}}</button>
-            @if (timer.timeKeeper[currentStep.id.toString()].started) {
-              <button class="btn btn-outline-primary" (click)="pauseTimer(currentStep.id)"><i class="bi bi-pause"></i></button>
-            } @else {
-              <button class="btn btn-outline-primary" (click)="startTimer(currentStep.id)"><i class="bi bi-play"></i></button>
-            }
-            <button class="btn btn-outline-primary" (click)="resetTimer(currentStep.id)"><i class="bi bi-arrow-counterclockwise"></i></button>
+            <!-- Recording Controls -->
+            <div class="btn-group btn-group-sm me-2" role="group">
+              @if (mediaDevice.recording) {
+                <button class="btn btn-danger" 
+                        (click)="mediaDevice.stopRecording()"
+                        ngbTooltip="Stop Recording">
+                  <i class="bi bi-stop-fill"></i>
+                  <span class="pulse-indicator"></span>
+                </button>
+              } @else {
+                <button class="btn btn-outline-danger" 
+                        (click)="clickedElement='Audio';mediaDevice.startRecording(true, false)"
+                        ngbTooltip="Start Audio Recording">
+                  <i class="bi bi-mic"></i>
+                </button>
+              }
+              <button class="btn btn-outline-primary" 
+                      (click)="cauldronConnect(currentStep)"
+                      ngbTooltip="Connect to Cauldron">
+                <i class="bi bi-intersect"></i>
+              </button>
+            </div>
+            
+            <!-- Timer Controls -->
+            <div class="timer-controls">
+              <div class="timer-display">
+                <span class="timer-time">{{timer.convertTime(timer.timeKeeper[currentStep.id.toString()].current)}}</span>
+                <small class="timer-label">remaining</small>
+              </div>
+              <div class="btn-group btn-group-sm" role="group">
+                @if (timer.timeKeeper[currentStep.id.toString()].started) {
+                  <button class="btn btn-warning" 
+                          (click)="pauseTimer(currentStep.id)"
+                          ngbTooltip="Pause Timer">
+                    <i class="bi bi-pause-fill"></i>
+                  </button>
+                } @else {
+                  <button class="btn btn-success" 
+                          (click)="startTimer(currentStep.id)"
+                          ngbTooltip="Start Timer">
+                    <i class="bi bi-play-fill"></i>
+                  </button>
+                }
+                <button class="btn btn-outline-secondary" 
+                        (click)="resetTimer(currentStep.id)"
+                        ngbTooltip="Reset Timer">
+                  <i class="bi bi-arrow-counterclockwise"></i>
+                </button>
+              </div>
+            </div>
           } @else {
-            <button class="btn btn-outline-primary">{{timer.convertTime(timer.timeKeeper[currentStep.id.toString()].current)}}</button>
+            <div class="timer-display readonly">
+              <span class="timer-time">{{timer.convertTime(timer.timeKeeper[currentStep.id.toString()].current)}}</span>
+              <small class="timer-label">remaining</small>
+            </div>
           }
         }
       </div>
     }
   </div>
-</nav>
-@if (timer.timeKeeper[currentStep.id.toString()].spent > 0) {
-  <ngb-progressbar [height]="'5px'" [value]="timer.timeKeeper[currentStep.id.toString()].duration-timer.timeKeeper[currentStep.id.toString()].current" [max]="timer.timeKeeper[currentStep.id.toString()].duration" [type]="'danger'"></ngb-progressbar>
-}
+</div>
 
+<!-- Combined Progress & Navigation -->
 @if (currentStep) {
-  <div class="d-flex flex-row justify-content-between">
-    @if (getPreviousStep() !== '') {
-      <a class="btn border-0" (click)="goToPrevious()">Previous <i>{{getPreviousStep()}}...</i></a>
-    } @else {
-      <a class="btn border-0" disabled>No previous step.</a>
-    }
-    @if (currentStep.next_step.length === 0) {
-      <a class="btn border-0" disabled>Finish, no next step.</a>
-    } @else {
-      <a class="btn border-0" (click)="goToNext()"><i>{{getNextStep()}}...</i> Next</a>
-    }
-  </div>
-  <div class="container-fluid d-flex flex-column justify-content-center">
-    <div [innerHTML]="getStepDescription(currentStep)"></div>
-    @if (currentStep.reagents.length > 0) {
-      <app-reagent-table [step]="currentStep"></app-reagent-table>
-    }
-
-    <div class="d-flex flex-column gap-2">
-      @if (!dataService.stepCompletionSummary[currentStep.id].started) {
-        <div>
-          <button class="btn btn-primary" (click)="getStepSummarySoFar(currentStep)">Summarize previous steps</button>
-        </div>
-
+  <div class="step-navigation-combined">
+    <!-- Navigation Controls -->
+    <div class="nav-controls">
+      @if (getPreviousStep() !== '') {
+        <button class="btn btn-sm btn-outline-primary nav-btn-with-text" 
+                (click)="goToPrevious()"
+                ngbTooltip="Previous: {{getPreviousStep()}}">
+          <i class="bi bi-chevron-left"></i>
+          <span class="nav-btn-text">{{getPreviousStep()}}</span>
+        </button>
+      } @else {
+        <button class="btn btn-sm btn-outline-secondary nav-btn-with-text" disabled>
+          <i class="bi bi-chevron-left"></i>
+          <span class="nav-btn-text">No previous</span>
+        </button>
       }
-      @if (dataService.stepCompletionSummary[currentStep.id]){
+    </div>
+
+    <!-- Combined Progress & Step Info -->
+    <div class="progress-info-section">
+      <!-- Step Counter & Timer -->
+      <div class="step-info-row">
+        <div class="step-counter-compact">
+          <span class="step-text">Step {{getCurrentStepNumber()}} of {{getTotalSteps()}}</span>
+          @if (timer.timeKeeper[currentStep.id.toString()]) {
+            <span class="timer-compact">
+              <i class="bi bi-clock me-1"></i>
+              {{timer.convertTime(timer.timeKeeper[currentStep.id.toString()].current)}} left
+            </span>
+          }
+        </div>
+        <div class="progress-stats">
+          @if (timer.timeKeeper[currentStep.id.toString()]) {
+            <span class="progress-percentage">{{getProgressPercentage()}}%</span>
+          }
+        </div>
+      </div>
+
+      <!-- Combined Progress Bars -->
+      <div class="progress-bars">
+        <!-- Step Progress -->
+        <div class="step-progress-bar">
+          <div class="progress-fill step-progress" [style.width.%]="getStepProgress()"></div>
+        </div>
+        
+        <!-- Timer Progress -->
+        @if (timer.timeKeeper[currentStep.id.toString()]) {
+          <div class="timer-progress-bar">
+            <div class="progress-fill timer-progress" 
+                 [style.width.%]="getProgressPercentage()"
+                 [class]="getProgressType()"></div>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Next Button -->
+    <div class="nav-controls">
+      @if (currentStep.next_step.length === 0) {
+        <button class="btn btn-sm btn-success nav-btn-with-text" disabled>
+          <span class="nav-btn-text">Completed</span>
+          <i class="bi bi-check-circle"></i>
+        </button>
+      } @else {
+        <button class="btn btn-sm btn-primary nav-btn-with-text" 
+                (click)="goToNext()"
+                ngbTooltip="Next: {{getNextStep()}}">
+          <span class="nav-btn-text">{{getNextStep()}}</span>
+          <i class="bi bi-chevron-right"></i>
+        </button>
+      }
+    </div>
+  </div>
+
+  <!-- Enhanced Step Content -->
+  <div class="step-content">
+    <div class="step-content-scrollable">
+      <!-- Step Description Card with Integrated AI Summary -->
+      <div class="card step-description-card mb-3">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="card-title mb-0">
+          <i class="bi bi-list-task me-2"></i>
+          Step Instructions
+        </h5>
+        <div class="step-actions d-flex gap-2">
+          @if (!dataService.stepCompletionSummary[currentStep.id].started) {
+            <button class="btn btn-sm btn-outline-info" 
+                    (click)="getStepSummarySoFar(currentStep)"
+                    ngbTooltip="Get AI summary of previous steps">
+              <i class="bi bi-magic me-1"></i>
+              AI Summary
+            </button>
+          }
+          @if (canMarkStepComplete()) {
+            <button class="btn btn-sm btn-outline-success" 
+                    (click)="toggleStepCompletion()"
+                    ngbTooltip="{{isStepCompleted() ? 'Mark as incomplete' : 'Mark as complete'}}">
+              <i class="bi" [ngClass]="isStepCompleted() ? 'bi-check-circle-fill' : 'bi-circle'"></i>
+            </button>
+          }
+        </div>
+      </div>
+      
+      <!-- AI Summary Section (when available) -->
+      @if (dataService.stepCompletionSummary[currentStep.id]) {
         @if (dataService.stepCompletionSummary[currentStep.id].started && !dataService.stepCompletionSummary[currentStep.id].completed) {
-          <div class="loading">
-            <div class="spinner-border text-primary" role="status">
-              <span class="visually-hidden">Loading...</span>
+          <div class="card-body border-bottom bg-info-subtle">
+            <div class="d-flex align-items-center">
+              <div class="spinner-border spinner-border-sm text-primary me-2" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+              <span class="text-muted">Generating AI summary...</span>
             </div>
           </div>
         }
+        
         @if (dataService.stepCompletionSummary[currentStep.id].content.length > 0) {
-          <div class="alert alert-info">
-            <p>{{dataService.stepCompletionSummary[currentStep.id].content}}</p>
+          <div class="card-body border-bottom bg-success-subtle">
+            <div class="d-flex align-items-start">
+              <i class="bi bi-robot text-success me-2 mt-1"></i>
+              <div class="flex-grow-1">
+                <h6 class="mb-1 text-success">
+                  <strong>Context Summary</strong>
+                </h6>
+                <p class="mb-0 small text-success-emphasis">{{dataService.stepCompletionSummary[currentStep.id].content}}</p>
+              </div>
+            </div>
           </div>
         }
-
       }
-
+      
+      <!-- Step Description -->
+      <div class="card-body">
+        <div class="step-description" [innerHTML]="getStepDescription(currentStep)"></div>
+        
+        @if (currentStep.reagents.length > 0) {
+          <div class="reagents-section mt-3">
+            <h6 class="text-muted mb-2">
+              <i class="bi bi-flask me-1"></i>
+              Required Reagents
+            </h6>
+            <app-reagent-table [step]="currentStep"></app-reagent-table>
+          </div>
+        }
+      </div>
     </div>
 
-
+    <!-- Annotation Input -->
     <app-annotation-input
       [clickedElement]="clickedElement"
       [annotations]="annotations"
@@ -102,18 +271,25 @@
       (deleteAnnotation)="deleteAnnotation($event)"
       (nextAnnotationPage)="nextAnnotationPage()"
       (previousAnnotationPage)="previousAnnotationPage()"
-      (annotationTypeSelected)="annotationMenuClick($event)">
+      (annotationTypeSelected)="annotationMenuClick($event)"
+      (refreshAnnotations)="refreshAnnotations()">
     </app-annotation-input>
+    </div>
   </div>
 } @else {
-  <div class="container-fluid p-2 d-flex flex-column" style="height: 100%">
-    <div class="border-dark border-opacity-25 rounded-3 d-flex justify-content-center align-items-center h-100"
-         style="border-style: dashed">
-      <div class="p-5">
-        <p>
-          No section or step selected yet.
-        </p>
+  <div class="empty-state-container">
+    <div class="empty-state">
+      <div class="empty-state-icon">
+        <i class="bi bi-arrow-left-circle"></i>
       </div>
+      <h4 class="empty-state-title">No Step Selected</h4>
+      <p class="empty-state-description">
+        Choose a section from the sidebar to begin working on your protocol steps.
+      </p>
+      <button class="btn btn-primary" (click)="showHideSidebar()">
+        <i class="bi bi-menu-app me-2"></i>
+        Show Sections
+      </button>
     </div>
   </div>
 }

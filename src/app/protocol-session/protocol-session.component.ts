@@ -173,10 +173,6 @@ export class ProtocolSessionComponent implements OnInit, OnDestroy {
     );
   }
 
-  hasFooterText(): boolean {
-    const settings = this.siteSettings.getCurrentPublicSettings();
-    return !!(settings?.footer_text && settings.footer_text.trim());
-  }
 
 
 

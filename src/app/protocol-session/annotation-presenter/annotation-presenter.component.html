@@ -1,51 +1,180 @@
-<div class="list-group overflow-auto">
-  @for (a of annotations; track a.id) {
+<div class="annotation-presenter-container">
+  <!-- Filter and Search Controls -->
+  <div class="annotation-controls mb-3">
+    <div class="row g-2">
+      <div class="col-md-4">
+        <div class="input-group input-group-sm">
+          <span class="input-group-text"><i class="bi bi-search"></i></span>
+          <input type="text" class="form-control" placeholder="Search annotations..." 
+                 [(ngModel)]="searchTerm" (input)="$event">
+        </div>
+      </div>
+      <div class="col-md-3">
+        <select class="form-select form-select-sm" [(ngModel)]="filterType">
+          <option value="all">All Types</option>
+          @for (type of availableTypes; track type) {
+            <option [value]="type">{{type | titlecase}}</option>
+          }
+        </select>
+      </div>
+      <div class="col-md-5">
+        <div class="d-flex gap-2 justify-content-end">
+          <button class="btn btn-sm btn-outline-secondary" 
+                  (click)="toggleCollapseAll()" 
+                  ngbTooltip="Toggle collapse all">
+            <i class="bi bi-arrows-collapse"></i>
+          </button>
+          <span class="badge bg-secondary align-self-center">
+            {{filteredAnnotations.length}} of {{annotations?.length || 0}}
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Annotations List -->
+  <div class="list-group overflow-auto">
+    @if (filteredAnnotations.length === 0) {
+      <div class="text-center py-4 text-muted">
+        <i class="bi bi-journal-x fs-1 d-block mb-2"></i>
+        @if (searchTerm || filterType !== 'all') {
+          <p>No annotations match your search criteria.</p>
+          <button class="btn btn-sm btn-outline-primary" 
+                  (click)="searchTerm = ''; filterType = 'all'">
+            Clear Filters
+          </button>
+        } @else {
+          <p>No annotations available.</p>
+        }
+      </div>
+    }
+    
+    @for (a of filteredAnnotations; track a.id) {
     @if (dataService.annotationPermissions[a.id]) {
       <div class="card mb-3">
-        <div class="card-header d-flex justify-content-between align-items-center">
-          <div>
-            <h5 class="card-title mb-0">
-              @if (a.annotation_name) {
-                {{a.annotation_name}}
-              } @else {
-                Untitled Annotation
+        <div class="card-header">
+          <div class="d-flex justify-content-between align-items-start">
+            <div class="flex-grow-1">
+              <div class="d-flex align-items-center gap-2 mb-1">
+                <i class="{{getAnnotationTypeIcon(a.annotation_type)}} {{getAnnotationTypeColor(a.annotation_type)}}"></i>
+                <h5 class="card-title mb-0">
+                  @if (a.annotation_name) {
+                    {{a.annotation_name}}
+                  } @else {
+                    Untitled {{a.annotation_type | titlecase}}
+                  }
+                </h5>
+                <span class="badge bg-secondary">{{a.annotation_type}}</span>
+                @if (isLoading.has(a.id)) {
+                  <div class="spinner-border spinner-border-sm text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                  </div>
+                }
+              </div>
+              
+              <div class="annotation-meta">
+                <small class="text-muted me-3">
+                  <i class="bi bi-calendar3 me-1"></i>
+                  {{a.created_at | date: "short"}}
+                </small>
+                @if (a.user) {
+                  <small class="text-muted me-3">
+                    <i class="bi bi-person me-1"></i>
+                    {{a.user.username}}
+                  </small>
+                }
+                @if (a.updated_at !== a.created_at) {
+                  <small class="text-muted">
+                    <i class="bi bi-pencil me-1"></i>
+                    Modified {{a.updated_at | date: "short"}}
+                  </small>
+                }
+              </div>
+            </div>
+            <div class="annotation-actions">
+              <!-- Collapse toggle -->
+              <button class="btn btn-sm btn-outline-secondary me-2" 
+                      (click)="toggleCollapse(a.id)"
+                      ngbTooltip="{{isCollapsed(a.id) ? 'Expand' : 'Collapse'}} annotation">
+                <i class="bi" [ngClass]="isCollapsed(a.id) ? 'bi-chevron-down' : 'bi-chevron-up'"></i>
+              </button>
+              
+              <!-- Action dropdown -->
+              <div class="btn-group" ngbDropdown>
+                <button class="btn btn-outline-primary btn-sm dropdown-toggle" 
+                        ngbDropdownToggle
+                        [disabled]="isLoading.has(a.id)">
+                  <i class="bi bi-three-dots"></i>
+                </button>
+                <div class="dropdown-menu dropdown-menu-end" ngbDropdownMenu>
+                  @if (dataService.annotationPermissions[a.id].edit) {
+                    <button class="dropdown-item" (click)="addMetadata(a)">
+                      <i class="bi bi-database-add me-2"></i>Add Metadata
+                    </button>
+                    <button class="dropdown-item" (click)="annotationRename(a)">
+                      <i class="bi bi-input-cursor-text me-2"></i>Rename
+                    </button>
+                    <button class="dropdown-item" (click)="scratch(a)">
+                      <i class="bi bi-type-strikethrough me-2"></i>
+                      {{a.scratched ? 'Unmark' : 'Mark'}} as disabled
+                    </button>
+                    <div class="dropdown-divider"></div>
+                  }
+                  
+                  @if (['audio', 'video'].includes(a.annotation_type) && dataService.annotationPermissions[a.id].edit) {
+                    <button class="dropdown-item" (click)="openTranscribeModal(a)">
+                      <i class="bi bi-mic me-2"></i>Re-transcribe
+                    </button>
+                    <button class="dropdown-item" (click)="transcriptSummarize(a.id)">
+                      <i class="bi bi-body-text me-2"></i>Summarize Transcript
+                    </button>
+                    <div class="dropdown-divider"></div>
+                  }
+                  
+                  @if (['sketch'].includes(a.annotation_type) && dataService.annotationPermissions[a.id].edit) {
+                    <button class="dropdown-item" (click)="ocrAnnotationWithLoading(a)">
+                      <i class="bi bi-eye me-2"></i>OCR
+                    </button>
+                    <div class="dropdown-divider"></div>
+                  }
+                  
+                  @if (['image', 'audio', 'video', 'sketch', 'file'].includes(a.annotation_type)) {
+                    <button class="dropdown-item" (click)="downloadWithLoading(a.id)">
+                      <i class="bi bi-download me-2"></i>Download
+                    </button>
+                    <div class="dropdown-divider"></div>
+                  }
+                  
+                  @if (dataService.annotationPermissions[a.id].delete) {
+                    <button class="dropdown-item text-danger" 
+                            (click)="deleteWithConfirmation(a.id, a.annotation_name)">
+                      <i class="bi bi-trash me-2"></i>Delete
+                    </button>
+                  }
+                </div>
+              </div>
+              
+              <!-- Speech recognition for counters -->
+              @if (['counter'].includes(a.annotation_type) && speech.speechRecognition) {
+                @if (speech.currentAnnotation === a.id) {
+                  <button class="btn btn-danger btn-sm ms-2" 
+                          (click)="forceStop = true;speechRecognition.stop();speech.currentAnnotation=-1"
+                          ngbTooltip="Stop voice control">
+                    <i class="bi bi-stop-fill"></i>
+                  </button>
+                } @else {
+                  <button class="btn btn-outline-primary btn-sm ms-2" 
+                          (click)="startSpeechRecognition(a.id)"
+                          ngbTooltip="Start voice control">
+                    <i class="bi bi-mic"></i>
+                  </button>
+                }
               }
-            </h5>
-
-            <small class="text-muted">Date: {{a.created_at | date: "short"}}</small> |
-            @if (a.user) {
-              <small class="text-muted">User: {{a.user.username}}</small>
-            }
-          </div>
-          <div class="btn-group">
-            @if (dataService.annotationPermissions[a.id].edit){
-              <button class="btn btn-outline-info btn-sm" ngbTooltip="Add metadata" (click)="addMetadata(a)"><i class="bi bi-database-add"></i></button>
-              <button class="btn btn-outline-danger btn-sm" (click)="scratch(a)" ngbTooltip="Strike content"><i class="bi bi-type-strikethrough"></i></button>
-              <button class="btn btn-outline-primary btn-sm" (click)="annotationRename(a)" ngbTooltip="Rename annotation"><i class="bi bi-input-cursor-text"></i></button>
-              @if (['audio', 'video'].includes(a.annotation_type)) {
-                <button class="btn btn-outline-primary btn-sm" (click)="openTranscribeModal(a)">Re-transcribe</button>
-                <button class="btn btn-outline-primary btn-sm" (click)="transcriptSummarize(a.id)" ngbTooltip="Transcribe annotation"><i class="bi bi-body-text"></i></button>
-              }
-              @if (['sketch'].includes(a.annotation_type)) {
-                <button class="btn btn-outline-primary btn-sm" (click)="ocrAnnotation(a)" ngbTooltip="Perform Optical Character Recognition">OCR</button>
-              }
-            }
-            @if (['counter'].includes(a.annotation_type) && speech.speechRecognition) {
-              @if (speech.currentAnnotation === a.id) {
-                <button class="btn btn-outline-danger btn-sm" (click)="forceStop = true;speechRecognition.stop();speech.currentAnnotation=-1"><i class="bi bi-stop"></i></button>
-              } @else {
-                <button class="btn btn-outline-primary btn-sm" (click)="startSpeechRecognition(a.id)"><i class="bi bi-record"></i></button>
-              }
-            }
-            @if (['image', 'audio', 'video', 'sketch', 'file'].includes(a.annotation_type)) {
-              <button class="btn btn-outline-primary btn-sm" (click)="download(a.id)"><i class="bi bi-download"></i></button>
-            }
-            @if (dataService.annotationPermissions[a.id].delete){
-              <button class="btn btn-outline-danger btn-sm" (click)="delete(a.id)"><i class="bi bi-trash"></i></button>
-            }
+            </div>
           </div>
         </div>
-        <div class="card-body">
+        
+        <div class="card-body" [ngbCollapse]="isCollapsed(a.id)">
           @if (a.scratched) {
             <div class="alert alert-secondary mt-2" role="alert">
               This annotation has been disabled
@@ -122,11 +251,17 @@
               </div>
             }
           }
-          <div class="text-end">
-            <small class="text-muted">Last save: {{a.updated_at | date: "short"}}</small>
-          </div>
+          @if (!isCollapsed(a.id)) {
+            <div class="text-end mt-2">
+              <small class="text-muted">
+                <i class="bi bi-clock me-1"></i>
+                Last saved: {{a.updated_at | date: "short"}}
+              </small>
+            </div>
+          }
         </div>
       </div>
     }
-  }
+    }
+  </div>
 </div>

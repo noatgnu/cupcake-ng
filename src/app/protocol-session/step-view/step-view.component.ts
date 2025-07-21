@@ -3,6 +3,7 @@ import {AnnotationTextFormComponent} from "../annotation-text-form/annotation-te
 import {FormsModule} from "@angular/forms";
 import {HandwrittenAnnotationComponent} from "../handwritten-annotation/handwritten-annotation.component";
 import {AnnotationPresenterComponent} from "../annotation-presenter/annotation-presenter.component";
+import {NgClass} from "@angular/common";
 import {
   NgbDateStruct,
   NgbDropdown,
@@ -52,7 +53,8 @@ import {SiteSettingsService} from "../../site-settings.service";
     ReagentTableComponent,
     NgbTooltip,
     AnnotationInputComponent,
-    McpSdrfSuggestionsComponent
+    McpSdrfSuggestionsComponent,
+    NgClass
   ],
     templateUrl: './step-view.component.html',
     styleUrl: './step-view.component.scss'
@@ -621,6 +623,58 @@ export class StepViewComponent {
     ref.componentInstance.metadataCreated.subscribe((metadata: any) => {
       this.onMcpMetadataCreated(metadata);
     });
+  }
+
+  // Enhanced step navigation methods
+  getCurrentStepNumber(): number {
+    if (!this.currentSection || !this.currentStep) return 0;
+    return this.currentSection.steps.findIndex(s => s.id === this.currentStep.id) + 1;
+  }
+
+  getTotalSteps(): number {
+    if (!this.currentSection) return 0;
+    return this.currentSection.steps.length;
+  }
+
+  getStepProgress(): number {
+    if (!this.currentSection || !this.currentStep) return 0;
+    const currentIndex = this.currentSection.steps.findIndex(s => s.id === this.currentStep.id);
+    return ((currentIndex + 1) / this.currentSection.steps.length) * 100;
+  }
+
+  getProgressPercentage(): number {
+    if (!this.currentStep || !this.timer.timeKeeper[this.currentStep.id.toString()]) return 0;
+    const timeKeeper = this.timer.timeKeeper[this.currentStep.id.toString()];
+    const elapsed = timeKeeper.duration - timeKeeper.current;
+    return Math.round((elapsed / timeKeeper.duration) * 100);
+  }
+
+  getProgressType(): string {
+    const percentage = this.getProgressPercentage();
+    if (percentage < 25) return 'info';
+    if (percentage < 50) return 'primary';
+    if (percentage < 75) return 'warning';
+    return 'danger';
+  }
+
+  // Step completion methods
+  canMarkStepComplete(): boolean {
+    return !!(this.dataService.currentSession && this.dataService.currentSessionPermissions?.['edit']);
+  }
+
+  isStepCompleted(): boolean {
+    if (!this.currentStep || !this.dataService.stepCompletionSummary[this.currentStep.id]) return false;
+    return this.dataService.stepCompletionSummary[this.currentStep.id].completed;
+  }
+
+  toggleStepCompletion(): void {
+    if (!this.currentStep || !this.canMarkStepComplete()) return;
+    
+    const currentStatus = this.isStepCompleted();
+    this.dataService.stepCompletionSummary[this.currentStep.id].completed = !currentStatus;
+    
+    // Optional: Save to backend
+    // this.web.updateStepCompletion(this.currentStep.id, !currentStatus).subscribe();
   }
 
 }

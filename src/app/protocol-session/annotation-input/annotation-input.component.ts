@@ -1,4 +1,4 @@
-import { Component, Input, ViewChild, Output, EventEmitter, ElementRef } from '@angular/core';
+import {Component, Input, ViewChild, Output, EventEmitter, ElementRef, OnInit} from '@angular/core';
 import {FormsModule} from "@angular/forms";
 import {HandwrittenAnnotationComponent} from "../handwritten-annotation/handwritten-annotation.component";
 import {AnnotationTextFormComponent} from "../annotation-text-form/annotation-text-form.component";
@@ -23,7 +23,7 @@ import {MediaDeviceService} from "../../media-device.service";
   templateUrl: './annotation-input.component.html',
   styleUrl: './annotation-input.component.scss'
 })
-export class AnnotationInputComponent {
+export class AnnotationInputComponent implements OnInit{
   @Input() clickedElement: string = '';
   @Input() annotations: any = null;
 
@@ -39,6 +39,7 @@ export class AnnotationInputComponent {
   @Output() previousAnnotationPage = new EventEmitter<void>();
   @Output() annotationTypeSelected = new EventEmitter<string>();
   @Output() saveRecording = new EventEmitter<void>();
+  @Output() refreshAnnotations = new EventEmitter<void>();
 
   constructor(public mediaDevice: MediaDeviceService, public dataService: DataService) {}
 
