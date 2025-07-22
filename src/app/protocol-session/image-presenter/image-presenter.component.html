@@ -1,4 +1,164 @@
-@if (image) {
-  <img [attr.src]="image" class="img-fluid" alt="image" width="400" height="400">
+@if (annotation.file) {
+  <div class="enhanced-image-presenter">
+    <!-- Image Controls -->
+    <div class="image-controls mb-2">
+      <div class="btn-toolbar" role="toolbar">
+        <div class="btn-group btn-group-sm me-2" role="group">
+          <button class="btn btn-outline-secondary" 
+                  (click)="zoomIn()" 
+                  ngbTooltip="Zoom In"
+                  [disabled]="zoomLevel >= maxZoom">
+            <i class="bi bi-zoom-in"></i>
+          </button>
+          <button class="btn btn-outline-secondary" 
+                  (click)="zoomOut()" 
+                  ngbTooltip="Zoom Out"
+                  [disabled]="zoomLevel <= minZoom">
+            <i class="bi bi-zoom-out"></i>
+          </button>
+          <button class="btn btn-outline-secondary" 
+                  (click)="resetZoom()" 
+                  ngbTooltip="Reset Zoom">
+            <i class="bi bi-arrow-counterclockwise"></i>
+          </button>
+        </div>
+        
+        <div class="btn-group btn-group-sm me-2" role="group">
+          <button class="btn btn-outline-secondary" 
+                  (click)="rotateLeft()" 
+                  ngbTooltip="Rotate Left">
+            <i class="bi bi-arrow-counterclockwise"></i>
+          </button>
+          <button class="btn btn-outline-secondary" 
+                  (click)="rotateRight()" 
+                  ngbTooltip="Rotate Right">
+            <i class="bi bi-arrow-clockwise"></i>
+          </button>
+        </div>
+        
+        <div class="btn-group btn-group-sm me-2" role="group">
+          <button class="btn btn-outline-secondary" 
+                  (click)="toggleMeasurementMode()" 
+                  ngbTooltip="Measurement Tool"
+                  [class.active]="measurementMode">
+            <i class="bi bi-rulers"></i>
+          </button>
+          <button class="btn btn-outline-secondary" 
+                  (click)="toggleFullscreen()" 
+                  ngbTooltip="Fullscreen">
+            <i class="bi" [ngClass]="isFullscreen ? 'bi-fullscreen-exit' : 'bi-arrows-fullscreen'"></i>
+          </button>
+        </div>
+        
+        <div class="btn-group btn-group-sm" role="group">
+          <span class="badge bg-secondary align-self-center">{{Math.round(zoomLevel * 100)}}%</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Image Container -->
+    <div class="image-container" 
+         [class.fullscreen]="isFullscreen"
+         [class.measurement-mode]="measurementMode"
+         #imageContainer>
+      <div class="image-wrapper" 
+           [style.transform]="getImageTransform()"
+           (wheel)="onWheel($event)"
+           (mousedown)="onMouseDown($event)"
+           (mousemove)="onMouseMove($event)"
+           (mouseup)="onMouseUp($event)"
+           (mouseleave)="onMouseLeave()">
+        @if (image) {
+          <img [attr.src]="image" 
+               class="enhanced-image" 
+               alt="image"
+               (load)="onImageLoad($event)"
+               (error)="onImageError($event)"
+               #imageElement>
+        } @else if (imageError) {
+          <div class="image-error-state">
+            <div class="text-center py-4">
+              <i class="bi bi-exclamation-triangle fs-1 text-warning"></i>
+              <p class="mt-2 text-muted">Failed to load image</p>
+              <button class="btn btn-sm btn-outline-primary" (click)="retryImageLoad()">
+                <i class="bi bi-arrow-clockwise me-1"></i>Retry
+              </button>
+            </div>
+          </div>
+        } @else {
+          <div class="image-loading-state">
+            <div class="text-center py-4">
+              <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading image...</span>
+              </div>
+              <p class="mt-2 text-muted">Loading image...</p>
+            </div>
+          </div>
+        }
+        
+        <!-- Measurement Overlay -->
+        @if (measurementMode && measurements.length > 0) {
+          <svg class="measurement-overlay" 
+               [attr.width]="imageWidth" 
+               [attr.height]="imageHeight">
+            @for (measurement of measurements; track measurement.id) {
+              <line [attr.x1]="measurement.startX" 
+                    [attr.y1]="measurement.startY"
+                    [attr.x2]="measurement.endX" 
+                    [attr.y2]="measurement.endY"
+                    stroke="#ff6b6b" 
+                    stroke-width="2" 
+                    stroke-dasharray="5,5"/>
+              <circle [attr.cx]="measurement.startX" 
+                      [attr.cy]="measurement.startY" 
+                      r="4" 
+                      fill="#ff6b6b"/>
+              <circle [attr.cx]="measurement.endX" 
+                      [attr.cy]="measurement.endY" 
+                      r="4" 
+                      fill="#ff6b6b"/>
+              <text [attr.x]="measurement.midX" 
+                    [attr.y]="measurement.midY - 10" 
+                    fill="#ff6b6b" 
+                    font-size="12" 
+                    text-anchor="middle"
+                    class="measurement-text">
+                {{measurement.distance.toFixed(1)}}px
+              </text>
+            }
+          </svg>
+        }
+      </div>
+    </div>
+
+    <!-- Image Information -->
+    <div class="image-info mt-2">
+      <div class="row g-2 text-muted small">
+        <div class="col-md-4">
+          <i class="bi bi-aspect-ratio me-1"></i>
+          @if (imageWidth && imageHeight) {
+            {{imageWidth}} × {{imageHeight}}
+          } @else {
+            Loading...
+          }
+        </div>
+        <div class="col-md-4">
+          <i class="bi bi-file-earmark-image me-1"></i>
+          {{getFileSize()}}
+        </div>
+        @if (measurements.length > 0) {
+          <div class="col-md-4">
+            <i class="bi bi-rulers me-1"></i>
+            {{measurements.length}} measurement(s)
+            <button class="btn btn-sm btn-outline-danger ms-1" 
+                    (click)="clearMeasurements()" 
+                    ngbTooltip="Clear measurements">
+              <i class="bi bi-x"></i>
+            </button>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
 }
 

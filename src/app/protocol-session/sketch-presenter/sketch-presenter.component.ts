@@ -28,11 +28,28 @@ export class SketchPresenterComponent {
       this.transcription = value.transcription
     }
     if (value.file) {
-      this.web.getAnnotationFile(value.id).subscribe((data: any) => {
-        this.data = data
-        console.log(this.data);
-      })
-
+      this.web.getSignedURL(value.id).subscribe({
+        next: (token: any) => {
+          const fileUrl = `${this.web.baseURL}/api/annotation/download_signed/?token=${token["signed_token"]}`;
+          console.log('Generated signed URL for sketch:', fileUrl);
+          
+          // Fetch the JSON data using the signed URL
+          fetch(fileUrl)
+            .then(response => response.json())
+            .then(data => {
+              this.data = data;
+              console.log('Sketch data loaded:', this.data);
+            })
+            .catch(error => {
+              console.error('Error loading sketch data:', error);
+              this.data = null;
+            });
+        },
+        error: (error: any) => {
+          console.error('Error getting signed URL:', error);
+          this.data = null;
+        }
+      });
     }
   }
   get annotation(): Annotation|undefined {

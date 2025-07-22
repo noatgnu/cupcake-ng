@@ -1,0 +1,52 @@
+// Sketch Presenter Styles - Simple Implementation
+.sketch-presenter {
+  background: var(--bs-body-bg);
+  color: var(--bs-body-color);
+  border-radius: 8px;
+  overflow: hidden;
+
+  // OCR Content Styling
+  .overflow-auto {
+    background: var(--bs-body-bg);
+  }
+
+  // Tab styling
+  .nav-tabs {
+    border-bottom: 1px solid var(--bs-border-color);
+    background: var(--bs-secondary-bg);
+
+    .nav-link {
+      border: none;
+      border-radius: 0;
+      color: var(--bs-secondary-color);
+      font-weight: 500;
+      padding: 0.75rem 1rem;
+      transition: all 0.2s ease;
+
+      &:hover {
+        color: var(--bs-primary);
+        background: var(--bs-primary-bg-subtle);
+        border-bottom: 2px solid var(--bs-primary);
+      }
+
+      &.active {
+        color: var(--bs-primary);
+        background: var(--bs-body-bg);
+        border-bottom: 2px solid var(--bs-primary);
+      }
+    }
+  }
+
+  // OCR text content
+  .mt-2 p {
+    color: var(--bs-body-color);
+    line-height: 1.5;
+    margin-bottom: 0.5rem;
+    padding: 0.25rem 0;
+    
+    &:empty {
+      color: var(--bs-secondary-color);
+      font-style: italic;
+    }
+  }
+}

@@ -1,0 +1,175 @@
+<div class="enhanced-text-annotation">
+  <!-- Annotation Header with Controls -->
+  <div class="text-annotation-header">
+    <div class="d-flex justify-content-between align-items-center">
+      <!-- Display Mode Toggle -->
+      <div class="btn-group btn-group-sm" role="group">
+        <input type="radio" class="btn-check" id="formatted-{{annotation.id}}" 
+               value="formatted" [(ngModel)]="displayMode" (change)="setDisplayMode('formatted')">
+        <label class="btn btn-outline-primary" for="formatted-{{annotation.id}}" ngbTooltip="Formatted view">
+          <i class="bi bi-file-richtext"></i>
+        </label>
+
+        <input type="radio" class="btn-check" id="raw-{{annotation.id}}" 
+               value="raw" [(ngModel)]="displayMode" (change)="setDisplayMode('raw')">
+        <label class="btn btn-outline-primary" for="raw-{{annotation.id}}" ngbTooltip="Raw HTML">
+          <i class="bi bi-code"></i>
+        </label>
+
+        <input type="radio" class="btn-check" id="preview-{{annotation.id}}" 
+               value="preview" [(ngModel)]="displayMode" (change)="setDisplayMode('preview')">
+        <label class="btn btn-outline-primary" for="preview-{{annotation.id}}" ngbTooltip="Plain text">
+          <i class="bi bi-file-text"></i>
+        </label>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="annotation-actions">
+        <!-- Search -->
+        <div class="btn-group" ngbDropdown container="body">
+          <button class="btn btn-outline-secondary btn-sm" ngbDropdownToggle ngbTooltip="Search in text">
+            <i class="bi bi-search"></i>
+            @if (searchResults.length > 0) {
+              <span class="badge bg-primary ms-1">{{currentSearchIndex + 1}}/{{searchResults.length}}</span>
+            }
+          </button>
+          <div class="dropdown-menu dropdown-menu-end p-3" ngbDropdownMenu style="min-width: 300px;" (click)="$event.stopPropagation()">
+            <div class="mb-2">
+              <div class="input-group input-group-sm">
+                <input type="text" class="form-control" placeholder="Search in text..."
+                       [(ngModel)]="searchTerm" (keyup.enter)="performSearch()">
+                <button class="btn btn-primary" (click)="performSearch()">
+                  <i class="bi bi-search"></i>
+                </button>
+              </div>
+            </div>
+            @if (searchResults.length > 0) {
+              <div class="d-flex gap-1 mb-2">
+                <button class="btn btn-sm btn-outline-secondary" (click)="previousSearchResult()" ngbTooltip="Previous">
+                  <i class="bi bi-chevron-up"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-secondary" (click)="nextSearchResult()" ngbTooltip="Next">
+                  <i class="bi bi-chevron-down"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-danger" (click)="clearSearch()" ngbTooltip="Clear">
+                  <i class="bi bi-x"></i>
+                </button>
+              </div>
+              <div class="search-context small text-muted">
+                {{searchResults[currentSearchIndex]?.text}}
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- Settings -->
+        <div class="btn-group ms-1" ngbDropdown container="body">
+          <button class="btn btn-outline-secondary btn-sm" ngbDropdownToggle ngbTooltip="Display settings">
+            <i class="bi bi-gear"></i>
+          </button>
+          <div class="dropdown-menu dropdown-menu-end" ngbDropdownMenu>
+            <h6 class="dropdown-header">Font Size</h6>
+            <button class="dropdown-item" [class.active]="fontSize === 'small'" (click)="setFontSize('small')">
+              <i class="bi bi-type me-2"></i>Small
+            </button>
+            <button class="dropdown-item" [class.active]="fontSize === 'normal'" (click)="setFontSize('normal')">
+              <i class="bi bi-type me-2"></i>Normal
+            </button>
+            <button class="dropdown-item" [class.active]="fontSize === 'large'" (click)="setFontSize('large')">
+              <i class="bi bi-type me-2"></i>Large
+            </button>
+            
+            <div class="dropdown-divider"></div>
+            <h6 class="dropdown-header">Line Spacing</h6>
+            <button class="dropdown-item" [class.active]="lineSpacing === 'compact'" (click)="setLineSpacing('compact')">
+              <i class="bi bi-distribute-vertical me-2"></i>Compact
+            </button>
+            <button class="dropdown-item" [class.active]="lineSpacing === 'normal'" (click)="setLineSpacing('normal')">
+              <i class="bi bi-distribute-vertical me-2"></i>Normal
+            </button>
+            <button class="dropdown-item" [class.active]="lineSpacing === 'relaxed'" (click)="setLineSpacing('relaxed')">
+              <i class="bi bi-distribute-vertical me-2"></i>Relaxed
+            </button>
+          </div>
+        </div>
+
+        <!-- Export -->
+        <div class="btn-group ms-1" ngbDropdown container="body">
+          <button class="btn btn-outline-info btn-sm" ngbDropdownToggle ngbTooltip="Export options">
+            <i class="bi bi-download"></i>
+          </button>
+          <div class="dropdown-menu dropdown-menu-end" ngbDropdownMenu>
+            <button class="dropdown-item" (click)="copyToClipboard()">
+              <i class="bi bi-clipboard me-2"></i>Copy to Clipboard
+            </button>
+            <button class="dropdown-item" (click)="exportAsText()">
+              <i class="bi bi-file-text me-2"></i>Export as Text
+            </button>
+            <button class="dropdown-item" (click)="exportAsHtml()">
+              <i class="bi bi-file-code me-2"></i>Export as HTML
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Text Statistics Bar -->
+  <div class="text-stats-bar">
+    <div class="stats-grid">
+      <div class="stat-item">
+        <i class="bi bi-file-word text-primary"></i>
+        <span>{{wordCount}} words</span>
+      </div>
+      <div class="stat-item">
+        <i class="bi bi-textarea-t text-info"></i>
+        <span>{{charCount}} chars</span>
+      </div>
+      <div class="stat-item">
+        <i class="bi bi-list-ol text-secondary"></i>
+        <span>{{lineCount}} lines</span>
+      </div>
+      <div class="stat-item">
+        <i class="bi bi-clock text-warning"></i>
+        <span>~{{estimatedReadingTime}} min read</span>
+      </div>
+      <div class="stat-item">
+        <i class="bi bi-speedometer2 text-success"></i>
+        <span>{{complexityScore}}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content Area -->
+  <div class="text-content-container"
+       [class.font-small]="fontSize === 'small'"
+       [class.font-large]="fontSize === 'large'"
+       [class.spacing-compact]="lineSpacing === 'compact'"
+       [class.spacing-relaxed]="lineSpacing === 'relaxed'">
+    
+    @switch (displayMode) {
+      @case ('formatted') {
+        <div class="formatted-content" #textContent [innerHTML]="sanitizedContent"></div>
+      }
+      @case ('raw') {
+        <div class="raw-content">
+          <pre class="code-block"><code>{{annotation.annotation}}</code></pre>
+        </div>
+      }
+      @case ('preview') {
+        <div class="plain-content">
+          <div class="plain-text-content">{{plainTextContent}}</div>
+        </div>
+      }
+    }
+  </div>
+
+  <!-- Reading Progress Indicator (for long content) -->
+  @if (wordCount > 500) {
+    <div class="reading-progress">
+      <div class="progress" style="height: 3px;">
+        <div class="progress-bar bg-primary" role="progressbar" style="width: 0%" id="readingProgress-{{annotation.id}}"></div>
+      </div>
+    </div>
+  }
+</div>

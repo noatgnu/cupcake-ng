@@ -5,7 +5,7 @@
       <div class="col-md-4">
         <div class="input-group input-group-sm">
           <span class="input-group-text"><i class="bi bi-search"></i></span>
-          <input type="text" class="form-control" placeholder="Search annotations..." 
+          <input type="text" class="form-control" placeholder="Search annotations..."
                  [(ngModel)]="searchTerm" (input)="$event">
         </div>
       </div>
@@ -19,8 +19,8 @@
       </div>
       <div class="col-md-5">
         <div class="d-flex gap-2 justify-content-end">
-          <button class="btn btn-sm btn-outline-secondary" 
-                  (click)="toggleCollapseAll()" 
+          <button class="btn btn-sm btn-outline-secondary"
+                  (click)="toggleCollapseAll()"
                   ngbTooltip="Toggle collapse all">
             <i class="bi bi-arrows-collapse"></i>
           </button>
@@ -39,7 +39,7 @@
         <i class="bi bi-journal-x fs-1 d-block mb-2"></i>
         @if (searchTerm || filterType !== 'all') {
           <p>No annotations match your search criteria.</p>
-          <button class="btn btn-sm btn-outline-primary" 
+          <button class="btn btn-sm btn-outline-primary"
                   (click)="searchTerm = ''; filterType = 'all'">
             Clear Filters
           </button>
@@ -48,7 +48,7 @@
         }
       </div>
     }
-    
+
     @for (a of filteredAnnotations; track a.id) {
     @if (dataService.annotationPermissions[a.id]) {
       <div class="card mb-3">
@@ -71,7 +71,7 @@
                   </div>
                 }
               </div>
-              
+
               <div class="annotation-meta">
                 <small class="text-muted me-3">
                   <i class="bi bi-calendar3 me-1"></i>
@@ -93,15 +93,15 @@
             </div>
             <div class="annotation-actions">
               <!-- Collapse toggle -->
-              <button class="btn btn-sm btn-outline-secondary me-2" 
+              <button class="btn btn-sm btn-outline-secondary me-2"
                       (click)="toggleCollapse(a.id)"
                       ngbTooltip="{{isCollapsed(a.id) ? 'Expand' : 'Collapse'}} annotation">
                 <i class="bi" [ngClass]="isCollapsed(a.id) ? 'bi-chevron-down' : 'bi-chevron-up'"></i>
               </button>
-              
+
               <!-- Action dropdown -->
-              <div class="btn-group" ngbDropdown>
-                <button class="btn btn-outline-primary btn-sm dropdown-toggle" 
+              <div class="btn-group" ngbDropdown container="body">
+                <button class="btn btn-outline-primary btn-sm dropdown-toggle"
                         ngbDropdownToggle
                         [disabled]="isLoading.has(a.id)">
                   <i class="bi bi-three-dots"></i>
@@ -120,7 +120,7 @@
                     </button>
                     <div class="dropdown-divider"></div>
                   }
-                  
+
                   @if (['audio', 'video'].includes(a.annotation_type) && dataService.annotationPermissions[a.id].edit) {
                     <button class="dropdown-item" (click)="openTranscribeModal(a)">
                       <i class="bi bi-mic me-2"></i>Re-transcribe
@@ -130,40 +130,40 @@
                     </button>
                     <div class="dropdown-divider"></div>
                   }
-                  
+
                   @if (['sketch'].includes(a.annotation_type) && dataService.annotationPermissions[a.id].edit) {
                     <button class="dropdown-item" (click)="ocrAnnotationWithLoading(a)">
                       <i class="bi bi-eye me-2"></i>OCR
                     </button>
                     <div class="dropdown-divider"></div>
                   }
-                  
+
                   @if (['image', 'audio', 'video', 'sketch', 'file'].includes(a.annotation_type)) {
                     <button class="dropdown-item" (click)="downloadWithLoading(a.id)">
                       <i class="bi bi-download me-2"></i>Download
                     </button>
                     <div class="dropdown-divider"></div>
                   }
-                  
+
                   @if (dataService.annotationPermissions[a.id].delete) {
-                    <button class="dropdown-item text-danger" 
+                    <button class="dropdown-item text-danger"
                             (click)="deleteWithConfirmation(a.id, a.annotation_name)">
                       <i class="bi bi-trash me-2"></i>Delete
                     </button>
                   }
                 </div>
               </div>
-              
+
               <!-- Speech recognition for counters -->
               @if (['counter'].includes(a.annotation_type) && speech.speechRecognition) {
                 @if (speech.currentAnnotation === a.id) {
-                  <button class="btn btn-danger btn-sm ms-2" 
+                  <button class="btn btn-danger btn-sm ms-2"
                           (click)="forceStop = true;speechRecognition.stop();speech.currentAnnotation=-1"
                           ngbTooltip="Stop voice control">
                     <i class="bi bi-stop-fill"></i>
                   </button>
                 } @else {
-                  <button class="btn btn-outline-primary btn-sm ms-2" 
+                  <button class="btn btn-outline-primary btn-sm ms-2"
                           (click)="startSpeechRecognition(a.id)"
                           ngbTooltip="Start voice control">
                     <i class="bi bi-mic"></i>
@@ -173,68 +173,125 @@
             </div>
           </div>
         </div>
-        
-        <div class="card-body" [ngbCollapse]="isCollapsed(a.id)">
+
+        <div class="card-body annotation-content" [ngbCollapse]="isCollapsed(a.id)">
           @if (a.scratched) {
-            <div class="alert alert-secondary mt-2" role="alert">
+            <div class="alert alert-secondary" role="alert">
+              <i class="bi bi-exclamation-triangle me-2"></i>
               This annotation has been disabled
             </div>
           } @else {
-            @if (a.annotation_type === 'text') {
-              <div [innerHTML]="a.annotation"></div>
-            } @else if (a.annotation_type === 'instrument') {
-              <div class="d-flex flex-row justify-content-center">
-                <app-instrument-booking-presenter [annotation]="a"></app-instrument-booking-presenter>
-              </div>
-            } @else if (a.annotation_type === 'image') {
-              <div class="d-flex flex-row justify-content-center">
-                <app-image-presenter [annotation]="a"></app-image-presenter>
-              </div>
-            } @else if (a.annotation_type === 'audio') {
-              <div class="d-flex flex-row justify-content-center">
-                <app-media-presenter [annotation]="a"></app-media-presenter>
-              </div>
-            } @else if (a.annotation_type === 'video') {
-              <div class="d-flex flex-row justify-content-center">
-                <app-media-presenter [annotation]="a"></app-media-presenter>
-              </div>
-            } @else if (a.annotation_type === 'sketch') {
-              <div class="d-flex flex-row justify-content-center">
-                <app-sketch-presenter [annotation]="a"></app-sketch-presenter>
-              </div>
-            } @else if (a.annotation_type === 'checklist') {
-              <div class="d-flex flex-row justify-content-center">
-                <app-checklist-presenter [annotation]="a" (change)="updateAnnotation($event)"></app-checklist-presenter>
-              </div>
-            } @else if (a.annotation_type === 'counter') {
-              <div class="d-flex flex-row justify-content-center">
-                <app-counter-presenter [annotation]="a" (change)="updateAnnotation($event)"></app-counter-presenter>
-              </div>
-            } @else if (a.annotation_type === 'table') {
-              <div class="d-flex flex-row justify-content-center">
-                <app-table-presenter [annotation]="a" (change)="updateAnnotation($event)"></app-table-presenter>
-              </div>
-            } @else if (a.annotation_type === 'alignment') {
-              <div class="d-flex flex-row justify-content-center">
-                <app-alignment-annotation [annotation]="a" (change)="updateAnnotation($event)"></app-alignment-annotation>
-              </div>
-            } @else if (a.annotation_type === 'calculator') {
-              <div class="d-flex flex-row justify-content-center">
-                <app-calculator-annotation [annotation]="a" [enableSave]="true" (change)="updateAnnotation($event)"></app-calculator-annotation>
-              </div>
-            } @else if (a.annotation_type === 'mcalculator') {
-              <div class="d-flex flex-row justify-content-center">
-                <app-molarity-calculator [annotation]="a" (change)="updateAnnotation($event)"></app-molarity-calculator>
-              </div>
-            } @else if (a.annotation_type === 'randomization') {
-              <div class="d-flex flex-row justify-content-center">
-                <app-randomization-presenter [annotation]="a"></app-randomization-presenter>
-              </div>
-            } @else if (a.annotation) {
-              <div>
-                <p>{{a.annotation}}</p>
-              </div>
-            }
+            <!-- Annotation Content Container -->
+            <div class="annotation-presenter-wrapper" [attr.data-type]="a.annotation_type">
+
+              <!-- Text Annotations -->
+              @if (a.annotation_type === 'text') {
+                <div class="text-annotation-content">
+                  <app-text-annotation-presenter [annotation]="a" (change)="updateAnnotation($event)"></app-text-annotation-presenter>
+                </div>
+              }
+
+              @else if (['image', 'audio', 'video', 'sketch'].includes(a.annotation_type)) {
+                <div class="media-annotation-container">
+                  @if (a.annotation_type === 'image') {
+                    <app-image-presenter [annotation]="a"></app-image-presenter>
+                  } @else if (a.annotation_type === 'audio' || a.annotation_type === 'video') {
+                    <app-media-presenter [annotation]="a"></app-media-presenter>
+                  } @else if (a.annotation_type === 'sketch') {
+                    <app-sketch-presenter [annotation]="a"></app-sketch-presenter>
+                  }
+
+                  <!-- Media Info Panel -->
+                  @if (a.transcription || a.summary) {
+                    <div class="media-info-panel mt-3">
+                      <div class="accordion" id="mediaInfo{{a.id}}">
+                        @if (a.transcription) {
+                          <div class="accordion-item">
+                            <h6 class="accordion-header">
+                              <button class="accordion-button collapsed" type="button"
+                                      data-bs-toggle="collapse"
+                                      [attr.data-bs-target]="'#transcription' + a.id"
+                                      [attr.aria-controls]="'transcription' + a.id">
+                                <i class="bi bi-file-text me-2"></i>Transcription
+                              </button>
+                            </h6>
+                            <div [id]="'transcription' + a.id"
+                                 class="accordion-collapse collapse"
+                                 [attr.data-bs-parent]="'#mediaInfo' + a.id">
+                              <div class="accordion-body">
+                                <p class="small">{{a.transcription}}</p>
+                              </div>
+                            </div>
+                          </div>
+                        }
+                        @if (a.summary) {
+                          <div class="accordion-item">
+                            <h6 class="accordion-header">
+                              <button class="accordion-button collapsed" type="button"
+                                      data-bs-toggle="collapse"
+                                      [attr.data-bs-target]="'#summary' + a.id"
+                                      [attr.aria-controls]="'summary' + a.id">
+                                <i class="bi bi-lightbulb me-2"></i>Summary
+                              </button>
+                            </h6>
+                            <div [id]="'summary' + a.id"
+                                 class="accordion-collapse collapse"
+                                 [attr.data-bs-parent]="'#mediaInfo' + a.id">
+                              <div class="accordion-body">
+                                <p class="small">{{a.summary}}</p>
+                              </div>
+                            </div>
+                          </div>
+                        }
+                      </div>
+                    </div>
+                  }
+                </div>
+              }
+
+              @else if (['checklist', 'counter', 'table', 'calculator', 'mcalculator'].includes(a.annotation_type)) {
+                <div class="interactive-annotation-container">
+                  @if (a.annotation_type === 'checklist') {
+                    <app-checklist-presenter [annotation]="a" (change)="updateAnnotation($event)"></app-checklist-presenter>
+                  } @else if (a.annotation_type === 'counter') {
+                    <app-counter-presenter [annotation]="a" (change)="updateAnnotation($event)"></app-counter-presenter>
+                  } @else if (a.annotation_type === 'table') {
+                    <app-table-presenter [annotation]="a" (change)="updateAnnotation($event)"></app-table-presenter>
+                  } @else if (a.annotation_type === 'calculator') {
+                    <app-calculator-annotation [annotation]="a" [enableSave]="true" (change)="updateAnnotation($event)"></app-calculator-annotation>
+                  } @else if (a.annotation_type === 'mcalculator') {
+                    <app-molarity-calculator [annotation]="a" (change)="updateAnnotation($event)"></app-molarity-calculator>
+                  }
+                </div>
+              }
+
+              @else if (['alignment', 'randomization'].includes(a.annotation_type)) {
+                <div class="scientific-annotation-container">
+                  @if (a.annotation_type === 'alignment') {
+                    <app-alignment-annotation [annotation]="a" (change)="updateAnnotation($event)"></app-alignment-annotation>
+                  } @else if (a.annotation_type === 'randomization') {
+                    <app-randomization-presenter [annotation]="a"></app-randomization-presenter>
+                  }
+                </div>
+              }
+
+              @else if (a.annotation_type === 'instrument') {
+                <div class="system-annotation-container">
+                  <app-instrument-booking-presenter [annotation]="a"></app-instrument-booking-presenter>
+                </div>
+              }
+
+              @else if (a.annotation) {
+                <div class="fallback-annotation-content">
+                  <div class="alert alert-info">
+                    <i class="bi bi-info-circle me-2"></i>
+                    <strong>{{a.annotation_type | titlecase}} Annotation</strong>
+                  </div>
+                  <pre class="bg-light p-2 rounded small">{{a.annotation}}</pre>
+                </div>
+              }
+            </div>
+
             @if (a.metadata_columns.length > 0) {
               <div class="d-flex flex-wrap gap-2 mt-2 mb-2">
                 @for (m of a.metadata_columns; track m.id) {

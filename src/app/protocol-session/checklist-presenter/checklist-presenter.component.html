@@ -1,16 +1,165 @@
-<div class="card border-0">
-  <div class="card-header">
-    <h5 class="card-title">{{data.name}}</h5>
-  </div>
-  <div class="card-body">
-    @for (d of data.checkList; track d) {
-      <div class="form-check">
-        <input class="form-check-input" type="checkbox" id="{{d.content}}" [(ngModel)]="d.checked" (change)="onChange($event)">
-        <label class="form-check-label" for="{{d.content}}">
-          {{d.content}}
-        </label>
+<div class="enhanced-checklist-presenter">
+  <div class="card border-0">
+    <!-- Enhanced Header with Progress -->
+    <div class="card-header">
+      <div class="d-flex justify-content-between align-items-center">
+        <h5 class="card-title mb-0">{{data.name}}</h5>
+        <div class="checklist-progress">
+          <span class="badge bg-primary">{{getCompletedCount()}}/{{data.checkList.length}}</span>
+        </div>
       </div>
-    }
+      
+      <!-- Progress Bar -->
+      <div class="progress mt-2" style="height: 4px;">
+        <div class="progress-bar" 
+             role="progressbar" 
+             [style.width.%]="getProgressPercentage()"
+             [attr.aria-valuenow]="getCompletedCount()"
+             [attr.aria-valuemin]="0"
+             [attr.aria-valuemax]="data.checkList.length">
+        </div>
+      </div>
+      
+      <!-- Bulk Actions -->
+      <div class="bulk-actions mt-2">
+        <div class="btn-group btn-group-sm" role="group">
+          <button class="btn btn-outline-success btn-sm" 
+                  (click)="checkAll()"
+                  ngbTooltip="Check all items"
+                  [disabled]="areAllChecked()">
+            <i class="bi bi-check-all"></i>
+          </button>
+          <button class="btn btn-outline-secondary btn-sm" 
+                  (click)="uncheckAll()"
+                  ngbTooltip="Uncheck all items"
+                  [disabled]="areAllUnchecked()">
+            <i class="bi bi-square"></i>
+          </button>
+          <button class="btn btn-outline-primary btn-sm" 
+                  (click)="toggleSortMode()"
+                  ngbTooltip="Toggle sort mode"
+                  [class.active]="sortMode">
+            <i class="bi bi-arrows-move"></i>
+          </button>
+          <button class="btn btn-outline-info btn-sm" 
+                  (click)="addNewItem()"
+                  ngbTooltip="Add new item">
+            <i class="bi bi-plus"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Enhanced Checklist Body -->
+    <div class="card-body">
+      @if (data.checkList.length === 0) {
+        <div class="text-center text-muted py-3">
+          <i class="bi bi-list-check fs-1 d-block mb-2"></i>
+          <p>No items in this checklist</p>
+          <button class="btn btn-sm btn-outline-primary" (click)="addNewItem()">
+            <i class="bi bi-plus me-1"></i>Add first item
+          </button>
+        </div>
+      } @else {
+        <div class="checklist-items" 
+             [class.sort-mode]="sortMode">
+          @for (item of getSortedItems(); track $index; let i = $index) {
+            <div class="checklist-item" 
+                 [class.completed]="item.checked"
+                 [class.editing]="editingIndex === i"
+                 [attr.data-index]="i"
+                 [draggable]="sortMode"
+                 (dragstart)="sortMode ? onDragStart($event, i) : null"
+                 (dragover)="sortMode ? onDragOver($event) : null"
+                 (drop)="sortMode ? onDrop($event, i) : null">
+              
+              <!-- Sort Handle -->
+              @if (sortMode) {
+                <div class="sort-handle">
+                  <i class="bi bi-grip-vertical"></i>
+                </div>
+              }
+              
+              <!-- Checkbox -->
+              <div class="item-checkbox">
+                <input class="form-check-input" 
+                       type="checkbox" 
+                       [id]="'item-' + i" 
+                       [(ngModel)]="item.checked" 
+                       (change)="onItemChange(i)"
+                       [disabled]="editingIndex === i">
+              </div>
+              
+              <!-- Content -->
+              <div class="item-content">
+                @if (editingIndex === i) {
+                  <input type="text" 
+                         class="form-control form-control-sm" 
+                         [(ngModel)]="item.content"
+                         (keyup.enter)="finishEditing()"
+                         (keyup.escape)="cancelEditing()"
+                         (blur)="finishEditing()"
+                         #editInput>
+                } @else {
+                  <label class="form-check-label" 
+                         [for]="'item-' + i"
+                         [class.text-decoration-line-through]="item.checked">
+                    {{item.content}}
+                  </label>
+                }
+              </div>
+              
+              <!-- Actions -->
+              <div class="item-actions">
+                @if (editingIndex === i) {
+                  <button class="btn btn-success btn-sm" 
+                          (click)="finishEditing()"
+                          ngbTooltip="Save">
+                    <i class="bi bi-check"></i>
+                  </button>
+                  <button class="btn btn-outline-secondary btn-sm" 
+                          (click)="cancelEditing()"
+                          ngbTooltip="Cancel">
+                    <i class="bi bi-x"></i>
+                  </button>
+                } @else {
+                  <button class="btn btn-outline-primary btn-sm" 
+                          (click)="startEditing(i)"
+                          ngbTooltip="Edit item"
+                          [disabled]="sortMode">
+                    <i class="bi bi-pencil"></i>
+                  </button>
+                  <button class="btn btn-outline-danger btn-sm" 
+                          (click)="deleteItem(i)"
+                          ngbTooltip="Delete item"
+                          [disabled]="sortMode">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                }
+              </div>
+            </div>
+          }
+        </div>
+        
+        <!-- Summary Stats -->
+        <div class="checklist-summary mt-3 pt-3 border-top">
+          <div class="row g-2 text-muted small">
+            <div class="col-md-4">
+              <i class="bi bi-check-circle me-1"></i>
+              Completed: {{getCompletedCount()}}
+            </div>
+            <div class="col-md-4">
+              <i class="bi bi-circle me-1"></i>
+              Remaining: {{getRemainingCount()}}
+            </div>
+            <div class="col-md-4">
+              <i class="bi bi-percent me-1"></i>
+              Progress: {{getProgressPercentage().toFixed(0)}}%
+            </div>
+          </div>
+        </div>
+      }
+    </div>
   </div>
 </div>
 

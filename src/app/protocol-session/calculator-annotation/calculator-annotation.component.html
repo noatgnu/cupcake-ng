@@ -1,158 +1,275 @@
-<div class="d-flex flex-column gap-2" style="max-width: 380px">
-  <form [formGroup]="form">
-    @if (executionMode === 'initial') {
-      <div class="form-floating">
-        <input type="text" class="form-control" formControlName="inputPromptFirstValue">
+<div class="enhanced-calculator">
+  <!-- Calculator Header -->
+  <div class="calculator-header">
+    <div class="d-flex justify-content-between align-items-center">
+      <div class="calculator-title">
+        <h6 class="mb-0">
+          <i class="bi bi-calculator me-2"></i>Scientific Calculator
+        </h6>
       </div>
-    } @else if (executionMode === 'second') {
-      <small>Initial: <span class="badge bg-danger">{{form.value.inputPromptFirstValue}}</span></small>
-      <div class="form-floating">
-        <input type="text" class="form-control" formControlName="inputPromptSecondValue">
-      </div>
-    }
-    @if (operation) {
-      <small>Operation: <span class="badge bg-primary" (click)="operation=null;form.controls.inputPromptSecondValue.setValue('');executionMode='initial'">
-        @switch (operation) {
-          @case('+') {
-            Addition
-          }
-          @case('-') {
-            Subtraction
-          }
-          @case('*') {
-            Multiplication
-          }
-          @case('/') {
-            Division
-          }
-          @case('^') {
-            Power
-          }
-          @default {
-            No Operation
-          }
-        }
-      </span></small>
-    }
-  </form>
-
-  <table class="table table-borderless">
-    <tbody>
-    <tr>
-      <td>
-        <button class="btn btn-sm btn-outline-primary" (click)="formNumber(1)" style="width: 60px">1</button>
-      </td>
-      <td>
-        <button class="btn btn-sm btn-outline-primary" (click)="formNumber(2)" style="width: 60px">2</button>
-      </td>
-      <td>
-        <button class="btn btn-sm btn-outline-primary" (click)="formNumber(3)" style="width: 60px">3</button>
-      </td>
-      <td>
-        <button class="btn btn-sm btn-outline-primary" (click)="formOperation('+')" style="width: 60px"><i class="bi bi-plus"></i></button>
-      </td>
-      <td>
-        <button class="btn btn-sm btn-outline-primary" [disabled]="executionMode==='second'" (click)="formOperation('log2')" style="width: 60px">log2</button>
-      </td>
-    </tr>
-    <tr>
-      <td>
-        <button class="btn btn-sm btn-outline-primary" (click)="formNumber(4)" style="width: 60px">4</button>
-      </td>
-      <td>
-        <button class="btn btn-sm btn-outline-primary" (click)="formNumber(5)" style="width: 60px">5</button>
-      </td>
-      <td>
-        <button class="btn btn-sm btn-outline-primary" (click)="formNumber(6)" style="width: 60px">6</button>
-      </td>
-      <td>
-        <button class="btn btn-sm btn-outline-primary" (click)="formOperation('-')" style="width: 60px">-</button>
-      </td>
-      <td>
-        <button class="btn btn-sm btn-outline-primary" [disabled]="executionMode==='second'" (click)="formOperation('log10')" style="width: 60px">log10</button>
-      </td>
-    </tr>
-    <tr>
-      <td>
-        <button class="btn btn-sm btn-outline-primary" (click)="formNumber(7)" style="width: 60px">7</button>
-      </td>
-      <td>
-        <button class="btn btn-sm btn-outline-primary" (click)="formNumber(8)" style="width: 60px">8</button>
-      </td>
-      <td>
-        <button class="btn btn-sm btn-outline-primary" (click)="formNumber(9)" style="width: 60px">9</button>
-      </td>
-      <td>
-        <button class="btn btn-sm btn-outline-primary" (click)="formOperation('/')" style="width: 60px"><i class="bi bi-slash"></i></button>
-      </td>
-      <td>
-        <button class="btn btn-sm btn-outline-primary" [disabled]="executionMode==='second'" (click)="formOperation('sqrt')" style="width: 60px">sqrt</button>
-      </td>
-    <tr>
-      <td>
-        <button class="btn btn-sm btn-outline-primary" (click)="formNumber(0)" style="width: 60px">0</button>
-      </td>
-      <td>
-        <button class="btn btn-sm btn-outline-primary" (click)="formDecimal()" style="width: 60px">.</button>
-      </td>
-      <td>
-        <button class="btn btn-sm btn-outline-primary" (click)="formOperation('*')" style="width: 60px"><i class="bi bi-x"></i></button>
-      </td>
-      <td>
-        <button class="btn btn-sm btn-outline-primary" (click)="formOperation('^')" style="width: 60px">^</button>
-      </td>
-      <td>
-        <button class="btn btn-sm btn-outline-primary" [disabled]="executionMode==='second'" (click)="formOperation('abs')" style="width: 60px">abs</button>
-      </td>
-    </tr>
-    <tr>
-      <td>
-        <button class="btn btn-sm btn-outline-primary" (click)="formOperation('=')" style="width: 60px">=</button>
-      </td>
-      <td>
-        <button class="btn btn-sm btn-outline-primary" (click)="formOperation('clr')" style="width: 60px">CLR</button>
-      </td>
-      <td>
-        <button class="btn btn-sm btn-outline-primary" (click)="formDelete()" style="width: 60px">DEL</button>
-      </td>
-      <td>
-        @if (enableSave) {
-          <button class="btn btn-sm btn-outline-primary" (click)="formSave()" style="width: 60px"><i class="bi bi-save"></i></button>
-        }
-      </td>
-      <td></td>
-      <td></td>
-    </tr>
-    </tbody>
-  </table>
-  @if (dataLog.length > 0) {
-    <div class="list-group" style="max-height: 300px; overflow: auto">
-      @for (l of dataLog; track l) {
-        <div class="list-group-item list-group-item-action">
-          <div class="d-flex flex-row gap-1 align-items-center">
-            <div>
-              <span (click)="l.scratch=!l.scratch"><i class="bi bi-type-strikethrough"></i></span>
-            </div>
-            <div (click)="revertValueTo(l)">
-              @if (l.scratch) {
-                <s>
-                  @if (l.inputPromptSecondValue !== 0) {
-                    {{ l.inputPromptFirstValue.toFixed(2) }} {{ l.operation }} {{ l.inputPromptSecondValue.toFixed(2) }} = {{ l.result }}
-                  } @else {
-                    {{l.operation}} {{ l.inputPromptFirstValue.toFixed(2) }} = {{ l.result }}
-                  }
-                </s>
-              } @else {
-                @if (l.inputPromptSecondValue !== 0) {
-                  {{ l.inputPromptFirstValue.toFixed(2) }} {{ l.operation }} {{ l.inputPromptSecondValue.toFixed(2) }} = {{ l.result }}
-                } @else {
-                  {{l.operation}} {{ l.inputPromptFirstValue.toFixed(2) }} = {{ l.result }}
-                }
-              }
-            </div>
+      <div class="calculator-actions">
+        <div class="btn-group btn-group-sm" ngbDropdown container="body">
+          <button class="btn btn-outline-secondary" ngbDropdownToggle>
+            <i class="bi bi-gear"></i>
+          </button>
+          <div class="dropdown-menu" ngbDropdownMenu>
+            <h6 class="dropdown-header">Calculator Mode</h6>
+            <button class="dropdown-item" [class.active]="calculatorMode === 'standard'" (click)="setCalculatorMode('standard')">
+              <i class="bi bi-calculator me-2"></i>Standard
+            </button>
+            <button class="dropdown-item" [class.active]="calculatorMode === 'scientific'" (click)="setCalculatorMode('scientific')">
+              <i class="bi bi-calculator-fill me-2"></i>Scientific
+            </button>
+            <div class="dropdown-divider"></div>
+            <h6 class="dropdown-header">History</h6>
+            <button class="dropdown-item" (click)="exportHistory()" [disabled]="dataLog.length === 0">
+              <i class="bi bi-download me-2"></i>Export History
+            </button>
+            <button class="dropdown-item" (click)="clearHistory()" [disabled]="dataLog.length === 0">
+              <i class="bi bi-trash me-2"></i>Clear History
+            </button>
           </div>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Calculator Display -->
+  <div class="calculator-display">
+    <!-- Primary Display -->
+    <div class="display-primary">
+      <div class="current-expression">
+        @if (displayExpression) {
+          <span class="text-muted small">{{displayExpression}}</span>
+        }
+      </div>
+      <div class="current-value">
+        {{getCurrentDisplayValue()}}
+      </div>
+    </div>
+    
+    <!-- Operation Status -->
+    @if (operation && executionMode === 'second') {
+      <div class="display-status">
+        <span class="operation-badge">
+          <i class="bi me-1" [ngClass]="getOperationIcon(operation!)"></i>
+          {{getOperationName(operation!)}}
+        </span>
+      </div>
+    }
+    
+    <!-- Memory Status -->
+    @if (memoryValue !== 0) {
+      <div class="memory-indicator">
+        <i class="bi bi-bookmark-fill text-warning"></i>
+        <span class="small text-muted">M: {{formatNumber(memoryValue)}}</span>
+      </div>
+    }
+  </div>
+
+  <!-- Calculator Buttons -->
+  <div class="calculator-buttons">
+    <!-- Memory Row -->
+    <div class="button-row memory-row">
+      <button class="calc-btn btn-memory" (click)="memoryOperation('MC')" [disabled]="memoryValue === 0" ngbTooltip="Memory Clear">
+        MC
+      </button>
+      <button class="calc-btn btn-memory" (click)="memoryOperation('MR')" [disabled]="memoryValue === 0" ngbTooltip="Memory Recall">
+        MR
+      </button>
+      <button class="calc-btn btn-memory" (click)="memoryOperation('M+')" [disabled]="getCurrentValue() === 0" ngbTooltip="Memory Add">
+        M+
+      </button>
+      <button class="calc-btn btn-memory" (click)="memoryOperation('M-')" [disabled]="getCurrentValue() === 0" ngbTooltip="Memory Subtract">
+        M−
+      </button>
+      <button class="calc-btn btn-memory" (click)="memoryOperation('MS')" [disabled]="getCurrentValue() === 0" ngbTooltip="Memory Store">
+        MS
+      </button>
+    </div>
+
+    <!-- Function Row -->
+    @if (calculatorMode === 'scientific') {
+      <div class="button-row function-row">
+        <button class="calc-btn btn-function" (click)="scientificOperation('sin')" [disabled]="executionMode === 'second'" ngbTooltip="Sine">
+          sin
+        </button>
+        <button class="calc-btn btn-function" (click)="scientificOperation('cos')" [disabled]="executionMode === 'second'" ngbTooltip="Cosine">
+          cos
+        </button>
+        <button class="calc-btn btn-function" (click)="scientificOperation('tan')" [disabled]="executionMode === 'second'" ngbTooltip="Tangent">
+          tan
+        </button>
+        <button class="calc-btn btn-function" (click)="scientificOperation('ln')" [disabled]="executionMode === 'second'" ngbTooltip="Natural Logarithm">
+          ln
+        </button>
+        <button class="calc-btn btn-function" (click)="scientificOperation('factorial')" [disabled]="executionMode === 'second'" ngbTooltip="Factorial">
+          x!
+        </button>
+      </div>
+      
+      <div class="button-row function-row">
+        <button class="calc-btn btn-function" (click)="scientificOperation('asin')" [disabled]="executionMode === 'second'" ngbTooltip="Arcsine">
+          sin⁻¹
+        </button>
+        <button class="calc-btn btn-function" (click)="scientificOperation('acos')" [disabled]="executionMode === 'second'" ngbTooltip="Arccosine">
+          cos⁻¹
+        </button>
+        <button class="calc-btn btn-function" (click)="scientificOperation('atan')" [disabled]="executionMode === 'second'" ngbTooltip="Arctangent">
+          tan⁻¹
+        </button>
+        <button class="calc-btn btn-function" (click)="scientificOperation('exp')" [disabled]="executionMode === 'second'" ngbTooltip="Exponential (e^x)">
+          eˣ
+        </button>
+        <button class="calc-btn btn-function" (click)="insertConstant('pi')" [disabled]="executionMode === 'second'" ngbTooltip="Pi (π)">
+          π
+        </button>
+      </div>
+    }
+    
+    <!-- Advanced Math Row -->
+    <div class="button-row advanced-row">
+      <button class="calc-btn btn-function" (click)="scientificOperation('log2')" [disabled]="executionMode === 'second'" ngbTooltip="Log base 2">
+        log₂
+      </button>
+      <button class="calc-btn btn-function" (click)="scientificOperation('log10')" [disabled]="executionMode === 'second'" ngbTooltip="Log base 10">
+        log
+      </button>
+      <button class="calc-btn btn-function" (click)="scientificOperation('sqrt')" [disabled]="executionMode === 'second'" ngbTooltip="Square Root">
+        √
+      </button>
+      <button class="calc-btn btn-function" (click)="scientificOperation('abs')" [disabled]="executionMode === 'second'" ngbTooltip="Absolute Value">
+        |x|
+      </button>
+      <button class="calc-btn btn-function" (click)="scientificOperation('reciprocal')" [disabled]="executionMode === 'second'" ngbTooltip="Reciprocal (1/x)">
+        1/x
+      </button>
+    </div>
+
+    <!-- Number Rows -->
+    <div class="button-row">
+      <button class="calc-btn btn-clear" (click)="clearAll()" ngbTooltip="Clear All">
+        C
+      </button>
+      <button class="calc-btn btn-clear" (click)="clearEntry()" ngbTooltip="Clear Entry">
+        CE
+      </button>
+      <button class="calc-btn btn-operation" (click)="formDelete()" ngbTooltip="Delete">
+        <i class="bi bi-backspace"></i>
+      </button>
+      <button class="calc-btn btn-operation" (click)="formOperation('/')" ngbTooltip="Divide">
+        ÷
+      </button>
+    </div>
+
+    <div class="button-row">
+      <button class="calc-btn btn-number" (click)="formNumber(7)">7</button>
+      <button class="calc-btn btn-number" (click)="formNumber(8)">8</button>
+      <button class="calc-btn btn-number" (click)="formNumber(9)">9</button>
+      <button class="calc-btn btn-operation" (click)="formOperation('*')" ngbTooltip="Multiply">
+        ×
+      </button>
+    </div>
+
+    <div class="button-row">
+      <button class="calc-btn btn-number" (click)="formNumber(4)">4</button>
+      <button class="calc-btn btn-number" (click)="formNumber(5)">5</button>
+      <button class="calc-btn btn-number" (click)="formNumber(6)">6</button>
+      <button class="calc-btn btn-operation" (click)="formOperation('-')" ngbTooltip="Subtract">
+        −
+      </button>
+    </div>
+
+    <div class="button-row">
+      <button class="calc-btn btn-number" (click)="formNumber(1)">1</button>
+      <button class="calc-btn btn-number" (click)="formNumber(2)">2</button>
+      <button class="calc-btn btn-number" (click)="formNumber(3)">3</button>
+      <button class="calc-btn btn-operation" (click)="formOperation('+')" ngbTooltip="Add">
+        +
+      </button>
+    </div>
+
+    <div class="button-row">
+      <button class="calc-btn btn-number btn-zero" (click)="formNumber(0)">0</button>
+      <button class="calc-btn btn-number" (click)="formDecimal()">.</button>
+      <button class="calc-btn btn-equals" (click)="formOperation('=')" ngbTooltip="Equals">
+        =
+      </button>
+    </div>
+
+    <!-- Power and Advanced -->
+    <div class="button-row advanced-row">
+      <button class="calc-btn btn-function" (click)="formOperation('^')" ngbTooltip="Power">
+        xʸ
+      </button>
+      <button class="calc-btn btn-function" (click)="scientificOperation('square')" [disabled]="executionMode === 'second'" ngbTooltip="Square">
+        x²
+      </button>
+      <button class="calc-btn btn-function" (click)="scientificOperation('cube')" [disabled]="executionMode === 'second'" ngbTooltip="Cube">
+        x³
+      </button>
+      <button class="calc-btn btn-function" (click)="insertConstant('e')" [disabled]="executionMode === 'second'" ngbTooltip="Euler's Number (e)">
+        e
+      </button>
+      @if (enableSave) {
+        <button class="calc-btn btn-save" (click)="formSave()" ngbTooltip="Save">
+          <i class="bi bi-floppy"></i>
+        </button>
       }
+    </div>
+  </div>
+
+  <!-- Calculation History -->
+  @if (showHistory && dataLog.length > 0) {
+    <div class="calculator-history">
+      <div class="history-header">
+        <div class="d-flex justify-content-between align-items-center">
+          <h6 class="mb-0">
+            <i class="bi bi-clock-history me-2"></i>History ({{dataLog.length}})
+          </h6>
+          <button class="btn btn-sm btn-outline-secondary" (click)="toggleHistory()">
+            <i class="bi bi-chevron-up"></i>
+          </button>
+        </div>
+      </div>
+      <div class="history-content">
+        @for (entry of getVisibleHistory(); track trackByHistoryId($index, entry); let i = $index) {
+          <div class="history-item" [class.scratched]="entry.scratch">
+            <div class="history-expression" (click)="revertValueTo(entry)">
+              <div class="expression-line">
+                @if (entry.inputPromptSecondValue !== 0) {
+                  <span class="expression-text">
+                    {{formatNumber(entry.inputPromptFirstValue)}} {{entry.operation}} {{formatNumber(entry.inputPromptSecondValue)}}
+                  </span>
+                } @else {
+                  <span class="expression-text">
+                    {{entry.operation}}({{formatNumber(entry.inputPromptFirstValue)}})
+                  </span>
+                }
+              </div>
+              <div class="result-line">
+                <span class="result-value">= {{formatNumber(entry.result)}}</span>
+                <small class="text-muted ms-2">{{formatTimestamp(entry.timestamp)}}</small>
+              </div>
+            </div>
+            <div class="history-actions">
+              <button class="btn btn-sm btn-ghost" (click)="entry.scratch = !entry.scratch" ngbTooltip="Toggle scratch">
+                <i class="bi" [ngClass]="entry.scratch ? 'bi-arrow-clockwise' : 'bi-slash-circle'"></i>
+              </button>
+              <button class="btn btn-sm btn-ghost text-danger" (click)="removeHistoryItem(i)" ngbTooltip="Delete">
+                <i class="bi bi-trash"></i>
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  } @else if (dataLog.length > 0) {
+    <div class="history-toggle">
+      <button class="btn btn-sm btn-outline-secondary w-100" (click)="toggleHistory()">
+        <i class="bi bi-clock-history me-2"></i>Show History ({{dataLog.length}})
+        <i class="bi bi-chevron-down ms-auto"></i>
+      </button>
     </div>
   }
 </div>

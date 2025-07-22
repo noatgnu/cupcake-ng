@@ -829,3 +829,95 @@ html, body { height: 100vh; width: 100%; margin: 0 }
     margin: 0.25rem 0;
   }
 }
+
+/* Hexagonal Network Background Decoration */
+.hexagon-network {
+  position: fixed;
+  bottom: -100px;
+  right: -100px;
+  width: 400px;
+  height: 400px;
+  pointer-events: none;
+  z-index: -1;
+  opacity: 0.3;
+}
+
+// Create the hexagonal network pattern - starts from bottom right and fades into the document
+body::after {
+  content: '';
+  position: fixed;
+  bottom: 0;
+  right: 0;
+  width: 60vw;
+  height: 60vh;
+  pointer-events: none;
+  z-index: -1;
+  opacity: 0.12;
+  
+  // Create proper hexagonal mesh using SVG background
+  background-image: url("data:image/svg+xml,%3Csvg width='100' height='87' viewBox='0 0 100 87' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3Cstyle%3E.hex-stroke%7Bstroke:rgba(0,0,0,0.3);stroke-width:1;fill:none;%7D.hex-node%7Bfill:rgba(0,0,0,0.4);r:1.5;%7D%3C/style%3E%3C/defs%3E%3Cg%3E%3C!-- Hexagon outlines in proper honeycomb pattern --%3E%3Cpolygon class='hex-stroke' points='25,7 40,0 55,7 55,21 40,29 25,21'/%3E%3Cpolygon class='hex-stroke' points='75,7 90,0 105,7 105,21 90,29 75,21'/%3E%3Cpolygon class='hex-stroke' points='0,29 15,22 30,29 30,43 15,51 0,43'/%3E%3Cpolygon class='hex-stroke' points='50,29 65,22 80,29 80,43 65,51 50,43'/%3E%3Cpolygon class='hex-stroke' points='25,51 40,44 55,51 55,65 40,73 25,65'/%3E%3Cpolygon class='hex-stroke' points='75,51 90,44 105,51 105,65 90,73 75,65'/%3E%3C!-- Connection nodes --%3E%3Ccircle class='hex-node' cx='40' cy='14' r='1'/%3E%3Ccircle class='hex-node' cx='90' cy='14' r='1'/%3E%3Ccircle class='hex-node' cx='15' cy='36' r='1'/%3E%3Ccircle class='hex-node' cx='65' cy='36' r='1'/%3E%3Ccircle class='hex-node' cx='40' cy='58' r='1'/%3E%3Ccircle class='hex-node' cx='90' cy='58' r='1'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 100px 87px;
+  background-repeat: repeat;
+  animation: hexagonalNetworkFloat 25s ease-in-out infinite;
+  
+  // Create fade gradient mask from bottom-right corner
+  mask: radial-gradient(ellipse 140% 140% at 100% 100%, black 15%, rgba(0,0,0,0.7) 35%, rgba(0,0,0,0.3) 60%, transparent 85%);
+  -webkit-mask: radial-gradient(ellipse 140% 140% at 100% 100%, black 15%, rgba(0,0,0,0.7) 35%, rgba(0,0,0,0.3) 60%, transparent 85%);
+}
+
+// Subtle floating animation for hexagonal network
+@keyframes hexagonalNetworkFloat {
+  0%, 100% {
+    transform: translate(0, 0) rotate(0deg);
+    opacity: 0.6;
+  }
+  20% {
+    transform: translate(-8px, -12px) rotate(1deg);
+    opacity: 0.4;
+  }
+  40% {
+    transform: translate(5px, -8px) rotate(-1deg);
+    opacity: 0.7;
+  }
+  60% {
+    transform: translate(-3px, 6px) rotate(0.5deg);
+    opacity: 0.5;
+  }
+  80% {
+    transform: translate(6px, -4px) rotate(-0.5deg);
+    opacity: 0.6;
+  }
+}
+
+// Subtle rotation for individual hexagon elements
+@keyframes hexagonSpin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// Dark mode adjustments for hexagonal decoration
+@media (prefers-color-scheme: dark) {
+  body::after {
+    opacity: 0.15;
+    background-image: url("data:image/svg+xml,%3Csvg width='100' height='87' viewBox='0 0 100 87' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3Cstyle%3E.hex-stroke%7Bstroke:rgba(255,255,255,0.3);stroke-width:1;fill:none;%7D.hex-node%7Bfill:rgba(255,255,255,0.4);r:1.5;%7D%3C/style%3E%3C/defs%3E%3Cg%3E%3C!-- Hexagon outlines in proper honeycomb pattern --%3E%3Cpolygon class='hex-stroke' points='25,7 40,0 55,7 55,21 40,29 25,21'/%3E%3Cpolygon class='hex-stroke' points='75,7 90,0 105,7 105,21 90,29 75,21'/%3E%3Cpolygon class='hex-stroke' points='0,29 15,22 30,29 30,43 15,51 0,43'/%3E%3Cpolygon class='hex-stroke' points='50,29 65,22 80,29 80,43 65,51 50,43'/%3E%3Cpolygon class='hex-stroke' points='25,51 40,44 55,51 55,65 40,73 25,65'/%3E%3Cpolygon class='hex-stroke' points='75,51 90,44 105,51 105,65 90,73 75,65'/%3E%3C!-- Connection nodes --%3E%3Ccircle class='hex-node' cx='40' cy='14' r='1'/%3E%3Ccircle class='hex-node' cx='90' cy='14' r='1'/%3E%3Ccircle class='hex-node' cx='15' cy='36' r='1'/%3E%3Ccircle class='hex-node' cx='65' cy='36' r='1'/%3E%3Ccircle class='hex-node' cx='40' cy='58' r='1'/%3E%3Ccircle class='hex-node' cx='90' cy='58' r='1'/%3E%3C/g%3E%3C/svg%3E");
+  }
+}
+
+// Responsive behavior - hide on smaller screens to reduce visual clutter
+@media (max-width: 768px) {
+  body::after {
+    display: none;
+  }
+}
+
+// Reduce motion for users who prefer it - accessibility consideration
+@media (prefers-reduced-motion: reduce) {
+  body::after {
+    animation: none;
+    transform: none;
+  }
+}

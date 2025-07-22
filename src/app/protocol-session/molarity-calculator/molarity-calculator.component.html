@@ -1,374 +1,766 @@
-<div class="d-flex flex-column gap-2" style="width: 290px">
-  <div class="d-flex flex-row gap-2">
-    <div class="form-floating">
-      <select class="form-select" [(ngModel)]="selectedForm">
-        <option value="dynamic">
-          Dynamic Molarity Formula
-        </option>
-        <option value="massFromVolumeAndConcentration">
-          Mass From Volume And Concentration
-        </option>
-        <option value="volumeFromMassAndConcentration">
-          Volume From Mass And Concentration
-        </option>
-        <option value="concentrationFromMassAndVolume">
-          Concentration From Mass And Volume
-        </option>
-        <option value="volumeFromStockVolumeAndConcentration">
-          Volume From Stock Volume And Concentration
-        </option>
-      </select>
-      <label>Selected Formula</label>
-    </div>
-    <div>
-      <button class="btn btn-success" (click)="updateAnnotation()">
-        <i class="bi bi-save"></i>
-      </button>
+<div class="enhanced-molarity-calculator">
+  <!-- Calculator Header -->
+  <div class="calculator-header">
+    <div class="d-flex justify-content-between align-items-start">
+      <div class="calculator-title">
+        <h6 class="mb-0">
+          <i class="bi bi-calculator-fill me-2"></i>Molarity Calculator
+        </h6>
+        <div class="calculator-subtitle">
+          <small class="text-muted">Chemical solution calculations</small>
+        </div>
+      </div>
+      <div class="calculator-actions">
+        <!-- Formula Reference -->
+        <div class="btn-group" ngbDropdown container="body">
+          <button class="btn btn-outline-info btn-sm" ngbDropdownToggle ngbTooltip="Formula Reference">
+            <i class="bi bi-book me-1"></i>Formulas
+          </button>
+          <div class="dropdown-menu dropdown-menu-end" ngbDropdownMenu>
+            <div class="dropdown-header">Common Formulas</div>
+            <div class="formula-item p-2">
+              <strong>Molarity (M)</strong><br>
+              <code>M = moles / L</code>
+            </div>
+            <div class="formula-item p-2">
+              <strong>Mass</strong><br>
+              <code>mass = M × V × MW</code>
+            </div>
+            <div class="formula-item p-2">
+              <strong>Volume</strong><br>
+              <code>V = mass / (M × MW)</code>
+            </div>
+            <div class="formula-item p-2">
+              <strong>Dilution</strong><br>
+              <code>C₁V₁ = C₂V₂</code>
+            </div>
+          </div>
+        </div>
+
+        <!-- Presets -->
+        <div class="btn-group ms-1" ngbDropdown container="body">
+          <button class="btn btn-outline-secondary btn-sm" ngbDropdownToggle ngbTooltip="Common Compounds">
+            <i class="bi bi-star me-1"></i>Presets
+          </button>
+          <div class="dropdown-menu dropdown-menu-end" ngbDropdownMenu>
+            <div class="dropdown-header">Common Compounds</div>
+            @for (preset of commonPresets; track preset.name) {
+              <button class="dropdown-item d-flex justify-content-between" (click)="applyPreset(preset)">
+                <span>{{preset.name}}</span>
+                <small class="text-muted">{{preset.mw}} g/mol</small>
+              </button>
+            }
+            <div class="dropdown-divider"></div>
+            <button class="dropdown-item" (click)="showCustomPresets = !showCustomPresets">
+              <i class="bi bi-plus me-2"></i>Add Custom Preset
+            </button>
+          </div>
+        </div>
+
+        <!-- Settings -->
+        <button class="btn btn-outline-secondary btn-sm ms-1" (click)="toggleSettings()" ngbTooltip="Settings">
+          <i class="bi bi-gear"></i>
+        </button>
+      </div>
     </div>
   </div>
 
-
-  @switch (selectedForm) {
-    @case ("dynamic") {
-      <form [formGroup]="formDynamicsFormula" class="d-flex flex-column gap-2" (ngSubmit)="calculateDynamic()">
-        <ngb-alert>
-          At least 3 numeric values are required to calculate the fourth value.
-        </ngb-alert>
-        <div class="d-flex flex-row gap-1">
-          <div class="form-floating">
-            <input type="number" class="form-control" id="volume" formControlName="volume" style="width: 100px" />
-            <label for="volume">Volume</label>
+  <!-- Settings Panel -->
+  @if (showSettings) {
+    <div class="settings-panel">
+      <div class="settings-header">
+        <h6 class="mb-0">Calculator Settings</h6>
+        <button class="btn btn-sm btn-ghost" (click)="toggleSettings()">
+          <i class="bi bi-x"></i>
+        </button>
+      </div>
+      <div class="settings-content">
+        <div class="row g-2">
+          <div class="col-6">
+            <label class="form-label small">Decimal Places</label>
+            <select class="form-select form-select-sm" [(ngModel)]="decimalPlaces">
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+            </select>
           </div>
-          <div class="form-floating">
-            <select class="form-select" formControlName="volumeUnit" id="volumeUnit" style="width: 150px">
+          <div class="col-6">
+            <label class="form-label small">Default Volume Unit</label>
+            <select class="form-select form-select-sm" [(ngModel)]="defaultVolumeUnit">
               @for (unit of dataService.volumeUnits; track unit) {
-                <option [value]="unit">{{ unit }}</option>
+                <option [value]="unit">{{unit}}</option>
               }
             </select>
-            <label for="volumeUnit">Volume Unit</label>
           </div>
         </div>
-        <div class="d-flex flex-row gap-1">
-          <div class="form-floating">
-            <input type="number" class="form-control" id="concentration" formControlName="concentration" style="width: 100px" />
-            <label for="concentration">Concentration</label>
-          </div>
-          <div class="form-floating">
-            <select class="form-select" formControlName="concentrationUnit" id="concentrationUnit" style="width: 150px">
-              @for (unit of dataService.molarityUnits; track unit) {
-                <option [value]="unit">{{ unit }}</option>
-              }
-            </select>
-            <label for="concentrationUnit">Concentration Unit</label>
-          </div>
-        </div>
-        <div class="d-flex flex-row gap-1">
-          <div class="form-floating">
-            <input type="number" class="form-control" id="molecularWeight" formControlName="molecularWeight" style="width: 100px" />
-            <label for="molecularWeight">Molecular Weight</label>
-          </div>
-          <div class="form-floating">
-            <input type="text" disabled value="g/mol" class="form-control">
-            <label>Unit</label>
-          </div>
-        </div>
-        <div class="d-flex flex-row gap-1">
-          <div class="form-floating">
-            <input type="number" class="form-control" id="weightDynamics" formControlName="weight" style="width: 100px" />
-            <label for="concentration">Concentration</label>
-          </div>
-          <div class="form-floating">
-            <select class="form-select" formControlName="weightUnit" id="weightDynamicsUnit" style="width: 150px">
-              @for (unit of dataService.massUnits; track unit) {
-                <option [value]="unit">{{ unit }}</option>
-              }
-            </select>
-            <label for="concentrationUnit">Weight Unit</label>
-          </div>
-        </div>
-        <div>
-          <button class="btn btn-primary" type="submit">
-            Calculate
-          </button>
-        </div>
-      </form>
-    }
-
-    @case ("massFromVolumeAndConcentration") {
-      <form [formGroup]="formMassFromVolumeAndConcentration" (ngSubmit)="calculateMassFromVolumeAndConcentration()" class="d-flex flex-column gap-2">
-        <div class="d-flex flex-row gap-1">
-          <div class="form-floating">
-            <input type="number" class="form-control" id="volume1" formControlName="volume" style="width: 100px" />
-            <label for="volume1">Volume</label>
-          </div>
-          <div class="form-floating">
-            <select class="form-select" formControlName="volumeUnit" id="volumeUnit1" style="width: 150px">
-              @for (unit of dataService.volumeUnits; track unit) {
-                <option [value]="unit">{{ unit }}</option>
-              }
-            </select>
-            <label for="volumeUnit1">Volume Unit</label>
-          </div>
-        </div>
-
-        <div class="d-flex flex-row gap-1">
-          <div class="form-floating">
-            <input type="number" class="form-control" id="concentration1" formControlName="concentration" style="width: 100px" />
-            <label for="concentration1">Concentration</label>
-          </div>
-          <div class="form-floating">
-            <select class="form-select" formControlName="concentrationUnit" id="concentrationUnit1" style="width: 150px">
-              @for (unit of dataService.molarityUnits; track unit) {
-                <option [value]="unit">{{ unit }}</option>
-              }
-            </select>
-            <label for="concentrationUnit1">Concentration Unit</label>
-          </div>
-        </div>
-
-        <div class="d-flex flex-row gap-1">
-          <div class="form-floating">
-            <input type="number" class="form-control" id="weight1" formControlName="molecularWeight" style="width: 100px" />
-            <label for="weight1">M.Weight</label>
-          </div>
-          <div class="form-floating">
-            <input type="text" disabled value="g/mol" class="form-control" style="width: 100px">
-            <label>Unit</label>
-          </div>
-        </div>
-        <div class="form-floating">
-          <select class="form-select" formControlName="weightUnit" id="weightUnit1" style="width: 150px">
-            @for (unit of dataService.massUnits; track unit) {
-              <option [value]="unit">{{ unit }}</option>
-            }
-          </select>
-          <label for="weightUnit1">Target Mass Unit</label>
-        </div>
-        <div>
-          <button class="btn btn-primary" type="submit">
-            Calculate
-          </button>
-        </div>
-      </form>
-    }
-    @case ('volumeFromMassAndConcentration') {
-      <form [formGroup]="formVolumeFromMassAndConcentration" (ngSubmit)="calculateVolumeFromMassAndConcentration()">
-        <div class="d-flex flex-row gap-1">
-          <div class="form-floating">
-            <input type="number" class="form-control" id="mass2" formControlName="weight" style="width: 100px"/>
-            <label for="mass2">Mass</label>
-          </div>
-          <div class="form-floating">
-            <select class="form-select" formControlName="weightUnit" id="massUnit2" style="width: 150px">
-              @for (unit of dataService.massUnits; track unit) {
-                <option [value]="unit">{{ unit }}</option>
-              }
-            </select>
-            <label for="massUnit2">Weight Unit</label>
-          </div>
-        </div>
-
-        <div class="d-flex flex-row gap-1">
-          <div class="form-floating">
-            <input type="number" class="form-control" id="concentration2" formControlName="concentration" style="width: 100px" />
-            <label for="concentration2">Concentration</label>
-          </div>
-          <div class="form-floating">
-            <select class="form-select" formControlName="concentrationUnit" id="concentrationUnit2" style="width: 150px">
-              @for (unit of dataService.molarityUnits; track unit) {
-                <option [value]="unit">{{ unit }}</option>
-              }
-            </select>
-            <label for="concentrationUnit2">Concentration Unit</label>
-          </div>
-        </div>
-
-        <div class="d-flex flex-row gap-1">
-          <div class="form-floating">
-            <input type="number" class="form-control" id="weight2" formControlName="molecularWeight" style="width: 100px" />
-            <label for="weight2">M.Weight</label>
-          </div>
-          <div class="form-floating">
-            <input type="text" disabled value="g/mol" class="form-control" style="width: 100px">
-            <label>Unit</label>
-          </div>
-
-        </div>
-        <div class="form-floating">
-          <select class="form-select" formControlName="weightUnit" id="weightUnit2" style="width: 150px">
-            @for (unit of dataService.massUnits; track unit) {
-              <option [value]="unit">{{ unit }}</option>
-            }
-          </select>
-          <label for="weightUnit2">Target Volume Unit</label>
-        </div>
-
-        <div>
-          <button class="btn btn-primary" type="submit">
-            Calculate
-          </button>
-        </div>
-      </form>
-    }
-    @case ('concentrationFromMassAndVolume') {
-      <form [formGroup]="formConcentrationFromMassAndVolume" (ngSubmit)="calculateConcentrationFromMassAndVolume()">
-        <div class="d-flex flex-row gap-1">
-          <div class="form-floating">
-            <input type="number" class="form-control" id="mass3" formControlName="weight" style="width: 100px" />
-            <label for="mass3">Mass</label>
-          </div>
-          <div class="form-floating">
-            <select class="form-select" formControlName="weightUnit" id="massUnit3" style="width: 150px">
-              @for (unit of dataService.massUnits; track unit) {
-                <option [value]="unit">{{ unit }}</option>
-              }
-            </select>
-            <label for="massUnit3">Mass Unit</label>
-          </div>
-        </div>
-
-        <div class="d-flex flex-row gap-1">
-          <div class="form-floating">
-            <input type="number" class="form-control" id="volume3" formControlName="volume" style="width: 100px" />
-            <label for="volume3">Volume</label>
-          </div>
-          <div class="form-floating">
-            <select class="form-select" formControlName="volumeUnit" id="volumeUnit3" style="width: 150px">
-              @for (unit of dataService.volumeUnits; track unit) {
-                <option [value]="unit">{{ unit }}</option>
-              }
-            </select>
-            <label for="volumeUnit3">Volume Unit</label>
-          </div>
-        </div>
-
-        <div class="d-flex flex-row gap-1">
-          <div class="form-floating">
-            <input type="number" class="form-control" id="weight3" formControlName="molecularWeight" style="width: 100px" />
-            <label for="weight3">M.Weight</label>
-          </div>
-          <div class="form-floating">
-            <input type="text" disabled value="g/mol" class="form-control" style="width: 100px">
-            <label>Unit</label>
-          </div>
-        </div>
-
-        <div class="form-floating">
-          <select class="form-select" formControlName="weightUnit" id="weightUnit3" style="width: 150px">
-            @for (unit of dataService.massUnits; track unit) {
-              <option [value]="unit">{{ unit }}</option>
-            }
-          </select>
-          <label for="weightUnit3">Target Concentration Unit</label>
-        </div>
-
-        <div>
-          <button class="btn btn-primary" type="submit">
-            Calculate
-          </button>
-        </div>
-      </form>
-    }
-    @case ('volumeFromStockVolumeAndConcentration') {
-      <form [formGroup]="formVolumeFromStockVolumeAndConcentration" (ngSubmit)="calculateVolumeFromStockVolumeAndConcentration()">
-        <div class="d-flex flex-row gap-1">
-          <div class="form-floating">
-            <input type="number" class="form-control" id="stockVolume4" formControlName="stockVolume" style="width: 100px" />
-            <label for="stockVolume4">Stock Volume</label>
-          </div>
-          <div class="form-floating">
-            <select class="form-select" formControlName="stockVolumeUnit" id="stockVolumeUnit4" style="width: 150px">
-              @for (unit of dataService.volumeUnits; track unit) {
-                <option [value]="unit">{{ unit }}</option>
-              }
-            </select>
-            <label for="stockVolumeUnit4">Stock Volume Unit</label>
-          </div>
-        </div>
-
-        <div class="d-flex flex-row gap-1">
-          <div class="form-floating">
-            <input type="number" class="form-control" id="stockConcentration4" formControlName="stockConcentration" style="width: 100px"/>
-            <label for="stockConcentration4">Stock Concentration</label>
-          </div>
-          <div class="form-floating">
-            <select class="form-select" formControlName="stockConcentrationUnit" id="stockConcentrationUnit4" style="width: 150px">
-              @for (unit of dataService.molarityUnits; track unit) {
-                <option [value]="unit">{{ unit }}</option>
-              }
-            </select>
-            <label for="stockConcentrationUnit4">Stock Concentration Unit</label>
-          </div>
-        </div>
-
-        <div class="d-flex flex-row gap-1">
-          <div class="form-floating">
-            <input type="number" class="form-control" id="targetConcentration4" formControlName="targetConcentration" style="width: 100px"/>
-            <label for="targetConcentration4">Target Concentration</label>
-          </div>
-          <div class="form-floating">
-            <select class="form-select" formControlName="targetConcentrationUnit" id="targetConcentrationUnit4" style="width: 150px">
-              @for (unit of dataService.molarityUnits; track unit) {
-                <option [value]="unit">{{ unit }}</option>
-              }
-            </select>
-            <label for="targetConcentrationUnit4">Target Concentration Unit</label>
-          </div>
-        </div>
-
-        <div>
-          <button class="btn btn-primary" type="submit">
-            Calculate
-          </button>
-        </div>
-      </form>
-    }
+      </div>
+    </div>
   }
 
-
-  @if (dataLog) {
-    @if (dataLog.length > 0) {
-      <div class="list-group">
-        @for (d of dataLog; track d) {
-          @switch (d.operationType) {
-            @case ('massFromVolumeAndConcentration') {
-              <div class="list-group-item list-group-item-action">
-
-                {{ d.data.concentration }} {{ d.data.concentrationUnit }} x {{ d.data.volume }} {{ d.data.volumeUnit }} x {{ d.data.molecularWeight }} = {{ d.result }} {{ d.data.weightUnit }}
-              </div>
-            }
-            @case ('volumeFromMassAndConcentration') {
-              <div class="list-group-item list-group-item-action">
-                {{ d.data.weight}} {{ d.data.weightUnit}} / ({{ d.data.concentration}} {{d.data.concentrationUnit}} x {{ d.data.molecularWeight}}) = {{ d.result}} {{ d.data.volumeUnit}}
-              </div>
-            }
-            @case ('concentrationFromMassAndVolume') {
-              <div class="list-group-item list-group-item-action">
-                {{ d.data.weight}} {{ d.data.weightUnit}} / ({{ d.data.volume}} {{d.data.volumeUnit}} x {{ d.data.molecularWeight}}) = {{ d.result}} {{ d.data.concentrationUnit}}
-              </div>
-            }
-            @case ('volumeFromStockVolumeAndConcentration') {
-              <div class="list-group-item list-group-item-action">
-                {{ d.data.stockVolumne}} {{ d.data.stockVolumeUnit}} x {{ d.data.targetConcentration }} {{ d.data.targetConcentrationUnit}} / {{ d.data.stockConcentration}} {{ d.data.stockConcentrationUnit}} = {{ d.result}} {{ d.data.volumeUnit}}
-              </div>
-            }
-            @case ('dynamic') {
-              <div class="list-group-item list-group-item-action">
-                @if (d.data.volume && d.data.concentration && d.data.molecularWeight) {
-                  {{ d.data.volume }} {{ d.data.volumeUnit }} x {{ d.data.concentration }} {{ d.data.concentrationUnit }} x {{ d.data.molecularWeight }} g/mol = {{ d.result }} {{ d.data.weightUnit }}
-                } @else if (d.data.volume && d.data.concentration && d.data.weight) {
-                  {{ d.data.weight }} {{ d.data.weightUnit }} / ({{ d.data.volume }} {{ d.data.volumeUnit }} x {{ d.data.concentration }} {{ d.data.concentrationUnit }}) = {{ d.result }} g/mol
-                } @else if (d.data.volume && d.data.molecularWeight && d.data.weight) {
-                  {{ d.data.weight }} {{ d.data.weightUnit }} / ({{ d.data.volume }} {{ d.data.volumeUnit }} x {{ d.data.molecularWeight }} g/mol)  = {{ d.result }} {{ d.data.concentrationUnit }}
-                } @else if (d.data.concentration && d.data.molecularWeight && d.data.weight) {
-                  {{ d.data.weight }} {{ d.data.weightUnit }} / ({{ d.data.concentration }} {{ d.data.concentrationUnit }} x {{ d.data.molecularWeight }} g/mol) = {{ d.result }} {{ d.data.volumeUnit }}
-                }
-              </div>
-            }
-          }
-        }
+  <!-- Custom Preset Creation -->
+  @if (showCustomPresets) {
+    <div class="custom-preset-panel">
+      <div class="preset-header">
+        <h6 class="mb-0">Add Custom Compound</h6>
+        <button class="btn btn-sm btn-ghost" (click)="showCustomPresets = false">
+          <i class="bi bi-x"></i>
+        </button>
       </div>
-    }
+      <div class="preset-content">
+        <div class="row g-2">
+          <div class="col-8">
+            <input type="text" class="form-control form-control-sm" 
+                   placeholder="Compound name" 
+                   [(ngModel)]="customPreset.name">
+          </div>
+          <div class="col-4">
+            <div class="input-group input-group-sm">
+              <input type="number" class="form-control" 
+                     placeholder="MW" 
+                     [(ngModel)]="customPreset.mw">
+              <span class="input-group-text">g/mol</span>
+            </div>
+          </div>
+        </div>
+        <div class="preset-actions mt-2">
+          <button class="btn btn-primary btn-sm" (click)="saveCustomPreset()" 
+                  [disabled]="!customPreset.name || !customPreset.mw">
+            <i class="bi bi-plus me-1"></i>Add Preset
+          </button>
+        </div>
+      </div>
+    </div>
+  }
 
+  <!-- Formula Selection -->
+  <div class="formula-selector">
+    <div class="formula-tabs">
+      <div class="btn-group w-100" role="group">
+        <input type="radio" class="btn-check" id="dynamic" value="dynamic" [(ngModel)]="selectedForm">
+        <label class="btn btn-outline-primary" for="dynamic">
+          <i class="bi bi-calculator me-1"></i>
+          <span class="d-none d-sm-inline">Dynamic</span>
+        </label>
+
+        <input type="radio" class="btn-check" id="mass" value="massFromVolumeAndConcentration" [(ngModel)]="selectedForm">
+        <label class="btn btn-outline-primary" for="mass">
+          <i class="bi bi-subtract me-1"></i>
+          <span class="d-none d-sm-inline">Mass</span>
+        </label>
+
+        <input type="radio" class="btn-check" id="volume" value="volumeFromMassAndConcentration" [(ngModel)]="selectedForm">
+        <label class="btn btn-outline-primary" for="volume">
+          <i class="bi bi-cup me-1"></i>
+          <span class="d-none d-sm-inline">Volume</span>
+        </label>
+
+        <input type="radio" class="btn-check" id="concentration" value="concentrationFromMassAndVolume" [(ngModel)]="selectedForm">
+        <label class="btn btn-outline-primary" for="concentration">
+          <i class="bi bi-droplet me-1"></i>
+          <span class="d-none d-sm-inline">Concentration</span>
+        </label>
+
+        <input type="radio" class="btn-check" id="dilution" value="volumeFromStockVolumeAndConcentration" [(ngModel)]="selectedForm">
+        <label class="btn btn-outline-primary" for="dilution">
+          <i class="bi bi-funnel me-1"></i>
+          <span class="d-none d-sm-inline">Dilution</span>
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <!-- Calculator Forms -->
+  <div class="calculator-body">
+    @switch (selectedForm) {
+      @case ("dynamic") {
+        <div class="form-card">
+          <div class="form-header">
+            <h6 class="mb-1">
+              <i class="bi bi-calculator me-2 text-primary"></i>Dynamic Calculator
+            </h6>
+            <p class="text-muted small mb-0">Fill any 3 values to calculate the 4th</p>
+          </div>
+          
+          <form [formGroup]="formDynamicsFormula" (ngSubmit)="calculateDynamic()">
+            <div class="input-grid">
+              <!-- Volume -->
+              <div class="input-group-enhanced">
+                <label class="input-label">
+                  <i class="bi bi-cup me-1"></i>Volume
+                  @if (getFilledCount() >= 3 && !formDynamicsFormula.get('volume')?.value) {
+                    <span class="calculated-badge">Calculated</span>
+                  }
+                </label>
+                <div class="input-with-unit">
+                  <input type="number" 
+                         class="form-control" 
+                         formControlName="volume"
+                         [class.is-calculated]="getFilledCount() >= 3 && !formDynamicsFormula.get('volume')?.value"
+                         placeholder="0.00">
+                  <select class="form-select unit-select" formControlName="volumeUnit">
+                    @for (unit of dataService.volumeUnits; track unit) {
+                      <option [value]="unit">{{unit}}</option>
+                    }
+                  </select>
+                </div>
+              </div>
+
+              <!-- Concentration -->
+              <div class="input-group-enhanced">
+                <label class="input-label">
+                  <i class="bi bi-droplet me-1"></i>Concentration
+                  @if (getFilledCount() >= 3 && !formDynamicsFormula.get('concentration')?.value) {
+                    <span class="calculated-badge">Calculated</span>
+                  }
+                </label>
+                <div class="input-with-unit">
+                  <input type="number" 
+                         class="form-control" 
+                         formControlName="concentration"
+                         [class.is-calculated]="getFilledCount() >= 3 && !formDynamicsFormula.get('concentration')?.value"
+                         placeholder="0.00">
+                  <select class="form-select unit-select" formControlName="concentrationUnit">
+                    @for (unit of dataService.molarityUnits; track unit) {
+                      <option [value]="unit">{{unit}}</option>
+                    }
+                  </select>
+                </div>
+              </div>
+
+              <!-- Molecular Weight -->
+              <div class="input-group-enhanced">
+                <label class="input-label">
+                  <i class="bi bi-grid-3x3 me-1"></i>Molecular Weight
+                  @if (getFilledCount() >= 3 && !formDynamicsFormula.get('molecularWeight')?.value) {
+                    <span class="calculated-badge">Calculated</span>
+                  }
+                </label>
+                <div class="input-with-unit">
+                  <input type="number" 
+                         class="form-control" 
+                         formControlName="molecularWeight"
+                         [class.is-calculated]="getFilledCount() >= 3 && !formDynamicsFormula.get('molecularWeight')?.value"
+                         placeholder="0.00">
+                  <span class="unit-display">g/mol</span>
+                </div>
+              </div>
+
+              <!-- Mass -->
+              <div class="input-group-enhanced">
+                <label class="input-label">
+                  <i class="bi bi-subtract me-1"></i>Mass
+                  @if (getFilledCount() >= 3 && !formDynamicsFormula.get('weight')?.value) {
+                    <span class="calculated-badge">Calculated</span>
+                  }
+                </label>
+                <div class="input-with-unit">
+                  <input type="number" 
+                         class="form-control" 
+                         formControlName="weight"
+                         [class.is-calculated]="getFilledCount() >= 3 && !formDynamicsFormula.get('weight')?.value"
+                         placeholder="0.00">
+                  <select class="form-select unit-select" formControlName="weightUnit">
+                    @for (unit of dataService.massUnits; track unit) {
+                      <option [value]="unit">{{unit}}</option>
+                    }
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div class="calculation-status">
+              @if (getFilledCount() < 3) {
+                <div class="status-message warning">
+                  <i class="bi bi-info-circle me-2"></i>
+                  Enter {{3 - getFilledCount()}} more value(s) to calculate
+                </div>
+              } @else {
+                <div class="status-message success">
+                  <i class="bi bi-check-circle me-2"></i>
+                  Ready to calculate
+                </div>
+              }
+            </div>
+
+            <div class="form-actions">
+              <button type="submit" 
+                      class="btn btn-primary" 
+                      [disabled]="getFilledCount() < 3">
+                <i class="bi bi-play-fill me-2"></i>Calculate
+              </button>
+              <button type="button" 
+                      class="btn btn-outline-secondary" 
+                      (click)="clearForm('dynamic')">
+                <i class="bi bi-arrow-clockwise me-2"></i>Clear
+              </button>
+            </div>
+          </form>
+        </div>
+      }
+
+      @case ("massFromVolumeAndConcentration") {
+        <div class="form-card">
+          <div class="form-header">
+            <h6 class="mb-1">
+              <i class="bi bi-subtract me-2 text-info"></i>Calculate Mass
+            </h6>
+            <p class="text-muted small mb-0">mass = concentration × volume × molecular weight</p>
+          </div>
+
+          <form [formGroup]="formMassFromVolumeAndConcentration" (ngSubmit)="calculateMassFromVolumeAndConcentration()">
+            <div class="input-grid">
+              <div class="input-group-enhanced">
+                <label class="input-label required">
+                  <i class="bi bi-droplet me-1"></i>Concentration
+                </label>
+                <div class="input-with-unit">
+                  <input type="number" class="form-control" formControlName="concentration" placeholder="0.00" required>
+                  <select class="form-select unit-select" formControlName="concentrationUnit">
+                    @for (unit of dataService.molarityUnits; track unit) {
+                      <option [value]="unit">{{unit}}</option>
+                    }
+                  </select>
+                </div>
+              </div>
+
+              <div class="input-group-enhanced">
+                <label class="input-label required">
+                  <i class="bi bi-cup me-1"></i>Volume
+                </label>
+                <div class="input-with-unit">
+                  <input type="number" class="form-control" formControlName="volume" placeholder="0.00" required>
+                  <select class="form-select unit-select" formControlName="volumeUnit">
+                    @for (unit of dataService.volumeUnits; track unit) {
+                      <option [value]="unit">{{unit}}</option>
+                    }
+                  </select>
+                </div>
+              </div>
+
+              <div class="input-group-enhanced">
+                <label class="input-label required">
+                  <i class="bi bi-grid-3x3 me-1"></i>Molecular Weight
+                </label>
+                <div class="input-with-unit">
+                  <input type="number" class="form-control" formControlName="molecularWeight" placeholder="0.00" required>
+                  <span class="unit-display">g/mol</span>
+                </div>
+              </div>
+
+              <div class="input-group-enhanced">
+                <label class="input-label">
+                  <i class="bi bi-subtract me-1"></i>Result Unit
+                </label>
+                <select class="form-select" formControlName="weightUnit">
+                  @for (unit of dataService.massUnits; track unit) {
+                    <option [value]="unit">{{unit}}</option>
+                  }
+                </select>
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button type="submit" class="btn btn-info" [disabled]="!formMassFromVolumeAndConcentration.valid">
+                <i class="bi bi-play-fill me-2"></i>Calculate Mass
+              </button>
+              <button type="button" class="btn btn-outline-secondary" (click)="clearForm('massFromVolumeAndConcentration')">
+                <i class="bi bi-arrow-clockwise me-2"></i>Clear
+              </button>
+            </div>
+          </form>
+        </div>
+      }
+
+      @case ("volumeFromMassAndConcentration") {
+        <div class="form-card">
+          <div class="form-header">
+            <h6 class="mb-1">
+              <i class="bi bi-cup me-2 text-success"></i>Calculate Volume
+            </h6>
+            <p class="text-muted small mb-0">volume = mass / (concentration × molecular weight)</p>
+          </div>
+
+          <form [formGroup]="formVolumeFromMassAndConcentration" (ngSubmit)="calculateVolumeFromMassAndConcentration()">
+            <div class="input-grid">
+              <div class="input-group-enhanced">
+                <label class="input-label required">
+                  <i class="bi bi-subtract me-1"></i>Mass
+                </label>
+                <div class="input-with-unit">
+                  <input type="number" class="form-control" formControlName="weight" placeholder="0.00" required>
+                  <select class="form-select unit-select" formControlName="weightUnit">
+                    @for (unit of dataService.massUnits; track unit) {
+                      <option [value]="unit">{{unit}}</option>
+                    }
+                  </select>
+                </div>
+              </div>
+
+              <div class="input-group-enhanced">
+                <label class="input-label required">
+                  <i class="bi bi-droplet me-1"></i>Concentration
+                </label>
+                <div class="input-with-unit">
+                  <input type="number" class="form-control" formControlName="concentration" placeholder="0.00" required>
+                  <select class="form-select unit-select" formControlName="concentrationUnit">
+                    @for (unit of dataService.molarityUnits; track unit) {
+                      <option [value]="unit">{{unit}}</option>
+                    }
+                  </select>
+                </div>
+              </div>
+
+              <div class="input-group-enhanced">
+                <label class="input-label required">
+                  <i class="bi bi-grid-3x3 me-1"></i>Molecular Weight
+                </label>
+                <div class="input-with-unit">
+                  <input type="number" class="form-control" formControlName="molecularWeight" placeholder="0.00" required>
+                  <span class="unit-display">g/mol</span>
+                </div>
+              </div>
+
+              <div class="input-group-enhanced">
+                <label class="input-label">
+                  <i class="bi bi-cup me-1"></i>Result Unit
+                </label>
+                <select class="form-select" formControlName="volumeUnit">
+                  @for (unit of dataService.volumeUnits; track unit) {
+                    <option [value]="unit">{{unit}}</option>
+                  }
+                </select>
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button type="submit" class="btn btn-success" [disabled]="!formVolumeFromMassAndConcentration.valid">
+                <i class="bi bi-play-fill me-2"></i>Calculate Volume
+              </button>
+              <button type="button" class="btn btn-outline-secondary" (click)="clearForm('volumeFromMassAndConcentration')">
+                <i class="bi bi-arrow-clockwise me-2"></i>Clear
+              </button>
+            </div>
+          </form>
+        </div>
+      }
+
+      @case ("concentrationFromMassAndVolume") {
+        <div class="form-card">
+          <div class="form-header">
+            <h6 class="mb-1">
+              <i class="bi bi-droplet me-2 text-warning"></i>Calculate Concentration
+            </h6>
+            <p class="text-muted small mb-0">concentration = mass / (volume × molecular weight)</p>
+          </div>
+
+          <form [formGroup]="formConcentrationFromMassAndVolume" (ngSubmit)="calculateConcentrationFromMassAndVolume()">
+            <div class="input-grid">
+              <div class="input-group-enhanced">
+                <label class="input-label required">
+                  <i class="bi bi-subtract me-1"></i>Mass
+                </label>
+                <div class="input-with-unit">
+                  <input type="number" class="form-control" formControlName="weight" placeholder="0.00" required>
+                  <select class="form-select unit-select" formControlName="weightUnit">
+                    @for (unit of dataService.massUnits; track unit) {
+                      <option [value]="unit">{{unit}}</option>
+                    }
+                  </select>
+                </div>
+              </div>
+
+              <div class="input-group-enhanced">
+                <label class="input-label required">
+                  <i class="bi bi-cup me-1"></i>Volume
+                </label>
+                <div class="input-with-unit">
+                  <input type="number" class="form-control" formControlName="volume" placeholder="0.00" required>
+                  <select class="form-select unit-select" formControlName="volumeUnit">
+                    @for (unit of dataService.volumeUnits; track unit) {
+                      <option [value]="unit">{{unit}}</option>
+                    }
+                  </select>
+                </div>
+              </div>
+
+              <div class="input-group-enhanced">
+                <label class="input-label required">
+                  <i class="bi bi-grid-3x3 me-1"></i>Molecular Weight
+                </label>
+                <div class="input-with-unit">
+                  <input type="number" class="form-control" formControlName="molecularWeight" placeholder="0.00" required>
+                  <span class="unit-display">g/mol</span>
+                </div>
+              </div>
+
+              <div class="input-group-enhanced">
+                <label class="input-label">
+                  <i class="bi bi-droplet me-1"></i>Result Unit
+                </label>
+                <select class="form-select" formControlName="concentrationUnit">
+                  @for (unit of dataService.molarityUnits; track unit) {
+                    <option [value]="unit">{{unit}}</option>
+                  }
+                </select>
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button type="submit" class="btn btn-warning" [disabled]="!formConcentrationFromMassAndVolume.valid">
+                <i class="bi bi-play-fill me-2"></i>Calculate Concentration
+              </button>
+              <button type="button" class="btn btn-outline-secondary" (click)="clearForm('concentrationFromMassAndVolume')">
+                <i class="bi bi-arrow-clockwise me-2"></i>Clear
+              </button>
+            </div>
+          </form>
+        </div>
+      }
+
+      @case ("volumeFromStockVolumeAndConcentration") {
+        <div class="form-card">
+          <div class="form-header">
+            <h6 class="mb-1">
+              <i class="bi bi-funnel me-2 text-danger"></i>Dilution Calculator
+            </h6>
+            <p class="text-muted small mb-0">C₁V₁ = C₂V₂ → V₂ = (C₁ × V₁) / C₂</p>
+          </div>
+
+          <form [formGroup]="formVolumeFromStockVolumeAndConcentration" (ngSubmit)="calculateVolumeFromStockVolumeAndConcentration()">
+            <div class="input-grid">
+              <div class="input-group-enhanced">
+                <label class="input-label required">
+                  <i class="bi bi-cup me-1"></i>Stock Volume (V₁)
+                </label>
+                <div class="input-with-unit">
+                  <input type="number" class="form-control" formControlName="stockVolume" placeholder="0.00" required>
+                  <select class="form-select unit-select" formControlName="stockVolumeUnit">
+                    @for (unit of dataService.volumeUnits; track unit) {
+                      <option [value]="unit">{{unit}}</option>
+                    }
+                  </select>
+                </div>
+              </div>
+
+              <div class="input-group-enhanced">
+                <label class="input-label required">
+                  <i class="bi bi-droplet me-1"></i>Stock Concentration (C₁)
+                </label>
+                <div class="input-with-unit">
+                  <input type="number" class="form-control" formControlName="stockConcentration" placeholder="0.00" required>
+                  <select class="form-select unit-select" formControlName="stockConcentrationUnit">
+                    @for (unit of dataService.molarityUnits; track unit) {
+                      <option [value]="unit">{{unit}}</option>
+                    }
+                  </select>
+                </div>
+              </div>
+
+              <div class="input-group-enhanced">
+                <label class="input-label required">
+                  <i class="bi bi-droplet-half me-1"></i>Target Concentration (C₂)
+                </label>
+                <div class="input-with-unit">
+                  <input type="number" class="form-control" formControlName="targetConcentration" placeholder="0.00" required>
+                  <select class="form-select unit-select" formControlName="targetConcentrationUnit">
+                    @for (unit of dataService.molarityUnits; track unit) {
+                      <option [value]="unit">{{unit}}</option>
+                    }
+                  </select>
+                </div>
+              </div>
+
+              <div class="input-group-enhanced">
+                <label class="input-label">
+                  <i class="bi bi-cup me-1"></i>Result Unit (V₂)
+                </label>
+                <select class="form-select" formControlName="volumeUnit">
+                  @for (unit of dataService.volumeUnits; track unit) {
+                    <option [value]="unit">{{unit}}</option>
+                  }
+                </select>
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button type="submit" class="btn btn-danger" [disabled]="!formVolumeFromStockVolumeAndConcentration.valid">
+                <i class="bi bi-play-fill me-2"></i>Calculate Final Volume
+              </button>
+              <button type="button" class="btn btn-outline-secondary" (click)="clearForm('volumeFromStockVolumeAndConcentration')">
+                <i class="bi bi-arrow-clockwise me-2"></i>Clear
+              </button>
+            </div>
+          </form>
+        </div>
+      }
+    }
+  </div>
+
+  <!-- Calculation History -->
+  @if (dataLog.length > 0) {
+    <div class="calculation-history">
+      <div class="history-header">
+        <div class="d-flex justify-content-between align-items-center">
+          <h6 class="mb-0">
+            <i class="bi bi-clock-history me-2"></i>Calculation History ({{dataLog.length}})
+          </h6>
+          <div class="history-actions">
+            <button class="btn btn-sm btn-outline-primary" (click)="exportHistory()" ngbTooltip="Export history">
+              <i class="bi bi-download"></i>
+            </button>
+            <button class="btn btn-sm btn-outline-danger" (click)="clearHistory()" ngbTooltip="Clear history">
+              <i class="bi bi-trash"></i>
+            </button>
+            <button class="btn btn-sm btn-outline-secondary" (click)="toggleHistory()" ngbTooltip="Toggle history">
+              <i class="bi" [ngClass]="showHistory ? 'bi-chevron-up' : 'bi-chevron-down'"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      @if (showHistory) {
+        <div class="history-content">
+          @for (entry of getVisibleHistory(); track trackByHistoryId($index, entry); let i = $index) {
+            <div class="history-item" [class.scratched]="entry.scratched">
+              <div class="history-main" (click)="revertToCalculation(entry)">
+                <div class="history-formula">
+                  @switch (entry.operationType) {
+                    @case ('massFromVolumeAndConcentration') {
+                      <div class="formula-display">
+                        <span class="formula-result">{{formatNumber(entry.result)}} {{entry.data.weightUnit}}</span>
+                        <span class="formula-equals"> = </span>
+                        <span class="formula-parts">
+                          {{formatNumber(entry.data.concentration)}} {{entry.data.concentrationUnit}} × 
+                          {{formatNumber(entry.data.volume)}} {{entry.data.volumeUnit}} × 
+                          {{formatNumber(entry.data.molecularWeight)}} g/mol
+                        </span>
+                      </div>
+                      <div class="operation-type">
+                        <i class="bi bi-subtract text-info"></i>
+                        <small>Mass Calculation</small>
+                      </div>
+                    }
+                    @case ('volumeFromMassAndConcentration') {
+                      <div class="formula-display">
+                        <span class="formula-result">{{formatNumber(entry.result)}} {{entry.data.volumeUnit}}</span>
+                        <span class="formula-equals"> = </span>
+                        <span class="formula-parts">
+                          {{formatNumber(entry.data.weight)}} {{entry.data.weightUnit}} / 
+                          ({{formatNumber(entry.data.concentration)}} {{entry.data.concentrationUnit}} × 
+                          {{formatNumber(entry.data.molecularWeight)}} g/mol)
+                        </span>
+                      </div>
+                      <div class="operation-type">
+                        <i class="bi bi-cup text-success"></i>
+                        <small>Volume Calculation</small>
+                      </div>
+                    }
+                    @case ('concentrationFromMassAndVolume') {
+                      <div class="formula-display">
+                        <span class="formula-result">{{formatNumber(entry.result)}} {{entry.data.concentrationUnit}}</span>
+                        <span class="formula-equals"> = </span>
+                        <span class="formula-parts">
+                          {{formatNumber(entry.data.weight)}} {{entry.data.weightUnit}} / 
+                          ({{formatNumber(entry.data.volume)}} {{entry.data.volumeUnit}} × 
+                          {{formatNumber(entry.data.molecularWeight)}} g/mol)
+                        </span>
+                      </div>
+                      <div class="operation-type">
+                        <i class="bi bi-droplet text-warning"></i>
+                        <small>Concentration Calculation</small>
+                      </div>
+                    }
+                    @case ('volumeFromStockVolumeAndConcentration') {
+                      <div class="formula-display">
+                        <span class="formula-result">{{formatNumber(entry.result)}} {{entry.data.volumeUnit}}</span>
+                        <span class="formula-equals"> = </span>
+                        <span class="formula-parts">
+                          ({{formatNumber(entry.data.stockConcentration)}} {{entry.data.stockConcentrationUnit}} × 
+                          {{formatNumber(entry.data.stockVolume)}} {{entry.data.stockVolumeUnit}}) / 
+                          {{formatNumber(entry.data.targetConcentration)}} {{entry.data.targetConcentrationUnit}}
+                        </span>
+                      </div>
+                      <div class="operation-type">
+                        <i class="bi bi-funnel text-danger"></i>
+                        <small>Dilution Calculation</small>
+                      </div>
+                    }
+                    @case ('dynamic') {
+                      <div class="formula-display">
+                        @if (entry.calculatedField === 'weight') {
+                          <span class="formula-result">{{formatNumber(entry.result)}} {{entry.data.weightUnit}}</span>
+                          <span class="formula-equals"> = </span>
+                          <span class="formula-parts">
+                            {{formatNumber(entry.data.volume)}} {{entry.data.volumeUnit}} × 
+                            {{formatNumber(entry.data.concentration)}} {{entry.data.concentrationUnit}} × 
+                            {{formatNumber(entry.data.molecularWeight)}} g/mol
+                          </span>
+                        } @else if (entry.calculatedField === 'volume') {
+                          <span class="formula-result">{{formatNumber(entry.result)}} {{entry.data.volumeUnit}}</span>
+                          <span class="formula-equals"> = </span>
+                          <span class="formula-parts">
+                            {{formatNumber(entry.data.weight)}} {{entry.data.weightUnit}} / 
+                            ({{formatNumber(entry.data.concentration)}} {{entry.data.concentrationUnit}} × 
+                            {{formatNumber(entry.data.molecularWeight)}} g/mol)
+                          </span>
+                        } @else if (entry.calculatedField === 'concentration') {
+                          <span class="formula-result">{{formatNumber(entry.result)}} {{entry.data.concentrationUnit}}</span>
+                          <span class="formula-equals"> = </span>
+                          <span class="formula-parts">
+                            {{formatNumber(entry.data.weight)}} {{entry.data.weightUnit}} / 
+                            ({{formatNumber(entry.data.volume)}} {{entry.data.volumeUnit}} × 
+                            {{formatNumber(entry.data.molecularWeight)}} g/mol)
+                          </span>
+                        } @else if (entry.calculatedField === 'molecularWeight') {
+                          <span class="formula-result">{{formatNumber(entry.result)}} g/mol</span>
+                          <span class="formula-equals"> = </span>
+                          <span class="formula-parts">
+                            {{formatNumber(entry.data.weight)}} {{entry.data.weightUnit}} / 
+                            ({{formatNumber(entry.data.volume)}} {{entry.data.volumeUnit}} × 
+                            {{formatNumber(entry.data.concentration)}} {{entry.data.concentrationUnit}})
+                          </span>
+                        }
+                      </div>
+                      <div class="operation-type">
+                        <i class="bi bi-calculator text-primary"></i>
+                        <small>Dynamic Calculation</small>
+                      </div>
+                    }
+                  }
+                </div>
+                <div class="history-meta">
+                  <small class="text-muted">
+                    <i class="bi bi-clock me-1"></i>{{formatTimestamp(entry.timestamp)}}
+                    @if (entry.preset) {
+                      <span class="mx-2">•</span>
+                      <i class="bi bi-star me-1"></i>{{entry.preset}}
+                    }
+                  </small>
+                </div>
+              </div>
+
+              <div class="history-actions">
+                <button class="btn btn-sm btn-ghost" 
+                        (click)="entry.scratched = !entry.scratched" 
+                        ngbTooltip="{{entry.scratched ? 'Restore' : 'Scratch'}}">
+                  <i class="bi" [ngClass]="entry.scratched ? 'bi-arrow-clockwise' : 'bi-slash-circle'"></i>
+                </button>
+                <button class="btn btn-sm btn-ghost" 
+                        (click)="copyToClipboard(entry)" 
+                        ngbTooltip="Copy result">
+                  <i class="bi bi-clipboard"></i>
+                </button>
+                <button class="btn btn-sm btn-ghost text-danger" 
+                        (click)="removeHistoryItem(i)" 
+                        ngbTooltip="Delete">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
   }
 </div>

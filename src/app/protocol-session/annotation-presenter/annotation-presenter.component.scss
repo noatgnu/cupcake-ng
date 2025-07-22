@@ -8,7 +8,7 @@
     
     .input-group-text {
       background-color: var(--bs-primary);
-      color: white;
+      color: var(--bs-body-bg);
       border-color: var(--bs-primary);
     }
     
@@ -206,6 +206,190 @@
   }
 }
 
+// Enhanced Annotation Content Integration
+.annotation-content {
+  .annotation-presenter-wrapper {
+    // Type-specific container styling
+    &[data-type="text"] .text-annotation-content {
+      .rich-text-content {
+        line-height: 1.6;
+        font-size: 0.95rem;
+        
+        // Enhanced text formatting
+        h1, h2, h3, h4, h5, h6 {
+          margin-top: 1.5rem;
+          margin-bottom: 0.75rem;
+          
+          &:first-child {
+            margin-top: 0;
+          }
+        }
+        
+        p {
+          margin-bottom: 1rem;
+          
+          &:last-child {
+            margin-bottom: 0;
+          }
+        }
+        
+        ul, ol {
+          margin-bottom: 1rem;
+          padding-left: 1.5rem;
+        }
+        
+        blockquote {
+          border-left: 4px solid var(--bs-primary);
+          padding-left: 1rem;
+          margin: 1rem 0;
+          font-style: italic;
+          color: var(--bs-secondary);
+        }
+        
+        code {
+          background-color: var(--bs-secondary-bg);
+          padding: 0.2rem 0.4rem;
+          border-radius: 0.25rem;
+          font-size: 0.875em;
+        }
+      }
+    }
+    
+    &[data-type="image"] .media-annotation-container,
+    &[data-type="audio"] .media-annotation-container,
+    &[data-type="video"] .media-annotation-container,
+    &[data-type="sketch"] .media-annotation-container {
+      text-align: center;
+      
+      .media-info-panel {
+        text-align: left;
+        
+        .accordion-item {
+          border: 1px solid var(--bs-border-color-translucent);
+          
+          .accordion-button {
+            padding: 0.75rem;
+            font-size: 0.9rem;
+            
+            &:not(.collapsed) {
+              background-color: var(--bs-primary-bg-subtle);
+              color: var(--bs-primary-text);
+            }
+          }
+          
+          .accordion-body {
+            padding: 0.75rem;
+            background-color: var(--bs-body-bg);
+          }
+        }
+      }
+    }
+    
+    &[data-type="checklist"] .interactive-annotation-container,
+    &[data-type="counter"] .interactive-annotation-container,
+    &[data-type="table"] .interactive-annotation-container,
+    &[data-type="calculator"] .interactive-annotation-container,
+    &[data-type="mcalculator"] .interactive-annotation-container {
+      display: flex;
+      justify-content: center;
+      
+      > * {
+        width: 100%;
+        max-width: 600px;
+      }
+    }
+    
+    &[data-type="alignment"] .scientific-annotation-container,
+    &[data-type="randomization"] .scientific-annotation-container {
+      overflow-x: auto;
+      
+      > * {
+        min-width: 400px;
+      }
+    }
+    
+    &[data-type="instrument"] .system-annotation-container {
+      text-align: center;
+    }
+    
+    .fallback-annotation-content {
+      .alert {
+        margin-bottom: 1rem;
+      }
+      
+      pre {
+        max-height: 300px;
+        overflow-y: auto;
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+    }
+  }
+  
+  // Enhanced Metadata Display
+  .annotation-metadata {
+    .metadata-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 0.75rem;
+      
+      .metadata-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.75rem;
+        border: 1px solid var(--bs-border-color-translucent);
+        border-radius: 0.375rem;
+        background-color: var(--bs-body-bg);
+        transition: all 0.2s ease;
+        
+        &:hover {
+          background-color: var(--bs-primary-bg-subtle);
+          border-color: var(--bs-primary-border-subtle);
+        }
+        
+        .metadata-label {
+          font-weight: 500;
+          color: var(--bs-dark);
+          margin-right: 0.5rem;
+          min-width: 0;
+          flex: 1;
+        }
+        
+        .metadata-value {
+          color: var(--bs-secondary);
+          margin-right: 0.5rem;
+          word-break: break-word;
+          text-align: right;
+          flex: 1;
+        }
+        
+        .metadata-type-badge {
+          font-size: 0.7rem;
+          padding: 0.25rem 0.5rem;
+          flex-shrink: 0;
+        }
+        
+        &[data-type="Characteristics"] {
+          border-left: 4px solid var(--bs-primary);
+        }
+        
+        &[data-type="Comment"] {
+          border-left: 4px solid var(--bs-secondary);
+        }
+        
+        &[data-type="Factor value"] {
+          border-left: 4px solid var(--bs-success);
+        }
+        
+        &[data-type="Other"] {
+          border-left: 4px solid var(--bs-warning);
+        }
+      }
+    }
+  }
+}
+
 // Utility classes for enhanced functionality
 .annotation-type-icon {
   font-size: 1.1rem;
@@ -230,6 +414,46 @@
 }
 
 // Responsive improvements
+@media (max-width: 768px) {
+  .annotation-content {
+    .annotation-metadata {
+      .metadata-grid {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+        
+        .metadata-item {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 0.5rem;
+          
+          .metadata-label,
+          .metadata-value {
+            text-align: left;
+            flex: none;
+            width: 100%;
+          }
+          
+          .metadata-type-badge {
+            align-self: flex-end;
+          }
+        }
+      }
+    }
+    
+    .annotation-presenter-wrapper {
+      &[data-type="checklist"] .interactive-annotation-container,
+      &[data-type="counter"] .interactive-annotation-container,
+      &[data-type="table"] .interactive-annotation-container,
+      &[data-type="calculator"] .interactive-annotation-container,
+      &[data-type="mcalculator"] .interactive-annotation-container {
+        > * {
+          max-width: none;
+        }
+      }
+    }
+  }
+}
+
 @media (max-width: 576px) {
   .annotation-presenter-container {
     .card {
@@ -249,6 +473,41 @@
       
       .card-body {
         padding: 0.75rem;
+      }
+    }
+  }
+  
+  .annotation-content {
+    .annotation-presenter-wrapper {
+      &[data-type="text"] .text-annotation-content {
+        .rich-text-content {
+          font-size: 0.9rem;
+          
+          h1, h2, h3, h4, h5, h6 {
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+          }
+        }
+      }
+      
+      &[data-type="alignment"] .scientific-annotation-container,
+      &[data-type="randomization"] .scientific-annotation-container {
+        > * {
+          min-width: 300px;
+        }
+      }
+    }
+    
+    .annotation-metadata {
+      .metadata-grid {
+        .metadata-item {
+          padding: 0.5rem;
+          
+          .metadata-type-badge {
+            font-size: 0.65rem;
+            padding: 0.2rem 0.4rem;
+          }
+        }
       }
     }
   }

@@ -18,6 +18,7 @@ import {TranscribeModalComponent} from "../transcribe-modal/transcribe-modal.com
 import {ChecklistPresenterComponent} from "../checklist-presenter/checklist-presenter.component";
 import {CounterPresenterComponent} from "../counter-presenter/counter-presenter.component";
 import {TablePresenterComponent} from "../table-presenter/table-presenter.component";
+import {TextAnnotationPresenterComponent} from "../text-annotation-presenter/text-annotation-presenter.component";
 import {AlignmentAnnotationComponent} from "../alignment-annotation/alignment-annotation.component";
 import {CalculatorAnnotationComponent} from "../calculator-annotation/calculator-annotation.component";
 import {MolarityCalculatorComponent} from "../molarity-calculator/molarity-calculator.component";
@@ -43,6 +44,7 @@ import {FormsModule} from '@angular/forms';
         ChecklistPresenterComponent,
         CounterPresenterComponent,
         TablePresenterComponent,
+        TextAnnotationPresenterComponent,
         AlignmentAnnotationComponent,
         CalculatorAnnotationComponent,
         MolarityCalculatorComponent,
@@ -160,7 +162,8 @@ export class AnnotationPresenterComponent implements OnDestroy {
   }
 
   updateAnnotation(annotation: Annotation) {
-    if (this.dataService.annotationPermissions[annotation.id].edit) {
+    const permissions = this.dataService.annotationPermissions[annotation.id]
+    if (permissions && permissions.edit) {
       this.annotations = this.annotations.map((a) => {
         if (a.id === annotation.id) {
           return annotation

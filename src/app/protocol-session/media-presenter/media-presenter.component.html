@@ -1,83 +1,433 @@
 @if (annotation && mediaURL) {
-  @if (annotation.annotation_type === 'video' ) {
-    <video controls (timeupdate)="highLightSubtitle($event)" #videoControlElement [width]="400" [height]="300">
-      @if (annotation.file.endsWith(".mp4")) {
-        <source [attr.src]="mediaURL" type="video/mp4">
-      } @else if (annotation.file.endsWith(".webm")) {
-        <source [attr.src]="mediaURL" type="video/webm">
-      }
-
-      @if (transcription) {
-        <track [attr.src]="transcription" kind="captions" srclang="en" label="captions">
-      }
-      @if (annotation.translation) {
-        <track [attr.src]="translation" kind="captions" srclang="en" label="translated english captions">
-      }
-      Your browser does not support the audio element.
-    </video>
-  } @else {
-    <audio controls (timeupdate)="highLightSubtitle($event)" #audioControlElement>
-      @if (annotation.file.endsWith(".m4a")) {
-        <source [attr.src]="mediaURL" type="audio/mp4">
-      } @else if (annotation.file.endsWith(".webm")) {
-        <source [attr.src]="mediaURL" type="audio/webm">
-      }
-
-      @if (transcription) {
-        <track [attr.src]="transcription" kind="captions" srclang="en" label="captions">
-      }
-      @if (annotation.translation) {
-        <track [attr.src]="translation" kind="captions" srclang="en" label="translated english captions">
-      }
-      Your browser does not support the audio element.
-    </audio>
-  }
-}
-@if (transcription) {
-  <div class="overflow-auto" style="max-height: 300px">
-    <ul ngbNav #nav="ngbNav" [(activeId)]="active" class="nav-tabs" [destroyOnHide]="false">
-      <li [ngbNavItem]="'transcription'" [destroyOnHide]="false">
-        <button ngbNavLink>Transcription</button>
-        <ng-template ngbNavContent>
-          <button class="btn btn-sm btn-primary" (click)="editText('transcription')">Edit</button>
-          <div class="list-group">
-            @for (e of subtitles.entries; track e; let i = $index) {
-              <div class="list-group-item list-group-item-action border-0 rounded-1" (click)="seekToTimePosition(e.from)"
-                   [ngClass]="{'list-group-item-success': i === currentSubtitleID, 'list-group-item-light': i !== currentSubtitleID}"
-              >
-                {{i}} {{msToTime(e.from)}} --> {{msToTime(e.to)}}<br> <span>{{e.text}}</span>
-              </div>
-            }
-          </div>
-        </ng-template>
-      </li>
-      @if (annotation.translation) {
-        <li [ngbNavItem]="'translation'" [destroyOnHide]="false">
-          <button ngbNavLink>Translation</button>
-          <ng-template ngbNavContent>
-            <button class="btn btn-sm btn-primary" (click)="editText('translation')">Edit</button>
-            <div class="list-group">
-              @for (e of translationSubtitles.entries; track e; let i = $index) {
-                <div class="list-group-item list-group-item-action border-0 rounded-1" (click)="seekToTimePosition(e.from)"
-                     [ngClass]="{'list-group-item-success': i === currentSubtitleID, 'list-group-item-light': i !== currentSubtitleID}"
-                >
-                  {{i}} {{msToTime(e.from)}} --> {{msToTime(e.to)}}<br> <span>{{e.text}}</span>
-                </div>
+  <div class="enhanced-media-presenter">
+    <!-- Media Controls Bar -->
+    <div class="media-controls-bar mb-3">
+      <div class="d-flex justify-content-between align-items-center">
+        <div class="media-info">
+          <span class="badge bg-primary me-2">
+            <i class="bi" [ngClass]="annotation.annotation_type === 'video' ? 'bi-camera-video' : 'bi-mic'"></i>
+            {{annotation.annotation_type | titlecase}}
+          </span>
+          @if (currentTime >= 0) {
+            <span class="text-muted small">{{formatTime(currentTime)}} / {{formatTime(duration)}}</span>
+          }
+        </div>
+        
+        <div class="media-actions">
+          <!-- Playback Speed -->
+          <div class="btn-group btn-group-sm me-2" ngbDropdown container="body">
+            <button class="btn btn-outline-secondary" ngbDropdownToggle>
+              <i class="bi bi-speedometer2 me-1"></i>{{playbackRate}}x
+            </button>
+            <div class="dropdown-menu" ngbDropdownMenu>
+              @for (speed of playbackSpeeds; track speed) {
+                <button class="dropdown-item" 
+                        (click)="setPlaybackRate(speed)"
+                        [class.active]="playbackRate === speed">
+                  {{speed}}x
+                </button>
               }
             </div>
-          </ng-template>
-        </li>
+          </div>
+          
+          <!-- Volume Control -->
+          <div class="btn-group btn-group-sm me-2">
+            <button class="btn btn-outline-secondary" (click)="toggleMute()">
+              <i class="bi" [ngClass]="isMuted ? 'bi-volume-mute' : 'bi-volume-up'"></i>
+            </button>
+          </div>
+          
+          <!-- Loop Toggle -->
+          <div class="btn-group btn-group-sm me-2">
+            <button class="btn btn-outline-secondary" 
+                    (click)="toggleLoop()"
+                    [class.active]="isLooping"
+                    ngbTooltip="Toggle Loop">
+              <i class="bi bi-arrow-repeat"></i>
+            </button>
+          </div>
+          
+          <!-- Fullscreen (Video only) -->
+          @if (annotation.annotation_type === 'video') {
+            <div class="btn-group btn-group-sm">
+              <button class="btn btn-outline-secondary" 
+                      (click)="toggleFullscreen()"
+                      ngbTooltip="Toggle Fullscreen">
+                <i class="bi bi-arrows-fullscreen"></i>
+              </button>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+    
+    <!-- Media Element -->
+    <div class="media-container">
+      @if (annotation.annotation_type === 'video') {
+        <div class="video-wrapper" #videoWrapper>
+          <video 
+            #videoControlElement
+            [width]="videoWidth" 
+            [height]="videoHeight"
+            controls
+            [loop]="isLooping"
+            (timeupdate)="highLightSubtitle($event)"
+            (loadedmetadata)="onMediaLoaded($event)"
+            (loadstart)="onMediaLoadStart()"
+            (error)="onMediaError($event)"
+            (canplay)="onMediaCanPlay()"
+            (volumechange)="onVolumeChange($event)">
+            @if (annotation.file.endsWith('.mp4')) {
+              <source [attr.src]="mediaURL" type="video/mp4">
+            } @else if (annotation.file.endsWith('.webm')) {
+              <source [attr.src]="mediaURL" type="video/webm">
+            }
+            
+            @if (transcription) {
+              <track [attr.src]="transcription" kind="captions" srclang="en" label="captions">
+            }
+            @if (annotation.translation) {
+              <track [attr.src]="translation" kind="captions" srclang="en" label="translated english captions">
+            }
+            Your browser does not support the video element.
+          </video>
+          
+          @if (isLoading) {
+            <div class="media-loading-overlay">
+              <div class="text-center">
+                <div class="spinner-border text-primary" role="status">
+                  <span class="visually-hidden">Loading media...</span>
+                </div>
+                <p class="mt-2 text-muted">Loading video...</p>
+              </div>
+            </div>
+          }
+          
+          @if (mediaError) {
+            <div class="media-error-overlay">
+              <div class="text-center">
+                <i class="bi bi-exclamation-triangle fs-1 text-warning"></i>
+                <p class="mt-2 text-muted">Failed to load video</p>
+                <button class="btn btn-sm btn-outline-primary" (click)="retryMediaLoad()">
+                  <i class="bi bi-arrow-clockwise me-1"></i>Retry
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+      } @else {
+        <div class="audio-wrapper">
+          <audio 
+            #audioControlElement
+            controls
+            [loop]="isLooping"
+            (timeupdate)="highLightSubtitle($event)"
+            (loadedmetadata)="onMediaLoaded($event)"
+            (loadstart)="onMediaLoadStart()"
+            (error)="onMediaError($event)"
+            (canplay)="onMediaCanPlay()"
+            (volumechange)="onVolumeChange($event)">
+            @if (annotation.file.endsWith('.m4a')) {
+              <source [attr.src]="mediaURL" type="audio/mp4">
+            } @else if (annotation.file.endsWith('.webm')) {
+              <source [attr.src]="mediaURL" type="audio/webm">
+            } @else if (annotation.file.endsWith('.mp3')) {
+              <source [attr.src]="mediaURL" type="audio/mpeg">
+            }
+            
+            @if (transcription) {
+              <track [attr.src]="transcription" kind="captions" srclang="en" label="captions">
+            }
+            @if (annotation.translation) {
+              <track [attr.src]="translation" kind="captions" srclang="en" label="translated english captions">
+            }
+            Your browser does not support the audio element.
+          </audio>
+          
+          @if (isLoading) {
+            <div class="audio-loading-state">
+              <div class="text-center py-3">
+                <div class="spinner-border text-primary" role="status">
+                  <span class="visually-hidden">Loading audio...</span>
+                </div>
+                <p class="mt-2 text-muted">Loading audio...</p>
+              </div>
+            </div>
+          }
+          
+          @if (mediaError) {
+            <div class="audio-error-state">
+              <div class="text-center py-3">
+                <i class="bi bi-exclamation-triangle fs-1 text-warning"></i>
+                <p class="mt-2 text-muted">Failed to load audio</p>
+                <button class="btn btn-sm btn-outline-primary" (click)="retryMediaLoad()">
+                  <i class="bi bi-arrow-clockwise me-1"></i>Retry
+                </button>
+              </div>
+            </div>
+          }
+        </div>
       }
-      @if (annotation.summary) {
-        <li [ngbNavItem]="'summary'" [destroyOnHide]="false">
-          <button ngbNavLink>Summary</button>
-          <ng-template ngbNavContent>
-            <p>{{annotation.summary}}</p>
-          </ng-template>
-        </li>
-      }
-    </ul>
-    <div [ngbNavOutlet]="nav" class="mt-2"></div>
+    </div>
+  </div>
+}
+<!-- Enhanced Transcript and Analysis Panel -->
+@if (transcription || annotation.summary) {
+  <div class="enhanced-transcript-panel mt-3">
+    <!-- Search and Filter Bar -->
+    <div class="transcript-controls mb-3">
+      <div class="row g-2">
+        <div class="col-md-6">
+          <div class="input-group input-group-sm">
+            <span class="input-group-text">
+              <i class="bi bi-search"></i>
+            </span>
+            <input type="text" 
+                   class="form-control" 
+                   placeholder="Search transcript..."
+                   [(ngModel)]="searchTerm"
+                   (input)="onSearchTermChange()">
+            @if (searchTerm) {
+              <button class="btn btn-outline-secondary" 
+                      (click)="clearSearch()"
+                      ngbTooltip="Clear search">
+                <i class="bi bi-x"></i>
+              </button>
+            }
+          </div>
+        </div>
+        
+        <div class="col-md-3">
+          <div class="btn-group btn-group-sm w-100" ngbDropdown container="body">
+            <button class="btn btn-outline-secondary" ngbDropdownToggle>
+              <i class="bi bi-funnel me-1"></i>{{getFilterLabel()}}
+            </button>
+            <div class="dropdown-menu" ngbDropdownMenu>
+              <button class="dropdown-item" 
+                      (click)="setTranscriptFilter('all')"
+                      [class.active]="transcriptFilter === 'all'">
+                All Entries
+              </button>
+              <button class="dropdown-item" 
+                      (click)="setTranscriptFilter('current')"
+                      [class.active]="transcriptFilter === 'current'">
+                Current Time
+              </button>
+              <button class="dropdown-item" 
+                      (click)="setTranscriptFilter('search')"
+                      [class.active]="transcriptFilter === 'search'"
+                      [disabled]="!searchResults.length">
+                Search Results ({{searchResults.length}})
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        <div class="col-md-3">
+          @if (searchResults.length > 1) {
+            <div class="btn-group btn-group-sm w-100">
+              <button class="btn btn-outline-primary" 
+                      (click)="previousSearchResult()"
+                      [disabled]="currentSearchIndex <= 0"
+                      ngbTooltip="Previous result">
+                <i class="bi bi-chevron-up"></i>
+              </button>
+              <span class="btn btn-outline-secondary disabled">
+                {{currentSearchIndex + 1}}/{{searchResults.length}}
+              </span>
+              <button class="btn btn-outline-primary" 
+                      (click)="nextSearchResult()"
+                      [disabled]="currentSearchIndex >= searchResults.length - 1"
+                      ngbTooltip="Next result">
+                <i class="bi bi-chevron-down"></i>
+              </button>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+    
+    <!-- Tabbed Content -->
+    <div class="transcript-tabs">
+      <ul ngbNav #nav="ngbNav" [(activeId)]="active" class="nav-pills nav-fill" [destroyOnHide]="false">
+        @if (transcription) {
+          <li [ngbNavItem]="'transcription'" [destroyOnHide]="false">
+            <button ngbNavLink>
+              <i class="bi bi-file-text me-1"></i>Transcription
+              @if (filteredSubtitles.length !== subtitles.entries.length) {
+                <span class="badge bg-primary ms-1">{{filteredSubtitles.length}}</span>
+              }
+            </button>
+            <ng-template ngbNavContent>
+              <div class="transcript-content-header mb-2">
+                <div class="d-flex justify-content-between align-items-center">
+                  <div class="transcript-stats">
+                    <small class="text-muted">
+                      <i class="bi bi-clock me-1"></i>Total: {{formatTime(getTotalDuration())}}
+                      <span class="mx-2">•</span>
+                      <i class="bi bi-list-ol me-1"></i>{{subtitles.entries.length}} entries
+                    </small>
+                  </div>
+                  <div class="transcript-actions">
+                    <button class="btn btn-sm btn-outline-primary me-1" 
+                            (click)="editText('transcription')"
+                            ngbTooltip="Edit transcription">
+                      <i class="bi bi-pencil me-1"></i>Edit
+                    </button>
+                    <button class="btn btn-sm btn-outline-secondary" 
+                            (click)="exportTranscript('transcription')"
+                            ngbTooltip="Export transcription">
+                      <i class="bi bi-download me-1"></i>Export
+                    </button>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="transcript-entries" [style.max-height.px]="transcriptMaxHeight">
+                @for (e of filteredSubtitles; track e.id; let i = $index) {
+                  <div class="transcript-entry" 
+                       (click)="seekToTimePosition(e.from)"
+                       [class.active]="getOriginalIndex(e) === currentSubtitleID"
+                       [class.search-result]="isSearchResult(e)"
+                       [class.current-search]="getCurrentSearchResult() === e">
+                    <div class="transcript-entry-header">
+                      <div class="transcript-time">
+                        <i class="bi bi-play-circle me-1"></i>
+                        <span class="time-from">{{msToTime(e.from)}}</span>
+                        <span class="time-separator">→</span>
+                        <span class="time-to">{{msToTime(e.to)}}</span>
+                        <span class="duration">({{formatDuration(e.to - e.from)}})</span>
+                      </div>
+                      <div class="transcript-entry-actions">
+                        <button class="btn btn-sm btn-outline-primary" 
+                                (click)="seekToTimePosition(e.from); $event.stopPropagation()"
+                                ngbTooltip="Jump to time">
+                          <i class="bi bi-cursor-fill"></i>
+                        </button>
+                      </div>
+                    </div>
+                    <div class="transcript-text" [innerHTML]="highlightSearchTerm(e.text)"></div>
+                  </div>
+                }
+                
+                @if (filteredSubtitles.length === 0) {
+                  <div class="text-center py-4">
+                    @if (searchTerm) {
+                      <i class="bi bi-search fs-2 text-muted"></i>
+                      <p class="text-muted mt-2">No results found for "{{searchTerm}}"</p>
+                      <button class="btn btn-sm btn-outline-primary" (click)="clearSearch()">
+                        Clear search
+                      </button>
+                    } @else {
+                      <i class="bi bi-file-text fs-2 text-muted"></i>
+                      <p class="text-muted mt-2">No transcript entries available</p>
+                    }
+                  </div>
+                }
+              </div>
+            </ng-template>
+          </li>
+        }
+        
+        @if (annotation.translation) {
+          <li [ngbNavItem]="'translation'" [destroyOnHide]="false">
+            <button ngbNavLink>
+              <i class="bi bi-translate me-1"></i>Translation
+              @if (filteredTranslationSubtitles.length !== translationSubtitles.entries.length) {
+                <span class="badge bg-primary ms-1">{{filteredTranslationSubtitles.length}}</span>
+              }
+            </button>
+            <ng-template ngbNavContent>
+              <div class="transcript-content-header mb-2">
+                <div class="d-flex justify-content-between align-items-center">
+                  <div class="transcript-stats">
+                    <small class="text-muted">
+                      <i class="bi bi-clock me-1"></i>Total: {{formatTime(getTranslationTotalDuration())}}
+                      <span class="mx-2">•</span>
+                      <i class="bi bi-list-ol me-1"></i>{{translationSubtitles.entries.length}} entries
+                    </small>
+                  </div>
+                  <div class="transcript-actions">
+                    <button class="btn btn-sm btn-outline-primary me-1" 
+                            (click)="editText('translation')"
+                            ngbTooltip="Edit translation">
+                      <i class="bi bi-pencil me-1"></i>Edit
+                    </button>
+                    <button class="btn btn-sm btn-outline-secondary" 
+                            (click)="exportTranscript('translation')"
+                            ngbTooltip="Export translation">
+                      <i class="bi bi-download me-1"></i>Export
+                    </button>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="transcript-entries" [style.max-height.px]="transcriptMaxHeight">
+                @for (e of filteredTranslationSubtitles; track e.id; let i = $index) {
+                  <div class="transcript-entry" 
+                       (click)="seekToTimePosition(e.from)"
+                       [class.active]="getOriginalTranslationIndex(e) === currentSubtitleID"
+                       [class.search-result]="isTranslationSearchResult(e)"
+                       [class.current-search]="getCurrentTranslationSearchResult() === e">
+                    <div class="transcript-entry-header">
+                      <div class="transcript-time">
+                        <i class="bi bi-play-circle me-1"></i>
+                        <span class="time-from">{{msToTime(e.from)}}</span>
+                        <span class="time-separator">→</span>
+                        <span class="time-to">{{msToTime(e.to)}}</span>
+                        <span class="duration">({{formatDuration(e.to - e.from)}})</span>
+                      </div>
+                      <div class="transcript-entry-actions">
+                        <button class="btn btn-sm btn-outline-primary" 
+                                (click)="seekToTimePosition(e.from); $event.stopPropagation()"
+                                ngbTooltip="Jump to time">
+                          <i class="bi bi-cursor-fill"></i>
+                        </button>
+                      </div>
+                    </div>
+                    <div class="transcript-text" [innerHTML]="highlightSearchTerm(e.text)"></div>
+                  </div>
+                }
+                
+                @if (filteredTranslationSubtitles.length === 0) {
+                  <div class="text-center py-4">
+                    @if (searchTerm) {
+                      <i class="bi bi-search fs-2 text-muted"></i>
+                      <p class="text-muted mt-2">No results found for "{{searchTerm}}"</p>
+                      <button class="btn btn-sm btn-outline-primary" (click)="clearSearch()">
+                        Clear search
+                      </button>
+                    } @else {
+                      <i class="bi bi-translate fs-2 text-muted"></i>
+                      <p class="text-muted mt-2">No translation entries available</p>
+                    }
+                  </div>
+                }
+              </div>
+            </ng-template>
+          </li>
+        }
+        
+        @if (annotation.summary) {
+          <li [ngbNavItem]="'summary'" [destroyOnHide]="false">
+            <button ngbNavLink>
+              <i class="bi bi-file-text-fill me-1"></i>Summary
+            </button>
+            <ng-template ngbNavContent>
+              <div class="summary-content">
+                <div class="card border-0">
+                  <div class="card-body">
+                    <div class="summary-text" [innerHTML]="formatSummary(annotation.summary)"></div>
+                  </div>
+                </div>
+              </div>
+            </ng-template>
+          </li>
+        }
+      </ul>
+      
+      <div [ngbNavOutlet]="nav" class="mt-3"></div>
+    </div>
   </div>
 }
 
