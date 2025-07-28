@@ -2,6 +2,8 @@ import {Component, Input} from '@angular/core';
 import {StorageObject} from "../../storage-object";
 import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
 import {FormBuilder, FormControl, ReactiveFormsModule, Validators} from "@angular/forms";
+import {WebService} from "../../web.service";
+import {ToastService} from "../../toast.service";
 
 @Component({
     selector: 'app-storage-object-editor-modal',
@@ -32,7 +34,9 @@ export class StorageObjectEditorModalComponent {
     object_description: new FormControl("")
   })
 
-  constructor(private activeModal: NgbActiveModal, private fb: FormBuilder) {
+  vaultToggleLoading: boolean = false;
+
+  constructor(private activeModal: NgbActiveModal, private fb: FormBuilder, private web: WebService, private toast: ToastService) {
   }
 
   submit() {
@@ -43,6 +47,26 @@ export class StorageObjectEditorModalComponent {
 
   close() {
     this.activeModal.dismiss()
+  }
+
+  toggleVault() {
+    if (!this.storageObject?.id) return;
+    
+    this.vaultToggleLoading = true;
+    this.web.unvaultStorageObject(this.storageObject.id).subscribe({
+      next: (response) => {
+        this.toast.show("Storage Object", response.message || "Storage object unvaulted successfully");
+        if (this.storageObject) {
+          this.storageObject.is_vaulted = false;
+        }
+        this.vaultToggleLoading = false;
+      },
+      error: (error) => {
+        console.error('Error unvaulting storage object:', error);
+        this.toast.show("Error", error.error?.error || "Failed to unvault storage object");
+        this.vaultToggleLoading = false;
+      }
+    });
   }
 
 }

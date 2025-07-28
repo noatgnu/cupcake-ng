@@ -65,6 +65,13 @@ export class LaboratoryNotebookComponent implements OnInit, AfterViewInit {
   hasLogo = false;
   baseUrl = environment.baseURL;
   logoUrl: string | null = null;
+  includeVaultedProtocols: boolean = false;
+  includeVaultedProjects: boolean = false;
+  includeVaultedSessions: boolean = false;
+  includeSharedProtocols: boolean = false;
+  includeSharedSessions: boolean = false;
+  vaultedOnlyProtocols: boolean = false;
+  vaultedOnlySessions: boolean = false;
 
 
   constructor(public accounts: AccountsService, private router: Router, private fb: FormBuilder, private web: WebService, private dataService: DataService, private toastService: ToastService, public siteSettings: SiteSettingsService) {
@@ -159,7 +166,7 @@ export class LaboratoryNotebookComponent implements OnInit, AfterViewInit {
   getUserProtocols(url?: string, limit: number = 5, offset: number = 0) {
     this.loadingProtocol = true;
     this.toastService.show("Protocol", "Fetching user's protocols...")
-    this.web.getUserProtocols(url, limit, offset, this.searchTerm).subscribe((response) => {
+    this.web.getUserProtocols(url, limit, offset, this.searchTerm, this.includeVaultedProtocols, this.includeSharedProtocols, this.vaultedOnlyProtocols).subscribe((response) => {
       this.protocolQuery = response;
       this.loadingProtocol = false;
       this.toastService.show("Protocol", "Protocols fetched successfully")
@@ -173,7 +180,7 @@ export class LaboratoryNotebookComponent implements OnInit, AfterViewInit {
   getUserSessions(url?: string, limit: number = 5, offset: number = 0) {
     this.loadingSession = true;
     this.toastService.show("Protocol", "Fetching user's sessions...")
-    this.web.getUserSessions(url, limit, offset, this.searchTerm).subscribe((response) => {
+    this.web.getUserSessions(url, limit, offset, this.searchTerm, this.includeVaultedSessions, this.includeSharedSessions, this.vaultedOnlySessions).subscribe((response) => {
       this.protocolSessionQuery = response;
       this.loadingSession = false;
       this.toastService.show("Protocol", "Sessions fetched successfully")
@@ -226,7 +233,7 @@ export class LaboratoryNotebookComponent implements OnInit, AfterViewInit {
   getProjects(url?: string, limit: number = 5, offset: number = 0) {
     this.loadingProject = true;
     this.toastService.show("Project", "Fetching user's projects...")
-    this.web.getProjects(url, limit, offset, this.searchTerm).subscribe((response) => {
+    this.web.getProjects(url, limit, offset, this.searchTerm, this.includeVaultedProjects).subscribe((response) => {
       this.projectQuery = response;
       this.loadingProject = false;
       this.toastService.show("Project", "Projects fetched successfully")
@@ -273,5 +280,86 @@ export class LaboratoryNotebookComponent implements OnInit, AfterViewInit {
 
   onImageLoad(event: any) {
     console.log('Logo loaded successfully:', event);
+  }
+
+  toggleVaultedProtocols() {
+    // Refresh the protocols view with the new vaulted setting
+    this.currentProtocolPage = 1;
+    this.currentProtocolQueryOffset = 0;
+    this.getUserProtocols(undefined, this.pageSize, this.currentProtocolQueryOffset);
+  }
+
+  toggleVaultedProjects() {
+    // Refresh the projects view with the new vaulted setting
+    this.currentProjectPage = 1;
+    this.currentProjectQueryOffset = 0;
+    this.getProjects(undefined, this.pageSize, this.currentProjectQueryOffset);
+  }
+
+  toggleVaultedSessions() {
+    // Refresh the sessions view with the new vaulted setting
+    this.currentSessionPage = 1;
+    this.currentProtocolSessionQueryOffset = 0;
+    this.getUserSessions(undefined, this.pageSize, this.currentProtocolSessionQueryOffset);
+  }
+
+  toggleSharedProtocols() {
+    // Refresh the protocols view with the new shared setting
+    this.currentProtocolPage = 1;
+    this.currentProtocolQueryOffset = 0;
+    this.getUserProtocols(undefined, this.pageSize, this.currentProtocolQueryOffset);
+  }
+
+  toggleSharedSessions() {
+    // Refresh the sessions view with the new shared setting
+    this.currentSessionPage = 1;
+    this.currentProtocolSessionQueryOffset = 0;
+    this.getUserSessions(undefined, this.pageSize, this.currentProtocolSessionQueryOffset);
+  }
+
+  toggleVaultedOnlyProtocols() {
+    // Refresh the protocols view with the new vaulted-only setting
+    this.currentProtocolPage = 1;
+    this.currentProtocolQueryOffset = 0;
+    this.getUserProtocols(undefined, this.pageSize, this.currentProtocolQueryOffset);
+  }
+
+  toggleVaultedOnlySessions() {
+    // Refresh the sessions view with the new vaulted-only setting
+    this.currentSessionPage = 1;
+    this.currentProtocolSessionQueryOffset = 0;
+    this.getUserSessions(undefined, this.pageSize, this.currentProtocolSessionQueryOffset);
+  }
+
+  isSessionVaulted(session: ProtocolSession): boolean {
+    // Check if any of the session's protocol objects are vaulted
+    return session.protocol_objects?.some(protocol => protocol.is_vaulted) || false;
+  }
+
+  isSessionSharedWithUser(session: ProtocolSession): boolean {
+    const currentUserId = this.accounts.getCurrentUserId();
+    if (!currentUserId || !session.user || session.user.id === currentUserId) {
+      return false;
+    }
+    
+    // Check if any of the session's protocol objects are shared with the current user
+    return session.protocol_objects?.some(protocol => {
+      const isViewer = protocol.viewers?.some((viewer: {id: number, username: string}) => viewer.id === currentUserId) || false;
+      const isEditor = protocol.editors?.some((editor: {id: number, username: string}) => editor.id === currentUserId) || false;
+      return isViewer || isEditor;
+    }) || false;
+  }
+
+  isProjectSharedWithUser(project: Project): boolean {
+    const currentUserId = this.accounts.getCurrentUserId();
+    if (!currentUserId || !project.user || project.user.id === currentUserId) {
+      return false;
+    }
+    
+    // Check if current user is in project viewers or editors list
+    const isViewer = project.viewers?.some((viewer: {id: number, username: string}) => viewer.id === currentUserId) || false;
+    const isEditor = project.editors?.some((editor: {id: number, username: string}) => editor.id === currentUserId) || false;
+    
+    return isViewer || isEditor;
   }
 }

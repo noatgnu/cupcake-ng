@@ -4,6 +4,7 @@ import {Protocol} from "../protocol";
 import {TimerService} from "../timer.service";
 import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import {RemovalAreYouSureComponent} from "./removal-are-you-sure/removal-are-you-sure.component";
+import {AccountsService} from "../accounts/accounts.service";
 
 @Component({
     selector: 'app-protocol-list',
@@ -37,7 +38,7 @@ export class ProtocolListComponent {
   @Output() removeProtocol: EventEmitter<number> = new EventEmitter<number>()
   @Output() addProtocol: EventEmitter<number> = new EventEmitter<number>()
   @Output() editProtocol: EventEmitter<number> = new EventEmitter<number>()
-  constructor(public timeKeeper: TimerService, private modal: NgbModal) { }
+  constructor(public timeKeeper: TimerService, private modal: NgbModal, private accounts: AccountsService) { }
 
   remove(id: number) {
     this.modal.open(RemovalAreYouSureComponent).result.then((result) => {
@@ -45,6 +46,19 @@ export class ProtocolListComponent {
         this.removeProtocol.emit(id)
       }
     })
+  }
+
+  isSharedWithUser(protocol: Protocol): boolean {
+    const currentUserId = this.accounts.getCurrentUserId()
+    if (!currentUserId || !protocol.user || protocol.user.id === currentUserId) {
+      return false
+    }
+    
+    // Check if current user is in viewers or editors list
+    const isViewer = protocol.viewers?.some((viewer: {id: number, username: string}) => viewer.id === currentUserId) || false
+    const isEditor = protocol.editors?.some((editor: {id: number, username: string}) => editor.id === currentUserId) || false
+    
+    return isViewer || isEditor
   }
 
 }

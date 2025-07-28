@@ -18,6 +18,10 @@ export interface Protocol {
   reagents: ProtocolReagent[];
   tags: ProtocolTag[];
   metadata_columns: MetadataColumn[];
+  user: {id: number, username: string}|null;
+  is_vaulted: boolean;
+  viewers?: {id: number, username: string}[];
+  editors?: {id: number, username: string}[];
 }
 
 export interface ProtocolStep {

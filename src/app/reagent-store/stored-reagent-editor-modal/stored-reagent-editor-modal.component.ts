@@ -26,6 +26,7 @@ import {Species} from "../../species";
 import {MsVocab} from "../../ms-vocab";
 import {WebService} from "../../web.service";
 import {MetadataColumn} from "../../metadata-column";
+import {ToastService} from "../../toast.service";
 import {Project} from "../../project";
 import {Protocol, ProtocolStep} from "../../protocol";
 import {ProtocolSession} from "../../protocol-session";
@@ -76,6 +77,7 @@ export class StoredReagentEditorModalComponent implements AfterViewInit, OnInit{
   pageSize = 5;
   paginatedSteps: ProtocolStep[] = []
   hoveredStep: ProtocolStep|undefined = undefined
+  vaultToggleLoading: boolean = false;
 
   formAutocomplete = this.fb.group({
     projectName: new FormControl(''),
@@ -223,7 +225,7 @@ export class StoredReagentEditorModalComponent implements AfterViewInit, OnInit{
     inputElement.dispatchEvent(event);
   }
 
-  constructor(private zone: NgZone, private cdr: ChangeDetectorRef, private activeModal: NgbActiveModal, private fb: FormBuilder, private web: WebService) {
+  constructor(private zone: NgZone, private cdr: ChangeDetectorRef, private activeModal: NgbActiveModal, private fb: FormBuilder, private web: WebService, private toast: ToastService) {
     this.form.controls.barcode.valueChanges.subscribe((data) => {
       if (data) {
         this.drawBarcode()
@@ -463,5 +465,25 @@ export class StoredReagentEditorModalComponent implements AfterViewInit, OnInit{
     if (this.storedReagent) {
       this.storedReagent.created_by_step = step;
     }
+  }
+
+  toggleVault() {
+    if (!this.storedReagent?.id) return;
+    
+    this.vaultToggleLoading = true;
+    this.web.unvaultStoredReagent(this.storedReagent.id).subscribe({
+      next: (response) => {
+        this.toast.show("Stored Reagent", response.message || "Stored reagent unvaulted successfully");
+        if (this.storedReagent) {
+          this.storedReagent.is_vaulted = false;
+        }
+        this.vaultToggleLoading = false;
+      },
+      error: (error) => {
+        console.error('Error unvaulting stored reagent:', error);
+        this.toast.show("Error", error.error?.error || "Failed to unvault stored reagent");
+        this.vaultToggleLoading = false;
+      }
+    });
   }
 }

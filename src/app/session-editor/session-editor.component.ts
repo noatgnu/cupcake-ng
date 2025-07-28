@@ -50,6 +50,7 @@ export class SessionEditorComponent {
   toDate: NgbDate | null = null;
   toDatePreview: NgbDate | null = null;
   associatedProjects: Project[] = [];
+  vaultToggleLoading: boolean = false;
   @Input() set sessionID(value: string) {
     this._sessionID = value;
 
@@ -248,6 +249,33 @@ export class SessionEditorComponent {
     this.web.removeSessionFromProject(project.id, this.sessionID).subscribe(() => {
       this.associatedProjects = this.associatedProjects.filter((p) => p !== project)
     })
+  }
+
+  hasVaultedProtocols(): boolean {
+    return this.associatedProtocols.some(protocol => protocol.is_vaulted);
+  }
+
+  getVaultedProtocolCount(): number {
+    return this.associatedProtocols.filter(protocol => protocol.is_vaulted).length;
+  }
+
+  unvaultSessionProtocols() {
+    if (!this.session) return;
+    
+    this.vaultToggleLoading = true;
+    this.web.unvaultSessionProtocols(this.session.unique_id).subscribe({
+      next: (response) => {
+        this.toast.show("Session", response.message || "Session protocols unvaulted successfully");
+        // Refresh the associated protocols to update vault status
+        this.refreshSessionAssociatedData(this.sessionID);
+        this.vaultToggleLoading = false;
+      },
+      error: (error) => {
+        console.error('Error unvaulting session protocols:', error);
+        this.toast.show("Error", error.error?.error || "Failed to unvault session protocols");
+        this.vaultToggleLoading = false;
+      }
+    });
   }
 
 }

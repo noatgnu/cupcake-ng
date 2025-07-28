@@ -10,12 +10,21 @@
     <!-- Storage locations sidebar -->
     <div class="sidebar" [ngClass]="{'sidebar-collapsed': !sidePanel}">
       <div class="sidebar-header border-bottom p-3">
-        <div class="d-flex justify-content-between align-items-center">
+        <div class="d-flex justify-content-between align-items-center mb-2">
           <h5 class="mb-0">Storage Location</h5>
           <button class="btn btn-sm btn-outline-primary" (click)="openStorageObjectCreator()"
                   ngbTooltip="Create storage location object">
             <i class="bi bi-folder-plus"></i>
           </button>
+        </div>
+        <div class="d-flex align-items-center">
+          <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" id="vaultToggle" 
+                   [(ngModel)]="includeVaulted" (change)="toggleVaulted()">
+            <label class="form-check-label small text-muted" for="vaultToggle">
+              <i class="bi bi-safe2"></i> Include vaulted items
+            </label>
+          </div>
         </div>
       </div>
 

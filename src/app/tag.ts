@@ -3,6 +3,8 @@ export interface Tag {
   created_at: string;
   updated_at: string;
   id: number;
+  user: {id: number, username: string}|null;
+  is_vaulted: boolean;
 }
 
 export interface StepTag {

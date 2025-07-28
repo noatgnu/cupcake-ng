@@ -16,6 +16,7 @@ export interface StorageObject {
   user: string;
   child_count: number;
   path_to_root: {id: number, name: string}[];
+  is_vaulted: boolean;
 }
 
 export interface StoredReagent {
@@ -51,6 +52,7 @@ export interface StoredReagent {
     notify_on_low_stock: boolean
     notify_on_expiry: boolean
   };
+  is_vaulted: boolean;
 }
 
 export interface StorageObjectQuery {

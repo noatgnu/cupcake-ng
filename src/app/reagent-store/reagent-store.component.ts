@@ -7,6 +7,7 @@ import {
 } from "./storage-object-creator-modal/storage-object-creator-modal.component";
 import {StorageObjectViewComponent} from "./storage-object-view/storage-object-view.component";
 import {Location, NgClass} from "@angular/common";
+import {FormsModule} from "@angular/forms";
 import {MetadataNotificationModalComponent} from "./metadata-notification-modal/metadata-notification-modal.component";
 import {Router} from "@angular/router";
 
@@ -16,7 +17,8 @@ import {Router} from "@angular/router";
         NgbPagination,
         StorageObjectViewComponent,
         NgbTooltip,
-      NgClass
+        NgClass,
+        FormsModule
     ],
     templateUrl: './reagent-store.component.html',
     styleUrl: './reagent-store.component.scss'
@@ -27,6 +29,7 @@ export class ReagentStoreComponent implements OnInit{
   private _storedReagentID?: number|undefined;
   sidePanel: boolean = true
   isLoading: boolean = false
+  includeVaulted: boolean = false
 
   @Input() set storageID(value: number|undefined) {
     this._storageID = value;
@@ -65,9 +68,19 @@ export class ReagentStoreComponent implements OnInit{
 
   getStorageObjects(url?: string, limit: number = 10, offset: number = 0, search?: string, root: boolean = true, stored_at?: number) {
     console.log(url, limit, offset, search, root, stored_at)
-    this.web.getStorageObjects(url, limit, offset, search, root, stored_at).subscribe((data) => {
+    this.web.getStorageObjects(url, limit, offset, search, root, stored_at, undefined, this.includeVaulted).subscribe((data) => {
       this.rootStorageObjects = data
     })
+  }
+
+  toggleVaulted() {
+    this.includeVaulted = !this.includeVaulted;
+    // Refresh the current view
+    if (this.selectedStorageObject) {
+      this.getStorageObjects(undefined, this.pageSize, 0, this.search, false, this.selectedStorageObject.id)
+    } else {
+      this.getStorageObjects(undefined, this.pageSize, 0, this.search, true)
+    }
   }
 
   clickStorage(storageObject: StorageObject) {

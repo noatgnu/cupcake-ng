@@ -152,6 +152,22 @@
         </form>
       </section>
 
+      @if (storedReagent.is_vaulted) {
+        <div class="alert alert-warning d-flex align-items-center">
+          <i class="bi bi-safe2 me-2"></i>
+          <div class="flex-grow-1">
+            <small><strong>Vaulted Stored Reagent</strong><br>
+            This stored reagent is private and not visible in normal searches.</small>
+          </div>
+          <button class="btn btn-sm btn-outline-warning ms-2" (click)="toggleVault()" [disabled]="vaultToggleLoading">
+            @if (vaultToggleLoading) {
+              <span class="spinner-border spinner-border-sm me-1"></span>
+            }
+            Unvault
+          </button>
+        </div>
+      }
+
       <hr>
 
       <!-- Protocol & Session Section -->

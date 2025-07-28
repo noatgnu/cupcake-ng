@@ -45,6 +45,22 @@
               </div>
             </form>
 
+            @if (protocol.is_vaulted) {
+              <div class="alert alert-warning d-flex align-items-center mb-3">
+                <i class="bi bi-safe2 me-2"></i>
+                <div class="flex-grow-1">
+                  <small><strong>Vaulted Protocol</strong><br>
+                  This protocol is private and not visible in normal searches.</small>
+                </div>
+                <button class="btn btn-sm btn-outline-warning ms-2" (click)="toggleVault()" [disabled]="vaultToggleLoading">
+                  @if (vaultToggleLoading) {
+                    <span class="spinner-border spinner-border-sm me-1"></span>
+                  }
+                  Unvault
+                </button>
+              </div>
+            }
+
             @if (protocol.tags.length > 0) {
               <div class="mb-3">
                 <label class="form-label"><strong>Tags</strong></label>

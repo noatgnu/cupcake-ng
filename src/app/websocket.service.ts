@@ -8,7 +8,18 @@ import {Subject, Subscription, takeUntil} from "rxjs";
   providedIn: 'root'
 })
 export class WebsocketService implements OnDestroy {
-  baseURL = environment.baseURL.replace("http", "ws")
+  _baseURL: string = environment.baseURL.replace("http", "ws");
+  set baseURL(value: string) {
+    this._baseURL = value;
+  }
+  get baseURL(): string {
+    // if baseURL hostname endswith .local replace wss with ws
+    if (this._baseURL.startsWith("wss://") && this._baseURL.endsWith(".local")) {
+      return this._baseURL.replace("wss://", "ws://");
+    }
+    return this._baseURL;
+  }
+
   timerWSConnection?: WebSocketSubject<any>
   annotationWSConnection?: WebSocketSubject<any>
   userWSConnection?: WebSocketSubject<any>

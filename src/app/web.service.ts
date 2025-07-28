@@ -428,7 +428,7 @@ export class WebService {
     );
   }
 
-  getUserProtocols(url?: string, limit: number = 5, offset: number = 0, searchTerm: string = "") {
+  getUserProtocols(url?: string, limit: number = 5, offset: number = 0, searchTerm: string = "", includeVaulted: boolean = false, includeShared: boolean = false, vaultedOnly: boolean = false) {
     if (url) {
       return this.http.get<ProtocolQuery>(
         url,
@@ -440,7 +440,16 @@ export class WebService {
       .set('limit', limit.toString())
       .set('offset', offset.toString())
     if (searchTerm !== "") {
-      params =params.append('search', searchTerm);
+      params = params.append('search', searchTerm);
+    }
+    if (includeVaulted) {
+      params = params.append('include_vaulted', 'true');
+    }
+    if (includeShared) {
+      params = params.append('include_shared', 'true');
+    }
+    if (vaultedOnly) {
+      params = params.append('vaulted_only', 'true');
     }
     console.log(params)
     return this.http.get<ProtocolQuery>(
@@ -637,7 +646,7 @@ export class WebService {
     )
   }
 
-  getUserSessions(url?: string, limit: number = 5, offset: number = 0, searchTerm: string = "") {
+  getUserSessions(url?: string, limit: number = 5, offset: number = 0, searchTerm: string = "", includeVaulted: boolean = false, includeShared: boolean = false, vaultedOnly: boolean = false) {
     if (url) {
       return this.http.get<ProtocolSessionQuery>(
         url,
@@ -649,6 +658,15 @@ export class WebService {
       .set('offset', offset.toString())
     if (searchTerm !== "") {
       params = params.append('search', searchTerm);
+    }
+    if (includeVaulted) {
+      params = params.append('include_vaulted', 'true');
+    }
+    if (includeShared) {
+      params = params.append('include_shared', 'true');
+    }
+    if (vaultedOnly) {
+      params = params.append('vaulted_only', 'true');
     }
     return this.http.get<ProtocolSessionQuery>(
       `${this.baseURL}/api/session/get_user_sessions/`,
@@ -774,6 +792,46 @@ export class WebService {
   deleteProtocol(protocol_id: number) {
     return this.http.delete(
       `${this.baseURL}/api/protocol/${protocol_id}/`,
+      {responseType: 'json', observe: 'body'}
+    );
+  }
+
+  unvaultProtocol(protocol_id: number): Observable<any> {
+    return this.http.post(
+      `${this.baseURL}/api/protocol/${protocol_id}/unvault/`,
+      {},
+      {responseType: 'json', observe: 'body'}
+    );
+  }
+
+  unvaultProject(project_id: number): Observable<any> {
+    return this.http.post(
+      `${this.baseURL}/api/project/${project_id}/unvault/`,
+      {},
+      {responseType: 'json', observe: 'body'}
+    );
+  }
+
+  unvaultStorageObject(storage_object_id: number): Observable<any> {
+    return this.http.post(
+      `${this.baseURL}/api/storage-object/${storage_object_id}/unvault/`,
+      {},
+      {responseType: 'json', observe: 'body'}
+    );
+  }
+
+  unvaultStoredReagent(stored_reagent_id: number): Observable<any> {
+    return this.http.post(
+      `${this.baseURL}/api/stored-reagent/${stored_reagent_id}/unvault/`,
+      {},
+      {responseType: 'json', observe: 'body'}
+    );
+  }
+
+  unvaultSessionProtocols(session_id: string): Observable<any> {
+    return this.http.post(
+      `${this.baseURL}/api/session/${session_id}/unvault_protocols/`,
+      {},
       {responseType: 'json', observe: 'body'}
     );
   }
@@ -1123,7 +1181,7 @@ export class WebService {
     )
   }
 
-  getProjects(url?: string, limit: number = 5, offset: number = 0, searchTerm: string = "") {
+  getProjects(url?: string, limit: number = 5, offset: number = 0, searchTerm: string = "", include_vaulted: boolean = false) {
     if (url) {
       return this.http.get<ProjectQuery>(
         url,
@@ -1136,6 +1194,10 @@ export class WebService {
 
     if (searchTerm !== "") {
       params = params.append('search', searchTerm);
+    }
+
+    if (include_vaulted) {
+      params = params.append('include_vaulted', 'true')
     }
 
     return this.http.get<ProjectQuery>(
@@ -1261,7 +1323,7 @@ export class WebService {
 
 
 
-  getStorageObjects(url?: string, limit: number = 10, offset: number = 0, searchTerm: string = "", root: boolean = false, stored_at: number|null = null, exclude_objects: number[]|null = null) {
+  getStorageObjects(url?: string, limit: number = 10, offset: number = 0, searchTerm: string = "", root: boolean = false, stored_at: number|null = null, exclude_objects: number[]|null = null, include_vaulted: boolean = false) {
     if (url) {
       return this.http.get<StorageObjectQuery>(
         url,
@@ -1282,6 +1344,10 @@ export class WebService {
     }
     if (exclude_objects) {
       params = params.append('exclude_objects', exclude_objects.join(','))
+    }
+    
+    if (include_vaulted) {
+      params = params.append('include_vaulted', 'true')
     }
 
     return this.http.get<StorageObjectQuery>(
@@ -1339,7 +1405,7 @@ export class WebService {
     )
   }
 
-  getStoredReagents(url?: string, limit: number = 10, offset: number = 0, searchTerm: string = "", storage_object: number|null = null, storage_object_name: string|null = null, user_owned_only: boolean= false, stored_reagent_id: number|null|undefined = null) {
+  getStoredReagents(url?: string, limit: number = 10, offset: number = 0, searchTerm: string = "", storage_object: number|null = null, storage_object_name: string|null = null, user_owned_only: boolean= false, stored_reagent_id: number|null|undefined = null, include_vaulted: boolean = false) {
     if (url) {
       return this.http.get<StoredReagentQuery>(
         url,
@@ -1367,6 +1433,10 @@ export class WebService {
 
     if (stored_reagent_id) {
       params = params.append('id', stored_reagent_id.toString())
+    }
+
+    if (include_vaulted) {
+      params = params.append('include_vaulted', 'true')
     }
 
     return this.http.get<StoredReagentQuery>(

@@ -78,6 +78,31 @@
                     <span class="badge bg-primary rounded-pill tab-count">{{protocolQuery.count}}</span>
                   </button>
                   <ng-template ngbNavContent>
+                    <!-- Toggle Controls for Protocols -->
+                    <div class="d-flex justify-content-end mb-3 gap-3">
+                      <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="protocolVaultToggle" 
+                               [(ngModel)]="includeVaultedProtocols" (change)="toggleVaultedProtocols()">
+                        <label class="form-check-label small text-muted" for="protocolVaultToggle">
+                          <i class="bi bi-safe2"></i> Include vaulted protocols
+                        </label>
+                      </div>
+                      <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="protocolVaultedOnlyToggle" 
+                               [(ngModel)]="vaultedOnlyProtocols" (change)="toggleVaultedOnlyProtocols()">
+                        <label class="form-check-label small text-muted" for="protocolVaultedOnlyToggle">
+                          <i class="bi bi-safe2-fill"></i> Vaulted only
+                        </label>
+                      </div>
+                      <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="protocolSharedToggle" 
+                               [(ngModel)]="includeSharedProtocols" (change)="toggleSharedProtocols()">
+                        <label class="form-check-label small text-muted" for="protocolSharedToggle">
+                          <i class="bi bi-people"></i> Include shared protocols
+                        </label>
+                      </div>
+                    </div>
+                    
                     @if (loadingProtocol) {
                       <div class="loading-container">
                         <div class="spinner-border text-primary" role="status"></div>
@@ -112,6 +137,31 @@
                     <span class="badge bg-primary rounded-pill tab-count">{{protocolSessionQuery.count}}</span>
                   </button>
                   <ng-template ngbNavContent>
+                    <!-- Toggle Controls for Sessions -->
+                    <div class="d-flex justify-content-end mb-3 gap-3">
+                      <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="sessionVaultToggle" 
+                               [(ngModel)]="includeVaultedSessions" (change)="toggleVaultedSessions()">
+                        <label class="form-check-label small text-muted" for="sessionVaultToggle">
+                          <i class="bi bi-safe2"></i> Include vaulted sessions
+                        </label>
+                      </div>
+                      <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="sessionVaultedOnlyToggle" 
+                               [(ngModel)]="vaultedOnlySessions" (change)="toggleVaultedOnlySessions()">
+                        <label class="form-check-label small text-muted" for="sessionVaultedOnlyToggle">
+                          <i class="bi bi-safe2-fill"></i> Vaulted only
+                        </label>
+                      </div>
+                      <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="sessionSharedToggle" 
+                               [(ngModel)]="includeSharedSessions" (change)="toggleSharedSessions()">
+                        <label class="form-check-label small text-muted" for="sessionSharedToggle">
+                          <i class="bi bi-people"></i> Include shared sessions
+                        </label>
+                      </div>
+                    </div>
+                    
                     @if (loadingSession) {
                       <div class="loading-container">
                         <div class="spinner-border text-primary" role="status"></div>
@@ -127,15 +177,27 @@
                         <div class="list-group">
                           @for (session of protocolSessionQuery.results; track session.id) {
                             <div class="list-group-item list-group-item-action protocol-card" (click)="getAssociatedProtocolTitle(session.unique_id)">
-                              <div class="d-flex w-100 justify-content-between align-items-center">
-                                <h6 class="mb-1">
-                                  @if (session.name) {
-                                    {{session.name}}
-                                  } @else {
-                                    {{session.unique_id}}
+                              <div class="d-flex w-100 justify-content-between align-items-start">
+                                <div class="flex-grow-1">
+                                  <h6 class="mb-1">
+                                    @if (session.name) {
+                                      {{session.name}}
+                                    } @else {
+                                      {{session.unique_id}}
+                                    }
+                                  </h6>
+                                </div>
+                                <div class="d-flex gap-1 ms-2">
+                                  @if (isSessionVaulted(session)) {
+                                    <span class="badge bg-warning text-dark" title="This session is associated with a vaulted protocol">
+                                      <i class="bi bi-safe2"></i> Vaulted
+                                    </span>
                                   }
-                                </h6>
-                                <div>
+                                  @if (isSessionSharedWithUser(session)) {
+                                    <span class="badge bg-info text-dark" title="This session is shared with you">
+                                      <i class="bi bi-people"></i> Shared
+                                    </span>
+                                  }
                                   <a class="btn btn-sm btn-outline-primary" href="#/session-editor/{{session.unique_id}}" target="_blank">
                                     <i class="bi bi-pen"></i> Edit
                                   </a>
@@ -178,6 +240,17 @@
                     <span class="badge bg-primary rounded-pill tab-count">{{projectQuery.count}}</span>
                   </button>
                   <ng-template ngbNavContent>
+                    <!-- Vaulting Toggle for Projects -->
+                    <div class="d-flex justify-content-end mb-3">
+                      <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="projectVaultToggle" 
+                               [(ngModel)]="includeVaultedProjects" (change)="toggleVaultedProjects()">
+                        <label class="form-check-label small text-muted" for="projectVaultToggle">
+                          <i class="bi bi-safe2"></i> Include vaulted projects
+                        </label>
+                      </div>
+                    </div>
+                    
                     @if (loadingProject) {
                       <div class="loading-container">
                         <div class="spinner-border text-primary" role="status"></div>
@@ -193,9 +266,21 @@
                         <div class="list-group">
                           @for (project of projectQuery.results; track project.id) {
                             <div class="list-group-item list-group-item-action protocol-card">
-                              <div class="d-flex w-100 justify-content-between align-items-center mb-2">
-                                <h6 class="mb-0">{{project.project_name}}</h6>
-                                <div>
+                              <div class="d-flex w-100 justify-content-between align-items-start mb-2">
+                                <div class="flex-grow-1">
+                                  <h6 class="mb-0">{{project.project_name}}</h6>
+                                </div>
+                                <div class="d-flex gap-1 ms-2">
+                                  @if (project.is_vaulted) {
+                                    <span class="badge bg-warning text-dark" title="This project is vaulted">
+                                      <i class="bi bi-safe2"></i> Vaulted
+                                    </span>
+                                  }
+                                  @if (isProjectSharedWithUser(project)) {
+                                    <span class="badge bg-info text-dark" title="This project is shared with you">
+                                      <i class="bi bi-people"></i> Shared
+                                    </span>
+                                  }
                                   <a class="btn btn-sm btn-outline-primary me-1" href="/#/project-editor/{{project.id}}">
                                     <i class="bi bi-pen"></i> Edit
                                   </a>

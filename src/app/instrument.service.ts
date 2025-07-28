@@ -53,7 +53,7 @@ export class InstrumentService {
     )
   }
 
-  getInstruments(url?: string, limit: number = 5, offset: number = 0, searchTerm: string = "", serialNumber: string = "", forBookings: boolean = false): Observable<InstrumentQuery> {
+  getInstruments(url?: string, limit: number = 5, offset: number = 0, searchTerm: string = "", serialNumber: string = "", forBookings: boolean = false, include_vaulted: boolean = false): Observable<InstrumentQuery> {
     if (url) {
       return this.http.get<InstrumentQuery>(
         url,
@@ -71,6 +71,9 @@ export class InstrumentService {
     }
     if (forBookings) {
       params = params.append('accepts_bookings', 'true');
+    }
+    if (include_vaulted) {
+      params = params.append('include_vaulted', 'true')
     }
     return this.http.get<InstrumentQuery>(
       `${this.baseURL}/api/instrument/`,

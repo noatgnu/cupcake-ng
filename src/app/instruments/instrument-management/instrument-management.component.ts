@@ -53,6 +53,7 @@ export class InstrumentManagementComponent {
 
   pageSize = 5
   currentInstrumentPage = 1
+  includeVaulted: boolean = false
 
   instrumentQuery?: InstrumentQuery
   form = this.fb.group({
@@ -60,13 +61,13 @@ export class InstrumentManagementComponent {
   })
 
   constructor(private instrumentService: InstrumentService, private fb: FormBuilder, private web: WebService, public dataService: DataService, private modal: NgbModal, private toastService: ToastService, public accounts: AccountsService) {
-    this.instrumentService.getInstruments().subscribe((data: any) => {
+    this.instrumentService.getInstruments(undefined, this.pageSize, 0, '', '', false, this.includeVaulted).subscribe((data: any) => {
       this.instrumentQuery = data
       this.getInstrumentPermission()
     })
     this.form.controls.searchTerm.valueChanges.subscribe((value: string| null) => {
       if (value) {
-        this.instrumentService.getInstruments(undefined, this.pageSize, 0, value).subscribe((data: InstrumentQuery) => {
+        this.instrumentService.getInstruments(undefined, this.pageSize, 0, value, '', false, this.includeVaulted).subscribe((data: InstrumentQuery) => {
           this.instrumentQuery = data
           this.getInstrumentPermission()
         })
@@ -76,12 +77,27 @@ export class InstrumentManagementComponent {
 
   handlePageChange(event: any) {
     if (this.form.controls.searchTerm.value) {
-      this.instrumentService.getInstruments(undefined, this.pageSize, (event.page - 1) * this.pageSize, this.form.controls.searchTerm.value).subscribe((data: InstrumentQuery) => {
+      this.instrumentService.getInstruments(undefined, this.pageSize, (event.page - 1) * this.pageSize, this.form.controls.searchTerm.value, '', false, this.includeVaulted).subscribe((data: InstrumentQuery) => {
         this.instrumentQuery = data
         this.getInstrumentPermission()
       })
     } else {
-      this.instrumentService.getInstruments(undefined, this.pageSize, (event.page - 1) * this.pageSize).subscribe((data: InstrumentQuery) => {
+      this.instrumentService.getInstruments(undefined, this.pageSize, (event.page - 1) * this.pageSize, '', '', false, this.includeVaulted).subscribe((data: InstrumentQuery) => {
+        this.instrumentQuery = data
+        this.getInstrumentPermission()
+      })
+    }
+  }
+
+  toggleVaulted() {
+    // Refresh the current view with the new vaulted setting
+    if (this.form.controls.searchTerm.value) {
+      this.instrumentService.getInstruments(undefined, this.pageSize, 0, this.form.controls.searchTerm.value, '', false, this.includeVaulted).subscribe((data: InstrumentQuery) => {
+        this.instrumentQuery = data
+        this.getInstrumentPermission()
+      })
+    } else {
+      this.instrumentService.getInstruments(undefined, this.pageSize, 0, '', '', false, this.includeVaulted).subscribe((data: InstrumentQuery) => {
         this.instrumentQuery = data
         this.getInstrumentPermission()
       })

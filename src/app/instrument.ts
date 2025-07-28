@@ -19,6 +19,8 @@ export interface Instrument {
   image: string|null;
   support_information: SupportInformation[];
   accepts_bookings: boolean;
+  user: {id: number, username: string}|null;
+  is_vaulted: boolean;
 }
 
 export interface InstrumentQuery {

@@ -84,6 +84,7 @@ export class ProtocolEditorComponent {
   protocol?: Protocol
   _protocolID: number = 0
   floatedClick: string|undefined|null = null
+  vaultToggleLoading: boolean = false
   @Input() set protocolID(value: number) {
     if (!value) {
       return
@@ -313,5 +314,25 @@ export class ProtocolEditorComponent {
   previewDescription(step: ProtocolStep) {
     const ref = this.modal.open(StepDescriptionPreviewModalComponent, {scrollable: true})
     ref.componentInstance.step = step
+  }
+
+  toggleVault() {
+    if (!this.protocol) return;
+    
+    this.vaultToggleLoading = true;
+    this.web.unvaultProtocol(this.protocol.id).subscribe({
+      next: (response) => {
+        this.toastService.show("Protocol", response.message || "Protocol unvaulted successfully");
+        if (this.protocol) {
+          this.protocol.is_vaulted = false;
+        }
+        this.vaultToggleLoading = false;
+      },
+      error: (error) => {
+        console.error('Error unvaulting protocol:', error);
+        this.toastService.show("Error", error.error?.error || "Failed to unvault protocol");
+        this.vaultToggleLoading = false;
+      }
+    });
   }
 }

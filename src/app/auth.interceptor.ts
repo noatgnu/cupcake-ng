@@ -20,6 +20,11 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
       setHeaders: { Authorization: `Token ${accountService.token}` }
     });
   }
+  if (req.url.startsWith("https://") && req.url.includes(".local")) {
+    req = req.clone({
+      url: req.url.replace("https://", "http://")
+    });
+  }
 
   return next(req);
 };

@@ -1,10 +1,24 @@
 <div class="list-group">
   @for (protocol of protocols; track protocol.id) {
     <div class="list-group-item list-group-item-action">
-      <div>
-        <a href="/#/protocol-session/{{protocol.id}}" target="_blank"><span [innerHTML]="protocol.protocol_title"></span></a>
+      <div class="d-flex justify-content-between align-items-start">
+        <div class="flex-grow-1">
+          <a href="/#/protocol-session/{{protocol.id}}" target="_blank"><span [innerHTML]="protocol.protocol_title"></span></a>
+        </div>
+        <div class="d-flex gap-1 ms-2">
+          @if (protocol.is_vaulted) {
+            <span class="badge bg-warning text-dark" title="This protocol is vaulted">
+              <i class="bi bi-safe2"></i> Vaulted
+            </span>
+          }
+          @if (isSharedWithUser(protocol)) {
+            <span class="badge bg-info text-dark" title="This protocol is shared with you">
+              <i class="bi bi-people"></i> Shared
+            </span>
+          }
+        </div>
       </div>
-      <div class="d-flex flex-row gap-2">
+      <div class="d-flex flex-row gap-2 mt-1">
         @for (tag of protocol.tags; track tag.id) {
           <span class="badge bg-primary">{{tag.tag.tag}}</span>
         }

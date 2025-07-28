@@ -36,6 +36,22 @@
       <label for="object_description">Object Description</label>
     </div>
   </form>
+
+  @if (storageObject?.id && storageObject?.is_vaulted) {
+    <div class="alert alert-warning d-flex align-items-center">
+      <i class="bi bi-safe2 me-2"></i>
+      <div class="flex-grow-1">
+        <small><strong>Vaulted Storage Object</strong><br>
+        This storage object is private and not visible in normal searches.</small>
+      </div>
+      <button class="btn btn-sm btn-outline-warning ms-2" (click)="toggleVault()" [disabled]="vaultToggleLoading">
+        @if (vaultToggleLoading) {
+          <span class="spinner-border spinner-border-sm me-1"></span>
+        }
+        Unvault
+      </button>
+    </div>
+  }
 </div>
 
 <div class="modal-footer">
