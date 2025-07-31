@@ -7,21 +7,21 @@
 }
 
 .custom-day.focused {
-  background-color: #2E2D62;
-  color: white;
+  background-color: var(--brand-primary);
+  color: var(--surface-primary);
 }
 
 .custom-day.range, .custom-day:hover {
-  background-color: #9d9dd9;
-  color: white;
+  background-color: var(--brand-secondary);
+  color: var(--surface-primary);
 }
 
 .custom-day.faded {
-  background-color: rgba(157, 157, 217, 0.5)
+  background-color: var(--surface-tertiary);
 }
 
 .custom-day.durationPreview {
-  border-bottom: #FF9B9B 2px solid;
+  border-bottom: var(--brand-danger) 2px solid;
 }
 
 

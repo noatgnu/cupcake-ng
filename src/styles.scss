@@ -1,14 +1,69 @@
 // Import external CSS first
 @import "../node_modules/cal-heatmap/dist/cal-heatmap.css";
 
+// CSS Custom Properties - Define design tokens
+:root {
+  // Brand Colors
+  --brand-primary: #2E2D62;
+  --brand-secondary: #a4a4a4;
+  --brand-success: #003632;
+  --brand-danger: #FF9B9B;
+  --brand-warning: #FFD6A5;
+  --brand-info: #8294C4;
+
+  // Surface Colors (Light Theme)
+  --surface-primary: #ffffff;
+  --surface-secondary: rgba(108, 117, 125, 0.1);
+  --surface-tertiary: rgba(108, 117, 125, 0.05);
+  --surface-elevated: #ffffff;
+  
+  // Text Colors (Light Theme)
+  --text-primary: #212529;
+  --text-secondary: #6c757d;
+  --text-muted: #6c757d;
+  --text-disabled: #adb5bd;
+  
+  // Border Colors (Light Theme)
+  --border-primary: rgba(0, 0, 0, 0.125);
+  --border-secondary: #dee2e6;
+  --border-focus: #0d6efd;
+  
+  // Component Tokens
+  --modal-backdrop: rgba(0, 0, 0, 0.5);
+  --card-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+  --button-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+// Dark Theme Overrides
+@media (prefers-color-scheme: dark) {
+  :root {
+    // Surface Colors (Dark Theme)
+    --surface-primary: #212529;
+    --surface-secondary: #343a40;
+    --surface-tertiary: #495057;
+    --surface-elevated: #343a40;
+    
+    // Text Colors (Dark Theme)
+    --text-primary: #f8f9fa;
+    --text-secondary: #adb5bd;
+    --text-muted: #6c757d;
+    --text-disabled: #495057;
+    
+    // Border Colors (Dark Theme)
+    --border-primary: #495057;
+    --border-secondary: #6c757d;
+    --border-focus: #0d6efd;
+  }
+}
+
 // Bootstrap variable customization - this must come before Bootstrap import
 $min-contrast-ratio: 3.5;
-$primary: #2E2D62;
-$secondary: #a4a4a4;
-$success: #003632;
-$info: #8294C4;
-$warning: #FFD6A5;
-$danger: #FF9B9B;
+$primary: var(--brand-primary);
+$secondary: var(--brand-secondary);
+$success: var(--brand-success);
+$info: var(--brand-info);
+$warning: var(--brand-warning);
+$danger: var(--brand-danger);
 
 // Import Bootstrap - this will use our custom variables above
 @import '../node_modules/bootstrap/scss/bootstrap.scss';
@@ -21,8 +76,8 @@ $dark-theme-colors: (
 
 // CSS rules and mixins after Bootstrap import
 .accordion-button:not(.collapsed) {
-  color: #FFF  !important;
-  background-color: #9acad5 !important;
+  color: var(--surface-primary) !important;
+  background-color: var(--brand-info) !important;
 }
 
 @mixin generate-dark-theme($colors) {
@@ -56,7 +111,7 @@ $dark-theme-colors: (
 }
 
 .dirty-control {
-  border-color: #ff0000; /* Red border for dirty controls */
+  border-color: var(--brand-danger);
 }
 
 @include generate-dark-theme($dark-theme-colors);
