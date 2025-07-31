@@ -58,12 +58,12 @@
 
 // Bootstrap variable customization - this must come before Bootstrap import
 $min-contrast-ratio: 3.5;
-$primary: var(--brand-primary);
-$secondary: var(--brand-secondary);
-$success: var(--brand-success);
-$info: var(--brand-info);
-$warning: var(--brand-warning);
-$danger: var(--brand-danger);
+$primary: #2E2D62;
+$secondary: #a4a4a4;
+$success: #003632;
+$info: #8294C4;
+$warning: #FFD6A5;
+$danger: #FF9B9B;
 
 // Import Bootstrap - this will use our custom variables above
 @import '../node_modules/bootstrap/scss/bootstrap.scss';
